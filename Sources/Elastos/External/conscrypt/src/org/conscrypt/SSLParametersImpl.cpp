@@ -34,13 +34,13 @@ namespace Conscrypt {
 // SSLParametersImpl::
 //=========================================
 
-volatile AutoPtr<IX509KeyManager> SSLParametersImpl::mDefaultX509KeyManager;
+AutoPtr<IX509KeyManager> SSLParametersImpl::sDefaultX509KeyManager;
 
-volatile AutoPtr<IX509TrustManager> SSLParametersImpl::mDefaultX509TrustManager;
+AutoPtr<IX509TrustManager> SSLParametersImpl::sDefaultX509TrustManager;
 
-volatile AutoPtr<ISecureRandom> SSLParametersImpl::mDefaultSecureRandom;
+AutoPtr<ISecureRandom> SSLParametersImpl::sDefaultSecureRandom;
 
-volatile AutoPtr<ISSLParametersImpl> SSLParametersImpl::mDefaultParameters;
+AutoPtr<ISSLParametersImpl> SSLParametersImpl::sDefaultParameters;
 
 String SSLParametersImpl::KEY_TYPE_RSA("RSA");
 
@@ -113,11 +113,11 @@ ECode SSLParametersImpl::GetDefault(
     /* [out] */ ISSLParametersImpl** res)
 {
     VALIDATE_NOT_NULL(res)
-    AutoPtr<ISSLParametersImpl> result = mDefaultParameters;
+    AutoPtr<ISSLParametersImpl> result = sDefaultParameters;
     if (result == NULL) {
         // single-check idiom
         assert(0 && "TODO");
-        // mDefaultParameters = result = new SSLParametersImpl(NULL,
+        // sDefaultParameters = result = new SSLParametersImpl(NULL,
         //                                                    NULL,
         //                                                    NULL,
         //                                                    new ClientSessionContext(),
@@ -195,12 +195,12 @@ ECode SSLParametersImpl::GetSecureRandom(
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
-    AutoPtr<ISecureRandom> res = mDefaultSecureRandom;
+    AutoPtr<ISecureRandom> res = sDefaultSecureRandom;
     if (res == NULL) {
         // single-check idiom
         assert(0 && "TODO");
         // CSecureRandom::New((ISecureRandom**)&res);
-        mDefaultSecureRandom = res;
+        sDefaultSecureRandom = res;
     }
     mSecureRandom = res;
     *result = mSecureRandom;
@@ -842,11 +842,11 @@ ECode SSLParametersImpl::Clone(
 
 AutoPtr<IX509KeyManager> SSLParametersImpl::GetDefaultX509KeyManager()
 {
-    AutoPtr<IX509KeyManager> result = mDefaultX509KeyManager;
+    AutoPtr<IX509KeyManager> result = sDefaultX509KeyManager;
     if (result == NULL) {
         // single-check idiom
         result = CreateDefaultX509KeyManager();
-        mDefaultX509KeyManager = result;
+        sDefaultX509KeyManager = result;
     }
     return result;
 }
@@ -907,10 +907,10 @@ ECode SSLParametersImpl::GetDefaultX509TrustManager(
     /* [out] */ IX509TrustManager** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IX509TrustManager> res = mDefaultX509TrustManager;
+    AutoPtr<IX509TrustManager> res = sDefaultX509TrustManager;
     if (res == NULL) {
         // single-check idiom
-        mDefaultX509TrustManager = res = CreateDefaultX509TrustManager();
+        sDefaultX509TrustManager = res = CreateDefaultX509TrustManager();
     }
     *result = res;
     REFCOUNT_ADD(*result)

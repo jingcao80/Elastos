@@ -8,9 +8,9 @@ namespace Elastos {
 namespace Security {
 namespace Spec {
 
-static const AutoPtr<IBigInteger> CRSAKeyGenParameterSpec::F0 = CRSAKeyGenParameterSpec::InitStatic(3LL);
+const AutoPtr<IBigInteger> CRSAKeyGenParameterSpec::F0 = CRSAKeyGenParameterSpec::InitStatic(3LL);
 
-static const AutoPtr<IBigInteger> CRSAKeyGenParameterSpec::F4 = CRSAKeyGenParameterSpec::InitStatic(65537LL);
+const AutoPtr<IBigInteger> CRSAKeyGenParameterSpec::F4 = CRSAKeyGenParameterSpec::InitStatic(65537LL);
 
 const AutoPtr<IBigInteger> CRSAKeyGenParameterSpec::InitStatic(
     /* [in] */ Int64 bi)
@@ -51,4 +51,3 @@ ECode CRSAKeyGenParameterSpec::constructor(
 }
 }
 }
-

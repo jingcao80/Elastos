@@ -367,13 +367,13 @@ public:
 
 private:
     // default source of X.509 certificate based authentication keys
-    static volatile AutoPtr<IX509KeyManager> mDefaultX509KeyManager;
+    static /* volatile */ AutoPtr<IX509KeyManager> sDefaultX509KeyManager;
     // default source of X.509 certificate based authentication trust decisions
-    static volatile AutoPtr<IX509TrustManager> mDefaultX509TrustManager;
+    static /* volatile */ AutoPtr<IX509TrustManager> sDefaultX509TrustManager;
     // default source of random numbers
-    static volatile AutoPtr<ISecureRandom> mDefaultSecureRandom;
+    static /* volatile */ AutoPtr<ISecureRandom> sDefaultSecureRandom;
     // default SSL parameters
-    static volatile AutoPtr<ISSLParametersImpl> mDefaultParameters;
+    static /* volatile */ AutoPtr<ISSLParametersImpl> sDefaultParameters;
 
     // client session context contains the set of reusable
     // client-side SSL sessions

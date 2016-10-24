@@ -141,8 +141,7 @@ private:
     String mAlgorithm;
 
     // Internal SecureRandom used for getSeed(Int32)
-    static volatile AutoPtr<ISecureRandom> internalSecureRandom;
-    Object THIS;
+    static /* volatile */ AutoPtr<ISecureRandom> sInternalSecureRandom;
 };
 
 }

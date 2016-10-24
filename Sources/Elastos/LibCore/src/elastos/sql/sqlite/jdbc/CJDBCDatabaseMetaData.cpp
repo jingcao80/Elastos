@@ -1054,7 +1054,6 @@ ECode CJDBCDatabaseMetaData::GetPrimaryKeys(
 
     AutoPtr<IJDBCResultSet> rsObj ;
     FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(trObj), NULL, (IJDBCResultSet**)&rsObj));
-    CJDBCResultSet* rs = (CJDBCResultSet*)rsObj.Get();
     if (rs0 != NULL && rs0->tr != NULL && rs0->tr->mNrows > 0) {
         HashMap<String, Int32> h0;
         for (Int32 i = 0; i < rs0->tr->mNcolumns; i++) {
@@ -1432,7 +1431,6 @@ ECode CJDBCDatabaseMetaData::GetTypeInfo(
     tr->Sql_types(types);
     AutoPtr<IJDBCResultSet> rsObj;
     FAIL_RETURN(CJDBCResultSet::New(ITableResult::Probe(trObj), NULL,(IJDBCResultSet**)&rsObj));
-    CJDBCResultSet* rs = (CJDBCResultSet*)rsObj.Get();
     AutoPtr<ArrayOf<String> > row1 = ArrayOf<String>::Alloc(18);
     (*row1)[0] = String("VARCHAR");
     (*row1)[1] = String("") + StringUtils::ToString(ITypes::VARCHAR);

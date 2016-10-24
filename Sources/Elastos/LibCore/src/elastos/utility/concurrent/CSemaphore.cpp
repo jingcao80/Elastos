@@ -314,8 +314,7 @@ ECode CSemaphore::ToString(
     mSync->GetPermits(&mits);
 //    *str = super.toString() + "[Permits = " + mits + "]";
     String res("[Permits = ");
-    res += mits;
-    res += "]";
+    res.AppendFormat("%d]", mits);
     *str = res;
     return NOERROR;
 }

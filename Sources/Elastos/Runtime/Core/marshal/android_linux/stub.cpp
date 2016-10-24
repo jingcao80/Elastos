@@ -133,7 +133,7 @@ void DUMP_ITFID(IInterface* intf)
     InterfaceID iid;
     intf->GetInterfaceID(intf, &iid);
     printf("======== DUMP_InterfaceID ========\n");
-    printf("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
+    printf("{0x%08x, 0x%04x, 0x%04x, {0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x} }\n",
             iid.mData1, iid.mData2, iid.mData3,
             iid.mData4[0], iid.mData4[1],
             iid.mData4[2], iid.mData4[3],
@@ -141,7 +141,7 @@ void DUMP_ITFID(IInterface* intf)
             iid.mData4[6], iid.mData4[7]);
     printf("============================\n");
     ALOGD("======== DUMP_InterfaceID ========\n");
-    ALOGD("{%p, %p, %p, {%p, %p, %p, %p, %p, %p, %p, %p} }\n",
+    ALOGD("{0x%08x, 0x%04x, 0x%04x, {0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x} }\n",
             iid.mData1, iid.mData2, iid.mData3,
             iid.mData4[0], iid.mData4[1],
             iid.mData4[2], iid.mData4[3],

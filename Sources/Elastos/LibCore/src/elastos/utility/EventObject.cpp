@@ -40,10 +40,7 @@ ECode EventObject::ToString(
 {
     // return getClass().getName() + "[source=" + source + ']';
     VALIDATE_NOT_NULL(str);
-    *str = String("EventObject:");
-    *str += "[source=";
-    *str += Object::ToString(mSource);
-    *str += ']';
+    str->AppendFormat("EventObject:[source=%s]", Object::ToString(mSource).string());
     return NOERROR;
 }
 

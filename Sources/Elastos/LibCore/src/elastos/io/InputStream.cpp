@@ -118,9 +118,7 @@ ECode InputStream::Skip(
 
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
-    Int64 result;
-    streams->SkipByReading(this, byteCount, number);
-    return NOERROR;
+    return streams->SkipByReading(this, byteCount, number);
 }
 
 } // namespace IO

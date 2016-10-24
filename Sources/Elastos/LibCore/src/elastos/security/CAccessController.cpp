@@ -27,7 +27,7 @@ ECode CAccessController::DoPrivileged(
     /* [out] */ IInterface **result)
 {
     ECode ec = action->Run(result);
-    if (FAILED(ec) && ec != E_RUNTIME_EXCEPTION) {
+    if (FAILED(ec) && ec != (ECode)E_RUNTIME_EXCEPTION) {
         ec = E_PRIVILEGED_ACTION_EXCEPTION;
     }
     return ec;

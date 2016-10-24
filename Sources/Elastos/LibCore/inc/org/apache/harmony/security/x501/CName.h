@@ -97,7 +97,7 @@ public:
 
 private:
     /** ASN.1 DER encoding of Name */
-    volatile AutoPtr<ArrayOf<Byte> > mEncoded;
+    /* volatile */ AutoPtr<ArrayOf<Byte> > mEncoded;
 
     /** RFC1779 string */
     String mRfc1779String;

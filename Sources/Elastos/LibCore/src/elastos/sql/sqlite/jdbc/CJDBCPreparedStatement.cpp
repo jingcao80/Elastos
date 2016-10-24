@@ -327,7 +327,7 @@ ECode CJDBCPreparedStatement::SetByte(
         return E_SQL_EXCEPTION;
     }
     String str("");
-    str += theByte;
+    str.AppendFormat("%d", theByte);
     (*mArgs)[parameterIndex - 1] = str;
     (*mBlobs)[parameterIndex - 1] = FALSE;
     return NOERROR;

@@ -34,11 +34,11 @@ static AutoPtr<IFileInputStream> InitDevURandom()
 }
 
 AutoPtr<IFileInputStream> CSHA1PRNG_SecureRandomImpl::sDevURandom = InitDevURandom();
-Int32 CSHA1PRNG_SecureRandomImpl::END_FLAGS[] = { 0x80000000, 0x800000, 0x8000, 0x80 };
+Int32 CSHA1PRNG_SecureRandomImpl::END_FLAGS[] = { (Int32)0x80000000, (Int32)0x800000, (Int32)0x8000, (Int32)0x80 };
 const Int32 CSHA1PRNG_SecureRandomImpl::RIGHT1[] = { 0, 40, 48, 56 };
 const Int32 CSHA1PRNG_SecureRandomImpl::RIGHT2[] = { 0, 8, 16, 24 };
 const Int32 CSHA1PRNG_SecureRandomImpl::LEFT[] = { 0, 24, 16, 8 };
-const Int32 CSHA1PRNG_SecureRandomImpl::MASK[] = { 0xFFFFFFFF, 0x00FFFFFF, 0x0000FFFF, 0x000000FF };
+const Int32 CSHA1PRNG_SecureRandomImpl::MASK[] = { (Int32)0xFFFFFFFF, (Int32)0x00FFFFFF, (Int32)0x0000FFFF, (Int32)0x000000FF };
 const Int32 CSHA1PRNG_SecureRandomImpl::HASHBYTES_TO_USE = 20;
 const Int32 CSHA1PRNG_SecureRandomImpl::FRAME_LENGTH = 16;
 const Int32 CSHA1PRNG_SecureRandomImpl::COUNTER_BASE = 0;

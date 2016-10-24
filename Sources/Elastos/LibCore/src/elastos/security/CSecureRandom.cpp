@@ -32,7 +32,7 @@ static AutoPtr<IEngine> InitEngine()
 const String CSecureRandom::SERVICE("SecureRandom");
 // Used to access common engine functionality
 AutoPtr<IEngine> CSecureRandom::ENGINE = InitEngine();
-volatile AutoPtr<ISecureRandom> CSecureRandom::internalSecureRandom;
+AutoPtr<ISecureRandom> CSecureRandom::sInternalSecureRandom;
 
 CAR_OBJECT_IMPL(CSecureRandom)
 CAR_INTERFACE_IMPL(CSecureRandom, Random, ISecureRandom)
@@ -179,7 +179,7 @@ ECode CSecureRandom::GetAlgorithm(
 ECode CSecureRandom::SetSeed(
     /* [in] */ ArrayOf<Byte>* seed)
 {
-    AutoLock lock(THIS);
+    AutoLock lock(this);
     if (mSecureRandomSpi != NULL) {
         mSecureRandomSpi->EngineSetSeed(seed);
     }
@@ -215,7 +215,7 @@ ECode CSecureRandom::SetSeed(
 ECode CSecureRandom::NextBytes(
     /* [in] */ ArrayOf<Byte>* bytes)
 {
-    AutoLock lock(THIS);
+    AutoLock lock(this);
     if (mSecureRandomSpi != NULL) {
         mSecureRandomSpi->EngineNextBytes(bytes);
     }
@@ -268,11 +268,11 @@ ECode CSecureRandom::GetSeed(
     /* [out] */ ArrayOf<Byte>** seed)
 {
     VALIDATE_NOT_NULL(seed);
-    AutoPtr<ISecureRandom> result = internalSecureRandom;
+    AutoPtr<ISecureRandom> result = sInternalSecureRandom;
     if (result == NULL) {
         // single-check idiom
         CSecureRandom::New((ISecureRandom**)&result);
-        internalSecureRandom = result;
+        sInternalSecureRandom = result;
     }
     return result->GenerateSeed(numBytes, seed);
 }

@@ -1057,7 +1057,7 @@ ECode CopyOnWriteArrayList::CowSubList::IndexOf(
     AutoPtr< ArrayOf<IInterface*> > snapshot = mHost->mElements;
     FAIL_RETURN(mSlice->CheckConcurrentModification(snapshot));
     Int32 result = 0;
-    CopyOnWriteArrayList::IndexOf(object, *snapshot, mSlice->mFrom, mSlice->mTo, &result);
+    CopyOnWriteArrayList::IndexOf(object, snapshot, mSlice->mFrom, mSlice->mTo, &result);
     *index = (result != -1) ? (result - mSlice->mFrom) : -1;
     return NOERROR;
 }

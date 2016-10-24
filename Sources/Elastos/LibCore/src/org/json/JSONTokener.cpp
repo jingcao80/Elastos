@@ -36,9 +36,8 @@ ECode JSONTokener::constructor(
 {
     String tmp = in;
     // consume an optional byte order mark (BOM) if it exists
-    Char32 c = 0xfeff;
     String str("");
-    str += c;
+    str.Append((Char32)0xfeff);
     if (!tmp.IsNull() && tmp.StartWith(str)) {
         tmp = tmp.Substring(1);
     }
@@ -630,7 +629,7 @@ ECode JSONTokener::NextTo(
     VALIDATE_NOT_NULL(str);
 
     String strExcluded("");
-    strExcluded += excluded;
+    strExcluded.Append(excluded);
     *str = NextToInternal(strExcluded).Trim();
     return NOERROR;
 }
