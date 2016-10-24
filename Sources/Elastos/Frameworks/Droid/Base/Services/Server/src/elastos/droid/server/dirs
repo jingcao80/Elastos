@@ -11,6 +11,7 @@ DIRS += content
 DIRS += devicepolicy
 DIRS += display
 DIRS += dreams
+DIRS += ethernet
 #DIRS += fingerprint
 DIRS += firewall
 DIRS += hdmi

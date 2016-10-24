@@ -39,7 +39,7 @@
 #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/dreams/CDreamManagerService.h"
 #include "elastos/droid/server/CBluetoothManagerService.h"
-
+#include "elastos/droid/server/ethernet/EthernetService.h"
 
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.App.h>
@@ -129,6 +129,7 @@ using Elastos::Droid::Server::Wm::InputMonitor;
 using Elastos::Droid::Server::DevicePolicy::CDevicePolicyManagerService;
 using Elastos::Droid::Server::Dreams::CDreamManagerService;
 using Elastos::Droid::Server::CBluetoothManagerService;
+using Elastos::Droid::Server::Ethernet::EthernetService;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -821,8 +822,10 @@ ECode SystemServer::StartOtherServices()
 
             bval = FALSE;
             if (mPackageManager->HasSystemFeature(IPackageManager::FEATURE_ETHERNET, &bval), bval) {
-                Slogger::I(TAG, "leliang_debug EthernetService not ok ????????");
-    //          mSystemServiceManager->StartService(ETHERNET_SERVICE_CLASS);
+                Slogger::I(TAG, "EthernetService");
+                AutoPtr<EthernetService> ehternetService = new EthernetService();
+                ehternetService->constructor(context);
+                mSystemServiceManager->StartService(ehternetService);
             }
 
             Slogger::I(TAG, "Connectivity Service");

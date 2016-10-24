@@ -345,7 +345,7 @@ ECode IpConfigStore::ReadIpAndProxyConfigurations(
                 if ((ECode)E_ILLEGAL_ARGUMENT_EXCEPTION == ec_inner)
                     Loge("Ignore invalid address while reading %d", ec_inner);
                 else
-                    return ec;
+                    goto out_try;
             }
         } while (TRUE);
         if (id != -1) {
@@ -407,8 +407,6 @@ out_try:
         else if ((ECode)E_IO_EXCEPTION == ec) {
             Loge("Error parsing configuration: %d", ec);
         }
-        else
-            return ec;
     }
     // finally {
     if (in != NULL) {
@@ -418,7 +416,9 @@ out_try:
     }
     // }
 
-    FUNC_RETURN(networks)
+    *result = networks;
+    REFCOUNT_ADD(*result)
+    return ec;
 }
 
 ECode IpConfigStore::Loge(

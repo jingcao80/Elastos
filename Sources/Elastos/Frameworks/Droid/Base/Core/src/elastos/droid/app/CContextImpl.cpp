@@ -63,6 +63,7 @@
 #include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/location/CLocationManager.h"
 #include "elastos/droid/net/CConnectivityManager.h"
+#include "elastos/droid/net/CEthernetManager.h"
 #include "elastos/droid/net/CNetworkPolicyManager.h"
 #include "elastos/droid/net/CNetworkScoreManager.h"
 #include "elastos/droid/telecom/CTelecomManager.h"
@@ -181,7 +182,9 @@ using Elastos::Droid::Net::INetworkPolicyManager;
 using Elastos::Droid::Net::IINetworkPolicyManager;
 using Elastos::Droid::Net::INetworkScoreManager;
 using Elastos::Droid::Net::CNetworkScoreManager;
-using Elastos::Droid::Net::EIID_IIEthernetManager;
+using Elastos::Droid::Net::CEthernetManager;
+using Elastos::Droid::Net::IEthernetManager;
+using Elastos::Droid::Net::IIEthernetManager;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Build;
@@ -2702,13 +2705,13 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::ETHERNET_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
-        // registerService(ETHERNET_SERVICE, new ServiceFetcher() {
-        //         public Object createService(ContextImpl ctx) {
-        //             IBinder b = ServiceManager.getService(ETHERNET_SERVICE);
-        //             IEthernetManager service = IEthernetManager.Stub.asInterface(b);
-        //             return new EthernetManager(ctx.getOuterContext(), service);
-        //         }});
+        AutoPtr<IInterface> b = ServiceManager::GetService(ETHERNET_SERVICE);
+        AutoPtr<IIEthernetManager> service = IIEthernetManager::Probe(b);
+        AutoPtr<IEthernetManager> ethernetManager;
+        CEthernetManager::New(GetOuterContext(), service, (IEthernetManager**)&ethernetManager);
+        *object = ethernetManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
     }
     else if (IContext::WINDOW_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);

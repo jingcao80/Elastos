@@ -1,0 +1,15 @@
+
+TARGET_NAME= ethernet
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = EthernetConfigStore.cpp
+SOURCES += EthernetNetworkFactory.cpp
+SOURCES += CEthernetServiceImpl.cpp
+SOURCES += EthernetService.cpp

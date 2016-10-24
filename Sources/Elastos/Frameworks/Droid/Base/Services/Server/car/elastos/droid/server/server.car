@@ -226,6 +226,7 @@ module
     using interface Elastos.Droid.Media.Session.IISessionController;
     using interface Elastos.Droid.Media.Session.IISessionManager;
     using interface Elastos.Droid.Net.IIConnectivityManager;
+    using interface Elastos.Droid.Net.IIEthernetManager;
     using interface Elastos.Droid.Net.IINetworkManagementEventObserver;
     using interface Elastos.Droid.Net.IINetworkPolicyManager;
     using interface Elastos.Droid.Net.IINetworkStatsService;
@@ -701,13 +702,6 @@ module
         interface IBinder;
     }
 
-//     class CEthernetService {
-//         constructor(
-//             [in] IContext* ctx);
-
-//         interface IIEthernetManager;
-//     }
-
 //     class CDeviceStorageMonitorService {
 //         constructor(
 //             [in] IContext* ctx);
@@ -797,6 +791,19 @@ module
 // //    }
 // //
 // //    } // namespace Updates
+
+    namespace Ethernet {
+
+        [local]
+        class CEthernetServiceImpl {
+            constructor(
+                [in] IContext* ctx);
+
+            interface IIEthernetManager;
+            interface IBinder;
+        }
+
+    } // namespace Ethernet
 
     namespace Usb {
 
