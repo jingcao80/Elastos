@@ -378,7 +378,7 @@ ECode KeyChain::BindAsUser(
     AutoPtr<ServiceConnection> keyChainServiceConnection = new ServiceConnection(NULL, q);
 
     AutoPtr<IIntent> intent;
-    CIntent::New(String("Elastos.Droid.KeyStore.Security.IIKeyChainService")/*TODO IKeyChainService.class.getName()*/, (IIntent**)&intent);
+    CIntent::New(String("android.security.IKeyChainService")/*TODO IKeyChainService.class.getName()*/, (IIntent**)&intent);
     AutoPtr<IComponentName> comp;
     AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);
@@ -392,7 +392,7 @@ ECode KeyChain::BindAsUser(
         //throw new AssertionError("could not bind to KeyChainService");
         Logger::E("KeyChain", "BindAsUser, could not bind to KeyChainService");
         assert(0);
-        return E_ILLEGAL_STATE_EXCEPTION;
+        return E_ASSERTION_ERROR;
     }
 
     AutoPtr<IInterface> obj;

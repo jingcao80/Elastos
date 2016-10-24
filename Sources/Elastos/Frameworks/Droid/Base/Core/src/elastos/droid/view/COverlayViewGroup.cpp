@@ -19,7 +19,7 @@ ECode COverlayViewGroup::constructor(
     ViewGroup::constructor(context);
     mHostView = hostView;
     mAttachInfo = VIEW_PROBE(mHostView)->mAttachInfo;
-    mAttachInfo->mViewRootImpl->AddRef();   // see View::DispatchAttachedToWindow and View::DispatchDetachedFromWindow
+    if (mAttachInfo != NULL) mAttachInfo->mViewRootImpl->AddRef();   // see View::DispatchAttachedToWindow and View::DispatchDetachedFromWindow
     hostView->GetWidth(&mRight);
     hostView->GetHeight(&mBottom);
     return NOERROR;
