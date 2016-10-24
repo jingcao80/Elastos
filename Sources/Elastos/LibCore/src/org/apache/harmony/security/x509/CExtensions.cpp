@@ -1,6 +1,7 @@
 
 #include "org/apache/harmony/security/x509/CExtensions.h"
 #include "org/apache/harmony/security/x509/CExtension.h"
+#include "org/apache/harmony/security/x509/CGeneralNames.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
 #include <elastos/core/CoreUtils.h>
@@ -334,8 +335,7 @@ ECode CExtensions::DecodeGeneralNames(
     AutoPtr<ArrayOf<Byte> > value;
     Elastos::Security::Cert::IExtension::Probe(extension)->GetValue((ArrayOf<Byte>**)&value);
     AutoPtr<IInterface> obj;
-    assert(0);
-    //CGeneralNames::ASN1->Decode(value, (IInterface**)&obj);
+    CGeneralNames::ASN1->Decode(value, (IInterface**)&obj);
     AutoPtr<ICollection> collection;
     IGeneralNames::Probe(obj)->GetPairsList((ICollection**)&collection);
 

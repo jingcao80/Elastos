@@ -124,8 +124,7 @@ ECode CAccessDescription::GetEncoded(
     VALIDATE_NOT_NULL(ppEncoded);
 
     if (mEncoding == NULL) {
-        assert(0);
-        //mEncoding = ASN1.encode(this);
+        IASN1Type::Probe(ASN1)->Encode(TO_IINTERFACE(this), (ArrayOf<Byte>**)&mEncoding);
     }
     *ppEncoded = mEncoding;
     REFCOUNT_ADD(*ppEncoded);

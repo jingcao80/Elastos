@@ -4,6 +4,7 @@
 #include "org/apache/harmony/security/asn1/CASN1Any.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
+#include "org/apache/harmony/security/utils/AlgNameMapper.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
@@ -16,6 +17,7 @@ using Org::Apache::Harmony::Security::Asn1::CASN1Any;
 using Org::Apache::Harmony::Security::Asn1::ASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::CObjectIdentifier;
+using Org::Apache::Harmony::Security::Utils::AlgNameMapper;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::IByte;
@@ -134,8 +136,7 @@ ECode AlgorithmIdentifier::GetAlgorithmName(
     VALIDATE_NOT_NULL(pAlgorithmName)
 
     if (mAlgorithmName.IsNull()) {
-        assert(0);
-        //mAlgorithmName = AlgNameMapper::Map2AlgName(mAlgorithm);
+        mAlgorithmName = AlgNameMapper::Map2AlgName(mAlgorithm);
         if (mAlgorithmName.IsNull()) {
             mAlgorithmName = mAlgorithm;
         }
@@ -160,8 +161,7 @@ ECode AlgorithmIdentifier::GetEncoded(
     VALIDATE_NOT_NULL(ppEncoded)
 
     if (mEncoding == NULL) {
-        assert(0);
-        //mEncoding = ASN1::Encode(this);
+        IASN1Type::Probe(ASN1)->Encode(TO_IINTERFACE(this), (ArrayOf<Byte>**)&mEncoding);
     }
     *ppEncoded = mEncoding;
     REFCOUNT_ADD(*ppEncoded);

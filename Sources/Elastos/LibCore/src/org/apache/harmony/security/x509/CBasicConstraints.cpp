@@ -79,7 +79,7 @@ AutoPtr<IASN1Type> CBasicConstraints::initASN1()
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
     tmp->constructor(array);
-    tmp->SetDefault(FALSE, 0);
+    tmp->SetDefault(TO_IINTERFACE(CoreUtils::Convert(FALSE)), 0);
     tmp->SetOptional(1);
     return IASN1Type::Probe(tmp);
 }
@@ -183,8 +183,7 @@ ECode CBasicConstraints::constructor(
             (*array)[i] = num;
         }
         AutoPtr<IBigInteger> bi;
-        assert(0);
-        //CBigInteger::New(array, (IBigInteger**)&bi);
+        CBigInteger::New(*array, (IBigInteger**)&bi);
         INumber::Probe(bi)->Int32Value(&mPathLenConstraint);
     }
     return NOERROR;

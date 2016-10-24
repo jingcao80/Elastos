@@ -14,6 +14,9 @@
 #include "org/apache/harmony/security/x509/CCRLNumber.h"
 #include "org/apache/harmony/security/x509/CCRLDistributionPoints.h"
 #include "org/apache/harmony/security/x509/CIssuingDistributionPoint.h"
+#include "org/apache/harmony/security/x509/CSubjectKeyIdentifier.h"
+#include "org/apache/harmony/security/x509/CNameConstraints.h"
+#include "org/apache/harmony/security/x509/CInfoAccessSyntax.h"
 #include "org/apache/harmony/security/asn1/ASN1Type.h"
 #include "org/apache/harmony/security/asn1/CObjectIdentifier.h"
 #include "org/apache/harmony/security/asn1/CASN1OctetString.h"
@@ -202,7 +205,7 @@ AutoPtr<IASN1Sequence> CExtension::initASN1()
 
     AutoPtr<ASN1Sequence> tmp = new MyASN1Sequence();
     tmp->constructor(array);
-    tmp->SetDefault(FALSE, 1);
+    tmp->SetDefault(TO_IINTERFACE(CoreUtils::Convert(FALSE)), 1);
     return IASN1Sequence::Probe(tmp);
 }
 
@@ -649,14 +652,12 @@ ECode CExtension::DecodeExtensionValue()
 
     if (Arrays::Equals(mExtnID, SUBJ_KEY_ID)) {
         AutoPtr<ISubjectKeyIdentifier> tmp;
-        assert(0);
-        //CSubjectKeyIdentifier::Decode(mExtnValue, (ISubjectKeyIdentifier*)&tmp);
+        CSubjectKeyIdentifier::Decode(mExtnValue, (ISubjectKeyIdentifier**)&tmp);
         mExtnValueObject = IExtensionValue::Probe(tmp);
     }
     else if (Arrays::Equals(mExtnID, KEY_USAGE)) {
         AutoPtr<IKeyUsage> usage;
-        assert(0);
-        //CKeyUsage::New(mExtnValue, (IKeyUsage**)&usage);
+        CKeyUsage::New(mExtnValue, (IKeyUsage**)&usage);
         mExtnValueObject = IExtensionValue::Probe(usage);
     }
     else if (Arrays::Equals(mExtnID, SUBJECT_ALT_NAME)) {
@@ -676,8 +677,7 @@ ECode CExtension::DecodeExtensionValue()
     }
     else if (Arrays::Equals(mExtnID, NAME_CONSTRAINTS)) {
         AutoPtr<INameConstraints> tmp;
-        assert(0);
-        //CNameConstraints::Decode(mExtnValue, (INameConstraints**)&tmp);
+        CNameConstraints::Decode(mExtnValue, (INameConstraints**)&tmp);
         mExtnValueObject = IExtensionValue::Probe(tmp);
     }
     else if (Arrays::Equals(mExtnID, CERTIFICATE_POLICIES)) {
@@ -737,20 +737,17 @@ ECode CExtension::DecodeExtensionValue()
     }
     else if (Arrays::Equals(mExtnID, ISSUING_DISTR_POINTS)) {
         AutoPtr<IIssuingDistributionPoint> tmp;
-        assert(0);
-        //CIssuingDistributionPoint::Decode(mExtnValue, (IIssuingDistributionPoint**)&tmp);
+        CIssuingDistributionPoint::Decode(mExtnValue, (IIssuingDistributionPoint**)&tmp);
         mExtnValueObject = IExtensionValue::Probe(tmp);
     }
     else if (Arrays::Equals(mExtnID, AUTHORITY_INFO_ACCESS)) {
         AutoPtr<IInfoAccessSyntax> tmp;
-        assert(0);
-        //CInfoAccessSyntax::Decode(mExtnValue, (IInfoAccessSyntax**)&tmp);
+        CInfoAccessSyntax::Decode(mExtnValue, (IInfoAccessSyntax**)&tmp);
         mExtnValueObject = IExtensionValue::Probe(tmp);
     }
     else if (Arrays::Equals(mExtnID, SUBJECT_INFO_ACCESS)) {
         AutoPtr<IInfoAccessSyntax> tmp;
-        assert(0);
-        //CInfoAccessSyntax::Decode(mExtnValue, (IInfoAccessSyntax**)&tmp);
+        CInfoAccessSyntax::Decode(mExtnValue, (IInfoAccessSyntax**)&tmp);
         mExtnValueObject = IExtensionValue::Probe(tmp);
     }
     mValueDecoded = TRUE;

@@ -101,18 +101,18 @@ ECode CIssuingDistributionPoint::MyASN1Sequence::GetValues(
 
     Boolean res;
     idp->mOnlyContainsUserCerts->GetValue(&res);
-    values->Set(1, res ? CoreUtils::Convert(TRUE) : NULL);
+    values->Set(1, res ? TO_IINTERFACE(CoreUtils::Convert(TRUE)) : NULL);
 
     idp->mOnlyContainsCACerts->GetValue(&res);
-    values->Set(2, res ? CoreUtils::Convert(TRUE) : NULL);
+    values->Set(2, res ? TO_IINTERFACE(CoreUtils::Convert(TRUE)) : NULL);
 
     values->Set(3, TO_IINTERFACE(idp->mOnlySomeReasons));
 
     idp->mIndirectCRL->GetValue(&res);
-    values->Set(4, res ? CoreUtils::Convert(TRUE) : NULL);
+    values->Set(4, res ? TO_IINTERFACE(CoreUtils::Convert(TRUE)) : NULL);
 
     idp->mOnlyContainsAttributeCerts->GetValue(&res);
-    values->Set(5, res ? CoreUtils::Convert(TRUE) : NULL);
+    values->Set(5, res ? TO_IINTERFACE(CoreUtils::Convert(TRUE)) : NULL);
     return NOERROR;
 }
 
@@ -153,10 +153,10 @@ AutoPtr<IASN1Type> CIssuingDistributionPoint::initASN1()
     tmp->constructor(array);
     tmp->SetOptional(0);
     tmp->SetOptional(3);
-    tmp->SetDefault(FALSE, 1);
-    tmp->SetDefault(FALSE, 2);
-    tmp->SetDefault(FALSE, 4);
-    tmp->SetDefault(FALSE, 5);
+    tmp->SetDefault(TO_IINTERFACE(CoreUtils::Convert(FALSE)), 1);
+    tmp->SetDefault(TO_IINTERFACE(CoreUtils::Convert(FALSE)), 2);
+    tmp->SetDefault(TO_IINTERFACE(CoreUtils::Convert(FALSE)), 4);
+    tmp->SetDefault(TO_IINTERFACE(CoreUtils::Convert(FALSE)), 5);
     return IASN1Type::Probe(tmp);
 }
 

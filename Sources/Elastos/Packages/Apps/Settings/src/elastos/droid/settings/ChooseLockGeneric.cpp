@@ -196,32 +196,33 @@ void ChooseLockGeneric::ChooseLockGenericFragment::MaybeEnableEncryption(
 {
     AutoPtr<IUserHandle> handle;
     Process::MyUserHandle((IUserHandle**)&handle);
-    Boolean res;
-    handle->IsOwner(&res);
-    if (res) {
-        AutoPtr<ILockPatternUtilsHelper> helper;
-        CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
-        helper->IsDeviceEncryptionEnabled(&res);
-        if (res) {
-            mEncryptionRequestQuality = quality;
-            mEncryptionRequestDisabled = disabled;
-            // If accessibility is enabled and the user hasn't seen this dialog before, set the
-            // default state to agree with that which is compatible with accessibility
-            // (password not required).
-            AutoPtr<IActivity> activity;
-            GetActivity((IActivity**)&activity);
-            AutoPtr<IAccessibilityManagerHelper> amHelper;
-            CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&amHelper);
-            AutoPtr<IAccessibilityManager> manager;
-            amHelper->GetInstance(IContext::Probe(activity), (IAccessibilityManager**)&manager);
-            Boolean accEn;
-            manager->IsEnabled(&accEn);
-            Boolean required;
-            mLockPatternUtils->IsCredentialRequiredToDecrypt(!accEn, &required);
-            AutoPtr<IIntent> intent = EncryptionInterstitial::CreateStartIntent(
-                    IContext::Probe(activity), quality, required);
-            StartActivityForResult(intent, ENABLE_ENCRYPTION_REQUEST);
-        }
+    Boolean res1;
+    handle->IsOwner(&res1);
+
+    AutoPtr<ILockPatternUtilsHelper> helper;
+    CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
+    Boolean res2;
+    helper->IsDeviceEncryptionEnabled(&res2);
+
+    if (res1 && res2) {
+        mEncryptionRequestQuality = quality;
+        mEncryptionRequestDisabled = disabled;
+        // If accessibility is enabled and the user hasn't seen this dialog before, set the
+        // default state to agree with that which is compatible with accessibility
+        // (password not required).
+        AutoPtr<IActivity> activity;
+        GetActivity((IActivity**)&activity);
+        AutoPtr<IAccessibilityManagerHelper> amHelper;
+        CAccessibilityManagerHelper::AcquireSingleton((IAccessibilityManagerHelper**)&amHelper);
+        AutoPtr<IAccessibilityManager> manager;
+        amHelper->GetInstance(IContext::Probe(activity), (IAccessibilityManager**)&manager);
+        Boolean accEn;
+        manager->IsEnabled(&accEn);
+        Boolean required;
+        mLockPatternUtils->IsCredentialRequiredToDecrypt(!accEn, &required);
+        AutoPtr<IIntent> intent = EncryptionInterstitial::CreateStartIntent(
+                IContext::Probe(activity), quality, required);
+        StartActivityForResult(intent, ENABLE_ENCRYPTION_REQUEST);
     }
     else {
         mRequirePassword = FALSE; // device encryption not enabled or not device owner.
