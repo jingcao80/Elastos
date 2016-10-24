@@ -563,7 +563,7 @@ ECode CPinnedHeaderListView::DispatchDraw(
         // first header's assigned y-value, use that for the first header's y value. This way,
         // the header inherits any padding applied to the list view.
         Int32 position;
-        if (mSize > 0 && GetFirstVisiblePosition(&position), position == 0) {
+        if (mSize > 0 && (GetFirstVisiblePosition(&position), position == 0)) {
             AutoPtr<IView> firstChild;
             GetChildAt(0, &firstChild);
             AutoPtr<PinnedHeader*> firstHeader = mHeaders[0];

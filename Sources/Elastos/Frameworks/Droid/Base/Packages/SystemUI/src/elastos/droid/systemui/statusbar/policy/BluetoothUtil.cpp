@@ -194,7 +194,6 @@ String BluetoothUtil::ProfileStateToString(
 String BluetoothUtil::UuidToString(
     /* [in] */ IParcelUuid* uuid)
 {
-    Boolean e = FALSE;
     if (Object::Equals(BluetoothUuid::AudioSink, uuid)) return String("AudioSink");
     if (Object::Equals(BluetoothUuid::AudioSource, uuid)) return String("AudioSource");
     if (Object::Equals(BluetoothUuid::AdvAudioDist, uuid)) return String("AdvAudioDist");
@@ -265,7 +264,6 @@ String BluetoothUtil::UuidsToString(
 Int32 BluetoothUtil::UuidToProfile(
     /* [in] */ IParcelUuid* uuid)
 {
-    Boolean e = FALSE;
     if (Object::Equals(BluetoothUuid::AudioSink, uuid)) return IBluetoothProfile::A2DP;
     if (Object::Equals(BluetoothUuid::AdvAudioDist, uuid)) return IBluetoothProfile::A2DP;
 

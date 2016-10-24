@@ -1450,7 +1450,9 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenVideoThumbnailCleared(
             ECode ec = pfh->Open(file,
                 IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pf);
             AutoPtr<IAssetFileDescriptor> afd;
-            CAssetFileDescriptor::New(pf, 0, IAssetFileDescriptor::UNKNOWN_LENGTH, (IAssetFileDescriptor**)&afd);
+            if (SUCCEEDED(ec)) {
+                CAssetFileDescriptor::New(pf, 0, IAssetFileDescriptor::UNKNOWN_LENGTH, (IAssetFileDescriptor**)&afd);
+            }
             AutoPtr<IIoUtils> ioUtils;
             CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));

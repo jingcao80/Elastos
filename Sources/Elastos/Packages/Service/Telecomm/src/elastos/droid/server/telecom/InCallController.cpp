@@ -465,7 +465,7 @@ ECode InCallController::Bind()
                     AutoPtr<IUserHandle> current;
                     userHandleHelper->GetCURRENT((IUserHandle**)&current);
                     Boolean isBindServiceAsUserOk;
-                    ECode ec = mContext->BindServiceAsUser(intent, inCallServiceConnection,
+                    mContext->BindServiceAsUser(intent, inCallServiceConnection,
                             IContext::BIND_AUTO_CREATE, current, &isBindServiceAsUserOk);
                     if (isBindServiceAsUserOk) {
                         mServiceConnections->Put(componentName, inCallServiceConnection);

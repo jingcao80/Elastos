@@ -824,7 +824,7 @@ void CStatus::UpdateConnectivity()
 
 void CStatus::UpdateTimes()
 {
-    Int64 at = SystemClock::GetUptimeMillis() / 1000;
+    // Int64 at = SystemClock::GetUptimeMillis() / 1000;
     Int64 ut = SystemClock::GetElapsedRealtime() / 1000;
 
     if (ut == 0) {

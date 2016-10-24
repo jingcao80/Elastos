@@ -156,7 +156,7 @@ ECode UsbPermissionActivity::OnCreate(
     // add "always use" checkbox
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
-    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(inflater);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IView> v;
     inflater->Inflate(Elastos::Droid::R::layout::always_use_checkbox, NULL, (IView**)&v);

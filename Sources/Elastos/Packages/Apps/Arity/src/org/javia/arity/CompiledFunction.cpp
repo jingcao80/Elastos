@@ -53,19 +53,9 @@ static AutoPtr<IRandom> InitRandom()
 }
 const AutoPtr<IRandom> CompiledFunction::RANDOM = InitRandom();
 
-static AutoPtr<ArrayOf<Double> > InitEmptyDouble()
-{
-    AutoPtr<ArrayOf<Double> > args = ArrayOf<Double>::Alloc(0);
-    return args;
-}
-const AutoPtr<ArrayOf<Double> > CompiledFunction::EMPTY_DOUBLE;
+const AutoPtr<ArrayOf<Double> > CompiledFunction::EMPTY_DOUBLE = ArrayOf<Double>::Alloc(0);
 
-static AutoPtr<ArrayOf<IFunction*> > InitEmptyFun()
-{
-    AutoPtr<ArrayOf<IFunction*> > args = ArrayOf<IFunction*>::Alloc(0);
-    return args;
-}
-const AutoPtr<ArrayOf<IFunction*> > CompiledFunction::EMPTY_FUN = InitEmptyFun();
+const AutoPtr<ArrayOf<IFunction*> > CompiledFunction::EMPTY_FUN = ArrayOf<IFunction*>::Alloc(0);
 
 static AutoPtr<IComplex> InitOneThird()
 {
@@ -377,13 +367,14 @@ ECode CompiledFunction::ExecWithoutCheck(
                 break;
             case VM::MOD: {
                 --p;
-                Double temp = fmod((*s)[p], (*s)[p+1]);
-                (*s)[p] = temp;
+                Double v = fmod((*s)[p], (*s)[p+1]);
+                (*s)[p] = v;
                 break;
             }
 
             case VM::POWER: {
-                (*s)[--p] = Elastos::Core::Math::Pow((*s)[p], (*s)[p+1]);
+                Double v = Elastos::Core::Math::Pow((*s)[p], (*s)[p+1]);
+                (*s)[--p] = v;
                 break;
             }
 
@@ -445,11 +436,31 @@ ECode CompiledFunction::ExecWithoutCheck(
                 break;
             }
 
-            case VM::MIN:  (*s)[--p] = Elastos::Core::Math::Min((*s)[p], (*s)[p+1]); break;
-            case VM::MAX:  (*s)[--p] = Elastos::Core::Math::Max((*s)[p], (*s)[p+1]); break;
-            case VM::GCD:  (*s)[--p] = MoreMath::Gcd((*s)[p], (*s)[p+1]); break;
-            case VM::COMB: (*s)[--p] = MoreMath::Combinations((*s)[p], (*s)[p+1]); break;
-            case VM::PERM: (*s)[--p] = MoreMath::Permutations((*s)[p], (*s)[p+1]); break;
+            case VM::MIN: {
+                Double v = Elastos::Core::Math::Min((*s)[p], (*s)[p+1]);
+                (*s)[--p] = v;
+                break;
+            }
+            case VM::MAX: {
+                Double v = Elastos::Core::Math::Max((*s)[p], (*s)[p+1]);
+                (*s)[--p] = v;
+                break;
+            }
+            case VM::GCD: {
+                Double v = MoreMath::Gcd((*s)[p], (*s)[p+1]);
+                (*s)[--p] = v;
+                break;
+            }
+            case VM::COMB: {
+                Double v = MoreMath::Combinations((*s)[p], (*s)[p+1]);
+                (*s)[--p] = v;
+                break;
+            }
+            case VM::PERM: {
+                Double v = MoreMath::Permutations((*s)[p], (*s)[p+1]);
+                (*s)[--p] = v;
+                break;
+            }
 
             case VM::LOAD0:
             case VM::LOAD1:
@@ -556,20 +567,38 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
             if (percentPC == pc-1) {
                 (*s)[p+1]->Mul((*s)[p]);
             }
-            (*s)[--p]->Add((*s)[p+1]);
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Add(o);
             break;
         }
         case VM::SUB: {
             if (percentPC == pc-1) {
                 (*s)[p+1]->Mul((*s)[p]);
             }
-            (*s)[--p]->Sub((*s)[p+1]);
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Sub(o);
             break;
         }
-        case VM::MUL: (*s)[--p]->Mul((*s)[p+1]); break;
-        case VM::DIV: (*s)[--p]->Div((*s)[p+1]); break;
-        case VM::MOD: (*s)[--p]->Mod((*s)[p+1]); break;
-        case VM::POWER: (*s)[--p]->Pow((*s)[p+1]); break;
+        case VM::MUL: {
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Mul(o);
+            break;
+        }
+        case VM::DIV: {
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Div(o);
+            break;
+        }
+        case VM::MOD: {
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Mod(o);
+            break;
+        }
+        case VM::POWER: {
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Pow(o);
+            break;
+        }
 
         case VM::UMIN: (*s)[p]->Negate();    break;
         case VM::FACT: (*s)[p]->Factorial(); break;
@@ -661,18 +690,24 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
             break;
         }
 
-        case VM::GCD:
+        case VM::GCD: {
             //s[--p] = MoreMath.gcd(s[p], s[p+1]);
-            (*s)[--p]->Gcd((*s)[p+1]);
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Gcd(o);
             break;
+        }
 
-        case VM::COMB:
-            (*s)[--p]->Combinations((*s)[p+1]);
+        case VM::COMB: {
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Combinations(o);
             break;
+        }
 
-        case VM::PERM:
-            (*s)[--p]->Permutations((*s)[p+1]);
+        case VM::PERM: {
+            IComplex* o = (*s)[p+1];
+            (*s)[--p]->Permutations(o);
             break;
+        }
 
         case VM::LOAD0:
         case VM::LOAD1:

@@ -45,7 +45,7 @@ const Int32 KeyMapDream::sKeyMap[] = {
     IKeyEvent::KEYCODE_A,
     IKeyEvent::KEYCODE_B | (0Xff3d/*'\uff3d'*/ << SHIFT_FWCH), // ]
     IKeyEvent::KEYCODE_C | (0X00a9/*'\u00a9'*/ << SHIFT_FWCH), // copyright
-    IKeyEvent::KEYCODE_D | (0X3001/*'\u3001'*/ << SHIFT_FWCH), // \\
+    IKeyEvent::KEYCODE_D | (0X3001/*'\u3001'*/ << SHIFT_FWCH), /* \\ */
     IKeyEvent::KEYCODE_E | ('_' << SHIFT_FWCH), // _
     IKeyEvent::KEYCODE_F | (0Xff5b/*'\uff5b'*/ << SHIFT_FWCH), // {
     IKeyEvent::KEYCODE_G | (0Xff5d/*'\uff5d'*/ << SHIFT_FWCH), // }

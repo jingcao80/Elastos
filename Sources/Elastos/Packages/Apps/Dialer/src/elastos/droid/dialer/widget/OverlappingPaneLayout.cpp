@@ -1493,10 +1493,10 @@ ECode OverlappingPaneLayout::OnNestedPreFling(
 {
     VALIDATE_NOT_NULL(res);
     Boolean result;
-    if (!(velocityY > 0 && mSlideOffsetPx != 0
-            || velocityY < 0 && mSlideOffsetPx < mIntermediateOffset
-            || velocityY < 0 && mSlideOffsetPx < mSlideRange
-            && (mPanelSlideCallbacks->IsScrollableChildUnscrolled(&result), result))) {
+    if (!((velocityY > 0 && mSlideOffsetPx != 0)
+            || (velocityY < 0 && mSlideOffsetPx < mIntermediateOffset)
+            || (velocityY < 0 && mSlideOffsetPx < mSlideRange
+            && (mPanelSlideCallbacks->IsScrollableChildUnscrolled(&result), result)))) {
         // No need to consume the fling if the fling won't collapse or expand the header.
         // How far we are willing to expand the header depends on isScrollableChildUnscrolled().
         *res = FALSE;

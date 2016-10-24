@@ -185,11 +185,11 @@ ECode FirstFrameAnimatorHelper::Print(
     Boolean isDirty;
     mTarget->IsDirty(&isDirty);
 
-    // Logger::D(
-    //     "FirstFrameAnimatorHelper%lld(%lld)%s dirty? %s %f %s %s",
-    //     sGlobalFrameCounter, sGlobalFrameCounter - mStartFrame,
-    //     TO_CSTR(mTarget), (isDirty ? "TRUE" : "FALSE"), flatFraction,
-    //     TO_CSTR(this), TO_CSTR(animation));
+    Logger::D("FirstFrameAnimatorHelper",
+            "FirstFrameAnimatorHelper%lld(%lld)%s dirty? %s %f %s %s",
+            sGlobalFrameCounter, sGlobalFrameCounter - mStartFrame,
+            TO_CSTR(mTarget), (isDirty ? "TRUE" : "FALSE"), flatFraction,
+            TO_CSTR(this), TO_CSTR(animation));
     return NOERROR;
 }
 

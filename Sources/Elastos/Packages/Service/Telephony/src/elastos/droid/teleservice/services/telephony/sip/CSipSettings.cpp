@@ -82,6 +82,7 @@ ECode CSipSettings::SipPreference::UpdateSummary(
     }
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(summary);
     SetSummary(cchar);
+    return NOERROR;
 }
 
 ECode CSipSettings::MyRunnable::Run()
@@ -180,6 +181,7 @@ ECode CSipSettings::OnCreate(
     if (actionBar != NULL) {
         actionBar->SetDisplayHomeAsUpEnabled(TRUE);
     }
+    return NOERROR;
 }
 
 ECode CSipSettings::OnResume()
@@ -223,6 +225,7 @@ ECode CSipSettings::OnActivityResult(
     //         }
     //     }
     // }.start();
+    return NOERROR;
 }
 
 void CSipSettings::UpdateProfilesStatus()

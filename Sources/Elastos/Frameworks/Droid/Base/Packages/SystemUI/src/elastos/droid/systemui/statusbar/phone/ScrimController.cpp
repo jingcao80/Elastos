@@ -368,7 +368,7 @@ void ScrimController::UpdateScrimKeyguard()
 {
     using Elastos::Core::Math;
     if (mExpanding && mDarkenWhileDragging) {
-        Float behindFraction = Math::Max(0.0, Math::Min(mFraction, 1.0));
+        Float behindFraction = Math::Max((Float)0.0, Math::Min(mFraction, (Float)1.0));
         Float fraction = 1 - behindFraction;
         fraction = (Float) Math::Pow(fraction, 0.8f);
         behindFraction = (Float) Math::Pow(behindFraction, 0.8f);
@@ -383,7 +383,7 @@ void ScrimController::UpdateScrimKeyguard()
         SetScrimInFrontColor(1);
     }
     else {
-        Float fraction = Math::Max(0.0, Math::Min(mFraction, 1.0));
+        Float fraction = Math::Max((Float)0.0, Math::Min(mFraction, (Float)1.0));
         SetScrimInFrontColor(0.f);
         SetScrimBehindColor(fraction
                 * (SCRIM_BEHIND_ALPHA_KEYGUARD - SCRIM_BEHIND_ALPHA_UNLOCKING)

@@ -492,7 +492,6 @@ void CDeviceAdminAdd::ContinueRemoveAction(
         return;
     }
     mWaitingForRemoveMsg = FALSE;
-    ECode ec;
     if (msg == NULL) {
         // try {
         ActivityManagerNative::GetDefault()->ResumeAppSwitches();

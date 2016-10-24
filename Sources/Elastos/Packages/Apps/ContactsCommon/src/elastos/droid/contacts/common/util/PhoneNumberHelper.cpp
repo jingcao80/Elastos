@@ -84,6 +84,7 @@ String PhoneNumberHelper::FormatNumber(
     // //     Log.w(LOG_TAG, "Number could not be parsed with the given country code!");
     // // }
     // return result;
+    return String(NULL);
 }
 
 String PhoneNumberHelper::NormalizeNumber(

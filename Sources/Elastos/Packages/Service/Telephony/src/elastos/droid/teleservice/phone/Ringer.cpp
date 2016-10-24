@@ -373,6 +373,7 @@ ECode Ringer::ShouldVibrate(
     //     *result = ringerMode == IAudioManager::RINGER_MODE_VIBRATE;
     //     return NOERROR;
     // }
+    return NOERROR;
 }
 
 ECode Ringer::StopRing()

@@ -4209,7 +4209,7 @@ jobject Util::ToJavaUri(
         Int32 representation;
         parcel->ReadInt32(&representation);
         String encode, decode;
-        jstring jencode, jdecode;
+        jstring jencode = NULL, jdecode = NULL;
         switch (representation) {
             case 0/*Representation::BOTH*/:
                 parcel->ReadString(&encode);
@@ -4384,7 +4384,7 @@ jobject Util::ToJavaUri(
         Int32 representation;
         parcel->ReadInt32(&representation);
         String encode, decode;
-        jstring jencode, jdecode;
+        jstring jencode = NULL, jdecode = NULL;
         switch (representation) {
             case 0/*Representation::BOTH*/:
                 parcel->ReadString(&encode);
@@ -8134,7 +8134,7 @@ jobject Util::ToJavaPorterDuffMode(
 {
     jclass cPorterDuffMode = env->FindClass("android/graphics/PorterDuff$Mode");
     CheckErrorAndLog(env, "Util::ToJavaPorterDuffMode()", "Fail FindClass: PorterDuff$Mode : %d!\n", __LINE__);
-    jfieldID f;
+    jfieldID f = NULL;
     switch (mode) {
         case Elastos::Droid::Graphics::PorterDuffMode_NONE:
             f = env->GetStaticFieldID(cPorterDuffMode, "NONE", "Landroid/graphics/PorterDuff$Mode;");

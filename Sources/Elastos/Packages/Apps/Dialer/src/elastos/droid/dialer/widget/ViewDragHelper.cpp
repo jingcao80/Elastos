@@ -909,7 +909,6 @@ Boolean ViewDragHelper::ShouldInterceptTouchEvent(
                 }
 
                 AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
-                Boolean checkRes;
 
                 if (toCapture != NULL && CheckTouchSlop(toCapture, dx, dy) &&
                         TryCaptureViewForDrag(toCapture, pointerId)) {
@@ -1178,7 +1177,6 @@ Boolean ViewDragHelper::CheckTouchSlop(
 {
     Int32 count = mInitialMotionX->GetLength();
     for (Int32 i = 0; i < count; i++) {
-        Boolean checkRes;
         if (CheckTouchSlop(directions, i)) {
             return TRUE;
         }

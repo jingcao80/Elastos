@@ -368,6 +368,7 @@ ECode WirelessSettings::OnManageMobilePlanClick()
     //     Log(String("onManageMobilePlanClick: message=") + mManageMobilePlanMessage);
     //     ShowDialog(MANAGE_MOBILE_PLAN_DIALOG_ID);
     // }
+    return NOERROR;
 }
 
 void WirelessSettings::InitSmsApplicationSetting()

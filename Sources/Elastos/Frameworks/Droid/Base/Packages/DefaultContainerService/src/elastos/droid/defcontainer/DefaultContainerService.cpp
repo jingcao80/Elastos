@@ -495,7 +495,7 @@ ECode DefaultContainerService::CopyPackageToContainerInner(
     AutoPtr< ArrayOf<String> > splitNames, paths;
     pkg->GetSplitNames((ArrayOf<String>**)&splitNames);
     pkg->GetSplitCodePaths((ArrayOf<String>**)&paths);
-    ECode ec2;
+    ECode ec2 = NOERROR;
     if (!ArrayUtils::IsEmpty(splitNames.Get())) {
         for (Int32 i = 0; i < splitNames->GetLength(); ++i) {
             ec2 = CopyFile((*paths)[i], targetDir, String("split_") +

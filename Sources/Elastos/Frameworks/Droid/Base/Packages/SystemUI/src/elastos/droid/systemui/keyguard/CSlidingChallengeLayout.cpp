@@ -748,10 +748,10 @@ ECode CSlidingChallengeLayout::OnInterceptTouchEvent(
                 Float y;
                 ev->GetY(i, &y);
                 if (!mIsBouncing && mActivePointerId == INVALID_POINTER
-                            && (CrossedDragHandle(x, y, mGestureStartY)
-                                    && ShouldEnableChallengeDragging()
-                                    || (IsInChallengeView(x, y) &&
-                                    mScrollState == SCROLL_STATE_SETTLING))) {
+                            && ((CrossedDragHandle(x, y, mGestureStartY)
+                                    && ShouldEnableChallengeDragging())
+                                    || ((IsInChallengeView(x, y) &&
+                                    mScrollState == SCROLL_STATE_SETTLING)))) {
                     ev->GetPointerId(i, &mActivePointerId);
                     mGestureStartX = x;
                     mGestureStartY = y;

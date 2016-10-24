@@ -206,7 +206,7 @@ void ActionBarController::SetHideOffset(
     mIsActionBarSlidUp = offset >= height;
     AutoPtr<IActionBar> actionBar;
     mActivityUi->GetActionBar((IActionBar**)&actionBar);
-    ECode ec = actionBar->SetHideOffset(offset);
+    actionBar->SetHideOffset(offset);
 }
 
 Int32 ActionBarController::GetHideOffset()

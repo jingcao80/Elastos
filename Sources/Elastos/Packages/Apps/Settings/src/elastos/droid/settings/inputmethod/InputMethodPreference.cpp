@@ -239,7 +239,7 @@ ECode InputMethodPreference::OnPreferenceClick(
     // try {
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
-    ECode ec;
+    ECode ec = NOERROR;
     if (intent != NULL) {
         // Invoke a settings activity of an input method.
         ec = context->StartActivity(intent);

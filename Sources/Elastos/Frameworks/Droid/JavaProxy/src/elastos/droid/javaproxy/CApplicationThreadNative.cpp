@@ -1847,7 +1847,7 @@ ECode CApplicationThreadNative::DumpService(
         }
     }
 
-    jobjectArray jargs;
+    jobjectArray jargs = NULL;
     if (args != NULL) {
         jargs = Util::ToJavaStringArray(env, args);
     }
@@ -1895,7 +1895,7 @@ ECode CApplicationThreadNative::DumpProvider(
         }
     }
 
-    jobjectArray jargs;
+    jobjectArray jargs = NULL;
     if (args != NULL) {
         jargs = Util::ToJavaStringArray(env, args);
     }
@@ -1980,7 +1980,7 @@ ECode CApplicationThreadNative::DumpActivity(
 
     jstring jprefix = Util::ToJavaString(env, prefix);
 
-    jobjectArray jargs;
+    jobjectArray jargs = NULL;
     if (args != NULL) {
         jargs = Util::ToJavaStringArray(env, args);
     }
@@ -2026,7 +2026,7 @@ ECode CApplicationThreadNative::DumpMemInfo(
         jmem = Util::ToJavaDebugMemoryInfo(env, mem);
     }
 
-    jobjectArray jargs;
+    jobjectArray jargs = NULL;
     if (args != NULL) {
         jargs = Util::ToJavaStringArray(env, args);
     }
@@ -2063,7 +2063,7 @@ ECode CApplicationThreadNative::DumpGfxInfo(
         jfd = Util::ToJavaFileDescriptor(env, fd);
     }
 
-    jobjectArray jargs;
+    jobjectArray jargs = NULL;
     if (args != NULL) {
         jargs = Util::ToJavaStringArray(env, args);
     }
@@ -2099,7 +2099,7 @@ ECode CApplicationThreadNative::DumpDbInfo(
         jfd = Util::ToJavaFileDescriptor(env, fd);
     }
 
-    jobjectArray jargs;
+    jobjectArray jargs = NULL;
     if (args != NULL) {
         jargs = Util::ToJavaStringArray(env, args);
     }
@@ -2322,7 +2322,7 @@ ECode CApplicationThreadNative::ScheduleInstallProvider(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jobject jProvider;
+    jobject jProvider = NULL;
     if (provider != NULL) {
         jProvider = Util::ToJavaProviderInfo(env, provider);
     }

@@ -1163,9 +1163,9 @@ AutoPtr<IDrawable> Utils::GetUserIcon(
 Boolean Utils::ShowSimCardTile(
     /* [in] */ IContext* context)
 {
-    AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
-    ITelephonyManager* tm = ITelephonyManager::Probe(obj);
+    // AutoPtr<IInterface> obj;
+    // context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    // ITelephonyManager* tm = ITelephonyManager::Probe(obj);
 
     // TODO: Uncomment to re-enable SimSettings.
     // return tm->GetSimCount() > 0;

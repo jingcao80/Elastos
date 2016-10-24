@@ -636,8 +636,8 @@ String CDeviceInfoSettings::FormatKernelVersion(
     /* [in] */ const String& rawKernelVersion)
 {
     // Example (see tests for more):
-    // Linux version 3.0.31-g6fb96c9 (android-build@xxx.xxx.xxx.xxx.com) \
-    //     (gcc version 4.6.x-xxx 20120106 (prerelease) (GCC) ) #1 SMP PREEMPT \
+    // Linux version 3.0.31-g6fb96c9 (android-build@xxx.xxx.xxx.xxx.com)
+    //     (gcc version 4.6.x-xxx 20120106 (prerelease) (GCC) ) #1 SMP PREEMPT
     //     Thu Jun 28 11:02:39 PDT 2012
 
     StringBuilder builder;
@@ -704,16 +704,12 @@ String CDeviceInfoSettings::GetMsvSuffix()
             }
         }
     }
-    else {
-        // Fail quietly, as the file may not exist on some devices.
-        return String("");
-    }
     // } catch (IOException ioe) {
         // Fail quietly, as the file may not exist on some devices.
     // } catch (NumberFormatException nfe) {
         // Fail quietly, returning empty string should be sufficient
     // }
-    // return "";
+    return String("");
 }
 
 String CDeviceInfoSettings::GetFeedbackReporterPackage(

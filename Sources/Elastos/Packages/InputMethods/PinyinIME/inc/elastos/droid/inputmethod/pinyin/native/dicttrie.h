@@ -36,7 +36,7 @@ class DictTrie : AtomDictBase {
                                  // nodes which are not in the first layer,
                                  // node_num < SpellingTrie::shm2full_num().
                                  // For a full spelling id, node_num = 1;
-  };
+  } ParsingMark;
 
   // Used to indicate an extended mile stone.
   // An extended mile stone is used to mark a partial match in the dictionary

@@ -107,7 +107,7 @@ ECode PhoneStateBroadcaster::SendPhoneStateChangedBroadcast(
         handle->GetSchemeSpecificPart(&callHandle);
     }
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         if (mRegistry != NULL) {
             ec = mRegistry->NotifyCallState(phoneState, callHandle);

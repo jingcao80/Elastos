@@ -557,7 +557,7 @@ ECode CUsageAccessSettings::OnPreferenceChange(
             ft->Remove(prev);
         }
         Int32 data;
-        (WarningDialogFragment*)(WarningDialogFragment::NewInstance(pe->mPackageName).Get())->Show(ft, String("warning"), &data);
+        WarningDialogFragment::NewInstance(pe->mPackageName)->Show(ft, String("warning"), &data);
         return NOERROR;
     }
     *result = TRUE;

@@ -257,7 +257,7 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
             msgWhat, request == NULL ? "NULL" : StringUtils::ToString(((MainThreadRequest*) request.Get())->mParam).string());
     if (msgWhat == MSG_ANSWER_CALL) {
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         callsManager->GetRingingCall((ICall**)&call);
         if (call != NULL) {
             ec = mHost->GetCallsManager()->AnswerCall(call, 0);
@@ -271,8 +271,7 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
     }
     else if (msgWhat == MSG_HANGUP_CALL) {
         // try {
-        ECode ec;
-        ec = callsManager->GetForegroundCall((ICall**)&call);
+        ECode ec = callsManager->GetForegroundCall((ICall**)&call);
         if (call != NULL) {
             ec = callsManager->DisconnectCall(call);
         }
@@ -285,7 +284,7 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
     }
     else if (msgWhat == MSG_SEND_DTMF) {
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             callsManager->GetForegroundCall((ICall**)&call);
             if (call != NULL) {
@@ -305,9 +304,8 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
     }
     else if (msgWhat == MSG_PROCESS_CHLD) {
         Boolean result = FALSE;
-        ECode ec;
         // try {
-        ec = mHost->ProcessChld(((MainThreadRequest*) request.Get())->mParam, &result);
+        ECode ec = mHost->ProcessChld(((MainThreadRequest*) request.Get())->mParam, &result);
         // } finally {
         AutoPtr<IBoolean> r;
         CBoolean::New(result, (IBoolean**)&r);
@@ -317,7 +315,7 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
     }
     else if (msgWhat == MSG_GET_SUBSCRIBER_NUMBER) {
         String address(NULL);
-        ECode ec;
+        ECode ec = NOERROR;
         // try {
         do {
             AutoPtr<IPhoneAccount> account = mHost->GetBestPhoneAccount();
@@ -353,7 +351,7 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
     }
     else if (msgWhat == MSG_GET_NETWORK_OPERATOR) {
         String label(NULL);
-        ECode ec;
+        ECode ec = NOERROR;
         // try {
         do {
             AutoPtr<IPhoneAccount> account = mHost->GetBestPhoneAccount();

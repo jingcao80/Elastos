@@ -202,14 +202,12 @@ Int32 SoftKeyboard::GetSkbTotalHeight()
 Int32 SoftKeyboard::GetKeyXMargin()
 {
     AutoPtr<Environment> env = Environment::GetInstance();
-    Float factor = 0.f;
     return (Int32) (mKeyXMargin * mSkbCoreWidth * env->GetKeyXMarginFactor());
 }
 
 Int32 SoftKeyboard::GetKeyYMargin()
 {
     AutoPtr<Environment> env = Environment::GetInstance();
-    Float factor = 0.f;
     return (Int32) (mKeyYMargin * mSkbCoreHeight * env->GetKeyYMarginFactor());
 }
 

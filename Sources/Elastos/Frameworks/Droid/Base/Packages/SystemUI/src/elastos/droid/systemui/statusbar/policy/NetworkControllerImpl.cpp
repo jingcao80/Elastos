@@ -1086,7 +1086,7 @@ void NetworkControllerImpl::UpdateWifiState(
         AutoPtr<IParcelable> p;
         intent->GetParcelableExtra(IWifiManager::EXTRA_NETWORK_INFO, (IParcelable**)&p);
         AutoPtr<INetworkInfo> networkInfo = INetworkInfo::Probe(p);
-        Boolean wasConnected = mWifiConnected, tmp = FALSE;
+        Boolean tmp = FALSE;
         mWifiConnected = networkInfo != NULL && (networkInfo->IsConnected(&tmp), tmp);
         // If Connected grab the signal strength and ssid
         if (mWifiConnected) {
@@ -1182,7 +1182,6 @@ void NetworkControllerImpl::UpdateWimaxState(
 {
     String action;
     intent->GetAction(&action);
-    Boolean wasConnected = mWimaxConnected;
     if (action.Equals(IWimaxManagerConstants::NET_4G_STATE_CHANGED_ACTION)) {
         Int32 wimaxStatus = 0;
         intent->GetInt32Extra(IWimaxManagerConstants::EXTRA_4G_STATE,
@@ -1413,8 +1412,6 @@ void NetworkControllerImpl::RefreshViews()
             mHasMobileDataFeature ? mDataSignalIconId : mWifiIconId;
         mContentDescriptionCombinedSignal = mHasMobileDataFeature
             ? mContentDescriptionDataType : mContentDescriptionWifi;
-
-        Int32 inetCondition = InetConditionForNetwork(IConnectivityManager::TYPE_MOBILE);
 
         mDataTypeIconId = 0;
         mQSDataTypeIconId = 0;

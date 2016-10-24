@@ -106,7 +106,7 @@ void PhoneCallDetailsHelper::SetPhoneCallDetails(
         IView::Probe(views->mVoicemailTranscriptionView)->SetVisibility(IView::VISIBLE);
     }
     else {
-        views->mVoicemailTranscriptionView->SetText(NULL);
+        views->mVoicemailTranscriptionView->SetText((ICharSequence*)NULL);
         IView::Probe(views->mVoicemailTranscriptionView)->SetVisibility(IView::GONE);
     }
 }

@@ -187,9 +187,10 @@ void Console::LogStackTrace(
     /* [in] */ const String& key,
     /* [in] */ Int32 depth)
 {
+#if 0
     Int32 offset = 0;
     AutoPtr<IThread> thread = Thread::GetCurrentThread();
-#if 0 //TODO  thread->GetStackTrace undefined
+    //TODO  thread->GetStackTrace undefined
     AutoPtr<ArrayOf<IStackTraceElement*> > callStack;
     thread->GetStackTrace((ArrayOf<IStackTraceElement*>**)&callStack);
     String tinyStackTrace("");

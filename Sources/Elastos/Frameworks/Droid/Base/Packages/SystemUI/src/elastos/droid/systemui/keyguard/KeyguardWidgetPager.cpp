@@ -67,6 +67,7 @@ ECode KeyguardWidgetPager::InnerListener::OnPageSwitching(
     /* [in] */ Int32 newPageIndex)
 {
     mHost->OnPageSwitching(newPage, newPageIndex);
+    return NOERROR;
 }
 
 //@Override
@@ -75,6 +76,7 @@ ECode KeyguardWidgetPager::InnerListener::OnPageSwitched(
     /* [in] */ Int32 newPageIndex)
 {
     mHost->OnPageSwitched(newPage, newPageIndex);
+    return NOERROR;
 }
 
 //@Override
@@ -83,6 +85,7 @@ ECode KeyguardWidgetPager::InnerListener::OnLongClick(
     /* [out] */ Boolean* result)
 {
     mHost->OnLongClick(v, result);
+    return NOERROR;
 }
 
 ECode KeyguardWidgetPager::MyRunnable::Run()
@@ -776,8 +779,8 @@ ECode KeyguardWidgetPager::IsOverScrollChild(
 
     Boolean isInOverscroll = mOverScrollX < 0 || mOverScrollX > mMaxScrollX;
     Int32 count;
-    *result = (isInOverscroll && (index == 0 && scrollProgress < 0 ||
-            index == (GetChildCount(&count), count) - 1 && scrollProgress > 0));
+    *result = (isInOverscroll && ((index == 0 && scrollProgress < 0) ||
+            (index == (GetChildCount(&count), count) - 1 && scrollProgress > 0)));
     return NOERROR;
 }
 
