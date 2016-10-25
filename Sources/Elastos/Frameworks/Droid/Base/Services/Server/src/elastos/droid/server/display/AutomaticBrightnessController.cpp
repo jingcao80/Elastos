@@ -621,8 +621,8 @@ void AutomaticBrightnessController::UpdateAmbientLux(
     Int64 nextDarkenTransition = NextAmbientLightDarkeningTransition(time);
     Float ambientLux = CalculateAmbientLux(time);
 
-    if (ambientLux >= mBrighteningLuxThreshold && nextBrightenTransition <= time
-            || ambientLux <= mDarkeningLuxThreshold && nextDarkenTransition <= time) {
+    if ((ambientLux >= mBrighteningLuxThreshold && nextBrightenTransition <= time)
+            || (ambientLux <= mDarkeningLuxThreshold && nextDarkenTransition <= time)) {
         SetAmbientLux(ambientLux);
         if (DEBUG) {
             Slogger::D(TAG, "UpdateAmbientLux: %s : mBrighteningLuxThreshold=%f"

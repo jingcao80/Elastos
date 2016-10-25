@@ -6542,16 +6542,12 @@ ECode CDevicePolicyManagerService::SetApplicationRestrictions(
         GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
         Int64 id = Binder::ClearCallingIdentity();
         // try {
-        ECode ec;
-        // TODO: Waiting for IUserManager
-        assert(0);
-        // ec = mUserManager->SetApplicationRestrictions(packageName, settings, userHandle);
+        ECode ec = mUserManager->SetApplicationRestrictions(packageName, settings, userHandle);
         // } finally {
         Binder::RestoreCallingIdentity(id);
         // }
         return ec;
     }
-    return NOERROR;
 }
 
 ECode CDevicePolicyManagerService::SetTrustAgentFeaturesEnabled(
@@ -7571,16 +7567,12 @@ ECode CDevicePolicyManagerService::GetApplicationRestrictions(
         GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
         Int64 id = Binder::ClearCallingIdentity();
         // try {
-        ECode ec;
-        // TODO: Waiting for UserManager
-        assert(0);
-        // ec = mUserManager->GetApplicationRestrictions(packageName, userHandle, result);
+        ECode ec = mUserManager->GetApplicationRestrictions(packageName, userHandle, result);
         // } finally {
         Binder::RestoreCallingIdentity(id);
         return ec;
         // }
     }
-    return NOERROR;
 }
 
 ECode CDevicePolicyManagerService::SetUserRestriction(

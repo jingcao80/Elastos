@@ -287,10 +287,10 @@ ECode CJsonWriter::StringImpl(
                 mOut->Write(String("\\f"));
                 break;
 
-            case '\u2028':
-            case '\u2029': {
+            case 0x2028:
+            case 0x2029: {
                 String str("");
-                str.AppendFormat("\\u%04x", (Int32) c);
+                str.Append(c);
                 mOut->Write(str);
                 break;
             }
@@ -298,7 +298,7 @@ ECode CJsonWriter::StringImpl(
             default: {
                 if (c <= 0x1F) {
                     String str("");
-                    str.AppendFormat("\\u%04x", (Int32) c);
+                    str.Append(c);
                     mOut->Write(str);
                 }
                 else {

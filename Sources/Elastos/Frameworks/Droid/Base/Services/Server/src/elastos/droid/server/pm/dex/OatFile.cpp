@@ -25,7 +25,7 @@ Boolean ReadFileToString(const String& file_name, String* result)
     char buf[8192];
     while (TRUE) {
         size_t n = fread(buf, 1, 8192, fp);
-        if (n == -1) {
+        if (ferror(fp) != 0) {
             fclose(fp);
             return FALSE;
         }

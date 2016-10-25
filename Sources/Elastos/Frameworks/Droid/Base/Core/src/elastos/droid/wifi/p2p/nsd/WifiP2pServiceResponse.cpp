@@ -202,7 +202,7 @@ ECode WifiP2pServiceResponse::Equals(
         return NOERROR;
     }
 
-    WifiP2pServiceResponse* req;// TODO = reinterpret_cast<WifiP2pServiceResponse*>(
+    WifiP2pServiceResponse* req = NULL;// TODO = reinterpret_cast<WifiP2pServiceResponse*>(
         // TODO obj->Probe(EIID_WifiP2pServiceResponse));
     assert(req != NULL);
 

@@ -1276,7 +1276,7 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
             Int32 flags;
             AutoPtr<IApplicationInfo> appInfo;
             IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-            if (appInfo->GetFlags(&flags), flags & IApplicationInfo::FLAG_CANT_SAVE_STATE != 0) {
+            if (appInfo->GetFlags(&flags), (flags & IApplicationInfo::FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 String infoProcessName, appInfoPackageName;

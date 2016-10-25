@@ -1444,7 +1444,7 @@ AutoPtr<IConnection> CdmaCallTracker::CheckMtFindNewRinging(
     // it's a ringing call
     AutoPtr<ICall> call;
     IConnection::Probe((*mConnections)[i])->GetCall((ICall**)&call);
-    if (call == ICall::Probe(mRingingCall)) {
+    if (call.Get() == ICall::Probe(mRingingCall)) {
         newRinging = IConnection::Probe((*mConnections)[i]);
         // if (IPhone::DEBUG_PHONE) Log("Notify new ring " + dc);
     }

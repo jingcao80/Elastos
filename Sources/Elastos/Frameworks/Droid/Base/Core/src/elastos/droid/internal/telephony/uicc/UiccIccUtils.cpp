@@ -147,7 +147,7 @@ String UiccIccUtils::AdnStringFieldToString(
                 // trim off trailing FFFF characters
 
                 ucslen = ret.GetLength();
-                while (ucslen > 0 && ret.GetChar(ucslen - 1) == '\uFFFF') {
+                while (ucslen > 0 && ret.GetChar(ucslen - 1) == 0xFFFF) {
                     ucslen--;
                 }
 
@@ -527,10 +527,13 @@ AutoPtr<ArrayOf<Int32> > UiccIccUtils::GetCLUT(
     Int32 colorIndex = 0;
     Int32 alpha = 0xff << 24;
     do {
+        Int32 data1 = ((*rawData)[valueIndex++] & 0xFF);
+        Int32 data2 = ((*rawData)[valueIndex++] & 0xFF);
+        Int32 data3 = ((*rawData)[valueIndex++] & 0xFF);
         (*result)[colorIndex++] = alpha
-                | (((*result)[valueIndex++] & 0xFF) << 16)
-                | (((*result)[valueIndex++] & 0xFF) << 8)
-                | (((*result)[valueIndex++] & 0xFF));
+                | (data1 << 16)
+                | (data2 << 8)
+                | data3;
     } while (valueIndex < endIndex);
     return result;
 }

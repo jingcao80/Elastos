@@ -641,18 +641,18 @@ const Int32 ImsPhoneCallTracker::EVENT_DIAL_PENDINGMO;
 const Int32 ImsPhoneCallTracker::TIMEOUT_HANGUP_PENDINGMO;
 
 ImsPhoneCallTracker::ImsPhoneCallTracker()
-    : mIsVolteEnabled(FALSE)
+    : mState(PhoneConstantsState_IDLE)
+    , mIsVolteEnabled(FALSE)
     , mIsVtEnabled(FALSE)
     , mClirMode(ICommandsInterface::CLIR_DEFAULT)
     , mDesiredMute(FALSE)
     , mOnHoldToneStarted(FALSE)
-    , mState(PhoneConstantsState_IDLE)
     , mServiceId(-1)
     , mSrvccState(ICallSrvccState_NONE)
     , mIsInEmergencyCall(FALSE)
-    , pendingCallClirMode(0)
+    , mPendingCallClirMode(0)
     , mPendingCallVideoState(0)
-    , pendingCallInEcm(FALSE)
+    , mPendingCallInEcm(FALSE)
 {
     mReceiver = new InnerBroadcastReceiver(this);
     CArrayList::New((IArrayList**)&mConnections);
@@ -865,9 +865,9 @@ ECode ImsPhoneCallTracker::Dial(
             //     throw new CallStateException("service not available");
             // }
             mPhone->SetOnEcbModeExitResponse(this, EVENT_EXIT_ECM_RESPONSE_CDMA, NULL);
-            pendingCallClirMode = clirMode;
+            mPendingCallClirMode = clirMode;
             mPendingCallVideoState = videoState;
-            pendingCallInEcm = TRUE;
+            mPendingCallInEcm = TRUE;
         }
     }
 
@@ -1243,7 +1243,7 @@ ECode ImsPhoneCallTracker::Hangup(
 
     AutoPtr<IImsPhoneCallTracker> ct;
     conn->GetOwner((IImsPhoneCallTracker**)&ct);
-    if (ct != IImsPhoneCallTracker::Probe(this)) {
+    if (ct.Get() != (IImsPhoneCallTracker*)this) {
         // throw new CallStateException ("ImsPhoneConnection " + conn
         //         + "does not belong to ImsPhoneCallTracker " + this);
         return E_CALL_STATE_EXCEPTION;
@@ -1485,12 +1485,12 @@ ECode ImsPhoneCallTracker::HandleMessage(
         }
         case EVENT_EXIT_ECM_RESPONSE_CDMA: {
             // no matter the result, we still do the same here
-            if (pendingCallInEcm) {
+            if (mPendingCallInEcm) {
                 AutoPtr<IBundle> bundle;
                 mPendingMO->GetCallExtras((IBundle**)&bundle);
-                DialInternal(mPendingMO, pendingCallClirMode,
+                DialInternal(mPendingMO, mPendingCallClirMode,
                         mPendingCallVideoState, bundle);
-                pendingCallInEcm = FALSE;
+                mPendingCallInEcm = FALSE;
             }
             mPhone->UnsetOnEcbModeExitResponse(this);
             break;
@@ -1884,7 +1884,7 @@ void ImsPhoneCallTracker::ProcessCallStateChange(
     if (changed) {
         AutoPtr<ICall> call;
         IConnection::Probe(conn)->GetCall((ICall**)&call);
-        if (call == ICall::Probe(mHandoverCall)) return;
+        if (call.Get() == ICall::Probe(mHandoverCall)) return;
         UpdatePhoneState();
         ((ImsPhone*)mPhone.Get())->NotifyPreciseCallStateChanged();
     }

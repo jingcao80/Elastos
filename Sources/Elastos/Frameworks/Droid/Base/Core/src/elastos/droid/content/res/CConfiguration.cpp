@@ -442,7 +442,6 @@ ECode CConfiguration::UpdateFrom(
         mSeq = config->mSeq;
     }
 
-    Boolean equals;
     if (config->mThemeConfig != NULL
             && (mThemeConfig == NULL || !Object::Equals(mThemeConfig, config->mThemeConfig))) {
         *changes |= IActivityInfo::CONFIG_THEME_RESOURCE;

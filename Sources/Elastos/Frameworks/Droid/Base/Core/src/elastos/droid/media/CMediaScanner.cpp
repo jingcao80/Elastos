@@ -741,7 +741,7 @@ ECode CMediaScanner::MyMediaScannerClient::GetGenreName(
             charAfterNumber = ' ';
         }
         if ((parenthesized && (charAfterNumber == ')'))
-                || (!parenthesized) && (Character::IsWhitespace(charAfterNumber))) {
+                || (!parenthesized && Character::IsWhitespace(charAfterNumber))) {
 //            try {
                 String tempText;
                 number.ToString(&tempText);
@@ -1561,14 +1561,12 @@ ECode CMediaScanner::ExtractAlbumArt(
         memcpy(array, data->data(), len);
     }
 
-done:
     free(data);
     // if NewByteArray() returned NULL, an out-of-memory
     // exception will have been raised. I just want to
     // return null in that case.
     *result = array;
     REFCOUNT_ADD(*result);
-
     return NOERROR;
 }
 
@@ -1845,7 +1843,6 @@ ECode CMediaScanner::Postscan(
     CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&media);
     AutoPtr<IUri> uri;
     media->GetContentUri(String("external"), (IUri**)&uri);
-    Boolean equals;
     if (mOriginalCount == 0 && mImagesUri == uri) {
         PruneDeadThumbnailFiles();
     }

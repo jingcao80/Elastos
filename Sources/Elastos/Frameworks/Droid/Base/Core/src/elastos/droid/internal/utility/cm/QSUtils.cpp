@@ -179,15 +179,13 @@ ECode QSUtils::DeviceSupportsFlashLight(
         AutoPtr<IInterface> ib;
         c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&ib);
         Boolean flashAvailable;
-        IBoolean::Probe(ib)->GetValue(&flashAvailable);
         AutoPtr<IInterface> obj;
         c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&obj);
-        AutoPtr<IInteger32> lensFacing = IInteger32::Probe(obj);
-        if (flashAvailable != NULL
-                && flashAvailable
-                && lensFacing != NULL) {
+        if (ib != NULL
+                && (IBoolean::Probe(ib)->GetValue(&flashAvailable), flashAvailable)
+                && obj != NULL) {
             Int32 value;
-            lensFacing->GetValue(&value);
+            IInteger32::Probe(obj)->GetValue(&value);
             if (value == ICameraMetadata::LENS_FACING_BACK) {
                 *result = TRUE;
                 return NOERROR;

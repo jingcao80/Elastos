@@ -36,6 +36,7 @@ ECode SpamFilter::GetNormalizedContent(
     VALIDATE_NOT_NULL(result)
     StringUtils::ReplaceAll(msg.ToLowerCase(),
             String("[^\\p{L}\\p{Nd}]+"), String(""), result);
+    return NOERROR;
 }
 
 ECode SpamFilter::GetNotificationContent(

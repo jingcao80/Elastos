@@ -1260,6 +1260,7 @@ Int32 MediaFocusControl::CheckRcdRegistrationAuthorization(
                     if (IObject::Probe(listenerComp)->Equals(component, &b), b) {
                         if (DEBUG_RC) { Logger::D(TAG,
                                 "ok to register RCC: %p is authorized notification listener", component.Get()); }
+                        Binder::RestoreCallingIdentity(ident);
                         return RCD_REG_SUCCESS_ENABLED_NOTIF;
                     }
                 }
@@ -1268,7 +1269,7 @@ Int32 MediaFocusControl::CheckRcdRegistrationAuthorization(
         if (DEBUG_RC) { Logger::D(TAG,
             "not ok to register RCD, %p is not in list of ENABLED_NOTIFICATION_LISTENERS", listenerComp); }
         // } finally {
-        //     Binder.restoreCallingIdentity(ident);
+        Binder::RestoreCallingIdentity(ident);
         // }
     }
 

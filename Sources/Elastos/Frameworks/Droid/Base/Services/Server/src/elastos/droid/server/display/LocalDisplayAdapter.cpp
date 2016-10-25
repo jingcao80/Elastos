@@ -170,7 +170,6 @@ AutoPtr<IRunnable> LocalDisplayAdapter::LocalDisplayDevice::RequestDisplayStateL
     /* [in] */ Int32 state)
 {
     if (mState != state) {
-        Int32 displayId = mBuiltInDisplayId;
         AutoPtr<IBinder> token = GetDisplayTokenLocked();
         Int32 mode = GetPowerModeForState(state);
         mState = state;

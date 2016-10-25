@@ -10,6 +10,7 @@
 #include "elastos/droid/net/NetworkIdentity.h"
 #include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -20,7 +21,7 @@ using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::R;
 using Elastos::Droid::Telephony::ITelephonyManager;
-
+using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
@@ -329,15 +330,13 @@ ECode NetworkTemplate::MatchesMobile3gLower(
         Int32 subtype;
         ident->GetSubType(&subtype);
         Int32 type;
-        // TODO: Waiting for TelephonyManager
-        assert(0);
-        // CTelephonyManager::GetNetworkClass(subtype, &type);
-        // switch (type) {
-        //     case ITelephonyManager::NETWORK_CLASS_UNKNOWN:
-        //     case ITelephonyManager::NETWORK_CLASS_2_G:
-        //     case ITelephonyManager::NETWORK_CLASS_3_G:
-        //         return TRUE;
-        // }
+        CTelephonyManager::GetNetworkClass(subtype, &type);
+        switch (type) {
+            case ITelephonyManager::NETWORK_CLASS_UNKNOWN:
+            case ITelephonyManager::NETWORK_CLASS_2_G:
+            case ITelephonyManager::NETWORK_CLASS_3_G:
+                return TRUE;
+        }
     }
     return FALSE;
 }
@@ -360,13 +359,11 @@ ECode NetworkTemplate::MatchesMobile4g(
         Int32 subtype;
         ident->GetSubType(&subtype);
         Int32 type;
-        // TODO: Waiting for TelephonyManager
-        assert(0);
-        // CTelephonyManager::GetNetworkClass(subtype, &type);
-        // switch (type) {
-        //     case ITelephonyManager::NETWORK_CLASS_4_G:
-        //         return TRUE;
-        // }
+        CTelephonyManager::GetNetworkClass(subtype, &type);
+        switch (type) {
+            case ITelephonyManager::NETWORK_CLASS_4_G:
+                return TRUE;
+        }
     }
     return FALSE;
 }

@@ -303,7 +303,9 @@ Boolean IntentFirewall::FirewallIntentResolver::IsPackageForFilter(
 AutoPtr<ArrayOf<Elastos::Droid::Server::Firewall::FirewallIntentFilter*> > IntentFirewall::FirewallIntentResolver::NewArray(
     /* [in] */ Int32 size)
 {
-    //return NULL;
+    AutoPtr<ArrayOf<Elastos::Droid::Server::Firewall::FirewallIntentFilter*> > filters =
+            ArrayOf<Elastos::Droid::Server::Firewall::FirewallIntentFilter*>::Alloc(size);
+    return filters;
 }
 
 //@Override
@@ -312,7 +314,7 @@ AutoPtr<Rule> IntentFirewall::FirewallIntentResolver::NewResult(
     /* [in] */ Int32 match,
     /* [in] */ Int32 userId)
 {
-    return NULL;
+    return filter->mRule;
 }
 
 //@Override

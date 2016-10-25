@@ -2805,6 +2805,7 @@ ECode CTethering::InterfaceMessageRecevied(
     // } catch (IllegalArgumentException ex) {
         // Slogger::E(TAG, "WifiDevice IllegalArgument: ");
     // }
+    return NOERROR;
 }
 
 } // namespace Connectivity

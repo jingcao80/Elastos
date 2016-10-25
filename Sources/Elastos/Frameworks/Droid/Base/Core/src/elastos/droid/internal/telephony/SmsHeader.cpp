@@ -204,11 +204,11 @@ ECode SmsHeader::ToByteArray(
             outStream->Write(ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT);
             outStream->Write(4);
             UInt32 value = (UInt32)mPortAddrs->destPort;
-            outStream->Write(mPortAddrs->destPort >> 8);// in java >>>
-            outStream->Write(mPortAddrs->destPort & 0x00FF);
+            outStream->Write(value >> 8);// in java >>>
+            outStream->Write(value & 0x00FF);
             value = (UInt32)mPortAddrs->origPort;
-            outStream->Write(mPortAddrs->origPort >> 8); // in java >>>
-            outStream->Write(mPortAddrs->origPort & 0x00FF);
+            outStream->Write(value >> 8); // in java >>>
+            outStream->Write(value & 0x00FF);
         }
     }
     if (smsHeader->mLanguageShiftTable != 0) {

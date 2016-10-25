@@ -1,6 +1,6 @@
 
-#ifndef __ELASTOS_DROID_UTILITY_CFASTIMMUTABLEARRAYSET<T>_H__
-#define __ELASTOS_DROID_UTILITY_CFASTIMMUTABLEARRAYSET<T>_H__
+#ifndef __ELASTOS_DROID_UTILITY_CFASTIMMUTABLEARRAYSET_H__
+#define __ELASTOS_DROID_UTILITY_CFASTIMMUTABLEARRAYSET_H__
 
 #include "_Elastos_Droid_Utility_CFastImmutableArraySet.h"
 #include "elastos/droid/utility/FastImmutableArraySet.h"
@@ -28,4 +28,4 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_UTILITY_CFASTIMMUTABLEARRAYSET<T>_H__
+#endif // __ELASTOS_DROID_UTILITY_CFASTIMMUTABLEARRAYSET_H__

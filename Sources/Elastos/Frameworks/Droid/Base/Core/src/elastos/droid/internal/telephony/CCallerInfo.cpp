@@ -435,7 +435,7 @@ ECode CCallerInfo::DoSecondaryLookupIfNecessary(
     VALIDATE_NOT_NULL(callerInfo);
 
     AutoPtr<ICallerInfo> ci;
-    Boolean contactExists, tempRes;
+    Boolean tempRes;
     AutoPtr<CCallerInfo> cInfo = (CCallerInfo*)previousResult;
     if (!cInfo->mContactExists && (PhoneNumberUtils::IsUriNumber(number, &tempRes), tempRes)) {
         String username;

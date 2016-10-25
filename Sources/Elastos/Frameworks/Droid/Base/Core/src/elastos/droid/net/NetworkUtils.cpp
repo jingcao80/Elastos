@@ -195,10 +195,11 @@ ECode NetworkUtils::IntToInetAddress(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<ArrayOf<Byte> > addressBytes = ArrayOf<Byte>::Alloc(new Byte[4] { (Byte)(0xff & hostAddress),
-            (Byte)(0xff & (hostAddress >> 8)),
-            (Byte)(0xff & (hostAddress >> 16)),
-            (Byte)(0xff & (hostAddress >> 24)) }, 4);
+    AutoPtr<ArrayOf<Byte> > addressBytes = ArrayOf<Byte>::Alloc(4);
+    (*addressBytes)[0] = (0xff & hostAddress);
+    (*addressBytes)[1] = (0xff & (hostAddress >> 8));
+    (*addressBytes)[2] = (0xff & (hostAddress >> 16));
+    (*addressBytes)[3] = (0xff & (hostAddress >> 24));
         // try {
     AutoPtr<IInetAddressHelper> helper;
     CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&helper);

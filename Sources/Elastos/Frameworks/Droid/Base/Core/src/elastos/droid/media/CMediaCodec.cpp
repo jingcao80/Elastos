@@ -1207,7 +1207,6 @@ ECode CMediaCodec::GetOutputFormat(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map = NativeGetFormatNative(FALSE /* input */);
     return CMediaFormat::New(map, result);
-    return NOERROR;
 }
 
 ECode CMediaCodec::GetInputFormat(
@@ -1216,7 +1215,6 @@ ECode CMediaCodec::GetInputFormat(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map = NativeGetFormatNative(TRUE /* input */);
     return CMediaFormat::New(map, result);
-    return NOERROR;
 }
 
 ECode CMediaCodec::GetOutputFormat(
@@ -1226,7 +1224,6 @@ ECode CMediaCodec::GetOutputFormat(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map = NativeGetOutputFormatNative(index);
     return CMediaFormat::New(map, result);
-    return NOERROR;
 }
 
 ECode CMediaCodec::GetInputBuffers(

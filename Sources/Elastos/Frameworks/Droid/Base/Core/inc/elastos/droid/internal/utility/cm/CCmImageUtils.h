@@ -29,7 +29,7 @@ public:
      *
      * @param inputStream The input stream of the image
      *
-     * @return A point structure that holds the Width and Height (x and y)/*"
+     * @return A point structure that holds the Width and Height (x and y)
      */
     CARAPI GetImageDimension(
         /* [in] */ IInputStream* inputStream,
@@ -44,7 +44,7 @@ public:
      * @param inputStream Desired Width
      * @param inputStream Desired Width
      *
-     * @return a new InputStream of the cropped area/*"
+     * @return a new InputStream of the cropped area
      */
     CARAPI CropImage(
         /* [in] */ IInputStream* inputStream,
@@ -60,7 +60,7 @@ public:
      * @param pkgName Name of the theme package
      * @param context The context
      *
-     * @return a new InputStream of the cropped image/*"
+     * @return a new InputStream of the cropped image
      */
     CARAPI GetCroppedKeyguardStream(
         /* [in] */ const String& pkgName,
@@ -73,7 +73,7 @@ public:
      * @param pkgName Name of the theme package
      * @param context The context
      *
-     * @return a new InputStream of the cropped image/*"
+     * @return a new InputStream of the cropped image
      */
     CARAPI GetCroppedWallpaperStream(
         /* [in] */ const String& pkgName,

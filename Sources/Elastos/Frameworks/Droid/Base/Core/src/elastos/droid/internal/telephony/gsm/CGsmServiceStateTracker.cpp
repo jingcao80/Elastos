@@ -1917,8 +1917,6 @@ void CGsmServiceStateTracker::QueueNextSignalStrengthPoll()
     ObtainMessage((IMessage**)&msg);
     msg->SetWhat(EVENT_POLL_SIGNAL_STRENGTH);
 
-    Int64 nextTime;
-
     // TODO Don't poll signal strength if screen is off
     Boolean b;
     SendMessageDelayed(msg, POLL_PERIOD_MILLIS, &b);

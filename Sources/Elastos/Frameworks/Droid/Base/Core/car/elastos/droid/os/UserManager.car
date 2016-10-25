@@ -771,6 +771,22 @@ module
             [out] IBundle** bundle);
 
         /**
+         * @hide
+         */
+        GetApplicationRestrictions(
+            [in] String packageName,
+            [in] IUserHandle* user,
+            [out] IBundle** bundle);
+
+        /**
+         * @hide
+         */
+        SetApplicationRestrictions(
+            [in] String packageName,
+            [in] IBundle* restrictions,
+            [in] IUserHandle* user);
+
+        /**
          * Sets a new challenge PIN for restrictions. This is only for use by pre-installed
          * apps and requires the MANAGE_USERS permission.
          * @param newPin the PIN to use for challenge dialogs.

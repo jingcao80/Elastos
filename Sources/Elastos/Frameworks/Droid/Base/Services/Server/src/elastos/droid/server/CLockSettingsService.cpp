@@ -15,6 +15,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Database.h>
 #include <Elastos.Droid.Internal.h>
+#include <Elastos.Droid.KeyStore.h>
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
@@ -50,10 +51,10 @@ using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::KeyStore::Security::IKeyStore;
+using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 using Elastos::Droid::Text::TextUtils;
-// using Elastos::Droid::Security::IKeyStore;
-// using Elastos::Droid::Security::IKeyStoreHelper;
-// using Elastos::Droid::Security::IKeyStoreHelper;
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -339,14 +340,14 @@ ECode CLockSettingsService::UserAddedBroadcastReceiver::OnReceive(
         Int32 userSysUid = UserHandle::GetUid(userHandle, IProcess::SYSTEM_UID);
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &userHandle);
 
-        Slogger::W(TAG, "TODO CKeyStoreHelper not ready.");
-        // AutoPtr<IKeyStoreHelper> helper;
-        // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-        // AutoPtr<IKeyStore> ks;
-        // helper->GetInstance((IKeyStore**)&ks);
+        AutoPtr<IKeyStoreHelper> helper;
+        CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+        AutoPtr<IKeyStore> ks;
+        helper->GetInstance((IKeyStore**)&ks);
 
-        // // Clear up keystore in case anything was left behind by previous users
-        // ks->ResetUid(userSysUid);
+        // Clear up keystore in case anything was left behind by previous users
+        Boolean result;
+        ks->ResetUid(userSysUid, &result);
 
         // If this user has a parent, sync with its keystore password
         AutoPtr<IInterface> service;
@@ -358,7 +359,7 @@ ECode CLockSettingsService::UserAddedBroadcastReceiver::OnReceive(
             Int32 id;
             parentInfo->GetId(&id);
             Int32 parentSysUid = UserHandle::GetUid(id, IProcess::SYSTEM_UID);
-            // ks->SyncUid(parentSysUid, userSysUid);
+            ks->SyncUid(parentSysUid, userSysUid, &result);
         }
     }
     return NOERROR;
@@ -814,11 +815,10 @@ void CLockSettingsService::MaybeUpdateKeystore(
     mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     AutoPtr<IUserManager> um = IUserManager::Probe(obj);
 
-    Slogger::W(TAG, "TODO CKeyStoreHelper not ready.");
-    // AutoPtr<IKeyStoreHelper> helper;
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-    // AutoPtr<IKeyStore> ks;
-    // helper->GetInstance((IKeyStore**)&ks);
+    AutoPtr<IKeyStoreHelper> helper;
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    AutoPtr<IKeyStore> ks;
+    helper->GetInstance((IKeyStore**)&ks);
 
     AutoPtr<IList> profiles;
     um->GetProfiles(userHandle, (IList**)&profiles);
@@ -829,25 +829,30 @@ void CLockSettingsService::MaybeUpdateKeystore(
     Int32 size;
     profiles->GetSize(&size);
     if (userHandle == IUserHandle::USER_OWNER && size == 1) {
-        // if (!ks->IsEmpty()) {
-        //     shouldReset = FALSE;
-        // }
+        Boolean isEmpty;
+        if (ks->IsEmpty(&isEmpty), !isEmpty) {
+            shouldReset = FALSE;
+        }
     }
 
-    // AutoPtr<IIterator> it;
-    // profiles->GetIterator((IIterator**)&it);
-    // Boolean hasNext;
-    // while (it->HasNext(&hasNext)) {
-    //     AutoPtr<IInterface> obj;
-    //     it->GetNext((IInterface**)&obj);
-    //     IUserInfo* ui = IUserInfo::Probe(obj);
-    //     Int32 profileUid = UserHandle::GetUid(pi.id, IProcess::SYSTEM_UID);
-    //     if (shouldReset) {
-    //         ks->ResetUid(profileUid);
-    //     } else {
-    //         ks->PasswordUid(password, profileUid);
-    //     }
-    // }
+    AutoPtr<IIterator> it;
+    profiles->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext)) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Int32 id;
+        IUserInfo::Probe(obj)->GetId(&id);
+        Int32 profileUid = UserHandle::GetUid(id, IProcess::SYSTEM_UID);
+        if (shouldReset) {
+            Boolean result;
+            ks->ResetUid(profileUid, &result);
+        }
+        else {
+            Boolean result;
+            ks->PasswordUid(password, profileUid, &result);
+        }
+    }
 }
 
 ECode CLockSettingsService::HavePattern(
@@ -1082,13 +1087,13 @@ ECode CLockSettingsService::RemoveUser(
         //}
     }
 
-    Slogger::W(TAG, "TODO CKeyStoreHelper not ready.");
-    // AutoPtr<IKeyStoreHelper> helper;
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
-    // AutoPtr<IKeyStore> ks;
-    // helper->GetInstance((IKeyStore**)&ks);
-    // Int32 userUid = UserHandle::GetUid(userId, IProcess::SYSTEM_UID);
-    // ks->ResetUid(userUid);
+    AutoPtr<IKeyStoreHelper> helper;
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    AutoPtr<IKeyStore> ks;
+    helper->GetInstance((IKeyStore**)&ks);
+    Int32 userUid = UserHandle::GetUid(userId, IProcess::SYSTEM_UID);
+    Boolean result;
+    ks->ResetUid(userUid, &result);
     return NOERROR;
 }
 

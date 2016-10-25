@@ -49,7 +49,9 @@ AutoPtr<IImageDescriptor> ImageDescriptor::Parse(
         d->mHighOffset = ((*rawData)[valueIndex++] & 0xff); // high byte offset
         d->mLowOffset = (*rawData)[valueIndex++] & 0xff; // low byte offset
 
-        d->mLength = (((*rawData)[valueIndex++] & 0xff) << 8 | ((*rawData)[valueIndex++] & 0xff));
+        Int32 high = ((*rawData)[valueIndex++] & 0xff);
+        Int32 low = ((*rawData)[valueIndex++] & 0xff);
+        d->mLength = (high << 8 | low);
         CatLog::D(String("ImageDescriptor"), String("parse; Descriptor : ")
                 + StringUtils::ToString(d->mWidth) + String(", ") + StringUtils::ToString(d->mHeight)
                 + String(", ") + StringUtils::ToString(d->mCodingScheme) + String(", 0x")

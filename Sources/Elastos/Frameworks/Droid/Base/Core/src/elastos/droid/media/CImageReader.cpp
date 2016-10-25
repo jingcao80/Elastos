@@ -560,7 +560,7 @@ static Int32 Image_imageGetPixelStride(android::CpuConsumer::LockedBuffer* buffe
         case HAL_PIXEL_FORMAT_Y8:
             // Single plane 8bpp data.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
-            pixelStride;
+            pixelStride = 0;
             break;
         case HAL_PIXEL_FORMAT_YV12:
             pixelStride = 1;

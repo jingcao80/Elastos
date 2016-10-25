@@ -1613,7 +1613,8 @@ ECode CMediaRouter::AddRouteStatic(
 ECode CMediaRouter::RemoveRouteStatic(
     /* [in] */ IMediaRouterRouteInfo* info)
 {
-    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it_ = Find(((Static*)(sStatic.Get()))->mRoutes.Begin(), ((Static*)(sStatic.Get()))->mRoutes.End(), info);
+    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it_ = Find(
+        ((Static*)(sStatic.Get()))->mRoutes.Begin(), ((Static*)(sStatic.Get()))->mRoutes.End(), AutoPtr<IMediaRouterRouteInfo>(info));
     ((Static*)(sStatic.Get()))->mRoutes.Erase(it_);//
 
     AutoPtr<IMediaRouterRouteCategory> removingCat;

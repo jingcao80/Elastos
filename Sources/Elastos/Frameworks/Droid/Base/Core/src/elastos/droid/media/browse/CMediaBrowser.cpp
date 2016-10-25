@@ -174,7 +174,7 @@ CMediaBrowser::Subscription::Subscription(
 ECode CMediaBrowser::ConnectRunnable::Run()
 {
     // Ensure that nobody else came in or tried to connect again.
-    if (mServiceConnection == IServiceConnection::Probe(mHost->mServiceConnection)) {
+    if (mServiceConnection.Get() == IServiceConnection::Probe(mHost->mServiceConnection)) {
         mHost->ForceCloseConnection();
         mHost->mCallback->OnConnectionFailed();
     }

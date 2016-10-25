@@ -107,13 +107,12 @@ ECode IsimUiccRecords::EfIsimImpuLoaded::OnRecordLoaded(
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
         AutoPtr<IArrayList> pArr = IArrayList::Probe(p);
-        Int32 size = 0;
         pArr->GetSize(&size);
         AutoPtr<ArrayOf<Byte> > identity = ArrayOf<Byte>::Alloc(size);
-        for (Int32 i = 0; i < size; ++i) {
+        for (Int32 j = 0; j < size; ++j) {
             AutoPtr<IInterface> v;
-            pArr->Get(i, (IInterface**)&v);
-            IByte::Probe(v)->GetValue(&((*identity)[i]));
+            pArr->Get(j, (IInterface**)&v);
+            IByte::Probe(v)->GetValue(&((*identity)[j]));
         }
         String impu = IsimTlvToString(identity);
         if (DUMP_RECORDS) {
@@ -235,13 +234,12 @@ ECode IsimUiccRecords::EfIsimPcscfLoaded::OnRecordLoaded(
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
         AutoPtr<IArrayList> pArr = IArrayList::Probe(p);
-        Int32 size = 0;
         pArr->GetSize(&size);
         AutoPtr<ArrayOf<Byte> > identity = ArrayOf<Byte>::Alloc(size);
-        for (Int32 i = 0; i < size; ++i) {
+        for (Int32 j = 0; j < size; ++j) {
             AutoPtr<IInterface> v;
-            pArr->Get(i, (IInterface**)&v);
-            IByte::Probe(v)->GetValue(&((*identity)[i]));
+            pArr->Get(j, (IInterface**)&v);
+            IByte::Probe(v)->GetValue(&((*identity)[j]));
         }
         String pcscf = IsimTlvToString(identity);
         if (DUMP_RECORDS) mHost->Log(String("EF_PCSCF[") + StringUtils::ToString(i) + String("]=") + pcscf);
