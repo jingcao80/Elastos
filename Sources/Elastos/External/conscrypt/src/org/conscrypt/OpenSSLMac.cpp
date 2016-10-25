@@ -5,6 +5,7 @@
 #include "NativeCrypto.h"
 #include "COpenSSLKey.h"
 #include "Elastos.CoreLibrary.Extensions.h"
+#include "org/conscrypt/COpenSSLDigestContext.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastosx::Crypto::ISecretKey;
@@ -224,8 +225,8 @@ void OpenSSLMac::ResetContext()
 {
     Int64 cxt = 0;
     NativeCrypto::EVP_MD_CTX_create(&cxt);
-    assert(0 && "TODO");
-    AutoPtr<IOpenSSLDigestContext> ctxLocal;// = new OpenSSLDigestContext(cxt);
+    AutoPtr<IOpenSSLDigestContext> ctxLocal;
+    COpenSSLDigestContext::New(cxt, (IOpenSSLDigestContext**)&ctxLocal);
     NativeCrypto::EVP_MD_CTX_init(ctxLocal);
 
     AutoPtr<IOpenSSLKey> macKey = mMacKey;
@@ -262,7 +263,6 @@ ECode OpenSSLMac::EngineDoFinal(
     AutoPtr<IOpenSSLDigestContext> ctxLocal = mCtx;
     AutoPtr<ArrayOf<Byte> > output;
     NativeCrypto::EVP_DigestSignFinal(ctxLocal, (ArrayOf<Byte>**)&output);
-    Logger::E("leliang", "OpenSSLMac::EngineDoFinal, output:%p", output.Get());
     ResetContext();
     *input = output;
     return NOERROR;

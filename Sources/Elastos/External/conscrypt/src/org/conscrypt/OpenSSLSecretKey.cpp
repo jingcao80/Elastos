@@ -8,6 +8,7 @@
 #include <elastos/utility/Arrays.h>
 
 using Elastosx::Crypto::EIID_ISecretKey;
+using Elastos::Security::EIID_IKey;
 using Elastos::Security::IKey;
 using Elastos::Utility::Arrays;
 
@@ -19,7 +20,7 @@ namespace Conscrypt {
 //=========================================
 Int64 OpenSSLSecretKey::mSerialVersionUID = 1831053062911514589L;
 
-CAR_INTERFACE_IMPL_3(OpenSSLSecretKey, Object, ISecretKey, IOpenSSLSecretKey, IOpenSSLKeyHolder)
+CAR_INTERFACE_IMPL_4(OpenSSLSecretKey, Object, IKey, ISecretKey, IOpenSSLSecretKey, IOpenSSLKeyHolder)
 
 ECode OpenSSLSecretKey::constructor(
     /* [in] */ String algorithm,

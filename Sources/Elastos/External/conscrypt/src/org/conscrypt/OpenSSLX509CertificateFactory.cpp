@@ -354,7 +354,7 @@ AutoPtr<ArrayOf<Byte> > OpenSSLX509CertificateFactory::PKCS7_MARKER = InitPKCS7_
 
 Int32 OpenSSLX509CertificateFactory::PUSHBACK_SIZE = 64;
 
-CAR_INTERFACE_IMPL(OpenSSLX509CertificateFactory, Object, IOpenSSLX509CertificateFactory)
+CAR_INTERFACE_IMPL(OpenSSLX509CertificateFactory, CertificateFactorySpi, IOpenSSLX509CertificateFactory)
 
 OpenSSLX509CertificateFactory::OpenSSLX509CertificateFactory()
 {

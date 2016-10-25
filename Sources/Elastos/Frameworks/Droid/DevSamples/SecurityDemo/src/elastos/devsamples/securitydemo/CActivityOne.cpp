@@ -82,6 +82,10 @@ ECode CActivityOne::MyListener::OnClick(
 
     if (id == R::id::Button2) {
         return mHost->Button2Function();
+    } else if (id == R::id::Button6) {
+        return mHost->Button6Function();
+    } else if (id == R::id::Button7) {
+        return mHost->Button7Function();
     }
 
     String data = String("testtesttest");
@@ -330,19 +334,25 @@ ECode CActivityOne::Button2Function()
     kgHelper->GetInstance(String("HMACMD5"), (IKeyGenerator**)&kg);
     AutoPtr<ISecretKey> sk;
     kg->GenerateKey((ISecretKey**)&sk);
+    Logger::E(TAG, "leliang Button2Function, secretkey:%p", sk.Get());
 
     // Get instance of Mac object implementing HMAC-MD5, and
     // initialize it with the above secret key
     AutoPtr<IMacHelper> macHelper;
     CMacHelper::AcquireSingleton((IMacHelper**)&macHelper);
     AutoPtr<IMac> mac;
+    //Logger::E(TAG, "leliang Button2Function, before macHelper->GetInstance");
     macHelper->GetInstance(String("HMACMD5"), (IMac**)&mac);
+    //Logger::E(TAG, "leliang Button2Function, after macHelper->GetInstance");
+    //Logger::E(TAG, "leliang Button2Function, before mac->Init");
     mac->Init(IKey::Probe(sk));
+    //Logger::E(TAG, "leliang Button2Function, after mac->Init");
     String test("Hi There");
     AutoPtr<ArrayOf<Byte> > input = test.GetBytes();
     AutoPtr<ArrayOf<Byte> > result;
+    //Logger::E(TAG, "leliang Button2Function, before mac->DoFinal");
     mac->DoFinal(input, (ArrayOf<Byte>**)&result);
-
+    //Logger::E(TAG, "leliang Button2Function, after mac->DoFinal");
     if (result != NULL) {
         for (Int32 i = 0; i < result->GetLength(); ++i) {
             Logger::E(TAG, "result[%d]: 0x%x", i, (*result)[i]);
@@ -350,7 +360,36 @@ ECode CActivityOne::Button2Function()
     } else {
         Logger::E(TAG, "leliang result is NULL");
     }
+
+    test = String("hi there");
+    input = test.GetBytes();
+    mac->Init(IKey::Probe(sk));
+    result = NULL;
+    mac->Update(input);
+    mac->DoFinal((ArrayOf<Byte>**)&result);
+    if (result != NULL) {
+        for (Int32 i = 0; i < result->GetLength(); ++i) {
+            Logger::E(TAG, "result[%d]: 0x%x", i, (*result)[i]);
+        }
+    } else {
+        Logger::E(TAG, "leliang result is NULL");
+    }
+
     Logger::E(TAG, "leliang end Button2Function");
+    return NOERROR;
+}
+
+ECode CActivityOne::Button6Function()// KeyAgreement
+{
+    Logger::E(TAG, "leliang begin Button6Function ");
+    Services::Initialize();
+    return NOERROR;
+}
+
+ECode CActivityOne::Button7Function()// Certificate
+{
+    Logger::E(TAG, "leliang begin Button7Function");
+    Services::Initialize();
     return NOERROR;
 }
 

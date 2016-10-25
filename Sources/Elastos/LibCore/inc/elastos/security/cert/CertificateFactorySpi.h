@@ -3,7 +3,7 @@
 #define __ELASTOS_SECURITY_CERT_CERTIFICATEFACTORYSPI_H__
 
 #include "Elastos.CoreLibrary.Security.h"
-#include "Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::IO::IInputStream;
@@ -19,7 +19,7 @@ namespace Cert {
  * {@code CertificateFactory} class. This SPI must be implemented for each
  * certificate type a security provider wishes to support.
  */
-class CertificateFactorySpi
+class ECO_PUBLIC CertificateFactorySpi
     : public Object
     , public ICertificateFactorySpi
 {

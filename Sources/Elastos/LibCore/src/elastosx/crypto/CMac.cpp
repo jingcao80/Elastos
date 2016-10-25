@@ -5,12 +5,14 @@
 #include "CSecurity.h"
 #include "AutoLock.h"
 #include "org/apache/harmony/security/fortress/CEngine.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::AutoLock;
 using Elastos::Security::CSecurity;
 using Elastos::Security::ISecurity;
 using Elastos::Utility::IIterator;
 using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastosx {
 namespace Crypto {
@@ -79,6 +81,7 @@ ECode CMac::Init(
 {
     if (key == NULL) {
         // throw new InvalidKeyException("key == NULL");
+        Logger::E("CMac", "Init 2 key == NULL");
         return E_INVALID_KEY_EXCEPTION;
     }
     AutoPtr<IMacSpi> spi;
@@ -93,6 +96,7 @@ ECode CMac::Init(
 {
     if (key == NULL) {
         // throw new InvalidKeyException("key == NULL");
+        Logger::E("CMac", "Init 1 key == NULL");
         return E_INVALID_KEY_EXCEPTION;
     }
     // try {
@@ -227,6 +231,7 @@ ECode CMac::DoFinal(
     *result = NULL;
     if (!mIsInitMac) {
         // throw new IllegalStateException();
+        Logger::E("CMac", "DoFinal IllegalStateException, mIsInitMac");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<IMacSpi> spi;
@@ -342,33 +347,33 @@ AutoPtr<ISpiAndProvider> CMac::TryAlgorithm(
     /* [in] */ IProvider * provider,
     /* [in] */ const String& algorithm)
 {
-        if (provider != NULL) {
-            AutoPtr<IProviderService> service;
-            provider->GetService(SERVICE, algorithm, (IProviderService**)&service);
-            if (service == NULL) {
-                return NULL;
-            }
-            return TryAlgorithmWithProvider(key, service);
-        }
-        AutoPtr<IArrayList/*<Provider.Service*/> services;
-        ENGINE->GetServices(algorithm, (IArrayList**)&services);
-        if (services == NULL) {
+    if (provider != NULL) {
+        AutoPtr<IProviderService> service;
+        provider->GetService(SERVICE, algorithm, (IProviderService**)&service);
+        if (service == NULL) {
             return NULL;
         }
-
-        AutoPtr<IIterator> it;
-        services->GetIterator((IIterator**)&it);
-        Boolean has = FALSE;
-        while(it->HasNext(&has), has) {
-            AutoPtr<IInterface> service;
-            it->GetNext((IInterface**)&service);
-
-            AutoPtr<ISpiAndProvider> sap = TryAlgorithmWithProvider(key, IProviderService::Probe(service));
-            if (sap != NULL) {
-                return sap;
-            }
-        }
+        return TryAlgorithmWithProvider(key, service);
+    }
+    AutoPtr<IArrayList/*<Provider.Service*/> services;
+    ENGINE->GetServices(algorithm, (IArrayList**)&services);
+    if (services == NULL) {
         return NULL;
+    }
+
+    AutoPtr<IIterator> it;
+    services->GetIterator((IIterator**)&it);
+    Boolean has = FALSE;
+    while(it->HasNext(&has), has) {
+        AutoPtr<IInterface> service;
+        it->GetNext((IInterface**)&service);
+
+        AutoPtr<ISpiAndProvider> sap = TryAlgorithmWithProvider(key, IProviderService::Probe(service));
+        if (sap != NULL) {
+            return sap;
+        }
+    }
+    return NULL;
 }
 
 AutoPtr<ISpiAndProvider> CMac::TryAlgorithmWithProvider(

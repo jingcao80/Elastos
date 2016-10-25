@@ -1,5 +1,6 @@
 
 #include "OpenSSLKeyGeneratorTest.h"
+#include "org/conscrypt/COpenSSLSecretKey.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastosx::Crypto::EIID_IKeyGeneratorSpi;
@@ -18,6 +19,14 @@ ECode OpenSSLKeyGeneratorTest::EngineGenerateKey(
     /* [out] */ ISecretKey** result)
 {
     Logger::E("leliang", "TODO OpenSSLKeyGeneratorTest::EngineGenerateKey");
+    VALIDATE_NOT_NULL(result);
+    String algorithm("HMACMD5");
+    AutoPtr<ArrayOf<Byte> > encoded = ArrayOf<Byte>::Alloc(10);
+    for (Int32 i = 0; i < 10; ++i) {
+        encoded->Set(i, 'A' + i);
+    }
+    COpenSSLSecretKey::New(algorithm, encoded, result);
+    Logger::E("leliang", "TODO OpenSSLKeyGeneratorTest::EngineGenerateKey, result:%p", *result);
     return NOERROR;
 }
 

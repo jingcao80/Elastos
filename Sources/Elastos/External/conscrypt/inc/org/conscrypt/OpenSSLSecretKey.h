@@ -5,6 +5,7 @@
 #include "_Org.Conscrypt.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Security::IKey;
 using Elastosx::Crypto::ISecretKey;
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
@@ -14,6 +15,7 @@ namespace Conscrypt {
 
 class OpenSSLSecretKey
     : public Object
+    , public IKey
     , public ISecretKey
     , public IOpenSSLSecretKey
     , public IOpenSSLKeyHolder

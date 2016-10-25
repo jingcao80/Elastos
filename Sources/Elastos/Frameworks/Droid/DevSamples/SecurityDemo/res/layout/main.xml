@@ -15,7 +15,7 @@
     <Button android:id="@+id/Button2"
         android:layout_width="500px"
         android:layout_height="wrap_content"
-        android:text="Button2">
+        android:text="MAC test">
     </Button>
     <Button android:id="@+id/Button3"
         android:layout_width="500px"
@@ -31,5 +31,15 @@
         android:layout_width="500px"
         android:layout_height="wrap_content"
         android:text="Button5">
+    </Button>
+    <Button android:id="@+id/Button6"
+        android:layout_width="500px"
+        android:layout_height="wrap_content"
+        android:text="KeyAgreement test">
+    </Button>
+    <Button android:id="@+id/Button7"
+        android:layout_width="500px"
+        android:layout_height="wrap_content"
+        android:text="Certificate test">
     </Button>
 </LinearLayout>

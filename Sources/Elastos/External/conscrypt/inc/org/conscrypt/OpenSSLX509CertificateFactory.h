@@ -6,10 +6,12 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "_Org.Conscrypt.h"
+#include "elastos/security/cert/CertificateFactorySpi.h"
 #include <elastos/core/Object.h>
 
 using Elastos::IO::IInputStream;
 using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::Cert::CertificateFactorySpi;
 using Elastos::Security::Cert::ICertPath;
 using Elastos::Security::Cert::ICRL;
 using Elastos::Utility::ICollection;
@@ -20,7 +22,7 @@ namespace Org {
 namespace Conscrypt {
 
 class OpenSSLX509CertificateFactory
-    : public Object  // public CertificateFactorySpi
+    : public CertificateFactorySpi
     , public IOpenSSLX509CertificateFactory
 {
 public:

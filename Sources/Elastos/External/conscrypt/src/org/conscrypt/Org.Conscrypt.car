@@ -359,7 +359,6 @@ module
 
         interface IOpenSSLECDHKeyAgreement;
         interface IKeyAgreementSpi;
-        interface ISSLContextSpi;
     }
 
     class COpenSSLECGroupContext {
@@ -614,6 +613,7 @@ module
             [in] String algorithm,
             [in] IOpenSSLKey* key);
 
+        interface IKey;
         interface ISecretKey;
         interface IOpenSSLSecretKey;
         interface IOpenSSLKeyHolder;
