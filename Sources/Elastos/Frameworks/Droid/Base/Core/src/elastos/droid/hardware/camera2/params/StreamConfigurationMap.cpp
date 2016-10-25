@@ -263,7 +263,12 @@ ECode StreamConfigurationMap::GetOutputSizes(
     Boolean isAssignable = FALSE;
     Int32 itfCount;
     klass->GetInterfaceCount(&itfCount);
+    Logger::I(TAG, " >> GetOutputSizes: interface count: %d", itfCount);
     AutoPtr< ArrayOf<IInterfaceInfo *> > itfes = ArrayOf<IInterfaceInfo *>::Alloc(itfCount);
+    if (itfes == NULL) {
+        Logger::E(TAG, "GetOutputSizes: E_OUT_OF_MEMORY.");
+        return E_OUT_OF_MEMORY;
+    }
     klass->GetAllInterfaceInfos(itfes.Get());
     String name, ns;
     for (Int32 i = 0; i < itfCount; ++i) {

@@ -54,24 +54,34 @@ const Int32 FlashlightController::DISPATCH_OFF = 1;
 const Int32 FlashlightController::DISPATCH_AVAILABILITY_CHANGED = 2;
 
 FlashlightController::CameraListener::CameraListener(
-    /* [in] */ FlashlightController* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode FlashlightController::CameraListener::OnOpened(
     /* [in] */ ICameraDevice* camera)
 {
-    mHost->mCameraDevice = camera;
-    mHost->PostUpdateFlashlight();
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    host->mCameraDevice = camera;
+    host->PostUpdateFlashlight();
     return NOERROR;
 }
 
 ECode FlashlightController::CameraListener::OnDisconnected(
     /* [in] */ ICameraDevice* camera)
 {
-    if (mHost->mCameraDevice.Get() == camera) {
-        mHost->DispatchOff();
-        mHost->Teardown();
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    if (host->mCameraDevice.Get() == camera) {
+        host->DispatchOff();
+        host->Teardown();
     }
     return NOERROR;
 }
@@ -80,72 +90,103 @@ ECode FlashlightController::CameraListener::OnError(
     /* [in] */ ICameraDevice* camera,
     /* [in] */ Int32 error)
 {
-    if (camera == mHost->mCameraDevice.Get() || mHost->mCameraDevice == NULL) {
-        mHost->HandleError();
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    if (camera == host->mCameraDevice.Get() || host->mCameraDevice == NULL) {
+        host->HandleError();
     }
     return NOERROR;
 }
 
 FlashlightController::SessionListener::SessionListener(
-    /* [in] */ FlashlightController* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode FlashlightController::SessionListener::OnConfigured(
     /* [in] */ ICameraCaptureSession* session)
 {
-    mHost->mSession = session;
-    mHost->PostUpdateFlashlight();
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    host->mSession = session;
+    host->PostUpdateFlashlight();
     return NOERROR;
 }
 
 ECode FlashlightController::SessionListener::OnConfigureFailed(
     /* [in] */ ICameraCaptureSession* session)
 {
-    if (mHost->mSession == NULL || mHost->mSession.Get() == session) {
-        mHost->HandleError();
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    if (host->mSession == NULL || host->mSession.Get() == session) {
+        host->HandleError();
     }
     return NOERROR;
 }
 
 FlashlightController::UpdateFlashlightRunnable::UpdateFlashlightRunnable(
-    /* [in] */ FlashlightController* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode FlashlightController::UpdateFlashlightRunnable::Run()
 {
-    mHost->UpdateFlashlight(FALSE /* forceDisable */);
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    host->UpdateFlashlight(FALSE /* forceDisable */);
     return NOERROR;
 }
 
 FlashlightController::KillFlashlightRunnable::KillFlashlightRunnable(
-    /* [in] */ FlashlightController* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode FlashlightController::KillFlashlightRunnable::Run()
 {
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
     {
         AutoLock syncLock(this);
-        mHost->mFlashlightEnabled = FALSE;
+        host->mFlashlightEnabled = FALSE;
     }
-    mHost->UpdateFlashlight(TRUE /* forceDisable */);
-    mHost->DispatchOff();
+    host->UpdateFlashlight(TRUE /* forceDisable */);
+    host->DispatchOff();
+
     return NOERROR;
 }
 
 FlashlightController::AvailabilityCallback::AvailabilityCallback(
-    /* [in] */ FlashlightController* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {}
 
 ECode FlashlightController::AvailabilityCallback::OnCameraAvailable(
     /* [in] */ const String& cameraId)
 {
     if (DEBUG) Logger::D(TAG, "onCameraAvailable(%s)", cameraId.string());
-    if (cameraId.Equals(mHost->mCameraId)) {
-        SetCameraAvailable(TRUE);
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    if (cameraId.Equals(host->mCameraId)) {
+        SetCameraAvailable(TRUE,  host);
     }
     return NOERROR;
 }
@@ -154,23 +195,31 @@ ECode FlashlightController::AvailabilityCallback::OnCameraUnavailable(
     /* [in] */ const String& cameraId)
 {
     if (DEBUG) Logger::D(TAG, "onCameraUnavailable(%s)", cameraId.string());
-    if (cameraId.Equals(mHost->mCameraId)) {
-        SetCameraAvailable(FALSE);
+
+    AutoPtr<IFlashlightController> hostObj;
+    mWeakHost->Resolve(EIID_IFlashlightController, (IInterface**)&hostObj);
+    FlashlightController* host = (FlashlightController*)hostObj.Get();
+    if (NULL == host) return NOERROR;
+
+    if (cameraId.Equals(host->mCameraId)) {
+        SetCameraAvailable(FALSE, host);
     }
     return NOERROR;
 }
 
 void FlashlightController::AvailabilityCallback::SetCameraAvailable(
-    /* [in] */ Boolean available)
+    /* [in] */ Boolean available,
+    /* [in] */ FlashlightController* host)
 {
     Boolean changed;
-    {    AutoLock syncLock(mHost);
-        changed = mHost->mCameraAvailable != available;
-        mHost->mCameraAvailable = available;
+    {
+        AutoLock syncLock(host);
+        changed = host->mCameraAvailable != available;
+        host->mCameraAvailable = available;
     }
     if (changed) {
         if (DEBUG) Logger::D(TAG, "dispatchAvailabilityChanged(%d)", available);
-        mHost->DispatchAvailabilityChanged(available);
+        host->DispatchAvailabilityChanged(available);
     }
 }
 
@@ -182,15 +231,22 @@ FlashlightController::FlashlightController()
 {
 }
 
+FlashlightController::~FlashlightController()
+{
+    Logger::I(TAG, " >> Destory FlashlightController %p", this);
+}
+
 ECode FlashlightController::constructor(
     /* [in] */ IContext* mContext)
 {
     CArrayList::New(1, (IArrayList**)&mListeners);
-    mCameraListener = new CameraListener(this);
-    mSessionListener = new SessionListener(this);
-    mUpdateFlashlightRunnable = new UpdateFlashlightRunnable(this);
-    mKillFlashlightRunnable = new KillFlashlightRunnable(this);
-    mAvailabilityCallback = new AvailabilityCallback(this);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    mCameraListener = new CameraListener(wr);
+    mSessionListener = new SessionListener(wr);
+    mUpdateFlashlightRunnable = new UpdateFlashlightRunnable(wr);
+    mKillFlashlightRunnable = new KillFlashlightRunnable(wr);
+    mAvailabilityCallback = new AvailabilityCallback(wr);
 
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::CAMERA_SERVICE, (IInterface**)&obj);
@@ -245,21 +301,19 @@ ECode FlashlightController::IsAvailable(
 ECode FlashlightController::AddListener(
     /* [in] */ IFlashlightListener* l)
 {
-    {    AutoLock syncLock(mListeners);
-        CleanUpListenersLocked(l);
-        AutoPtr<IWeakReference> wr;
-        IWeakReferenceSource::Probe(l)->GetWeakReference((IWeakReference**)&wr);
-        mListeners->Add(wr);
-    }
+    AutoLock syncLock(mListeners);
+    CleanUpListenersLocked(l);
+    AutoPtr<IWeakReference> wr;
+    IWeakReferenceSource::Probe(l)->GetWeakReference((IWeakReference**)&wr);
+    mListeners->Add(wr);
     return NOERROR;
 }
 
 ECode FlashlightController::RemoveListener(
     /* [in] */ IFlashlightListener* l)
 {
-    {    AutoLock syncLock(mListeners);
-        CleanUpListenersLocked(l);
-    }
+    AutoLock syncLock(mListeners);
+    CleanUpListenersLocked(l);
     return NOERROR;
 }
 
@@ -316,8 +370,9 @@ ECode FlashlightController::GetSmallestSize(
     FAIL_RETURN(mCameraManager->GetCameraCharacteristics(cameraId, (ICameraCharacteristics**)&outcc));
     AutoPtr<IInterface> values;
     outcc->Get(CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP, (IInterface**)&values);
-
     assert(IStreamConfigurationMap::Probe(values));
+
+    Logger::I(TAG, " >> GetSmallestSize %s: %s", cameraId.string(), TO_CSTR(values));
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<IClassInfo> classInfo;
     FAIL_RETURN(cl->LoadClass(String("Elastos.Droid.Graphics.CSurfaceTexture"), (IClassInfo**)&classInfo))

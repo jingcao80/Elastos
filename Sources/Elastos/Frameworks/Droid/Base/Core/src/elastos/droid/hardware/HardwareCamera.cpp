@@ -2210,8 +2210,8 @@ void HardwareCamera::Parameters::SplitInt(
 
     Int32 index = 0;
     Boolean has = FALSE;
-    while(splitter->HasNext(&has), has) {
-        String s;
+    String s;
+    while (splitter->HasNext(&has), has) {
         splitter->GetNext(&s);
         (*output)[index++] = StringUtils::ParseInt32(s);
     }
@@ -2333,12 +2333,8 @@ AutoPtr<IList> HardwareCamera::Parameters::SplitRange(
         if (endIndex == -1) endIndex = str.GetLength() - 1;
         AutoPtr<ArrayOf<Int32> > output = ArrayOf<Int32>::Alloc(2);
         SplitInt(str.Substring(fromIndex, endIndex), output);
-        AutoPtr<IInteger32> value1;
-        CInteger32::New((*output)[0], (IInteger32**)&value1);
-        range->Set(0, value1);
-        AutoPtr<IInteger32> value2;
-        CInteger32::New((*output)[1], (IInteger32**)&value2);
-        range->Set(1, value2);
+        range->Set(0, CoreUtils::Convert((*output)[0]));
+        range->Set(1, CoreUtils::Convert((*output)[1]));
         rangeList->Add(TO_IINTERFACE(range));
         fromIndex = endIndex + 3;
     } while (endIndex != (str.GetLength() - 1));
@@ -2414,18 +2410,15 @@ HardwareCamera::HardwareCamera()
     , mWithBuffer(FALSE)
     , mFaceDetectionRunning(FALSE)
 {
-    Logger::D(TAG, "create %s: %p, %d", __FUNCTION__, this, __LINE__);
 }
 
 HardwareCamera::~HardwareCamera()
 {
-    Logger::D(TAG, "destory %s: %p, %d", __FUNCTION__, this, __LINE__);
     ReleaseResources();
 }
 
 ECode HardwareCamera::ReleaseResources()
 {
-    Logger::D(TAG, "%s: %d", __FUNCTION__, __LINE__);
     native_release();
     mFaceDetectionRunning = FALSE;
     return NOERROR;

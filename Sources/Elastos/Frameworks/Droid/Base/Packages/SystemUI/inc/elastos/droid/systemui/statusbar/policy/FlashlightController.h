@@ -50,7 +50,7 @@ private:
         TO_STRING_IMPL("FlashlightController::CameraListener")
 
         CameraListener(
-            /* [in] */ FlashlightController* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         CARAPI OnOpened(
@@ -66,7 +66,7 @@ private:
             /* [in] */ Int32 error);
 
     private:
-        FlashlightController* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class SessionListener: public CameraCaptureSession::StateListener
@@ -75,7 +75,7 @@ private:
         TO_STRING_IMPL("FlashlightController::SessionListener")
 
         SessionListener(
-            /* [in] */ FlashlightController* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         CARAPI OnConfigured(
@@ -86,33 +86,33 @@ private:
             /* [in] */ ICameraCaptureSession* session);
 
     private:
-        FlashlightController* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class UpdateFlashlightRunnable: public Runnable
     {
     public:
         UpdateFlashlightRunnable(
-            /* [in] */ FlashlightController* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         CARAPI Run();
 
     private:
-        FlashlightController* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class KillFlashlightRunnable: public Runnable
     {
     public:
         KillFlashlightRunnable(
-            /* [in] */ FlashlightController* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         CARAPI Run();
 
     private:
-        FlashlightController* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class AvailabilityCallback: public CameraManager::AvailabilityCallback
@@ -121,7 +121,7 @@ private:
         TO_STRING_IMPL("FlashlightController::AvailabilityCallback")
 
         AvailabilityCallback(
-            /* [in] */ FlashlightController* host);
+            /* [in] */ IWeakReference* host);
 
         // @Override
         CARAPI OnCameraAvailable(
@@ -133,16 +133,19 @@ private:
 
     private:
         CARAPI_(void) SetCameraAvailable(
-            /* [in] */ Boolean available);
+            /* [in] */ Boolean available,
+            /* [in] */ FlashlightController* host);
 
     private:
-        FlashlightController* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 public:
     CAR_INTERFACE_DECL()
 
     FlashlightController();
+
+    ~FlashlightController();
 
     CARAPI constructor(
         /* [in] */ IContext* mContext);
