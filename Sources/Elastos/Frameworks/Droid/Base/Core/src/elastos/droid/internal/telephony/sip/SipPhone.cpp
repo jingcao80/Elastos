@@ -406,7 +406,7 @@ void SipPhone::SipCall::Add(
     AutoPtr<ICall> c;
     conn->GetCall((ICall**)&c);
     AutoPtr<SipCall> call = (SipCall*)c.Get();
-    if (call == this) return;
+    if (call.Get() == this) return;
     if (call != NULL) call->mConnections->Remove((IInterface*)(IObject*)conn);
 
     mConnections->Add((IInterface*)(IObject*)conn);
@@ -491,8 +491,12 @@ SipPhone::SipConnection::SipConnection(
     /* [in] */ SipPhone* host,
     /* [in] */ SipCall* owner,
     /* [in] */ /*TODO ISipProfile*/IInterface* callee)
-    : SipConnection(host, owner, callee, host->GetUriString(callee))
+    : mOwner(owner)
+    , mPeer(callee)
+    , mOriginalNumber(host->GetUriString(callee))
+    , mHost(host)
 {
+    SipConnectionBase::constructor(mOriginalNumber);
 }
 
 ECode SipPhone::SipConnection::GetCnapName(

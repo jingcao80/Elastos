@@ -79,7 +79,6 @@ ECode WebViewUpdateService::BinderService::WaitForRelroCreationCompleted(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    ISynchronize* obj = this;
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     Int64 nt;
@@ -94,7 +93,7 @@ ECode WebViewUpdateService::BinderService::WaitForRelroCreationCompleted(
     //         Int64 timeNowMs = nt / NS_PER_MS;
     //         if (timeNowMs >= timeoutTimeMs) break;
     //         // try {
-    //         obj->Wait(timeoutTimeMs - timeNowMs);
+    //         Wait(timeoutTimeMs - timeNowMs);
     //         // } catch (InterruptedException e) {}
     //         relroReady = (is64Bit ? mHost->mRelroReady64Bit : mHost->mRelroReady32Bit);
     //     }

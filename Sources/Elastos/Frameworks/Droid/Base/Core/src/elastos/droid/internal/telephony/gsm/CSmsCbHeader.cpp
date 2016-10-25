@@ -113,7 +113,7 @@ ECode CSmsCbHeader::constructor(
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
-        mMessageIdentifier = (((*pdu)[1] & 0xff) << 8) | (*pdu)[2] & 0xff;
+        mMessageIdentifier = (((*pdu)[1] & 0xff) << 8) | ((*pdu)[2] & 0xff);
         mGeographicalScope = ((*pdu)[3] & 0xc0) >> 6;
         mSerialNumber = (((*pdu)[3] & 0xff) << 8) | ((*pdu)[4] & 0xff);
         mDataCodingScheme = (*pdu)[5] & 0xff;

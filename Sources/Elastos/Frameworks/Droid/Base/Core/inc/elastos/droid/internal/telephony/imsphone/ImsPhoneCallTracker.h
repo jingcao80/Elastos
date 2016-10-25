@@ -502,9 +502,9 @@ private:
     Int32 mServiceId;
     ICallSrvccState mSrvccState;
     Boolean mIsInEmergencyCall;
-    Int32 pendingCallClirMode;
+    Int32 mPendingCallClirMode;
     Int32 mPendingCallVideoState;
-    Boolean pendingCallInEcm;
+    Boolean mPendingCallInEcm;
     /**
       * Listen to the IMS call state change
       */

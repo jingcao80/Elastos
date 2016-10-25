@@ -10,7 +10,7 @@
 #include "elastos/droid/view/Display.h"
 #include "elastos/droid/view/DisplayInfo.h"
 #include "elastos/droid/content/res/CCompatibilityInfoHelper.h"
-#include <elastos/core/StringBuilder.h>;
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::View::Display;
 using Elastos::Droid::View::IDisplay;

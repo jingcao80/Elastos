@@ -456,9 +456,6 @@ ECode CRingtoneManager::GetDefaultType(
     *result = -1;
 
     AutoPtr<IUri> uri;
-    Boolean tempState = FALSE;
-    Boolean tempState1 = FALSE;
-    Boolean tempState2 = FALSE;
     if (defaultRingtoneUri == NULL) {
         *result = -1;
     }

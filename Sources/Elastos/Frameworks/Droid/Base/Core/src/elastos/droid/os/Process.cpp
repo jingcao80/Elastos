@@ -936,6 +936,7 @@ ECode Process::SetThreadScheduler(
     if (rc) {
         return SignalExceptionForPriorityError(errno);
     }
+    return NOERROR;
 #else
     return SignalExceptionForPriorityError(ENOSYS);
 #endif

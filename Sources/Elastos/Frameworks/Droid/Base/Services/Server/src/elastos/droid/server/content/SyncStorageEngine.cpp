@@ -959,7 +959,6 @@ void SyncStorageEngine::ClearAllBackoffsLocked(
         // Clear backoff for all sync adapters.
         AccountInfo* accountInfo;
         AuthorityInfo* authorityInfo;
-        IComponentName* service;
         HashMap<Int32, AutoPtr<AuthorityInfo> >* aInfos;
         HashMap< AutoPtr<IAccountAndUser>, AutoPtr<AccountInfo> >::Iterator it;
         HashMap<String, AutoPtr<AuthorityInfo> >::Iterator ait;
@@ -989,7 +988,6 @@ void SyncStorageEngine::ClearAllBackoffsLocked(
         }
         // Clear backoff for all sync services.
         for (sit = mServices.Begin(); sit != mServices.End(); ++sit) {
-            service = sit->mFirst;
             aInfos = sit->mSecond;
             for (authIt = aInfos->Begin(); authIt != aInfos->End(); ++authIt) {
                 authorityInfo = authIt->mSecond;
@@ -1716,8 +1714,8 @@ AutoPtr<List<AutoPtr<ISyncInfo> > > SyncStorageEngine::GetCurrentSyncsLocked(
 AutoPtr<List<AutoPtr<ISyncStatusInfo> > > SyncStorageEngine::GetSyncStatus()
 {
     AutoPtr<List<AutoPtr<ISyncStatusInfo> > > ops;
-    {    AutoLock syncLock(mAuthoritiesLock);
-        Int32 N = mSyncStatus.GetSize();
+    {
+        AutoLock syncLock(mAuthoritiesLock);
         ops = new List<AutoPtr<ISyncStatusInfo> >();
 
         HashMap<Int32, AutoPtr<ISyncStatusInfo> >::Iterator it;
@@ -1731,11 +1729,12 @@ AutoPtr<List<AutoPtr<ISyncStatusInfo> > > SyncStorageEngine::GetSyncStatus()
 AutoPtr<AuthoritySyncStatusPair> SyncStorageEngine::GetCopyOfAuthorityWithSyncStatus(
     /* [in] */ EndPoint* info)
 {
-    {    AutoLock syncLock(mAuthoritiesLock);
+    {
+        AutoLock syncLock(mAuthoritiesLock);
         AutoPtr<AuthorityInfo> authorityInfo = GetOrCreateAuthorityLocked(
-            info,
-            -1 /* assign a new identifier if creating a new target */,
-            TRUE /* write to storage if this results in a change */);
+                info,
+                -1 /* assign a new identifier if creating a new target */,
+                TRUE /* write to storage if this results in a change */);
         return CreateCopyPairOfAuthorityWithSyncStatusLocked(authorityInfo);
     }
     return NULL;
@@ -1744,7 +1743,8 @@ AutoPtr<AuthoritySyncStatusPair> SyncStorageEngine::GetCopyOfAuthorityWithSyncSt
 AutoPtr<List<AutoPtr<AuthoritySyncStatusPair> > > SyncStorageEngine::GetCopyOfAllAuthoritiesWithSyncStatus()
 {
     AutoPtr<List<AutoPtr<AuthoritySyncStatusPair> > > infos;
-    {    AutoLock syncLock(mAuthoritiesLock);
+    {
+        AutoLock syncLock(mAuthoritiesLock);
         infos = new List<AutoPtr<AuthoritySyncStatusPair> >();
         HashMap<Int32, AutoPtr<AuthorityInfo> >::Iterator it;
         for (it = mAuthorities.Begin(); it != mAuthorities.End(); ++it) {
@@ -1765,7 +1765,8 @@ AutoPtr<ISyncStatusInfo> SyncStorageEngine::GetStatusByAuthority(
         return NULL;
     }
 
-    {    AutoLock syncLock(mAuthoritiesLock);
+    {
+        AutoLock syncLock(mAuthoritiesLock);
         ISyncStatusInfo* cur;
         AutoPtr<AuthorityInfo> ainfo;
         Int32 ival;

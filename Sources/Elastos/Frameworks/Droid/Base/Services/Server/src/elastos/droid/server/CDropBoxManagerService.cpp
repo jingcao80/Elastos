@@ -487,7 +487,7 @@ ECode CDropBoxManagerService::Add(
 
            FAIL_GOTO(input->Read(buffer, &read), EXIT);
            if (read <= 0) {
-               Boolean result = FileUtils::Sync(foutput);
+               FileUtils::Sync(foutput);
                ICloseable::Probe(output)->Close();  // Get a final size measurement
                output = NULL;
            }

@@ -237,8 +237,8 @@ CLayoutTransition::ViewOnLayoutChangeListener::ViewOnLayoutChangeListener(
     , mChangeReason(changeReason)
     , mDuration(duration)
     , mChild(child)
-    , mParent(parent)
     , mAnim(anim)
+    , mParent(parent)
 {}
 
 ECode CLayoutTransition::ViewOnLayoutChangeListener::OnLayoutChange(

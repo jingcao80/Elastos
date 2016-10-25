@@ -250,7 +250,6 @@ ECode CFastXmlSerializer::WriteEndTag(
     /* [in] */ const String& ns,
     /* [in] */ const String& name)
 {
-    ECode ec = NOERROR;
     mNesting--;
     if (mInTag) {
         FAIL_RETURN((Append(String(" />\n"))));

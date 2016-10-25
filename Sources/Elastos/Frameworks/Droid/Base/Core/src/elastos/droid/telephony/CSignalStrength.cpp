@@ -926,7 +926,7 @@ AutoPtr<ISignalStrength> CSignalStrength::MakeSignalStrengthFromRilParcel(
     source->ReadInt32(&lteRssnr);
     Int32 lteCqi;
     source->ReadInt32(&lteCqi);
-    (CSignalStrength*)(signalStrength.Get())->Initialize(
+    signalStrength->Initialize(
             gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio, evdoDbm, evdoEcio,
             evdoSnr, lteSignalStrength, lteRsrp, lteRsrq, lteRssnr, lteCqi, TRUE);//TODO
 

@@ -2961,7 +2961,6 @@ ECode CAssetManager::GetStyleAttributes(
         return NOERROR;
     }
 
-    android::Res_value value;
     const android::ResTable::bag_entry* bag = startOfBag;
     for (size_t i=0; ((ssize_t)i)<N; i++, bag++) {
         Int32 resourceId = bag->map.name.ident;

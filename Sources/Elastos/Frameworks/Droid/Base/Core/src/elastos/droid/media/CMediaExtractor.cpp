@@ -811,7 +811,7 @@ ECode CMediaExtractor::HasCacheReachedEndOfStream(
 
 ECode CMediaExtractor::NativeSetup()
 {
-    android::sp<android::NuMediaExtractor> extractor = new struct android::NuMediaExtractor;
+    android::sp<android::NuMediaExtractor> extractor = new android::NuMediaExtractor;
     SetMediaExtractor(extractor);
     return NOERROR;
 }

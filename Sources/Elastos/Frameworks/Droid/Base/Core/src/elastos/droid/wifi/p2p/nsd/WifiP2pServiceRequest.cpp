@@ -147,7 +147,7 @@ ECode WifiP2pServiceRequest::Equals(
      * Not compare transaction id.
      * Transaction id may be changed on each service discovery operation.
      */
-    WifiP2pServiceRequest* psr;// TODO =
+    WifiP2pServiceRequest* psr = NULL;// TODO =
     // TODO reinterpret_cast<WifiP2pServiceRequest*>(other->Probe(EIID_WifiP2pServiceRequest));
     assert(psr != NULL);
 

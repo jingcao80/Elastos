@@ -85,11 +85,11 @@ const Int32 IccCardProxy::EVENT_SUBSCRIPTION_DEACTIVATED;
 const Int32 IccCardProxy::EVENT_CARRIER_PRIVILIGES_LOADED;
 
 IccCardProxy::IccCardProxy()
-    : mCurrentAppType(IUiccController::APP_FAM_3GPP)
+    : mExternalState(IccCardConstantsState_UNKNOWN)
+    , mCurrentAppType(IUiccController::APP_FAM_3GPP)
     , mRadioOn(FALSE)
     , mQuietMode(FALSE)
     , mInitialized(FALSE)
-    , mExternalState(IccCardConstantsState_UNKNOWN)
     , mIsCardStatusAvailable(FALSE)
     , mPersoSubState(PERSOSUBSTATE_UNKNOWN)
 {

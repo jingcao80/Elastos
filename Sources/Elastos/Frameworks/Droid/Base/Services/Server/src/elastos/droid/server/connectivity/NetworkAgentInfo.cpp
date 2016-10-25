@@ -65,6 +65,7 @@ ECode NetworkAgentInfo::MyBroadcastReceiver::OnReceive(
         intent->GetInt32Extra(EXTRA_PARAMETER_VALUE, -1, &featureVal);
         mHost->HandlePrefChange(featureId, featureParam, featureVal);
     }
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(NetworkAgentInfo, Object, INetworkAgentInfo)

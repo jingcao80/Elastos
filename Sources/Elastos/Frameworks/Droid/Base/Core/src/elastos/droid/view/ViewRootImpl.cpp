@@ -7162,7 +7162,7 @@ Int32 ViewRootImpl::ViewPostImeInputStage::ProcessKeyEvent(
 
     // Handle automatic focus changes.
     if (action == IKeyEvent::ACTION_DOWN) {
-        int direction = 0, eventCode;
+        int direction = 0;
         switch (keyCode) {
             case IKeyEvent::KEYCODE_DPAD_LEFT: {
                 Boolean hasNoModifiers;

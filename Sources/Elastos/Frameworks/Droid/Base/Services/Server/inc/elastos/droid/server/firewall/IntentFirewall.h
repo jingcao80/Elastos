@@ -63,7 +63,7 @@ public:
     FirewallIntentFilter(
         /* [in] */ Rule* rule);
 
-private:
+public:
     AutoPtr<Rule> mRule;
 };
 

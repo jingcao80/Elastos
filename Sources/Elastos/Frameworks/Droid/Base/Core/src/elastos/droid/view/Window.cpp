@@ -414,6 +414,7 @@ ECode Window::ClearPrivateFlags(
     /* [in] */ Int32 flags)
 {
     SetPrivateFlags(0, flags);
+    return NOERROR;
 }
 
 ECode Window::SetFlags(

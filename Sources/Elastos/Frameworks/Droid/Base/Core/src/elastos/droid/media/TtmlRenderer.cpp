@@ -651,8 +651,9 @@ ECode TtmlTrack::OnData(
     String str(*data);
 
     // implement intermixing restriction for TTML.
-    {    AutoLock syncLock(mParser);
-        if (mCurrentRunID != NULL && runID != mCurrentRunID) {
+    {
+        AutoLock syncLock(mParser);
+        if (mCurrentRunID != 0 && runID != mCurrentRunID) {
             Slogger::E("TtmlTrack", "Run #%lld in progress.  Cannot process run #%d", mCurrentRunID, runID);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -668,7 +669,7 @@ ECode TtmlTrack::OnData(
             // }
             FinishedRun(runID);
             mParsingData = String("");
-            mCurrentRunID = NULL;
+            mCurrentRunID = 0;
         }
     }
     // } catch (java.io.UnsupportedEncodingException e) {
@@ -735,6 +736,7 @@ ECode TtmlTrack::GetNextResult(
 
     AutoPtr<TtmlCue> cue;
     while (mTimeEvents.GetSize() >= 2) {
+        assert(0 && "TODO");
         Int64 start;
         // mTimeEvents.PopFront();
         Int64 end;
@@ -780,7 +782,6 @@ AutoPtr<List<AutoPtr<TtmlNode> > > TtmlTrack::GetActiveNodes(
     /* [in] */ Int64 startTimeUs,
     /* [in] */ Int64 endTimeUs)
 {
-    Int32 size = mTtmlNodes.GetSize();
     AutoPtr<List<AutoPtr<TtmlNode> > > activeNodes = new List<AutoPtr<TtmlNode> >();
     List<AutoPtr<TtmlNode> >::Iterator it = mTtmlNodes.Begin();
     Boolean flag = FALSE;

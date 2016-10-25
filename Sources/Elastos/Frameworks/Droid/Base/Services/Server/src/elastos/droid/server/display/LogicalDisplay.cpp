@@ -91,7 +91,6 @@ Boolean LogicalDisplay::SetDisplayInfoOverrideFromWindowManagerLocked(
     /* [in] */ IDisplayInfo* info)
 {
     if (info != NULL) {
-        Boolean isEqual;
         if (mOverrideDisplayInfo == NULL) {
             CDisplayInfo::New(info, (IDisplayInfo**)&mOverrideDisplayInfo);
             mInfo = NULL;

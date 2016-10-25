@@ -2846,16 +2846,16 @@ ECode CActivityManagerService::constructor(
     bstats->SetCallback(cb);
 
     AutoPtr<IFile> file;
-    ECode ec = CFile::New(systemDir, String("procstats"), (IFile**)&file);
+    CFile::New(systemDir, String("procstats"), (IFile**)&file);
     CProcessStatsService::NewByFriend(this, file, (CProcessStatsService**)&mProcessStats);
 
     file = NULL;
-    ec = CFile::New(systemDir, String("appops.xml"), (IFile**)&file);
+    CFile::New(systemDir, String("appops.xml"), (IFile**)&file);
     CAppOpsService::NewByFriend(file, mHandler, (CAppOpsService**)&mAppOpsService);
 
     file = NULL;
-    ec = CFile::New(systemDir, String("urigrants.xml"), (IFile**)&file);
-    ec = CAtomicFile::New(file, (IAtomicFile**)&mGrantFile);
+    CFile::New(systemDir, String("urigrants.xml"), (IFile**)&file);
+    CAtomicFile::New(file, (IAtomicFile**)&mGrantFile);
 
     // User 0 is the first and only user that runs at boot.
     AutoPtr<IUserHandle> userHandle;
