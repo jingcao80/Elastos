@@ -691,9 +691,9 @@ private:
             /* [in] */ INetworkCapabilities* f);
 
     protected:
-        CARAPI_(void) StartNetwork();
+        CARAPI StartNetwork();
 
-        CARAPI_(void) StopNetwork();
+        CARAPI StopNetwork();
     };
 
     class WifiNetworkAgent

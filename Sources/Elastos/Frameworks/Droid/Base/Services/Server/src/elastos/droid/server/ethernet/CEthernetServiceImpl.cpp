@@ -43,6 +43,7 @@ ECode CEthernetServiceImpl::constructor(
     mNMService = IINetworkManagementService::Probe(b);
 
     mTracker = new EthernetNetworkFactory();
+    mTracker->constructor();
 
     return NOERROR;
 }

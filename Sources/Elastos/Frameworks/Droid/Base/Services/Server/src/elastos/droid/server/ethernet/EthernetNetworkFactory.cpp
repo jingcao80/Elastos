@@ -221,8 +221,14 @@ String EthernetNetworkFactory::mIfaceMatch("");
 String EthernetNetworkFactory::mIface("");
 Boolean EthernetNetworkFactory::mLinkUp = FALSE;
 
-EthernetNetworkFactory::EthernetNetworkFactory()
+ECode EthernetNetworkFactory::constructor()
 {
+    CNetworkInfo::New(IConnectivityManager::TYPE_ETHERNET, 0,
+        NETWORK_TYPE, String(""), (INetworkInfo**)&mNetworkInfo);
+    CLinkProperties::New((ILinkProperties**)&mLinkProperties);
+    InitNetworkCapabilities();
+
+    return NOERROR;
 }
 
 void EthernetNetworkFactory::UpdateInterfaceState(

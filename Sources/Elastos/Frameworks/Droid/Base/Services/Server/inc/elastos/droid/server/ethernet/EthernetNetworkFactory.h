@@ -120,7 +120,7 @@ private:
     };
 
 public:
-    EthernetNetworkFactory();
+    CARAPI constructor();
 
     CARAPI UpdateAgent();
 

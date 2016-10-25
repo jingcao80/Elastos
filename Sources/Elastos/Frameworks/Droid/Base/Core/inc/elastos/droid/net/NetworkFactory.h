@@ -99,16 +99,16 @@ public:
         /* [out] */ Boolean* result);
 
     // override to do simple mode (request independent)
-    CARAPI StartNetwork();
+    virtual CARAPI StartNetwork();
 
-    CARAPI StopNetwork();
+    virtual CARAPI StopNetwork();
 
     // override to do fancier stuff
-    CARAPI NeedNetworkFor(
+    virtual CARAPI NeedNetworkFor(
         /* [in] */ INetworkRequest* networkRequest,
         /* [in] */ Int32 score);
 
-    CARAPI ReleaseNetworkFor(
+    virtual CARAPI ReleaseNetworkFor(
         /* [in] */ INetworkRequest* networkRequest);
 
     CARAPI AddNetworkRequest(
@@ -124,7 +124,7 @@ public:
     CARAPI SetCapabilityFilter(
         /* [in] */ INetworkCapabilities* netCap);
 
-    CARAPI Log(
+    virtual CARAPI Log(
         /* [in] */ const char* fmt, ...);
 
 private:

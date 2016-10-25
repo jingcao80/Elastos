@@ -4576,16 +4576,18 @@ WifiStateMachine::WifiNetworkFactory::WifiNetworkFactory(
     constructor(l, c, TAG, f);
 }
 
-void WifiStateMachine::WifiNetworkFactory::StartNetwork()
+ECode WifiStateMachine::WifiNetworkFactory::StartNetwork()
 {
     // TODO
     // Enter association mode.
+    return NOERROR;
 }
 
-void WifiStateMachine::WifiNetworkFactory::StopNetwork()
+ECode WifiStateMachine::WifiNetworkFactory::StopNetwork()
 {
     // TODO
     // Stop associating.
+    return NOERROR;
 }
 
 //==============================================================================
