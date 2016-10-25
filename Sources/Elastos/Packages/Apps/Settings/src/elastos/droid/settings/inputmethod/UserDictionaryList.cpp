@@ -49,7 +49,7 @@ UserDictionaryList::~UserDictionaryList()
 
 ECode UserDictionaryList::constructor()
 {
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode UserDictionaryList::OnCreate(

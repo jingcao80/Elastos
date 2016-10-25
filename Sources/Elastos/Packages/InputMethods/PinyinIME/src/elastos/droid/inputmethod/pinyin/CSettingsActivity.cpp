@@ -2,6 +2,7 @@
 #include "elastos/droid/inputmethod/pinyin/CSettingsActivity.h"
 #include "elastos/droid/inputmethod/pinyin/Settings.h"
 #include "R.h"
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceChangeListener;
@@ -9,6 +10,7 @@ using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::Preference::ITwoStatePreference;
 using Elastos::Core::CString;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -47,27 +49,25 @@ ECode CSettingsActivity::OnCreate(
 
     AutoPtr<IPreferenceScreen> prefSet;
     GetPreferenceScreen((IPreferenceScreen**)&prefSet);
+    IPreferenceGroup* group = IPreferenceGroup::Probe(prefSet);
 
     String key;
     GetString(R::string::setting_sound_key, &key);
-    AutoPtr<ICharSequence> value;
-    CString::New(key, (ICharSequence**)&value);
+    AutoPtr<ICharSequence> value = CoreUtils::Convert(key);
     AutoPtr<IPreference> pref;
-    IPreferenceGroup::Probe(prefSet)->FindPreference(value, (IPreference**)&pref);
+    group->FindPreference(value, (IPreference**)&pref);
     mKeySoundPref = ICheckBoxPreference::Probe(pref);
 
     GetString(R::string::setting_vibrate_key, &key);
-    value = NULL;
-    CString::New(key, (ICharSequence**)&value);
+    value = CoreUtils::Convert(key);
     pref = NULL;
-    IPreferenceGroup::Probe(prefSet)->FindPreference(value, (IPreference**)&pref);
+    group->FindPreference(value, (IPreference**)&pref);
     mVibratePref = ICheckBoxPreference::Probe(pref);
 
     GetString(R::string::setting_prediction_key, &key);
-    value = NULL;
-    CString::New(key, (ICharSequence**)&value);
+    value = CoreUtils::Convert(key);
     pref = NULL;
-    IPreferenceGroup::Probe(prefSet)->FindPreference(value, (IPreference**)&pref);
+    group->FindPreference(value, (IPreference**)&pref);
     mPredictionPref = ICheckBoxPreference::Probe(pref);
 
     AutoPtr<InnerListener> listener = new InnerListener(this);
@@ -84,7 +84,7 @@ ECode CSettingsActivity::OnCreate(
     Settings::GetInstance(sp);
 
     GetString(R::string::setting_advanced_key, &key);
-    UpdatePreference(IPreferenceGroup::Probe(prefSet), key);
+    UpdatePreference(group, key);
 
     UpdateWidgets();
     return NOERROR;

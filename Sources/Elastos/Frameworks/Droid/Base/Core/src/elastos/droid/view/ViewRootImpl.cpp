@@ -1224,9 +1224,9 @@ Object ViewRootImpl::sConfigCallbacksLock;
 
 static AutoPtr<IInterpolator> CreateInterpolator()
 {
-    AutoPtr<CAccelerateDecelerateInterpolator> interpolator;
-    CAccelerateDecelerateInterpolator::NewByFriend((CAccelerateDecelerateInterpolator**)&interpolator);
-    return IInterpolator::Probe(interpolator);
+    AutoPtr<IInterpolator> interpolator;
+    CAccelerateDecelerateInterpolator::New((IInterpolator**)&interpolator);
+    return interpolator;
 }
 
 AutoPtr<Elastos::Droid::View::Animation::IInterpolator> ViewRootImpl::mResizeInterpolator = CreateInterpolator();
