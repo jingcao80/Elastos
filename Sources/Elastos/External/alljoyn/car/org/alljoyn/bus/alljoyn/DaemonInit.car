@@ -1,0 +1,33 @@
+
+module
+{
+    using Elastos.Droid.Content.IContext;
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Alljoyn {
+
+    interface IDaemonInit {
+        GetContext(
+            [out] IContext** context);
+
+        /**
+         * Initialize daemon service if needed.
+         * First it checks whether any daemon is running; if no daemon is running, then it starts the APK daemon if it is installed;
+         * If no APK daemon is installed, then starts the bundled daemon. This is a blocking call; it blocks until the daemon is ready or
+         * no daemon is found. Thus only non-UI thread is allowed to call PrepareDaemon().
+         * @param context The application context
+         * @return true  if the daemon is ready for connection
+         *         false if no daemon is available
+         */
+        PrepareDaemon(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    } // namespace Alljoyn
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

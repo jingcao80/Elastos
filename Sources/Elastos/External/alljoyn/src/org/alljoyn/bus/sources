@@ -1,0 +1,26 @@
+
+TARGET_NAME= Org.Alljoyn.Bus
+TARGET_TYPE= eco
+
+EXPORT_ALL_SYMBOLS=1
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/../../../../inc/
+INCLUDES += ../../../../
+
+SOURCES = Org.Alljoyn.Bus.car
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+ELASTOS_LIBS += alljoyn/alljoyn.lib
+
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+#LIBRARIES += $(PREBUILD_LIB)/libm.a
+#LIBRARIES += -lbinder -linput -llog -lutils
+#LIBRARIES += -lcutils -licuuc -landroidfw
