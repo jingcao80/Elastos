@@ -1,13 +1,19 @@
 
 #include "elastos/droid/dialer/list/PhoneFavoriteListView.h"
+#include "elastos/droid/dialer/list/PhoneFavoriteTileView.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Dialer::List::EIID_IOnDragDropListener;
+using Elastos::Droid::Dialer::List::EIID_IDragItemContainer;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -16,22 +22,32 @@ namespace Dialer {
 namespace List {
 
 //=================================================================
+// PhoneFavoriteListView::InnerContainer
+//=================================================================
+CAR_INTERFACE_IMPL(PhoneFavoriteListView::InnerContainer, Object, IDragItemContainer)
+
+ECode PhoneFavoriteListView::InnerContainer::GetViewForLocation(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y,
+    /* [out] */ IPhoneFavoriteSquareTileView** view)
+{
+    return mHost->GetViewForLocation(x, y, view);
+}
+
+
+//=================================================================
 // PhoneFavoriteListView::DragScroller
 //=================================================================
-PhoneFavoriteListView::DragScroller::DragScroller(
-    /* [in] */ PhoneFavoriteListView* host)
-    : mHost(host)
-{}
-
 ECode PhoneFavoriteListView::DragScroller::Run()
 {
     if (mHost->mLastDragY <= mHost->mTopScrollBound) {
-        SmoothScrollBy(-DRAG_SCROLL_PX_UNIT, (Int32) SCROLL_HANDLER_DELAY_MILLIS);
+        mHost->SmoothScrollBy(-DRAG_SCROLL_PX_UNIT, (Int32)SCROLL_HANDLER_DELAY_MILLIS);
     }
     else if (mHost->mLastDragY >= mHost->mBottomScrollBound) {
-        SmoothScrollBy(DRAG_SCROLL_PX_UNIT, (Int32) SCROLL_HANDLER_DELAY_MILLIS);
+        mHost->SmoothScrollBy(DRAG_SCROLL_PX_UNIT, (Int32)SCROLL_HANDLER_DELAY_MILLIS);
     }
-    mHost->mScrollHandler->postDelayed(this, SCROLL_HANDLER_DELAY_MILLIS);
+    Boolean result;
+    mHost->mScrollHandler->PostDelayed(this, SCROLL_HANDLER_DELAY_MILLIS, &result);
 
     return NOERROR;
 }
@@ -40,11 +56,6 @@ ECode PhoneFavoriteListView::DragScroller::Run()
 //=================================================================
 // PhoneFavoriteListView::DragShadowOverAnimatorListener
 //=================================================================
-PhoneFavoriteListView::DragShadowOverAnimatorListener::DragShadowOverAnimatorListener(
-    /* [in] */ PhoneFavoriteListView* host)
-    : mHost(host)
-{}
-
 ECode PhoneFavoriteListView::DragShadowOverAnimatorListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
@@ -52,7 +63,7 @@ ECode PhoneFavoriteListView::DragShadowOverAnimatorListener::OnAnimationEnd(
         mHost->mDragShadowBitmap->Recycle();
         mHost->mDragShadowBitmap = NULL;
     }
-    mHost->mDragShadowOverlay->SetVisibility(GONE);
+    IView::Probe(mHost->mDragShadowOverlay)->SetVisibility(GONE);
     mHost->mDragShadowOverlay->SetImageBitmap(NULL);
     return NOERROR;
 }
@@ -60,22 +71,30 @@ ECode PhoneFavoriteListView::DragShadowOverAnimatorListener::OnAnimationEnd(
 //=================================================================
 // PhoneFavoriteListView
 //=================================================================
-// TODO:
-CAR_INTERFACE_IMPL_3(PhoneFavoriteListView, /*GridView*/AbsListView, IPhoneFavoriteListView,
-        IOnDragDropListener, IDragItemContainer);
+const String PhoneFavoriteListView::TAG("PhoneFavoriteListView");
+const Int64 PhoneFavoriteListView::SCROLL_HANDLER_DELAY_MILLIS;
+const Int32 PhoneFavoriteListView::DRAG_SCROLL_PX_UNIT;
+const Float PhoneFavoriteListView::DRAG_SHADOW_ALPHA;
+const Float PhoneFavoriteListView::BOUND_GAP_RATIO;
 
-const String PhoneFavoriteListView::LOG_TAG("PhoneFavoriteListView");
+CAR_INTERFACE_IMPL_2(PhoneFavoriteListView, GridView
+        , IPhoneFavoriteListView
+        , IOnDragDropListener);
 
 PhoneFavoriteListView::PhoneFavoriteListView()
-    : SCROLL_HANDLER_DELAY_MILLIS(5)
-    , DRAG_SCROLL_PX_UNIT(25)
+    : mTouchSlop(0)
+    , mTopScrollBound(0)
+    , mBottomScrollBound(0)
+    , mLastDragY(0)
     , mIsDragScrollerRunning(FALSE)
-    , DRAG_SHADOW_ALPHA(0.7f)
-    , BOUND_GAP_RATIO(0.2f)
+    , mTouchDownForDragStartX(0)
+    , mTouchDownForDragStartY(0)
+    , mAnimationDuration(0)
 {
-    CDragDropController::New(this, (IDragDropController**)&mDragDropController);
+    mLocationOnScreen = ArrayOf<Int32>::Alloc(2);
+    AutoPtr<IDragItemContainer> container = (IDragItemContainer*)new InnerContainer(this);
     mDragScroller = (IRunnable*)new DragScroller(this);
-    mDragShadowOverAnimatorListener = (IAnimatorListenerAdapter*)new DragShadowOverAnimatorListener(this);
+    mDragShadowOverAnimatorListener = (AnimatorListenerAdapter*)new DragShadowOverAnimatorListener(this);
 }
 
 ECode PhoneFavoriteListView::constructor(
@@ -96,16 +115,15 @@ ECode PhoneFavoriteListView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    assert(0 && "TODO");
-    // GridView::constructor(context, attrs, defStyle);
+    GridView::constructor(context, attrs, defStyle);
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
-    resources->GetInteger(R::integer::fade_duration, mAnimationDuration);
+    resources->GetInteger(Elastos::Droid::Dialer::R::integer::fade_duration, &mAnimationDuration);
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> configuration;
     helper->Get(context, (IViewConfiguration**)&configuration);
-    configuration->GetScaledPagingTouchSlop(&mTouchSlop);
+    configuration->GetScaledPagingTouchSlop((Int32*)&mTouchSlop);
     mDragDropController->AddOnDragDropListener(this);
 
     return NOERROR;
@@ -114,15 +132,14 @@ ECode PhoneFavoriteListView::constructor(
 ECode PhoneFavoriteListView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    assert(0 && "TODO");
-    // GridView::OnConfigurationChanged(newConfig);
+    GridView::OnConfigurationChanged(newConfig);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> configuration;
     helper->Get(context, (IViewConfiguration**)&configuration);
-    configuration->GetScaledPagingTouchSlop(&mTouchSlop);
+    configuration->GetScaledPagingTouchSlop((Int32*)&mTouchSlop);
 
     return NOERROR;
 }
@@ -131,66 +148,67 @@ ECode PhoneFavoriteListView::OnInterceptTouchEvent(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     Int32 action;
     ev->GetAction(&action);
     if (action == IMotionEvent::ACTION_DOWN) {
-        ev->GetX(&mTouchDownForDragStartX);
-        ev->GetY(&mTouchDownForDragStartY);
+        ev->GetX((Float*)&mTouchDownForDragStartX);
+        ev->GetY((Float*)&mTouchDownForDragStartY);
     }
 
-    assert(0 && "TODO");
-    // return GridView::OnInterceptTouchEvent(ev);
-    return NOERROR;
+    return GridView::OnInterceptTouchEvent(ev, result);
 }
 
 ECode PhoneFavoriteListView::OnDragEvent(
     /* [in] */ IDragEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     Int32 action;
     event->GetAction(&action);
 
-    Int32 eX;
+    Float eX;
     event->GetX(&eX);
-    Int32 eY;
+    Float eY;
     event->GetY(&eY);
     switch (action) {
         case IDragEvent::ACTION_DRAG_STARTED: {
+            AutoPtr<IInterface> localState;
+            event->GetLocalState((IInterface**)&localState);
             String state;
-            event->GetLocalState(&state);
-            if (!IPhoneFavoriteTileView::DRAG_PHONE_FAVORITE_TILE.Equals(state)) {
+            ICharSequence::Probe(localState)->ToString(&state);
+            if (!PhoneFavoriteTileView::DRAG_PHONE_FAVORITE_TILE.Equals(state)) {
                 // Ignore any drag events that were not propagated by long pressing
                 // on a {@link PhoneFavoriteTileView}
                 *result = FALSE;
                 return NOERROR;
             }
-            Boolean ret;
-            if (mDragDropController->HandleDragStarted(eX, eY, &ret), !ret) {
+            if (!mDragDropController->HandleDragStarted(eX, eY)) {
                 *result = FALSE;
                 return NOERROR;
             }
             break;
         }
-        case IDragEvent::ACTION_DRAG_LOCATION:
+        case IDragEvent::ACTION_DRAG_LOCATION: {
             mLastDragY = eY;
-            mDragDropController->HandleDragHovered(this, eX, eY);
+            mDragDropController->HandleDragHovered(IView::Probe(this), eX, eY);
             // Kick off {@link #mScrollHandler} if it's not started yet.
             if (!mIsDragScrollerRunning &&
                     // And if the distance traveled while dragging exceeds the touch slop
                     (Elastos::Core::Math::Abs(mLastDragY - mTouchDownForDragStartY) >= 4 * mTouchSlop)) {
                 mIsDragScrollerRunning = TRUE;
                 EnsureScrollHandler();
-                mScrollHandler->PostDelayed(mDragScroller, SCROLL_HANDLER_DELAY_MILLIS);
+                Boolean result;
+                mScrollHandler->PostDelayed(mDragScroller, SCROLL_HANDLER_DELAY_MILLIS, &result);
             }
             break;
-        case IDragEvent::ACTION_DRAG_ENTERED:
+        }
+        case IDragEvent::ACTION_DRAG_ENTERED: {
             Int32 height;
             GetHeight(&height);
-            const Int32 boundGap = (Int32) (height * BOUND_GAP_RATIO);
+            Int32 boundGap =(Int32) (height * BOUND_GAP_RATIO);
             Int32 top;
             GetTop(&top);
             mTopScrollBound = (top + boundGap);
@@ -198,6 +216,7 @@ ECode PhoneFavoriteListView::OnDragEvent(
             GetBottom(&bottom);
             mBottomScrollBound = (bottom - boundGap);
             break;
+        }
         case IDragEvent::ACTION_DRAG_EXITED:
         case IDragEvent::ACTION_DRAG_ENDED:
         case IDragEvent::ACTION_DROP:
@@ -221,7 +240,9 @@ ECode PhoneFavoriteListView::SetDragShadowOverlay(
     /* [in] */ IImageView* overlay)
 {
     mDragShadowOverlay = overlay;
-    mDragShadowOverlay->GetParent(*mDragShadowParent);
+    AutoPtr<IViewParent> parent;
+    IView::Probe(mDragShadowOverlay)->GetParent((IViewParent**)&parent);
+    mDragShadowParent = IView::Probe(parent);
     return NOERROR;
 }
 
@@ -235,12 +256,8 @@ AutoPtr<IView> PhoneFavoriteListView::GetViewAtPosition(
         AutoPtr<IView> child;
         GetChildAt(childIdx, (IView**)&child);
         Int32 top, bottom, left, right;
-        child->GetTop(&top);
-        child->GetBottom(&bottom);
-        child->GetLeft(&left);
-        child->GetRight(&right);
-        if ( y >= top && y <= bottom &&
-                 x >= left && x <= right) {
+        if ((child->GetTop(&top), y >= top) && (child->GetBottom(&bottom), y <= bottom) &&
+                (child->GetLeft(&left), x >= left) && (child->GetRight(&right), x <= right)) {
             return child;
         }
     }
@@ -257,9 +274,9 @@ void PhoneFavoriteListView::EnsureScrollHandler()
 ECode PhoneFavoriteListView::GetDragDropController(
     /* [out] */ IDragDropController** controller)
 {
-    VALIDATE_NOT_NULL(controller);
+    VALIDATE_NOT_NULL(controller)
     *controller = mDragDropController;
-    REFCOUNT_ADD(*controller);
+    REFCOUNT_ADD(*controller)
     return NOERROR;
 }
 
@@ -272,15 +289,15 @@ ECode PhoneFavoriteListView::OnDragStarted(
         return NOERROR;
     }
 
-    mDragShadowOverlay->ClearAnimation();
-    CreateDraggedChildBitmap(tileView, &mDragShadowBitmap);
+    IView::Probe(mDragShadowOverlay)->ClearAnimation();
+    mDragShadowBitmap = CreateDraggedChildBitmap(IView::Probe(tileView));
     if (mDragShadowBitmap == NULL) {
         return NOERROR;
     }
 
-    tileView->GetLocationOnScreen(mLocationOnScreen);
-    mDragShadowLeft = mLocationOnScreen[0];
-    mDragShadowTop = mLocationOnScreen[1];
+    IView::Probe(tileView)->GetLocationOnScreen(mLocationOnScreen);
+    mDragShadowLeft = (*mLocationOnScreen)[0];
+    mDragShadowTop = (*mLocationOnScreen)[1];
 
     // x and y are the coordinates of the on-screen touch event. Using these
     // and the on-screen location of the tileView, calculate the difference between
@@ -291,15 +308,16 @@ ECode PhoneFavoriteListView::OnDragStarted(
     mTouchOffsetToChildTop = y - mDragShadowTop;
 
     mDragShadowParent->GetLocationOnScreen(mLocationOnScreen);
-    mDragShadowLeft -= mLocationOnScreen[0];
-    mDragShadowTop -= mLocationOnScreen[1];
+    mDragShadowLeft -= (*mLocationOnScreen)[0];
+    mDragShadowTop -= (*mLocationOnScreen)[1];
 
     mDragShadowOverlay->SetImageBitmap(mDragShadowBitmap);
-    mDragShadowOverlay->SetVisibility(IView::VISIBLE);
+    AutoPtr<IView> view = IView::Probe(mDragShadowOverlay);
+    view->SetVisibility(IView::VISIBLE);
     mDragShadowOverlay->SetAlpha(DRAG_SHADOW_ALPHA);
 
-    mDragShadowOverlay->SetX(mDragShadowLeft);
-    mDragShadowOverlay->SetY(mDragShadowTop);
+    view->SetX(mDragShadowLeft);
+    view->SetY(mDragShadowTop);
 
     return NOERROR;
 }
@@ -310,13 +328,14 @@ ECode PhoneFavoriteListView::OnDragHovered(
     /* [in] */ IPhoneFavoriteSquareTileView* tileView)
 {
     // Update the drag shadow location.
-    mDragShadowParent->GetLocationOnScreen(mLocationOnScreen);
-    mDragShadowLeft = x - mTouchOffsetToChildLeft - mLocationOnScreen[0];
-    mDragShadowTop = y - mTouchOffsetToChildTop - mLocationOnScreen[1];
+    AutoPtr<IView> view = IView::Probe(mDragShadowParent);
+    view->GetLocationOnScreen(mLocationOnScreen);
+    mDragShadowLeft = x - mTouchOffsetToChildLeft - (*mLocationOnScreen)[0];
+    mDragShadowTop = y - mTouchOffsetToChildTop - (*mLocationOnScreen)[1];
     // Draw the drag shadow at its last known location if the drag shadow exists.
     if (mDragShadowOverlay != NULL) {
-        mDragShadowOverlay->SetX(mDragShadowLeft);
-        mDragShadowOverlay->SetY(mDragShadowTop);
+        view->SetX(mDragShadowLeft);
+        view->SetY(mDragShadowTop);
     }
     return NOERROR;
 }
@@ -326,9 +345,10 @@ ECode PhoneFavoriteListView::OnDragFinished(
     /* [in] */ Int32 y)
 {
     if (mDragShadowOverlay != NULL) {
-        mDragShadowOverlay->ClearAnimation();
+        AutoPtr<IView> view = IView::Probe(mDragShadowOverlay);
+        view->ClearAnimation();
         AutoPtr<IViewPropertyAnimator> animator;
-        mRemoveView->Animate((IViewPropertyAnimator**)&animator);
+        view->Animate((IViewPropertyAnimator**)&animator);
         animator->Alpha(0);
         animator->SetDuration(mAnimationDuration);
         animator->SetListener(mDragShadowOverAnimatorListener);
@@ -352,45 +372,40 @@ AutoPtr<IBitmap> PhoneFavoriteListView::CreateDraggedChildBitmap(
     AutoPtr<IBitmap> bitmap;
     if (cache != NULL) {
         // try {
-             ECode ec = cache->Copy(BitmapConfig_ARGB_8888,
-                    FALSE, (IBitmap**)&bitmap);
-             if (ec == (ECode)E_OUT_OF_MEMORY) {
-                Logger::W(LOG_TAG, "Failed to copy bitmap from Drawing cache %x", ec);
-                bitmap = NULL;
-             }
+        ECode ec = cache->Copy(BitmapConfig_ARGB_8888, FALSE, (IBitmap**)&bitmap);
+        if (ec == (ECode)E_OUT_OF_MEMORY) {
+            Logger::W(TAG, "Failed to copy bitmap from Drawing cache %x", ec);
+            bitmap = NULL;
+        }
         // } catch (final OutOfMemoryError e) {
-        //     Log.w(LOG_TAG, "Failed to copy bitmap from Drawing cache", e);
+        //     Log.w(TAG, "Failed to copy bitmap from Drawing cache", e);
         //     bitmap = null;
         // }
     }
 
     view->DestroyDrawingCache();
     view->SetDrawingCacheEnabled(FALSE);
-
-    *view = IView::Probe(bitmap);
-    REFCOUNT_ADD(*view);
-    return NOERROR;
+    return bitmap;
 }
 
 ECode PhoneFavoriteListView::GetViewForLocation(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
-    /* [out] */ IPhoneFavoriteSquareTileView* view)
+    /* [out] */ IPhoneFavoriteSquareTileView** view)
 {
     GetLocationOnScreen(mLocationOnScreen);
     // Calculate the X and Y coordinates of the drag event relative to the view
-    Int32 viewX = x - mLocationOnScreen[0];
-    Int32 viewY = y - mLocationOnScreen[1];
-    AutoPtr<IView> child;
-    GetViewAtPosition(viewX, viewY, (IView**)&child);
+    Int32 viewX = x - (*mLocationOnScreen)[0];
+    Int32 viewY = y - (*mLocationOnScreen)[1];
+    AutoPtr<IView> child = GetViewAtPosition(viewX, viewY);
 
-    if (!IPhoneFavoriteSquareTileView::Probe(child)) {
+    if (IPhoneFavoriteSquareTileView::Probe(child) != NULL) {
         *view = NULL;
         return NOERROR;
     }
 
     *view = IPhoneFavoriteSquareTileView::Probe(child);
-    REFCOUNT_ADD(*view);
+    REFCOUNT_ADD(*view)
     return NOERROR;
 }
 

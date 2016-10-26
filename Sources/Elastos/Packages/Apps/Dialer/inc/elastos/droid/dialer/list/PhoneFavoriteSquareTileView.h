@@ -1,17 +1,10 @@
 #ifndef __ELASTOS_DROID_DIALER_LIST_PHONEFAVORITESQUARETITLEVIEW_H__
 #define __ELASTOS_DROID_DIALER_LIST_PHONEFAVORITESQUARETITLEVIEW_H__
 
-#include "_Elastos.Droid.Dialer.h"
-#include "elastos/apps/dialer/list/PhoneFavoriteTileView.h"
-#include <elastos/core/Object.h>
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Utility.h"
-#include "Elastos.Droid.Widget.h"
+#include "elastos/droid/dialer/list/PhoneFavoriteTileView.h"
+#include "elastos/droid/contacts/common/list/ContactEntry.h"
 
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Contacts::Common::List::ContactEntry;
 using Elastos::Droid::Widget::IImageButton;
 
 namespace Elastos {
@@ -32,7 +25,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         SecondaryButtonOnClickListener(
             /* [in] */ PhoneFavoriteSquareTileView* host);
@@ -46,27 +39,25 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    // TODO:
     // @Override
-    // CARAPI LoadFromContact(
-    //     /* [in] */ IContactEntry* entry);
+    CARAPI LoadFromContact(
+        /* [in] */ IInterface* entry);
 
-    // CARAPI GetContactEntry(
-    //     /* [out] */ IContactEntry** entry);
+    CARAPI GetContactEntry(
+        /* [out] */ IInterface** entry);
 
 protected:
     // @Override
     CARAPI OnFinishInflate();
 
     // @Override
-    CARAPI GetApproximateImageSize(
-        /* [out] */ Int32* size);
+    CARAPI_(Int32) GetApproximateImageSize();
 
     // @Override
     CARAPI OnMeasure(
@@ -76,13 +67,13 @@ private:
     CARAPI_(void) LaunchQuickContact();
 
 private:
-    static const String TAG; // = PhoneFavoriteSquareTileView.class.getSimpleName();
+    static const String TAG;
 
     Float mHeightToWidthRatio;
 
     AutoPtr<IImageButton> mSecondaryButton;
 
-    // AutoPtr<IContactEntry> mContactEntry;
+    AutoPtr<ContactEntry> mContactEntry;
 };
 
 } // List

@@ -1,11 +1,14 @@
 
 #include "elastos/droid/dialer/list/PhoneFavoriteSquareTileView.h"
 #include "Elastos.Droid.Provider.h"
-#include <elastos/droid/view/View.h>
+#include "elastos/droid/view/View.h"
+#include "R.h"
 
+using Elastos::Droid::Dialer::List::EIID_IPhoneFavoriteSquareTileView;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Provider::IContactsContractQuickContact;
 using Elastos::Droid::Provider::CContactsContractQuickContact;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::View;
 using Elastos::Droid::Widget::ITextView;
 
@@ -32,12 +35,13 @@ ECode PhoneFavoriteSquareTileView::SecondaryButtonOnClickListener::OnClick(
     return NOERROR;
 }
 
+
 //=================================================================
 // PhoneFavoriteSquareTileView
 //=================================================================
 CAR_INTERFACE_IMPL(PhoneFavoriteSquareTileView, PhoneFavoriteTileView, IPhoneFavoriteSquareTileView);
 
-static const String PhoneFavoriteSquareTileView::TAG("PhoneFavoriteSquareTileView");
+const String PhoneFavoriteSquareTileView::TAG("PhoneFavoriteSquareTileView");
 
 ECode PhoneFavoriteSquareTileView::constructor(
     /* [in] */ IContext* context,
@@ -47,7 +51,7 @@ ECode PhoneFavoriteSquareTileView::constructor(
 
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
-    resources->GetFraction(R::dimen::contact_tile_height_to_width_ratio,
+    resources->GetFraction(Elastos::Droid::Dialer::R::dimen::contact_tile_height_to_width_ratio,
             1, 1, &mHeightToWidthRatio);
 
     return NOERROR;
@@ -57,26 +61,25 @@ ECode PhoneFavoriteSquareTileView::OnFinishInflate()
 {
     PhoneFavoriteTileView::OnFinishInflate();
     AutoPtr<IView> nameView;
-    FindViewById(R::id::contact_tile_name, (IView**)&nameView);
+    FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_name, (IView**)&nameView);
     ITextView::Probe(nameView)->SetElegantTextHeight(FALSE);
     AutoPtr<IView> phoneTypeView;
-    FindViewById(R::id::contact_tile_phone_type, (IView**)&phoneTypeView);
+    FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_phone_type, (IView**)&phoneTypeView);
     ITextView::Probe(phoneTypeView)->SetElegantTextHeight(FALSE);
 
     AutoPtr<IView> button;
-    FindViewById(R::id::contact_tile_secondary_button, (IView**)&button);
-    mSecondaryButton = ImageButton::Probe(button);
+    FindViewById(Elastos::Droid::Dialer::R::id::contact_tile_secondary_button, (IView**)&button);
+    mSecondaryButton = IImageButton::Probe(button);
 
     return NOERROR;
 }
 
-ECode PhoneFavoriteSquareTileView::GetApproximateImageSize(
-    /* [out] */ Int32* size)
+Int32 PhoneFavoriteSquareTileView::GetApproximateImageSize()
 {
-    VALIDATE_NOT_NULL(size);
-
     // The picture is the full size of the tile (minus some padding, but we can be generous)
-    return GetWidth(size);
+    Int32 width;
+    GetWidth(&width);
+    return width;
 }
 
 void PhoneFavoriteSquareTileView::LaunchQuickContact()
@@ -87,31 +90,31 @@ void PhoneFavoriteSquareTileView::LaunchQuickContact()
     GetLookupUri((IUri**)&uri);
 
     AutoPtr<IContactsContractQuickContact> contact;
-    CContactsContractQuickContact::AquireSingleton(
+    CContactsContractQuickContact::AcquireSingleton(
             (IContactsContractQuickContact**)&contact);
     contact->ShowQuickContact(context, this,
                 uri, IContactsContractQuickContact::MODE_LARGE, NULL);
 }
 
-// TODO:
-// ECode PhoneFavoriteSquareTileView::LoadFromContact(
-//     /* [in] */ IContactEntry* entry)
-// {
-//     PhoneFavoriteTileView::LoadFromContact(entry);
-//     if (entry != NULL) {
-//         mSecondaryButton->SetOnClickListener(new SecondaryButtonOnClickListener(this));
-//     }
-//     mContactEntry = entry;
+ECode PhoneFavoriteSquareTileView::LoadFromContact(
+    /* [in] */ IInterface* entry)
+{
+    PhoneFavoriteTileView::LoadFromContact(entry);
+    if (entry != NULL) {
+        AutoPtr<IViewOnClickListener> listener = (IViewOnClickListener*)new SecondaryButtonOnClickListener(this);
+        IView::Probe(mSecondaryButton)->SetOnClickListener(listener);
+    }
+    mContactEntry = (ContactEntry*)(IObject*)entry;
 
-//     return NOERROR;
-// }
+    return NOERROR;
+}
 
 ECode PhoneFavoriteSquareTileView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Int32 width = View::MeasureSpec::GetSize(widthMeasureSpec);
-    Int32 height = (Int32) (mHeightToWidthRatio * width);
+    Int32 width = Elastos::Droid::View::View::MeasureSpec::GetSize(widthMeasureSpec);
+    Int32 height = (Int32)(mHeightToWidthRatio * width);
     Int32 count;
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
@@ -126,15 +129,14 @@ ECode PhoneFavoriteSquareTileView::OnMeasure(
     return NOERROR;
 }
 
-// TODO:
-// ECode PhoneFavoriteSquareTileView::GetContactEntry(
-//     /* [out] */ IContactEntry** entry)
-// {
-//     VALIDATE_NOT_NULL(entry);
-//     *entry = mContactEntry;
-//     REFCOUNT_ADD(*entry);
-//     return NOERROR;
-// }
+ECode PhoneFavoriteSquareTileView::GetContactEntry(
+    /* [out] */ IInterface** entry)
+{
+    VALIDATE_NOT_NULL(entry)
+    *entry = (IObject*)mContactEntry;
+    REFCOUNT_ADD(*entry)
+    return NOERROR;
+}
 
 } // List
 } // Dialer

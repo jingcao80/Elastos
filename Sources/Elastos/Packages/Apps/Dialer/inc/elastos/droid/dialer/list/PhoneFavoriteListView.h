@@ -2,8 +2,10 @@
 #define __ELASTOS_DROID_DIALER_LIST_PHONEFAVORITELISTVIEW_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/os/Runnable>
-#include <elastos/droid/widget/GridView>
+#include "elastos/droid/dialer/list/DragDropController.h"
+#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/droid/widget/GridView.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -13,15 +15,14 @@
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
-using Elastos::Droid::Animation::IAnimatorListenerAdapter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Os::IRunnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IDragEvent;
 using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::GridView;
 using Elastos::Droid::Widget::IImageView;
 
 namespace Elastos {
@@ -36,9 +37,30 @@ class PhoneFavoriteListView
     : public GridView
     , public IPhoneFavoriteListView
     , public IOnDragDropListener
-    , public IDragItemContainer
 {
 private:
+    class InnerContainer
+        : public Object
+        , public IDragItemContainer
+    {
+    public:
+        InnerContainer(
+            /* [in] */ PhoneFavoriteListView* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        // @Override
+        CARAPI GetViewForLocation(
+            /* [in] */ Int32 x,
+            /* [in] */ Int32 y,
+            /* [out] */ IPhoneFavoriteSquareTileView** view);
+
+    private:
+        PhoneFavoriteListView* mHost;
+    };
+
     class DragScroller
         : public Runnable
     {
@@ -55,12 +77,13 @@ private:
         PhoneFavoriteListView* mHost;
     };
 
-    class DragShadowOverAnimatorListener
-        : AnimatorListenerAdapter
+    class DragShadowOverAnimatorListener : AnimatorListenerAdapter
     {
     public:
         DragShadowOverAnimatorListener(
-            /* [in] */ PhoneFavoriteListView* host);
+            /* [in] */ PhoneFavoriteListView* host)
+            : mHost(host)
+        {}
 
         // @Override
         CARAPI OnAnimationEnd(
@@ -71,7 +94,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     PhoneFavoriteListView();
 
@@ -131,7 +154,7 @@ public:
     CARAPI GetViewForLocation(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
-        /* [out] */ IPhoneFavoriteSquareTileView* view);
+        /* [out] */ IPhoneFavoriteSquareTileView** view);
 
 protected:
     // @Override
@@ -152,9 +175,20 @@ private:
         /* [in] */ IView* view);
 
 public:
-    static const String LOG_TAG;
+    static const String TAG;
 
 private:
+    static const Int64 SCROLL_HANDLER_DELAY_MILLIS = 5;
+    static const Int32 DRAG_SCROLL_PX_UNIT = 25;
+
+    static const Float DRAG_SHADOW_ALPHA = 0.7f;
+
+    /**
+     * {@link #mTopScrollBound} and {@link mBottomScrollBound} will be
+     * offseted to the top / bottom by {@link #getHeight} * {@link #BOUND_GAP_RATIO} pixels.
+     */
+    static const Float BOUND_GAP_RATIO = 0.2f;
+
     Float mTouchSlop;
 
     Int32 mTopScrollBound;
@@ -162,10 +196,8 @@ private:
     Int32 mLastDragY;
 
     AutoPtr<IHandler> mScrollHandler;
-    const Int64 SCROLL_HANDLER_DELAY_MILLIS; // = 5;
-    const Int32 DRAG_SCROLL_PX_UNIT; // = 25;
 
-    Boolean mIsDragScrollerRunning; // = false;
+    Boolean mIsDragScrollerRunning;
     Int32 mTouchDownForDragStartX;
     Int32 mTouchDownForDragStartY;
 
@@ -174,7 +206,7 @@ private:
     AutoPtr<IView> mDragShadowParent;
     Int32 mAnimationDuration;
 
-    Int32 mLocationOnScreen[2];
+    AutoPtr<ArrayOf<Int32> > mLocationOnScreen;
 
     // X and Y offsets inside the item from where the user grabbed to the
     // child's left coordinate. This is used to aid in the drawing of the drag shadow.
@@ -184,18 +216,10 @@ private:
     Int32 mDragShadowLeft;
     Int32 mDragShadowTop;
 
-    AutoPtr<IDragDropController> mDragDropController; // = new DragDropController(this);
-
-    const Float DRAG_SHADOW_ALPHA; // = 0.7f;
-
-    /**
-     * {@link #mTopScrollBound} and {@link mBottomScrollBound} will be
-     * offseted to the top / bottom by {@link #getHeight} * {@link #BOUND_GAP_RATIO} pixels.
-     */
-    const Float BOUND_GAP_RATIO; // = 0.2f;
+    AutoPtr<DragDropController> mDragDropController;
 
     AutoPtr<IRunnable> mDragScroller;
-    AutoPtr<IAnimatorListenerAdapter> mDragShadowOverAnimatorListener;
+    AutoPtr<AnimatorListenerAdapter> mDragShadowOverAnimatorListener;
 };
 
 } // List

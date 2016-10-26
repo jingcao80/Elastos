@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_CPHONEFAVORITELISTVIEW_H__
 
 #include "_Elastos_Droid_Dialer_List_CPhoneFavoriteListView.h"
-#include "elastos/apps/dialer/list/PhoneFavoriteListView.h"
+#include "elastos/droid/dialer/list/PhoneFavoriteListView.h"
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +13,7 @@ CarClass(CPhoneFavoriteListView)
     , public PhoneFavoriteListView
 {
 public:
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 };
 
 } // List

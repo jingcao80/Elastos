@@ -246,6 +246,7 @@ module
 //    using interface Elastos.Core.ICharSequence;
 
     interface Elastos.Droid.Contacts.Common.List.IOnPhoneNumberPickerActionListener;
+    interface Elastos.Droid.Contacts.Common.List.IContactTileView;
     interface Elastos.Droid.Contacts.Common.Model.IValuesDelta;
     using interface Elastos.Droid.DialerBind.Analytics.IAnalyticsInterface;
 
@@ -275,13 +276,10 @@ module
 //    interface Elastos.Droid.Dialer.List.IAllContactsFragment;
 //    interface Elastos.Droid.Dialer.List.IDialerPhoneNumberListAdapter;
 //    interface Elastos.Droid.Dialer.List.IDragItemContainer;
-//    interface Elastos.Droid.Dialer.List.IDragDropController;
     interface Elastos.Droid.Dialer.List.IListsFragment;
     interface Elastos.Droid.Dialer.List.IListsFragmentHostInterface;
     interface Elastos.Droid.Dialer.List.IOnDragDropListener;
 //    interface Elastos.Droid.Dialer.List.IPhoneFavoriteTileView;
-//    interface Elastos.Droid.Dialer.List.IPhoneFavoriteSquareTileView;
-//    interface Elastos.Droid.Dialer.List.ISearchFragment;
     interface Elastos.Droid.Dialer.List.ISearchFragmentHostInterface;
 //    interface Elastos.Droid.Dialer.List.IRegularSearchFragment;
 //    interface Elastos.Droid.Dialer.List.IRegularSearchListAdapter;
@@ -564,13 +562,6 @@ module
 //        // interface IPhoneNumberListAdapter;
 //        interface IDialerPhoneNumberListAdapter;
 //    }
-//
-//    class CDragDropController {
-//        constructor(
-//            [in] IDragItemContainer* dragItemContainer);
-//
-//        interface IDragDropController;
-//    }
 
     class CListsFragment {
         constructor();
@@ -585,77 +576,57 @@ module
         interface IListsFragment;
     }
 
-//    [local]
-//    class CPhoneFavoriteListView {
-//        constructor(
-//            [in] IContext* ctx);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs,
-//            [in] Int32 defStyle);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        interface IAdapterView;
-//        interface IAbsListView;
-//        interface IGridView;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IOnGlobalLayoutListener;
-//        interface IOnTouchModeChangeListener;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface ITextWatcher;
-//        interface INoCopySpan;
-//        interface IFilterListener;
-//        interface IRemoteAdapterConnectionCallback;
-//        interface IDrawableCallback;
-//        interface IOnDragDropListener;
-//        interface IDragItemContainer;
-//        interface IPhoneFavoriteListView;
-//    }
-//
-//    [local]
-//    class CPhoneFavoriteSquareTileView {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        interface IPhoneFavoriteTileView;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface IContactTileView;
-//        interface IPhoneFavoriteSquareTileView;
-//    }
-//
-//    [local]
-//    class CPhoneFavoriteTileView {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        // TODO:
-//        // interface IContactTileView;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface IPhoneFavoriteTileView;
-//    }
-//
+    [local]
+    class CPhoneFavoriteListView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IAdapterView;
+        interface IAbsListView;
+        interface IGridView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IOnGlobalLayoutListener;
+        interface IOnTouchModeChangeListener;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface ITextWatcher;
+        interface IFilterListener;
+        interface IRemoteAdapterConnectionCallback;
+        interface IDrawableCallback;
+        interface IOnDragDropListener;
+        interface IPhoneFavoriteListView;
+    }
+
+    [local]
+    class CPhoneFavoriteSquareTileView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IContactTileView;
+        interface IPhoneFavoriteTileView;
+        interface IPhoneFavoriteSquareTileView;
+    }
+
 //    class CRegularSearchFragment {
 //        constructor();
 //

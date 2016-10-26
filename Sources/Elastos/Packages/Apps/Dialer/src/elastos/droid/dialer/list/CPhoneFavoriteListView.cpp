@@ -6,7 +6,7 @@ namespace Droid {
 namespace Dialer {
 namespace List {
 
-CAR_OBJECT_IMPL(CPhoneFavoriteListView);
+CAR_OBJECT_IMPL(CPhoneFavoriteListView)
 
 } // List
 } // Dialer

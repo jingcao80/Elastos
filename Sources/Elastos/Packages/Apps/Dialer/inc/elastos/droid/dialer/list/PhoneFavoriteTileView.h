@@ -1,25 +1,20 @@
 #ifndef __ELASTOS_DROID_DIALER_LIST_PHONEFAVORITETITLEVIEW_H__
 #define __ELASTOS_DROID_DIALER_LIST_PHONEFAVORITETITLEVIEW_H__
 
-#include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/widget/FrameLayout.h>
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Utility.h"
+#include "elastos/droid/contacts/common/list/ContactTileView.h"
 
+using Elastos::Droid::Contacts::Common::IContactPhotoManagerDefaultImageProvider;
+using Elastos::Droid::Contacts::Common::List::ContactTileView;
 using Elastos::Droid::Content::IClipData;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
-using Elastos::Droid::Utility::IAttributeSet;
-using Elastos::Droid::Widget::FrameLayout;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace List {
+
+class PhoneFavoriteListView;
 
 /**
  * A light version of the {@link com.android.contacts.common.list.ContactTileView} that is used in
@@ -29,9 +24,7 @@ namespace List {
  * view.
  */
 class PhoneFavoriteTileView
-    // TODO:
-    /*: public ContactTileView*/
-    : public FrameLayout
+    : public ContactTileView
     , public IPhoneFavoriteTileView
 {
 private:
@@ -40,7 +33,7 @@ private:
         , public IViewOnLongClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         MyLongClickListener(
             /* [in] */ PhoneFavoriteTileView* host);
@@ -73,59 +66,52 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
-
-    PhoneFavoriteTileView();
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    // TODO:
     // @Override
-    // CARAPI LoadFromContact(
-    //     /* [in] */ IContactEntry* entry);
+    CARAPI LoadFromContact(
+        /* [in] */ IInterface* entry);
+
 protected:
     // @Override
     CARAPI OnFinishInflate();
 
     // @Override
-    CARAPI IsDarkTheme(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsDarkTheme();
 
     // @Override
-    CARAPI CreateClickListener(
-        /* [out] */ IViewOnClickListener** listener);
-
-    // TODO:
-    // @Override
-    // CARAPI  GetDefaultImageRequest(
-    //     /* [in] */ const String& displayName,
-    //     /* [in] */ const String& lookupKey,
-    //     /* [out] */ IDefaultImageRequest** request);
+    CARAPI_(AutoPtr<IViewOnClickListener>) CreateClickListener();
 
     // @Override
-    CARAPI ConfigureViewForImage(
+    CARAPI_(AutoPtr<IContactPhotoManagerDefaultImageProvider>)  GetDefaultImageRequest(
+        /* [in] */ const String& displayName,
+        /* [in] */ const String& lookupKey);
+
+    // @Override
+    CARAPI_(void) ConfigureViewForImage(
         /* [in] */ Boolean isDefaultImage);
 
     // @Override
-    CARAPI IsContactPhotoCircular(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsContactPhotoCircular();
 
-public:
+protected:
     // Constant to pass to the drag event so that the drag action only happens when a phone favorite
     // tile is long pressed.
-    static const String DRAG_PHONE_FAVORITE_TILE; // = "PHONE_FAVORITE_TILE";
+    static const String DRAG_PHONE_FAVORITE_TILE;
 
 private:
-    static const String TAG; // = PhoneFavoriteTileView.class.getSimpleName();
-    static const Boolean DEBUG; // = false;
+    static const String TAG;
+    static const Boolean DEBUG = FALSE;
 
     // These parameters instruct the photo manager to display the default image/letter at 70% of
     // its normal size, and vertically offset upwards 12% towards the top of the letter tile, to
     // make room for the contact name and number label at the bottom of the image.
-    static const Float DEFAULT_IMAGE_LETTER_OFFSET; // = -0.12f;
-    static const Float DEFAULT_IMAGE_LETTER_SCALE; // = 0.70f;
+    static const Float DEFAULT_IMAGE_LETTER_OFFSET = -0.12f;
+    static const Float DEFAULT_IMAGE_LETTER_SCALE = 0.70f;
 
     /** View that contains the transparent shadow that is overlaid on top of the contact image. */
     AutoPtr<IView> mShadowOverlay;
@@ -135,9 +121,10 @@ private:
 
     // Dummy clip data object that is attached to drag shadows so that text views
     // don't crash with an NPE if the drag shadow is released in their bounds
-    static const AutoPtr<IClipData> EMPTY_CLIP_DATA; // = ClipData.newPlainText("", "");
+    static const AutoPtr<IClipData> EMPTY_CLIP_DATA;
 
-
+    friend class MyClickListener;
+    friend class PhoneFavoriteListView;
 };
 
 } // List

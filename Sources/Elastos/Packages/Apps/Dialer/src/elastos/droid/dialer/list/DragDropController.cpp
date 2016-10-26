@@ -1,6 +1,7 @@
 
 #include "elastos/droid/dialer/list/DragDropController.h"
 
+using Elastos::Droid::Dialer::List::EIID_IDragDropController;
 using Elastos::Utility::CArrayList;
 
 namespace Elastos {
@@ -8,19 +9,14 @@ namespace Droid {
 namespace Dialer {
 namespace List {
 
-CAR_INTERFACE_IMPL(DragDropController, Object, IDragDropController);
+CAR_INTERFACE_IMPL(DragDropController, Object, IDragDropController)
 
-DragDropController::DragDropController()
+DragDropController::DragDropController(
+    /* [in] */ IDragItemContainer* dragItemContainer)
+    : mDragItemContainer(dragItemContainer)
 {
     CArrayList::New((IList**)&mOnDragDropListeners);
     mLocationOnScreen = ArrayOf<Int32>::Alloc(2);
-}
-
-ECode DragDropController::constructor(
-    /* [in] */ IDragItemContainer* dragItemContainer)
-{
-    mDragItemContainer = dragItemContainer;
-    return NOERROR;
 }
 
 Boolean DragDropController::HandleDragStarted(

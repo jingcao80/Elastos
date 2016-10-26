@@ -1,10 +1,10 @@
 #ifndef __ELASTOS_DROID_DIALER_LIST_DRAGDROPCONTROLLER_H__
 #define __ELASTOS_DROID_DIALER_LIST_DRAGDROPCONTROLLER_H__
 
-#include "Elastos.Droid.View.h"
-#include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/core/Object.h>
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::View::IView;
 using Elastos::Utility::IList;
@@ -23,7 +23,7 @@ class DragDropController
     , public IDragDropController
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     DragDropController(
         /* [in] */ IDragItemContainer* dragItemContainer);
