@@ -22,198 +22,185 @@ namespace Security {
 //-------------------------------------------------------------
 //  SignatureImpl
 //-------------------------------------------------------------
-/**
- * Internal Signature implementation
- */
-class SignatureImpl : public Signature
+SignatureImpl::SignatureImpl()
+{}
+
+ECode SignatureImpl::constructor(
+    /* [in] */ const String& algorithm,
+    /* [in] */ IProvider* provider)
 {
-public:
-    SignatureImpl(
-        /* [in] */ const String& algorithm,
-        /* [in] */ IProvider* provider)
-    {
-        Signature::constructor(algorithm);
-        mSpecifiedProvider = provider;
+    Signature::constructor(algorithm);
+    mSpecifiedProvider = provider;
+    return NOERROR;
+}
+
+ECode SignatureImpl::constructor(
+    /* [in] */ const String& algorithm,
+    /* [in] */ IProvider* provider,
+    /* [in] */ SignatureSpi* spi)
+{
+    constructor(algorithm, provider);
+    mSpiImpl = spi;
+    return NOERROR;
+}
+
+// @Override
+ECode SignatureImpl::EnsureProviderChosen()
+{
+    AutoPtr<SignatureSpi> spi;
+    return GetSpi(NULL, (SignatureSpi**)&spi);
+}
+
+// @Override
+ECode SignatureImpl::EngineSign(
+    /* [out, callee] */ ArrayOf<Byte>** sign)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    return spi->EngineSign(sign);
+}
+
+// @Override
+ECode SignatureImpl::EngineUpdate(
+    /* [in] */ Byte arg0)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    return spi->EngineUpdate(arg0);
+}
+
+// @Override
+ECode SignatureImpl::EngineVerify(
+    /* [in] */ ArrayOf<Byte>* arg0,
+    /* [out] */ Boolean* result)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    return spi->EngineVerify(arg0, result);
+}
+
+// @Override
+ECode SignatureImpl::EngineUpdate(
+    /* [in] */ ArrayOf<Byte>* arg0,
+    /* [in] */ Int32 arg1,
+    /* [in] */ Int32 arg2)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    assert(spi != NULL);
+    return spi->EngineUpdate(arg0, arg1, arg2);
+}
+
+// @Override
+ECode SignatureImpl::EngineInitSign(
+    /* [in] */ IPrivateKey* arg0)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi(IKey::Probe(arg0), (SignatureSpi**)&spi));
+    return spi->EngineInitSign(arg0);
+}
+
+// @Override
+ECode SignatureImpl::EngineInitVerify(
+    /* [in] */ IPublicKey* arg0)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi(IKey::Probe(arg0), (SignatureSpi**)&spi));
+    return spi->EngineInitVerify(arg0);
+}
+
+// @Override
+ECode SignatureImpl::EngineGetParameter(
+    /* [in] */ const String& arg0,
+    /* [out] */ IInterface** object)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    return spi->EngineGetParameter(arg0, object);
+}
+
+// @Override
+ECode SignatureImpl::EngineSetParameter(
+    /* [in] */ const String& arg0,
+    /* [in] */ IInterface* arg1)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    return spi->EngineSetParameter(arg0, arg1);
+}
+
+// @Override
+ECode SignatureImpl::EngineSetParameter(
+    /* [in] */ IAlgorithmParameterSpec* arg0)
+{
+    AutoPtr<SignatureSpi> spi;
+    FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
+    return spi->EngineSetParameter(arg0);
+}
+
+// @Override
+ECode SignatureImpl::Clone(
+    /* [out] */ IInterface** object)
+{
+    AutoPtr<SignatureSpi> spi;
+    if (mSpiImpl != NULL) {
+        AutoPtr<IInterface> cloneObj;
+        mSpiImpl->Clone((IInterface**)&cloneObj);
+        spi = (SignatureSpi*)ISignatureSpi::Probe(cloneObj);
     }
+    String algo;
+    GetAlgorithm(&algo);
+    AutoPtr<IProvider> provider;
+    GetProvider((IProvider**)&provider);
+    AutoPtr<SignatureImpl> si = new SignatureImpl();
+    si->constructor(algo, provider, spi);
+    *object = si->Probe(EIID_IInterface);
+    REFCOUNT_ADD(*object);
+    return NOERROR;
+}
 
-    SignatureImpl(
-        /* [in] */ const String& algorithm,
-        /* [in] */ IProvider* provider,
-        /* [in] */ SignatureSpi* spi)
-    {
-        Signature::constructor(algorithm);
-        mSpecifiedProvider = provider;
-        mSpiImpl = spi;
-    }
-
-    // @Override
-    CARAPI EnsureProviderChosen()
-    {
-        AutoPtr<SignatureSpi> spi;
-        return GetSpi(NULL, (SignatureSpi**)&spi);
-    }
-
-    // @Override
-    CARAPI EngineSign(
-        /* [out, callee] */ ArrayOf<Byte>** sign)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineSign(sign);
-    }
-
-    // @Override
-    CARAPI EngineUpdate(
-        /* [in] */ Byte arg0)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineUpdate(arg0);
-    }
-
-    // @Override
-    CARAPI EngineVerify(
-        /* [in] */ ArrayOf<Byte>* arg0,
-        /* [out] */ Boolean* result)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineVerify(arg0, result);
-    }
-
-    // @Override
-    CARAPI EngineUpdate(
-        /* [in] */ ArrayOf<Byte>* arg0,
-        /* [in] */ Int32 arg1,
-        /* [in] */ Int32 arg2)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineUpdate(arg0, arg1, arg2);
-    }
-
-    // @Override
-    CARAPI EngineInitSign(
-        /* [in] */ IPrivateKey* arg0)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi(IKey::Probe(arg0), (SignatureSpi**)&spi));
-        return spi->EngineInitSign(arg0);
-    }
-
-    // @Override
-    CARAPI EngineInitVerify(
-        /* [in] */ IPublicKey* arg0)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi(IKey::Probe(arg0), (SignatureSpi**)&spi));
-        return spi->EngineInitVerify(arg0);
-    }
-
-    // @Override
-    CARAPI EngineGetParameter(
-        /* [in] */ const String& arg0,
-        /* [out] */ IInterface** object)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineGetParameter(arg0, object);
-    }
-
-    // @Override
-    CARAPI EngineSetParameter(
-        /* [in] */ const String& arg0,
-        /* [in] */ IInterface* arg1)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineSetParameter(arg0, arg1);
-    }
-
-    // @Override
-    CARAPI EngineSetParameter(
-        /* [in] */ IAlgorithmParameterSpec* arg0)
-    {
-        AutoPtr<SignatureSpi> spi;
-        FAIL_RETURN(GetSpi((SignatureSpi**)&spi));
-        return spi->EngineSetParameter(arg0);
-    }
-
-    // @Override
-    CARAPI Clone(
-        /* [out] */ IInterface** object)
-    {
-        AutoPtr<SignatureSpi> spi;
-        if (mSpiImpl != NULL) {
-            AutoPtr<IInterface> cloneObj;
-            mSpiImpl->Clone((IInterface**)&cloneObj);
-            spi = (SignatureSpi*)ISignatureSpi::Probe(cloneObj);
-        }
-        String algo;
-        GetAlgorithm(&algo);
-        AutoPtr<IProvider> provider;
-        GetProvider((IProvider**)&provider);
-        *object = (ISignature*)new SignatureImpl(algo, provider, spi);
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-
-private:
-    /**
-     * Makes sure a CipherSpi that matches this type is selected.
-     */
-    CARAPI GetSpi(
-        /* [in] */ IKey* key,
-        /* [out] */ SignatureSpi** spi)
-    {
-        {    AutoLock syncLock(mInitLock);
-            if (mSpiImpl != NULL && key == NULL) {
-                *spi = mSpiImpl;
-                REFCOUNT_ADD(*spi);
-                return NOERROR;
-            }
-
-            AutoPtr<ISpiAndProvider> sap;
-            TryAlgorithm(key, mSpecifiedProvider, mAlgorithm, (ISpiAndProvider**)&sap);
-            if (sap == NULL) {
-                String algo;
-                GetAlgorithm(&algo);
-                Logger::E("SignatureImpl", "No provider for %s", algo.string());
-                return E_PROVIDER_EXCEPTION;
-            }
-
-            AutoPtr<IInterface> obj;
-            sap->GetSpi((IInterface**)&obj);
-            mSpiImpl = (SignatureSpi*)ISignatureSpi::Probe(obj);
-            sap->GetProvider((IProvider**)&mProvider);
-
+/**
+ * Makes sure a CipherSpi that matches this type is selected.
+ */
+ECode SignatureImpl::GetSpi(
+    /* [in] */ IKey* key,
+    /* [out] */ SignatureSpi** spi)
+{
+    {    AutoLock syncLock(mInitLock);
+        if (mSpiImpl != NULL && key == NULL) {
             *spi = mSpiImpl;
             REFCOUNT_ADD(*spi);
             return NOERROR;
         }
+
+        AutoPtr<ISpiAndProvider> sap;
+        TryAlgorithm(key, mSpecifiedProvider, mAlgorithm, (ISpiAndProvider**)&sap);
+        if (sap == NULL) {
+            String algo;
+            GetAlgorithm(&algo);
+            Logger::E("SignatureImpl", "No provider for %s", algo.string());
+            return E_PROVIDER_EXCEPTION;
+        }
+        AutoPtr<IInterface> obj;
+        sap->GetSpi((IInterface**)&obj);
+        mSpiImpl = (SignatureSpi*)ISignatureSpi::Probe(obj);
+        sap->GetProvider((IProvider**)&mProvider);
+
+        *spi = mSpiImpl;
+        REFCOUNT_ADD(*spi);
         return NOERROR;
     }
+    return NOERROR;
+}
 
-    /**
-     * Convenience call when the Key is not available.
-     */
-    CARAPI GetSpi(
-        /* [out] */ SignatureSpi** spi)
-    {
-        return GetSpi(NULL, spi);
-    }
-
-private:
-    /**
-     * Lock held while the SPI is initializing.
-     */
-    Object mInitLock;
-
-    // The provider specified when creating this instance.
-    AutoPtr<IProvider> mSpecifiedProvider;
-
-    AutoPtr<SignatureSpi> mSpiImpl;
-};
+/**
+ * Convenience call when the Key is not available.
+ */
+ECode SignatureImpl::GetSpi(
+    /* [out] */ SignatureSpi** spi)
+{
+    return GetSpi(NULL, spi);
+}
 
 
 //-------------------------------------------------------------
@@ -230,6 +217,15 @@ AutoPtr<IEngine> Signature::Init_ENGINE()
     AutoPtr<CEngine> engine;
     CEngine::NewByFriend(SERVICE, (CEngine**)&engine);
     return engine.Get();
+}
+
+Signature::Signature()
+    : mState(0)
+{}
+
+Signature::~Signature()
+{
+    Logger::D("Signature", "[TODO wanli] ~Signature =================1, this=[%p]", this);
 }
 
 ECode Signature::constructor(
@@ -327,7 +323,10 @@ ECode Signature::GetSignature(
         REFCOUNT_ADD(*signature);
         return NOERROR;
     }
-    *signature = new SignatureImpl(algorithm, provider);
+
+    AutoPtr<SignatureImpl> si = new SignatureImpl();
+    si->constructor(algorithm, provider);
+    *signature = si;
     REFCOUNT_ADD(*signature);
     return NOERROR;
 }

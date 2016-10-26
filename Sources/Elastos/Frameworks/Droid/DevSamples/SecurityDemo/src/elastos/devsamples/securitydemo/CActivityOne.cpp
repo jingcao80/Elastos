@@ -1,6 +1,7 @@
 
 #include "elastos/devsamples/securitydemo/CActivityOne.h"
 #include "org/apache/harmony/security/fortress/Services.h"
+#include "elastos/devsamples/securitydemo/Signaturetest.h"
 #include "R.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Security.h>
@@ -95,6 +96,8 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::Button12) {
         return mHost->ButtonCSecureRandom();
+    else if (id == R::id::signaturetest) {
+        return mHost->SignatureTest();
     }
 
     String data = String("testtesttest");
@@ -257,6 +260,13 @@ ECode CActivityOne::OnCreate(
     view = FindViewById(R::id::Button12);
     view->SetOnClickListener(l.Get());
 
+    view = NULL;
+    view = FindViewById(R::id::signaturetest);
+    view->SetOnClickListener(l.Get());
+
+    //TODO : To be deleted.
+    Services::Initialize();
+
     return NOERROR;
 }
 
@@ -302,7 +312,6 @@ ECode CActivityOne::OnActivityResult(
 ECode CActivityOne::Button2Function()
 {
     Logger::E(TAG, "leliang begin Button2Function");
-    Services::Initialize();
     /*
     //test keypairgenerator
     AutoPtr<IKeyPairGeneratorSpecBuilder> kpgSpecBuilder;
@@ -394,6 +403,7 @@ ECode CActivityOne::Button2Function()
     return NOERROR;
 }
 
+<<<<<<< Updated upstream
 ECode CActivityOne::Button6Function()// KeyAgreement
 {
     Logger::E(TAG, "leliang begin Button6Function ");
@@ -441,6 +451,11 @@ ECode CActivityOne::ButtonCSecureRandom()
     // }
 
     return NOERROR;
+=======
+ECode CActivityOne::SignatureTest()
+{
+    return SignatureTest::MD5WithRSA();
+>>>>>>> Stashed changes
 }
 
 } // namespace SecurityDemo

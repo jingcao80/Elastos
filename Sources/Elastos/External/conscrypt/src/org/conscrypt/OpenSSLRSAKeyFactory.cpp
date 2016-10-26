@@ -42,14 +42,14 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
     /* [out] */ IPublicKey** pubKey)
 {
     VALIDATE_NOT_NULL(pubKey)
+    *pubKey = NULL;
     if (keySpec == NULL) {
         // throw new InvalidKeySpecException("keySpec == null");
-        return NOERROR;
+        return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
     if (IRSAPublicKeySpec::Probe(keySpec) != NULL) {
         AutoPtr<IOpenSSLRSAPublicKey> result;
-        assert(0 && "TODO");
         COpenSSLRSAPublicKey::New(IRSAPublicKeySpec::Probe(keySpec), (IOpenSSLRSAPublicKey**)&result);
         *pubKey = IPublicKey::Probe(result);
         REFCOUNT_ADD(*pubKey)
@@ -63,7 +63,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
     }
     // throw new InvalidKeySpecException("Must use RSAPublicKeySpec or X509EncodedKeySpec; was "
     //         + keySpec.getClass().getName());
-    return NOERROR;
+    return E_INVALID_KEY_SPEC_EXCEPTION;
 }
 
 ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(

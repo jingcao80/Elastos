@@ -1,5 +1,6 @@
 
 #include "OpenSSLSignature.h"
+#include "COpenSSLDigestContext.h"
 #include "NativeCrypto.h"
 #include "OpenSSLKey.h"
 
@@ -237,7 +238,10 @@ ECode OpenSSLSignatureSHA512ECDSA::constructor()
 //=========================================
 // OpenSSLSignature::
 //=========================================
-CAR_INTERFACE_IMPL(OpenSSLSignature, Object, IOpenSSLSignature)
+CAR_INTERFACE_IMPL(OpenSSLSignature, SignatureSpi, IOpenSSLSignature)
+OpenSSLSignature::OpenSSLSignature()
+    : mSigning(FALSE)
+{}
 
 ECode OpenSSLSignature::constructor(
     /* [in] */ Int64 algorithm,
@@ -254,8 +258,8 @@ void OpenSSLSignature::ResetContext()
     Int64 create = 0;
     NativeCrypto::EVP_MD_CTX_create(&create);
     AutoPtr<IOpenSSLDigestContext> ctxLocal;
-    assert(0 && "TODO");
-    // COpenSSLDigestContext::New(create, (IOpenSSLDigestContext**)&ctxLocal);
+    COpenSSLDigestContext::New(create, (IOpenSSLDigestContext**)&ctxLocal);
+    assert(ctxLocal != NULL);
     NativeCrypto::EVP_MD_CTX_init(ctxLocal);
     if (mSigning) {
         EnableDSASignatureNonceHardeningIfApplicable();
@@ -287,13 +291,14 @@ ECode OpenSSLSignature::EngineUpdate(
         NativeCrypto::EVP_SignUpdate(ctxLocal, input, offset, len);
     }
     else {
-        NativeCrypto::EVP_VerifyUpdate(ctxLocal, input, offset, len);
+        assert(ctxLocal != NULL);
+        NativeCrypto::EVP_VerifyUpdate_Native(ctxLocal, input, offset, len);
     }
     return NOERROR;
 }
 
 ECode OpenSSLSignature::EngineGetParameter(
-    /* [in] */ String param,
+    /* [in] */ const String& param,
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
@@ -387,7 +392,7 @@ ECode OpenSSLSignature::EngineInitVerify(
 }
 
 ECode OpenSSLSignature::EngineSetParameter(
-    /* [in] */ String param,
+    /* [in] */ const String& param,
     /* [in] */ IInterface* value)
 {
     return NOERROR;
@@ -422,6 +427,7 @@ ECode OpenSSLSignature::EngineSign(
      */
     ResetContext();
     *result = signature;
+    REFCOUNT_ADD(*result);
     return NOERROR;
     // } catch (Exception ex) {
     //     throw new SignatureException(ex);

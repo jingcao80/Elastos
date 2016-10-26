@@ -4,10 +4,10 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "_Org.Conscrypt.h"
-// #include "elastos/security/SignatureSpi.h"
+#include "elastos/security/SignatureSpi.h"
 #include <elastos/core/Object.h>
 
-// using Elastos::Security::SignatureSpi;
+using Elastos::Security::SignatureSpi;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
 
@@ -19,11 +19,13 @@ namespace Conscrypt {
  * signature verification using OpenSSL.
  */
 class OpenSSLSignature
-    : public Object/*SignatureSpi*/
+    : public SignatureSpi
     , public IOpenSSLSignature
 {
 public:
     CAR_INTERFACE_DECL()
+
+    OpenSSLSignature();
 
     CARAPI EngineUpdate(
         /* [in] */ Byte input);
@@ -34,7 +36,7 @@ public:
         /* [in] */ Int32 len);
 
     CARAPI EngineGetParameter(
-        /* [in] */ String param,
+        /* [in] */ const String& param,
         /* [out] */ IInterface** result);
 
     CARAPI EngineInitSign(
@@ -44,7 +46,7 @@ public:
         /* [in] */ IPublicKey* publicKey);
 
     CARAPI EngineSetParameter(
-        /* [in] */ String param,
+        /* [in] */ const String& param,
         /* [in] */ IInterface* value);
 
     CARAPI EngineSign(

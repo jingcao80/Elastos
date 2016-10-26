@@ -258,6 +258,7 @@ ECode CProviderService::GetAttribute(
     /* [out] */ String* attrib)
 {
     VALIDATE_NOT_NULL(attrib);
+    *attrib = String(NULL);
     if (name.IsNull()) {
         Logger::E("CProviderService", "name == null");
         return E_NULL_POINTER_EXCEPTION;
@@ -270,7 +271,10 @@ ECode CProviderService::GetAttribute(
     CString::New(name, (ICharSequence**)&keyObj);
     AutoPtr<IInterface> valueObj;
     mAttributes->Get(keyObj, (IInterface**)&valueObj);
-    return ICharSequence::Probe(valueObj)->ToString(attrib);
+    if (ICharSequence::Probe(valueObj) != NULL) {
+        return ICharSequence::Probe(valueObj)->ToString(attrib);
+    }
+    return NOERROR;
 }
 
 ECode CProviderService::GetAliases(

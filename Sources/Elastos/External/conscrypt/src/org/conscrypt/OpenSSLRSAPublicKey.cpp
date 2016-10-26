@@ -7,7 +7,10 @@
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
+using Elastos::IO::EIID_ISerializable;
 using Elastos::Math::CBigInteger;
+using Elastos::Security::EIID_IPublicKey;
+using Elastos::Security::EIID_IKey;
 using Elastos::Security::Interfaces::IRSAKey;
 using Elastos::Security::Interfaces::EIID_IRSAPublicKey;
 
@@ -19,7 +22,8 @@ namespace Conscrypt {
 //=========================================
 Int64 OpenSSLRSAPublicKey::mSerialVersionUID = 123125005824688292L;
 
-CAR_INTERFACE_IMPL_3(OpenSSLRSAPublicKey, Object, IRSAPublicKey, IOpenSSLKeyHolder, IOpenSSLRSAPublicKey)
+CAR_INTERFACE_IMPL_6(OpenSSLRSAPublicKey, Object, IRSAPublicKey, IPublicKey, \
+    IKey, ISerializable, IOpenSSLKeyHolder, IOpenSSLRSAPublicKey)
 
 ECode OpenSSLRSAPublicKey::constructor(
     /* [in] */ IOpenSSLKey* key)
@@ -41,7 +45,7 @@ ECode OpenSSLRSAPublicKey::constructor(
     /* [in] */ IRSAPublicKeySpec* spec)
 {
     AutoPtr<IBigInteger> modulus;
-    IRSAKey::Probe(spec)->GetModulus((IBigInteger**)&modulus);
+    spec->GetModulus((IBigInteger**)&modulus);
     AutoPtr<ArrayOf<Byte> > arr;
     modulus->ToByteArray((ArrayOf<Byte>**)&arr);
     AutoPtr<IBigInteger> exponent;

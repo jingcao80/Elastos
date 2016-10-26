@@ -21,6 +21,10 @@ class Signature
 public:
     CAR_INTERFACE_DECL()
 
+    Signature();
+
+    ~Signature();
+
     /**
      * Returns a new instance of {@code Signature} that utilizes the specified
      * algorithm.
@@ -454,6 +458,94 @@ private:
 
     // Used to access common engine functionality
     static AutoPtr<IEngine> ENGINE;
+};
+
+class SignatureImpl : public Signature
+{
+public:
+    SignatureImpl();
+
+    CARAPI constructor(
+        /* [in] */ const String& algorithm,
+        /* [in] */ IProvider* provider);
+
+    CARAPI constructor(
+        /* [in] */ const String& algorithm,
+        /* [in] */ IProvider* provider,
+        /* [in] */ SignatureSpi* spi);
+
+    // @Override
+    CARAPI EnsureProviderChosen();
+
+    // @Override
+    CARAPI EngineSign(
+        /* [out, callee] */ ArrayOf<Byte>** sign);
+
+    // @Override
+    CARAPI EngineUpdate(
+        /* [in] */ Byte arg0);
+
+    // @Override
+    CARAPI EngineVerify(
+        /* [in] */ ArrayOf<Byte>* arg0,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI EngineUpdate(
+        /* [in] */ ArrayOf<Byte>* arg0,
+        /* [in] */ Int32 arg1,
+        /* [in] */ Int32 arg2);
+
+    // @Override
+    CARAPI EngineInitSign(
+        /* [in] */ IPrivateKey* arg0);
+
+    // @Override
+    CARAPI EngineInitVerify(
+        /* [in] */ IPublicKey* arg0);
+
+    // @Override
+    CARAPI EngineGetParameter(
+        /* [in] */ const String& arg0,
+        /* [out] */ IInterface** object);
+
+    // @Override
+    CARAPI EngineSetParameter(
+        /* [in] */ const String& arg0,
+        /* [in] */ IInterface* arg1);
+
+    // @Override
+    CARAPI EngineSetParameter(
+        /* [in] */ IAlgorithmParameterSpec* arg0);
+
+    // @Override
+    CARAPI Clone(
+        /* [out] */ IInterface** object);
+
+private:
+    /**
+     * Makes sure a CipherSpi that matches this type is selected.
+     */
+    CARAPI GetSpi(
+        /* [in] */ IKey* key,
+        /* [out] */ SignatureSpi** spi);
+
+    /**
+     * Convenience call when the Key is not available.
+     */
+    CARAPI GetSpi(
+        /* [out] */ SignatureSpi** spi);
+
+private:
+    /**
+     * Lock held while the SPI is initializing.
+     */
+    Object mInitLock;
+
+    // The provider specified when creating this instance.
+    AutoPtr<IProvider> mSpecifiedProvider;
+
+    AutoPtr<SignatureSpi> mSpiImpl;
 };
 
 } // namespace Security

@@ -3,7 +3,7 @@
 #define __ELASTOS_SECURITY_SIGNATURESPI_H__
 
 #include "Elastos.CoreLibrary.Security.h"
-#include "core/Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::IO::IByteBuffer;
@@ -16,7 +16,7 @@ using Elastos::Security::Spec::IAlgorithmParameterSpec;
 namespace Elastos {
 namespace Security {
 
-class SignatureSpi
+class ECO_PUBLIC SignatureSpi
     : public Object
     , public ISignatureSpi
 {
@@ -24,6 +24,10 @@ class SignatureSpi
 
 public:
     CAR_INTERFACE_DECL()
+
+    SignatureSpi();
+
+    virtual ~SignatureSpi();
 
     // @Override
     CARAPI Clone(

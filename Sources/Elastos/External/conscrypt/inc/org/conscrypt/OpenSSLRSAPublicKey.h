@@ -5,11 +5,14 @@
 #include "_Org.Conscrypt.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Security::IPublicKey;
+using Elastos::Security::IKey;
 using Elastos::Security::Interfaces::IRSAPublicKey;
 using Elastos::Security::Spec::IRSAPublicKeySpec;
 using Elastos::Math::IBigInteger;
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
+using Elastos::IO::ISerializable;
 
 namespace Org {
 namespace Conscrypt {
@@ -17,6 +20,9 @@ namespace Conscrypt {
 class OpenSSLRSAPublicKey
     : public Object
     , public IRSAPublicKey
+    , public IPublicKey
+    , public IKey
+    , public ISerializable
     , public IOpenSSLKeyHolder
     , public IOpenSSLRSAPublicKey
 {

@@ -93,7 +93,7 @@ ECode COpenSSLProvider::constructor(
     Put("KeyAgreement.ECDH", prefix + "COpenSSLECDHKeyAgreement");
 
     /* == Signatures == */
-    Put("Signature.MD5WithRSA", prefix + "COpenSSLSignature$MD5RSA");
+    Put("Signature.MD5WithRSA", prefix + "COpenSSLSignatureMD5RSA");
     Put("Alg.Alias.Signature.MD5WithRSAEncryption", "MD5WithRSA");
     Put("Alg.Alias.Signature.MD5/RSA", "MD5WithRSA");
     Put("Alg.Alias.Signature.1.2.840.113549.1.1.4", "MD5WithRSA");
@@ -204,7 +204,7 @@ ECode COpenSSLProvider::constructor(
      * alias for PKCS5Padding.
      */
     Put("Cipher.AES/ECB/NoPadding", prefix + "COpenSSLCipherAESECBNoPadding");
-    Put("Cipher.AES/ECB/PKCS5Padding", prefix + "COpenSSLCipher$AES$ECB$PKCS5Padding");
+    Put("Cipher.AES/ECB/PKCS5Padding", prefix + "COpenSSLCipherAESECBPKCS5Padding");
     Put("Alg.Alias.Cipher.AES/ECB/PKCS7Padding", "AES/ECB/PKCS5Padding");
     Put("Cipher.AES/CBC/NoPadding", prefix + "COpenSSLCipherAESCBCNoPadding");
     Put("Cipher.AES/CBC/PKCS5Padding", prefix + "COpenSSLCipherAESCBCPKCS5Padding");

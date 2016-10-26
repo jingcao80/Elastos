@@ -19,11 +19,19 @@ ECode OpenSSLNativeReference::constructor(
 {
     if (ctx == 0) {
         //throw new NullPointerException("ctx == 0");
-        return NOERROR;
+        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
 
     mContext = ctx;
+    return NOERROR;
+}
 
+ECode OpenSSLNativeReference::GetNativeContext(
+    /* [out] */ Int64* ctxRef)
+{
+    VALIDATE_NOT_NULL(ctxRef);
+    *ctxRef = mContext;
     return NOERROR;
 }
 

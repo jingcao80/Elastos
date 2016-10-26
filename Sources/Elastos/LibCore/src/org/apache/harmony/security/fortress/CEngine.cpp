@@ -19,6 +19,10 @@ namespace Fortress {
 // CEngine::SpiAndProvider
 //---------------------------------------------------
 CAR_INTERFACE_IMPL(CEngine::SpiAndProvider, Object, ISpiAndProvider)
+CEngine::SpiAndProvider::~SpiAndProvider()
+{
+    Logger::D("SpiAndProvider", "[TODO wanli] ~SpiAndProvider =================1, this=[%p]", this);
+}
 
 ECode CEngine::SpiAndProvider::SetSpi(
     /* [in] */ IInterface* spi)
@@ -111,10 +115,10 @@ ECode CEngine::GetInstance(
     AutoPtr<ICharSequence> strObj;
     CString::New(param, (ICharSequence**)&strObj);
     AutoPtr<IInterface> obj;
-    service->NewInstance(strObj, (IInterface**)&obj);
+    FAIL_RETURN(service->NewInstance(strObj, (IInterface**)&obj));
     AutoPtr<IProvider> pro;
-    service->GetProvider((IProvider**)&pro);
-    AutoPtr<SpiAndProvider> sap =  new SpiAndProvider(obj, pro);
+    FAIL_RETURN(service->GetProvider((IProvider**)&pro));
+    AutoPtr<SpiAndProvider> sap = new SpiAndProvider(obj, pro);
     *instance = sap;
     REFCOUNT_ADD(*instance);
     return NOERROR;

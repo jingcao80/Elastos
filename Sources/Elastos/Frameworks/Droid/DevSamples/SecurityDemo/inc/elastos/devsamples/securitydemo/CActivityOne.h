@@ -64,6 +64,8 @@ private:
     CARAPI Button7Function();// CertificateFactory
 
     CARAPI ButtonCSecureRandom();
+
+    CARAPI SignatureTest();
 private:
 };
 

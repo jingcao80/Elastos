@@ -589,6 +589,9 @@ module
             [in] IRSAPublicKeySpec* spec);
 
         interface IRSAPublicKey;
+        interface IPublicKey;
+        interface IKey;
+        interface ISerializable;
         interface IOpenSSLKeyHolder;
         interface IOpenSSLRSAPublicKey;
     }
