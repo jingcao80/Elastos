@@ -61,21 +61,34 @@ public:
 
             CAR_INTERFACE_DECL()
 
+            CARAPI_(String) GetName();
+
+            CARAPI_(Int32) GetOrdinal();
+
+            static CARAPI_(AutoPtr<Stage>) ValueOf(
+                /* [in] */ const String& name);
+
+        private:
             Stage(
+                /* [in] */ const String& name,
+                /* [in] */ Int32 ordinal,
                 /* [in] */ Int32 hintInAlpha,
                 /* [in] */ Int32 hintInNumeric,
                 /* [in] */ Int32 nextButtonText);
 
-            static CARAPI_(AutoPtr<IPasswordStage>) Convert(
-                /* [in] */ const String& str);
-
-            static CARAPI_(String) GetName(
-                /* [in] */ IPasswordStage* stage);
+        public:
+            static AutoPtr<Stage> INTRODUCTION;
+            static AutoPtr<Stage> NEED_TO_CONFIRM;
+            static AutoPtr<Stage> CONFIRM_WRONG;
 
         public:
             Int32 mAlphaHint;
             Int32 mNumericHint;
             Int32 mButtonText;
+
+        private:
+            String mName;
+            Int32 mOrdinal;
         };
 
     private:
@@ -199,7 +212,7 @@ public:
 
     protected:
         CARAPI_(void) UpdateStage(
-            /* [in] */ IPasswordStage* stage);
+            /* [in] */ Stage* stage);
 
     private:
         /**
@@ -214,7 +227,7 @@ public:
 
         CARAPI_(void) ShowError(
             /* [in] */ const String& msg,
-            /* [in] */ IPasswordStage* next);
+            /* [in] */ Stage* next);
 
         /**
          * Update the hint based on current Stage and length of password entry
@@ -223,9 +236,6 @@ public:
 
     protected:
         static const Int32 RESULT_FINISHED;// = RESULT_FIRST_USER;
-        static AutoPtr<IPasswordStage> Stage_Introduction;
-        static AutoPtr<IPasswordStage> Stage_NeedToConfirm;
-        static AutoPtr<IPasswordStage> Stage_ConfirmWrong;
 
     private:
         static const String KEY_FIRST_PIN;// = "first_pin";
@@ -246,7 +256,7 @@ public:
         AutoPtr<ILockPatternUtils> mLockPatternUtils;
         Int32 mRequestedQuality;// = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
         AutoPtr<ChooseLockSettingsHelper> mChooseLockSettingsHelper;
-        AutoPtr<IPasswordStage> mUiStage;// = Stage_Introduction;
+        AutoPtr<Stage> mUiStage;// = Stage_Introduction;
         Boolean mDone;// = FALSE;
         AutoPtr<ITextView> mHeaderText;
         String mFirstPin;

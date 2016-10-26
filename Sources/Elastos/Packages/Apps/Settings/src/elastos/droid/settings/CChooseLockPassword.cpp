@@ -43,49 +43,66 @@ namespace Settings {
 //                  CChooseLockPassword::ChooseLockPasswordFragment::Stage
 //===============================================================================
 
+AutoPtr<CChooseLockPassword::ChooseLockPasswordFragment::Stage>
+CChooseLockPassword::ChooseLockPasswordFragment::Stage::INTRODUCTION = new Stage(
+        String("INTRODUCTION"), 0,
+        R::string::lockpassword_choose_your_password_header,
+        R::string::lockpassword_choose_your_pin_header,
+        R::string::lockpassword_continue_label);
+
+AutoPtr<CChooseLockPassword::ChooseLockPasswordFragment::Stage>
+CChooseLockPassword::ChooseLockPasswordFragment::Stage::NEED_TO_CONFIRM = new Stage(
+        String("NEED_TO_CONFIRM"), 1,
+        R::string::lockpassword_confirm_your_password_header,
+        R::string::lockpassword_confirm_your_pin_header,
+        R::string::lockpassword_ok_label);
+
+AutoPtr<CChooseLockPassword::ChooseLockPasswordFragment::Stage>
+CChooseLockPassword::ChooseLockPasswordFragment::Stage::CONFIRM_WRONG = new Stage(
+        String("CONFIRM_WRONG"), 2,
+        R::string::lockpassword_confirm_passwords_dont_match,
+        R::string::lockpassword_confirm_pins_dont_match,
+        R::string::lockpassword_continue_label);
+
 CAR_INTERFACE_IMPL(CChooseLockPassword::ChooseLockPasswordFragment::Stage, Object, IPasswordStage)
 
 CChooseLockPassword::ChooseLockPasswordFragment::Stage::Stage(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 ordinal,
     /* [in] */ Int32 hintInAlpha,
     /* [in] */ Int32 hintInNumeric,
     /* [in] */ Int32 nextButtonText)
+    : mAlphaHint(hintInAlpha)
+    , mNumericHint(hintInNumeric)
+    , mButtonText(nextButtonText)
+    , mName(name)
+    , mOrdinal(ordinal)
+{}
+
+String CChooseLockPassword::ChooseLockPasswordFragment::Stage::GetName()
 {
-    mAlphaHint = hintInAlpha;
-    mNumericHint = hintInNumeric;
-    mButtonText = nextButtonText;
+    return mName;
 }
 
-AutoPtr<IPasswordStage> CChooseLockPassword::ChooseLockPasswordFragment::Stage::Convert(
-    /* [in] */ const String& str)
+Int32 CChooseLockPassword::ChooseLockPasswordFragment::Stage::GetOrdinal()
 {
-    if (str.Equals("Stage_Introduction")) {
-        return Stage_Introduction;
+    return mOrdinal;
+}
+
+AutoPtr<CChooseLockPassword::ChooseLockPasswordFragment::Stage> CChooseLockPassword::ChooseLockPasswordFragment::Stage::ValueOf(
+    /* [in] */ const String& name)
+{
+    if (name.Equals("INTRODUCTION")) {
+        return INTRODUCTION;
     }
-    else if (str.Equals("Stage_NeedToConfirm")) {
-        return Stage_NeedToConfirm;
+    else if (name.Equals("NEED_TO_CONFIRM")) {
+        return NEED_TO_CONFIRM;
     }
-    else if (str.Equals("Stage_ConfirmWrong")) {
-        return Stage_ConfirmWrong;
+    else if (name.Equals("CONFIRM_WRONG")) {
+        return CONFIRM_WRONG;
     }
     else {
         return NULL;
-    }
-}
-
-String CChooseLockPassword::ChooseLockPasswordFragment::Stage::GetName(
-    /* [in] */ IPasswordStage* stage)
-{
-    if (stage == Stage_Introduction.Get()) {
-        return String("Stage_Introduction");
-    }
-    else if (stage == Stage_NeedToConfirm.Get()) {
-        return String("Stage_NeedToConfirm");
-    }
-    else if (stage == Stage_ConfirmWrong.Get()) {
-        return String("Stage_ConfirmWrong");
-    }
-    else {
-        return String(NULL);
     }
 }
 
@@ -156,7 +173,7 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::MyHandler::HandleMessage(
     if (what == MSG_SHOW_ERROR) {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        mHost->UpdateStage(IPasswordStage::Probe(obj));
+        mHost->UpdateStage((Stage*)IPasswordStage::Probe(obj));
     }
     return NOERROR;
 }
@@ -166,22 +183,6 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::MyHandler::HandleMessage(
 //===============================================================================
 
 const Int32 CChooseLockPassword::ChooseLockPasswordFragment::RESULT_FINISHED = RESULT_FIRST_USER;
-
-AutoPtr<IPasswordStage> CChooseLockPassword::ChooseLockPasswordFragment::Stage_Introduction = new Stage(
-        R::string::lockpassword_choose_your_password_header,
-        R::string::lockpassword_choose_your_pin_header,
-        R::string::lockpassword_continue_label);
-
-AutoPtr<IPasswordStage> CChooseLockPassword::ChooseLockPasswordFragment::Stage_NeedToConfirm = new Stage(
-        R::string::lockpassword_confirm_your_password_header,
-        R::string::lockpassword_confirm_your_pin_header,
-        R::string::lockpassword_ok_label);
-
-AutoPtr<IPasswordStage> CChooseLockPassword::ChooseLockPasswordFragment::Stage_ConfirmWrong = new Stage(
-        R::string::lockpassword_confirm_passwords_dont_match,
-        R::string::lockpassword_confirm_pins_dont_match,
-        R::string::lockpassword_continue_label);
-
 const String CChooseLockPassword::ChooseLockPasswordFragment::KEY_FIRST_PIN("first_pin");
 const String CChooseLockPassword::ChooseLockPasswordFragment::KEY_UI_STAGE("ui_stage");
 const Int32 CChooseLockPassword::ChooseLockPasswordFragment::CONFIRM_EXISTING_REQUEST = 58;
@@ -207,7 +208,7 @@ CChooseLockPassword::ChooseLockPasswordFragment::~ChooseLockPasswordFragment()
 
 ECode CChooseLockPassword::ChooseLockPasswordFragment::constructor()
 {
-    mUiStage = Stage_Introduction;
+    mUiStage = Stage::INTRODUCTION;
     mHandler = new MyHandler(this);
     return Fragment::constructor();
 }
@@ -319,7 +320,7 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::OnCreateView(
     Boolean confirmCredentials;
     intent->GetBooleanExtra(String("confirm_credentials"), TRUE, &confirmCredentials);
     if (savedInstanceState == NULL) {
-        UpdateStage(Stage_Introduction);
+        UpdateStage(Stage::INTRODUCTION);
         if (confirmCredentials) {
             mChooseLockSettingsHelper->LaunchConfirmationActivity(CONFIRM_EXISTING_REQUEST,
                     NULL, NULL);
@@ -330,7 +331,7 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::OnCreateView(
         String state;
         savedInstanceState->GetString(KEY_UI_STAGE, &state);
         if (state != NULL) {
-            mUiStage = Stage::Convert(state);
+            mUiStage = Stage::ValueOf(state);
             UpdateStage(mUiStage);
         }
     }
@@ -368,7 +369,7 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     Fragment::OnSaveInstanceState(outState);
-    outState->PutString(KEY_UI_STAGE, Stage::GetName(mUiStage));
+    outState->PutString(KEY_UI_STAGE, mUiStage->GetName());
     outState->PutString(KEY_FIRST_PIN, mFirstPin);
     return NOERROR;
 }
@@ -394,9 +395,9 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::OnActivityResult(
 }
 
 void CChooseLockPassword::ChooseLockPasswordFragment::UpdateStage(
-    /* [in] */ IPasswordStage* stage)
+    /* [in] */ Stage* stage)
 {
-    AutoPtr<IPasswordStage> previousStage = mUiStage;
+    AutoPtr<Stage> previousStage = mUiStage;
     mUiStage = stage;
     UpdateUi();
 
@@ -556,15 +557,15 @@ void CChooseLockPassword::ChooseLockPasswordFragment::HandleNext()
         return;
     }
     String errorMsg;
-    if (mUiStage == Stage_Introduction) {
+    if (mUiStage == Stage::INTRODUCTION) {
         errorMsg = ValidatePassword(pin);
         if (errorMsg.IsNull()) {
             mFirstPin = pin;
             mPasswordEntry->SetText(CoreUtils::Convert(""));
-            UpdateStage(Stage_NeedToConfirm);
+            UpdateStage(Stage::NEED_TO_CONFIRM);
         }
     }
-    else if (mUiStage == Stage_NeedToConfirm) {
+    else if (mUiStage == Stage::NEED_TO_CONFIRM) {
         if (mFirstPin.Equals(pin)) {
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
@@ -593,7 +594,7 @@ void CChooseLockPassword::ChooseLockPasswordFragment::HandleNext()
                 Int32 len;
                 selection->SetSelection(ISpannable::Probe(tmp), 0, (tmp->GetLength(&len), len));
             }
-            UpdateStage(Stage_ConfirmWrong);
+            UpdateStage(Stage::CONFIRM_WRONG);
         }
     }
     if (!errorMsg.IsNull()) {
@@ -623,14 +624,14 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::OnClick(
 
 void CChooseLockPassword::ChooseLockPasswordFragment::ShowError(
     /* [in] */ const String& msg,
-    /* [in] */ IPasswordStage* next)
+    /* [in] */ Stage* next)
 {
     mHeaderText->SetText(CoreUtils::Convert(msg));
     AutoPtr<ICharSequence> cs;
     mHeaderText->GetText((ICharSequence**)&cs);
     IView::Probe(mHeaderText)->AnnounceForAccessibility(cs);
     AutoPtr<IMessage> mesg;
-    mHandler->ObtainMessage(MSG_SHOW_ERROR, next, (IMessage**)&mesg);
+    mHandler->ObtainMessage(MSG_SHOW_ERROR, (IPasswordStage*)next, (IMessage**)&mesg);
     mHandler->RemoveMessages(MSG_SHOW_ERROR);
     Boolean res;
     mHandler->SendMessageDelayed(mesg, ERROR_MESSAGE_TIMEOUT, &res);
@@ -663,8 +664,7 @@ void CChooseLockPassword::ChooseLockPasswordFragment::UpdateUi()
     String password;
     cs->ToString(&password);
     const Int32 length = password.GetLength();
-    AutoPtr<Stage> stage = (Stage*)mUiStage.Get();
-    if (mUiStage == Stage_Introduction && length > 0) {
+    if (mUiStage == Stage::INTRODUCTION && length > 0) {
         if (length < mPasswordMinLength) {
             AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
             args->Set(0, CoreUtils::Convert(mPasswordMinLength));
@@ -688,18 +688,18 @@ void CChooseLockPassword::ChooseLockPasswordFragment::UpdateUi()
         }
     }
     else {
-        mHeaderText->SetText(mIsAlphaMode ? stage->mAlphaHint : stage->mNumericHint);
+        mHeaderText->SetText(mIsAlphaMode ? mUiStage->mAlphaHint : mUiStage->mNumericHint);
         IView::Probe(mNextButton)->SetEnabled(length > 0);
     }
-    ITextView::Probe(mNextButton)->SetText(stage->mButtonText);
+    ITextView::Probe(mNextButton)->SetText(mUiStage->mButtonText);
 }
 
 ECode CChooseLockPassword::ChooseLockPasswordFragment::AfterTextChanged(
     /* [in] */ IEditable* s)
 {
     // Changing the text while error displayed resets to NeedToConfirm state
-    if (mUiStage == Stage_ConfirmWrong) {
-        mUiStage = Stage_NeedToConfirm;
+    if (mUiStage == Stage::CONFIRM_WRONG) {
+        mUiStage = Stage::NEED_TO_CONFIRM;
     }
     UpdateUi();
     return NOERROR;
