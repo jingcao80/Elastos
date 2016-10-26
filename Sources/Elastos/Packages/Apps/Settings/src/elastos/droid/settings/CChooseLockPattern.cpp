@@ -33,92 +33,155 @@ namespace Elastos {
 namespace Droid {
 namespace Settings {
 
+
 //===============================================================================
 //                  CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode
 //===============================================================================
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::CANCEL = new CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode(
+        String("CANCEL"), 0, R::string::cancel, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::CANCEL_DISABLED = new CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode(
+        String("CANCEL_DISABLED"), 1, R::string::cancel, FALSE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::RETRY = new CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode(
+        String("RETRY"), 2, R::string::lockpattern_retry_button_text, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::RETRY_DISABLED = new CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode(
+        String("RETRY_DISABLED"), 3, R::string::lockpattern_retry_button_text, FALSE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::GONE = new CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode(
+        String("GONE"), 4, ID_EMPTY_MESSAGE, FALSE);
 
 CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::LeftButtonMode(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 ordinal,
     /* [in] */ Int32 text,
     /* [in] */ Boolean enabled)
-{
-    mText = text;
-    mEnabled = enabled;
-}
+    : mText(text)
+    , mEnabled(enabled)
+    , mName(name)
+    , mOrdinal(ordinal)
+{}
 
 //===============================================================================
 //                  CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode
 //===============================================================================
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONTINUE = new CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode(
+        String("CONTINUE"), 0, R::string::lockpattern_continue_button_text, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONTINUE_DISABLED = new CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode(
+        String("CONTINUE_DISABLED"), 1, R::string::lockpattern_continue_button_text, FALSE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONFIRM = new CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode(
+        String("CONFIRM"), 2, R::string::lockpattern_confirm_button_text, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONFIRM_DISABLED = new CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode(
+        String("CONFIRM_DISABLED"), 3, R::string::lockpattern_confirm_button_text, FALSE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode>
+CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::OK = new CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode(
+        String("OK"), 4, Elastos::Droid::R::string::ok, TRUE);
 
 CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::RightButtonMode(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 ordinal,
     /* [in] */ Int32 text,
     /* [in] */ Boolean enabled)
-{
-    mText = text;
-    mEnabled = enabled;
-}
+    : mText(text)
+    , mEnabled(enabled)
+    , mName(name)
+    , mOrdinal(ordinal)
+{}
 
 //===============================================================================
 //                  CChooseLockPattern::ChooseLockPatternFragment::Stage
 //===============================================================================
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::INTRODUCTION = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("INTRODUCTION"), 0, R::string::lockpattern_recording_intro_header,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::CANCEL,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONTINUE_DISABLED,
+        ID_EMPTY_MESSAGE, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::HELP_SCREEN = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("HELP_SCREEN"), 1, R::string::lockpattern_settings_help_how_to_record,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::GONE,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::OK,
+        ID_EMPTY_MESSAGE, FALSE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::CHOICE_TOO_SHORT = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("CHOICE_TOO_SHORT"), 2, R::string::lockpattern_recording_incorrect_too_short,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::RETRY,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONTINUE_DISABLED,
+        ID_EMPTY_MESSAGE, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::FIRST_CHOICE_VALID = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("FIRST_CHOICE_VALID"), 3, R::string::lockpattern_pattern_entered_header,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::RETRY,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONTINUE,
+        ID_EMPTY_MESSAGE, FALSE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::NEED_TO_CONFIRM = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("NEED_TO_CONFIRM"), 4, R::string::lockpattern_need_to_confirm,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::CANCEL,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONFIRM_DISABLED,
+        ID_EMPTY_MESSAGE, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::CONFIRM_WRONG = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("CONFIRM_WRONG"), 5, R::string::lockpattern_need_to_unlock_wrong,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::CANCEL,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONFIRM_DISABLED,
+        ID_EMPTY_MESSAGE, TRUE);
+AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::Stage>
+CChooseLockPattern::ChooseLockPatternFragment::Stage::CHOICE_CONFIRMED = new CChooseLockPattern::ChooseLockPatternFragment::Stage(
+        String("CHOICE_CONFIRMED"), 6, R::string::lockpattern_pattern_confirmed_header,
+        CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode::CANCEL,
+        CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode::CONFIRM,
+        ID_EMPTY_MESSAGE, FALSE);
+
+AutoPtr< ArrayOf<CChooseLockPattern::ChooseLockPatternFragment::Stage*> >
+CChooseLockPattern::ChooseLockPatternFragment::Stage::sSharedConstantsCache;
 
 CAR_INTERFACE_IMPL(CChooseLockPattern::ChooseLockPatternFragment::Stage, Object, IPatternStage)
 
 CChooseLockPattern::ChooseLockPatternFragment::Stage::Stage(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 ordinal,
     /* [in] */ Int32 headerMessage,
     /* [in] */ LeftButtonMode* leftMode,
     /* [in] */ RightButtonMode* rightMode,
     /* [in] */ Int32 footerMessage,
     /* [in] */ Boolean patternEnabled)
+    : mHeaderMessage(headerMessage)
+    , mLeftMode(leftMode)
+    , mRightMode(rightMode)
+    , mFooterMessage(footerMessage)
+    , mPatternEnabled(patternEnabled)
+    , mName(name)
+    , mOrdinal(ordinal)
+{}
+
+Int32 CChooseLockPattern::ChooseLockPatternFragment::Stage::GetOrdinal()
 {
-    mHeaderMessage = headerMessage;
-    mLeftMode = leftMode;
-    mRightMode = rightMode;
-    mFooterMessage = footerMessage;
-    mPatternEnabled = patternEnabled;
+    return mOrdinal;
 }
 
-AutoPtr< ArrayOf<IPatternStage*> > CChooseLockPattern::ChooseLockPatternFragment::Stage::GetValues()
+AutoPtr< ArrayOf<CChooseLockPattern::ChooseLockPatternFragment::Stage*> >
+CChooseLockPattern::ChooseLockPatternFragment::Stage::GetValues()
 {
-    AutoPtr< ArrayOf<IPatternStage*> > args = ArrayOf<IPatternStage*>::Alloc(7);
-    args->Set(0, Stage_Introduction);
-    args->Set(1, Stage_HelpScreen);
-    args->Set(2, Stage_ChoiceTooShort);
-    args->Set(3, Stage_FirstChoiceValid);
-    args->Set(4, Stage_NeedToConfirm);
-    args->Set(5, Stage_ConfirmWrong);
-    args->Set(6, Stage_ChoiceConfirmed);
+    if (sSharedConstantsCache == NULL) {
+        sSharedConstantsCache = ArrayOf<Stage*>::Alloc(7);
+        sSharedConstantsCache->Set(0, INTRODUCTION);
+        sSharedConstantsCache->Set(1, HELP_SCREEN);
+        sSharedConstantsCache->Set(2, CHOICE_TOO_SHORT);
+        sSharedConstantsCache->Set(3, FIRST_CHOICE_VALID);
+        sSharedConstantsCache->Set(4, NEED_TO_CONFIRM);
+        sSharedConstantsCache->Set(5, CONFIRM_WRONG);
+        sSharedConstantsCache->Set(6, CHOICE_CONFIRMED);
+    }
 
-    return args;
-}
-
-Int32 CChooseLockPattern::ChooseLockPatternFragment::Stage::GetOrdinal(
-    /* [in] */ IPatternStage* stage)
-{
-    if (stage == Stage_Introduction.Get()) {
-        return 0;
-    }
-    else if (stage == Stage_HelpScreen.Get()) {
-        return 1;
-    }
-    else if (stage == Stage_ChoiceTooShort.Get()) {
-        return 2;
-    }
-    else if (stage == Stage_FirstChoiceValid.Get()) {
-        return 3;
-    }
-    else if (stage == Stage_NeedToConfirm.Get()) {
-        return 4;
-    }
-    else if (stage == Stage_ConfirmWrong.Get()) {
-        return 5;
-    }
-    else if (stage == Stage_ChoiceConfirmed.Get()) {
-        return 6;
-    }
-    else {
-        Slogger::E("CChooseLockPattern::ChooseLockPatternFragment::Stage", "stage is error");
-        return -1;
-    }
+    return sSharedConstantsCache;
 }
 
 //===============================================================================
@@ -155,7 +218,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternLis
 ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener::OnPatternDetected(
     /* [in] */ IList* pattern)
 {
-    if (mHost->mUiStage == Stage_NeedToConfirm || mHost->mUiStage == Stage_ConfirmWrong) {
+    if (mHost->mUiStage == Stage::NEED_TO_CONFIRM || mHost->mUiStage == Stage::CONFIRM_WRONG) {
         if (mHost->mChosenPattern == NULL) {
             Slogger::E("CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener",
                     "NULL chosen pattern in stage 'need to confirm");
@@ -163,21 +226,21 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternLis
         }
         Boolean res;
         if (mHost->mChosenPattern->Equals(pattern, &res), res) {
-            mHost->UpdateStage(Stage_ChoiceConfirmed);
+            mHost->UpdateStage(Stage::CHOICE_CONFIRMED);
         }
         else {
-            mHost->UpdateStage(Stage_ConfirmWrong);
+            mHost->UpdateStage(Stage::CONFIRM_WRONG);
         }
     }
-    else if (mHost->mUiStage == Stage_Introduction || mHost->mUiStage == Stage_ChoiceTooShort){
+    else if (mHost->mUiStage == Stage::INTRODUCTION || mHost->mUiStage == Stage::CHOICE_TOO_SHORT){
         Int32 size;
         if ((pattern->GetSize(&size), size) < ILockPatternUtils::MIN_LOCK_PATTERN_SIZE) {
-            mHost->UpdateStage(Stage_ChoiceTooShort);
+            mHost->UpdateStage(Stage::CHOICE_TOO_SHORT);
         }
         else {
             mHost->mChosenPattern = NULL;
             CArrayList::New(ICollection::Probe(pattern), (IList**)&mHost->mChosenPattern);
-            mHost->UpdateStage(Stage_FirstChoiceValid);
+            mHost->UpdateStage(Stage::FIRST_CHOICE_VALID);
         }
     }
     else {
@@ -230,114 +293,16 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::ClearPatternRunnable::Run()
 //===============================================================================
 //                  CChooseLockPattern::ChooseLockPatternFragment
 //===============================================================================
-
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode> CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode_Cancel;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode> CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode_CancelDisabled;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode> CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode_Retry;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode> CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode_RetryDisabled;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode> CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode_Gone;
-
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode> CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode_Continue;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode> CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode_ContinueDisabled;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode> CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode_Confirm;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode> CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode_ConfirmDisabled;
-AutoPtr<CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode> CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode_Ok;
-
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_Introduction;
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_HelpScreen;
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_ChoiceTooShort;
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_FirstChoiceValid;
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_NeedToConfirm;
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_ConfirmWrong;
-AutoPtr<IPatternStage> CChooseLockPattern::ChooseLockPatternFragment::Stage_ChoiceConfirmed;
-
 const Int32 CChooseLockPattern::ChooseLockPatternFragment::CONFIRM_EXISTING_REQUEST = 55;
 const Int32 CChooseLockPattern::ChooseLockPatternFragment::INFORMATION_MSG_TIMEOUT_MS = 3000;
 const Int32 CChooseLockPattern::ChooseLockPatternFragment::WRONG_PATTERN_CLEAR_TIMEOUT_MS = 2000;
-const Int32 CChooseLockPattern::ChooseLockPatternFragment::ID_EMPTY_MESSAGE = -1;
+const Int32 CChooseLockPattern::ChooseLockPatternFragment::ID_EMPTY_MESSAGE;
 const String CChooseLockPattern::ChooseLockPatternFragment::KEY_UI_STAGE("uiStage");
 const String CChooseLockPattern::ChooseLockPatternFragment::KEY_PATTERN_CHOICE("chosenPattern");
-
-Boolean CChooseLockPattern::ChooseLockPatternFragment::InitStatic()
-{
-    if (LeftButtonMode_Cancel == NULL) {
-        LeftButtonMode_Cancel = new LeftButtonMode(R::string::cancel, TRUE);
-    }
-    if (LeftButtonMode_CancelDisabled == NULL) {
-        LeftButtonMode_CancelDisabled = new LeftButtonMode(R::string::cancel, FALSE);
-    }
-    if (LeftButtonMode_Retry == NULL) {
-        LeftButtonMode_Retry = new LeftButtonMode(R::string::lockpattern_retry_button_text, TRUE);
-    }
-    if (LeftButtonMode_RetryDisabled == NULL) {
-        LeftButtonMode_RetryDisabled = new LeftButtonMode(R::string::lockpattern_retry_button_text, FALSE);
-    }
-    if (LeftButtonMode_Gone == NULL) {
-        LeftButtonMode_Gone = new LeftButtonMode(ID_EMPTY_MESSAGE, FALSE);
-    }
-
-    if (RightButtonMode_Continue == NULL) {
-        RightButtonMode_Continue = new RightButtonMode(R::string::lockpattern_continue_button_text, TRUE);
-    }
-    if (RightButtonMode_ContinueDisabled == NULL) {
-        RightButtonMode_ContinueDisabled = new RightButtonMode(R::string::lockpattern_continue_button_text, FALSE);
-    }
-    if (RightButtonMode_Confirm == NULL) {
-        RightButtonMode_Confirm = new RightButtonMode(R::string::lockpattern_confirm_button_text, TRUE);
-    }
-    if (RightButtonMode_ConfirmDisabled == NULL) {
-        RightButtonMode_ConfirmDisabled = new RightButtonMode(R::string::lockpattern_confirm_button_text, FALSE);
-    }
-    if (RightButtonMode_Ok == NULL) {
-        RightButtonMode_Ok = new RightButtonMode(Elastos::Droid::R::string::ok, TRUE);
-    }
-
-    if (Stage_Introduction == NULL) {
-        Stage_Introduction = new Stage(
-                R::string::lockpattern_recording_intro_header,
-                LeftButtonMode_Cancel, RightButtonMode_ContinueDisabled,
-                ID_EMPTY_MESSAGE, TRUE);
-    }
-    if (Stage_HelpScreen == NULL) {
-        Stage_HelpScreen = new Stage(
-                R::string::lockpattern_settings_help_how_to_record,
-                LeftButtonMode_Gone, RightButtonMode_Ok, ID_EMPTY_MESSAGE, FALSE);
-    }
-    if (Stage_ChoiceTooShort == NULL) {
-        Stage_ChoiceTooShort = new Stage(
-                R::string::lockpattern_recording_incorrect_too_short,
-                LeftButtonMode_Retry, RightButtonMode_ContinueDisabled,
-                ID_EMPTY_MESSAGE, TRUE);
-    }
-    if (Stage_FirstChoiceValid == NULL) {
-        Stage_FirstChoiceValid = new Stage(
-                R::string::lockpattern_pattern_entered_header,
-                LeftButtonMode_Retry, RightButtonMode_Continue, ID_EMPTY_MESSAGE, FALSE);
-    }
-    if (Stage_NeedToConfirm == NULL) {
-        Stage_NeedToConfirm = new Stage(
-                R::string::lockpattern_need_to_confirm,
-                LeftButtonMode_Cancel, RightButtonMode_ConfirmDisabled,
-                ID_EMPTY_MESSAGE, TRUE);
-    }
-    if (Stage_ConfirmWrong == NULL) {
-        Stage_ConfirmWrong = new Stage(
-                R::string::lockpattern_need_to_unlock_wrong,
-                LeftButtonMode_Cancel, RightButtonMode_ConfirmDisabled,
-                ID_EMPTY_MESSAGE, TRUE);
-    }
-    if (Stage_ChoiceConfirmed == NULL) {
-        Stage_ChoiceConfirmed = new Stage(
-                R::string::lockpattern_pattern_confirmed_header,
-                LeftButtonMode_Cancel, RightButtonMode_Confirm, ID_EMPTY_MESSAGE, FALSE);
-    }
-    return TRUE;
-}
 
 CChooseLockPattern::ChooseLockPatternFragment::ChooseLockPatternFragment()
     : mPatternSize(ILockPatternUtils::PATTERN_SIZE_DEFAULT)
     , mDone(FALSE)
-    , mInitstatic(FALSE)
 {}
 
 CChooseLockPattern::ChooseLockPatternFragment::~ChooseLockPatternFragment()
@@ -346,10 +311,8 @@ CChooseLockPattern::ChooseLockPatternFragment::~ChooseLockPatternFragment()
 ECode CChooseLockPattern::ChooseLockPatternFragment::constructor()
 {
     mChooseNewLockPatternListener = new LockPatternViewOnPatternListener(this);
-    mUiStage = Stage_Introduction;
+    mUiStage = Stage::INTRODUCTION;
     mClearPatternRunnable = new ClearPatternRunnable(this);
-
-    mInitstatic = InitStatic();
     return Fragment::constructor();
 }
 
@@ -367,7 +330,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnActivityResult(
                 activity->SetResult(RESULT_FINISHED);
                 activity->Finish();
             }
-            UpdateStage(Stage_Introduction);
+            UpdateStage(Stage::INTRODUCTION);
             break;
         }
     }
@@ -472,16 +435,16 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnCreateView(
         if (confirmCredentials) {
             // first launch. As a security measure, we're in NeedToConfirm mode until we
             // know there isn't an existing password or the user confirms their password.
-            UpdateStage(Stage_NeedToConfirm);
+            UpdateStage(Stage::NEED_TO_CONFIRM);
             Boolean launchedConfirmationActivity =
                 mChooseLockSettingsHelper->LaunchConfirmationActivity(
                         CONFIRM_EXISTING_REQUEST, NULL, NULL);
             if (!launchedConfirmationActivity) {
-                UpdateStage(Stage_Introduction);
+                UpdateStage(Stage::INTRODUCTION);
             }
         }
         else {
-            UpdateStage(Stage_Introduction);
+            UpdateStage(Stage::INTRODUCTION);
         }
     }
     else {
@@ -494,7 +457,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnCreateView(
         }
         Int32 key;
         savedInstanceState->GetInt32(KEY_UI_STAGE, &key);
-        AutoPtr< ArrayOf<IPatternStage*> > values = Stage::GetValues();
+        AutoPtr< ArrayOf<Stage*> > values = Stage::GetValues();
         UpdateStage((*values)[key]);
     }
     mDone = FALSE;
@@ -509,12 +472,12 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnClick(
 {
     AutoPtr<Stage> uiStage = (Stage*)mUiStage.Get();
     if (v == IView::Probe(mFooterLeftButton)) {
-        if (uiStage->mLeftMode == LeftButtonMode_Retry) {
+        if (uiStage->mLeftMode == LeftButtonMode::RETRY) {
             mChosenPattern = NULL;
             mLockPatternView->ClearPattern();
-            UpdateStage(Stage_Introduction);
+            UpdateStage(Stage::INTRODUCTION);
         }
-        else if (uiStage->mLeftMode == LeftButtonMode_Cancel) {
+        else if (uiStage->mLeftMode == LeftButtonMode::CANCEL) {
             // They are canceling the entire wizard
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
@@ -528,30 +491,30 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnClick(
     }
     else if (v == IView::Probe(mFooterRightButton)) {
 
-        if (uiStage->mRightMode == RightButtonMode_Continue) {
-            if (mUiStage != Stage_FirstChoiceValid) {
+        if (uiStage->mRightMode == RightButtonMode::CONTINUE) {
+            if (mUiStage != Stage::FIRST_CHOICE_VALID) {
                 Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "expected ui stage %s when button is %s",
-                        TO_CSTR(Stage_FirstChoiceValid), TO_CSTR(RightButtonMode_Continue));
+                        TO_CSTR(Stage::FIRST_CHOICE_VALID), TO_CSTR(RightButtonMode::CONTINUE));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
-            UpdateStage(Stage_NeedToConfirm);
+            UpdateStage(Stage::NEED_TO_CONFIRM);
         }
-        else if (uiStage->mRightMode == RightButtonMode_Confirm) {
-            if (mUiStage != Stage_ChoiceConfirmed) {
+        else if (uiStage->mRightMode == RightButtonMode::CONFIRM) {
+            if (mUiStage != Stage::CHOICE_CONFIRMED) {
                 Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "expected ui stage %s when button is %s",
-                        TO_CSTR(Stage_ChoiceConfirmed), TO_CSTR(RightButtonMode_Confirm));
+                        TO_CSTR(Stage::CHOICE_CONFIRMED), TO_CSTR(RightButtonMode::CONFIRM));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             SaveChosenPatternAndFinish();
         }
-        else if (uiStage->mRightMode == RightButtonMode_Ok) {
-            if (mUiStage != Stage_HelpScreen) {
+        else if (uiStage->mRightMode == RightButtonMode::OK) {
+            if (mUiStage != Stage::HELP_SCREEN) {
                 Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "Help screen is only mode with ok button, but stage is %s", TO_CSTR(mUiStage));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             mLockPatternView->ClearPattern();
             mLockPatternView->SetDisplayMode(DisplayMode_Correct);
-            UpdateStage(Stage_Introduction);
+            UpdateStage(Stage::INTRODUCTION);
         }
     }
     return NOERROR;
@@ -567,14 +530,14 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnKeyDown(
 
     Int32 data;
     if (keyCode == IKeyEvent::KEYCODE_BACK && (event->GetRepeatCount(&data), data == 0)) {
-        if (mUiStage == Stage_HelpScreen) {
-            UpdateStage(Stage_Introduction);
+        if (mUiStage == Stage::HELP_SCREEN) {
+            UpdateStage(Stage::INTRODUCTION);
             *result = TRUE;
             return NOERROR;
         }
     }
-    if (keyCode == IKeyEvent::KEYCODE_MENU && mUiStage == Stage_Introduction) {
-        UpdateStage(Stage_HelpScreen);
+    if (keyCode == IKeyEvent::KEYCODE_MENU && mUiStage == Stage::INTRODUCTION) {
+        UpdateStage(Stage::HELP_SCREEN);
         *result = TRUE;
         return NOERROR;
     }
@@ -586,7 +549,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnSaveInstanceState(
 {
     Fragment::OnSaveInstanceState(outState);
 
-    outState->PutInt32(KEY_UI_STAGE, Stage::GetOrdinal(mUiStage));
+    outState->PutInt32(KEY_UI_STAGE, mUiStage->GetOrdinal());
     if (mChosenPattern != NULL) {
         String str;
         mChooseLockSettingsHelper->Utils()->PatternToString(mChosenPattern, &str);
@@ -596,50 +559,48 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnSaveInstanceState(
 }
 
 void CChooseLockPattern::ChooseLockPatternFragment::UpdateStage(
-    /* [in] */ IPatternStage* stage)
+    /* [in] */ Stage* stage)
 {
-    AutoPtr<IPatternStage> previousStage = mUiStage;
+    AutoPtr<Stage> previousStage = mUiStage;
 
     mUiStage = stage;
 
-    AutoPtr<Stage> _stage = (Stage*)stage;
-
     // header text, footer text, visibility and
     // enabled state all known from the stage
-    if (stage == Stage_ChoiceTooShort) {
+    if (stage == Stage::CHOICE_TOO_SHORT) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, CoreUtils::Convert(ILockPatternUtils::MIN_LOCK_PATTERN_SIZE));
         String str;
-        resources->GetString(_stage->mHeaderMessage, args, &str);
+        resources->GetString(mUiStage->mHeaderMessage, args, &str);
         mHeaderText->SetText(CoreUtils::Convert(str));
     }
     else {
-        mHeaderText->SetText(_stage->mHeaderMessage);
+        mHeaderText->SetText(mUiStage->mHeaderMessage);
     }
-    if (_stage->mFooterMessage == ID_EMPTY_MESSAGE) {
+    if (mUiStage->mFooterMessage == ID_EMPTY_MESSAGE) {
         mFooterText->SetText(CoreUtils::Convert(""));
     }
     else {
-        mFooterText->SetText(_stage->mFooterMessage);
+        mFooterText->SetText(mUiStage->mFooterMessage);
     }
 
-    if (_stage->mLeftMode == LeftButtonMode_Gone) {
+    if (mUiStage->mLeftMode == LeftButtonMode::GONE) {
         IView::Probe(mFooterLeftButton)->SetVisibility(IView::GONE);
     }
     else {
         IView* footerLeftButton = IView::Probe(mFooterLeftButton);
         footerLeftButton->SetVisibility(IView::VISIBLE);
-        mFooterLeftButton->SetText(_stage->mLeftMode->mText);
-        footerLeftButton->SetEnabled(_stage->mLeftMode->mEnabled);
+        mFooterLeftButton->SetText(mUiStage->mLeftMode->mText);
+        footerLeftButton->SetEnabled(mUiStage->mLeftMode->mEnabled);
     }
 
-    mFooterRightButton->SetText(_stage->mRightMode->mText);
-    IView::Probe(mFooterRightButton)->SetEnabled(_stage->mRightMode->mEnabled);
+    mFooterRightButton->SetText(mUiStage->mRightMode->mText);
+    IView::Probe(mFooterRightButton)->SetEnabled(mUiStage->mRightMode->mEnabled);
 
     // same for whether the patten is enabled
-    if (_stage->mPatternEnabled) {
+    if (mUiStage->mPatternEnabled) {
         mLockPatternView->EnableInput();
     }
     else {
@@ -650,26 +611,26 @@ void CChooseLockPattern::ChooseLockPatternFragment::UpdateStage(
     // on a case by case basis.
     mLockPatternView->SetDisplayMode(DisplayMode_Correct);
 
-    if (mUiStage == Stage_Introduction) {
+    if (mUiStage == Stage::INTRODUCTION) {
         mLockPatternView->ClearPattern();
     }
-    else if (mUiStage == Stage_HelpScreen) {
+    else if (mUiStage == Stage::HELP_SCREEN) {
         mLockPatternView->SetPattern(DisplayMode_Animate, mAnimatePattern);
     }
-    else if (mUiStage == Stage_ChoiceTooShort) {
+    else if (mUiStage == Stage::CHOICE_TOO_SHORT) {
         mLockPatternView->SetDisplayMode(DisplayMode_Wrong);
         PostClearPatternRunnable();
     }
-    else if (mUiStage == Stage_FirstChoiceValid) {
+    else if (mUiStage == Stage::FIRST_CHOICE_VALID) {
     }
-    else if (mUiStage == Stage_NeedToConfirm) {
+    else if (mUiStage == Stage::NEED_TO_CONFIRM) {
         mLockPatternView->ClearPattern();
     }
-    else if (mUiStage == Stage_ConfirmWrong) {
+    else if (mUiStage == Stage::CONFIRM_WRONG) {
         mLockPatternView->SetDisplayMode(DisplayMode_Wrong);
         PostClearPatternRunnable();
     }
-    else if (mUiStage == Stage_ChoiceConfirmed) {
+    else if (mUiStage == Stage::CHOICE_CONFIRMED) {
     }
 
     // If the stage changed, announce the header for accessibility. This

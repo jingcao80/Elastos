@@ -51,17 +51,30 @@ public:
         public:
             TO_STRING_IMPL("CChooseLockPattern::ChooseLockPatternFragment::LeftButtonMode")
 
+        private:
             /**
              * @param text The displayed text for this mode.
              * @param enabled Whether the button should be enabled.
              */
             LeftButtonMode(
+                /* [in] */ const String& name,
+                /* [in] */ Int32 ordinal,
                 /* [in] */ Int32 text,
                 /* [in] */ Boolean enabled);
 
         public:
+            static AutoPtr<LeftButtonMode> CANCEL;
+            static AutoPtr<LeftButtonMode> CANCEL_DISABLED;
+            static AutoPtr<LeftButtonMode> RETRY;
+            static AutoPtr<LeftButtonMode> RETRY_DISABLED;
+            static AutoPtr<LeftButtonMode> GONE;
+
             Int32 mText;
             Boolean mEnabled;
+
+        private:
+            String mName;
+            Int32 mOrdinal;
         };
 
         /**
@@ -73,17 +86,30 @@ public:
         public:
             TO_STRING_IMPL("CChooseLockPattern::ChooseLockPatternFragment::RightButtonMode")
 
+        private:
             /**
              * @param text The displayed text for this mode.
              * @param enabled Whether the button should be enabled.
              */
             RightButtonMode(
+                /* [in] */ const String& name,
+                /* [in] */ Int32 ordinal,
                 /* [in] */ Int32 text,
                 /* [in] */ Boolean enabled);
 
         public:
+            static AutoPtr<RightButtonMode> CONTINUE;
+            static AutoPtr<RightButtonMode> CONTINUE_DISABLED;
+            static AutoPtr<RightButtonMode> CONFIRM;
+            static AutoPtr<RightButtonMode> CONFIRM_DISABLED;
+            static AutoPtr<RightButtonMode> OK;
+
             Int32 mText;
             Boolean mEnabled;
+
+        private:
+            String mName;
+            Int32 mOrdinal;
         };
 
     protected:
@@ -99,6 +125,11 @@ public:
 
             CAR_INTERFACE_DECL()
 
+            CARAPI_(Int32) GetOrdinal();
+
+            static CARAPI_(AutoPtr< ArrayOf<Stage*> >) GetValues();
+
+        private:
             /**
              * @param headerMessage The message displayed at the top.
              * @param leftMode The mode of the left button.
@@ -107,23 +138,34 @@ public:
              * @param patternEnabled Whether the pattern widget is enabled.
              */
             Stage(
+                /* [in] */ const String& name,
+                /* [in] */ Int32 ordinal,
                 /* [in] */ Int32 headerMessage,
                 /* [in] */ LeftButtonMode* leftMode,
                 /* [in] */ RightButtonMode* rightMode,
                 /* [in] */ Int32 footerMessage,
                 /* [in] */ Boolean patternEnabled);
 
-            static CARAPI_(AutoPtr< ArrayOf<IPatternStage*> >) GetValues();
-
-            static CARAPI_(Int32) GetOrdinal(
-                /* [in] */ IPatternStage* stage);
-
         public:
+            static AutoPtr<Stage> INTRODUCTION;
+            static AutoPtr<Stage> HELP_SCREEN;
+            static AutoPtr<Stage> CHOICE_TOO_SHORT;
+            static AutoPtr<Stage> FIRST_CHOICE_VALID;
+            static AutoPtr<Stage> NEED_TO_CONFIRM;
+            static AutoPtr<Stage> CONFIRM_WRONG;
+            static AutoPtr<Stage> CHOICE_CONFIRMED;
+
             Int32 mHeaderMessage;
             AutoPtr<LeftButtonMode> mLeftMode;
             AutoPtr<RightButtonMode> mRightMode;
             Int32 mFooterMessage;
             Boolean mPatternEnabled;
+
+        private:
+            String mName;
+            Int32 mOrdinal;
+
+            static AutoPtr< ArrayOf<Stage*> > sSharedConstantsCache;
         };
 
         class LockPatternViewOnPatternListener
@@ -236,7 +278,7 @@ public:
          * @param stage
          */
         CARAPI_(void) UpdateStage(
-            /* [in] */ IPatternStage* stage);
+            /* [in] */ Stage* stage);
 
         static CARAPI_(Boolean) InitStatic();
 
@@ -248,26 +290,6 @@ public:
         CARAPI_(void) SaveChosenPatternAndFinish();
 
     public:
-        static AutoPtr<LeftButtonMode> LeftButtonMode_Cancel;
-        static AutoPtr<LeftButtonMode> LeftButtonMode_CancelDisabled;
-        static AutoPtr<LeftButtonMode> LeftButtonMode_Retry;
-        static AutoPtr<LeftButtonMode> LeftButtonMode_RetryDisabled;
-        static AutoPtr<LeftButtonMode> LeftButtonMode_Gone;
-
-        static AutoPtr<RightButtonMode> RightButtonMode_Continue;
-        static AutoPtr<RightButtonMode> RightButtonMode_ContinueDisabled;
-        static AutoPtr<RightButtonMode> RightButtonMode_Confirm;
-        static AutoPtr<RightButtonMode> RightButtonMode_ConfirmDisabled;
-        static AutoPtr<RightButtonMode> RightButtonMode_Ok;
-
-        static AutoPtr<IPatternStage> Stage_Introduction;
-        static AutoPtr<IPatternStage> Stage_HelpScreen;
-        static AutoPtr<IPatternStage> Stage_ChoiceTooShort;
-        static AutoPtr<IPatternStage> Stage_FirstChoiceValid;
-        static AutoPtr<IPatternStage> Stage_NeedToConfirm;
-        static AutoPtr<IPatternStage> Stage_ConfirmWrong;
-        static AutoPtr<IPatternStage> Stage_ChoiceConfirmed;
-
         static const Int32 CONFIRM_EXISTING_REQUEST;// = 55;
 
         // how Int64 after a confirmation message is shown before moving on
@@ -290,7 +312,7 @@ public:
         // how Int64 we wait to clear a wrong pattern
         static const Int32 WRONG_PATTERN_CLEAR_TIMEOUT_MS;// = 2000;
 
-        static const Int32 ID_EMPTY_MESSAGE;// = -1;
+        static const Int32 ID_EMPTY_MESSAGE = -1;
 
         static const String KEY_UI_STAGE;// = "uiStage";
         static const String KEY_PATTERN_CHOICE;// = "chosenPattern";
@@ -306,13 +328,12 @@ public:
         AutoPtr<IList> mAnimatePattern;// List<LockPatternView.Cell>
 
 
-        AutoPtr<IPatternStage> mUiStage;// = Stage_Introduction;
+        AutoPtr<Stage> mUiStage;// = Stage_Introduction;
         Boolean mDone;// = FALSE;
 
         AutoPtr<ClearPatternRunnable> mClearPatternRunnable;
 
         AutoPtr<ChooseLockSettingsHelper> mChooseLockSettingsHelper;
-        Boolean mInitstatic;
     };
 
 public:
@@ -367,5 +388,7 @@ public:
 } // namespace Settings
 } // namespace Droid
 } // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Settings::CChooseLockPattern::ChooseLockPatternFragment::Stage, IInterface);
 
 #endif //__ELASTOS_DROID_SETTINGS_CCHOOSELOCKPATTERN_H__
