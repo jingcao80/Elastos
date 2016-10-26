@@ -145,11 +145,12 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
     // Copy the fragments that the FragmentManager finds so that we can store them in
     // instance variables for later.
-    AutoPtr<IInterface> fragment;
-    FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
-    if (ISpeedDialFragment::Probe(fragment) != NULL) {
-        mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
-    }
+    // TODO:
+    // AutoPtr<IInterface> fragment;
+    // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
+    // if (ISpeedDialFragment::Probe(fragment) != NULL) {
+    //     mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
+    // }
     // else if (ICallLogFragment::Probe(fragment) != NULL) {
     //     mHost->mRecentsFragment = ICallLogFragment::Probe(fragment);
     // }
