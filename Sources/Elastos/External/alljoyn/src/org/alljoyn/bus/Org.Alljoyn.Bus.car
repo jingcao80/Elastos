@@ -1,0 +1,21 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("../../../../car/org/alljoyn/bus/alljoyn/DaemonInit.car");
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Alljoyn {
+
+    singleton class CDaemonInit {
+        interface IDaemonInit;
+    }
+
+    } // namespace Alljoyn
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}
