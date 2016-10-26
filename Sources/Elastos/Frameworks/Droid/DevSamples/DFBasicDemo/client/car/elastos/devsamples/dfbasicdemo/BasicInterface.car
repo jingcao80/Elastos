@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFBasicDemo {
+
+    interface IBasicInterface {
+        Cat(
+            [in] String inStr1,
+            [in] String inStr2,
+            [out] String* result);
+    }
+
+    } // namespace DFBasicDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}
