@@ -1,11 +1,13 @@
 
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/settings/ChooseLockSettingsHelper.h"
+#include "elastos/droid/settings/CConfirmLockPattern.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -85,22 +87,21 @@ Boolean ChooseLockSettingsHelper::ConfirmPattern(
     if (!res1 || (mLockPatternUtils->SavedPatternExists(&res2), !res2)) {
         return FALSE;
     }
-    assert(0 && "TODO");
-    // AutoPtr<IIntent> intent;
-    // CIntent::New((IIntent**)&intent);
-    // // supply header and footer text in the intent
-    // intent->PutExtra(ConfirmLockPattern.HEADER_TEXT, message);
-    // intent->PutExtra(ConfirmLockPattern.FOOTER_TEXT, details);
-    // intent->SetClassName("com.android.settings",
-    //                     returnCredentials
-    //                     ? ConfirmLockPattern.InternalActivity.class->GetName()
-    //                     : ConfirmLockPattern.class->GetName());
-    // if (mFragment != NULL) {
-    //     mFragment->StartActivityForResult(intent, request);
-    // }
-    // else {
-    //     mActivity->StartActivityForResult(intent, request);
-    // }
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    // supply header and footer text in the intent
+    intent->PutExtra(CConfirmLockPattern::HEADER_TEXT, message);
+    intent->PutExtra(CConfirmLockPattern::FOOTER_TEXT, details);
+    intent->SetClassName(String("com.android.settings"),
+                        returnCredentials
+                        ? String("Elastos.Droid.Settings.CConfirmLockPatternInternalActivity")
+                        : String("Elastos.Droid.Settings.CConfirmLockPattern"));
+    if (mFragment != NULL) {
+        mFragment->StartActivityForResult(intent, request);
+    }
+    else {
+        mActivity->StartActivityForResult(intent, request);
+    }
     return TRUE;
 }
 
@@ -113,21 +114,20 @@ Boolean ChooseLockSettingsHelper::ConfirmPassword(
     mLockPatternUtils->IsLockPasswordEnabled(&res);
     if (!res) return FALSE;
 
-    assert(0 && "TODO");
-    // AutoPtr<IIntent> intent;
-    // CIntent::New((IIntent**)&intent);
-    // // supply header text in the intent
-    // intent->PutExtra(ConfirmLockPattern.HEADER_TEXT, message);
-    // intent->SetClassName("com.android.settings",
-    //                     returnCredentials
-    //                     ? ConfirmLockPassword.InternalActivity.class->GetName()
-    //                     : ConfirmLockPassword.class->GetName());
-    // if (mFragment != NULL) {
-    //     mFragment->StartActivityForResult(intent, request);
-    // }
-    // else {
-    //     mActivity->StartActivityForResult(intent, request);
-    // }
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    // supply header text in the intent
+    intent->PutExtra(CConfirmLockPattern::HEADER_TEXT, message);
+    intent->SetClassName(String("com.android.settings"),
+                        returnCredentials
+                        ? String("Elastos.Droid.Settings.CConfirmLockPasswordInternalActivity")
+                        : String("Elastos.Droid.Settings.CConfirmLockPassword"));
+    if (mFragment != NULL) {
+        mFragment->StartActivityForResult(intent, request);
+    }
+    else {
+        mActivity->StartActivityForResult(intent, request);
+    }
     return TRUE;
 }
 

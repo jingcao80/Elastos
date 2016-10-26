@@ -4,6 +4,14 @@
 #include "elastos/droid/settings/CChooseLockGeneric.h"
 #include "elastos/droid/settings/CChooseLockGenericFragment.h"
 #include "elastos/droid/settings/CChooseLockGenericInternalActivity.h"
+#include "elastos/droid/settings/CChooseLockPasswordFragment.h"
+#include "elastos/droid/settings/CChooseLockPatternFragment.h"
+#include "elastos/droid/settings/CConfirmLockPassword.h"
+#include "elastos/droid/settings/CConfirmLockPasswordFragment.h"
+#include "elastos/droid/settings/CConfirmLockPasswordInternalActivity.h"
+#include "elastos/droid/settings/CConfirmLockPattern.h"
+#include "elastos/droid/settings/CConfirmLockPatternFragment.h"
+#include "elastos/droid/settings/CConfirmLockPatternInternalActivity.h"
 #include "elastos/droid/settings/CEncryptionInterstitial.h"
 #include "elastos/droid/settings/CEncryptionInterstitialFragment.h"
 #include "elastos/droid/settings/CSecuritySettings.h"
@@ -96,6 +104,14 @@ CAR_OBJECT_IMPL(CDateTimeSettingsSetupWizard);
 CAR_OBJECT_IMPL(CChooseLockGeneric);
 CAR_OBJECT_IMPL(CChooseLockGenericFragment);
 CAR_OBJECT_IMPL(CChooseLockGenericInternalActivity);
+CAR_OBJECT_IMPL(CChooseLockPasswordFragment);
+CAR_OBJECT_IMPL(CChooseLockPatternFragment);
+CAR_OBJECT_IMPL(CConfirmLockPassword);
+CAR_OBJECT_IMPL(CConfirmLockPasswordFragment);
+CAR_OBJECT_IMPL(CConfirmLockPasswordInternalActivity);
+CAR_OBJECT_IMPL(CConfirmLockPattern);
+CAR_OBJECT_IMPL(CConfirmLockPatternFragment);
+CAR_OBJECT_IMPL(CConfirmLockPatternInternalActivity);
 CAR_OBJECT_IMPL(CEncryptionInterstitial);
 CAR_OBJECT_IMPL(CEncryptionInterstitialFragment);
 CAR_OBJECT_IMPL(CSecuritySettings);

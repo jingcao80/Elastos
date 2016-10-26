@@ -1111,7 +1111,7 @@
         <!-- Second and third-level settings -->
 
         <!-- Lock screen settings -->
-        <activity android:name="ConfirmDeviceCredentialActivity"
+        <activity android:name="CConfirmDeviceCredentialActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.app.action.CONFIRM_DEVICE_CREDENTIAL" />
@@ -1129,17 +1129,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="ConfirmLockPattern"/>
+        <activity android:name="CConfirmLockPattern"/>
 
-        <activity android:name="ConfirmLockPassword"
+        <activity android:name="CConfirmLockPassword"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
 
         <!-- Note this must not be exported since it returns the password in the intent -->
-        <activity android:name="ConfirmLockPatternInternalActivity"
+        <activity android:name="CConfirmLockPatternInternalActivity"
             android:exported="false"/>
 
         <!-- Note this must not be exported since it returns the password in the intent -->
-        <activity android:name="ConfirmLockPasswordInternalActivity"
+        <activity android:name="CConfirmLockPasswordInternalActivity"
             android:exported="false"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
 
@@ -1159,9 +1159,9 @@
             android:excludeFromRecents="true"
         />
 
-        <activity android:name="ChooseLockPattern" android:exported="false"/>
+        <activity android:name="CChooseLockPattern" android:exported="false"/>
 
-        <activity android:name="ChooseLockPassword" android:exported="false"
+        <activity android:name="CChooseLockPassword" android:exported="false"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
 
         <activity android:name=".CEncryptionInterstitial"/>

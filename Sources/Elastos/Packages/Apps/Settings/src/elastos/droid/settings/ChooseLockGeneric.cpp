@@ -2,6 +2,8 @@
 #include "Elastos.Droid.AccessibilityService.h"
 #include "elastos/droid/settings/ChooseLockGeneric.h"
 #include "elastos/droid/settings/EncryptionInterstitial.h"
+#include "elastos/droid/settings/CChooseLockPassword.h"
+#include "elastos/droid/settings/CChooseLockPattern.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/R.h"
@@ -549,9 +551,8 @@ ECode ChooseLockGeneric::ChooseLockGenericFragment::UpdateUnlockMethodAndFinish(
         }
         Int32 maxLength;
         mDPM->GetPasswordMaximumLength(quality, &maxLength);
-        assert(0 && "TODO");
-        // AutoPtr<IIntent> intent = ChooseLockPassword::CreateIntent(activity, quality, isFallback,
-        //         minLength, maxLength, mRequirePassword, FALSE /* confirm credentials */);
+        AutoPtr<IIntent> intent = CChooseLockPassword::CreateIntent(IContext::Probe(activity), quality, isFallback,
+                minLength, maxLength, mRequirePassword, FALSE /* confirm credentials */);
         if (isFallback) {
             StartActivityForResult(intent, FALLBACK_REQUEST);
             return NOERROR;
@@ -563,9 +564,8 @@ ECode ChooseLockGeneric::ChooseLockGenericFragment::UpdateUnlockMethodAndFinish(
         }
     }
     else if (quality == IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING) {
-        assert(0 && "TODO");
-        // AutoPtr<IIntent> intent = ChooseLockPattern::CreateIntent(activity,
-        //         isFallback, mRequirePassword, FALSE /* confirm credentials */);
+        AutoPtr<IIntent> intent = CChooseLockPattern::CreateIntent(IContext::Probe(activity),
+                isFallback, mRequirePassword, FALSE /* confirm credentials */);
         if (isFallback) {
             StartActivityForResult(intent, FALLBACK_REQUEST);
             return NOERROR;

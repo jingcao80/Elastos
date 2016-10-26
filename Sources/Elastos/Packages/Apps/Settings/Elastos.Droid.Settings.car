@@ -4,7 +4,12 @@ module
 
     merge("car/elastos/droid/ButtonBarHandler.car");
     merge("car/elastos/droid/ChooseLockGeneric.car");
+    merge("car/elastos/droid/ChooseLockPassword.car");
+    merge("car/elastos/droid/ChooseLockPattern.car");
+    merge("car/elastos/droid/ConfirmLockPassword.car");
+    merge("car/elastos/droid/ConfirmLockPattern.car");
     merge("car/elastos/droid/DialogCreatable.car");
+    merge("car/elastos/droid/EditPinPreference.car");
     merge("car/elastos/droid/SettingsActivity.car");
     merge("car/elastos/droid/SettingsPreferenceFragment.car");
     merge("car/elastos/droid/TrustedCredentialsSettings.car");
@@ -86,6 +91,7 @@ module
     using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Preference.IPreference;
     using interface Elastos.Droid.Preference.IDialogPreference;
+    using interface Elastos.Droid.Preference.IEditTextPreference;
     using interface Elastos.Droid.Preference.IListPreference;
     using interface Elastos.Droid.Preference.IPreferenceActivity;
     using interface Elastos.Droid.Preference.IRingtonePreference;
@@ -1381,6 +1387,26 @@ module
         interface IIndexable;
     }
 
+    [local]
+    class CEditPinPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        interface IEditPinPreference;
+        interface IEditTextPreference;
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+    }
+
     class CLocalePicker {
         constructor();
 
@@ -1448,6 +1474,190 @@ module
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
+    }
+
+    class CChooseLockPassword {
+        constructor();
+
+        interface IChooseLockPassword;
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CChooseLockPasswordFragment {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CChooseLockPattern {
+        constructor();
+
+        interface IChooseLockPattern;
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CChooseLockPatternFragment {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CConfirmDeviceCredentialActivity {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CConfirmLockPassword {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CConfirmLockPasswordFragment {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CConfirmLockPasswordInternalActivity {
+        constructor();
+
+        interface IConfirmLockPasswordInternalActivity;
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CConfirmLockPattern {
+        constructor();
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
+    }
+
+    class CConfirmLockPatternFragment {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CConfirmLockPatternInternalActivity {
+        constructor();
+
+        interface IConfirmLockPatternInternalActivity;
+
+        interface ISettingsActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IButtonBarHandler;
     }
 
     class CEncryptionInterstitial {

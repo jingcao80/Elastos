@@ -175,8 +175,8 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[49] = "Elastos.Droid.Settings.Inputmethod.CKeyboardLayoutPickerFragment";
     (*args)[50] = "Elastos.Droid.Settings.Notification.CZenModeSettings";
     (*args)[51] = "Elastos.Droid.Settings.Notification.CNotificationSettings";
-    (*args)[52] = "Elastos.Droid.Settings.ChooseLockPassword.CChooseLockPasswordFragment";
-    (*args)[53] = "Elastos.Droid.Settings.ChooseLockPattern.CChooseLockPatternFragment";
+    (*args)[52] = "Elastos.Droid.Settings.CChooseLockPasswordFragment";
+    (*args)[53] = "Elastos.Droid.Settings.CChooseLockPatternFragment";
     (*args)[54] = "Elastos.Droid.Settings.Applications.CInstalledAppDetails";
     (*args)[55] = "Elastos.Droid.Settings.Fuelgauge.CBatterySaverSettings";
     (*args)[56] = "Elastos.Droid.Settings.Notification.CNotificationAppList";

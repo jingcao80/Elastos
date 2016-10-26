@@ -150,10 +150,6 @@ private:
 
     CARAPI_(void) PerformHapticFeedback();
 
-public:
-    static const Int32 KEYBOARD_MODE_ALPHA;
-    static const Int32 KEYBOARD_MODE_NUMERIC;
-
 private:
     static const Int32 KEYBOARD_STATE_NORMAL;
     static const Int32 KEYBOARD_STATE_SHIFTED;

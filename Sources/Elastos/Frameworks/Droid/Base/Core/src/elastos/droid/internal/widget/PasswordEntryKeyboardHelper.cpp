@@ -32,8 +32,6 @@ namespace Internal {
 namespace Widget {
 
 const String PasswordEntryKeyboardHelper::TAG("PasswordEntryKeyboardHelper");
-const Int32 PasswordEntryKeyboardHelper::KEYBOARD_MODE_ALPHA = 0;
-const Int32 PasswordEntryKeyboardHelper::KEYBOARD_MODE_NUMERIC = 1;
 const Int32 PasswordEntryKeyboardHelper::KEYBOARD_STATE_NORMAL = 0;
 const Int32 PasswordEntryKeyboardHelper::KEYBOARD_STATE_SHIFTED = 1;
 const Int32 PasswordEntryKeyboardHelper::KEYBOARD_STATE_CAPSLOCK = 2;
