@@ -183,7 +183,7 @@ OpenSSLProvider::OpenSSLProvider(
      * that algorithm by name instead of just recommending calling
      * "new SecureRandom()"
      */
-    Put(CoreUtils::Convert("SecureRandom.SHA1PRNG"), CoreUtils::Convert(prefix + "OpenSSLRandom"), (IInterface**)&res);
+    Put(CoreUtils::Convert("SecureRandom.SHA1PRNG"), CoreUtils::Convert(prefix + "COpenSSLRandom"), (IInterface**)&res);
     Put(CoreUtils::Convert("SecureRandom.SHA1PRNG ImplementedIn"), CoreUtils::Convert("Software"), (IInterface**)&res);
 
     /* === Cipher === */

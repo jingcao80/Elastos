@@ -42,4 +42,9 @@
         android:layout_height="wrap_content"
         android:text="Certificate test">
     </Button>
+    <Button android:id="@+id/Button12"
+        android:layout_width="500px"
+        android:layout_height="wrap_content"
+        android:text="CSecureRandom">
+    </Button>
 </LinearLayout>

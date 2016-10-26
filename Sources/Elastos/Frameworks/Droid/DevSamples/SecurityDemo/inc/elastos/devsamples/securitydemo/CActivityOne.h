@@ -62,6 +62,8 @@ private:
     CARAPI Button2Function();// MAC test
     CARAPI Button6Function();// KeyAgreement test
     CARAPI Button7Function();// CertificateFactory
+
+    CARAPI ButtonCSecureRandom();
 private:
 };
 

@@ -27,6 +27,9 @@ using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
+using Elastos::Security::ISecureRandom;
+using Elastos::Security::CSecureRandomHelper;
+using Elastos::Security::ISecureRandomHelper;
 using Elastos::Utility::Logging::Logger;
 using Org::Apache::Harmony::Security::Fortress::Services;
 
@@ -47,6 +50,7 @@ using Elastos::Math::CBigIntegerHelper;
 using Elastos::Math::IBigInteger;
 using Elastos::Utility::IDate;
 using Elastos::Utility::CDate;
+using Elastos::Utility::IRandom;
 using Elastos::Droid::KeyStore::Security::IKeyPairGeneratorSpec;
 using Elastos::Security::IKeyPairGenerator;
 using Elastos::Security::KeyPairGenerator;
@@ -82,10 +86,15 @@ ECode CActivityOne::MyListener::OnClick(
 
     if (id == R::id::Button2) {
         return mHost->Button2Function();
-    } else if (id == R::id::Button6) {
+    }
+    else if (id == R::id::Button6) {
         return mHost->Button6Function();
-    } else if (id == R::id::Button7) {
+    }
+    else if (id == R::id::Button7) {
         return mHost->Button7Function();
+    }
+    else if (id == R::id::Button12) {
+        return mHost->ButtonCSecureRandom();
     }
 
     String data = String("testtesttest");
@@ -242,6 +251,12 @@ ECode CActivityOne::OnCreate(
     view = FindViewById(R::id::Button2);
     view->SetOnClickListener(l.Get());
 
+    view = FindViewById(R::id::Button7);
+    view->SetOnClickListener(l.Get());
+
+    view = FindViewById(R::id::Button12);
+    view->SetOnClickListener(l.Get());
+
     return NOERROR;
 }
 
@@ -390,6 +405,41 @@ ECode CActivityOne::Button7Function()// Certificate
 {
     Logger::E(TAG, "leliang begin Button7Function");
     Services::Initialize();
+    return NOERROR;
+}
+
+ECode CActivityOne::ButtonCSecureRandom()
+{
+    //setprop elastos.class.path /system/lib/Elastos.Droid.Core.eco:/system/lib/Org.Conscrypt.eco
+    Logger::E(TAG, "snow begin ButtonCSecureRandom");
+    Services::Initialize();
+
+    const String algorithm("SHA1PRNG"); // algorithm's name
+
+    AutoPtr<ISecureRandomHelper> helper;
+    CSecureRandomHelper::AcquireSingleton((ISecureRandomHelper**)&helper);
+
+    AutoPtr<ISecureRandom> sr;
+    helper->GetInstance(algorithm, (ISecureRandom**)&sr);
+    // AutoPtr<ISecureRandom> sr2;
+    // helper->GetInstance(algorithm, (ISecureRandom**)&sr2);
+
+    AutoPtr<ArrayOf<Byte> > randomData1 = ArrayOf<Byte>::Alloc(64);
+    //AutoPtr<ArrayOf<Byte> > randomData2 = ArrayOf<Byte>::Alloc(64);
+
+    IRandom::Probe(sr)->NextBytes(randomData1);
+    //IRandom::Probe(sr2)->NextBytes(randomData2);
+
+    Logger::E(TAG, "randomData1 begin==========");
+    for (Int32 i = 0; i < randomData1->GetLength(); i++) {
+        Logger::E(TAG, "randomData1[%d]=%d", i, (*randomData1)[i]);
+    }
+    Logger::E(TAG, "randomData1 end==========");
+
+    // for (Int32 i = 0; i < randomData2->GetLength(); i++) {
+    //     Logger::E(TAG, "randomData2[%d]=%d", i, (*randomData2)[i]);
+    // }
+
     return NOERROR;
 }
 

@@ -28,7 +28,7 @@ public:
     CARAPI constructor(
         /* [in] */ ISecureRandomSpi* secureRandomSpi,
         /* [in] */ IProvider* provider,
-        /* [in] */ String algorithm);
+        /* [in] */ const String& algorithm);
 
     CARAPI constructor(
         /* [in] */ ISecureRandomSpi* secureRandomSpi,
