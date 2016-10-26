@@ -35,13 +35,5 @@ ECode OpenSSLNativeReference::GetNativeContext(
     return NOERROR;
 }
 
-ECode OpenSSLNativeReference::GetNativeContext(
-    /* [out] */ Int64* ctxRef)
-{
-    VALIDATE_NOT_NULL(ctxRef);
-    *ctxRef = mContext;
-    return NOERROR;
-}
-
 } // namespace Conscrypt
 } // namespace Org

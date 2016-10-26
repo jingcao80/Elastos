@@ -292,7 +292,7 @@ ECode OpenSSLSignature::EngineUpdate(
     }
     else {
         assert(ctxLocal != NULL);
-        NativeCrypto::EVP_VerifyUpdate_Native(ctxLocal, input, offset, len);
+        NativeCrypto::EVP_VerifyUpdate(ctxLocal, input, offset, len);
     }
     return NOERROR;
 }
