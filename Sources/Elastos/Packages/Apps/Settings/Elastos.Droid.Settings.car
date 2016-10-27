@@ -12,6 +12,7 @@ module
     merge("car/elastos/droid/EditPinPreference.car");
     merge("car/elastos/droid/SettingsActivity.car");
     merge("car/elastos/droid/SettingsPreferenceFragment.car");
+    merge("car/elastos/droid/TrustAgentSettings.car");
     merge("car/elastos/droid/TrustedCredentialsSettings.car");
     merge("car/elastos/droid/ZonePicker.car");
     merge("car/elastos/droid/applications/ApplicationsState.car");
@@ -1660,6 +1661,22 @@ module
         interface IButtonBarHandler;
     }
 
+    class CCredentialStorage {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
     class CEncryptionInterstitial {
         constructor();
 
@@ -1702,6 +1719,25 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
+    }
+
+    class CIccLockSettings {
+        constructor();
+
+        interface IPreferenceActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
     }
 
     class CSetFullBackupPassword {
@@ -3350,6 +3386,18 @@ module
         interface IOnWindowDismissedCallback;
 
         interface IButtonBarHandler;
+    }
+
+    class CTrustAgentSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
     }
 
     class CTrustedCredentialsSettings {

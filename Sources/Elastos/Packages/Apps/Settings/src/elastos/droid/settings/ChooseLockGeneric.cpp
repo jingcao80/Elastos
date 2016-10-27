@@ -479,13 +479,6 @@ void ChooseLockGeneric::ChooseLockGenericFragment::UpdatePreferenceSummaryIfNeed
         if (str.Equals(KEY_UNLOCK_SET_PATTERN) || str.Equals(KEY_UNLOCK_SET_PIN) || str.Equals(KEY_UNLOCK_SET_PASSWORD)) {
             preference->SetSummary(summary);
         }
-        // switch (str) {
-        //     case KEY_UNLOCK_SET_PATTERN:
-        //     case KEY_UNLOCK_SET_PIN:
-        //     case KEY_UNLOCK_SET_PASSWORD: {
-        //         preference->SetSummary(summary);
-        //     } break;
-        // }
     }
 }
 

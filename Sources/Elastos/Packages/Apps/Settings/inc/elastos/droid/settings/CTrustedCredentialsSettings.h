@@ -5,7 +5,6 @@
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.Security.h"
 #include "_Elastos_Droid_Settings_CTrustedCredentialsSettings.h"
-#include "elastos/droid/settings/SettingsPreferenceFragment.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/widget/BaseAdapter.h"
