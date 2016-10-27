@@ -498,7 +498,7 @@ private:
             /* [out] */ Boolean* res);
 
     private:
-        TextView* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class ECO_LOCAL OnRestoreInstanceStateRunnable

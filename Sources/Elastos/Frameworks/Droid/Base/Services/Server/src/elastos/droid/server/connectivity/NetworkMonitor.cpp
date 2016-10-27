@@ -381,7 +381,7 @@ String NetworkMonitor::EvaluatingState::GetName()
 // NetworkMonitor::CustomIntentReceiver
 //==============================================================================
 
-NetworkMonitor::CustomIntentReceiver::CustomIntentReceiver(
+ECode NetworkMonitor::CustomIntentReceiver::constructor(
     /* [in] */ const String& action,
     /* [in] */ Int32 token,
     /* [in] */ Int32 message,
@@ -402,7 +402,7 @@ NetworkMonitor::CustomIntentReceiver::CustomIntentReceiver(
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(mAction, (IIntentFilter**)&filter);
     AutoPtr<IIntent> intent;
-    mHost->mContext->RegisterReceiver(this, filter, (IIntent**)&intent);
+    return mHost->mContext->RegisterReceiver(this, filter, (IIntent**)&intent);
 }
 
 ECode NetworkMonitor::CustomIntentReceiver::GetPendingIntent(
@@ -450,7 +450,8 @@ ECode NetworkMonitor::UserPromptedState::Enter()
     mHost->mConnectivityServiceHandler->SendMessage(msg, &bval);
 
     // Wait for user to select sign-in notifcation.
-    mUserRespondedBroadcastReceiver = new CustomIntentReceiver(
+    mUserRespondedBroadcastReceiver = new CustomIntentReceiver();
+    mUserRespondedBroadcastReceiver->constructor(
         ACTION_SIGN_IN_REQUESTED,
         ++mHost->mUserPromptedToken,
         NetworkMonitor::CMD_USER_WANTS_SIGN_IN, mHost);
@@ -660,7 +661,8 @@ NetworkMonitor::LingeringState::LingeringState(
 
 ECode NetworkMonitor::LingeringState::Enter()
 {
-    mBroadcastReceiver = new CustomIntentReceiver(
+    mBroadcastReceiver = new CustomIntentReceiver();
+    mBroadcastReceiver->constructor(
         ACTION_LINGER_EXPIRED, ++mHost->mLingerToken,
         NetworkMonitor::CMD_LINGER_EXPIRED, mHost);
     mBroadcastReceiver->GetPendingIntent((IPendingIntent**)&mIntent);

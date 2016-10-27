@@ -219,13 +219,21 @@ CAR_INTERFACE_IMPL(TextView::PreDrawListener, Object, IOnPreDrawListener)
 
 TextView::PreDrawListener::PreDrawListener(
     /* [in] */ TextView* host)
-    : mHost(host)
-{}
+{
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
+}
 
 ECode TextView::PreDrawListener::OnPreDraw(
     /* [out] */ Boolean* res)
 {
-    return mHost->OnPreDraw(res);
+    AutoPtr<IInterface> obj;
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+    if (obj) {
+        TextView* tv = (TextView*)ITextView::Probe(obj);
+        return tv->OnPreDraw(res);
+    }
+    assert(0);
+    return NOERROR;
 }
 
 //==============================================================================
@@ -5809,7 +5817,7 @@ ECode TextView::OnAttachedToWindow()
     if (mPreDrawListenerDetached) {
         AutoPtr<IViewTreeObserver> observer;
         GetViewTreeObserver((IViewTreeObserver**)&observer);
-        observer->AddOnPreDrawListener(this);
+        observer->AddOnPreDrawListener(mPreDrawListener);
         mPreDrawListenerDetached = FALSE;
     }
     return NOERROR;
@@ -5820,7 +5828,7 @@ ECode TextView::OnDetachedFromWindowInternal()
     if (mPreDrawRegistered) {
         AutoPtr<IViewTreeObserver> observer;
         GetViewTreeObserver((IViewTreeObserver**)&observer);
-        observer->RemoveOnPreDrawListener(this);
+        observer->RemoveOnPreDrawListener(mPreDrawListener);
         mPreDrawListenerDetached = TRUE;
     }
 

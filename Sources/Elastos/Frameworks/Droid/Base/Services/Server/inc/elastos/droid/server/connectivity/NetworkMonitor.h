@@ -130,7 +130,7 @@ private:
     public:
         TO_STRING_IMPL("NetworkMonitor::CustomIntentReceiver")
 
-        CustomIntentReceiver(
+        CARAPI constructor(
             /* [in] */ const String& action,
             /* [in] */ Int32 token,
             /* [in] */ Int32 message,
