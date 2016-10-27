@@ -188,7 +188,7 @@ AutoPtr<ILocation> LocationBasedCountryDetector::GetLastKnownLocation()
     mLocationManager->GetAllProviders((IList**)&providers);
     AutoPtr<ILocation> bestLocation;
     AutoPtr<IIterator> iterator;
-    ICollection::Probe(providers)->GetIterator((IIterator**)&iterator);
+    providers->GetIterator((IIterator**)&iterator);
     Boolean hasNext;
     while(iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;

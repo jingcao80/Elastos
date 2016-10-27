@@ -186,7 +186,6 @@ CameraDeviceImpl::CaptureCallbackHolder::CaptureCallbackHolder()
 
 CameraDeviceImpl::CaptureCallbackHolder::~CaptureCallbackHolder()
 {
-    Logger::I("CameraDeviceImpl", " >> %p destory", this);
 }
 
 ECode CameraDeviceImpl::CaptureCallbackHolder::constructor(
@@ -198,15 +197,14 @@ ECode CameraDeviceImpl::CaptureCallbackHolder::constructor(
     if (callback == NULL || handler == NULL) {
         // throw new UnsupportedOperationException(
         //     "Must have a valid handler and a valid callback");
-        Logger::E("CameraDeviceImpl::CaptureCallbackHolder::", "Must have a "
-                "valid handler and a valid callback");
+        Logger::E("CameraDeviceImpl::CaptureCallbackHolder",
+            "Must have a valid handler and a valid callback");
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     mRepeating = repeating;
     mHandler = handler;
     CArrayList::New(ICollection::Probe(requestList), (IList**)&mRequestList);
     mCallback = callback;
-    Logger::I("CameraDeviceImpl", " >> %p Create CaptureCallbackHolder: %s", this, TO_CSTR(mCallback));
     return NOERROR;
 }
 
@@ -224,8 +222,6 @@ ECode CameraDeviceImpl::CaptureCallbackHolder::GetCallback(
 {
     VALIDATE_NOT_NULL(callback);
 
-    Logger::I("CameraDeviceImpl", " %p >> Get CaptureCallbackHolder", this);
-    Logger::I("CameraDeviceImpl", " %p >> Get CaptureCallbackHolder: %s", this, TO_CSTR(mCallback));
     *callback = mCallback;
     REFCOUNT_ADD(*callback);
     return NOERROR;
@@ -341,7 +337,7 @@ ECode CameraDeviceImpl::FrameNumberTracker::UpdateTracker(
          * should have arrived. The following line checks whether this holds.
          */
         if (frameNumber != mCompletedFrameNumber + 1) {
-            Logger::E(mHost->TAG, "result frame number %d comes out of order, should be %d + 1",
+            Logger::E(mHost->TAG, "result frame number %lld comes out of order, should be %lld + 1",
                     frameNumber, mCompletedFrameNumber);
             // Continue on to set the completed frame number to this frame anyway,
             // to be robust to lower-level errors and allow for clean shutdowns.
@@ -441,13 +437,12 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnDeviceError(
         resultExtras->GetRequestId(&requestId);
         Int32 subsequenceId;
         resultExtras->GetSubsequenceId(&subsequenceId);
-        Logger::D(mHost->TAG, "Device error received, code %d, frame number %d,"
-                "request ID %d, subseq ID %d",
-                errorCode, number, requestId, subsequenceId);
+        Logger::D(mHost->TAG, "Device error received, code %d, frame number %lld,"
+            "request ID %08x, subseq ID %08x", errorCode, number, requestId, subsequenceId);
     }
 
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) {
             return NOERROR; // Camera already closed
         }
@@ -466,7 +461,9 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnDeviceError(
             case ERROR_CAMERA_SERVICE:
             {
                 mHost->mInError = TRUE;
-                AutoPtr<OnDeviceErrorRunnable> r = new OnDeviceErrorRunnable(mHost, errorCode);
+                AutoPtr<IWeakReference> wr;
+                mHost->GetWeakReference((IWeakReference**)&wr);
+                AutoPtr<OnDeviceErrorRunnable> r = new OnDeviceErrorRunnable(wr, errorCode);
                 Boolean result;
                 mHost->mDeviceHandler->Post(r, &result);
                 break;
@@ -487,8 +484,8 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnDeviceIdle()
         Logger::D(mHost->TAG, "Camera now idle");
     }
 
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         if (!mHost->mIdle) {
@@ -505,17 +502,17 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureStarted(
     /* [in] */ Int64 timestamp)
 {
     Int32 requestId;
-    resultExtras->GetRequestId(&requestId);
     Int64 frameNumber;
+    resultExtras->GetRequestId(&requestId);
     resultExtras->GetFrameNumber(&frameNumber);
 
     if (mHost->DEBUG) {
-        Logger::D(mHost->TAG, "Capture started for id %d frame number %d", requestId, frameNumber);
+        Logger::D(mHost->TAG, "Capture started for id %08x frame number %lld", requestId, frameNumber);
     }
     AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
 
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         // Get the callback for this frame ID, if there is one
@@ -530,8 +527,10 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureStarted(
         if (mHost->IsClosed()) return NOERROR;
 
         // Dispatch capture start notice
-        AutoPtr<OnCaptureStartedRunnable> r = new OnCaptureStartedRunnable(mHost,
-                resultExtras, timestamp, frameNumber, holder);
+        AutoPtr<IWeakReference> wr;
+        mHost->GetWeakReference((IWeakReference**)&wr);
+        AutoPtr<OnCaptureStartedRunnable> r = new OnCaptureStartedRunnable(
+            wr, resultExtras, timestamp, frameNumber, holder);
         AutoPtr<IHandler> handler;
         holder->GetHandler((IHandler**)&handler);
         Boolean result;
@@ -545,17 +544,16 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
     /* [in] */ ICaptureResultExtras* resultExtras)
 {
     Int32 requestId;
-    resultExtras->GetRequestId(&requestId);
     Int64 frameNumber;
+    resultExtras->GetRequestId(&requestId);
     resultExtras->GetFrameNumber(&frameNumber);
 
     if (mHost->DEBUG) {
-        Logger::V(mHost->TAG, "Received result frame %d for id %d"
-                , frameNumber, requestId);
+        Logger::V(mHost->TAG, "Received result frame %lld for id %08x", frameNumber, requestId);
     }
 
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
@@ -575,8 +573,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
         // Check if we have a callback for this
         if (holder == NULL) {
             if (mHost->DEBUG) {
-                Logger::D(mHost->TAG,
-                        "holder is null, early return at frame %d", frameNumber);
+                Logger::D(mHost->TAG, "holder is null, early return at frame %lld", frameNumber);
             }
 
             return mHost->mFrameNumberTracker->UpdateTracker(frameNumber, /*result*/NULL, isPartialResult);
@@ -584,8 +581,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
 
         if (mHost->IsClosed()) {
             if (mHost->DEBUG) {
-                Logger::D(mHost->TAG,
-                        "camera is closed, early return at frame %d" ,frameNumber);
+                Logger::D(mHost->TAG, "camera is closed, early return at frame %lld" ,frameNumber);
             }
 
             return mHost->mFrameNumberTracker->UpdateTracker(frameNumber, /*result*/NULL, isPartialResult);
@@ -605,7 +601,9 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
             CCaptureResult::New(result, request, resultExtras, (ICaptureResult**)&resultAsCapture);
 
             // Partial result
-            resultDispatch = new OnResultReceivedRunnable(mHost, holder, request, resultAsCapture);
+            AutoPtr<IWeakReference> wr;
+            mHost->GetWeakReference((IWeakReference**)&wr);
+            resultDispatch = new OnResultReceivedRunnable(wr, holder, request, resultAsCapture);
             finalResult = resultAsCapture;
         }
         else {
@@ -617,7 +615,9 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnResultReceived(
                     partialResults, (ITotalCaptureResult**)&resultAsCapture);
 
             // Final capture result
-            resultDispatch = new FinalCaptureResultRunnable(mHost, holder, request, resultAsCapture);
+            AutoPtr<IWeakReference> wr;
+            mHost->GetWeakReference((IWeakReference**)&wr);
+            resultDispatch = new FinalCaptureResultRunnable(wr, holder, request, resultAsCapture);
             finalResult = ICaptureResult::Probe(resultAsCapture);
         }
 
@@ -641,9 +641,8 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureErrorLocked(
     /* [in] */ Int32 errorCode,
     /* [in] */ ICaptureResultExtras* resultExtras)
 {
-    Int32 requestId;
+    Int32 requestId, subsequenceId;
     resultExtras->GetRequestId(&requestId);
-    Int32 subsequenceId;
     resultExtras->GetSubsequenceId(&subsequenceId);
     Int64 frameNumber;
     resultExtras->GetFrameNumber(&frameNumber);
@@ -656,7 +655,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureErrorLocked(
 
     // No way to report buffer errors right now
     if (errorCode == ERROR_CAMERA_BUFFER) {
-        Logger::E(mHost->TAG, "Lost output buffer reported for frame %d", frameNumber);
+        Logger::E(mHost->TAG, "Lost output buffer reported for frame %lld", frameNumber);
         return NOERROR;
     }
 
@@ -680,8 +679,11 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureErrorLocked(
         frameNumber,
         (ICaptureFailure**)&failure);
 
+    AutoPtr<IWeakReference> wr;
+    mHost->GetWeakReference((IWeakReference**)&wr);
     AutoPtr<OnCaptureErrorLockedRunnable> failureDispatch =
-            new OnCaptureErrorLockedRunnable(mHost, holder, request, failure);
+        new OnCaptureErrorLockedRunnable(wr, holder, request, failure);
+
     AutoPtr<IHandler> handler;
     holder->GetHandler((IHandler**)&handler);
     Boolean result;
@@ -689,7 +691,7 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::OnCaptureErrorLocked(
 
     // Fire onCaptureSequenceCompleted if appropriate
     if (mHost->DEBUG) {
-        Logger::V(mHost->TAG, "got error frame %d", frameNumber);
+        Logger::V(mHost->TAG, "got error frame %lld", frameNumber);
     }
     mHost->mFrameNumberTracker->UpdateTracker(frameNumber, /*error*/TRUE);
     return mHost->CheckAndFireSequenceComplete();
@@ -708,13 +710,18 @@ ECode CameraDeviceImpl::CameraDeviceCallbacks::ToString(
 // CameraDeviceImpl::CallOnOpeneRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnOpeneRunnable::CallOnOpeneRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode CameraDeviceImpl::CallOnOpeneRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     {
         AutoLock syncLock(mHost->mInterfaceLock);
@@ -732,13 +739,18 @@ ECode CameraDeviceImpl::CallOnOpeneRunnable::Run()
 // CameraDeviceImpl::CallOnUnconfiguredRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnUnconfiguredRunnable::CallOnUnconfiguredRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode CameraDeviceImpl::CallOnUnconfiguredRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
     {
         AutoLock syncLock(mHost->mInterfaceLock);
@@ -756,16 +768,21 @@ ECode CameraDeviceImpl::CallOnUnconfiguredRunnable::Run()
 // CameraDeviceImpl::CallOnActiveRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnActiveRunnable::CallOnActiveRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode CameraDeviceImpl::CallOnActiveRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -780,16 +797,21 @@ ECode CameraDeviceImpl::CallOnActiveRunnable::Run()
 // CameraDeviceImpl::CallOnBusyRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnBusyRunnable::CallOnBusyRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode CameraDeviceImpl::CallOnBusyRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -804,23 +826,26 @@ ECode CameraDeviceImpl::CallOnBusyRunnable::Run()
 // CameraDeviceImpl::CallOnCloseRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnCloseRunnable::CallOnCloseRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
     , mClosedOnce(FALSE)
 {
 }
 
 ECode CameraDeviceImpl::CallOnCloseRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (mClosedOnce) {
-        //throw new AssertionError("Don't post #onClosed more than once");
         Logger::E(mHost->TAG, "Don't post #onClosed more than once");
         return E_ASSERTION_ERROR;
     }
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
-    Object& lock = mHost->mInterfaceLock;
     {
-        AutoLock syncLock(lock);
+        AutoLock syncLock(mHost->mInterfaceLock);
         sessionCallback = mHost->mSessionStateCallback;
     }
     if (sessionCallback != NULL) {
@@ -835,16 +860,21 @@ ECode CameraDeviceImpl::CallOnCloseRunnable::Run()
 // CameraDeviceImpl::CallOnIdlRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnIdlRunnable::CallOnIdlRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode CameraDeviceImpl::CallOnIdlRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -859,16 +889,21 @@ ECode CameraDeviceImpl::CallOnIdlRunnable::Run()
 // CameraDeviceImpl::CallOnDisconnectedRunnable
 //==============================================================================================
 CameraDeviceImpl::CallOnDisconnectedRunnable::CallOnDisconnectedRunnable(
-    /* [in] */ CameraDeviceImpl* host)
-    : mHost(host)
+    /* [in] */ IWeakReference* host)
+    : mWeakHost(host)
 {
 }
 
 ECode CameraDeviceImpl::CallOnDisconnectedRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     AutoPtr<ICameraDeviceImplStateCallbackKK> sessionCallback;
-    Object& lock = mHost->mInterfaceLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(mHost->mInterfaceLock);
         if (mHost->mRemoteDevice == NULL) return NOERROR; // Camera already closed
 
         sessionCallback = mHost->mSessionStateCallback;
@@ -883,10 +918,10 @@ ECode CameraDeviceImpl::CallOnDisconnectedRunnable::Run()
 // CameraDeviceImpl::RemoteFailureRunnable
 //==============================================================================================
 CameraDeviceImpl::RemoteFailureRunnable::RemoteFailureRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ Boolean isError,
     /* [in] */ Int32 code)
-    : mHost(host)
+    : mWeakHost(host)
     , mIsError(isError)
     , mCode(code)
 {
@@ -894,6 +929,11 @@ CameraDeviceImpl::RemoteFailureRunnable::RemoteFailureRunnable(
 
 ECode CameraDeviceImpl::RemoteFailureRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (mIsError) {
         return mHost->mDeviceCallback->OnError(mHost, mCode);
     }
@@ -907,11 +947,11 @@ ECode CameraDeviceImpl::RemoteFailureRunnable::Run()
 // CameraDeviceImpl::ResultDispatchRunnable
 //==============================================================================================
 CameraDeviceImpl::ResultDispatchRunnable::ResultDispatchRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ Int32 requestId,
     /* [in] */ Int64 lastFrameNumber,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder)
-    : mHost(host)
+    : mWeakHost(host)
     , mRequestId(requestId)
     , mLastFrameNumber(lastFrameNumber)
     , mHolder(holder)
@@ -920,16 +960,19 @@ CameraDeviceImpl::ResultDispatchRunnable::ResultDispatchRunnable(
 
 ECode CameraDeviceImpl::ResultDispatchRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     ECode ec = NOERROR;
     if (!mHost->IsClosed()) {
         if (mHost->DEBUG) {
-            Logger::D(mHost->TAG,
-                    "early trigger sequence complete for request %d",
-                    mRequestId);
+            Logger::D(mHost->TAG, "early trigger sequence complete for request %08x", mRequestId);
         }
         if (mLastFrameNumber < Elastos::Core::Math::INT32_MIN_VALUE
                 || mLastFrameNumber > Elastos::Core::Math::INT32_MAX_VALUE) {
-            Logger::E(mHost->TAG, "%d cannot be cast to int", mLastFrameNumber);
+            Logger::E(mHost->TAG, "%lld cannot be cast to int", mLastFrameNumber);
             return E_ASSERTION_ERROR;
         }
         AutoPtr<ICameraDeviceImplCaptureCallback> callback;
@@ -942,36 +985,41 @@ ECode CameraDeviceImpl::ResultDispatchRunnable::Run()
 }
 
 //==============================================================================================
-// CameraDeviceImpl::ResultDispatchRunnable2
+// CameraDeviceImpl::SequenceCompleteResultDispatchRunnable
 //==============================================================================================
-CameraDeviceImpl::ResultDispatchRunnable2::ResultDispatchRunnable2(
-    /* [in] */ CameraDeviceImpl* host,
+CameraDeviceImpl::SequenceCompleteResultDispatchRunnable::SequenceCompleteResultDispatchRunnable(
+    /* [in] */ IWeakReference* host,
     /* [in] */ Int32 requestId,
     /* [in] */ Int64 keyValue,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder)
-    : mHost(host)
+    : mWeakHost(host)
     , mRequestId(requestId)
     , mKeyValue(keyValue)
     , mHolder(holder)
 {
 }
 
-ECode CameraDeviceImpl::ResultDispatchRunnable2::Run()
+ECode CameraDeviceImpl::SequenceCompleteResultDispatchRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     ECode ec = NOERROR;
     if (!mHost->IsClosed()){
-        if (mHost->DEBUG) {
-            Logger::D(mHost->TAG, "fire sequence complete for request %d",mRequestId);
-        }
-
         Int64 lastFrameNumber = mKeyValue;
         if (lastFrameNumber < Elastos::Core::Math::INT32_MIN_VALUE
                 || lastFrameNumber > Elastos::Core::Math::INT32_MAX_VALUE) {
-            Logger::E(mHost->TAG, "%d cannot be cast to int", lastFrameNumber);
+            Logger::E(mHost->TAG, "%lld cannot be cast to int", lastFrameNumber);
             return E_ASSERTION_ERROR;
         }
+
         AutoPtr<ICameraDeviceImplCaptureCallback> callback;
         mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
+        if (mHost->DEBUG) {
+            Logger::D(mHost->TAG, "%s fire sequence complete for request %08x", TO_CSTR(callback), mRequestId);
+        }
         ec = callback->OnCaptureSequenceCompleted(mHost, mRequestId, lastFrameNumber);
     }
 
@@ -983,15 +1031,20 @@ ECode CameraDeviceImpl::ResultDispatchRunnable2::Run()
 // CameraDeviceImpl::OnDeviceErrorRunnable
 //==============================================================================================
 CameraDeviceImpl::OnDeviceErrorRunnable::OnDeviceErrorRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ Int32 errorCode)
-    : mHost(host)
+    : mWeakHost(host)
     , mErrorCode(errorCode)
 {
 }
 
 ECode CameraDeviceImpl::OnDeviceErrorRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (!mHost->IsClosed()) {
         return mHost->mDeviceCallback->OnError(mHost, mErrorCode);
     }
@@ -1002,12 +1055,12 @@ ECode CameraDeviceImpl::OnDeviceErrorRunnable::Run()
 // CameraDeviceImpl::OnCaptureStartedRunnable
 //==============================================================================================
 CameraDeviceImpl::OnCaptureStartedRunnable::OnCaptureStartedRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ ICaptureResultExtras* resultExtras,
     /* [in] */ Int64 timestamp,
     /* [in] */ Int64 frameNumber,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder)
-    : mHost(host)
+    : mWeakHost(host)
     , mResultExtras(resultExtras)
     , mTimestamp(timestamp)
     , mFrameNumber(frameNumber)
@@ -1017,6 +1070,11 @@ CameraDeviceImpl::OnCaptureStartedRunnable::OnCaptureStartedRunnable(
 
 ECode CameraDeviceImpl::OnCaptureStartedRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (!mHost->IsClosed()) {
         AutoPtr<ICameraDeviceImplCaptureCallback> callback;
         mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
@@ -1035,11 +1093,11 @@ ECode CameraDeviceImpl::OnCaptureStartedRunnable::Run()
 // CameraDeviceImpl::OnResultReceivedRunnable
 //==============================================================================================
 CameraDeviceImpl::OnResultReceivedRunnable::OnResultReceivedRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ICaptureResult* result)
-    : mHost(host)
+    : mWeakHost(host)
     , mHolder(holder)
     , mRequest(request)
     , mResult(result)
@@ -1048,6 +1106,11 @@ CameraDeviceImpl::OnResultReceivedRunnable::OnResultReceivedRunnable(
 
 ECode CameraDeviceImpl::OnResultReceivedRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (!mHost->IsClosed()){
         AutoPtr<ICameraDeviceImplCaptureCallback> callback;
         mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
@@ -1061,11 +1124,11 @@ ECode CameraDeviceImpl::OnResultReceivedRunnable::Run()
 // CameraDeviceImpl::FinalCaptureResultRunnable
 //==============================================================================================
 CameraDeviceImpl::FinalCaptureResultRunnable::FinalCaptureResultRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ITotalCaptureResult* result)
-    : mHost(host)
+    : mWeakHost(host)
     , mHolder(holder)
     , mRequest(request)
     , mResult(result)
@@ -1074,6 +1137,11 @@ CameraDeviceImpl::FinalCaptureResultRunnable::FinalCaptureResultRunnable(
 
 ECode CameraDeviceImpl::FinalCaptureResultRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (!mHost->IsClosed()){
         AutoPtr<ICameraDeviceImplCaptureCallback> callback;
         mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
@@ -1087,11 +1155,11 @@ ECode CameraDeviceImpl::FinalCaptureResultRunnable::Run()
 // CameraDeviceImpl::OnCaptureErrorLockedRunnable
 //==============================================================================================
 CameraDeviceImpl::OnCaptureErrorLockedRunnable::OnCaptureErrorLockedRunnable(
-    /* [in] */ CameraDeviceImpl* host,
+    /* [in] */ IWeakReference* host,
     /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
     /* [in] */ ICaptureRequest* request,
     /* [in] */ ICaptureFailure* failure)
-    : mHost(host)
+    : mWeakHost(host)
     , mHolder(holder)
     , mRequest(request)
     , mFailure(failure)
@@ -1100,6 +1168,11 @@ CameraDeviceImpl::OnCaptureErrorLockedRunnable::OnCaptureErrorLockedRunnable(
 
 ECode CameraDeviceImpl::OnCaptureErrorLockedRunnable::Run()
 {
+    AutoPtr<ICameraDeviceImpl> obj;
+    mWeakHost->Resolve(EIID_ICameraDeviceImpl, (IInterface**)&obj);
+    if (obj == NULL) return NOERROR;
+    CameraDeviceImpl* mHost = (CameraDeviceImpl*)obj.Get();
+
     if (!mHost->IsClosed()){
         AutoPtr<ICameraDeviceImplCaptureCallback> callback;
         mHolder->GetCallback((ICameraDeviceImplCaptureCallback**)&callback);
@@ -1131,6 +1204,8 @@ CameraDeviceImpl::CameraDeviceImpl()
 
 CameraDeviceImpl::~CameraDeviceImpl()
 {
+    Logger::I("CameraDeviceImpl", " >>>>> ~CameraDeviceImpl: %p", this);
+
     // Debug::DumpBacktrace();
     //try {
     Close();
@@ -1158,13 +1233,15 @@ ECode CameraDeviceImpl::constructor(
     CArrayList::New((IList**)&mFrameNumberRequestPairs);
     CCameraDeviceImplFrameNumberTracker::New(this, (ICameraDeviceImplFrameNumberTracker**)&mFrameNumberTracker);
 
-    mCallOnOpened = new CallOnOpeneRunnable(this);
-    mCallOnUnconfigured = new CallOnUnconfiguredRunnable(this);
-    mCallOnActive = new CallOnActiveRunnable(this);
-    mCallOnBusy = new CallOnBusyRunnable(this);
-    mCallOnClosed = new CallOnCloseRunnable(this);
-    mCallOnIdle = new CallOnIdlRunnable(this);
-    mCallOnDisconnected = new CallOnDisconnectedRunnable(this);
+    AutoPtr<IWeakReference> wr;
+    GetWeakReference((IWeakReference**)&wr);
+    mCallOnOpened = new CallOnOpeneRunnable(wr);
+    mCallOnUnconfigured = new CallOnUnconfiguredRunnable(wr);
+    mCallOnActive = new CallOnActiveRunnable(wr);
+    mCallOnBusy = new CallOnBusyRunnable(wr);
+    mCallOnClosed = new CallOnCloseRunnable(wr);
+    mCallOnIdle = new CallOnIdlRunnable(wr);
+    mCallOnDisconnected = new CallOnDisconnectedRunnable(wr);
 
     mCameraId = cameraId;
     mDeviceCallback = callback;
@@ -1252,7 +1329,10 @@ ECode CameraDeviceImpl::SetRemoteFailure(
     {
         AutoLock syncLock(mInterfaceLock);
         mInError = TRUE;
-        AutoPtr<RemoteFailureRunnable> run = new RemoteFailureRunnable(this, isError, code);
+
+        AutoPtr<IWeakReference> wr;
+        GetWeakReference((IWeakReference**)&wr);
+        AutoPtr<RemoteFailureRunnable> run = new RemoteFailureRunnable(wr, isError, code);
         Boolean result;
         mDeviceHandler->Post(run, &result);
     }
@@ -1594,17 +1674,6 @@ ECode CameraDeviceImpl::CheckEarlyTriggerSequenceComplete(
             mCaptureCallbackMap->ValueAt(index, (IInterface**)&obj);
             holder = ICameraDeviceImplCaptureCallbackHolder::Probe(obj);
         }
-        else {
-            holder = NULL;
-        }
-
-        if (holder != NULL) {
-            mCaptureCallbackMap->RemoveAt(index);
-            if (DEBUG) {
-                Logger::V(TAG, "remove holder for requestId %d, because lastFrame is %d.",
-                    requestId, lastFrameNumber);
-            }
-        }
 
         if (holder != NULL) {
             if (DEBUG) {
@@ -1612,16 +1681,23 @@ ECode CameraDeviceImpl::CheckEarlyTriggerSequenceComplete(
                     " request did not reach HAL");
             }
 
-            AutoPtr<ResultDispatchRunnable> resultDispatch = new ResultDispatchRunnable(this,
-                    requestId, lastFrameNumber, holder);
+            AutoPtr<IWeakReference> wr;
+            GetWeakReference((IWeakReference**)&wr);
+            AutoPtr<ResultDispatchRunnable> resultDispatch = new ResultDispatchRunnable(
+                wr, requestId, lastFrameNumber, holder);
             AutoPtr<IHandler> handler;
             holder->GetHandler((IHandler**)&handler);
             Boolean result;
             handler->Post(resultDispatch, &result);
+
+            mCaptureCallbackMap->RemoveAt(index);
+            if (DEBUG) {
+                Logger::V(TAG, "remove holder for requestId %d, because lastFrame is %lld.",
+                    requestId, lastFrameNumber);
+            }
         }
         else {
-            Logger::W(TAG, "did not register callback to request %d",
-                requestId);
+            Logger::W(TAG, "did not register callback to request %d", requestId);
         }
     }
     else {
@@ -1950,20 +2026,17 @@ ECode CameraDeviceImpl::CheckAndFireSequenceComplete()
         AutoPtr<IPair> pair = IPair::Probe(obj);
         AutoPtr<IInterface> keyObj;
         pair->GetFirst((IInterface**)&keyObj);
-        AutoPtr<IInteger64> keyValueObj = IInteger64::Probe(keyObj);
         Int64 keyValue;
-        keyValueObj->GetValue(&keyValue);
+        IInteger64::Probe(keyObj)->GetValue(&keyValue);
 
         if (keyValue <= completedFrameNumber) {
 
             // remove request from mCaptureCallbackMap
             AutoPtr<IInterface> valueObj;
             pair->GetSecond((IInterface**)&valueObj);
-            AutoPtr<IInteger32> int32Obj = IInteger32::Probe(valueObj);
-            Int32 value;
-            int32Obj->GetValue(&value);
+            Int32 requestId;
+            IInteger32::Probe(valueObj)->GetValue(&requestId);
 
-            Int32 requestId = value;
             AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
             {
                 AutoLock syncLock(mInterfaceLock);
@@ -1979,24 +2052,23 @@ ECode CameraDeviceImpl::CheckAndFireSequenceComplete()
                     mCaptureCallbackMap->ValueAt(index, (IInterface**)&outface);
                     holder = ICameraDeviceImplCaptureCallbackHolder::Probe(outface);
                 }
-                else {
-                    holder = NULL;
-                }
 
                 if (holder != NULL) {
                     mCaptureCallbackMap->RemoveAt(index);
                     if (DEBUG) {
-                        Logger::V(TAG, "remove holder for requestId %d, because lastFrame %d is <= %d",
+                        Logger::V(TAG, "remove holder for requestId %d, because lastFrame %lld is <= %lld",
                             requestId, keyValue, completedFrameNumber);
                     }
                 }
             }
-            mFrameNumberRequestPairs->Remove(reqIter);
+            reqIter->Remove();
 
             // Call onCaptureSequenceCompleted
             if (holder != NULL) {
-                AutoPtr<ResultDispatchRunnable2> resultDispatch = new ResultDispatchRunnable2(this, requestId,
-                        keyValue, holder);
+                AutoPtr<IWeakReference> wr;
+                GetWeakReference((IWeakReference**)&wr);
+                AutoPtr<SequenceCompleteResultDispatchRunnable> resultDispatch = new SequenceCompleteResultDispatchRunnable(
+                    wr, requestId, keyValue, holder);
                 AutoPtr<IHandler> handler;
                 holder->GetHandler((IHandler**)&handler);
                 Boolean result;

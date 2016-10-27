@@ -98,11 +98,6 @@ RequestThreadManager::RequestThreadManagerFpsCounter::RequestThreadManagerFpsCou
 {
 }
 
-ECode RequestThreadManager::RequestThreadManagerFpsCounter::constructor()
-{
-    return NOERROR;
-}
-
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::constructor(
     /* [in] */ const String& streamType)
 {
@@ -112,18 +107,17 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::constructor(
 
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::CountFrame()
 {
-    {    AutoLock syncLock(this);
-        mFrameCount++;
-        Int64 nextTime = SystemClock::GetElapsedRealtimeNanos();
-        if (mLastTime == 0) {
-            mLastTime = nextTime;
-        }
-        if (nextTime > mLastTime + NANO_PER_SECOND) {
-            Int64 elapsed = nextTime - mLastTime;
-            mLastFps = mFrameCount * (NANO_PER_SECOND / (Double) elapsed);
-            mFrameCount = 0;
-            mLastTime = nextTime;
-        }
+    AutoLock syncLock(this);
+    mFrameCount++;
+    Int64 nextTime = SystemClock::GetElapsedRealtimeNanos();
+    if (mLastTime == 0) {
+        mLastTime = nextTime;
+    }
+    if (nextTime > mLastTime + NANO_PER_SECOND) {
+        Int64 elapsed = nextTime - mLastTime;
+        mLastFps = mFrameCount * (NANO_PER_SECOND / (Double) elapsed);
+        mFrameCount = 0;
+        mLastTime = nextTime;
     }
     return NOERROR;
 }
@@ -132,36 +126,32 @@ ECode RequestThreadManager::RequestThreadManagerFpsCounter::CheckFps(
     /* [out] */ Double* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = 0;
 
-    {    AutoLock syncLock(this);
-        *result = mLastFps;
-    }
+    AutoLock syncLock(this);
+    *result = mLastFps;
     return NOERROR;
 }
 
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::StaggeredLog()
 {
-    {    AutoLock syncLock(this);
-        if (mLastTime > mLastPrintTime + 5 * NANO_PER_SECOND) {
-            mLastPrintTime = mLastTime;
-            StringBuilder sb;
-            sb += "FPS for ";
-            sb += mStreamType;
-            sb += " stream: ";
-            sb += mLastFps;
-            Logger::D(TAG, sb.ToString());
-        }
+    AutoLock syncLock(this);
+    if (mLastTime > mLastPrintTime + 5 * NANO_PER_SECOND) {
+        mLastPrintTime = mLastTime;
+        StringBuilder sb;
+        sb += "FPS for ";
+        sb += mStreamType;
+        sb += " stream: ";
+        sb += mLastFps;
+        Logger::D(TAG, sb.ToString());
     }
     return NOERROR;
 }
 
 ECode RequestThreadManager::RequestThreadManagerFpsCounter::CountAndLog()
 {
-    {    AutoLock syncLock(this);
-        CountFrame();
-        StaggeredLog();
-    }
+    AutoLock syncLock(this);
+    CountFrame();
+    StaggeredLog();
     return NOERROR;
 }
 
@@ -344,12 +334,15 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     if (DEBUG) {
-        Logger::D(mHost->TAG, "Request thread handling message:%d", what);
+        Logger::D(mHost->TAG, "Request thread handling message: %d", what);
     }
     Int64 startTime = 0;
     if (DEBUG) {
         startTime = SystemClock::GetElapsedRealtimeNanos();
     }
+
+    AutoPtr<ITimeUnitHelper> helper;
+    CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
 
     switch (what) {
         case RequestThreadManager::MSG_CONFIGURE_OUTPUTS:
@@ -358,7 +351,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             msg->GetObj((IInterface**)&obj);
             AutoPtr<ConfigureHolder> config = (ConfigureHolder*)IObject::Probe(obj);
             Int32 sizes;
-            if  (config->mSurfaces != NULL) {
+            if (config->mSurfaces != NULL) {
                 config->mSurfaces->GetSize(&sizes);
             }
             else {
@@ -368,8 +361,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
             //try {
             Boolean success;
-            AutoPtr<ITimeUnitHelper> helper;
-            CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
             AutoPtr<ITimeUnit> milliSeconds;
             helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
             ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT,
@@ -408,13 +399,12 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             AutoPtr<IPair> nextBurst;
             mHost->mRequestQueue->GetNext((IPair**)&nextBurst);
 
+            Logger::I(mHost->TAG, " >> Get next burst %s", TO_CSTR(nextBurst));
             if (nextBurst == NULL) {
                 // If there are no further requests queued, wait for any currently executing
                 // requests to complete, then switch to idle state.
                 //try {
                 Boolean success;
-                AutoPtr<ITimeUnitHelper> helper;
-                CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
                 AutoPtr<ITimeUnit> milliSeconds;
                 helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
                 ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT,
@@ -426,8 +416,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                     break;
                 }
                 if (!success) {
-                    Logger::E(mHost->TAG,
-                            "Timed out while waiting for prior requests to complete.");
+                    Logger::E(mHost->TAG, "Timed out while waiting for prior requests to complete.");
                     mHost->mCaptureCollector->FailAll();
                 }
                 //} catch (InterruptedException e) {
@@ -437,8 +426,8 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 // break;
                 //}
 
-                Object& lock = mHost->mIdleLock;
-                {    AutoLock syncLock(lock);
+                {
+                    AutoLock syncLock(mHost->mIdleLock);
                     // Retry the the request queue.
                     mHost->mRequestQueue->GetNext((IPair**)&nextBurst);
 
@@ -463,14 +452,14 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             AutoPtr<IBurstHolder> first = IBurstHolder::Probe(firstObj);
             AutoPtr<IInterface> secondObj;
             nextBurst->GetSecond((IInterface**)&secondObj);
-            AutoPtr<IInteger64> second = IInteger64::Probe(secondObj);
             Int64 value;
-            second->GetValue(&value);
+            IInteger64::Probe(secondObj)->GetValue(&value);
             AutoPtr<IList> requests;
             first->ProduceRequestHolders(value, (IList**)&requests);
 
             Int32 size;
             requests->GetSize(&size);
+            Logger::I(mHost->TAG, " >> Get next burst %s, requests: %d", TO_CSTR(nextBurst), size);
             for (Int32 i = 0; i < size; i++) {
                 AutoPtr<IInterface> obj;
                 requests->Get(i, (IInterface**)&obj);
@@ -498,7 +487,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                     AutoPtr<ILegacyRequest> legacyRequest;
                     CLegacyRequest::New(mHost->mCharacteristics,
                         request, previewSize, mHost->mParams, (ILegacyRequest**)&legacyRequest); // params are copied
-
 
                     // Parameters are mutated as a side-effect
                     LegacyMetadataMapper::ConvertRequestMetadata(/*inout*/legacyRequest);
@@ -532,8 +520,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
                 //try {
                 Boolean success;
-                AutoPtr<ITimeUnitHelper> helper;
-                CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
                 AutoPtr<ITimeUnit> milliSeconds;
                 helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
                 ECode ec = mHost->mCaptureCollector->QueueRequest(holder,
@@ -565,8 +551,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 FAIL_GOTO(ec, error);
                 if (result) {
                     Boolean res;
-                    AutoPtr<ITimeUnitHelper> helper;
-                    CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
                     AutoPtr<ITimeUnit> milliSeconds;
                     helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
                     while((mHost->mCaptureCollector->WaitForPreviewsEmpty(PREVIEW_FRAME_TIMEOUT,
@@ -634,6 +618,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                         Logger::D(mHost->TAG, "Params changed -- getting new Parameters from HAL.");
                     }
                     //try {
+                    mHost->mParams = NULL;
                     ECode ec = mHost->mCamera->GetParameters((IParameters**)&(mHost->mParams));
                     //} catch (RuntimeException e) {
                     if (FAILED(ec)) {
@@ -650,10 +635,8 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
                 AutoPtr<IInteger64> timestampMutable = CoreUtils::Convert(/*value*/(Int64)0);
                 //try {
-                AutoPtr<ITimeUnitHelper> helper2;
-                CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper2);
                 AutoPtr<ITimeUnit> milliSeconds2;
-                helper2->GetMILLISECONDS((ITimeUnit**)&milliSeconds2);
+                helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds2);
                 Boolean tmp;
                 ec = mHost->mCaptureCollector->WaitForRequestCompleted(holder,
                         REQUEST_COMPLETE_TIMEOUT, milliSeconds2,
@@ -688,13 +671,11 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 // Update face-related results
                 mHost->mFaceDetectMapper->MapResultFaces(_result, mHost->mLastRequest);
 
-
                 holder->RequestFailed(&success);
                 if (!success) {
                     mHost->mDeviceState->SetCaptureResult(holder, _result,
                             ICameraDeviceState::NO_CAPTURE_ERROR, &success);
                 }
-
             }
 
             if (DEBUG) {
@@ -709,8 +690,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             mCleanup = TRUE;
             //try {
             Boolean success;
-            AutoPtr<ITimeUnitHelper> helper;
-            CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
             AutoPtr<ITimeUnit> milliSeconds;
             helper->GetMILLISECONDS((ITimeUnit**)&milliSeconds);
             ECode ec = mHost->mCaptureCollector->WaitForEmpty(JPEG_FRAME_TIMEOUT, milliSeconds, &success);
@@ -751,8 +730,8 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
 CAR_INTERFACE_IMPL(RequestThreadManager, Object, IRequestThreadManager)
 
-const Boolean RequestThreadManager::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
-const Boolean RequestThreadManager::VERBOSE = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
+const Boolean RequestThreadManager::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean RequestThreadManager::VERBOSE = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
 
 const Int32 RequestThreadManager::MSG_CONFIGURE_OUTPUTS;
 const Int32 RequestThreadManager::MSG_SUBMIT_CAPTURE_REQUEST;
@@ -773,6 +752,23 @@ RequestThreadManager::RequestThreadManager()
     , mCameraId(0)
     , mPreviewRunning(FALSE)
 {
+}
+
+ECode RequestThreadManager::constructor(
+    /* [in] */ Int32 cameraId,
+    /* [in] */ IHardwareCamera* camera,
+    /* [in] */ ICameraCharacteristics* characteristics,
+    /* [in] */ ICameraDeviceState* deviceState)
+{
+    FAIL_RETURN(Preconditions::CheckNotNull(camera, String("camera must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(characteristics, String("characteristics must not be null")))
+    FAIL_RETURN(Preconditions::CheckNotNull(deviceState, String("deviceState must not be null")))
+
+    StringBuilder sb;
+    sb += "RequestThread-";
+    sb += cameraId;
+    TAG = sb.ToString();
+
     CArrayList::New((IList**)&mPreviewOutputs);
     CArrayList::New((IList**)&mCallbackOutputs);
     CArrayList::New((IList**)&mJpegSurfaceIds);
@@ -789,36 +785,16 @@ RequestThreadManager::RequestThreadManager()
     mJpegShutterCallback = new CameraShutterCallback(this);
     mPreviewCallback = new SurfaceTextureOnFrameAvailableListener(this);
     mRequestHandlerCb = new MyHandlerCallback(this);
-}
 
-ECode RequestThreadManager::constructor()
-{
-    return NOERROR;
-}
-
-ECode RequestThreadManager::constructor(
-    /* [in] */ Int32 cameraId,
-    /* [in] */ IHardwareCamera* camera,
-    /* [in] */ ICameraCharacteristics* characteristics,
-    /* [in] */ ICameraDeviceState* deviceState)
-{
-    FAIL_RETURN(Preconditions::CheckNotNull(camera, String("camera must not be null")))
     mCamera = camera;
     mCameraId = cameraId;
-    FAIL_RETURN(Preconditions::CheckNotNull(characteristics, String("characteristics must not be null")))
     mCharacteristics = characteristics;
-    StringBuilder sb;
-    sb += "RequestThread-";
-    sb += cameraId;
-    String name;
-    sb.ToString(&name);
-    TAG = name;
-    FAIL_RETURN(Preconditions::CheckNotNull(deviceState, String("deviceState must not be null")))
     mDeviceState = deviceState;
+
     CLegacyFocusStateMapper::New(mCamera, (ILegacyFocusStateMapper**)&mFocusStateMapper);
     CLegacyFaceDetectMapper::New(mCamera, mCharacteristics, (ILegacyFaceDetectMapper**)&mFaceDetectMapper);
     CCaptureCollector::New(MAX_IN_FLIGHT_REQUESTS, mDeviceState, (ICaptureCollector**)&mCaptureCollector);
-    CRequestHandlerThread::New(name, mRequestHandlerCb, (IRequestHandlerThread**)&mRequestThread);
+    CRequestHandlerThread::New(TAG, mRequestHandlerCb, (IRequestHandlerThread**)&mRequestThread);
     return mCamera->SetErrorCallback(mErrorCallback);
 }
 
@@ -836,7 +812,7 @@ void RequestThreadManager::CreateDummySurface()
 void RequestThreadManager::StopPreview()
 {
     if (VERBOSE) {
-        Logger::V(TAG, "stopPreview - preview running? %d" + mPreviewRunning);
+        Logger::V(TAG, "stopPreview - preview running? %d", mPreviewRunning);
     }
     if (mPreviewRunning) {
         mCamera->StopPreview();
@@ -848,7 +824,7 @@ void RequestThreadManager::StopPreview()
 void RequestThreadManager::StartPreview()
 {
     if (VERBOSE) {
-        Logger::V(TAG, "startPreview - preview running? %d" + mPreviewRunning);
+        Logger::V(TAG, "startPreview - preview running? %d", mPreviewRunning);
     }
     if (!mPreviewRunning) {
         // XX: CameraClient:;startPreview is not getting called after a stop
@@ -862,7 +838,7 @@ ECode RequestThreadManager::DoJpegCapturePrepare(
     /* [in] */ IRequestHolder* request)
 {
     if (DEBUG) {
-        Logger::D(TAG, "doJpegCapturePrepare - preview running? %d" + mPreviewRunning);
+        Logger::D(TAG, "doJpegCapturePrepare - preview running? %d", mPreviewRunning);
     }
 
     if (!mPreviewRunning) {
@@ -893,7 +869,7 @@ ECode RequestThreadManager::DoPreviewCapture(
     /* [in] */ IRequestHolder* request)
 {
     if (VERBOSE) {
-        Logger::V(TAG, "doPreviewCapture - preview running? %d" + mPreviewRunning);
+        Logger::V(TAG, "DoPreviewCapture - preview running? %d", mPreviewRunning);
     }
 
     if (mPreviewRunning) {
@@ -901,15 +877,12 @@ ECode RequestThreadManager::DoPreviewCapture(
     }
 
     if (mPreviewTexture == NULL) {
-        // throw new IllegalStateException(
-        //         "Preview capture called with no preview surfaces configured.");
         Logger::E(TAG, "Preview capture called with no preview surfaces configured.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    Int32 size;
+    Int32 size, height;
     mIntermediateBufferSize->GetWidth(&size);
-    Int32 height;
     mIntermediateBufferSize->GetHeight(&height);
     mPreviewTexture->SetDefaultBufferSize(size, height);
     FAIL_RETURN(mCamera->SetPreviewTexture(mPreviewTexture))

@@ -16,11 +16,6 @@ ArgumentReplacingDispatcher::ArgumentReplacingDispatcher()
 {
 }
 
-ECode ArgumentReplacingDispatcher::constructor()
-{
-    return NOERROR;
-}
-
 ECode ArgumentReplacingDispatcher::constructor(
     /* [in] */ IDispatchable* target,
     /* [in] */ Int32 argumentIndex,
@@ -41,27 +36,34 @@ ECode ArgumentReplacingDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* args)
 {
-    assert(0);
-    // AutoPtr<ArrayOf<IInterface*> > _args;
-    // if (args->GetLength() > mArgumentIndex) {
-    //     // don't change in-place since it can affect upstream dispatches
-    //     _args = ArrayCopy(args);
-    //     _args->Set(mArgumentIndex ,mReplaceWith);
-    // }
+    Int32 argumentCount;
+    method->GetParamCount(&argumentCount);
+    if (argumentCount > mArgumentIndex) {
+        String methodName, paraName, name;
+        method->GetName(&methodName);
 
-    // return mTarget->Dispatch(method, _args);
-    return NOERROR;
-}
+        AutoPtr<IParamInfo> paramInfo;
+        method->GetParamInfoByIndex(mArgumentIndex, (IParamInfo**)&paramInfo);
+        AutoPtr<IDataTypeInfo> typeInfo;
+        paramInfo->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        paramInfo->GetName(&paraName);
+        CarDataType dataType;
+        typeInfo->GetName(&name);
+        typeInfo->GetDataType(&dataType);
+        Logger::V("ArgumentReplacingDispatcher", " >> replace parament %s[type: %s, CarDataType: %d] at %d with %s, "
+            "dataType: %d in method [%s, parament count: %d].",
+            paraName.string(), name.string(), mArgumentIndex, TO_CSTR(mReplaceWith),
+            dataType, methodName.string(), argumentCount);
+        assert(dataType == CarDataType_Interface);
 
-AutoPtr<ArrayOf<IInterface*> > ArgumentReplacingDispatcher::ArrayCopy(
-    /* [in] */ ArrayOf<IInterface*>* array)
-{
-    Int32 length = array->GetLength();
-    AutoPtr<ArrayOf<IInterface*> > newArray = ArrayOf<IInterface*>::Alloc(length);
-    for (Int32 i = 0; i < length; ++i) {
-        newArray->Set(i, (*array)[i]);
+        //TODO clone args luo.zhaohui
+        // AutoPtr<IArgumentList> cloneArgs;
+        // ECode ec = method->CreateArgumentList((IArgumentList**)&cloneArgs);
+
+        // don't change in-place since it can affect upstream dispatches
+        args->SetInputArgumentOfObjectPtr(mArgumentIndex, mReplaceWith);
     }
-    return newArray;
+    return mTarget->Dispatch(method, args);
 }
 
 } // namespace Dispatch

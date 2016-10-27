@@ -12,6 +12,7 @@
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::View::ISurface;
 using Elastos::IO::IByteBuffer;
+using Elastos::IO::IAutoCloseable;
 
 namespace Elastos {
 namespace Droid {
@@ -37,11 +38,10 @@ namespace Media {
  * ImageReader does not obtain and release Images at a rate equal to the
  * production rate.</p>
  */
-// TODO: Need IAutoCloseable
-    // , public IAutoCloseable
 CarClass(CImageReader)
     , public Object
     , public IImageReader
+    , public IAutoCloseable
 {
 private:
     class ListenerHandler

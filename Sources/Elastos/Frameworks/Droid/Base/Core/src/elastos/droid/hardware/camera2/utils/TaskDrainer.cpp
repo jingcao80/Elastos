@@ -87,20 +87,18 @@ ECode TaskDrainer::constructor(
 ECode TaskDrainer::TaskStarted(
     /* [in] */ IInterface* task)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (VERBOSE) {
             StringBuilder sb;
             sb += TAG;
             sb += "[";
             sb += mName;
             sb += "]";
-            String str;
-            IObject::Probe(task)->ToString(&str);
-            Logger::V(sb.ToString(), "taskStarted %s", str.string());
+            Logger::V(sb.ToString(), "taskStarted %s", TO_CSTR(task));
         }
 
         if (mDraining) {
-            //throw new IllegalStateException("Can't start more tasks after draining has begun");
             Logger::E(TAG, "Can't start more tasks after draining has begun");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -108,10 +106,7 @@ ECode TaskDrainer::TaskStarted(
         Boolean result;
         mTaskSet->Add(task, &result);
         if (!result) {
-            //throw new IllegalStateException("Task " + task + " was already started");
-            String str;
-            IObject::Probe(task)->ToString(&str);
-            Logger::E(TAG, "Task %s was already started", str.string());
+            Logger::E(TAG, "Task %s was already started", TO_CSTR(task));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
@@ -121,25 +116,21 @@ ECode TaskDrainer::TaskStarted(
 ECode TaskDrainer::TaskFinished(
     /* [in] */ IInterface* task)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         if (VERBOSE) {
             StringBuilder sb;
             sb += TAG;
             sb += "[";
             sb += mName;
             sb += "]";
-            String str;
-            IObject::Probe(task)->ToString(&str);
-            Logger::V(sb.ToString(), "taskFinished %s", str.string());
+            Logger::V(sb.ToString(), "taskFinished %s", TO_CSTR(task));
         }
 
         Boolean result;
         mTaskSet->Remove(task, &result);
         if (!result) {
-            //throw new IllegalStateException("Task " + task + " was already finished");
-            String str;
-            IObject::Probe(task)->ToString(&str);
-            Logger::E(TAG, "Task %s was already finished", str.string());
+            Logger::E(TAG, "Task %s was already finished", TO_CSTR(task));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 

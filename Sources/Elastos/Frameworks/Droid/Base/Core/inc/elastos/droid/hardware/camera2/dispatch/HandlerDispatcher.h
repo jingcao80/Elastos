@@ -29,14 +29,14 @@ private:
     {
     public:
         MyRunnable(
-            /* [in] */ HandlerDispatcher* host,
+            /* [in] */ IDispatchable* target,
             /* [in] */ IMethodInfo* method,
             /* [in] */ IArgumentList* args);
 
         CARAPI Run();
 
     private:
-        HandlerDispatcher* mHost;
+        AutoPtr<IDispatchable> mDispatchTarget;
         AutoPtr<IMethodInfo> mMethod;
         AutoPtr<IArgumentList> mArgs;
     };

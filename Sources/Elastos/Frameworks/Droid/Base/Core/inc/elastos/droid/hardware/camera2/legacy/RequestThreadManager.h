@@ -47,8 +47,6 @@ public:
 
         RequestThreadManagerFpsCounter();
 
-        CARAPI constructor();
-
         CARAPI constructor(
             /* [in] */ const String& streamType);
 
@@ -185,8 +183,6 @@ public:
     RequestThreadManager();
 
     virtual ~RequestThreadManager() {}
-
-    CARAPI constructor();
 
     /**
      * Create a new RequestThreadManager.

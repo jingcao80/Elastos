@@ -41,23 +41,21 @@ ECode CSemaphore::Sync::NonfairTryAcquireShared(
     }
 }
 
-ECode CSemaphore::Sync::TryReleaseShared(
-    /* [in] */ Int32 releases,
-    /* [out] */ Boolean* out)
+Boolean CSemaphore::Sync::TryReleaseShared(
+    /* [in] */ Int32 releases)
 {
-    VALIDATE_NOT_NULL(out)
     for (;;) {
         Int32 current = GetState();
         Int32 next = current + releases;
         if (next < current) {
-//            throw new Error("Maximum permit count exceeded");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            ALOGD("CSemaphore:Maximum permit count exceeded");
+            return FALSE;
         }
         if (CompareAndSetState(current, next)) {
-            *out = TRUE;
-            return NOERROR;
+            return TRUE;
         }
     }
+    return FALSE;
 }
 
 ECode CSemaphore::Sync::ReducePermits(
@@ -67,7 +65,7 @@ ECode CSemaphore::Sync::ReducePermits(
         Int32 current = GetState();
         Int32 next = current - reductions;
         if (next > current) {
-//            throw new Error("Permit count underflow");
+            ALOGD("CSemaphore:Permit count underflow");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         if (CompareAndSetState(current, next)) {
@@ -99,11 +97,12 @@ CSemaphore::NonfairSync::NonfairSync(
 {
 }
 
-ECode CSemaphore::NonfairSync::TryAcquireShared(
-    /* [in] */ Int32 acquires,
-    /* [out] */ Int32* out)
+Int32 CSemaphore::NonfairSync::TryAcquireShared(
+    /* [in] */ Int32 acquires)
 {
-    return NonfairTryAcquireShared(acquires, out);
+    Int32 ival;
+    NonfairTryAcquireShared(acquires, &ival);
+    return ival;
 }
 
 
@@ -116,25 +115,22 @@ CSemaphore::FairSync::FairSync(
 {
 }
 
-ECode CSemaphore::FairSync::TryAcquireShared(
-    /* [in] */ Int32 acquires,
-    /* [out] */ Int32* out)
+Int32 CSemaphore::FairSync::TryAcquireShared(
+    /* [in] */ Int32 acquires)
 {
-    VALIDATE_NOT_NULL(out)
     for (;;) {
         Boolean b = FALSE;
         if ((HasQueuedPredecessors(&b), b)) {
-            *out = -1;
-            return NOERROR;
+            return -1;
         }
         Int32 available = GetState();
         Int32 remaining = available - acquires;
         if (remaining < 0 ||
             CompareAndSetState(available, remaining)) {
-            *out = remaining;
-            return NOERROR;
+            return remaining;
         }
     }
+    return -1;
 }
 
 

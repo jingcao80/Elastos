@@ -91,7 +91,7 @@ public:
 
 private:
     AutoPtr<ITaskDrainer> mTaskDrainer;
-    const Object mSingleTask;
+    AutoPtr<IInterface> mSingleTask;
 };
 
 } // namespace Utils

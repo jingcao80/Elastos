@@ -481,7 +481,10 @@ ECode Surface::constructor(
     /* [in] */ Int64 nativeObject)
 {
     AutoLock lock(this);
+
     SetNativeObjectLocked(nativeObject);
+    sp<android::Surface> surface(reinterpret_cast<android::Surface *>(mNativeObject));
+    surface->incStrong(&sRefBaseOwner);
     return NOERROR;
 }
 

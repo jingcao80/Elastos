@@ -13,17 +13,17 @@
 #include <utils/misc.h>
 #include <utils/String8.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::View::CSurface;
+using Elastos::Core::AutoLock;
 using Elastos::IO::ByteOrder;
 using Elastos::IO::CByteBufferHelper;
 using Elastos::IO::CByteOrderHelper;
 using Elastos::IO::IByteBufferHelper;
 using Elastos::IO::IByteOrderHelper;
+using Elastos::IO::EIID_IAutoCloseable;
 using Elastos::Utility::Logging::Logger;
 
 DEFINE_CONVERSION_FOR(Elastos::Droid::Media::CImageReader::SurfaceImage::SurfacePlane, IInterface)
@@ -31,6 +31,8 @@ DEFINE_CONVERSION_FOR(Elastos::Droid::Media::CImageReader::SurfaceImage::Surface
 namespace Elastos {
 namespace Droid {
 namespace Media {
+
+static const String TAG("CImageReader");
 
 //================================================================================
 //  JNI Code
@@ -253,7 +255,7 @@ static Int32 Image_getPixelFormat(Int32 format)
 {
     Int32 jpegFormat;
 
-    ALOGV("%s: format = 0x%x", __FUNCTION__, format);
+    Logger::V(TAG, "%s: format = 0x%x", __FUNCTION__, format);
 
     jpegFormat = IImageFormat::JPEG;
 
@@ -295,7 +297,7 @@ static uint32_t Image_getJpegSize(android::CpuConsumer::LockedBuffer* buffer, bo
     struct camera3_jpeg_blob *blob = (struct camera3_jpeg_blob*)(header);
     if (blob->jpeg_blob_id == CAMERA3_JPEG_BLOB_ID) {
         size = blob->jpeg_size;
-        ALOGV("%s: Jpeg size = %d", __FUNCTION__, size);
+        Logger::V(TAG, "%s: Jpeg size = %d", __FUNCTION__, size);
     }
 
     // failed to find size, default to whole buffer
@@ -306,7 +308,7 @@ static uint32_t Image_getJpegSize(android::CpuConsumer::LockedBuffer* buffer, bo
          * will be misidentified as having a header, in which case
          * we will get a garbage size value.
          */
-        ALOGW("%s: No JPEG header detected, defaulting to size=width=%d",
+        Logger::W(TAG, "%s: No JPEG header detected, defaulting to size=width=%d",
                 __FUNCTION__, width);
         size = width;
     }
@@ -322,7 +324,7 @@ static ECode Image_getLockedBufferInfo(android::CpuConsumer::LockedBuffer* buffe
     ALOG_ASSERT(size != NULL, "size is NULL!!!");
     ALOG_ASSERT((idx < IMAGE_READER_MAX_NUM_PLANES) && (idx >= 0));
 
-    ALOGV("%s: buffer: %p", __FUNCTION__, buffer);
+    Logger::V(TAG, "%s: buffer: %p", __FUNCTION__, buffer);
 
     uint32_t dataSize, ySize, cSize, cStride;
     uint8_t *cb, *cr;
@@ -464,7 +466,7 @@ static ECode Image_getLockedBufferInfo(android::CpuConsumer::LockedBuffer* buffe
 static Int32 Image_imageGetRowStride(android::CpuConsumer::LockedBuffer* buffer, int idx,
         int32_t readerFormat)
 {
-    ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
+    Logger::V(TAG, "%s: buffer index: %d", __FUNCTION__, idx);
     ALOG_ASSERT((idx < IMAGE_READER_MAX_NUM_PLANES) && (idx >= 0));
 
     int rowStride = 0;
@@ -540,7 +542,7 @@ static Int32 Image_imageGetRowStride(android::CpuConsumer::LockedBuffer* buffer,
 static Int32 Image_imageGetPixelStride(android::CpuConsumer::LockedBuffer* buffer, int idx,
         int32_t readerFormat)
 {
-    ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
+    Logger::V(TAG, "%s: buffer index: %d", __FUNCTION__, idx);
     ALOG_ASSERT((idx < IMAGE_READER_MAX_NUM_PLANES) && (idx >= 0), "Index is out of range:%d", idx);
 
     int pixelStride = 0;
@@ -681,7 +683,7 @@ JNIImageReaderContext::~JNIImageReaderContext()
 
 void JNIImageReaderContext::onFrameAvailable()
 {
-    ALOGV("%s: frame available", __FUNCTION__);
+    Logger::V(TAG, "%s: frame available", __FUNCTION__);
     CImageReader::PostEventFromNative(mWeakThiz);
 }
 
@@ -941,7 +943,7 @@ ECode CImageReader::SurfaceImage::NativeImageGetBuffer(
     uint32_t size = 0;
     AutoPtr<IByteBuffer> byteBuffer;
 
-    ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
+    Logger::V(TAG, "%s: buffer index: %d", __FUNCTION__, idx);
 
     android::CpuConsumer::LockedBuffer* buffer =
             reinterpret_cast<android::CpuConsumer::LockedBuffer*>(mLockedBuffer);
@@ -986,7 +988,7 @@ ECode CImageReader::SurfaceImage::NativeCreatePlane(
 {
     VALIDATE_NOT_NULL(result)
     Int32 rowStride, pixelStride;
-    ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
+    Logger::V(TAG, "%s: buffer index: %d", __FUNCTION__, idx);
 
     android::CpuConsumer::LockedBuffer* buffer =
             reinterpret_cast<android::CpuConsumer::LockedBuffer*>(mLockedBuffer);
@@ -1019,8 +1021,7 @@ const Int32 CImageReader::ACQUIRE_SUCCESS = 0;
 const Int32 CImageReader::ACQUIRE_NO_BUFS = 1;
 const Int32 CImageReader::ACQUIRE_MAX_IMAGES = 2;
 
-CAR_INTERFACE_IMPL(CImageReader, Object, IImageReader)
-// CAR_INTERFACE_IMPL_2(CImageReader, Object, IImageReader, IAutoCloseable)
+CAR_INTERFACE_IMPL_2(CImageReader, Object, IImageReader, IAutoCloseable)
 
 CAR_OBJECT_IMPL(CImageReader)
 
@@ -1036,6 +1037,7 @@ CImageReader::CImageReader()
 
 CImageReader::~CImageReader()
 {
+    NativeClose();
 }
 
 ECode CImageReader::constructor(
@@ -1254,7 +1256,7 @@ ECode CImageReader::AcquireNextSurfaceImage(
         case ACQUIRE_MAX_IMAGES:
             break;
         default:
-            // throw new AssertionError("Unknown nativeImageSetup return code " + status);
+            Logger::E(TAG, "Unknown nativeImageSetup return code " + status);
             return E_ASSERTION_ERROR;
     }
     *result = status;
@@ -1265,16 +1267,14 @@ ECode CImageReader::ReleaseImage(
     /* [in] */ IImage* i)
 {
     if (IImageReaderSurfaceImage::Probe(i) != NULL) {
-        // throw new IllegalArgumentException(
-        //     "This image was not produced by an ImageReader");
+        Logger::E(TAG, "This image was not produced by an ImageReader");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<SurfaceImage> si = (SurfaceImage*) i;
     AutoPtr<IImageReader> r;
     si->GetReader((IImageReader**)&r);
     if (r != this) {
-        // throw new IllegalArgumentException(
-        //     "This image was not produced by this ImageReader");
+        Logger::E(TAG, "This image was not produced by this ImageReader");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1344,7 +1344,7 @@ ECode CImageReader::NativeInit(
     android::status_t res;
     int nativeFormat;
 
-    ALOGV("%s: width:%d, height: %d, format: 0x%x, maxImages:%d",
+    Logger::V(TAG, "%s: width:%d, height: %d, format: 0x%x, maxImages:%d",
           __FUNCTION__, width, height, format, maxImages);
 
     nativeFormat = Image_getPixelFormat(format);
@@ -1356,16 +1356,17 @@ ECode CImageReader::NativeInit(
             gbConsumer, maxImages, /*controlledByApp*/true);
     // TODO: throw dvm exOutOfMemoryError?
     if (consumer == NULL) {
-        // jniThrowRuntimeException(env, "Failed to allocate native CpuConsumer");
+        Logger::E(TAG, "Failed to allocate native CpuConsumer");
         return E_RUNTIME_EXCEPTION;
     }
 
-    android::sp<JNIImageReaderContext> ctx(new JNIImageReaderContext(weakThiz, maxImages));
+    android::sp<JNIImageReaderContext> ctx = new JNIImageReaderContext(weakThiz, maxImages);
     ctx->setCpuConsumer(consumer);
     ctx->setProducer(gbProducer);
     consumer->setFrameAvailableListener(ctx);
 
-    mNativeContext = (Int64)ctx.get();
+    mNativeContext = reinterpret_cast<Int64>(ctx.get());
+    ctx->incStrong(this);
     ctx->setBufferFormat(nativeFormat);
     ctx->setBufferWidth(width);
     ctx->setBufferHeight(height);
@@ -1373,14 +1374,12 @@ ECode CImageReader::NativeInit(
     // Set the width/height/format to the CpuConsumer
     res = consumer->setDefaultBufferSize(width, height);
     if (res != android::OK) {
-        // jniThrowException(env, "java/lang/IllegalStateException",
-        //                   "Failed to set CpuConsumer buffer size");
+        Logger::E(TAG, "Failed to set CpuConsumer buffer size");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     res = consumer->setDefaultBufferFormat(nativeFormat);
     if (res != android::OK) {
-        // jniThrowException(env, "java/lang/IllegalStateException",
-        //                   "Failed to set CpuConsumer buffer format");
+        Logger::E(TAG, "Failed to set CpuConsumer buffer format");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;
@@ -1388,9 +1387,9 @@ ECode CImageReader::NativeInit(
 
 void CImageReader::NativeClose()
 {
-    ALOGV("%s:", __FUNCTION__);
+    Logger::V(TAG, "%s:", __FUNCTION__);
 
-    JNIImageReaderContext* const ctx = reinterpret_cast<JNIImageReaderContext *>(mNativeContext);
+    android::sp<JNIImageReaderContext> ctx = reinterpret_cast<JNIImageReaderContext *>(mNativeContext);
     if (ctx == NULL) {
         // ImageReader is already closed.
         return;
@@ -1403,16 +1402,17 @@ void CImageReader::NativeClose()
         consumer->setFrameAvailableListener(NULL);
     }
 
+    ctx->decStrong(this);
     mNativeContext = 0;
 }
 
 void CImageReader::NativeReleaseImage(
     /* [in] */ IImage* image)
 {
-    ALOGV("%s:", __FUNCTION__);
+    Logger::V(TAG, "%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = reinterpret_cast<JNIImageReaderContext *>(mNativeContext);
     if (ctx == NULL) {
-        ALOGW("ImageReader#close called before Image#close, consider calling Image#close first");
+        Logger::W(TAG, "ImageReader#close called before Image#close, consider calling Image#close first");
         return;
     }
 
@@ -1421,7 +1421,7 @@ void CImageReader::NativeReleaseImage(
             reinterpret_cast<android::CpuConsumer::LockedBuffer*>(((SurfaceImage*)image)->mLockedBuffer);
 
     if (!buffer) {
-        ALOGW("Image already released!!!");
+        Logger::W(TAG, "Image already released!!!");
         return;
     }
     consumer->unlockBuffer(*buffer);
@@ -1435,30 +1435,27 @@ ECode CImageReader::NativeGetSurface(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    ALOGV("%s: ", __FUNCTION__);
+    Logger::V(TAG, "%s: ", __FUNCTION__);
 
     JNIImageReaderContext* const ctx = reinterpret_cast<JNIImageReaderContext *>(mNativeContext);
     if (ctx == NULL) {
-        // jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
+        Logger::E(TAG, "ImageReaderContext is not initialized");
         return E_RUNTIME_EXCEPTION;
     }
-    android::IGraphicBufferProducer* gbp = ctx->getProducer();
 
+    android::IGraphicBufferProducer* gbp = ctx->getProducer();
     if (gbp == NULL) {
-        // jniThrowRuntimeException(env, "CpuConsumer is uninitialized");
+        Logger::E(TAG, "CpuConsumer is uninitialized");
         return E_RUNTIME_EXCEPTION;
     }
 
     // Wrap the IGBP in a Java-language Surface.
     android::sp<android::Surface> surface(new android::Surface(gbp, true));
     if (surface == NULL) {
-        *result = NULL;
         return NOERROR;
     }
-    CSurface::New((Int64)surface.get(), result);
 
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return CSurface::New((Int64)surface.get(), result);
 }
 
 ECode CImageReader::NativeImageSetup(
@@ -1468,10 +1465,10 @@ ECode CImageReader::NativeImageSetup(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    ALOGV("%s:", __FUNCTION__);
+    Logger::V(TAG, "%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = reinterpret_cast<JNIImageReaderContext *>(mNativeContext);
     if (ctx == NULL) {
-        // jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
+        Logger::E(TAG, "ImageReaderContext is not initialized");
         *result = -1;
         return E_RUNTIME_EXCEPTION;
     }
@@ -1479,7 +1476,7 @@ ECode CImageReader::NativeImageSetup(
     android::CpuConsumer* consumer = ctx->getCpuConsumer();
     android::CpuConsumer::LockedBuffer* buffer = ctx->getLockedBuffer();
     if (buffer == NULL) {
-        ALOGW("Unable to acquire a lockedBuffer, very likely client tries to lock more than"
+        Logger::W(TAG, "Unable to acquire a lockedBuffer, very likely client tries to lock more than"
             " maxImages buffers");
         *result = ACQUIRE_MAX_IMAGES;
         return NOERROR;
@@ -1492,11 +1489,9 @@ ECode CImageReader::NativeImageSetup(
                 return ACQUIRE_MAX_IMAGES;
             }
             else {
-                ALOGE("%s Fail to lockNextBuffer with error: %d ",
+                Logger::E(TAG, "%s Fail to lockNextBuffer with error: %d ",
                       __FUNCTION__, res);
-                // jniThrowExceptionFmt(env, "java/lang/AssertionError",
-                //           "Unknown error (%d) when we tried to lock buffer.",
-                //           res);
+                Logger::E(TAG, "Unknown error (%d) when we tried to lock buffer.", res);
                 return E_ASSERTION_ERROR;
             }
         }
@@ -1505,8 +1500,7 @@ ECode CImageReader::NativeImageSetup(
     }
 
     if (buffer->format == HAL_PIXEL_FORMAT_YCrCb_420_SP) {
-        // jniThrowException(env, "java/lang/UnsupportedOperationException",
-        //         "NV21 format is not supported by ImageReader");
+        Logger::E(TAG, "NV21 format is not supported by ImageReader");
         *result = -1;
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
@@ -1515,8 +1509,7 @@ ECode CImageReader::NativeImageSetup(
     // zero, will revist this once this assumption turns out problematic.
     android::Point lt = buffer->crop.leftTop();
     if (lt.x != 0 || lt.y != 0) {
-        // jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
-        //         "crop left top corner [%d, %d] need to be at origin", lt.x, lt.y);
+        Logger::E(TAG, "crop left top corner [%d, %d] need to be at origin", lt.x, lt.y);
         *result = -1;
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
@@ -1545,9 +1538,8 @@ ECode CImageReader::NativeImageSetup(
          * check. Right now, only make sure buffer height is no less than ImageReader
          * height.
          */
-        // jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-        //         "Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
-        //         outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
+        Logger::E(TAG, "Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
+            outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
         *result = -1;
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -1560,12 +1552,12 @@ ECode CImageReader::NativeImageSetup(
             // Special casing for when producer switches to a format compatible with flexible YUV
             // (HAL_PIXEL_FORMAT_YCbCr_420_888).
             ctx->setBufferFormat(bufFmt);
-            ALOGD("%s: Overriding buffer format YUV_420_888 to %x.", __FUNCTION__, bufFmt);
+            Logger::D(TAG, "%s: Overriding buffer format YUV_420_888 to %x.", __FUNCTION__, bufFmt);
         }
         else if (imgReaderFmt == HAL_PIXEL_FORMAT_BLOB && bufFmt == HAL_PIXEL_FORMAT_RGBA_8888) {
             // Using HAL_PIXEL_FORMAT_RGBA_8888 gralloc buffers containing JPEGs to get around SW
             // write limitations for (b/17379185).
-            ALOGD("%s: Receiving JPEG in HAL_PIXEL_FORMAT_RGBA_8888 buffer.", __FUNCTION__);
+            Logger::D(TAG, "%s: Receiving JPEG in HAL_PIXEL_FORMAT_RGBA_8888 buffer.", __FUNCTION__);
         }
         else {
             // Return the buffer to the queue.
@@ -1579,8 +1571,7 @@ ECode CImageReader::NativeImageSetup(
             msg.appendFormat("The producer output buffer format 0x%x doesn't "
                     "match the ImageReader's configured buffer format 0x%x.",
                     buffer->format, ctx->getBufferFormat());
-            // jniThrowException(env, "java/lang/UnsupportedOperationException",
-            //         msg.string());
+            Logger::E(TAG, msg.string());
             *result = -1;
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
@@ -1594,7 +1585,7 @@ ECode CImageReader::NativeImageSetup(
 
 void CImageReader::NativeClassInit()
 {
-    ALOGV("%s:", __FUNCTION__);
+    Logger::V(TAG, "%s:", __FUNCTION__);
 }
 
 } // namespace Media

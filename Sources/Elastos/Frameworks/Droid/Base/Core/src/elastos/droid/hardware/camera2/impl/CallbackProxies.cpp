@@ -397,6 +397,7 @@ ECode CallbackProxies::SessionStateCallbackProxy::constructor(
 ECode CallbackProxies::SessionStateCallbackProxy::OnConfigured(
     /* [in] */ ICameraCaptureSession* session)
 {
+    Logger::I(TAG, " >> OnConfigured");
     AutoPtr<IMethodInfo> methodInfo;
     const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
     FAIL_RETURN(mProxy->GetMethodInfo(String("OnConfigured"),signature, (IMethodInfo**)&methodInfo))
@@ -414,6 +415,7 @@ ECode CallbackProxies::SessionStateCallbackProxy::OnConfigured(
 ECode CallbackProxies::SessionStateCallbackProxy::OnConfigureFailed(
     /* [in] */ ICameraCaptureSession* session)
 {
+    Logger::I(TAG, " >> OnConfigureFailed");
     AutoPtr<IMethodInfo> methodInfo;
     const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
     FAIL_RETURN(mProxy->GetMethodInfo(String("OnConfigureFailed"),signature, (IMethodInfo**)&methodInfo))
@@ -431,6 +433,7 @@ ECode CallbackProxies::SessionStateCallbackProxy::OnConfigureFailed(
 ECode CallbackProxies::SessionStateCallbackProxy::OnReady(
     /* [in] */ ICameraCaptureSession* session)
 {
+    Logger::I(TAG, " >> OnReady");
     AutoPtr<IMethodInfo> methodInfo;
     const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
     FAIL_RETURN(mProxy->GetMethodInfo(String("OnReady"),signature, (IMethodInfo**)&methodInfo))
@@ -448,6 +451,7 @@ ECode CallbackProxies::SessionStateCallbackProxy::OnReady(
 ECode CallbackProxies::SessionStateCallbackProxy::OnActive(
     /* [in] */ ICameraCaptureSession* session)
 {
+    Logger::I(TAG, " >> OnActive");
     AutoPtr<IMethodInfo> methodInfo;
     const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
     FAIL_RETURN(mProxy->GetMethodInfo(String("OnActive"),signature, (IMethodInfo**)&methodInfo))
@@ -465,6 +469,7 @@ ECode CallbackProxies::SessionStateCallbackProxy::OnActive(
 ECode CallbackProxies::SessionStateCallbackProxy::OnClosed(
     /* [in] */ ICameraCaptureSession* session)
 {
+    Logger::I(TAG, " >> OnClosed");
     AutoPtr<IMethodInfo> methodInfo;
     const String signature("(LElastos/Droid/Hardware/Camera2/ICameraCaptureSession;*)E");
     FAIL_RETURN(mProxy->GetMethodInfo(String("OnClosed"),signature, (IMethodInfo**)&methodInfo))

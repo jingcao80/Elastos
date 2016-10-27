@@ -19,7 +19,7 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-class CaptureResultKey
+class ECO_PUBLIC CaptureResultKey
     : public Object
     , public ICaptureResultKey
 {
@@ -106,7 +106,7 @@ private:
     AutoPtr<ICameraMetadataNativeKey> mKey;
 };
 
-class CaptureResult
+class ECO_PUBLIC CaptureResult
     : public CameraMetadata
     , public ICaptureResult
 {

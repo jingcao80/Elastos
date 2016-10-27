@@ -107,6 +107,7 @@ module
     interface Elastos.Droid.Utility.IArrayMap;
     using interface Elastos.Core.ICloneable;
     using interface Elastos.IO.IInputStream;
+    using interface Elastos.IO.IAutoCloseable;
 
     namespace Elastos {
     namespace Droid {
@@ -1787,7 +1788,7 @@ module
             [in] /*@NonNull*/ Elastos.Droid.Os.IParcelFileDescriptor* input);
 
         interface IPdfRenderer;
-        //intefface IAutoCloseable;
+        interface IAutoCloseable;
     }
 
     } // namespace Pdf

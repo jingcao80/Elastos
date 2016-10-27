@@ -16,6 +16,18 @@ CArgumentList::CArgumentList()
 
 CArgumentList::~CArgumentList()
 {
+    // TODO
+    if (!mInterfaceParams.IsEmpty() && mParamCount > 0) {
+        for (UInt32 i = 0; i < mParamCount; ++i) {
+            if (mParamElem[i].mType == CarDataType_Interface) {
+                IInterface** prev = mInterfaceParams.Get(&i);
+                if (prev && *prev) {
+                    (*prev)->Release();
+                }
+            }
+        }
+    }
+
     if (mParamBuf) free(mParamBuf);
 }
 
@@ -292,6 +304,14 @@ ECode CArgumentList::SetInputArgumentOfObjectPtr(
         EIID iid = adjustInterfaceDescAddr(base, ifDir->mDesc)->mIID;
         value = value->Probe(iid);
         if (!value) return E_NO_INTERFACE;
+
+        // TODO hold param's ref-count.
+        IInterface** prev = mInterfaceParams.Get(&index);
+        if (prev && *prev) {
+            (*prev)->Release();
+        }
+        value->AddRef();
+        mInterfaceParams.Put(&index, (IInterface**)&value);
     }
 
     return SetParamValue(index, &value, CarDataType_Interface,

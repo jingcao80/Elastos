@@ -6,17 +6,17 @@
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/server/location/CountryDetectorBase.h"
-// #include "elastos/droid/telephony/PhoneStateListener.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
 #include "elastos/utility/TimerTask.h"
 #include "Elastos.Droid.Location.h"
+#include "Elastos.Droid.Telephony.h"
 
 using Elastos::Droid::Location::ICountry;
 using Elastos::Droid::Location::ICountryListener;
 using Elastos::Droid::Os::Runnable;
-// using Elastos::Droid::Telephony::IPhoneStateListener;
-// using Elastos::Droid::Telephony::IServiceState;
-// using Elastos::Droid::Telephony::ITelephonyManager;
-// using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Utility::Concurrent::IConcurrentLinkedQueue;
 using Elastos::Utility::ITimer;
 using Elastos::Utility::TimerTask;
@@ -104,24 +104,21 @@ private:
         ComprehensiveCountryDetector* mHost;
     };
 
-#if 0 //TODO
     class MyPhoneStateListener
-        // : public PhoneStateListener
+        : public PhoneStateListener
     {
     public:
-        CAR_INTERFACE_DECL()
-
         MyPhoneStateListener(
             /* [in] */ ComprehensiveCountryDetector* host);
 
         //@Override
         CARAPI OnServiceStateChanged(
-            /* [in] */ IServiceState* serviceState);
+            /* [in] */ Elastos::Droid::Telephony::IServiceState* serviceState);
 
     private:
         ComprehensiveCountryDetector* mHost;
     };
-#endif
+
 
 public:
     ComprehensiveCountryDetector(
@@ -264,11 +261,11 @@ private:
     const static Int64 LOCATION_REFRESH_INTERVAL; // 1 day
 
     AutoPtr<ICountry> mCountry;
-    // AutoPtr<ITelephonyManager> mTelephonyManager;
+    AutoPtr<ITelephonyManager> mTelephonyManager;
     AutoPtr<ICountry> mCountryFromLocation;
     Boolean mStopped;
 
-    // AutoPtr<IPhoneStateListener> mPhoneStateListener;
+    AutoPtr<IPhoneStateListener> mPhoneStateListener;
 
     /**
      * List of the most recent country state changes for debugging. This should have

@@ -417,8 +417,6 @@ module
         }
 
         class CCaptureFailure {
-            constructor();
-
             constructor(
                 [in] ICaptureRequest* request,
                 [in] Int32 reason,
@@ -430,8 +428,6 @@ module
         }
 
         class CTotalCaptureResult {
-            constructor();
-
             constructor(
                 [in] ICameraMetadataNative* results,
                 [in] ICaptureRequest* parent,
@@ -975,8 +971,6 @@ module
         }
 
         class CRequestHandlerThread {
-            constructor();
-
             constructor(
                 [in] String name,
                 [in] IHandlerCallback* _callback);
@@ -985,8 +979,6 @@ module
         }
 
         class CRequestHolderBuilder {
-            constructor();
-
             constructor(
                 [in] Int32 requestId,
                 [in] Int32 subsequenceId,
@@ -998,7 +990,6 @@ module
         }
 
         class CRequestQueue {
-
             constructor(
                 [in] IList* jpegSurfaceIds);
 
@@ -1006,8 +997,6 @@ module
         }
 
         class CRequestThreadManager {
-            constructor();
-
             constructor(
                 [in] Int32 cameraId,
                 [in] IHardwareCamera* camera,
@@ -1018,8 +1007,6 @@ module
         }
 
         class CRequestThreadManagerFpsCounter {
-            constructor();
-
             constructor(
                 [in] String streamType);
 
@@ -1027,6 +1014,8 @@ module
         }
 
         class CLegacySizeAreaComparator {
+            constructor();
+
             interface ILegacySizeAreaComparator;
             interface IComparator;
         }

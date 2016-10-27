@@ -39,9 +39,8 @@ public:
             /* [in] */ Int32 acquires,
             /* [out] */ Int32* out);
 
-        CARAPI TryReleaseShared(
-            /* [in] */ Int32 releases,
-            /* [out] */ Boolean* out);
+        virtual CARAPI_(Boolean) TryReleaseShared(
+            /* [in] */ Int32 arg);
 
         CARAPI ReducePermits(
             /* [in] */ Int32 reductions);
@@ -64,9 +63,8 @@ public:
         NonfairSync(
             /* [in] */ Int32 permits);
 
-        CARAPI TryAcquireShared(
-            /* [in] */ Int32 acquires,
-            /* [out] */ Int32* out);
+        virtual CARAPI_(Int32) TryAcquireShared(
+            /* [in] */ Int32 arg);
 
         virtual SyncID GetSyncID()
         {
@@ -82,9 +80,8 @@ public:
         FairSync(
             /* [in] */ Int32 permits);
 
-        CARAPI TryAcquireShared(
-            /* [in] */ Int32 acquires,
-            /* [out] */ Int32* out);
+        virtual CARAPI_(Int32) TryAcquireShared(
+            /* [in] */ Int32 arg);
 
         virtual SyncID GetSyncID()
         {

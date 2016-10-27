@@ -29,8 +29,6 @@ public:
 
     virtual ~BroadcastDispatcher() {}
 
-    CARAPI constructor();
-
     /**
      * Create a broadcast dispatcher from the supplied dispatch targets.
      *
@@ -46,7 +44,7 @@ public:
         /* [in] */ IArgumentList* args);
 
 private:
-    AutoPtr<IList> mDispatchTargets;
+    AutoPtr< ArrayOf<IDispatchable*> > mDispatchTargets;
 };
 
 } // namespace Dispatch

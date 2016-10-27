@@ -3,11 +3,13 @@
 #define __ELASTOS_DROID_MEDIA_IMAGE_H__
 
 #include "Elastos.Droid.Media.h"
+#include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::IO::IByteBuffer;
+using Elastos::IO::IAutoCloseable;
 
 namespace Elastos {
 namespace Droid {
@@ -38,11 +40,10 @@ namespace Media {
  *
  * @see ImageReader
  */
-// TODO: Need IAutoCloseable
-    // , public IAutoCloseable
 class Image
     : public Object
     , public IImage
+    , public IAutoCloseable
 {
 public:
     /**

@@ -1927,9 +1927,8 @@ Int32 AlarmManagerService::AttemptCoalesceLocked(
 
 void AlarmManagerService::RebatchAllAlarms()
 {
-    {    AutoLock syncLock(mLock);
-        RebatchAllAlarmsLocked(TRUE);
-    }
+    AutoLock syncLock(mLock);
+    RebatchAllAlarmsLocked(TRUE);
 }
 
 void AlarmManagerService::RebatchAllAlarmsLocked(

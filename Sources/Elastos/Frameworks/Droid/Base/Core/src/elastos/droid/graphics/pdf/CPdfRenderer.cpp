@@ -25,6 +25,7 @@ using Elastos::Droid::System::IStructStat;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
 using Elastos::Core::Mutex;
+using Elastos::IO::EIID_IAutoCloseable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Utility::Logging::Logger;
 using Libcore::IO::CLibcore;
@@ -38,7 +39,9 @@ namespace Pdf {
 
 const Int32 CPdfRenderer::Page::RENDER_MODE_FOR_DISPLAY = 1;
 const Int32 CPdfRenderer::Page::RENDER_MODE_FOR_PRINT = 2;
-CAR_INTERFACE_IMPL(CPdfRenderer::Page, Object, IPdfRendererPage);
+
+CAR_INTERFACE_IMPL_2(CPdfRenderer::Page, Object, IPdfRendererPage, IAutoCloseable);
+
 CPdfRenderer::Page::Page()
     : mIndex(0)
     , mWidth(0)

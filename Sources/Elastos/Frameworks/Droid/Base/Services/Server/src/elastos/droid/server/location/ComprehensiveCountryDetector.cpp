@@ -9,12 +9,9 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Content.h"
-// #include "Elastos.Droid.Telephony.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Location::CCountry;
 using Elastos::Droid::Location::CGeocoderHelper;
@@ -23,6 +20,7 @@ using Elastos::Droid::Location::IGeocoderHelper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Telephony::IPhoneStateListener;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
@@ -71,8 +69,8 @@ ECode ComprehensiveCountryDetector::MyCountryListener::OnCountryDetected(
 // ComprehensiveCountryDetector
 //=====================================
 
-const String ComprehensiveCountryDetector::TAG("CountryDetector");
-const Boolean ComprehensiveCountryDetector::DEBUG = FALSE;
+const String ComprehensiveCountryDetector::TAG("ComprehensiveCountryDetector");
+const Boolean ComprehensiveCountryDetector::DEBUG = TRUE;
 const Int32 ComprehensiveCountryDetector::MAX_LENGTH_DEBUG_LOGS = 20;
 const Int64 ComprehensiveCountryDetector::LOCATION_REFRESH_INTERVAL = 1000 * 60 * 60 * 24; // 1 day
 
@@ -88,7 +86,7 @@ ComprehensiveCountryDetector::ComprehensiveCountryDetector(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
-    // mTelephonyManager = ITelephonyManager::Probe(obj);
+    mTelephonyManager = ITelephonyManager::Probe(obj);
     AutoPtr<MyCountryListener> cl = new MyCountryListener(this);
     mLocationBasedCountryDetectionListener = (ICountryListener*)cl.Get();
     CConcurrentLinkedQueue::New((IConcurrentLinkedQueue**)&mDebugLogs);
@@ -143,11 +141,9 @@ ECode ComprehensiveCountryDetector::AddToLogs(
     // If the country (ISO and source) are the same as before, then there is no
     // need to add this country as another entry in the logs. Synchronize access to this
     // variable since multiple threads could be calling this method.
-    {    AutoLock syncLock(this);
-        Boolean equals = FALSE;
-        if (mLastCountryAddedToLogs != NULL)
-            IObject::Probe(mLastCountryAddedToLogs)->Equals(country, &equals);
-        if (mLastCountryAddedToLogs != NULL && equals) {
+    {
+        AutoLock syncLock(this);
+        if (mLastCountryAddedToLogs != NULL && Object::Equals(mLastCountryAddedToLogs, country)) {
             return E_NULL_POINTER_EXCEPTION;
         }
         mLastCountryAddedToLogs = country;
@@ -160,9 +156,7 @@ ECode ComprehensiveCountryDetector::AddToLogs(
         IQueue::Probe(mDebugLogs)->Poll((IInterface**)&obj);
     }
     if (DEBUG) {
-        String str;
-        IObject::Probe(country)->ToString(&str);
-        Slogger::D(TAG, str.string());
+        Slogger::D(TAG, TO_CSTR(country));
     }
     ICollection::Probe(mDebugLogs)->Add(country);
     return NOERROR;
@@ -172,28 +166,27 @@ Boolean ComprehensiveCountryDetector::IsNetworkCountryCodeAvailable()
 {
     // On CDMA TelephonyManager.getNetworkCountryIso() just returns SIM country.  We don't want
     // to prioritize it over location based country, so ignore it.
-    //TODO
-    // const Int32 phoneType;
-    // mTelephonyManager->GetPhoneType(&phoneType);
-    // if (DEBUG) Slogger::V(TAG, "    phonetype=%d", phoneType);
-    // return phoneType == ITelephonyManager::PHONE_TYPE_GSM;
-    return FALSE;
+    Int32 phoneType;
+    mTelephonyManager->GetPhoneType(&phoneType);
+    if (DEBUG) Slogger::V(TAG, "    phonetype=%d", phoneType);
+    return phoneType == ITelephonyManager::PHONE_TYPE_GSM;
 }
 
 ECode ComprehensiveCountryDetector::GetNetworkBasedCountry(
     /* [out] */ ICountry** country)
 {
-    //TODO
     VALIDATE_NOT_NULL(country)
+    *country = NULL;
+
     // String countryIso;
     if (IsNetworkCountryCodeAvailable()) {
-        // mTelephonyManager->GetNetworkCountryIso(&countryIso);
-        // if (!TextUtils::IsEmpty(countryIso)) {
-        //     CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_NETWORK, country);
-        //     return NOERROR;
-        // }
+        String countryIso;
+        mTelephonyManager->GetNetworkCountryIso(&countryIso);
+        if (!TextUtils::IsEmpty(countryIso)) {
+            CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_NETWORK, country);
+            return NOERROR;
+        }
     }
-    *country = NULL;
     return NOERROR;
 }
 
@@ -210,14 +203,12 @@ ECode ComprehensiveCountryDetector::GetSimBasedCountry(
     /* [out] */ ICountry** country)
 {
     VALIDATE_NOT_NULL(country)
-    //TODO
-    // String countryIso;
-    // mTelephonyManager->GetSimCountryIso(&countryIso);
-    // if (!TextUtils::IsEmpty(countryIso)) {
-    //     CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_SIM, country);
-    //     return NOERROR;
-    // }
     *country = NULL;
+    String countryIso;
+    mTelephonyManager->GetSimCountryIso(&countryIso);
+    if (!TextUtils::IsEmpty(countryIso)) {
+        return CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_SIM, country);
+    }
     return NOERROR;
 }
 
@@ -260,7 +251,8 @@ ECode ComprehensiveCountryDetector::RunAfterDetectionAsync(
     /* [in] */ Boolean notifyChange,
     /* [in] */ Boolean startLocationBasedDetection)
 {
-    AutoPtr<MyRunnable> mr = new MyRunnable(this, country, detectedCountry, notifyChange, startLocationBasedDetection);
+    AutoPtr<MyRunnable> mr = new MyRunnable(
+        this, country, detectedCountry, notifyChange, startLocationBasedDetection);
     Boolean result;
     return mHandler->Post((IRunnable*)mr.Get(), &result);
 }
@@ -362,27 +354,25 @@ ECode ComprehensiveCountryDetector::RunAfterDetection(
 ECode ComprehensiveCountryDetector::StartLocationBasedDetector(
     /* [in] */ ICountryListener* listener)
 {
-    {    AutoLock syncLock(this);
-        if (mLocationBasedCountryDetector != NULL) {
-            return E_NULL_POINTER_EXCEPTION;
-        }
-        if (DEBUG) {
-            Slogger::D(TAG, "starts LocationBasedDetector to detect Country code via Location info (e.g. GPS)");
-        }
-        CreateLocationBasedCountryDetector((CountryDetectorBase**)&mLocationBasedCountryDetector);
-        mLocationBasedCountryDetector->SetCountryListener(listener);
-        AutoPtr<ICountry> c;
-        mLocationBasedCountryDetector->DetectCountry((ICountry**)&c);
+    AutoLock syncLock(this);
+    if (mLocationBasedCountryDetector != NULL) {
+        return E_NULL_POINTER_EXCEPTION;
     }
+    if (DEBUG) {
+        Slogger::D(TAG, "starts LocationBasedDetector to detect Country code via Location info (e.g. GPS)");
+    }
+    CreateLocationBasedCountryDetector((CountryDetectorBase**)&mLocationBasedCountryDetector);
+    mLocationBasedCountryDetector->SetCountryListener(listener);
+    AutoPtr<ICountry> c;
+    mLocationBasedCountryDetector->DetectCountry((ICountry**)&c);
     return NOERROR;
 }
 
 void ComprehensiveCountryDetector::StopLocationBasedDetector()
 {
     if (DEBUG) {
-        String str;
-        mLocationBasedCountryDetector->ToString(&str);
-        Slogger::D(TAG, "tries to stop LocationBasedDetector (current detector: %s)", str.string());
+        Slogger::D(TAG, "tries to stop LocationBasedDetector (current detector: %s)",
+            TO_CSTR(mLocationBasedCountryDetector));
     }
     if (mLocationBasedCountryDetector != NULL) {
         mLocationBasedCountryDetector->Stop();
@@ -435,50 +425,42 @@ void ComprehensiveCountryDetector::NotifyIfCountryChanged(
 
 ECode ComprehensiveCountryDetector::ScheduleLocationRefresh()
 {
-    {    AutoLock syncLock(this);
-        if (mLocationRefreshTimer != NULL) return E_NULL_POINTER_EXCEPTION;
-        if (DEBUG) {
-            Slogger::D(TAG, "start periodic location refresh timer. Interval: %lld", LOCATION_REFRESH_INTERVAL);
-        }
-        CTimer::New((ITimer**)&mLocationRefreshTimer);
-        AutoPtr<MyTimeTask> tt = new MyTimeTask(this);
-        mLocationRefreshTimer->Schedule((ITimerTask*)tt.Get(), LOCATION_REFRESH_INTERVAL);
+    AutoLock syncLock(this);
+    if (mLocationRefreshTimer != NULL) return E_NULL_POINTER_EXCEPTION;
+    if (DEBUG) {
+        Slogger::D(TAG, "start periodic location refresh timer. Interval: %lld", LOCATION_REFRESH_INTERVAL);
     }
+    CTimer::New((ITimer**)&mLocationRefreshTimer);
+    AutoPtr<MyTimeTask> tt = new MyTimeTask(this);
+    mLocationRefreshTimer->Schedule((ITimerTask*)tt.Get(), LOCATION_REFRESH_INTERVAL);
     return NOERROR;
 }
 
 void ComprehensiveCountryDetector::CancelLocationRefresh()
 {
-    {    AutoLock syncLock(this);
-        if (mLocationRefreshTimer != NULL) {
-            mLocationRefreshTimer->Cancel();
-            mLocationRefreshTimer = NULL;
-        }
+    AutoLock syncLock(this);
+    if (mLocationRefreshTimer != NULL) {
+        mLocationRefreshTimer->Cancel();
+        mLocationRefreshTimer = NULL;
     }
 }
 
-
 void ComprehensiveCountryDetector::AddPhoneStateListener()
 {
-    #if 0 //TODO
-    {    AutoLock syncLock(this);
-        if (mPhoneStateListener == NULL) {
-            AutoPtr<MyPhoneStateListener> psl = new MyPhoneStateListener(this);
-            mPhoneStateListener = (IPhoneStateListener*)psl.Get();
-            mTelephonyManager->Listen(mPhoneStateListener.Get(), IPhoneStateListener::LISTEN_SERVICE_STATE);
-        }
+    AutoLock syncLock(this);
+    if (mPhoneStateListener == NULL) {
+        AutoPtr<MyPhoneStateListener> psl = new MyPhoneStateListener(this);
+        mPhoneStateListener = (IPhoneStateListener*)psl.Get();
+        mTelephonyManager->Listen(mPhoneStateListener.Get(), IPhoneStateListener::LISTEN_SERVICE_STATE);
     }
-    #endif
 }
 
 ECode ComprehensiveCountryDetector::RemovePhoneStateListener()
 {
-    //TODO
-    {    AutoLock syncLock(this);
-        // if (mPhoneStateListener == NULL) {
-            // mTelephonyManager->Listen(mPhoneStateListener.Get(), IPhoneStateListener::LISTEN_NONE);
-        //     mPhoneStateListener = NULL;
-        // }
+    AutoLock syncLock(this);
+    if (mPhoneStateListener != NULL) {
+        mTelephonyManager->Listen(mPhoneStateListener.Get(), IPhoneStateListener::LISTEN_NONE);
+        mPhoneStateListener = NULL;
     }
     return NOERROR;
 }
@@ -594,14 +576,13 @@ ECode ComprehensiveCountryDetector::MyTimeTask::Run()
 //=====================================
 // ComprehensiveCountryDetector::MyPhoneStateListener
 //=====================================
-#if 0 //wait PhoneStateListener
 ComprehensiveCountryDetector::MyPhoneStateListener::MyPhoneStateListener(
     /* [in] */ ComprehensiveCountryDetector* host)
     : mHost(host)
 {}
 
 ECode ComprehensiveCountryDetector::MyPhoneStateListener::OnServiceStateChanged(
-    /* [in] */ IServiceState* serviceState)
+    /* [in] */ Elastos::Droid::Telephony::IServiceState* serviceState)
 {
     mHost->mCountServiceStateChanges++;
     mHost->mTotalCountServiceStateChanges++;
@@ -618,7 +599,7 @@ ECode ComprehensiveCountryDetector::MyPhoneStateListener::OnServiceStateChanged(
     mHost->DetectCountry(TRUE, TRUE);
     return NOERROR;
 }
-#endif
+
 } // namespace Location
 } // namespace Server
 } // namespace Droid

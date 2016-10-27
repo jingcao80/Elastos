@@ -182,7 +182,8 @@ CARAPI CameraDeviceState::SetCaptureResult(
     VALIDATE_NOT_NULL(value);
     *value = FALSE;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mCurrentState != STATE_CAPTURING) {
             Logger::E(TAG, "Cannot receive result while in state: %d", mCurrentState);
             mCurrentError = ICameraDeviceImplCameraDeviceCallbacks::ERROR_CAMERA_DEVICE;
@@ -213,10 +214,9 @@ CARAPI CameraDeviceState::SetCameraDeviceCallbacks(
     /* [in] */ IHandler* handler,
     /* [in] */ ICameraDeviceStateListener* listener)
 {
-    {    AutoLock syncLock(this);
-        mCurrentHandler = handler;
-        mCurrentListener = listener;
-    }
+    AutoLock syncLock(this);
+    mCurrentHandler = handler;
+    mCurrentListener = listener;
     return NOERROR;
 }
 
@@ -326,7 +326,6 @@ CARAPI CameraDeviceState::DoStateTransition(
             break;
         }
         default:
-            //throw new IllegalStateException("Transition to unknown state: " + newState);
             Logger::E(TAG, "Transition to unknown state: %d", newState);
             return E_ILLEGAL_STATE_EXCEPTION;
     }
