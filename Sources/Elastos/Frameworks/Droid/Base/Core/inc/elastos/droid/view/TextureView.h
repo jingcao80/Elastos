@@ -12,12 +12,12 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-class TextureView
+class ECO_PUBLIC TextureView
     : public View
     , public ITextureView
 {
 private:
-    class OnFrameAvailableListener
+    class ECO_LOCAL OnFrameAvailableListener
         : public Object
         , public IOnFrameAvailableListener
     {
@@ -429,12 +429,12 @@ private:
 
     CARAPI_(void) NativeDestroyNativeWindow();
 
-    static CARAPI_(Boolean) NativeLockCanvas(
+    ECO_LOCAL static CARAPI_(Boolean) NativeLockCanvas(
         /* [in] */ Int64 nativeWindow,
         /* [in] */ ICanvas* canvas,
         /* [in] */ IRect* dirty);
 
-    static CARAPI_(void) NativeUnlockCanvasAndPost(
+    ECO_LOCAL static CARAPI_(void) NativeUnlockCanvasAndPost(
         /* [in] */ Int64 nativeWindow,
         /* [in] */ ICanvas* canvas);
 

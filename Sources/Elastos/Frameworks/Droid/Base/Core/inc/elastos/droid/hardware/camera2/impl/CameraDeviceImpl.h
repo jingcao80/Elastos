@@ -29,6 +29,22 @@ namespace Hardware {
 namespace Camera2 {
 namespace Impl {
 
+#ifndef DECLARE_INNER_RUNNABLE
+#define DECLARE_INNER_RUNNABLE(className)           \
+    class className                                 \
+        : public Runnable                           \
+    {                                               \
+    public:                                         \
+        className(                                  \
+            /* [in] */ IWeakReference* host);       \
+                                                    \
+        CARAPI Run();                               \
+                                                    \
+    private:                                        \
+        AutoPtr<IWeakReference> mWeakHost;          \
+    };
+#endif
+
 class CameraDeviceImpl
     : public CameraDevice
     , public ICameraDeviceImpl
@@ -39,6 +55,8 @@ public:
         , public ICameraDeviceImplCaptureCallback
     {
     public:
+        TO_STRING_IMPL("CameraDeviceImpl::CaptureCallback")
+
         CAR_INTERFACE_DECL()
 
         /**
@@ -118,6 +136,8 @@ public:
         , public ICameraDeviceImplStateCallbackKK
     {
     public:
+        TO_STRING_IMPL("CameraDeviceImpl::StateCallbackKK")
+
         CAR_INTERFACE_DECL()
 
         /**
@@ -316,96 +336,25 @@ public:
     };
 
 private:
-    class CallOnOpeneRunnable
-        : public Runnable
-    {
-    public:
-        CallOnOpeneRunnable(
-            /* [in] */ CameraDeviceImpl* host);
-
-        CARAPI Run();
-
-    private:
-        CameraDeviceImpl* mHost;
-    };
-
-    class CallOnUnconfiguredRunnable
-        : public Runnable
-    {
-    public:
-        CallOnUnconfiguredRunnable(
-            /* [in] */ CameraDeviceImpl* host);
-
-        CARAPI Run();
-
-    private:
-        CameraDeviceImpl* mHost;
-    };
-
-    class CallOnActiveRunnable
-        : public Runnable
-    {
-    public:
-        CallOnActiveRunnable(
-            /* [in] */ CameraDeviceImpl* host);
-
-        CARAPI Run();
-
-    private:
-        CameraDeviceImpl* mHost;
-    };
-
-    class CallOnBusyRunnable
-        : public Runnable
-    {
-    public:
-        CallOnBusyRunnable(
-            /* [in] */ CameraDeviceImpl* host);
-
-        CARAPI Run();
-
-    private:
-        CameraDeviceImpl* mHost;
-    };
+    DECLARE_INNER_RUNNABLE(CallOnOpeneRunnable)
+    DECLARE_INNER_RUNNABLE(CallOnUnconfiguredRunnable)
+    DECLARE_INNER_RUNNABLE(CallOnActiveRunnable)
+    DECLARE_INNER_RUNNABLE(CallOnBusyRunnable)
+    DECLARE_INNER_RUNNABLE(CallOnIdlRunnable)
+    DECLARE_INNER_RUNNABLE(CallOnDisconnectedRunnable)
 
     class CallOnCloseRunnable
         : public Runnable
     {
     public:
         CallOnCloseRunnable(
-            /* [in] */ CameraDeviceImpl* host);
+            /* [in] */ IWeakReference* host);
 
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         Boolean mClosedOnce;
-    };
-
-    class CallOnIdlRunnable
-        : public Runnable
-    {
-    public:
-        CallOnIdlRunnable(
-            /* [in] */ CameraDeviceImpl* host);
-
-        CARAPI Run();
-
-    private:
-        CameraDeviceImpl* mHost;
-    };
-
-    class CallOnDisconnectedRunnable
-        : public Runnable
-    {
-    public:
-        CallOnDisconnectedRunnable(
-            /* [in] */ CameraDeviceImpl* host);
-
-        CARAPI Run();
-
-    private:
-        CameraDeviceImpl* mHost;
     };
 
     class RemoteFailureRunnable
@@ -413,14 +362,14 @@ private:
     {
     public:
         RemoteFailureRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ Boolean isError,
             /* [in] */ Int32 code);
 
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         Boolean mIsError;
         Int32 mCode;
     };
@@ -430,7 +379,7 @@ private:
     {
     public:
         ResultDispatchRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ Int32 requestId,
             /* [in] */ Int64 lastFrameNumber,
             /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder);
@@ -438,18 +387,18 @@ private:
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         Int32 mRequestId;
         Int64 mLastFrameNumber;
         AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
     };
 
-    class ResultDispatchRunnable2
+    class SequenceCompleteResultDispatchRunnable
         : public Runnable
     {
     public:
-        ResultDispatchRunnable2(
-            /* [in] */ CameraDeviceImpl* host,
+        SequenceCompleteResultDispatchRunnable(
+            /* [in] */ IWeakReference* host,
             /* [in] */ Int32 requestId,
             /* [in] */ Int64 keyValue,
             /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder);
@@ -457,7 +406,7 @@ private:
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         Int32 mRequestId;
         Int64 mKeyValue;
         AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
@@ -468,13 +417,13 @@ private:
     {
     public:
         OnDeviceErrorRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ Int32 errorCode);
 
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         Int32 mErrorCode;
     };
 
@@ -483,7 +432,7 @@ private:
     {
     public:
         OnCaptureStartedRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ ICaptureResultExtras* resultExtras,
             /* [in] */ Int64 timestamp,
             /* [in] */ Int64 frameNumber,
@@ -492,7 +441,7 @@ private:
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         AutoPtr<ICaptureResultExtras> mResultExtras;
         Int64 mTimestamp;
         Int64 mFrameNumber;
@@ -504,7 +453,7 @@ private:
     {
     public:
         OnResultReceivedRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
             /* [in] */ ICaptureRequest* request,
             /* [in] */ ICaptureResult* result);
@@ -512,7 +461,7 @@ private:
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
         AutoPtr<ICaptureRequest> mRequest;
         AutoPtr<ICaptureResult> mResult;
@@ -523,7 +472,7 @@ private:
     {
     public:
         FinalCaptureResultRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
             /* [in] */ ICaptureRequest* request,
             /* [in] */ ITotalCaptureResult* result);
@@ -531,7 +480,7 @@ private:
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
         AutoPtr<ICaptureRequest> mRequest;
         AutoPtr<ITotalCaptureResult> mResult;
@@ -542,7 +491,7 @@ private:
     {
     public:
         OnCaptureErrorLockedRunnable(
-            /* [in] */ CameraDeviceImpl* host,
+            /* [in] */ IWeakReference* host,
             /* [in] */ ICameraDeviceImplCaptureCallbackHolder* holder,
             /* [in] */ ICaptureRequest* request,
             /* [in] */ ICaptureFailure* failure);
@@ -550,7 +499,7 @@ private:
         CARAPI Run();
 
     private:
-        CameraDeviceImpl* mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         AutoPtr<ICameraDeviceImplCaptureCallbackHolder> mHolder;
         AutoPtr<ICaptureRequest> mRequest;
         AutoPtr<ICaptureFailure> mFailure;

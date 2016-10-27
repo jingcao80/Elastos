@@ -19,11 +19,6 @@ DuckTypingDispatcher::DuckTypingDispatcher()
 {
 }
 
-ECode DuckTypingDispatcher::constructor()
-{
-    return NOERROR;
-}
-
 ECode DuckTypingDispatcher::constructor(
     /* [in] */ IDispatchable* target,
     /* [in] */ IInterfaceInfo* targetClass)

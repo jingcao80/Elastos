@@ -209,15 +209,17 @@ module
     interface Elastos.Droid.View.IViewGroup;
     interface Elastos.Droid.View.IViewParent;
     interface Elastos.Droid.View.IView;
-    interface Elastos.Core.ICharSequence;
-    interface Elastos.Core.IRunnable;
-    interface Elastos.IO.ICloseable;
-    interface Elastos.IO.IByteBuffer;
-    interface Elastos.IO.IInputStream;
-    interface Elastos.Utility.IArrayList;
-    interface Elastos.Utility.IList;
-    interface Elastos.Utility.IMap;
-    interface Elastos.Utility.IUUID;
+    
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IAutoCloseable;
+    using interface Elastos.IO.IByteBuffer;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.IUUID;
 
     namespace Elastos {
     namespace Droid {
@@ -609,8 +611,11 @@ module
             [in] Int32 maxImages);
 
         interface IImageReader;
-// TODO: Need IAutoCloseable
-//        interface IAutoCloseable;
+        interface IAutoCloseable;
+    }
+
+    singleton class CImageReaderHelper {
+        interface IImageReaderHelper;
     }
 
     class CJetPlayer {

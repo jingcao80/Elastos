@@ -11,10 +11,10 @@ namespace Camera2 {
 namespace Dispatch {
 
 HandlerDispatcher::MyRunnable::MyRunnable(
-    /* [in] */ HandlerDispatcher* host,
+    /* [in] */ IDispatchable* target,
     /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* args)
-    : mHost(host)
+    : mDispatchTarget(target)
     , mMethod(method)
     , mArgs(args)
 {
@@ -22,20 +22,9 @@ HandlerDispatcher::MyRunnable::MyRunnable(
 
 ECode HandlerDispatcher::MyRunnable::Run()
 {
-    return mHost->mDispatchTarget->Dispatch(mMethod, mArgs);
-    // } catch (InvocationTargetException e) {
-    //     Throwable t = e.getTargetException();
-    //     // Potential UB. Hopefully 't' is a runtime exception.
-    //     UncheckedThrow.throwAnyException(t);
-    // } catch (IllegalAccessException e) {
-    //     // Impossible
-    //     Log.wtf(TAG, "IllegalAccessException while invoking " + method, e);
-    // } catch (IllegalArgumentException e) {
-    //     // Impossible
-    //     Log.wtf(TAG, "IllegalArgumentException while invoking " + method, e);
-    // } catch (Throwable e) {
-    //     UncheckedThrow.throwAnyException(e);
-    // }
+    ECode ec = mDispatchTarget->Dispatch(mMethod, mArgs);
+    mDispatchTarget = NULL;
+    return NOERROR;
 }
 
 const String HandlerDispatcher::TAG("HandlerDispatcher");
@@ -61,8 +50,8 @@ ECode HandlerDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* args)
 {
-    AutoPtr<MyRunnable> myRun = new MyRunnable(this, method, args);
     Boolean result;
+    AutoPtr<MyRunnable> myRun = new MyRunnable(mDispatchTarget, method, args);
     return mHandler->Post(myRun, &result);
 }
 

@@ -66,6 +66,7 @@ EXPORT_HEADERS += elastos/droid/hardware/camera2/CameraDevice.h
 EXPORT_HEADERS += elastos/droid/hardware/camera2/CameraManager.h
 EXPORT_HEADERS += elastos/droid/hardware/camera2/CameraMetadata.h
 EXPORT_HEADERS += elastos/droid/hardware/camera2/CaptureRequest.h
+EXPORT_HEADERS += elastos/droid/hardware/camera2/CaptureResult.h
 EXPORT_HEADERS += elastos/droid/hardware/location/GeofenceHardwareImpl.h
 
 EXPORT_HEADERS += elastos/droid/inputmethodservice/AbstractInputMethodService.h
@@ -218,6 +219,7 @@ EXPORT_HEADERS += elastos/droid/view/NativeInputChannel.h
 //EXPORT_HEADERS += elastos/droid/view/SoundEffectConstants.h
 EXPORT_HEADERS += elastos/droid/view/WindowIdFocusObserver.h
 EXPORT_HEADERS += elastos/droid/view/SurfaceView.h
+EXPORT_HEADERS += elastos/droid/view/TextureView.h
 EXPORT_HEADERS += elastos/droid/view/OrientationEventListener.h
 EXPORT_HEADERS += elastos/droid/view/animation/Animation.h
 EXPORT_HEADERS += elastos/droid/view/animation/AnimationUtils.h

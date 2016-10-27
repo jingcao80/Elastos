@@ -24,6 +24,8 @@ TaskSingleDrainer::~TaskSingleDrainer()
 
 ECode TaskSingleDrainer::constructor()
 {
+    AutoPtr<Object> obj = new Object();
+    mSingleTask = TO_IINTERFACE(obj);
     return NOERROR;
 }
 
@@ -44,13 +46,13 @@ ECode TaskSingleDrainer::constructor(
 
 ECode TaskSingleDrainer::TaskStarted()
 {
-    return mTaskDrainer->TaskStarted(TO_IINTERFACE((IObject*)&mSingleTask));
+    return mTaskDrainer->TaskStarted(mSingleTask);
 }
 
 ECode TaskSingleDrainer::TaskFinished()
 {
 
-    return mTaskDrainer->TaskFinished(TO_IINTERFACE((IObject*)&mSingleTask));
+    return mTaskDrainer->TaskFinished(mSingleTask);
 }
 
 ECode TaskSingleDrainer::BeginDrain()

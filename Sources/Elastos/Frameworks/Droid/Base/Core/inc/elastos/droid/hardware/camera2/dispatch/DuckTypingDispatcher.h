@@ -26,8 +26,6 @@ public:
 
     virtual ~DuckTypingDispatcher() {}
 
-    CARAPI constructor();
-
     /**
      * Create a new duck typing dispatcher.
      *

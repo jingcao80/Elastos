@@ -58,6 +58,7 @@ SOURCES += CFaceDetector.cpp
 SOURCES += FocusRequester.cpp
 SOURCES += Image.cpp
 SOURCES += CImageReader.cpp
+SOURCES += CImageReaderHelper.cpp
 SOURCES += CJetPlayer.cpp
 SOURCES += CJetPlayerHelper.cpp
 SOURCES += CMediaActionSound.cpp

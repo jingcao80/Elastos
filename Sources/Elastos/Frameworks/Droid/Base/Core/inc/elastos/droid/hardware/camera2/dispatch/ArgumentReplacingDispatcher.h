@@ -26,8 +26,6 @@ public:
 
     virtual ~ArgumentReplacingDispatcher() {}
 
-    CARAPI constructor();
-
     /**
      * Create a new argument replacing dispatcher; dispatches are forwarded to {@code target}
      * after the argument is replaced.
@@ -52,10 +50,6 @@ public:
     CARAPI Dispatch(
         /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* args);
-
-private:
-    static CARAPI_(AutoPtr<ArrayOf<IInterface*> >) ArrayCopy(
-        /* [in] */ ArrayOf<IInterface*>* array);
 
 private:
     AutoPtr<IDispatchable> mTarget;

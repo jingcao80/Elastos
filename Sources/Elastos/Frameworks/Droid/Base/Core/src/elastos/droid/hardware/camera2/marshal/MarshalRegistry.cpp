@@ -125,10 +125,10 @@ ECode MarshalRegistry::GetMarshaler(
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
 
-        String type;
-        MarshalHelpers::ToStringNativeType(nativeType, &type);
-        Logger::D("MarshalRegistry", ">> GetMarshaler %s for type:%d(%s), class:%s",
-            TO_CSTR(marshaler), nativeType, type.string(), TO_CSTR(typeToken));
+        // String type;
+        // MarshalHelpers::ToStringNativeType(nativeType, &type);
+        // Logger::D("MarshalRegistry", ">> GetMarshaler %s for type:%d(%s), class:%s",
+        //     TO_CSTR(marshaler), nativeType, type.string(), TO_CSTR(typeToken));
 
         // Only put when no cached version exists to avoid +0.5ms lookup per call.
         sMarshalerMap->Put(TO_IINTERFACE(marshalToken), TO_IINTERFACE(marshaler));

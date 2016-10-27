@@ -400,8 +400,10 @@ ECode LocationManager::constructor(
     mService = service;
     mContext = context;
     CGpsStatus::New((IGpsStatus**)&mGpsStatus);
-    CGpsMeasurementListenerTransport::New(mContext, mService, (IGpsMeasurementListenerTransport**)&mGpsMeasurementListenerTransport);
-    CGpsNavigationMessageListenerTransport::New(mContext, mService, (IGpsNavigationMessageListenerTransport**)&mGpsNavigationMessageListenerTransport);
+    CGpsMeasurementListenerTransport::New(mContext, mService,
+        (IGpsMeasurementListenerTransport**)&mGpsMeasurementListenerTransport);
+    CGpsNavigationMessageListenerTransport::New(mContext, mService, (
+        IGpsNavigationMessageListenerTransport**)&mGpsNavigationMessageListenerTransport);
     return NOERROR;
 }
 

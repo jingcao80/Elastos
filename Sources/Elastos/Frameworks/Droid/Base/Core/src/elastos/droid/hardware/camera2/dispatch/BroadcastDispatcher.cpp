@@ -1,10 +1,10 @@
 
 #include "elastos/droid/hardware/camera2/dispatch/BroadcastDispatcher.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
-#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Utility::Preconditions;
-using Elastos::Utility::Arrays;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -18,43 +18,24 @@ BroadcastDispatcher::BroadcastDispatcher()
 {
 }
 
-ECode BroadcastDispatcher::constructor()
-{
-    return NOERROR;
-}
-
 ECode BroadcastDispatcher::constructor(
     /* [in] */ ArrayOf<IDispatchable*>* dispatchTargets)
 {
-    //FAIL_RETURN(Preconditions::CheckNotNull(dispatchTargets,
-    //        String("dispatchTargets must not be null")))
     if (dispatchTargets == NULL) {
+        Logger::E("BroadcastDispatcher", "dispatchTargets must not be null");
         return E_NULL_POINTER_EXCEPTION;
     }
-
-    return Arrays::AsList(dispatchTargets, (IList**)&mDispatchTargets);
+    mDispatchTargets = dispatchTargets;
+    return NOERROR;
 }
 
 ECode BroadcastDispatcher::Dispatch(
     /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* args)
 {
-    Boolean gotResult = FALSE;
-
-    assert(0);
-    // Int32 size;
-    // mDispatchTargets->GetSize(&size);
-    // for (Int32 i = 0; i < size; i++) {
-    //     AutoPtr<IInterface> obj;
-    //     mDispatchTargets->Get(i, (IInterface**)&obj);
-    //     AutoPtr<IDispatchable> dispatchTarget = IDispatchable::Probe(obj);
-
-    //     dispatchTarget->Dispatch(method, args);
-
-    //     if (!gotResult) {
-    //         gotResult = TRUE;
-    //     }
-    // }
+     for (Int32 i = 0; i < mDispatchTargets->GetLength(); i++) {
+        (*mDispatchTargets)[i]->Dispatch(method, args);
+    }
     return NOERROR;
 }
 

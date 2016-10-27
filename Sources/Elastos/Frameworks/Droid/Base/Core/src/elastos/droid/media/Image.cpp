@@ -2,6 +2,7 @@
 #include "elastos/droid/media/Image.h"
 
 using Elastos::Droid::Graphics::CRect;
+using Elastos::IO::EIID_IAutoCloseable;
 
 namespace Elastos {
 namespace Droid {
@@ -43,9 +44,7 @@ ECode Image::Plane::GetBuffer(
 //  Image
 //================================================================================
 
-// TODO: Need IAutoCloseable
-// CAR_INTERFACE_IMPL_2(Image, Object, IImage, IAutoCloseable)
-CAR_INTERFACE_IMPL(Image, Object, IImage)
+CAR_INTERFACE_IMPL_2(Image, Object, IImage, IAutoCloseable)
 
 Image::Image()
 {

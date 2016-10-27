@@ -3,10 +3,12 @@
 #define __ELASTOS_DROID_GRAPHICS_PDF_CPDFRENDERER_H__
 
 #include "_Elastos_Droid_Graphics_Pdf_CPdfRenderer.h"
+#include <Elastos.CoreLibrary.IO.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Core::ICloseGuard;
+using Elastos::IO::IAutoCloseable;
 
 namespace Elastos {
 namespace Droid {
@@ -79,7 +81,7 @@ namespace Pdf {
 CarClass(CPdfRenderer)
     , public Object
     , public IPdfRenderer
-    /*implements AutoCloseable*/
+    , public IAutoCloseable
 {
 public:
     /**

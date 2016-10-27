@@ -100,6 +100,8 @@ private:
         : public CameraDeviceImpl::StateCallbackKK
     {
     public:
+        TO_STRING_IMPL("CameraCaptureSessionImpl::MyStateCallbackKK")
+
         MyStateCallbackKK(
             /* [in] */ CameraCaptureSessionImpl* host,
             /* [in] */ ICameraCaptureSession* session);
@@ -144,6 +146,8 @@ private:
         : public CameraDeviceImpl::CaptureCallback
     {
     public:
+        TO_STRING_IMPL("CameraCaptureSessionImpl::MyCaptureCallback")
+
         MyCaptureCallback(
             /* [in] */ CameraCaptureSessionImpl* host);
 
@@ -160,6 +164,56 @@ private:
 
     private:
         CameraCaptureSessionImpl* mHost;
+    };
+
+    class SessionCaptureCallbackWrapper
+        : public CameraDeviceImpl::CaptureCallback
+    {
+    public:
+        TO_STRING_IMPL("CameraCaptureSessionImpl::SessionCaptureCallbackWrapper")
+
+        SessionCaptureCallbackWrapper(
+            /* [in] */ CameraCaptureSessionImpl* host,
+            /* [in] */ ICameraCaptureSessionCaptureCallback* callback);
+
+        CARAPI OnCaptureStarted(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ ICaptureRequest* request,
+            /* [in] */ Int64 timestamp,
+            /* [in] */ Int64 frameNumber);
+
+        CARAPI OnCapturePartial(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ ICaptureRequest* request,
+            /* [in] */ ICaptureResult* result);
+
+        CARAPI OnCaptureProgressed(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ ICaptureRequest* request,
+            /* [in] */ ICaptureResult* partialResult);
+
+        CARAPI OnCaptureCompleted(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ ICaptureRequest* request,
+            /* [in] */ ITotalCaptureResult* result);
+
+        CARAPI OnCaptureFailed(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ ICaptureRequest* request,
+            /* [in] */ ICaptureFailure* failure);
+
+        CARAPI OnCaptureSequenceCompleted(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ Int32 sequenceId,
+            /* [in] */ Int64 frameNumber);
+
+        CARAPI OnCaptureSequenceAborted(
+            /* [in] */ ICameraDevice* camera,
+            /* [in] */ Int32 sequenceId);
+
+    private:
+        CameraCaptureSessionImpl* mHost;
+        AutoPtr<ICameraCaptureSessionCaptureCallback> mSessionCaptureCallback;
     };
 
 public:
@@ -181,7 +235,7 @@ public:
     CARAPI constructor(
         /* [in] */ Int32 id,
         /* [in] */ IList* outputs,
-        /* [in] */ ICameraCaptureSessionStateCallback* _callback,
+        /* [in] */ ICameraCaptureSessionStateCallback* callback,
         /* [in] */ IHandler* stateHandler,
         /* [in] */ ICameraDeviceImpl* deviceImpl,
         /* [in] */ IHandler* deviceStateHandler,
@@ -260,7 +314,7 @@ public:
 private:
     CARAPI CreateUserStateCallbackProxy(
         /* [in] */ IHandler* handler,
-        /* [in] */ ICameraCaptureSessionStateCallback* _callback,
+        /* [in] */ ICameraCaptureSessionStateCallback* callback,
         /* [out] */ ICameraCaptureSessionStateCallback** back);
 
     /**
@@ -276,7 +330,7 @@ private:
     //@SuppressWarnings("deprecation")
     CARAPI CreateCaptureCallbackProxy(
         /* [in] */ IHandler* handler,
-        /* [in] */ ICameraCaptureSessionCaptureCallback* _callback,
+        /* [in] */ ICameraCaptureSessionCaptureCallback* callback,
         /* [out] */ ICameraDeviceImplCaptureCallback** back);
 
     /**

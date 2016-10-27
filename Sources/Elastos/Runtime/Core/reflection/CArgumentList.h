@@ -205,6 +205,8 @@ private:
     UInt32          mParamBufSize;
     AutoPtr<IFunctionInfo>  mFunctionInfo;
     Boolean         mIsMethodInfo;
+
+    HashTable<IInterface *> mInterfaceParams;
 };
 
 #endif // __CARGLIST_H__

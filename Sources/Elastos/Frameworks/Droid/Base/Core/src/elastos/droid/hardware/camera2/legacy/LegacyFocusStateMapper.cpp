@@ -28,7 +28,7 @@ namespace Legacy {
 CAR_INTERFACE_IMPL(LegacyFocusStateMapper, Object, ILegacyFocusStateMapper)
 
 const String LegacyFocusStateMapper::TAG("LegacyFocusStateMapper");
-const Boolean LegacyFocusStateMapper::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
+const Boolean LegacyFocusStateMapper::VERBOSE = TRUE;//Log.isLoggable(TAG, Log.VERBOSE);
 
 CAR_INTERFACE_IMPL(LegacyFocusStateMapper::MyMoveCallback, Object, IAutoFocusMoveCallback)
 
@@ -46,20 +46,18 @@ LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
     /* [in] */ Boolean start,
     /* [in] */ IHardwareCamera* camera)
 {
-    Object& _lock = mHost->mLock;
-    {    AutoLock syncLock(_lock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 latestAfRun = mHost->mAfRun;
 
         if (mHost->VERBOSE) {
-            Logger::V(TAG,
-                    "onAutoFocusMoving - start %d latest AF run %d, last AF run %d",
-                    start, latestAfRun, mCurrentAfRun);
+            Logger::V(TAG, "onAutoFocusMoving - start %d latest AF run %d, last AF run %d",
+                start, latestAfRun, mCurrentAfRun);
         }
 
         if (mCurrentAfRun != latestAfRun) {
-            Logger::D(TAG,
-                    "onAutoFocusMoving - ignoring move callbacks from old af run %d"
-                            ,mCurrentAfRun);
+            Logger::D(TAG, "onAutoFocusMoving - ignoring move callbacks from old af run %d",
+                mCurrentAfRun);
             return NOERROR;
         }
 
@@ -73,8 +71,8 @@ LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
             // This callback should never be sent in any other AF mode
         }
         else {
-            Logger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s"
-                    ,mAfMode.string());
+            Logger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s",
+                mAfMode.string());
         }
 
         mHost->mAfState = newAfState;
@@ -98,19 +96,19 @@ ECode LegacyFocusStateMapper::MyFocusCallback::OnAutoFocus(
     /* [in] */ Boolean success,
     /* [in] */ IHardwareCamera* camera)
 {
-    Object& _lock = mHost->mLock;
-    {    AutoLock syncLock(_lock);
+    {
+        AutoLock syncLock(mHost->mLock);
         Int32 latestAfRun = mHost->mAfRun;
 
         if (mHost->VERBOSE) {
             Logger::V(TAG, "onAutoFocus - success %d latest AF run %d, last AF run %d",
-                    success, latestAfRun, mCurrentAfRun);
+                success, latestAfRun, mCurrentAfRun);
         }
 
         // Ignore old auto-focus results, since another trigger was requested
         if (latestAfRun != mCurrentAfRun) {
             Logger::D(TAG, "onAutoFocus - ignoring AF callback (old run %d, new run %d)",
-                    mCurrentAfRun, latestAfRun);
+                mCurrentAfRun, latestAfRun);
 
             return NOERROR;
         }
@@ -126,8 +124,8 @@ ECode LegacyFocusStateMapper::MyFocusCallback::OnAutoFocus(
             // This callback should never be sent in any other AF mode
         }
         else {
-            Logger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s"
-                    ,mAfMode.string());
+            Logger::W(TAG, "onAutoFocus - got unexpected onAutoFocus in mode %s",
+                mAfMode.string());
         }
 
         mHost->mAfState = newAfState;
@@ -178,12 +176,13 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
     if (mAfModePrevious != afMode) {
         if (VERBOSE) {
             Logger::V(TAG, "processRequestTriggers - AF mode switched from %s to %s",
-                    mAfModePrevious.string(), afMode.string());
+                mAfModePrevious.string(), afMode.string());
         }
 
         // Switching modes always goes back to INACTIVE; ignore callbacks from previous modes
 
-        {    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mLock);
             ++mAfRun;
             mAfState = ICameraMetadata::CONTROL_AF_STATE_INACTIVE;
         }
@@ -196,7 +195,8 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
     {
         Int32 currentAfRun = 0;
 
-        {    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mLock);
             currentAfRun = mAfRun;
         }
 
@@ -275,8 +275,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
             // No action necessary. The callbacks will handle transitions.
             break;
         default:
-            Logger::W(TAG, "processRequestTriggers - ignoring unknown control.afTrigger = %d"
-                    ,afTrigger);
+            Logger::W(TAG, "processRequestTriggers - ignoring unknown control.afTrigger = %d", afTrigger);
     }
     return NOERROR;
 }
