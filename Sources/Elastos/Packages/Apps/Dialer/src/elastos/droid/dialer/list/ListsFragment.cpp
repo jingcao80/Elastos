@@ -1,12 +1,11 @@
 
+#include "elastos/droid/contacts/common/GeoUtil.h"
 #include "elastos/droid/dialer/list/ListsFragment.h"
 #include "elastos/droid/dialer/list/SpeedDialFragment.h"
 #include "elastos/droid/dialer/list/CAllContactsFragment.h"
 // #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
-// #include "elastos/droid/dialer/list/CShortcutCardsAdapter.h"
 #include "elastos/droid/dialer/calllog/CallLogFragment.h"
-// #include "elastos/droid/dialer/calllog/CContactInfoHelper.h"
-// #include "elastos/droid/dialer/calllog/CCallLogQueryHandler.h"
+#include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
 #include "elastos/droid/dialer/util/DialerUtils.h"
 #include "elastos/droid/dialerbind/ObjectFactory.h"
 #include <elastos/core/CoreUtils.h>
@@ -16,6 +15,7 @@
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IListFragment;
+using Elastos::Droid::Contacts::Common::GeoUtil;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
@@ -23,7 +23,7 @@ using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::Widget::IAdapterView;
 // using Elastos::Droid::Dialer::CallLog::ICallLogQuery;
 using Elastos::Droid::Dialer::CallLog::CallLogFragment;
-// using Elastos::Droid::Dialer::CallLog::CCallLogQueryHandler;
+using Elastos::Droid::Dialer::CallLog::ContactInfoHelper;
 using Elastos::Droid::Dialer::Util::DialerUtils;
 // using Elastos::Droid::Dialer::IDialtactsActivity;
 using Elastos::Droid::DialerBind::ObjectFactory;
@@ -46,7 +46,6 @@ namespace List {
 //=================================================================
 // ListsFragment::InnerListener
 //=================================================================
-
 CAR_INTERFACE_IMPL(ListsFragment::InnerListener, Object, IViewPagerOnPageChangeListener)
 
 ListsFragment::InnerListener::InnerListener(
@@ -74,6 +73,26 @@ ECode ListsFragment::InnerListener::OnPageScrollStateChanged(
 {
     return mHost->OnPageScrollStateChanged(state);
 }
+
+
+//=================================================================
+// ListsFragment::InnerCallLogQueryHandlerListener
+//=================================================================
+CAR_INTERFACE_IMPL(ListsFragment::InnerCallLogQueryHandlerListener, Object, ICallLogQueryHandlerListener)
+
+ECode ListsFragment::InnerCallLogQueryHandlerListener::OnVoicemailStatusFetched(
+    /* [in] */ ICursor* statusCursor)
+{
+    return mHost->OnVoicemailStatusFetched(statusCursor);
+}
+
+ECode ListsFragment::InnerCallLogQueryHandlerListener::OnCallsFetched(
+    /* [in] */ ICursor* cursor,
+    /* [out] */ Boolean* result)
+{
+    return mHost->OnCallsFetched(cursor, result);
+}
+
 
 //=================================================================
 // ListsFragment::ViewPagerAdapter
@@ -114,9 +133,10 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
             CSystem::AcquireSingleton((ISystem**)&sys);
             Int64 value;
             sys->GetCurrentTimeMillis(&value);
-            assert(0);
-            // CCallLogFragment::New(ICallLogQueryHandler::CALL_TYPE_ALL, MAX_RECENTS_ENTRIES,
-            //         value - OLDEST_RECENTS_DATE, (ICallLogFragment**)&(mHost->mRecentsFragment));
+            AutoPtr<CallLogFragment> fragment = new CallLogFragment();
+            mHost->mRecentsFragment = (ICallLogFragment*)fragment;
+            fragment->constructor(CallLogQueryHandler::CALL_TYPE_ALL,
+                    MAX_RECENTS_ENTRIES, value - OLDEST_RECENTS_DATE);
             mHost->mRecentsFragment->SetHasFooterView(TRUE);
             *item = IFragment::Probe(mHost->mRecentsFragment);
             REFCOUNT_ADD(*item);
@@ -143,20 +163,19 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
     // Copy the fragments that the FragmentManager finds so that we can store them in
     // instance variables for later.
-    // TODO
-    // AutoPtr<IInterface> fragment;
-    // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
-    // if (ISpeedDialFragment::Probe(fragment) != NULL) {
-    //     mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
-    // }
-    // else if (ICallLogFragment::Probe(fragment) != NULL) {
-    //     mHost->mRecentsFragment = ICallLogFragment::Probe(fragment);
-    // }
-    // else if (IAllContactsFragment::Probe(fragment) != NULL) {
-    //     mHost->mAllContactsFragment = IAllContactsFragment::Probe(fragment);
-    // }
-    // *item = fragment;
-    // REFCOUNT_ADD(*item);
+    AutoPtr<IInterface> fragment;
+    FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
+    if (ISpeedDialFragment::Probe(fragment) != NULL) {
+        mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
+    }
+    else if (ICallLogFragment::Probe(fragment) != NULL) {
+        mHost->mRecentsFragment = ICallLogFragment::Probe(fragment);
+    }
+    else if (IAllContactsFragment::Probe(fragment) != NULL) {
+        mHost->mAllContactsFragment = IAllContactsFragment::Probe(fragment);
+    }
+    *item = fragment;
+    REFCOUNT_ADD(*item);
     return NOERROR;
 }
 
@@ -297,8 +316,7 @@ const Int64 ListsFragment::OLDEST_RECENTS_DATE = 1000LL * 60 * 60 * 24 * 14;
 
 const String ListsFragment::KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE("key_last_dismissed_call_shortcut_date");
 
-CAR_INTERFACE_IMPL_3(ListsFragment, AnalyticsFragment, IListsFragment,
-        ICallLogQueryHandlerListener, ICallFetcher)
+CAR_INTERFACE_IMPL_2(ListsFragment, AnalyticsFragment, IListsFragment, ICallFetcher)
 
 ListsFragment::ListsFragment()
     : mIsPanelOpen(TRUE)
@@ -360,20 +378,16 @@ ECode ListsFragment::OnCreate(
     GetActivity((IActivity**)&activity);
     AutoPtr<IContentResolver> resolver;
     IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
-    // TODO:
-    // CCallLogQueryHandler::New(resolver,
-    //         this, 1, (ICallLogQueryHandler**)&mCallLogQueryHandler);
-    // String currentCountryIso;
-    // currentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
+    mCallLogQueryHandler = new CallLogQueryHandler();
+    AutoPtr<ICallLogQueryHandlerListener> listener = (ICallLogQueryHandlerListener*)new InnerCallLogQueryHandlerListener(this);
+    mCallLogQueryHandler->constructor(resolver, listener, 1);
+    AutoPtr<IContext> ctx = IContext::Probe(activity);
+    String currentCountryIso = GeoUtil::GetCurrentCountryIso(ctx);
+    AutoPtr<ContactInfoHelper> helper = new ContactInfoHelper(ctx, currentCountryIso);
+    mCallLogAdapter = ObjectFactory::NewCallLogAdapter(ctx, this,
+            helper, NULL, NULL, FALSE);
 
-    // AutoPtr<IContactInfoHelper> helper;
-    // CContactInfoHelper::New(IContext::Probe(activity),
-    //         currentCountryIso, (IContactInfoHelper**)&helper);
-    // factory->NewCallLogAdapter(IContext::Probe(activity), this,
-    //         helper, NULL, NULL, FALSE, (ICallLogAdapter**)&mCallLogAdapter);
-
-    // CShortcutCardsAdapter::New(activity, this,
-    //         mCallLogAdapter, (IShortcutCardsAdapter**)&mMergedAdapter);
+    // mMergedAdapter = new ShortcutCardsAdapter(getActivity(), this, mCallLogAdapter);
     return NOERROR;
 }
 

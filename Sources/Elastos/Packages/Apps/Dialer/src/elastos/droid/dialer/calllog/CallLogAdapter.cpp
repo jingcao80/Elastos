@@ -337,6 +337,8 @@ ECode CallLogAdapter::ReportButtonClickListener::OnClick(
 //=================================================================
 // CallLogAdapter::BadgeContainerClickListener
 //=================================================================
+CAR_INTERFACE_IMPL(CallLogAdapter::BadgeContainerClickListener, Object, IViewOnClickListener)
+
 ECode CallLogAdapter::BadgeContainerClickListener::OnClick(
     /* [in] */ IView* view)
 {
@@ -441,7 +443,8 @@ ECode CallLogAdapter::constructor(
     resources->GetColor(Elastos::Droid::Dialer::R::color::call_log_expanded_background_color, &mExpandedBackgroundColor);
     resources->GetDimension(Elastos::Droid::Dialer::R::dimen::call_log_expanded_translation_z, &mExpandedTranslationZ);
 
-    mContactPhotoManager = ContactPhotoManager::GetInstance(mContext);
+    // TODO:
+    // mContactPhotoManager = ContactPhotoManager::GetInstance(mContext);
     mPhoneNumberHelper = new PhoneNumberDisplayHelper(resources);
     AutoPtr<PhoneNumberUtilsWrapper> wrapper = new PhoneNumberUtilsWrapper();
     AutoPtr<PhoneCallDetailsHelper> phoneCallDetailsHelper = new PhoneCallDetailsHelper(

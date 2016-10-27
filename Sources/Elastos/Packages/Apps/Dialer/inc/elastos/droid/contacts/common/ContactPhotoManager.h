@@ -356,6 +356,7 @@ private:
     // Static field used to cache the default letter avatar drawable that is created
     // using a null {@link DefaultImageRequest}
     static AutoPtr<IDrawable> sDefaultLetterAvatar;
+    static Object sLock;
 
     friend class DefaultImageRequest;
 };

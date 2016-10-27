@@ -83,7 +83,7 @@ module
     merge("car/elastos/droid/dialer/list/SmartDialNumberListAdapter.car");
     merge("car/elastos/droid/dialer/list/SmartDialSearchFragment.car");
     merge("car/elastos/droid/dialer/list/SpeedDialFragment.car");
-//    merge("car/elastos/droid/dialer/list/SwipeHelper.car");
+    merge("car/elastos/droid/dialer/list/SwipeHelper.car");
     merge("car/elastos/droid/dialer/list/TileInteractionTeaserView.car");
     merge("car/elastos/droid/dialer/service/CachedNumberLookupService.car");
 //    merge("car/elastos/droid/dialer/settings/DefaultRingtonePreference.car");
@@ -578,7 +578,6 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IFragment;
         interface IAnalyticsInterface;
-        interface ICallLogQueryHandlerListener;
         interface ICallFetcher;
         interface IListsFragment;
     }
@@ -698,20 +697,6 @@ module
 //        // interface IContactEntryListFragment;
 //        // interface IPhoneNumberPickerFragment;
 //        interface ISearchFragment;
-//    }
-//
-//    [local]
-//    class CShortcutCardsAdapter {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IListsFragment* fragment,
-//            [in] ICallLogAdapter* callLogAdapter);
-//
-//        interface IListAdapter;
-//        interface ISpinnerAdapter;
-//        interface IAdapter;
-//        interface IBaseAdapter;
-//        interface IShortcutCardsAdapter;
 //    }
 //
 //    [local]

@@ -2,6 +2,8 @@
 #define __ELASTOS_DROID_DIALER_LIST_SHORTCUTCARDSADAPTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/dialer/calllog/CallLogAdapter.h"
+#include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
 #include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include <elastos/droid/widget/FrameLayout.h>
@@ -19,8 +21,8 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Droid::Widget::FrameLayout;
-using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
-using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandler;
+using Elastos::Droid::Dialer::CallLog::CallLogAdapter;
+using Elastos::Droid::Dialer::CallLog::CallLogQueryHandler;
 using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandlerListener;
 
 namespace Elastos {
@@ -191,12 +193,10 @@ private:
 public:
     CAR_INTERFACE_DECL();
 
-    ShortcutCardsAdapter();
-
-    CARAPI constructor(
+    ShortcutCardsAdapter(
         /* [in] */ IContext* context,
         /* [in] */ IListsFragment* fragment,
-        /* [in] */ ICallLogAdapter* callLogAdapter);
+        /* [in] */ CallLogAdapter* callLogAdapter);
 
     /**
      * Determines the number of items in the adapter.
@@ -253,13 +253,13 @@ public:
         /* [out] */ Boolean* enabled);
 
 private:
-    static const String TAG; // = ShortcutCardsAdapter.class.getSimpleName();
-    static const Float CLIP_CARD_BARELY_HIDDEN_RATIO; // = 0.001f;
-    static const Float CLIP_CARD_MOSTLY_HIDDEN_RATIO; // = 0.9f;
+    static const String TAG;
+    static const Float CLIP_CARD_BARELY_HIDDEN_RATIO = 0.001f;
+    static const Float CLIP_CARD_MOSTLY_HIDDEN_RATIO = 0.9f;
     // Fade out 5x faster than the hidden ratio.
-    static const Float CLIP_CARD_OPACITY_RATIO; // = 5f;
+    static const Float CLIP_CARD_OPACITY_RATIO = 5f;
 
-    AutoPtr<ICallLogAdapter> mCallLogAdapter;
+    AutoPtr<CallLogAdapter> mCallLogAdapter;
 
     AutoPtr<IListsFragment> mFragment;
 
@@ -276,7 +276,7 @@ private:
 
     AutoPtr<IDataSetObserver> mObserver;
 
-    AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
+    AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
 
     AutoPtr<ISwipeHelperOnItemGestureListener> mCallLogOnItemSwipeListene;
     AutoPtr<ICallLogQueryHandlerListener> mCallLogQueryHandlerListener;

@@ -321,7 +321,9 @@ ECode SpeedDialFragment::OnAttach(
     AutoPtr<IOnDataSetChangedForAnimationListener> listener = new InnerOnDataSetChangedListener(this);
     mContactTileAdapter = new PhoneFavoritesTileAdapter(IContext::Probe(activity), mContactTileAdapterListener,
             listener);
-    AutoPtr<IContactPhotoManager> cpm = ContactPhotoManager::GetInstance(IContext::Probe(activity));
+    AutoPtr<IContactPhotoManager> cpm;
+    // TODO:
+    // cpm = ContactPhotoManager::GetInstance(IContext::Probe(activity));
     mContactTileAdapter->SetPhotoLoader(cpm);
     return NOERROR;
 }
