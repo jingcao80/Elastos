@@ -9,8 +9,8 @@ INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Ex/Common/inc
 INCLUDES += $(MAKEDIR)/../../../../../../PhoneCommon/inc/
 INCLUDES += ../../../../../
 
-#SOURCES += AllContactsFragment.cpp
-#SOURCES += CAllContactsFragment.cpp
+SOURCES += AllContactsFragment.cpp
+SOURCES += CAllContactsFragment.cpp
 SOURCES += DialerPhoneNumberListAdapter.cpp
 #SOURCES += CDialerPhoneNumberListAdapter.cpp
 SOURCES += DragDropController.cpp

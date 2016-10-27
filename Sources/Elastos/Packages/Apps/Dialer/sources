@@ -35,6 +35,9 @@ SOURCES += CViewPagerSavedState.cpp
 SOURCES += FragmentPagerAdapter.cpp
 SOURCES += CompositeCursorAdapter.cpp
 SOURCES += GroupingListAdapter.cpp
+SOURCES += FragmentCompat.cpp
+SOURCES += FragmentCompatICS.cpp
+SOURCES += FragmentCompatICSMR1.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 

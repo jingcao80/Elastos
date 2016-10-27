@@ -2,14 +2,15 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGFRAGMENT_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLLOGFRAGMENT_H__
 
+#include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include "elastos/droid/dialerbind/analytics/AnalyticsListFragment.h"
 #include "elastos/droid/dialer/calllog/CallLogAdapter.h"
 #include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
 #include "elastos/droid/dialer/calllog/CallLogListItemViews.h"
-#include "elastos/droid/dialerbind/analytics/AnalyticsListFragment.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Runnable.h"
 

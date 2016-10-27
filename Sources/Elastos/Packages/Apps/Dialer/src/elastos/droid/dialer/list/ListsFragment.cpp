@@ -1,10 +1,10 @@
 
 #include "elastos/droid/dialer/list/ListsFragment.h"
-// #include "elastos/droid/dialer/list/CAllContactsFragment.h"
 #include "elastos/droid/dialer/list/SpeedDialFragment.h"
+#include "elastos/droid/dialer/list/CAllContactsFragment.h"
 // #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
 // #include "elastos/droid/dialer/list/CShortcutCardsAdapter.h"
-// #include "elastos/droid/dialer/calllog/CCallLogFragment.h"
+#include "elastos/droid/dialer/calllog/CallLogFragment.h"
 // #include "elastos/droid/dialer/calllog/CContactInfoHelper.h"
 // #include "elastos/droid/dialer/calllog/CCallLogQueryHandler.h"
 #include "elastos/droid/dialer/util/DialerUtils.h"
@@ -19,11 +19,10 @@ using Elastos::Droid::App::IListFragment;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
-// using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::Widget::IAdapterView;
 // using Elastos::Droid::Dialer::CallLog::ICallLogQuery;
-// using Elastos::Droid::Dialer::CallLog::CCallLogFragment;
+using Elastos::Droid::Dialer::CallLog::CallLogFragment;
 // using Elastos::Droid::Dialer::CallLog::CCallLogQueryHandler;
 using Elastos::Droid::Dialer::Util::DialerUtils;
 // using Elastos::Droid::Dialer::IDialtactsActivity;
@@ -124,8 +123,7 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
             return NOERROR;
         }
         case TAB_INDEX_ALL_CONTACTS:
-            assert(0);
-            // CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
+            CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
             *item = IFragment::Probe(mHost->mAllContactsFragment);
             REFCOUNT_ADD(*item);
             return NOERROR;
@@ -145,7 +143,7 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
     // Copy the fragments that the FragmentManager finds so that we can store them in
     // instance variables for later.
-    // TODO:
+    // TODO
     // AutoPtr<IInterface> fragment;
     // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
     // if (ISpeedDialFragment::Probe(fragment) != NULL) {

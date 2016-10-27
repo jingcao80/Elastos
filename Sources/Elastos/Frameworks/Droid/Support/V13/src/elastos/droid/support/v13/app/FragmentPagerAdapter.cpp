@@ -1,5 +1,6 @@
 
 #include "elastos/droid/support/v13/app/FragmentPagerAdapter.h"
+#include "elastos/droid/support/v13/app/FragmentCompat.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -21,7 +22,6 @@ ECode FragmentPagerAdapter::StartUpdate(
     return NOERROR;
 }
 
-// @Override
 ECode FragmentPagerAdapter::InstantiateItem(
     /* [in] */ IViewGroup* container,
     /* [in] */ Int32 position,
@@ -52,9 +52,8 @@ ECode FragmentPagerAdapter::InstantiateItem(
                 MakeFragmentName(viewId, itemId));
     }
     if (fragment != mCurrentPrimaryItem) {
-        assert(0 && "TODO");
-        // FragmentCompat::SetMenuVisibility(fragment, FALSE);
-        // FragmentCompat::SetUserVisibleHint(fragment, FALSE);
+        FragmentCompat::SetMenuVisibility(fragment, FALSE);
+        FragmentCompat::SetUserVisibleHint(fragment, FALSE);
     }
 
     *newPage = fragment;
