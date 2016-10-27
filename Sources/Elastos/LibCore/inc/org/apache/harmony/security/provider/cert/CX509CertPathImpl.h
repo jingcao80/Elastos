@@ -4,6 +4,7 @@
 
 #include "_Org_Apache_Harmony_Security_Provider_Cert_CX509CertPathImpl.h"
 
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Elastos::Utility::IList;
 using Elastos::Utility::IIterator;
 

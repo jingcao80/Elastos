@@ -450,6 +450,9 @@ static ECode ThrowExceptionIfNecessary(const char* location  __attribute__ ((unu
         NATIVE_TRACE("OpenSSL error in %s error=%lx library=%x reason=%x (%s:%d): %s %s",
                   location, error, library, reason, file, line, message,
                   (flags & ERR_TXT_STRING) ? data : "(no data)");
+        Logger::E("NativeCrypto", "OpenSSL error in %s error=%lx library=%x reason=%x (%s:%d): %s %s",
+                  location, error, library, reason, file, line, message,
+                  (flags & ERR_TXT_STRING) ? data : "(no data)");
         switch (library) {
         case ERR_LIB_RSA:
             ec = ThrowForRsaError(reason, message);

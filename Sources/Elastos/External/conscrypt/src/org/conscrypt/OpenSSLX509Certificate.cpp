@@ -1,10 +1,15 @@
 
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.CoreLibrary.Apache.h"
 #include "OpenSSLX509Certificate.h"
 #include "NativeCrypto.h"
+#include "org/conscrypt/COpenSSLX509Certificate.h"
+#include "org/conscrypt/COpenSSLBIOInputStream.h"
+#include "org/conscrypt/CX509PublicKey.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
@@ -12,7 +17,7 @@ using Elastos::Math::CBigInteger;
 using Elastos::Security::IKeyFactory;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
-// using Elastos::Security::CSignatureHelper;
+using Elastos::Security::CSignatureHelper;
 using Elastos::Security::Spec::IKeySpec;
 using Elastos::Security::Spec::IX509EncodedKeySpec;
 using Elastos::Security::Spec::CX509EncodedKeySpec;
@@ -30,6 +35,9 @@ using Elastos::Utility::IHashSet;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::CDate;
 using Elastosx::Security::Auth::X500::CX500Principal;
+using Org::Apache::Harmony::Security::Utils::IAlgNameMapperHelper;
+using Org::Apache::Harmony::Security::Utils::CAlgNameMapperHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -37,7 +45,7 @@ namespace Conscrypt {
 //=========================================
 // OpenSSLX509Certificate::
 //=========================================
-CAR_INTERFACE_IMPL(OpenSSLX509Certificate, Object, IOpenSSLX509Certificate)
+CAR_INTERFACE_IMPL(OpenSSLX509Certificate, X509Certificate, IOpenSSLX509Certificate)
 
 ECode OpenSSLX509Certificate::constructor(
     /* [in] */ Int64 ctx)
@@ -52,8 +60,7 @@ ECode OpenSSLX509Certificate::FromX509DerInputStream(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IOpenSSLBIOInputStream> bis;
-    assert(0 && "TODO");
-    // COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
+    COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
 
     // try {
         Int64 context = 0;
@@ -65,8 +72,7 @@ ECode OpenSSLX509Certificate::FromX509DerInputStream(
             return NOERROR;
         }
         AutoPtr<IOpenSSLX509Certificate> res;
-        assert(0 && "TODO");
-        // COpenSSLX509Certificate::New(certCtx, (IOpenSSLX509Certificate**)&res);
+        COpenSSLX509Certificate::New(certCtx, (IOpenSSLX509Certificate**)&res);
         *result = res;
         REFCOUNT_ADD(*result)
     // } catch (Exception e) {
@@ -89,8 +95,7 @@ ECode OpenSSLX509Certificate::FromX509Der(
         return NOERROR;
     }
     AutoPtr<IOpenSSLX509Certificate> res;
-    assert(0 && "TODO");
-    // COpenSSLX509Certificate::New(certCtx, (IOpenSSLX509Certificate**)&res);
+    COpenSSLX509Certificate::New(certCtx, (IOpenSSLX509Certificate**)&res);
     *result = res;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -102,8 +107,7 @@ ECode OpenSSLX509Certificate::FromPkcs7DerInputStream(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IOpenSSLBIOInputStream> bis;
-    assert(0 && "TODO");
-    // COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
+    COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
 
     Int64 context = 0;
     bis->GetBioContext(&context);
@@ -129,8 +133,7 @@ ECode OpenSSLX509Certificate::FromPkcs7DerInputStream(
             continue;
         }
         AutoPtr<IOpenSSLX509Certificate> p;
-        assert(0 && "TODO");
-        // COpenSSLX509Certificate::New((*certRefs)[i], (IOpenSSLX509Certificate**)&p)
+        COpenSSLX509Certificate::New((*certRefs)[i], (IOpenSSLX509Certificate**)&p);
         certs->Add(p);
     }
     *result = certs;
@@ -144,8 +147,7 @@ ECode OpenSSLX509Certificate::FromX509PemInputStream(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IOpenSSLBIOInputStream> bis;
-    assert(0 && "TODO");
-    // COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
+    COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
 
     // try {
         Int64 context = 0;
@@ -157,8 +159,7 @@ ECode OpenSSLX509Certificate::FromX509PemInputStream(
             return NOERROR;
         }
         AutoPtr<IOpenSSLX509Certificate> res;
-        assert(0 && "TODO");
-        // COpenSSLX509Certificate::New(certCtx, (IOpenSSLX509Certificate**)&res);
+        COpenSSLX509Certificate::New(certCtx, (IOpenSSLX509Certificate**)&res);
         *result = res;
         REFCOUNT_ADD(*result)
     // } catch (Exception e) {
@@ -175,8 +176,7 @@ ECode OpenSSLX509Certificate::FromPkcs7PemInputStream(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IOpenSSLBIOInputStream> bis;
-    assert(0 && "TODO");
-    // COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
+    COpenSSLBIOInputStream::New(is, (IOpenSSLBIOInputStream**)&bis);
 
     AutoPtr<ArrayOf<Int64> > certRefs;
     // try {
@@ -198,8 +198,7 @@ ECode OpenSSLX509Certificate::FromPkcs7PemInputStream(
             continue;
         }
         AutoPtr<IOpenSSLX509Certificate> p;
-        assert(0 && "TODO");
-        // COpenSSLX509Certificate::New((*certRefs)[i], (IOpenSSLX509Certificate**)&p)
+        COpenSSLX509Certificate::New((*certRefs)[i], (IOpenSSLX509Certificate**)&p);
         certs->Add(p);
     }
     *result = certs;
@@ -444,9 +443,9 @@ ECode OpenSSLX509Certificate::GetSigAlgName(
     VALIDATE_NOT_NULL(result)
     String oid;
     GetSigAlgOID(&oid);
-    assert(0 && "TODO");
-    // return AlgNameMapper::Map2AlgName(oid, result);
-    return NOERROR;
+    AutoPtr<IAlgNameMapperHelper> anmHelper;
+    CAlgNameMapperHelper::AcquireSingleton((IAlgNameMapperHelper**)&anmHelper);
+    return anmHelper->Map2AlgName(oid, result);
 }
 
 ECode OpenSSLX509Certificate::GetSigAlgOID(
@@ -553,8 +552,7 @@ void OpenSSLX509Certificate::VerifyInternal(
     }
 
     AutoPtr<ISignatureHelper> hlp;
-    assert(0 && "TODO");
-    // CSignatureHelper::AcquireSingleton((ISignatureHelper**)&hlp);
+    CSignatureHelper::AcquireSingleton((ISignatureHelper**)&hlp);
     AutoPtr<ISignature> sig;
     if (sigProvider.IsNull()) {
         hlp->GetInstance(sigAlg, (ISignature**)&sig);
@@ -593,7 +591,7 @@ ECode OpenSSLX509Certificate::Verify(
 
 ECode OpenSSLX509Certificate::Verify(
     /* [in] */ IPublicKey* key,
-    /* [in] */ String sigProvider)
+    /* [in] */ const String& sigProvider)
 {
     VerifyInternal(key, sigProvider);
     return NOERROR;
@@ -651,8 +649,7 @@ ECode OpenSSLX509Certificate::GetPublicKey(
      * X.509-encoded key.
      */
     AutoPtr<IX509PublicKey> res;
-    assert(0 && "TODO");
-    // CX509PublicKey::New(oid, encoded, (IX509PublicKey**)&res);
+    CX509PublicKey::New(oid, encoded, (IX509PublicKey**)&res);
     *result = IPublicKey::Probe(res);
     REFCOUNT_ADD(*result)
     return NOERROR;

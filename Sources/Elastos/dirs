@@ -3,4 +3,5 @@ DIRS = Runtime
 DIRS += LibCore
 DIRS += Frameworks/Droid
 DIRS += Packages
+DIRS += External
 #DIRS += Samples

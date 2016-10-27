@@ -8,7 +8,8 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-CAR_INTERFACE_IMPL(ASN1SequenceOf, ASN1ValueCollection, IASN1SequenceOf)
+CAR_INTERFACE_IMPL(ASN1SequenceOf, ASN1ValueCollection, IASN1SequenceOf);
+
 ECode ASN1SequenceOf::Decode(
     /* [in] */ IBerInputStream* bis,
     /* [out] */ IInterface** object)

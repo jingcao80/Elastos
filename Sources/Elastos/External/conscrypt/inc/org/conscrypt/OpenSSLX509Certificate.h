@@ -3,6 +3,7 @@
 #define __ORG_CONSCRYPT_OPENSSLX509CERTIFICATE_H__
 
 #include "Elastos.CoreLibrary.Extensions.h"
+#include "elastos/security/cert/X509Certificate.h"
 #include "_Org.Conscrypt.h"
 #include <elastos/core/Object.h>
 
@@ -15,13 +16,14 @@ using Elastos::Utility::IList;
 using Elastos::Security::IPrincipal;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::Cert::X509Certificate;
 using Elastosx::Security::Auth::X500::IX500Principal;
 
 namespace Org {
 namespace Conscrypt {
 
 class OpenSSLX509Certificate
-    : public Object  // public X509Certificate
+    : public X509Certificate
     , public IOpenSSLX509Certificate
 {
 public:
@@ -125,7 +127,7 @@ public:
 
     CARAPI Verify(
         /* [in] */ IPublicKey* key,
-        /* [in] */ String sigProvider);
+        /* [in] */ const String& sigProvider);
 
     CARAPI ToString(
         /* [out] */ String* result);

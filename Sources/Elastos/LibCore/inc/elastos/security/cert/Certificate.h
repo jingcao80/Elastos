@@ -3,7 +3,7 @@
 #define __ELASTOS_SECURITY_CERT_CERTIFICATE_H__
 
 #include "Elastos.CoreLibrary.Security.h"
-#include "core/Object.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Core::Object;
 using Elastos::IO::IInputStream;
@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-class Certificate
+class ECO_PUBLIC Certificate
     : public Object
     , public ICertificate
     , public ISerializable

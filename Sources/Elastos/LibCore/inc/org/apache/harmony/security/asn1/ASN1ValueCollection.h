@@ -22,8 +22,11 @@ namespace Asn1 {
  */
 class ASN1ValueCollection
     : public ASN1Constructed
+    , public IASN1ValueCollection
 {
 public:
+    CAR_INTERFACE_DECL();
+
     ASN1ValueCollection();
 
     CARAPI constructor(
@@ -42,6 +45,12 @@ public:
     virtual CARAPI GetValues(
         /* [in] */ IInterface* object,
         /* [out] */ ICollection** values);
+
+    CARAPI SetType(
+        /* [in] */ IASN1Type* type);
+
+    CARAPI GetType(
+        /* [out] */ IASN1Type** type);
 
 public:
     /** A value collection of this ASN.1 type */

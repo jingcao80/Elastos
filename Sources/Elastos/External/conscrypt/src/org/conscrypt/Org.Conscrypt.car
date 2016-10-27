@@ -801,6 +801,8 @@ module
         constructor(
             [in] Int64 ctx);
 
+        interface IX509Certificate;
+        interface IX509Extension;
         interface IOpenSSLX509Certificate;
     }
 

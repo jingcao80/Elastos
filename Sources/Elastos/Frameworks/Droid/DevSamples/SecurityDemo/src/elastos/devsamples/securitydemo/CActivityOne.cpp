@@ -18,12 +18,15 @@ using Elastos::Droid::Widget::IImageView;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::IInputStream;
-using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::CKeyStoreHelper;
 using Elastos::Security::CSignatureHelper;
 using Elastos::Security::IKey;
 using Elastos::Security::IKeyStore;
 using Elastos::Security::IKeyStoreHelper;
+using Elastos::Security::IKeyFactoryHelper;
+using Elastos::Security::CKeyFactoryHelper;
+using Elastos::Security::IKeyFactory;
+using Elastos::Security::IPrincipal;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::ISignature;
@@ -31,9 +34,20 @@ using Elastos::Security::ISignatureHelper;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::CSecureRandomHelper;
 using Elastos::Security::ISecureRandomHelper;
+using Elastos::Security::Cert::ICertificateFactoryHelper;
+using Elastos::Security::Cert::CCertificateFactoryHelper;
+using Elastos::Security::Cert::ICertificateFactory;
+using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Security::Spec::IX509EncodedKeySpec;
+using Elastos::Security::Spec::CX509EncodedKeySpec;
+using Elastos::Security::Spec::IKeySpec;
 using Elastos::Utility::Logging::Logger;
 using Org::Apache::Harmony::Security::Fortress::Services;
 
+using Elastosx::Crypto::IKeyAgreement;
+using Elastosx::Crypto::IKeyAgreementHelper;
+using Elastosx::Crypto::CKeyAgreementHelper;
 using Elastosx::Crypto::IKeyGeneratorHelper;
 using Elastosx::Crypto::CKeyGeneratorHelper;
 using Elastosx::Crypto::IKeyGenerator;
@@ -96,6 +110,7 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::Button12) {
         return mHost->ButtonCSecureRandom();
+    }
     else if (id == R::id::signaturetest) {
         return mHost->SignatureTest();
     }
@@ -254,6 +269,9 @@ ECode CActivityOne::OnCreate(
     view = FindViewById(R::id::Button2);
     view->SetOnClickListener(l.Get());
 
+    view = FindViewById(R::id::Button6);
+    view->SetOnClickListener(l.Get());
+
     view = FindViewById(R::id::Button7);
     view->SetOnClickListener(l.Get());
 
@@ -403,11 +421,89 @@ ECode CActivityOne::Button2Function()
     return NOERROR;
 }
 
-<<<<<<< Updated upstream
 ECode CActivityOne::Button6Function()// KeyAgreement
 {
     Logger::E(TAG, "leliang begin Button6Function ");
     Services::Initialize();
+    AutoPtr<IKeyAgreementHelper> kaHelper;
+    CKeyAgreementHelper::AcquireSingleton((IKeyAgreementHelper**)&kaHelper);
+    AutoPtr<IKeyAgreement> ka;
+    kaHelper->GetInstance(String("ECDH"), (IKeyAgreement**)&ka);
+    Logger::E(TAG, "leliang after get IKeyAgreement ka:%p", ka.Get());
+
+    AutoPtr<IKeyFactoryHelper> kfHelper;
+    CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
+    AutoPtr<IKeyFactory> kf;
+    kfHelper->GetInstance(String("RSA"), (IKeyFactory**)&kf);
+
+    AutoPtr<ArrayOf<Byte> > der_public = ArrayOf<Byte>::Alloc(162);
+    der_public->Set(0, 0x30); der_public->Set(1, 0x81); der_public->Set(2, 0x9f); der_public->Set(3, 0x30);
+    der_public->Set(4, 0xd); der_public->Set(5, 0x6); der_public->Set(6, 0x9); der_public->Set(7, 0x2a);
+    der_public->Set(8, 0x86); der_public->Set(9, 0x48); der_public->Set(10, 0x86); der_public->Set(11, 0xf7);
+    der_public->Set(12, 0xd); der_public->Set(13, 0x1); der_public->Set(14, 0x1); der_public->Set(15, 0x1);
+    der_public->Set(16, 0x5); der_public->Set(17, 0x0); der_public->Set(18, 0x3); der_public->Set(19, 0x81);
+    der_public->Set(20, 0x8d); der_public->Set(21, 0x0); der_public->Set(22, 0x30); der_public->Set(23, 0x81);
+    der_public->Set(24, 0x89); der_public->Set(25, 0x2); der_public->Set(26, 0x81); der_public->Set(27, 0x81);
+    der_public->Set(28, 0x0); der_public->Set(29, 0xe9); der_public->Set(30, 0x9b); der_public->Set(31, 0x82);
+    der_public->Set(32, 0x9a); der_public->Set(33, 0x9b); der_public->Set(34, 0x1b); der_public->Set(35, 0xa5);
+    der_public->Set(36, 0x26); der_public->Set(37, 0x7c); der_public->Set(38, 0x9c); der_public->Set(39, 0x13);
+    der_public->Set(40, 0x33); der_public->Set(41, 0x4e); der_public->Set(42, 0x34); der_public->Set(43, 0x63);
+    der_public->Set(44, 0x3b); der_public->Set(45, 0xa7); der_public->Set(46, 0x40); der_public->Set(47, 0xaf);
+    der_public->Set(48, 0x1); der_public->Set(49, 0xaa); der_public->Set(50, 0x19); der_public->Set(51, 0xc4);
+    der_public->Set(52, 0x91); der_public->Set(53, 0x1d); der_public->Set(54, 0xe4); der_public->Set(55, 0x3b);
+    der_public->Set(56, 0xe2); der_public->Set(57, 0xa3); der_public->Set(58, 0x96); der_public->Set(59, 0xfa);
+    der_public->Set(60, 0x5); der_public->Set(61, 0x13); der_public->Set(62, 0x9d); der_public->Set(63, 0xa);
+    der_public->Set(64, 0xd4); der_public->Set(65, 0x4d); der_public->Set(66, 0x94); der_public->Set(67, 0x4b);
+    der_public->Set(68, 0x1); der_public->Set(69, 0xfb); der_public->Set(70, 0xdb); der_public->Set(71, 0xed);
+    der_public->Set(72, 0x7); der_public->Set(73, 0x9b); der_public->Set(74, 0x61); der_public->Set(75, 0x93);
+    der_public->Set(76, 0x20); der_public->Set(77, 0xd5); der_public->Set(78, 0xb); der_public->Set(79, 0xb3);
+    der_public->Set(80, 0x7e); der_public->Set(81, 0x21); der_public->Set(82, 0x6d); der_public->Set(83, 0x0);
+    der_public->Set(84, 0x8e); der_public->Set(85, 0xdc); der_public->Set(86, 0x83); der_public->Set(87, 0x13);
+    der_public->Set(88, 0xa8); der_public->Set(89, 0x76); der_public->Set(90, 0x40); der_public->Set(91, 0xff);
+    der_public->Set(92, 0x80); der_public->Set(93, 0x59); der_public->Set(94, 0xaf); der_public->Set(95, 0x9c);
+    der_public->Set(96, 0xe1); der_public->Set(97, 0xd8); der_public->Set(98, 0x74); der_public->Set(99, 0x44);
+    der_public->Set(100, 0xcd); der_public->Set(101, 0xae); der_public->Set(102, 0x35); der_public->Set(103, 0x55);
+    der_public->Set(104, 0xe4); der_public->Set(105, 0x51); der_public->Set(106, 0x63); der_public->Set(107, 0xeb);
+    der_public->Set(108, 0x3); der_public->Set(109, 0xc0); der_public->Set(110, 0xbe); der_public->Set(111, 0xf8);
+    der_public->Set(112, 0x61); der_public->Set(113, 0xef); der_public->Set(114, 0x10); der_public->Set(115, 0x39);
+    der_public->Set(116, 0x71); der_public->Set(117, 0x67); der_public->Set(118, 0x34); der_public->Set(119, 0x46);
+    der_public->Set(120, 0x89); der_public->Set(121, 0x1); der_public->Set(122, 0xc); der_public->Set(123, 0xba);
+    der_public->Set(124, 0x2a); der_public->Set(125, 0x69); der_public->Set(126, 0x61); der_public->Set(127, 0xf2);
+    der_public->Set(128, 0x32); der_public->Set(129, 0x5); der_public->Set(130, 0x59); der_public->Set(131, 0xe);
+    der_public->Set(132, 0xfb); der_public->Set(133, 0x8f); der_public->Set(134, 0x86); der_public->Set(135, 0x46);
+    der_public->Set(136, 0xf9); der_public->Set(137, 0xe4); der_public->Set(138, 0x1b); der_public->Set(139, 0x87);
+    der_public->Set(140, 0x4a); der_public->Set(141, 0x8f); der_public->Set(142, 0x3c); der_public->Set(143, 0x6b);
+    der_public->Set(144, 0x41); der_public->Set(145, 0x83); der_public->Set(146, 0xea); der_public->Set(147, 0x29);
+    der_public->Set(148, 0x42); der_public->Set(149, 0xb7); der_public->Set(150, 0xb); der_public->Set(151, 0x83);
+    der_public->Set(152, 0xe0); der_public->Set(153, 0x15); der_public->Set(154, 0x6d); der_public->Set(155, 0x85);
+    der_public->Set(156, 0x7b); der_public->Set(157, 0x2); der_public->Set(158, 0x3); der_public->Set(159, 0x1);
+    der_public->Set(160, 0x0); der_public->Set(161, 0x1);
+
+    AutoPtr<IX509EncodedKeySpec> x509EncodedKeySpec;
+    CX509EncodedKeySpec::New(der_public, (IX509EncodedKeySpec**)&x509EncodedKeySpec);
+    IKeySpec* keySpec = IKeySpec::Probe(x509EncodedKeySpec);
+    Logger::E(TAG, "leliang keySpec: %p", keySpec);
+
+    AutoPtr<IPublicKey> pubKey;
+    kf->GeneratePublic(keySpec, (IPublicKey**)&pubKey);
+    Logger::E(TAG, "leliang pubKey: %p", pubKey.Get());
+    AutoPtr<IPrivateKey> priKey;
+    kf->GeneratePrivate(keySpec, (IPrivateKey**)&priKey);
+    Logger::E(TAG, "leliang priKey: %p", priKey.Get());
+
+    AutoPtr<IKey> tmpResult;
+    ka->Init(IKey::Probe(priKey));
+    ka->DoPhase(IKey::Probe(pubKey), TRUE, (IKey**)&tmpResult);
+
+    AutoPtr<ArrayOf<Byte> > secret;
+    ka->GenerateSecret((ArrayOf<Byte>**)&secret);
+
+    Logger::E(TAG, "leliang secret begin");
+    for (Int32 i = 0; i < secret->GetLength(); i++) {
+        Logger::E(TAG, "secret[%d]=%d", i, (*secret)[i]);
+    }
+    Logger::E(TAG, "leliang secret end");
+    Logger::E(TAG, "leliang end Button6Function ");
     return NOERROR;
 }
 
@@ -415,6 +511,61 @@ ECode CActivityOne::Button7Function()// Certificate
 {
     Logger::E(TAG, "leliang begin Button7Function");
     Services::Initialize();
+    AutoPtr<ICertificateFactoryHelper> cfHelper;
+    CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfHelper);
+    AutoPtr<ICertificateFactory> cf;
+    cfHelper->GetInstance(String("X509"), (ICertificateFactory**)&cf);
+    Logger::E(TAG, "leliang after get ICertificateFactory cf:%p", cf.Get());
+    AutoPtr<IFileInputStream> fis;
+    CFileInputStream::New(String("/data/security/test.crt"), (IFileInputStream**)&fis);
+    Logger::E(TAG, "leliang after create CFileInputStream, fis:%p", fis.Get());
+    if (fis == NULL) {
+        Logger::E(TAG, "leliang /data/security/test.crt is not found");
+        return NOERROR;
+    }
+    AutoPtr<ICertificate> certificate;
+    cf->GenerateCertificate(IInputStream::Probe(fis), (ICertificate**)&certificate);
+    Logger::E(TAG, "leliang after get ICertificate certificate:%p", certificate.Get());
+
+    String type;
+    certificate->GetType(&type);
+    Logger::E(TAG, "certificate type:%s", type.string());
+    IX509Certificate* x509Certificate = IX509Certificate::Probe(certificate);
+    Logger::E(TAG, "leliang after get IX509Certificate:%p", x509Certificate);
+    Int32 version;
+    x509Certificate->GetVersion(&version);
+    Logger::E(TAG, "x509 version:%d", version);
+    AutoPtr<IBigInteger> sn;
+    x509Certificate->GetSerialNumber((IBigInteger**)&sn);
+    String serialNum;
+    sn->ToString(10, &serialNum);
+    Logger::E(TAG, "x509 serial number:%s", serialNum.string());
+    AutoPtr<IPrincipal> issueDN;
+    x509Certificate->GetIssuerDN((IPrincipal**)&issueDN);
+    String issueDNName;
+    issueDN->GetName(&issueDNName);
+    Logger::E(TAG, "x509 issueDN:%s", issueDNName.string());
+    AutoPtr<IPrincipal> subjectDN;
+    x509Certificate->GetSubjectDN((IPrincipal**)&subjectDN);
+    String subjectDNName;
+    subjectDN->GetName(&subjectDNName);
+    Logger::E(TAG, "x509 subjectDNName:%s", subjectDNName.string());
+    String sigAlgName;
+    x509Certificate->GetSigAlgName(&sigAlgName);
+    Logger::E(TAG, "x509 sigAlgName:%s", sigAlgName.string());
+    AutoPtr<IDate> notBefore;
+    x509Certificate->GetNotBefore((IDate**)&notBefore);
+    String nbString;
+    notBefore->ToString(&nbString);
+    AutoPtr<IDate> notAfter;
+    x509Certificate->GetNotAfter((IDate**)&notAfter);
+    String naString;
+    notAfter->ToString(&naString);
+    Logger::E(TAG, "x509 naString:%s, nbString:%s", naString.string(), nbString.string());
+
+
+
+    Logger::E(TAG, "leliang end Button7Function");
     return NOERROR;
 }
 
@@ -451,11 +602,11 @@ ECode CActivityOne::ButtonCSecureRandom()
     // }
 
     return NOERROR;
-=======
+}
+
 ECode CActivityOne::SignatureTest()
 {
     return SignatureTest::MD5WithRSA();
->>>>>>> Stashed changes
 }
 
 } // namespace SecurityDemo

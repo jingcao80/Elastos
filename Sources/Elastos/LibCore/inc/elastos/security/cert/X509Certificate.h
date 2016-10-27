@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_SECURITY_CERT_X509CERTIFICATE_H__
 #define __ELASTOS_SECURITY_CERT_X509CERTIFICATE_H__
 
-#include "security/cert/Certificate.h"
+#include "elastos/security/cert/Certificate.h"
 
 using Elastos::Math::IBigInteger;
 using Elastos::Security::IPrincipal;
@@ -17,7 +17,7 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-class X509Certificate
+class ECO_PUBLIC X509Certificate
     : public Certificate
     , public IX509Certificate
     , public IX509Extension

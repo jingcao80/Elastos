@@ -116,6 +116,8 @@ EXPORT_HEADERS += elastos/security/KeyStoreSpi.h
 EXPORT_HEADERS += elastos/security/cert/CertificateFactorySpi.h
 EXPORT_HEADERS += elastos/security/Provider.h
 EXPORT_HEADERS += elastos/security/SignatureSpi.h
+EXPORT_HEADERS += elastos/security/cert/X509Certificate.h
+EXPORT_HEADERS += elastos/security/cert/Certificate.h
 
 EXPORT_HEADERS += libcore/io/SocketTagger.h
 EXPORT_HEADERS += libcore/utility/EmptyArray.h

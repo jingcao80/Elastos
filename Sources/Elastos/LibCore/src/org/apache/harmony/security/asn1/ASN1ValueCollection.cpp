@@ -10,6 +10,8 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
+CAR_INTERFACE_IMPL(ASN1ValueCollection, ASN1Constructed, IASN1ValueCollection);
+
 ASN1ValueCollection::ASN1ValueCollection()
 {}
 
@@ -29,6 +31,22 @@ ECode ASN1ValueCollection::GetValues(
     VALIDATE_NOT_NULL(values)
     *values = ICollection::Probe(object);
     REFCOUNT_ADD(*values)
+    return NOERROR;
+}
+
+ECode ASN1ValueCollection::SetType(
+    /* [in] */ IASN1Type* type)
+{
+    mType = type;
+    return NOERROR;
+}
+
+ECode ASN1ValueCollection::GetType(
+    /* [out] */ IASN1Type** type)
+{
+    VALIDATE_NOT_NULL(type);
+    *type = mType;
+    REFCOUNT_ADD(*type);
     return NOERROR;
 }
 
