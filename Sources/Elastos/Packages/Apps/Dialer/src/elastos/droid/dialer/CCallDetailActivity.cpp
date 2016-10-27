@@ -539,7 +539,8 @@ ECode CCallDetailActivity::OnCreate(
     mAccountLabel = ITextView::Probe(view);
 
     mDefaultCountryIso = GeoUtil::GetCurrentCountryIso(this);
-    mContactPhotoManager = ContactPhotoManager::GetInstance(this);
+    // TODO:
+    // mContactPhotoManager = ContactPhotoManager::GetInstance(this);
     CProximitySensorManager::New(this, mProximitySensorListener,
             (ProximitySensorManager**)&mProximitySensorManager);
     CContactInfoHelper::New(this, GeoUtil::GetCurrentCountryIso(this),

@@ -3,6 +3,8 @@
 #include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "elastos/droid/contacts/common/lettertiles/LetterTileDrawable.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
 using Elastos::Droid::Contacts::Common::EIID_IContactPhotoManagerDefaultImageRequest;
@@ -15,6 +17,8 @@ using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -234,6 +238,7 @@ AutoPtr<IUri> ContactPhotoManager::InitDefaultImageUri()
 }
 const AutoPtr<IUri> ContactPhotoManager::DEFAULT_IMAGE_URI = ContactPhotoManager::InitDefaultImageUri();
 AutoPtr<IDrawable> ContactPhotoManager::sDefaultLetterAvatar;
+Object ContactPhotoManager::sLock;
 
 CAR_INTERFACE_IMPL_2(ContactPhotoManager, Object, IContactPhotoManager, IComponentCallbacks2)
 
@@ -277,13 +282,24 @@ Boolean ContactPhotoManager::IsBusinessContactUri(
 AutoPtr<IContactPhotoManager> ContactPhotoManager::GetInstance(
     /* [in] */ IContext* context)
 {
-    assert(0);
-    return NULL;
+    AutoPtr<IContext> applicationContext;
+    context->GetApplicationContext((IContext**)&applicationContext);
+    AutoPtr<IInterface> s;
+    applicationContext->GetSystemService(CONTACT_PHOTO_SERVICE, (IInterface**)&s);
+    AutoPtr<IContactPhotoManager> service = IContactPhotoManager::Probe(s);
+    if (service == NULL) {
+        assert(0);
+        // service = CreateContactPhotoManager(applicationContext);
+        Logger::E(TAG, "No contact photo service in context: %s", TO_CSTR(applicationContext));
+    }
+    return service;
 }
 
 AutoPtr<IContactPhotoManager> ContactPhotoManager::CreateContactPhotoManager(
     /* [in] */ IContext* context)
 {
+    AutoLock lock(sLock);
+    // return new ContactPhotoManagerImpl(context);
     assert(0);
     return NULL;
 }

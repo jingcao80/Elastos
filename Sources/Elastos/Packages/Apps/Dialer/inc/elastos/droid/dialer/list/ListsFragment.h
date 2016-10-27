@@ -9,6 +9,8 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
+#include "elastos/droid/dialer/calllog/CallLogAdapter.h"
 #include "elastos/droid/dialerbind/analytics/AnalyticsFragment.h"
 #include "elastos/droid/support/v4/view/CViewPager.h"
 #include "elastos/droid/support/v13/app/FragmentPagerAdapter.h"
@@ -27,10 +29,10 @@ using Elastos::Droid::Widget::IListView;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
 using Elastos::Droid::Contacts::Common::List::IViewPagerTabs;
-// using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
+using Elastos::Droid::Dialer::CallLog::CallLogQueryHandler;
+using Elastos::Droid::Dialer::CallLog::CallLogAdapter;
 using Elastos::Droid::Dialer::CallLog::ICallFetcher;
 using Elastos::Droid::Dialer::CallLog::ICallLogFragment;
-// using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandler;
 using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayout;
 using Elastos::Droid::Dialer::Widget::IPanelSlideCallbacks;
@@ -55,7 +57,6 @@ namespace List {
 class ListsFragment
     : public AnalyticsFragment
     , public IListsFragment
-    , public ICallLogQueryHandlerListener
     , public ICallFetcher
 {
 public:
@@ -82,6 +83,31 @@ public:
         // @Override
         virtual CARAPI OnPageScrollStateChanged(
             /* [in] */ Int32 state);
+
+    private:
+        ListsFragment* mHost;
+    };
+
+    class InnerCallLogQueryHandlerListener
+        : public Object
+        , public ICallLogQueryHandlerListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerCallLogQueryHandlerListener(
+            /* [in] */ ListsFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnVoicemailStatusFetched(
+            /* [in] */ ICursor* statusCursor);
+
+        // @Override
+        CARAPI OnCallsFetched(
+            /* [in] */ ICursor* cursor,
+            /* [out] */ Boolean* result);
 
     private:
         ListsFragment* mHost;
@@ -271,9 +297,9 @@ private:
 
     AutoPtr<ArrayOf<String> > mTabTitles;
 
-    // AutoPtr<IShortcutCardsAdapter> mMergedAdapter;
-    // AutoPtr<ICallLogAdapter> mCallLogAdapter;
-    // AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
+    // AutoPtr<ShortcutCardsAdapter> mMergedAdapter;
+    AutoPtr<CallLogAdapter> mCallLogAdapter;
+    AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
 
     Boolean mIsPanelOpen;
 
