@@ -1,21 +1,19 @@
 #ifndef __ELASTOS_DROID_DIALER_LIST_ALLCONTACTSFRAGMENT_H__
 #define __ELASTOS_DROID_DIALER_LIST_ALLCONTACTSFRAGMENT_H__
 
-#include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/app/Fragment.h>
+#include "elastos/droid/contacts/common/list/ContactEntryListFragment.h"
+// #include "elastos/droid/contacts/common/list/DefaultContactListAdapters.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 
-using Elastos::Droid::App::Fragment;
+using Elastos::Droid::Contacts::Common::List::ContactEntryListFragment;
+using Elastos::Droid::Contacts::Common::List::IContactEntryListAdapter;
+// using Elastos::Droid::Contacts::Common::List::DefaultContactListAdapters;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::View::ILayoutInflater;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::Widget::IAdapterView;
 
 namespace Elastos {
 namespace Droid {
@@ -26,9 +24,7 @@ namespace List {
  * Fragments to show all contacts with phone numbers.
  */
 class AllContactsFragment
-    // TODO:
-    /*: public ContactEntryListFragment*/
-    : public Fragment
+    : public ContactEntryListFragment
     , public IAllContactsFragment
 {
 private:
@@ -37,7 +33,9 @@ private:
     // {
     // public:
     //     MyDefaultContactListAdapter(
-    //         /* [in] */ AllContactsFragment* host);
+    //         /* [in] */ AllContactsFragment* host)
+    //         : mHost(host)
+    //     {}
 
     // protected:
     //     // @Override
@@ -52,9 +50,9 @@ private:
     // };
 
 public:
-    CAR_INTERFACE_DECL();
-
     AllContactsFragment();
+
+    CAR_INTERFACE_DECL()
 
     // @Override
     CARAPI OnViewCreated(
@@ -70,18 +68,15 @@ public:
 
 protected:
     // @Override
-    // TODO:
-    // CARAPI CreateListAdapter(
-    //     /* [out] */ IContactEntryListAdapter** adapter);
+    CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
 
     // @Override
-    CARAPI InflateView(
+    CARAPI_(AutoPtr<IView>) InflateView(
         /* [in] */ ILayoutInflater* inflater,
-        /* [in] */ IViewGroup* container,
-        /* [out] */ IView** view);
+        /* [in] */ IViewGroup* container);
 
     // @Override
-    CARAPI OnItemClick(
+    CARAPI_(void) OnItemClick(
         /* [in] */ Int32 position,
         /* [in] */ Int64 id);
 };

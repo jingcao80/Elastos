@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Elastos.Droid.App.IFragment;
+
+    submodule Elastos.Droid.Support.V13 {
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Support {
+    namespace V13 {
+    namespace App {
+
+    [local]
+    interface IFragmentCompatImpl {
+        SetMenuVisibility(
+            [in] IFragment* f,
+            [in] Boolean visible);
+
+        SetUserVisibleHint(
+            [in] IFragment* f,
+            [in] Boolean deferStart);
+    }
+
+    } // App
+    } // V13
+    } // Support
+    } // Droid
+    } // Elastos
+
+    } // submodule
+}

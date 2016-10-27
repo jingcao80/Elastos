@@ -32,6 +32,7 @@ module
     merge("car/elastos/droid/contacts/common/list/CustomContactListFilterActivity.car");
     merge("car/elastos/droid/contacts/common/list/ViewPagerTabs.car");
     merge("car/elastos/droid/contacts/common/list/ContactTileView.car");
+    merge("car/elastos/droid/contacts/common/list/ContactListAdapter.car");
     merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
     merge("car/elastos/droid/contacts/common/model/ValuesDelta.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");
@@ -142,6 +143,7 @@ module
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
     merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/MotionEventCompat.car");
+    merge("../../../Frameworks/Droid/Support/V13/car/elastos/droid/support/v13/app/FragmentCompat.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
@@ -247,6 +249,7 @@ module
 
     interface Elastos.Droid.Contacts.Common.List.IOnPhoneNumberPickerActionListener;
     interface Elastos.Droid.Contacts.Common.List.IContactTileView;
+    interface Elastos.Droid.Contacts.Common.List.IContactEntryListFragment;
     interface Elastos.Droid.Contacts.Common.Model.IValuesDelta;
     using interface Elastos.Droid.DialerBind.Analytics.IAnalyticsInterface;
 
@@ -273,7 +276,6 @@ module
 //    interface Elastos.Droid.Dialer.Interactions.IPhoneDisambiguationDialogFragmentHelper;
 //    interface Elastos.Droid.Dialer.Interactions.IPhoneNumberInteraction;
 //    interface Elastos.Droid.Dialer.Interactions.IUndemoteOutgoingCallReceiver;
-//    interface Elastos.Droid.Dialer.List.IAllContactsFragment;
 //    interface Elastos.Droid.Dialer.List.IDialerPhoneNumberListAdapter;
 //    interface Elastos.Droid.Dialer.List.IDragItemContainer;
     interface Elastos.Droid.Dialer.List.IListsFragment;
@@ -544,12 +546,17 @@ module
     namespace Dialer {
     namespace List {
 
-//    class CAllContactsFragment {
-//        // TODO:
-//        // interface IContactEntryListFragment;
-//        interface IAllContactsFragment;
-//    }
-//
+    class CAllContactsFragment {
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IAnalyticsInterface;
+        interface IAllContactsFragment;
+        interface IContactEntryListFragment;
+        interface ILoaderManagerLoaderCallbacks;
+    }
+
 //    [local]
 //    class CDialerPhoneNumberListAdapter {
 //        constructor(

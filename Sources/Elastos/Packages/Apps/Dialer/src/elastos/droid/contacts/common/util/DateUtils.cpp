@@ -50,7 +50,7 @@ DateUtils::StaticInitializer::StaticInitializer()
 
 
 //==========================================================
-// DateUtils::StaticInitializer
+// DateUtils
 //==========================================================
 static AutoPtr<ITimeZone> InitTimeZone()
 {
