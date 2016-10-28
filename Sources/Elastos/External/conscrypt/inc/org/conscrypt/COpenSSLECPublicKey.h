@@ -12,6 +12,9 @@
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
 using Elastos::Security::Interfaces::IECPublicKey;
+using Elastos::Security::Interfaces::IECKey;
+using Elastos::Security::IPublicKey;
+using Elastos::Security::IKey;
 using Elastos::Security::Spec::IECParameterSpec;
 using Elastos::Security::Spec::IECPoint;
 using Elastos::Security::Spec::IECPublicKeySpec;
@@ -20,10 +23,13 @@ namespace Org {
 namespace Conscrypt {
 
 CarClass(COpenSSLECPublicKey)
-    , public IOpenSSLECPublicKey
-    , public IECPublicKey
-    , public IOpenSSLKeyHolder
     , public Object
+    , public IKey
+    , public IPublicKey
+    , public IECKey
+    , public IECPublicKey
+    , public IOpenSSLECPublicKey
+    , public IOpenSSLKeyHolder
 {
 public:
     CAR_OBJECT_DECL()

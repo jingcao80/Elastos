@@ -89,7 +89,7 @@ OpenSSLProvider::OpenSSLProvider(
 
     Put(CoreUtils::Convert("KeyFactory.DSA"), CoreUtils::Convert(prefix + "OpenSSLDSAKeyFactory"), (IInterface**)&res);
 
-    Put(CoreUtils::Convert("KeyFactory.EC"), CoreUtils::Convert(prefix + "OpenSSLECKeyFactory"), (IInterface**)&res);
+    Put(CoreUtils::Convert("KeyFactory.EC"), CoreUtils::Convert(prefix + "COpenSSLECKeyFactory"), (IInterface**)&res);
 
     /* == KeyAgreement == */
     Put(CoreUtils::Convert("KeyAgreement.ECDH"), CoreUtils::Convert(prefix + "OpenSSLECDHKeyAgreement"), (IInterface**)&res);

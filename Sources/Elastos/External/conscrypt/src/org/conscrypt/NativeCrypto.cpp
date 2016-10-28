@@ -3953,14 +3953,13 @@ ECode NativeCrypto::EC_KEY_get0_group(
     }
 
     if (::EVP_PKEY_type(pkey->type) != EVP_PKEY_EC) {
-        NATIVE_TRACE("EC_KEY_get0_group(%p) => not EC key (type == %d)", pkey,
-                ::EVP_PKEY_type(pkey->type));
+        NATIVE_TRACE("EC_KEY_get0_group(%p) => not EC key (type == %d)", pkey, ::EVP_PKEY_type(pkey->type));
         *result = 0;
         return ThrowRuntimeException("not EC key");
     }
 
     const EC_GROUP* group = ::EC_KEY_get0_group(pkey->pkey.ec);
-    NATIVE_TRACE("EC_KEY_get0_group(%p) => %p", pkey, group);
+    //NATIVE_TRACE("EC_KEY_get0_group(%p) => %p", pkey, group);
     *result = reinterpret_cast<uintptr_t>(group);
     return NOERROR;
 }

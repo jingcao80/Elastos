@@ -39,9 +39,23 @@ using Elastos::Security::Cert::CCertificateFactoryHelper;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Security::Spec::IRSAPrivateKeySpec;
+using Elastos::Security::Spec::CRSAPrivateKeySpec;
 using Elastos::Security::Spec::IX509EncodedKeySpec;
 using Elastos::Security::Spec::CX509EncodedKeySpec;
 using Elastos::Security::Spec::IKeySpec;
+using Elastos::Security::Spec::IECPrivateKeySpec;
+using Elastos::Security::Spec::CECPrivateKeySpec;
+using Elastos::Security::Spec::IECParameterSpec;
+using Elastos::Security::Spec::CECParameterSpec;
+using Elastos::Security::Spec::IEllipticCurve;
+using Elastos::Security::Spec::CEllipticCurve;
+using Elastos::Security::Spec::IECField;
+using Elastos::Security::Spec::CECFieldFp;
+using Elastos::Security::Spec::IECPoint;
+using Elastos::Security::Spec::CECPoint;
+using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
+using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
 using Elastos::Utility::Logging::Logger;
 using Org::Apache::Harmony::Security::Fortress::Services;
 
@@ -434,8 +448,9 @@ ECode CActivityOne::Button6Function()// KeyAgreement
     AutoPtr<IKeyFactoryHelper> kfHelper;
     CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
     AutoPtr<IKeyFactory> kf;
-    kfHelper->GetInstance(String("RSA"), (IKeyFactory**)&kf);
+    kfHelper->GetInstance(String("EC"), (IKeyFactory**)&kf);
 
+    /*
     AutoPtr<ArrayOf<Byte> > der_public = ArrayOf<Byte>::Alloc(162);
     der_public->Set(0, 0x30); der_public->Set(1, 0x81); der_public->Set(2, 0x9f); der_public->Set(3, 0x30);
     der_public->Set(4, 0xd); der_public->Set(5, 0x6); der_public->Set(6, 0x9); der_public->Set(7, 0x2a);
@@ -478,17 +493,108 @@ ECode CActivityOne::Button6Function()// KeyAgreement
     der_public->Set(152, 0xe0); der_public->Set(153, 0x15); der_public->Set(154, 0x6d); der_public->Set(155, 0x85);
     der_public->Set(156, 0x7b); der_public->Set(157, 0x2); der_public->Set(158, 0x3); der_public->Set(159, 0x1);
     der_public->Set(160, 0x0); der_public->Set(161, 0x1);
+    */
+    AutoPtr<ArrayOf<Byte> > ec_public = ArrayOf<Byte>::Alloc(91);
+    ec_public->Set(0, 0x30); ec_public->Set(1, 0x59); ec_public->Set(2, 0x30); ec_public->Set(3, 0x13);
+    ec_public->Set(4, 0x6); ec_public->Set(5, 0x7); ec_public->Set(6, 0x2a); ec_public->Set(7, 0x86);
+    ec_public->Set(8, 0x48); ec_public->Set(9, 0xce); ec_public->Set(10, 0x3d); ec_public->Set(11, 0x2);
+    ec_public->Set(12, 0x1); ec_public->Set(13, 0x6); ec_public->Set(14, 0x8); ec_public->Set(15, 0x2a);
+    ec_public->Set(16, 0x86); ec_public->Set(17, 0x48); ec_public->Set(18, 0xce); ec_public->Set(19, 0x3d);
+    ec_public->Set(20, 0x3); ec_public->Set(21, 0x1); ec_public->Set(22, 0x7); ec_public->Set(23, 0x3);
+    ec_public->Set(24, 0x42); ec_public->Set(25, 0x0); ec_public->Set(26, 0x4); ec_public->Set(27, 0x46);
+    ec_public->Set(28, 0x2a); ec_public->Set(29, 0xb1); ec_public->Set(30, 0xd); ec_public->Set(31, 0x7);
+    ec_public->Set(32, 0xa4); ec_public->Set(33, 0x1b); ec_public->Set(34, 0x5b); ec_public->Set(35, 0xb7);
+    ec_public->Set(36, 0x18); ec_public->Set(37, 0x35); ec_public->Set(38, 0x2f); ec_public->Set(39, 0xba);
+    ec_public->Set(40, 0x93); ec_public->Set(41, 0x5); ec_public->Set(42, 0xf8); ec_public->Set(43, 0x78);
+    ec_public->Set(44, 0x8f); ec_public->Set(45, 0x23); ec_public->Set(46, 0x5f); ec_public->Set(47, 0x38);
+    ec_public->Set(48, 0x62); ec_public->Set(49, 0x2d); ec_public->Set(50, 0x11); ec_public->Set(51, 0x96);
+    ec_public->Set(52, 0x48); ec_public->Set(53, 0x38); ec_public->Set(54, 0x45); ec_public->Set(55, 0x10);
+    ec_public->Set(56, 0x50); ec_public->Set(57, 0x67); ec_public->Set(58, 0xde); ec_public->Set(59, 0x2);
+    ec_public->Set(60, 0x94); ec_public->Set(61, 0xb6); ec_public->Set(62, 0x86); ec_public->Set(63, 0xa9);
+    ec_public->Set(64, 0x66); ec_public->Set(65, 0x96); ec_public->Set(66, 0xe); ec_public->Set(67, 0x36);
+    ec_public->Set(68, 0xde); ec_public->Set(69, 0x56); ec_public->Set(70, 0x63); ec_public->Set(71, 0xe);
+    ec_public->Set(72, 0x6b); ec_public->Set(73, 0xb); ec_public->Set(74, 0x1f); ec_public->Set(75, 0xd3);
+    ec_public->Set(76, 0x84); ec_public->Set(77, 0x9a); ec_public->Set(78, 0x2b); ec_public->Set(79, 0x33);
+    ec_public->Set(80, 0xcf); ec_public->Set(81, 0xe4); ec_public->Set(82, 0x5f); ec_public->Set(83, 0x67);
+    ec_public->Set(84, 0x44); ec_public->Set(85, 0x8c); ec_public->Set(86, 0x3); ec_public->Set(87, 0x8f);
+    ec_public->Set(88, 0x2a); ec_public->Set(89, 0x8e); ec_public->Set(90, 0x7d);
+
+
 
     AutoPtr<IX509EncodedKeySpec> x509EncodedKeySpec;
-    CX509EncodedKeySpec::New(der_public, (IX509EncodedKeySpec**)&x509EncodedKeySpec);
+    CX509EncodedKeySpec::New(ec_public, (IX509EncodedKeySpec**)&x509EncodedKeySpec);
+    Logger::E(TAG, "leliang x509EncodedKeySpec: %p", x509EncodedKeySpec.Get());
     IKeySpec* keySpec = IKeySpec::Probe(x509EncodedKeySpec);
     Logger::E(TAG, "leliang keySpec: %p", keySpec);
 
     AutoPtr<IPublicKey> pubKey;
     kf->GeneratePublic(keySpec, (IPublicKey**)&pubKey);
     Logger::E(TAG, "leliang pubKey: %p", pubKey.Get());
+
+    AutoPtr<IBigIntegerHelper> biHelper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
+    /*
+    AutoPtr<IRSAPrivateKeySpec> rsaPrivateKeySpec;
+    AutoPtr<IBigInteger> mod;
+    biHelper->ValueOf(10000, (IBigInteger**)&mod);
+    AutoPtr<IBigInteger> priExp;
+    biHelper->ValueOf(20000, (IBigInteger**)&priExp);
+    CRSAPrivateKeySpec::New(mod, priExp, (IRSAPrivateKeySpec**)&rsaPrivateKeySpec);
+    Logger::E(TAG, "leliang rsaPrivateKeySpec: %p", rsaPrivateKeySpec.Get());
+    */
+    /*
+    AutoPtr<IECPrivateKeySpec> ecPrivatekeySpec;
+    AutoPtr<IBigInteger> bi;
+    biHelper->ValueOf(10000, (IBigInteger**)&bi);
+    AutoPtr<IECParameterSpec> params;
+    AutoPtr<IEllipticCurve> ec;
+    AutoPtr<IECField> ecField;
+    AutoPtr<IBigInteger> p;
+    biHelper->ValueOf(10001, (IBigInteger**)&p);
+    CECFieldFp::New(p, (IECField**)&ecField);
+    AutoPtr<IBigInteger> a;
+    biHelper->ValueOf(20000, (IBigInteger**)&a);
+    AutoPtr<IBigInteger> b;
+    biHelper->ValueOf(30000, (IBigInteger**)&b);
+    AutoPtr<ArrayOf<Byte> > seed = ArrayOf<Byte>::Alloc(5);
+    seed->Set(0, 0x10); seed->Set(1, 0x20); seed->Set(2, 0x30); seed->Set(3, 0x40); seed->Set(4, 0x50);
+    CEllipticCurve::New(ecField, a, b, seed, (IEllipticCurve**)&ec);
+    AutoPtr<IECPoint> ecPoint;
+    AutoPtr<IBigInteger> affineX;
+    biHelper->ValueOf(40000, (IBigInteger**)&affineX);
+    AutoPtr<IBigInteger> affineY;
+    biHelper->ValueOf(50000, (IBigInteger**)&affineY);
+    CECPoint::New(affineX, affineY, (IECPoint**)&ecPoint);
+    AutoPtr<IBigInteger> order;
+    biHelper->ValueOf(40000, (IBigInteger**)&order);
+    Int32 cofactor = 100;
+    CECParameterSpec::New(ec, ecPoint, order, cofactor, (IECParameterSpec**)&params);
+    CECPrivateKeySpec::New(bi, params, (IECPrivateKeySpec**)&ecPrivatekeySpec);
+    */
+
+    AutoPtr<IPKCS8EncodedKeySpec> ecPrivatekeySpec;
+    AutoPtr<ArrayOf<Byte> > ec_private = ArrayOf<Byte>::Alloc(67);
+    ec_private->Set(0, 0x30); ec_private->Set(1, 0x41); ec_private->Set(2, 0x2); ec_private->Set(3, 0x1);
+    ec_private->Set(4, 0x0); ec_private->Set(5, 0x30); ec_private->Set(6, 0x13); ec_private->Set(7, 0x6);
+    ec_private->Set(8, 0x7); ec_private->Set(9, 0x2a); ec_private->Set(10, 0x86); ec_private->Set(11, 0x48);
+    ec_private->Set(12, 0xce); ec_private->Set(13, 0x3d); ec_private->Set(14, 0x2); ec_private->Set(15, 0x1);
+    ec_private->Set(16, 0x6); ec_private->Set(17, 0x8); ec_private->Set(18, 0x2a); ec_private->Set(19, 0x86);
+    ec_private->Set(20, 0x48); ec_private->Set(21, 0xce); ec_private->Set(22, 0x3d); ec_private->Set(23, 0x3);
+    ec_private->Set(24, 0x1); ec_private->Set(25, 0x7); ec_private->Set(26, 0x4); ec_private->Set(27, 0x27);
+    ec_private->Set(28, 0x30); ec_private->Set(29, 0x25); ec_private->Set(30, 0x2); ec_private->Set(31, 0x1);
+    ec_private->Set(32, 0x1); ec_private->Set(33, 0x4); ec_private->Set(34, 0x20); ec_private->Set(35, 0x1c);
+    ec_private->Set(36, 0x4c); ec_private->Set(37, 0x8a); ec_private->Set(38, 0x6d); ec_private->Set(39, 0x9b);
+    ec_private->Set(40, 0xd8); ec_private->Set(41, 0x6f); ec_private->Set(42, 0x6); ec_private->Set(43, 0xd8);
+    ec_private->Set(44, 0xd2); ec_private->Set(45, 0x78); ec_private->Set(46, 0x21); ec_private->Set(47, 0x38);
+    ec_private->Set(48, 0xa3); ec_private->Set(49, 0xce); ec_private->Set(50, 0xaa); ec_private->Set(51, 0xfa);
+    ec_private->Set(52, 0x9c); ec_private->Set(53, 0x79); ec_private->Set(54, 0x93); ec_private->Set(55, 0x72);
+    ec_private->Set(56, 0x41); ec_private->Set(57, 0xdc); ec_private->Set(58, 0x35); ec_private->Set(59, 0xb2);
+    ec_private->Set(60, 0x54); ec_private->Set(61, 0xf8); ec_private->Set(62, 0xdb); ec_private->Set(63, 0xd6);
+    ec_private->Set(64, 0x75); ec_private->Set(65, 0xae); ec_private->Set(66, 0x85);
+
+    CPKCS8EncodedKeySpec::New(ec_private, (IPKCS8EncodedKeySpec**)&ecPrivatekeySpec);
     AutoPtr<IPrivateKey> priKey;
-    kf->GeneratePrivate(keySpec, (IPrivateKey**)&priKey);
+    kf->GeneratePrivate(IKeySpec::Probe(ecPrivatekeySpec), (IPrivateKey**)&priKey);
     Logger::E(TAG, "leliang priKey: %p", priKey.Get());
 
     AutoPtr<IKey> tmpResult;
@@ -499,8 +605,13 @@ ECode CActivityOne::Button6Function()// KeyAgreement
     ka->GenerateSecret((ArrayOf<Byte>**)&secret);
 
     Logger::E(TAG, "leliang secret begin");
-    for (Int32 i = 0; i < secret->GetLength(); i++) {
-        Logger::E(TAG, "secret[%d]=%d", i, (*secret)[i]);
+    if (secret != NULL) {
+        for (Int32 i = 0; i < secret->GetLength(); i++) {
+            Logger::E(TAG, "secret[%d]=%d", i, (*secret)[i]);
+        }
+    }
+    else {
+        Logger::E(TAG, "leliang secret is NULL");
     }
     Logger::E(TAG, "leliang secret end");
     Logger::E(TAG, "leliang end Button6Function ");

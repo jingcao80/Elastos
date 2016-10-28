@@ -8,12 +8,18 @@
 #include "COpenSSLRSAPrivateCrtKey.h"
 #include "COpenSSLRSAPrivateKey.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Math::CBigInteger;
 using Elastos::Security::IKey;
 using Elastos::Security::Interfaces::IRSAKey;
 using Elastos::Security::Interfaces::EIID_IRSAPrivateKey;
+using Elastos::Security::Interfaces::EIID_IRSAKey;
+using Elastos::Security::EIID_IPrivateKey;
+using Elastos::Security::EIID_IKey;
+using Elastos::IO::EIID_ISerializable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -23,7 +29,7 @@ namespace Conscrypt {
 //=========================================
 Int64 OpenSSLRSAPrivateKey::mSerialVersionUID = 4872170254439578735L;
 
-CAR_INTERFACE_IMPL_3(OpenSSLRSAPrivateKey, Object, IRSAPrivateKey, IOpenSSLKeyHolder, IOpenSSLRSAPrivateKey)
+CAR_INTERFACE_IMPL_7(OpenSSLRSAPrivateKey, Object, IKey, IPrivateKey, IRSAKey, IRSAPrivateKey, IOpenSSLKeyHolder, IOpenSSLRSAPrivateKey, ISerializable)
 
 ECode OpenSSLRSAPrivateKey::constructor(
     /* [in] */ IOpenSSLKey* key)

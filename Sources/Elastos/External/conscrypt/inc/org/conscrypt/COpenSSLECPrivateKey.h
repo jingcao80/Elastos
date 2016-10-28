@@ -12,6 +12,9 @@
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
 using Elastos::Math::IBigInteger;
+using Elastos::Security::IPrivateKey;
+using Elastos::Security::IKey;
+using Elastos::Security::Interfaces::IECKey;
 using Elastos::Security::Interfaces::IECPrivateKey;
 using Elastos::Security::Spec::IECPrivateKeySpec;
 using Elastos::Security::Spec::IECParameterSpec;
@@ -20,6 +23,9 @@ namespace Org {
 namespace Conscrypt {
 
 CarClass(COpenSSLECPrivateKey)
+    , public IKey
+    , public IPrivateKey
+    , public IECKey
     , public IOpenSSLECPrivateKey
     , public IECPrivateKey
     , public IOpenSSLKeyHolder

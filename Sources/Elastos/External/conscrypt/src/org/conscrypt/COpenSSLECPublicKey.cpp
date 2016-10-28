@@ -10,6 +10,9 @@ using Elastos::IO::IObjectInput;
 using Elastos::IO::IObjectOutput;
 using Elastos::Math::CBigInteger;
 using Elastos::Security::Interfaces::EIID_IECPublicKey;
+using Elastos::Security::Interfaces::EIID_IECKey;
+using Elastos::Security::EIID_IPublicKey;
+using Elastos::Security::EIID_IKey;
 using Elastos::Security::Interfaces::IECKey;
 using Elastos::Security::Spec::IECPoint;
 using Elastos::Security::Spec::IEllipticCurve;
@@ -24,7 +27,7 @@ const String COpenSSLECPublicKey::ALGORITHM("EC");
 
 CAR_OBJECT_IMPL(COpenSSLECPublicKey)
 
-CAR_INTERFACE_IMPL_3(COpenSSLECPublicKey, Object, IOpenSSLECPublicKey,
+CAR_INTERFACE_IMPL_6(COpenSSLECPublicKey, Object, IKey, IPublicKey, IECKey, IOpenSSLECPublicKey,
     IECPublicKey, IOpenSSLKeyHolder)
 
 ECode COpenSSLECPublicKey::constructor()
