@@ -3,6 +3,7 @@
 #include <Elastos.CoreLibrary.Extensions.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
+#include "_Org.Conscrypt.h"
 #include "elastos/droid/net/SSLSessionCache.h"
 #include <elastos/utility/logging/Logger.h>
 

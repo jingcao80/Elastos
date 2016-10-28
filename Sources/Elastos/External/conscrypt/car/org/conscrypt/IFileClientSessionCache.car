@@ -13,7 +13,9 @@ module
      */
     interface IFileClientSessionCache {
         const Int32 MAX_SIZE = 12; // ~72k
+    }
 
+    interface IFileClientSessionCacheHelper {
         /**
          * Returns a cache backed by the given directory. Creates the directory
          * (including parent directories) if necessary. This cache should have

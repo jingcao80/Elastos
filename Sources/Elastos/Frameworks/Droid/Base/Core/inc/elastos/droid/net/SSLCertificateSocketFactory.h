@@ -5,6 +5,7 @@
 #include <Elastos.CoreLibrary.Security.h>
 #include "Elastos.Droid.Net.h"
 #include "_Elastos.Droid.Core.h"
+#include "_Org.Conscrypt.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastosx/net/ssl/SSLSocketFactory.h>
 

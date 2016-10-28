@@ -73,15 +73,7 @@ module
 
     namespace Org {
     namespace Conscrypt {
-        interface IPSKKeyManager {}
-        interface IOpenSSLSocketImpl {}
-        interface IOpenSSLContextImpl {}
-        interface ISSLClientSessionCache {}
-        interface ISSLParametersImpl {}
         interface ITrustManagerImpl {}
-        interface IClientSessionContext {}
-        interface IFileClientSessionCache {}
-        interface IFileClientSessionCacheHelper {}
     }} // Org.Conscrypt
 
     namespace Org {

@@ -1,15 +1,18 @@
 #include "Elastos.CoreLibrary.Security.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "_Org.Conscrypt.h"
 #include "elastos/droid/keystore/security/ElastosKeyStore.h"
 #include "elastos/droid/keystore/security/Credentials.h"
 #include "elastos/droid/keystore/security/KeyStore.h"
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
-//TODO using Org::Conscrypt::IOpenSSLEngine;
-//import com.android.org.conscrypt.OpenSSLEngine;
-//TODO using Org::Conscrypt::IOpenSSLKeyHolder;
+using Org::Conscrypt::IOpenSSLEngine;
+using Org::Conscrypt::IOpenSSLEngineHelper;
+using Org::Conscrypt::COpenSSLEngineHelper;
+using Org::Conscrypt::IOpenSSLKey;
+using Org::Conscrypt::IOpenSSLKeyHolder;
 //
 //import android.util.Log;
 //
@@ -82,17 +85,23 @@ ECode ElastosKeyStore::EngineGetKey(
         return NOERROR;
     }
 
-    //TODO AutoPtr<IOpenSSLEngine> engine;
-    //TODO AutoPtr<IOpenSSLEngineHelper> oseHelper;
-    //TODO COpenSSLEngineHelper::AcquireSingleton((IOpenSSLEngineHelper**)&oseHelper);
-    //TODO oseHelper->GetInstance(String("keystore"), (IOpenSSLEngine**)&engine);
+    AutoPtr<IOpenSSLEngine> engine;
+    AutoPtr<IOpenSSLEngineHelper> oseHelper;
+    COpenSSLEngineHelper::AcquireSingleton((IOpenSSLEngineHelper**)&oseHelper);
+    oseHelper->GetInstance(String("keystore"), (IOpenSSLEngine**)&engine);
     //try {
-    //TODO return engine->GetPrivateKeyById(Credentials::USER_PRIVATE_KEY + alias, key);
+    AutoPtr<IPrivateKey> _key;
+    ECode ec = engine->GetPrivateKeyById(Credentials::USER_PRIVATE_KEY + alias, (IPrivateKey**)&_key);
     //} catch (InvalidKeyException e) {
-    //    UnrecoverableKeyException t = new UnrecoverableKeyException("Can't get key");
-    //    t.initCause(e);
-    //    throw t;
-    //}
+    if (ec == (ECode)E_INVALID_KEY_EXCEPTION) {
+        //UnrecoverableKeyException t = new UnrecoverableKeyException("Can't get key");
+        //t.initCause(e);
+        //throw t;
+        Logger::E("ElastosKeyStore", "Can't get key");
+        return E_INVALID_KEY_EXCEPTION;
+    }
+    *key = IKey::Probe(_key);
+    REFCOUNT_ADD(*key);
     return NOERROR;
 }
 
@@ -101,11 +110,10 @@ ECode ElastosKeyStore::EngineGetCertificateChain(
     /* [out, callee] */ ArrayOf<ICertificate*>** certChain)
 {
     VALIDATE_NOT_NULL(certChain);
-    certChain = NULL;
+    *certChain = NULL;
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("ElastosKeyStore", "EngineGetCertificateChain, alias == NULL");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -160,7 +168,6 @@ ECode ElastosKeyStore::EngineGetCertificate(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("ElastosKeyStore", "EngineGetCertificate, alias == null");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -244,7 +251,6 @@ ECode ElastosKeyStore::EngineGetCreationDate(
     if (alias == NULL) {
         //throw new NullPointerException("alias == null");
         Logger::E("ElastosKeyStore", "EngineGetCreationDate alias == NULL");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -277,16 +283,15 @@ ECode ElastosKeyStore::EngineSetKeyEntry(
     if ((password != NULL) && (password->GetLength() > 0)) {
         //throw new KeyStoreException("entries cannot be protected with passwords");
         Logger::E("ElastosKeyStore", "EngineSetKeyEntry entries cannot be protected with passwords");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (IPrivateKey::Probe(key) != NULL) {
         SetPrivateKeyEntry(alias, IPrivateKey::Probe(key), chain, NULL);
-    } else {
+    }
+    else {
         //throw new KeyStoreException("Only PrivateKeys are supported");
         Logger::E("ElastosKeyStore", "EngineSetKeyEntry Only PrivateKeys are supported");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -301,12 +306,12 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
     AutoPtr<ArrayOf<Byte> > keyBytes;
 
     String pkeyAlias;
-    //TODO if (IOpenSSLKeyHolder::Probe(key) != NULL) {
-    //TODO     AutoPtr<IOpenSSLKey> opensslKey;
-    //TODO     IOpenSSLKeyHolder::Probe(key)->GetOpenSSLKey((IOpenSSLKey**)&opensslKey);
-    //TODO     opensslKey->GetAlias(&pkeyAlias);
-    //TODO } else
-    {
+    if (IOpenSSLKeyHolder::Probe(key) != NULL) {
+        AutoPtr<IOpenSSLKey> opensslKey;
+        IOpenSSLKeyHolder::Probe(key)->GetOpenSSLKey((IOpenSSLKey**)&opensslKey);
+        opensslKey->GetAlias(&pkeyAlias);
+    }
+    else {
         pkeyAlias = String(NULL);
     }
 
@@ -316,19 +321,18 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
         if (!alias.Equals(keySubalias)) {
             //throw new KeyStoreException("Can only replace keys with same alias: " + alias + " != " + keySubalias);
             Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Can only replace keys with same alias:%s != %s", alias.string(), keySubalias.string());
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
         shouldReplacePrivateKey = FALSE;
-    } else {
+    }
+    else {
         // Make sure the PrivateKey format is the one we support.
         String keyFormat;
         IKey::Probe(key)->GetFormat(&keyFormat);
         if ((keyFormat.IsNull()) || (!String("PKCS#8").Equals(keyFormat))) {
             //throw new KeyStoreException( "Only PrivateKeys that can be encoded into PKCS#8 are supported");
             Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Only PrivateKeys that can be encoded into PKCS#8 are supported");
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -337,7 +341,6 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
         if (keyBytes == NULL) {
             //throw new KeyStoreException("PrivateKey has no encoding");
             Logger::E("ElastosKeyStore", "SetPrivateKeyEntry PrivateKey has no encoding");
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -348,7 +351,6 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
     if ((chain == NULL) || (chain->GetLength() == 0)) {
         //throw new KeyStoreException("Must supply at least one Certificate with PrivateKey");
         Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Must supply at least one Certificate with PrivateKey");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -359,14 +361,12 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
         if (!String("X.509").Equals(((*chain)[i]->GetType(&type), type))) {
             //throw new KeyStoreException("Certificates must be in X.509 format: invalid cert #" + i);
             Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Certificates must be in X.509 format: invalid cert #%d", i);
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
         if (IX509Certificate::Probe((*chain)[i]) == NULL) {
             //throw new KeyStoreException("Certificates must be in X.509 format: invalid cert #" + i);
             Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Certificates must be in X.509 format: invalid cert #%d", i);
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
@@ -375,10 +375,13 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
 
     AutoPtr<ArrayOf<Byte> > userCertBytes;
     //try {
-    ICertificate::Probe((*x509chain)[0])->GetEncoded((ArrayOf<Byte>**)&userCertBytes);
+    ECode ec = ICertificate::Probe((*x509chain)[0])->GetEncoded((ArrayOf<Byte>**)&userCertBytes);
     //} catch (CertificateEncodingException e) {
-    //    throw new KeyStoreException("Couldn't encode certificate #1", e);
-    //}
+    if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
+        //throw new KeyStoreException("Couldn't encode certificate #1", e);
+        Logger::E("ElastosKeyStore", "Couldn't encode certificate #1");
+        return E_KEY_STORE_EXCEPTION;
+    }
 
     /*
      * If we have a chain, store it in the CA certificate slot for this
@@ -394,14 +397,21 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
         AutoPtr<ArrayOf<ArrayOf<Byte>*> > certsBytes = ArrayOf<ArrayOf<Byte>* >::Alloc(x509chain->GetLength() - 1);
         Int32 totalCertLength = 0;
         for (Int32 i = 0; i < certsBytes->GetLength(); i++) {
-            //try {
-            AutoPtr<ArrayOf<Byte> > encoded;
-            ICertificate::Probe((*x509chain)[i+1])->GetEncoded((ArrayOf<Byte>**)&encoded);
-            certsBytes->Set(i, encoded);
-            totalCertLength += (*certsBytes)[i]->GetLength();
+            //try
+            ECode ec = NOERROR;
+            {
+                AutoPtr<ArrayOf<Byte> > encoded;
+                FAIL_GOTO(ec = ICertificate::Probe((*x509chain)[i+1])->GetEncoded((ArrayOf<Byte>**)&encoded), ERROR)
+                certsBytes->Set(i, encoded);
+                totalCertLength += (*certsBytes)[i]->GetLength();
+            }
+        ERROR:
             //} catch (CertificateEncodingException e) {
-            //    throw new KeyStoreException("Can't encode Certificate #" + i, e);
-            //}
+            if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
+                //throw new KeyStoreException("Can't encode Certificate #" + i, e);
+                Logger::E("ElastosKeyStore", "Can't encode Certificate #%d", i);
+                return E_KEY_STORE_EXCEPTION;
+            }
         }
 
         /*
@@ -413,12 +423,14 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
         for (Int32 i = 0; i < certsBytes->GetLength(); i++) {
             Int32 certLength = (*certsBytes)[i]->GetLength();
             //System.arraycopy(certsBytes[i], 0, chainBytes, outputOffset, certLength);
-            memcpy((*certsBytes)[i]->GetPayload(), chainBytes->GetPayload() + outputOffset, certLength);
+            //memcpy((*certsBytes)[i]->GetPayload(), chainBytes->GetPayload() + outputOffset, certLength);
+            chainBytes->Copy(outputOffset, (*certsBytes)[i], 0, certLength);
 
             outputOffset += certLength;
             certsBytes->Set(i, NULL);
         }
-    } else {
+    }
+    else {
         chainBytes = NULL;
     }
 
@@ -429,14 +441,16 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
     if (shouldReplacePrivateKey) {
         Boolean tmp;
         Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &tmp);
-    } else {
+    }
+    else {
         Boolean tmp;
         Credentials::DeleteCertificateTypesForAlias(mKeyStore, alias, &tmp);
     }
 
     Int32 flags = 0;
-    if (params != NULL)
+    if (params != NULL) {
         params->GetFlags(&flags);
+    }
 
     Boolean bTmp;
     if (shouldReplacePrivateKey
@@ -446,24 +460,23 @@ ECode ElastosKeyStore::SetPrivateKeyEntry(
         Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &tmp);
         //throw new KeyStoreException("Couldn't put private key in keystore");
         Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Couldn't put private key in keystore");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    } else if (!(mKeyStore->Put(Credentials::USER_CERTIFICATE + alias, userCertBytes,
+    }
+    else if (!(mKeyStore->Put(Credentials::USER_CERTIFICATE + alias, userCertBytes,
             KeyStore::UID_SELF, flags, &bTmp), bTmp)) {
         Boolean tmp;
         Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &tmp);
         //throw new KeyStoreException("Couldn't put certificate #1 in keystore");
         Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Couldn't put certificate #1 in keystore");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    } else if (chainBytes != NULL
+    }
+    else if (chainBytes != NULL
             && !(mKeyStore->Put(Credentials::CA_CERTIFICATE + alias, chainBytes,
                     KeyStore::UID_SELF, flags, &bTmp), bTmp)) {
         Boolean tmp;
         Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &tmp);
         //throw new KeyStoreException("Couldn't put certificate chain in keystore");
         Logger::E("ElastosKeyStore", "SetPrivateKeyEntry Couldn't put certificate chain in keystore");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -476,7 +489,6 @@ ECode ElastosKeyStore::EngineSetKeyEntry(
 {
     //throw new KeyStoreException("Operation not supported because key encoding is unknown");
     Logger::E("ElastosKeyStore", "EngineSetKeyEntry Operation not supported because key encoding is unknown");
-    assert(0);
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
@@ -487,7 +499,6 @@ ECode ElastosKeyStore::EngineSetCertificateEntry(
     if (IsKeyEntry(alias)) {
         //throw new KeyStoreException("Entry exists and is not a trusted certificate");
         Logger::E("ElastosKeyStore", "EngineSetCertificateEntry Entry exists and is not a trusted certificate");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -495,22 +506,23 @@ ECode ElastosKeyStore::EngineSetCertificateEntry(
     if (cert == NULL) {
         //throw new NullPointerException("cert == null");
         Logger::E("ElastosKeyStore", "EngineSetCertificateEntry cert == null");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
 
     AutoPtr<ArrayOf<Byte> > encoded;
     //try {
-    cert->GetEncoded((ArrayOf<Byte>**)&encoded);
+    ECode ec = cert->GetEncoded((ArrayOf<Byte>**)&encoded);
     //} catch (CertificateEncodingException e) {
-    //    throw new KeyStoreException(e);
-    //}
+    if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
+        //throw new KeyStoreException(e);
+        Logger::E("ElastosKeyStore", "KeyStoreException");
+        return E_KEY_STORE_EXCEPTION;
+    }
 
     Boolean bTmp;
     if (!(mKeyStore->Put(Credentials::CA_CERTIFICATE + alias, encoded, KeyStore::UID_SELF, KeyStore::FLAG_NONE, &bTmp), bTmp)) {
         //throw new KeyStoreException("Couldn't insert certificate; is KeyStore initialized?");
         Logger::E("ElastosKeyStore", "EngineSetCertificateEntry Couldn't insert certificate; is KeyStore initialized?");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -527,7 +539,6 @@ ECode ElastosKeyStore::EngineDeleteEntry(
     if (!(Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp), bTmp)) {
         //throw new KeyStoreException("No such entry " + alias);
         Logger::E("ElastosKeyStore", "EngineDeleteEntry No such entry %s", alias.string());
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -578,7 +589,6 @@ ECode ElastosKeyStore::EngineContainsAlias(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("ElastosKeyStore", "EngineContainsAlias alias == null");
-        assert(0);
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -614,7 +624,6 @@ Boolean ElastosKeyStore::IsKeyEntry(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("ElastosKeyStore", "IsKeyEntry alias == null");
-        assert(0);
         //return E_NULL_POINTER_EXCEPTION;
         return FALSE;
     }
@@ -630,7 +639,6 @@ Boolean ElastosKeyStore::IsCertificateEntry(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("ElastosKeyStore", "IsKeyEntry alias == null");
-        assert(0);
         //return E_NULL_POINTER_EXCEPTION;
         return FALSE;
     }
@@ -732,6 +740,7 @@ ECode ElastosKeyStore::EngineStore(
     /* [in] */ ArrayOf<Char32>* password)
 {
     //throw new UnsupportedOperationException("Can not serialize AndroidKeyStore to OutputStream");
+    Logger::E("ElastosKeyStore", "Can not serialize AndroidKeyStore to OutputStream");
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -742,14 +751,12 @@ ECode ElastosKeyStore::EngineLoad(
     if (stream != NULL) {
         //throw new IllegalArgumentException("InputStream not supported");
         Logger::E("ElastosKeyStore", "EngineLoad InputStream not supported");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     if (password != NULL) {
         //throw new IllegalArgumentException("password not supported");
         Logger::E("ElastosKeyStore", "EngineLoad password not supported");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -766,7 +773,6 @@ ECode ElastosKeyStore::EngineSetEntry(
     if (entry == NULL) {
         //throw new KeyStoreException("entry == null");
         Logger::E("ElastosKeyStore", "EngineSetEntry entry == null");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -786,7 +792,6 @@ ECode ElastosKeyStore::EngineSetEntry(
     if (param != NULL && (IKeyStoreParameter::Probe(param) == NULL)) {
         //throw new KeyStoreException( "protParam should be android.security.KeyStoreParameter; was: " + param.getClass().getName());
         Logger::E("ElastosKeyStore", "EngineSetEntry protParam should be android.security.KeyStoreParameter");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -802,7 +807,6 @@ ECode ElastosKeyStore::EngineSetEntry(
 
     //throw new KeyStoreException( "Entry must be a PrivateKeyEntry or TrustedCertificateEntry; was " + entry);
     Logger::E("ElastosKeyStore", "EngineSetEntry ntry must be a PrivateKeyEntry or TrustedCertificateEntry");
-    assert(0);
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 

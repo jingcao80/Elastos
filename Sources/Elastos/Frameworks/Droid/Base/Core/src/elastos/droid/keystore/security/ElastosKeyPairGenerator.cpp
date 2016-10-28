@@ -1,26 +1,19 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Security.h"
+#include "_Org.Conscrypt.h"
 #include "elastos/droid/keystore/security/ElastosKeyPairGenerator.h"
 #include "elastos/droid/keystore/security/KeyStore.h"
 #include "elastos/droid/keystore/security/Credentials.h"
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Math::IBigInteger;
-
 //import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
-//
-//import com.android.org.conscrypt.NativeCrypto;
-//TODO using Org::Conscrypt::INativeCrypto;
-//TODO using Org::Conscrypt::IOpenSSLEngine;
-//import com.android.org.conscrypt.OpenSSLEngine;
-//
-//import java.security.InvalidAlgorithmParameterException;
-//import java.security.InvalidKeyException;
-//import java.security.KeyPair;
-//import java.security.KeyPairGenerator;
-//import java.security.KeyPairGeneratorSpi;
-//import java.security.NoSuchAlgorithmException;
+using Org::Conscrypt::INativeCrypto;
+using Org::Conscrypt::IOpenSSLEngine;
+using Org::Conscrypt::IOpenSSLEngineHelper;
+using Org::Conscrypt::COpenSSLEngineHelper;
+using Org::Conscrypt::EIID_IOpenSSLEngineHelper;
+using Elastos::Math::IBigInteger;
 using Elastos::Security::IKeyPair;
 using Elastos::Security::CKeyPair;
 using Elastos::Security::IPrivateKey;
@@ -28,14 +21,7 @@ using Elastos::Security::IPublicKey;
 using Elastos::Security::IKeyFactory;
 using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::CKeyFactoryHelper;
-//import java.security.SecureRandom;
-//import java.security.cert.CertificateEncodingException;
-//import java.security.cert.X509Certificate;
-//import java.security.spec.AlgorithmParameterSpec;
-//import java.security.spec.DSAParameterSpec;
-//import java.security.spec.InvalidKeySpecException;
-//import java.security.spec.RSAKeyGenParameterSpec;
-//TODO using Elastos::Security::Auth::X500::IX500Principal;
+using Elastos::Security::ISecureRandom;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Cert::IX509Certificate;
 using Elastos::Security::Spec::IRSAKeyGenParameterSpec;
@@ -47,6 +33,7 @@ using Elastos::Security::Spec::CX509EncodedKeySpec;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::IDate;
 using Elastos::Utility::Logging::Logger;
+using Elastosx::Security::Auth::X500::IX500Principal;
 
 namespace Elastos {
 namespace Droid {
@@ -68,7 +55,6 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
     if (mKeyStore == NULL || mSpec == NULL) {
         //throw new IllegalStateException("Must call initialize with an android.security.KeyPairGeneratorSpec first");
         Logger::E("ElastosKeyPairGenerator", "Must call initialize with an android.security.KeyPairGeneratorSpec first");
-        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -77,7 +63,6 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
     if ((((mSpec->GetFlags(&flags), flags) & KeyStore::FLAG_ENCRYPTED) != 0) && ((mKeyStore->State(&state), state) != KeyStoreState_UNLOCKED)) {
         //throw new IllegalStateException( "Android keystore must be in initialized and unlocked state if encryption is required");
         Logger::E("ElastosKeyPairGenerator", "Android keystore must be in initialized and unlocked state if encryption is required");
-        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -103,43 +88,59 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
         args2->Set(i, CoreUtils::ConvertByteArray((*args)[i]));
     }
 
+    mSpec->GetFlags(&flags);
     if (!(mKeyStore->Generate(privateKeyAlias, KeyStore::UID_SELF, keyType,
             keySize, flags, args2, &bTmp), bTmp)) {
         //throw new IllegalStateException("could not generate key in keystore");
         Logger::E("ElastosKeyPairGenerator", "could not generate key in keystore");
-        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     AutoPtr<IPrivateKey> privKey;
-    //TODO AutoPtr<IOpenSSLEngineHelper> opensslEngineHelper;
-    //TODO COpenSSLEngineHelper::AcquireSingleton((IOpenSSLEngineHelper**)&opensslEngineHelper);
-    //TODO AutoPtr<IOpenSSLEngine> engine;
-    //TODO opensslEngineHelper->GetInstance(String("keystore"), (IOpenSSLEngine**)&engine);
+    AutoPtr<IOpenSSLEngineHelper> opensslEngineHelper;
+    COpenSSLEngineHelper::AcquireSingleton((IOpenSSLEngineHelper**)&opensslEngineHelper);
+    AutoPtr<IOpenSSLEngine> engine;
+    opensslEngineHelper->GetInstance(String("keystore"), (IOpenSSLEngine**)&engine);
+
     //try {
-    //TODO engine->GetPrivateKeyById(privateKeyAlias, (IPrivateKey**)&privKey);
+    ECode ec = engine->GetPrivateKeyById(privateKeyAlias, (IPrivateKey**)&privKey);
     //} catch (InvalidKeyException e) {
-    //    throw new RuntimeException("Can't get key", e);
-    //}
+    if (ec == (ECode)E_INVALID_KEY_EXCEPTION) {
+        //throw new RuntimeException("Can't get key", e);
+        Logger::E("ElastosKeyPairGenerator", "Can't get key");
+        return E_INVALID_KEY_EXCEPTION;
+    }
 
     AutoPtr<ArrayOf<Byte> > pubKeyBytes;
     mKeyStore->GetPubkey(privateKeyAlias, (ArrayOf<Byte>**)&pubKeyBytes);
 
     AutoPtr<IPublicKey> pubKey;
-    //try {
-    AutoPtr<IKeyFactoryHelper> kfHelper;
-    CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
-    AutoPtr<IKeyFactory> keyFact;
-    kfHelper->GetInstance(skeyType, (IKeyFactory**)&keyFact);
-    AutoPtr<IX509EncodedKeySpec> x509eks;
-    CX509EncodedKeySpec::New(pubKeyBytes, (IX509EncodedKeySpec**)&x509eks);
-    keyFact->GeneratePublic(IKeySpec::Probe(x509eks), (IPublicKey**)&pubKey);
-    //} catch (NoSuchAlgorithmException e) {
-    //    throw new IllegalStateException("Can't instantiate key generator", e);
+    //try
+    {
+        AutoPtr<IKeyFactoryHelper> kfHelper;
+        CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
+        FAIL_GOTO(ec = mSpec->GetKeyType(&skeyType), ERROR)
+        AutoPtr<IKeyFactory> keyFact;
+        FAIL_GOTO(ec = kfHelper->GetInstance(skeyType, (IKeyFactory**)&keyFact), ERROR)
+        AutoPtr<IX509EncodedKeySpec> x509eks;
+        FAIL_GOTO(ec = CX509EncodedKeySpec::New(pubKeyBytes, (IX509EncodedKeySpec**)&x509eks), ERROR)
+        FAIL_GOTO(ec = keyFact->GeneratePublic(IKeySpec::Probe(x509eks), (IPublicKey**)&pubKey), ERROR)
+    }
+    // catch (NoSuchAlgorithmException e) {
+ERROR:
+    if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
+        //throw new IllegalStateException("Can't instantiate key generator", e);
+        Logger::E("ElastosKeyPairGenerator", "Can't instantiate key generator");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     //} catch (InvalidKeySpecException e) {
-    //    throw new IllegalStateException("keystore returned invalid key encoding", e);
-    //}
+    if (ec == (ECode)E_INVALID_KEY_SPEC_EXCEPTION) {
+        //throw new IllegalStateException("keystore returned invalid key encoding", e);
+        Logger::E("ElastosKeyPairGenerator", "keystore returned invalid key encoding");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
+    assert(0);
     //TODO AutoPtr<IX509V3CertificateGenerator> certGen;
     //TODO CX509V3CertificateGenerator::New((IX509V3CertificateGenerator**)&certGen);
     //TODO certGen->SetPublicKey(pubKey);
@@ -155,12 +156,14 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
     mSpec->GetEndDate((IDate**)&end);
     //TODO certGen->SetNotBefore(start);
     //TODO certGen->SetNotAfter(end);
+    mSpec->GetKeyType(&skeyType);
     String sigAl;
     GetDefaultSignatureAlgorithmForKeyType(skeyType, &sigAl);
     //TODO certGen->SetSignatureAlgorithm(sigAl);
 
     AutoPtr<IX509Certificate> cert;
     //try {
+    assert(0);
     //TODO certGen->Generate(privKey, (IX509Certificate**)&cert);
     //} catch (Exception e) {
     //    Credentials.deleteAllTypesForAlias(mKeyStore, alias);
@@ -169,19 +172,23 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
 
     AutoPtr<ArrayOf<Byte> > certBytes;
     //try {
-    ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&certBytes);
+    ec = ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&certBytes);
     //} catch (CertificateEncodingException e) {
-    //    Credentials.deleteAllTypesForAlias(mKeyStore, alias);
-    //    throw new IllegalStateException("Can't get encoding of certificate", e);
-    //}
+    if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
+        Boolean bTmp;
+        Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
+        //throw new IllegalStateException("Can't get encoding of certificate", e);
+        Logger::E("ElastosKeyPairGenerator", "Can't get encoding of certificate");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
+    mSpec->GetFlags(&flags);
     Boolean put;
     if (!(mKeyStore->Put(Credentials::USER_CERTIFICATE + alias, certBytes, KeyStore::UID_SELF, flags, &put), put)) {
         Boolean bTmp;
         Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
         //throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
         Logger::E("ElastosKeyPairGenerator", "Can't store certificate in AndroidKeyStore");
-        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -202,7 +209,6 @@ ECode ElastosKeyPairGenerator::GetDefaultSignatureAlgorithmForKeyType(
     } else {
         //throw new IllegalArgumentException("Unsupported key type " + keyType);
         Logger::E("ElastosKeyPairGenerator", "Unsupported key type %s", keyType.string());
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -213,7 +219,7 @@ AutoPtr< ArrayOf< ArrayOf<Byte>* > > ElastosKeyPairGenerator::GetArgsForKeyType(
     /* [in] */ IAlgorithmParameterSpec* spec)
 {
     switch (keyType) {
-        case 6://TODO INativeCrypto::EVP_PKEY_RSA:
+        case INativeCrypto::EVP_PKEY_RSA:
             if (IRSAKeyGenParameterSpec::Probe(spec) != NULL) {
                 IRSAKeyGenParameterSpec* rsaSpec = IRSAKeyGenParameterSpec::Probe(spec);
                 AutoPtr<IBigInteger> bi;
@@ -225,7 +231,7 @@ AutoPtr< ArrayOf< ArrayOf<Byte>* > > ElastosKeyPairGenerator::GetArgsForKeyType(
                 return result;
             }
             break;
-        case 116://TODO INativeCrypto::EVP_PKEY_DSA:
+        case INativeCrypto::EVP_PKEY_DSA:
             if (IDSAParameterSpec::Probe(spec) != NULL) {
                 IDSAParameterSpec* dsaSpec = IDSAParameterSpec::Probe(spec);
                 IDSAParams* dsaParams = IDSAParams::Probe(dsaSpec);
@@ -262,7 +268,6 @@ ECode ElastosKeyPairGenerator::Initialize(
 {
     //throw new IllegalArgumentException("cannot specify keysize with AndroidKeyPairGenerator");
     Logger::E("ElastosKeyPairGenerator", "Initialize - cannot specify keysize with AndroidKeyPairGenerator");
-    assert(0);
     return NOERROR;
 }
 
@@ -274,21 +279,18 @@ ECode ElastosKeyPairGenerator::Initialize(
         //throw new InvalidAlgorithmParameterException(
         //        "must supply params of type android.security.KeyPairGeneratorSpec");
         Logger::E("ElastosKeyPairGenerator", "Initialize - must supply params of type android.security.KeyPairGeneratorSpec");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    } else if (IKeyPairGeneratorSpec::Probe(params) == NULL) {
+    }
+    else if (IKeyPairGeneratorSpec::Probe(params) == NULL) {
         //throw new InvalidAlgorithmParameterException(
         //        "params must be of type android.security.KeyPairGeneratorSpec");
         Logger::E("ElastosKeyPairGenerator", "Initialize - params must be of type android.security.KeyPairGeneratorSpec");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<IKeyPairGeneratorSpec> spec = IKeyPairGeneratorSpec::Probe(params);
-    mSpec = spec;
+    mSpec = IKeyPairGeneratorSpec::Probe(params);
 
-    AutoPtr<IKeyStore>  ks = KeyStore::GetInstance();
-    //mKeyStore = KeyStore::GetInstance();
+    mKeyStore = KeyStore::GetInstance();
     return NOERROR;
 }
 

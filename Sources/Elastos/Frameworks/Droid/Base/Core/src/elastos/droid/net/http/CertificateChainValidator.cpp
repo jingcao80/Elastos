@@ -2,6 +2,7 @@
 #include "_Elastos.Droid.Core.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
+#include "_Org.Conscrypt.h"
 #include "elastos/droid/net/http/CertificateChainValidator.h"
 #include "elastos/droid/net/http/CCertificateChainValidator.h"
 #include "elastos/droid/net/http/CDelegatingSSLSessionCertificateWrap.h"

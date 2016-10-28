@@ -2,6 +2,7 @@
 module
 {
     importlib("Elastos.CoreLibrary.eco");
+    importlib("Org.Conscrypt.eco");
 
     merge("../../../car/elastos/droid/Exceptions.car");
     merge("../../../car/elastos/droid/fake_interfaces.car");

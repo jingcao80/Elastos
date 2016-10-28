@@ -4,6 +4,7 @@
 
 #include <Elastos.CoreLibrary.Extensions.h>
 #include "Elastos.Droid.Net.h"
+#include "_Org.Conscrypt.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
