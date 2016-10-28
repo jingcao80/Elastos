@@ -3,6 +3,7 @@
 #include "org/conscrypt/COpenSSLECPublicKey.h"
 #include "org/conscrypt/NativeCrypto.h"
 #include "org/conscrypt/OpenSSLKey.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IECKey;
@@ -17,6 +18,7 @@ using Elastos::Security::Spec::IECPrivateKeySpec;
 using Elastos::Security::Spec::IECPublicKeySpec;
 using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::IX509EncodedKeySpec;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -36,6 +38,7 @@ ECode OpenSSLECKeyFactory::EngineGeneratePublic(
     *result = NULL;
     if (keySpec == NULL) {
         // throw new InvalidKeySpecException("keySpec == NULL");
+        Logger::E("OpenSSLECKeyFactory", "EngineGeneratePublic, keySpec == NULL");
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
@@ -47,11 +50,13 @@ ECode OpenSSLECKeyFactory::EngineGeneratePublic(
         return NOERROR;
     }
     else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
-        *result = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
+        AutoPtr<IPublicKey> pKey = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
                 INativeCrypto::EVP_PKEY_EC);
+        *result = pKey;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
+    Logger::E("OpenSSLECKeyFactory", "EngineGeneratePublic, Must use ECPublicKeySpec or X509EncodedKeySpec");
     // throw new InvalidKeySpecException("Must use ECPublicKeySpec or X509EncodedKeySpec; was "
     //         + keySpec.getClass().getName());
     return E_INVALID_KEY_SPEC_EXCEPTION;
@@ -65,6 +70,7 @@ ECode OpenSSLECKeyFactory::EngineGeneratePrivate(
     *result = NULL;
     if (keySpec == NULL) {
         // throw new InvalidKeySpecException("keySpec == NULL");
+        Logger::E("OpenSSLECKeyFactory", "EngineGeneratePrivate keySpec == NULL");
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
@@ -76,8 +82,9 @@ ECode OpenSSLECKeyFactory::EngineGeneratePrivate(
         return NOERROR;
     }
     else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
-        *result = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
-                INativeCrypto::EVP_PKEY_EC);
+        AutoPtr<IPrivateKey> privateKey =
+            OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec), INativeCrypto::EVP_PKEY_EC);
+        *result = privateKey;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }

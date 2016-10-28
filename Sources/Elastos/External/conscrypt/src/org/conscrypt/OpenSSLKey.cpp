@@ -10,9 +10,13 @@
 #include "COpenSSLECPublicKey.h"
 #include "COpenSSLRSAPrivateKey.h"
 #include "COpenSSLECPrivateKey.h"
+#include "org/conscrypt/COpenSSLDHPublicKey.h"
+#include "org/conscrypt/COpenSSLDSAPublicKey.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::IKey;
 using Elastos::Security::Spec::IEncodedKeySpec;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -91,6 +95,7 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
     }
     else if (!keyFormat.Equals("PKCS#8")) {
         // throw new InvalidKeyException("Unknown key format " + keyFormat);
+        Logger::E("OpenSSLKey", "FromPrivateKey Unknown key format:%s", keyFormat.string());
         return NULL;
     }
 
@@ -98,6 +103,7 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
     IKey::Probe(key)->GetEncoded((ArrayOf<Byte>**)&encoded);
     if (encoded == NULL) {
         // throw new InvalidKeyException("Key encoding is null");
+        Logger::E("OpenSSLKey", "FromPrivateKey Key encoding is null:");
         return NULL;
     }
 
@@ -174,16 +180,14 @@ ECode OpenSSLKey::GetPublicKey(
         }
         case INativeCrypto::EVP_PKEY_DH: {
             AutoPtr<IOpenSSLDHPublicKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLDHPublicKey(this);
+            COpenSSLDHPublicKey::New(this, (IOpenSSLDHPublicKey**)&p);
             *result = IPublicKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
         }
         case INativeCrypto::EVP_PKEY_DSA: {
             AutoPtr<IOpenSSLDSAPublicKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLDSAPublicKey(this);
+            COpenSSLDSAPublicKey::New(this, (IOpenSSLDSAPublicKey**)&p);
             *result = IPublicKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -197,6 +201,7 @@ ECode OpenSSLKey::GetPublicKey(
         }
         default: {
             // throw new NoSuchAlgorithmException("unknown PKEY type");
+            Logger::E("OpenSSLKey", "unknown PKEY type");
             return NOERROR;
         }
     }
@@ -221,11 +226,13 @@ AutoPtr<IPublicKey> OpenSSLKey::GetPublicKey(
     NativeCrypto::EVP_PKEY_type(keyContext, &keyType);
     if (keyType != type) {
         // throw new InvalidKeySpecException("Unexpected key type");
+        Logger::E("OpenSSLKey", "GetPublicKey, Unexpected key type, keyType:%d, type:%d", keyType, type);
         return NULL;
     }
 
     AutoPtr<IPublicKey> res;
     key->GetPublicKey((IPublicKey**)&res);
+    Logger::E("OpenSSLKey", "GetPublicKey, res:%p", res.Get());
     return res;
 }
 
@@ -292,6 +299,7 @@ AutoPtr<IPrivateKey> OpenSSLKey::GetPrivateKey(
     NativeCrypto::EVP_PKEY_type(keyContext, &keyType);
     if (keyType != type) {
         // throw new InvalidKeySpecException("Unexpected key type");
+        Logger::E("OpenSSLKey", "GetPrivateKey, Unexpected key type, keyType:%d, type:%d", keyType, type);
         return NULL;
     }
 

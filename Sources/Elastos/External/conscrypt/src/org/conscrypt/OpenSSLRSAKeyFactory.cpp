@@ -3,9 +3,11 @@
 #include "OpenSSLRSAKeyFactory.h"
 #include "NativeCrypto.h"
 // #include "OpenSSLRSAPrivateCrtKey.h"
+#include "org/conscrypt/OpenSSLKey.h"
 #include "COpenSSLRSAPublicKey.h"
 #include "COpenSSLRSAPrivateCrtKey.h"
 #include "COpenSSLRSAPrivateKey.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IRSAPrivateKey;
@@ -28,6 +30,7 @@ using Elastos::Security::Spec::CRSAPublicKeySpec;
 using Elastos::Security::Spec::IRSAPublicKeySpec;
 using Elastos::Security::Spec::EIID_IRSAPublicKeySpec;
 using Elastos::Math::IBigInteger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -56,9 +59,10 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePublic(
         return NOERROR;
     }
     else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
-        assert(0 && "TODO");
-        // *pubKey = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec), INativeCrypto::EVP_PKEY_RSA);
-        // REFCOUNT_ADD(*pubKey)
+        AutoPtr<IPublicKey> pkey =
+            OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec), INativeCrypto::EVP_PKEY_RSA);
+        *pubKey = pkey;
+        REFCOUNT_ADD(*pubKey)
         return NOERROR;
     }
     // throw new InvalidKeySpecException("Must use RSAPublicKeySpec or X509EncodedKeySpec; was "
@@ -73,6 +77,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
     VALIDATE_NOT_NULL(priKey)
     if (keySpec == NULL) {
         // throw new InvalidKeySpecException("keySpec == NULL");
+        Logger::E("OpenSSLRSAKeyFactory", "EngineGeneratePrivate keySpec == NULL");
         return NOERROR;
     }
 
@@ -97,6 +102,7 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
         // REFCOUNT_ADD(*priKey)
         return NOERROR;
     }
+    Logger::E("OpenSSLRSAKeyFactory", "EngineGeneratePrivate Must use RSAPrivateKeySpec or PKCS8EncodedKeySpec");
     // throw new InvalidKeySpecException("Must use RSAPublicKeySpec or PKCS8EncodedKeySpec; was "
     //         + keySpec.getClass().getName());
     return NOERROR;

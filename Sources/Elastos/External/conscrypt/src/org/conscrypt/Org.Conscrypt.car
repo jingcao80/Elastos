@@ -89,6 +89,7 @@ module
     using interface Elastos.Security.IKeyPairGenerator;
     using interface Elastos.Security.Interfaces.IECPrivateKey;
     using interface Elastos.Security.Interfaces.IECPublicKey;
+    using interface Elastos.Security.Interfaces.IECKey;
     using interface Elastos.Security.Spec.IECPrivateKeySpec;
     using interface Elastos.Security.Spec.IECPublicKeySpec;
     using interface Elastos.Security.IPrivateKey;
@@ -406,6 +407,9 @@ module
         interface IOpenSSLECPrivateKey;
         interface IECPrivateKey;
         interface IOpenSSLKeyHolder;
+        interface IPrivateKey;
+        interface IECKey;
+        interface IKey;
     }
 
     singleton class COpenSSLECPrivateKeyHelper {
@@ -428,6 +432,9 @@ module
         interface IOpenSSLECPublicKey;
         interface IECPublicKey;
         interface IOpenSSLKeyHolder;
+        interface IECKey;
+        interface IPublicKey;
+        interface IKey;
     }
 
     singleton class COpenSSLECPublicKeyHelper {

@@ -1,10 +1,12 @@
 #include "org/conscrypt/COpenSSLECDHKeyAgreement.h"
 #include "org/conscrypt/NativeCrypto.h"
 #include "org/conscrypt/OpenSSLKey.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
 using Elastosx::Crypto::Spec::CSecretKeySpec;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -129,10 +131,12 @@ ECode COpenSSLECDHKeyAgreement::EngineInit(
 {
     if (key == NULL) {
         // throw new InvalidKeyException("key == NULL");
+        Logger::E("COpenSSLECDHKeyAgreement", "EngineInit key == NULL");
         return E_INVALID_KEY_EXCEPTION;
     }
     if (IPrivateKey::Probe(key) == NULL) {
         // throw new InvalidKeyException("Not a private key: " + key.getClass());
+        Logger::E("COpenSSLECDHKeyAgreement", "EngineInit Not a private key");
         return E_INVALID_KEY_EXCEPTION;
     }
 
