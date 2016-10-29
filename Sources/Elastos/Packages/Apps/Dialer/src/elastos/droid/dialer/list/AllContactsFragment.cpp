@@ -55,6 +55,11 @@ AllContactsFragment::AllContactsFragment()
     SetVisibleScrollbarEnabled(TRUE);
 }
 
+ECode AllContactsFragment::constructor()
+{
+    return ContactEntryListFragment::constructor();
+}
+
 ECode AllContactsFragment::OnViewCreated(
     /* [in] */ IView* view,
     /* [in] */ IBundle* savedInstanceState)

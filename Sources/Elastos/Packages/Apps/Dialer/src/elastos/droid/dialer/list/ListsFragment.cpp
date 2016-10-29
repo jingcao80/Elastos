@@ -123,10 +123,14 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
     mHost->GetRtlPosition(position, &rtl);
     switch (rtl) {
         case TAB_INDEX_SPEED_DIAL:
-            mHost->mSpeedDialFragment = (ISpeedDialFragment*)new SpeedDialFragment();
+        {
+            AutoPtr<SpeedDialFragment> fragment = new SpeedDialFragment();
+            fragment->constructor();
+            mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
             *item = IFragment::Probe(mHost->mSpeedDialFragment);
             REFCOUNT_ADD(*item)
             return NOERROR;
+        }
         case TAB_INDEX_RECENTS:
         {
             AutoPtr<ISystem> sys;
@@ -134,6 +138,7 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
             Int64 value;
             sys->GetCurrentTimeMillis(&value);
             AutoPtr<CallLogFragment> fragment = new CallLogFragment();
+            fragment->constructor();
             mHost->mRecentsFragment = (ICallLogFragment*)fragment;
             fragment->constructor(CallLogQueryHandler::CALL_TYPE_ALL,
                     MAX_RECENTS_ENTRIES, value - OLDEST_RECENTS_DATE);

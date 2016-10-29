@@ -208,6 +208,11 @@ ContactEntryListFragment::ContactEntryListFragment()
     // mPreferencesChangeListener  = new PreferencesChangeListener(this);
 }
 
+ECode ContactEntryListFragment::constructor()
+{
+    return AnalyticsFragment::constructor();
+}
+
 ECode ContactEntryListFragment::OnAttach(
     /* [in] */ IActivity* activity)
 {

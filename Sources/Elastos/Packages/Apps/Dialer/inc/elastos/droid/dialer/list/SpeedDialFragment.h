@@ -213,6 +213,8 @@ public:
 
     SpeedDialFragment();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnAttach(
         /* [in] */ IActivity* activity);

@@ -89,14 +89,12 @@ ECode FragmentPagerAdapter::SetPrimaryItem(
     AutoPtr<IFragment> fragment = IFragment::Probe(object);
     if (fragment != mCurrentPrimaryItem) {
         if (mCurrentPrimaryItem != NULL) {
-            assert(0 && "TODO");
-            // FragmentCompat.setMenuVisibility(mCurrentPrimaryItem, false);
-            // FragmentCompat.setUserVisibleHint(mCurrentPrimaryItem, false);
+            FragmentCompat::SetMenuVisibility(mCurrentPrimaryItem, FALSE);
+            FragmentCompat::SetUserVisibleHint(mCurrentPrimaryItem, FALSE);
         }
         if (fragment != NULL) {
-            assert(0 && "TODO");
-            // FragmentCompat.setMenuVisibility(fragment, true);
-            // FragmentCompat.setUserVisibleHint(fragment, true);
+            FragmentCompat::SetMenuVisibility(fragment, TRUE);
+            FragmentCompat::SetUserVisibleHint(fragment, TRUE);
         }
         mCurrentPrimaryItem = fragment;
     }
