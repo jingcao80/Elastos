@@ -1291,7 +1291,7 @@ ECode ViewPager::Populate(
     }
 
     AutoPtr<IView> v = IView::Probe(this);
-    mAdapter->SetPrimaryItem(v, mCurItem, curItem != NULL ? curItem->mObject : NULL);
+    mAdapter->SetPrimaryItem(IViewGroup::Probe(this), mCurItem, curItem != NULL ? curItem->mObject : NULL);
 
     mAdapter->FinishUpdate(v);
 

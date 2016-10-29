@@ -54,6 +54,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnViewCreated(
         /* [in] */ IView* view,

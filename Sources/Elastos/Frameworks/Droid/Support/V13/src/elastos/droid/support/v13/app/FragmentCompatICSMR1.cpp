@@ -11,7 +11,7 @@ void FragmentCompatICSMR1::SetUserVisibleHint(
     /* [in] */ IFragment* f,
     /* [in] */ Boolean visible)
 {
-    f->SetMenuVisibility(visible);
+    f->SetUserVisibleHint(visible);
 }
 
 } // namespace App

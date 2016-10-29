@@ -18,6 +18,8 @@ class ECO_PUBLIC AnalyticsFragment
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     // @Override
     CARAPI SendHitEvent(
         /* [in] */ const String& categoryId,

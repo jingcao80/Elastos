@@ -307,6 +307,11 @@ SpeedDialFragment::SpeedDialFragment()
     mScrollListener = new ScrollListener(this);
 }
 
+ECode SpeedDialFragment::constructor()
+{
+    return AnalyticsFragment::constructor();
+}
+
 ECode SpeedDialFragment::OnAttach(
     /* [in] */ IActivity* activity)
 {
@@ -367,7 +372,7 @@ ECode SpeedDialFragment::OnCreateView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
-
+assert(0);
     mParentView = NULL;
     inflater->Inflate(Elastos::Droid::Dialer::R::layout::speed_dial_fragment,
             container, FALSE, (IView**)&mParentView);
