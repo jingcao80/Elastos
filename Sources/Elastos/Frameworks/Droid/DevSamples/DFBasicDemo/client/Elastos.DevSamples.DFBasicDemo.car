@@ -1,6 +1,7 @@
 
 module
 {
+    importlib("Org.Alljoyn.Bus.eco");
     importlib("Elastos.Droid.Core.eco");
 
     merge("car/elastos/devsamples/dfbasicdemo/BasicInterface.car");

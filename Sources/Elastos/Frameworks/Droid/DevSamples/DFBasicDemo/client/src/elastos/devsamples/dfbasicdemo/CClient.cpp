@@ -1,6 +1,7 @@
 
 #include "CClient.h"
 #include "R.h"
+#include <Org.Alljoyn.Bus.h>
 
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
@@ -8,6 +9,9 @@ using Elastos::Droid::Widget::CArrayAdapter;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
+
+using Org::Alljoyn::Bus::IDaemonInit;
+using Org::Alljoyn::Bus::CDaemonInit;
 
 namespace Elastos {
 namespace DevSamples {
@@ -102,7 +106,8 @@ const String CClient::BusHandler::SERVICE_NAME("org.alljoyn.Bus.sample");
 const Int16 CClient::BusHandler::CONTACT_PORT = 25;
 
 ECode CClient::BusHandler::constructor(
-    /* [in] */ ILooper* looper)
+    /* [in] */ ILooper* looper,
+    /* [in] */ CClient* host)
 {
     Handler::constructor(looper);
 
@@ -110,6 +115,7 @@ ECode CClient::BusHandler::constructor(
     mIsInASession = FALSE;
     mIsConnected = FALSE;
     mIsStoppingDiscovery = FALSE;
+    mHost = host;
     return NOERROR;
 }
 
@@ -121,7 +127,11 @@ ECode CClient::BusHandler::HandleMessage(
     switch(what) {
     /* Connect to a remote instance of an object implementing the BasicInterface. */
     case CONNECT: {
-//        org.alljoyn.bus.alljoyn.DaemonInit.PrepareDaemon(getApplicationContext());
+        AutoPtr<IContext> context;
+        mHost->GetApplicationContext((IContext**)&context);
+        AutoPtr<IDaemonInit> di;
+        CDaemonInit::AcquireSingleton((IDaemonInit**)&di);
+        di->PrepareDaemon(context);
 //        /*
 //         * All communication through AllJoyn begins with a BusAttachment.
 //         *

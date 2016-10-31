@@ -3,6 +3,18 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+    merge("../../../../car/org/alljoyn/bus/Exception.car");
+    merge("../../../../car/org/alljoyn/bus/AboutListener.car");
+    merge("../../../../car/org/alljoyn/bus/BusAttachment.car");
+    merge("../../../../car/org/alljoyn/bus/BusListener.car");
+    merge("../../../../car/org/alljoyn/bus/BusObject.car");
+    merge("../../../../car/org/alljoyn/bus/Mutable.car");
+    merge("../../../../car/org/alljoyn/bus/OnJoinSessionListener.car");
+    merge("../../../../car/org/alljoyn/bus/OnPingListener.car");
+    merge("../../../../car/org/alljoyn/bus/SessionListener.car");
+    merge("../../../../car/org/alljoyn/bus/SessionOpts.car");
+    merge("../../../../car/org/alljoyn/bus/SessionPortListener.car");
+    merge("../../../../car/org/alljoyn/bus/Translator.car");
     merge("../../../../car/org/alljoyn/bus/alljoyn/DaemonInit.car");
 
     namespace Org {
