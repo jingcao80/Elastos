@@ -2,6 +2,11 @@
 #ifndef __ORG_ALLJOYN_BUS_ALLJOYN_DAEMONINIT_H__
 #define __ORG_ALLJOYN_BUS_ALLJOYN_DAEMONINIT_H__
 
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Content::IContext;
+
 namespace Org {
 namespace Alljoyn {
 namespace Bus {

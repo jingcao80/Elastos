@@ -1,0 +1,9 @@
+
+TARGET_NAME= alljoyn
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += ../
+
+SOURCES += DaemonInit.cpp
+SOURCES += CDaemonInit.cpp

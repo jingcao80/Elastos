@@ -73,7 +73,8 @@ private:
     {
     public:
         CARAPI constructor(
-            /* [in] */ ILooper* looper);
+            /* [in] */ ILooper* looper,
+            /* [in] */ CClient* host);
 
         // @Override
         CARAPI HandleMessage(
@@ -105,6 +106,7 @@ private:
         Boolean mIsInASession;
         Boolean mIsConnected;
         Boolean mIsStoppingDiscovery;
+        CClient* mHost;
     };
 
 public:

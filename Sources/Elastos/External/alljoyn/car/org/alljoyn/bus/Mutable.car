@@ -1,0 +1,23 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    interface IMutableInteger16Value {
+
+    }
+
+    interface IMutableInteger32Value {
+
+    }
+
+    interface IMutableStringValue {
+
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

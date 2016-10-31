@@ -1,13 +1,14 @@
 
 module
 {
-    using Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContext;
 
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
     namespace Alljoyn {
 
+    [local]
     interface IDaemonInit {
         GetContext(
             [out] IContext** context);
