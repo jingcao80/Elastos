@@ -8,6 +8,7 @@ module
     merge("car/elastos/droid/ChooseLockPattern.car");
     merge("car/elastos/droid/ConfirmLockPassword.car");
     merge("car/elastos/droid/ConfirmLockPattern.car");
+    merge("car/elastos/droid/CryptKeeper.car");
     merge("car/elastos/droid/DialogCreatable.car");
     merge("car/elastos/droid/EditPinPreference.car");
     merge("car/elastos/droid/SettingsActivity.car");
@@ -1710,6 +1711,47 @@ module
         interface IDialogCreatable;
 
         interface IDialogInterfaceOnClickListener;
+    }
+
+    class CCryptKeeper {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CCryptKeeperConfirm {
+        constructor();
+
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    class CCryptKeeperConfirmBlank {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
     }
 
     class CCryptKeeperSettings {

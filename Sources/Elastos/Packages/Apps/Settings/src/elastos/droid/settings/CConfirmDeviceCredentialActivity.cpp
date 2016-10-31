@@ -39,7 +39,7 @@ AutoPtr<IIntent> CConfirmDeviceCredentialActivity::CreateIntent(
 {
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->SetClassName(String("com.android.settings"),
+    intent->SetClassName(String("Elastos.Droid.Settings"),
             String("Elastos.Droid.Settings.CConfirmDeviceCredentialActivity"));
     intent->PutExtra(IKeyguardManager::EXTRA_TITLE, title);
     intent->PutExtra(IKeyguardManager::EXTRA_DESCRIPTION, details);

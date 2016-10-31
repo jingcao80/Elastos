@@ -300,8 +300,7 @@ void AdvancedWifiSettings::InitPreferences()
     }
 
     AutoPtr<IIntent> wifiDirectIntent;
-    assert(0 && "TODO");
-    // CIntent::New(context, ECLSID_CWifiP2pSettingsActivity, (IIntent**)&wifiDirectIntent);
+    CIntent::New(context, ECLSID_CSettingsWifiP2pSettingsActivity, (IIntent**)&wifiDirectIntent);
     AutoPtr<IPreference> wifiDirectPref;
     FindPreference(CoreUtils::Convert(KEY_WIFI_DIRECT), (IPreference**)&wifiDirectPref);
     wifiDirectPref->SetIntent(wifiDirectIntent);

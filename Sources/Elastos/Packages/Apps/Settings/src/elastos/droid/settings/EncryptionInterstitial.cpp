@@ -253,7 +253,7 @@ void EncryptionInterstitial::EncryptionInterstitialFragment::SetRequirePasswordS
     if (resultIntentData == NULL) {
         CIntent::New((IIntent**)&resultIntentData);
     }
-    resultIntentData->PutExtra(EXTRA_REQUIRE_PASSWORD, mPasswordRequired);
+    resultIntentData->PutBooleanExtra(EXTRA_REQUIRE_PASSWORD, mPasswordRequired);
     sa->SetResultIntentData(resultIntentData);
 }
 

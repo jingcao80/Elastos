@@ -1666,8 +1666,8 @@
             android:label="@string/header_add_an_account"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.SubSettingsDialogWhenLarge"/>
-<!--
-        <activity android:name=".CryptKeeper"
+
+        <activity android:name=".CCryptKeeper"
                   android:immersive="true"
                   android:launchMode="singleTop"
                   android:excludeFromRecents="true"
@@ -1681,14 +1681,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
--->
-        <activity android:name=".CryptKeeperFadeToBlack"
+
+<!--         <activity android:name=".CryptKeeperFadeToBlack"
             android:immersive="true"
             android:launchMode="singleTop"
             android:theme="@style/CryptKeeperBlankTheme"
-        />
+        /> -->
 
-        <activity android:name=".CryptKeeperConfirmBlank"
+        <activity android:name=".CCryptKeeperConfirmBlank"
             android:immersive="true"
             android:launchMode="singleTop"
             android:theme="@style/CryptKeeperBlankTheme"

@@ -474,7 +474,7 @@ ECode CNotificationAppList::MyOnClickListener::OnClick(
     intent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_TOP);
     intent->PutExtra(ISettings::EXTRA_APP_PACKAGE, mRow->mPkg);
     intent->PutExtra(ISettings::EXTRA_APP_UID, mRow->mUid);
-    intent->PutExtra(CAppNotificationSettings::EXTRA_HAS_SETTINGS_INTENT, mRow->mSettingsIntent != NULL);
+    intent->PutBooleanExtra(CAppNotificationSettings::EXTRA_HAS_SETTINGS_INTENT, mRow->mSettingsIntent != NULL);
     intent->PutExtra(CAppNotificationSettings::EXTRA_SETTINGS_INTENT, IParcelable::Probe(mRow->mSettingsIntent));
     mHost->mContext->StartActivity(intent);
     return NOERROR;

@@ -205,7 +205,6 @@ void ChooseLockGeneric::ChooseLockGenericFragment::MaybeEnableEncryption(
     CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
     Boolean res2;
     helper->IsDeviceEncryptionEnabled(&res2);
-
     if (res1 && res2) {
         mEncryptionRequestQuality = quality;
         mEncryptionRequestDisabled = disabled;

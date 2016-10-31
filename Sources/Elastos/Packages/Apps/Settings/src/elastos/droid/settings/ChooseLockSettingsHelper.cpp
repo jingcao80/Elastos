@@ -92,7 +92,7 @@ Boolean ChooseLockSettingsHelper::ConfirmPattern(
     // supply header and footer text in the intent
     intent->PutExtra(CConfirmLockPattern::HEADER_TEXT, message);
     intent->PutExtra(CConfirmLockPattern::FOOTER_TEXT, details);
-    intent->SetClassName(String("com.android.settings"),
+    intent->SetClassName(String("Elastos.Droid.Settings"),
                         returnCredentials
                         ? String("Elastos.Droid.Settings.CConfirmLockPatternInternalActivity")
                         : String("Elastos.Droid.Settings.CConfirmLockPattern"));
@@ -118,7 +118,7 @@ Boolean ChooseLockSettingsHelper::ConfirmPassword(
     CIntent::New((IIntent**)&intent);
     // supply header text in the intent
     intent->PutExtra(CConfirmLockPattern::HEADER_TEXT, message);
-    intent->SetClassName(String("com.android.settings"),
+    intent->SetClassName(String("Elastos.Droid.Settings"),
                         returnCredentials
                         ? String("Elastos.Droid.Settings.CConfirmLockPasswordInternalActivity")
                         : String("Elastos.Droid.Settings.CConfirmLockPassword"));

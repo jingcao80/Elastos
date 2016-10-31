@@ -396,7 +396,7 @@ ECode CDeviceInfoSettings::OnPreferenceTreeClick(
         if ((*mHits)[0] >= (SystemClock::GetUptimeMillis()-500)) {
             AutoPtr<IIntent> intent;
             CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
-            intent->SetClassName(String("android"),
+            intent->SetClassName(String("Elastos.Droid"),
                     String("Elastos.Droid.Internal.App.CPlatLogoActivity"));
             // try {
                 ECode ec = StartActivity(intent);

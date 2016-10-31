@@ -26,7 +26,7 @@ namespace Elastos {
 namespace Droid {
 namespace Settings {
 
-const String CCryptKeeperSettings::TAG("CryptKeeper");
+const String CCryptKeeperSettings::TAG("CCryptKeeperSettings");
 
 const Int32 CCryptKeeperSettings::KEYGUARD_REQUEST = 55;
 

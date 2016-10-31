@@ -1831,7 +1831,7 @@ void CInstalledAppDetails::SetIntentAndFinish(
     if (localLOGV) Logger::I(TAG, "appChanged= %d", appChanged);
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->PutExtra(ManageApplications::APP_CHG, appChanged);
+    intent->PutBooleanExtra(ManageApplications::APP_CHG, appChanged);
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     CSettingsActivity* sa = (CSettingsActivity*)ISettingsActivity::Probe(activity);
@@ -2020,7 +2020,7 @@ void CInstalledAppDetails::UninstallPkg(
     helper->Parse(String("package:") + packageName, (IUri**)&packageURI);
     AutoPtr<IIntent> uninstallIntent;
     CIntent::New(IIntent::ACTION_UNINSTALL_PACKAGE, packageURI, (IIntent**)&uninstallIntent);
-    uninstallIntent->PutExtra(IIntent::EXTRA_UNINSTALL_ALL_USERS, allUsers);
+    uninstallIntent->PutBooleanExtra(IIntent::EXTRA_UNINSTALL_ALL_USERS, allUsers);
     StartActivityForResult(uninstallIntent, REQUEST_UNINSTALL);
     mDisableAfterUninstall = andDisable;
 }

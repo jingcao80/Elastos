@@ -12,6 +12,7 @@
 #include "elastos/droid/settings/CConfirmLockPattern.h"
 #include "elastos/droid/settings/CConfirmLockPatternFragment.h"
 #include "elastos/droid/settings/CConfirmLockPatternInternalActivity.h"
+#include "elastos/droid/settings/CCryptKeeperConfirmBlank.h"
 #include "elastos/droid/settings/CEncryptionInterstitial.h"
 #include "elastos/droid/settings/CEncryptionInterstitialFragment.h"
 #include "elastos/droid/settings/CSecuritySettings.h"
@@ -112,6 +113,7 @@ CAR_OBJECT_IMPL(CConfirmLockPasswordInternalActivity);
 CAR_OBJECT_IMPL(CConfirmLockPattern);
 CAR_OBJECT_IMPL(CConfirmLockPatternFragment);
 CAR_OBJECT_IMPL(CConfirmLockPatternInternalActivity);
+CAR_OBJECT_IMPL(CCryptKeeperConfirmBlank);
 CAR_OBJECT_IMPL(CEncryptionInterstitial);
 CAR_OBJECT_IMPL(CEncryptionInterstitialFragment);
 CAR_OBJECT_IMPL(CSecuritySettings);
