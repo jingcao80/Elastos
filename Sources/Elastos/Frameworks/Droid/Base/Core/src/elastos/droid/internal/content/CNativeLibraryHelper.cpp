@@ -754,6 +754,7 @@ static install_status_t copyFileIfChanged(void* arg, ZipFileRO* zipFile, ZipEntr
         return INSTALL_FAILED_INVALID_APK;
     } else {
         struct tm t;
+        //memset(&t, 0, sizeof(t));
         ZipUtils::zipTimeToTimespec(when, &t);
         modTime = mktime(&t);
     }
