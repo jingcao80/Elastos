@@ -1416,6 +1416,8 @@ void ListView::CorrectTooLow(
                 if (lastPosition == mItemCount - 1) {
                     topOffSet = Elastos::Core::Math::Min(topOffSet, lastBottom - end);
                 }
+                // Move everything up
+                OffsetChildrenTopAndBottom(-topOffSet);
                 if (lastPosition < mItemCount - 1) {
                     Int32 lastChildBottom;
                     lastChild->GetBottom(&lastChildBottom);

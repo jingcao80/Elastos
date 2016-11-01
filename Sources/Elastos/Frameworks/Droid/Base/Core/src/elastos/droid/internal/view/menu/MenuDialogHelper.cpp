@@ -32,8 +32,9 @@ CAR_INTERFACE_IMPL_4(MenuDialogHelper::Listener, Object, IDialogInterfaceOnKeyLi
 
 MenuDialogHelper::Listener::Listener(
     /* [in] */ MenuDialogHelper* owner)
-    : mOwner(owner)
-{}
+{
+    owner->GetWeakReference((IWeakReference**)&mWeakOwner);
+}
 
 ECode MenuDialogHelper::Listener::OnKey(
     /* [in] */ IDialogInterface* dialog,
@@ -41,36 +42,68 @@ ECode MenuDialogHelper::Listener::OnKey(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* flag)
 {
-    return mOwner->OnKey(dialog, keyCode, event, flag);
+    AutoPtr<IInterface> obj;
+    mWeakOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
+    if (obj) {
+        MenuDialogHelper* owner = (MenuDialogHelper*)IMenuDialogHelper::Probe(obj);
+        return owner->OnKey(dialog, keyCode, event, flag);
+    }
+    return NOERROR;
 }
 
 ECode MenuDialogHelper::Listener::OnDismiss(
     /* [in] */ IDialogInterface* dialog)
 {
-    return mOwner->OnDismiss(dialog);
+    AutoPtr<IInterface> obj;
+    mWeakOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
+    if (obj) {
+        MenuDialogHelper* owner = (MenuDialogHelper*)IMenuDialogHelper::Probe(obj);
+        return owner->OnDismiss(dialog);
+    }
+    return NOERROR;
 }
 
 ECode MenuDialogHelper::Listener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    return mOwner->OnClick(dialog, which);
+    AutoPtr<IInterface> obj;
+    mWeakOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
+    if (obj) {
+        MenuDialogHelper* owner = (MenuDialogHelper*)IMenuDialogHelper::Probe(obj);
+        return owner->OnClick(dialog, which);
+    }
+    return NOERROR;
 }
 
 ECode MenuDialogHelper::Listener::OnCloseMenu(
     /* [in] */ IMenuBuilder* menu,
     /* [in] */ Boolean allMenusAreClosing)
 {
-    return mOwner->OnCloseMenu(menu, allMenusAreClosing);
+    AutoPtr<IInterface> obj;
+    mWeakOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
+    if (obj) {
+        MenuDialogHelper* owner = (MenuDialogHelper*)IMenuDialogHelper::Probe(obj);
+        return owner->OnCloseMenu(menu, allMenusAreClosing);
+    }
+    return NOERROR;
 }
 
 ECode MenuDialogHelper::Listener::OnOpenSubMenu(
     /* [in] */ IMenuBuilder* subMenu,
     /* [out] */ Boolean* result)
 {
-    return mOwner->OnOpenSubMenu(subMenu, result);
+    AutoPtr<IInterface> obj;
+    mWeakOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
+    if (obj) {
+        MenuDialogHelper* owner = (MenuDialogHelper*)IMenuDialogHelper::Probe(obj);
+        return owner->OnOpenSubMenu(subMenu, result);
+    }
+    return NOERROR;
 }
 
+CAR_INTERFACE_IMPL_5(MenuDialogHelper, Object, IMenuDialogHelper, IDialogInterfaceOnKeyListener,
+    IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener, IMenuPresenterCallback)
 
 ECode MenuDialogHelper::constructor(
     /* [in] */ IMenuBuilder* menu)
@@ -232,7 +265,7 @@ ECode MenuDialogHelper::OnCloseMenu(
         Dismiss();
     }
     if (mPresenterCallback != NULL) {
-        return IMenuPresenter::Probe(mPresenterCallback)->OnCloseMenu(menu, allMenusAreClosing);
+        return mPresenterCallback->OnCloseMenu(menu, allMenusAreClosing);
     }
 
     return NOERROR;
