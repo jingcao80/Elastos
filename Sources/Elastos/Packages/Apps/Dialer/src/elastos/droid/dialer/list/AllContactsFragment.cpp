@@ -82,7 +82,8 @@ ECode AllContactsFragment::OnViewCreated(
 
 AutoPtr<IContactEntryListAdapter> AllContactsFragment::CreateListAdapter()
 {
-    assert(0);
+    // TODO:
+    // assert(0);
     // AutoPtr<MyDefaultContactListAdapter> adapter = new MyDefaultContactListAdapter(this);
     // AutoPtr<IActivity> activity;
     // GetActivity((IActivity**)&activity);

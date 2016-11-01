@@ -356,12 +356,12 @@ ECode SpeedDialFragment::OnCreate(
 ECode SpeedDialFragment::OnResume()
 {
     FAIL_RETURN(AnalyticsFragment::OnResume())
-
-    AutoPtr<ILoaderManager> manager;
-    GetLoaderManager((ILoaderManager**)&manager);
-    AutoPtr<ILoader> loader;
-    manager->GetLoader(LOADER_ID_CONTACT_TILE, (ILoader**)&loader);
-    loader->ForceLoad();
+    // TODO
+    // AutoPtr<ILoaderManager> manager;
+    // GetLoaderManager((ILoaderManager**)&manager);
+    // AutoPtr<ILoader> loader;
+    // manager->GetLoader(LOADER_ID_CONTACT_TILE, (ILoader**)&loader);
+    // loader->ForceLoad();
     return NOERROR;
 }
 
@@ -372,7 +372,7 @@ ECode SpeedDialFragment::OnCreateView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
-assert(0);
+
     mParentView = NULL;
     inflater->Inflate(Elastos::Droid::Dialer::R::layout::speed_dial_fragment,
             container, FALSE, (IView**)&mParentView);

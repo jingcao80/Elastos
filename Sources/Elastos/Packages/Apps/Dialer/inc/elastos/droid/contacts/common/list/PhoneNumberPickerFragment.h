@@ -50,6 +50,8 @@ private:
 public:
     PhoneNumberPickerFragment();
 
+    CARAPI constructor();
+
     CAR_INTERFACE_DECL()
 
     CARAPI_(void) SetDirectorySearchEnabled(

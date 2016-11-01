@@ -760,6 +760,7 @@ ECode FragmentManagerImpl::MoveToState(
                     f->PerformCreate(savedFragmentState);
                 }
                 f->SetRetaining(FALSE);
+                f->GetFromLayout(&fromLayout);
                 if (fromLayout) {
                     // For fragments that are part of the content view
                     // layout, we need to instantiate the view immediately
@@ -783,6 +784,7 @@ ECode FragmentManagerImpl::MoveToState(
             case IFragment::CREATED:
                 if (newState > IFragment::CREATED) {
                     if (DEBUG) Logger::V(TAG, "moveto ACTIVITY_CREATED: %s", TO_CSTR(f));
+                    f->GetFromLayout(&fromLayout);
                     if (!fromLayout) {
                         AutoPtr<IViewGroup> container = NULL;
                         Int32 containerId;
@@ -1548,6 +1550,7 @@ ECode FragmentManagerImpl::ExecPendingActions(
 
     if (mExecutingActions) {
 //         throw new IllegalStateException("Recursive entry to executePendingTransactions");
+        Logger::E(TAG, "Recursive entry to executePendingTransactions");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -1556,6 +1559,7 @@ ECode FragmentManagerImpl::ExecPendingActions(
     AutoPtr<ILooper> aLooper;
     activity->mHandler->GetLooper((ILooper**)&aLooper);
     if (myLooper.Get() != aLooper.Get()) {
+        Logger::E(TAG, "Must be called from main thread of process");
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Must be called from main thread of process");
     }

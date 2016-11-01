@@ -70,6 +70,11 @@ SearchFragment::SearchFragment()
 
 CAR_INTERFACE_IMPL(SearchFragment, PhoneNumberPickerFragment, ISearchFragment);
 
+ECode SearchFragment::constructor()
+{
+    return PhoneNumberPickerFragment::constructor();
+}
+
 ECode SearchFragment::OnAttach(
     /* [in] */ IActivity* activity)
 {

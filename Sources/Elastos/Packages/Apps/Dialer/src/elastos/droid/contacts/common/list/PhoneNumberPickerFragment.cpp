@@ -65,6 +65,11 @@ PhoneNumberPickerFragment::PhoneNumberPickerFragment()
 
 CAR_INTERFACE_IMPL(PhoneNumberPickerFragment, ContactEntryListFragment, IOnShortcutIntentCreatedListener)
 
+ECode PhoneNumberPickerFragment::constructor()
+{
+    return ContactEntryListFragment::constructor();
+}
+
 void PhoneNumberPickerFragment::SetDirectorySearchEnabled(
     /* [in] */ Boolean flag)
 {

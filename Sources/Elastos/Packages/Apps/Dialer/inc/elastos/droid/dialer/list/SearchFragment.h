@@ -55,6 +55,8 @@ public:
 
     CAR_INTERFACE_DECL();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnAttach(
         /* [in] */ IActivity* activity);

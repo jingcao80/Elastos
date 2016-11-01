@@ -547,6 +547,8 @@ module
     namespace List {
 
     class CAllContactsFragment {
+        constructor();
+
         interface IFragment;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;

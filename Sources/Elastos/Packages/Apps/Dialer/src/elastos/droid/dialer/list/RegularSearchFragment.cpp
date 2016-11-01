@@ -28,6 +28,11 @@ RegularSearchFragment::RegularSearchFragment()
     ConfigureDirectorySearch();
 }
 
+ECode RegularSearchFragment::constructor()
+{
+    return SearchFragment::constructor();
+}
+
 ECode RegularSearchFragment::ConfigureDirectorySearch()
 {
     SetDirectorySearchEnabled(TRUE);

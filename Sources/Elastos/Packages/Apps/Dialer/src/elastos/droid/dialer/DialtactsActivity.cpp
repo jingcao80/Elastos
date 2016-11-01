@@ -1169,10 +1169,12 @@ void DialtactsActivity::EnterSearchUi(
     if (fragment == NULL) {
         if (smartDialSearch) {
             AutoPtr<SmartDialSearchFragment> smartFragment = new SmartDialSearchFragment();
+            smartFragment->constructor();
             fragment = IFragment::Probe(smartFragment);
         }
         else {
             AutoPtr<RegularSearchFragment> regularFragment = new RegularSearchFragment();
+            regularFragment->constructor();
             fragment = IFragment::Probe(regularFragment);
         }
         // transaction->Add(R::id::dialtacts_frame, fragment, tag);

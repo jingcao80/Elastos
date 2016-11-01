@@ -93,6 +93,7 @@ PhoneFavoriteListView::PhoneFavoriteListView()
 {
     mLocationOnScreen = ArrayOf<Int32>::Alloc(2);
     AutoPtr<IDragItemContainer> container = (IDragItemContainer*)new InnerContainer(this);
+    mDragDropController = new DragDropController(container);
     mDragScroller = (IRunnable*)new DragScroller(this);
     mDragShadowOverAnimatorListener = (AnimatorListenerAdapter*)new DragShadowOverAnimatorListener(this);
 }

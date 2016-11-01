@@ -21,6 +21,8 @@ class RegularSearchFragment
 public:
     RegularSearchFragment();
 
+    CARAPI constructor();
+
     CAR_INTERFACE_DECL();
 
     CARAPI ConfigureDirectorySearch();

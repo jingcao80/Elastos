@@ -14,6 +14,11 @@ const String SmartDialSearchFragment::TAG("SmartDialSearchFragment");
 
 CAR_INTERFACE_IMPL(SmartDialSearchFragment, SearchFragment, ISmartDialSearchFragment);
 
+ECode SmartDialSearchFragment::constructor()
+{
+    return SearchFragment::constructor();
+}
+
 AutoPtr<IContactEntryListAdapter> SmartDialSearchFragment::CreateListAdapter()
 {
     AutoPtr<IActivity> activity;

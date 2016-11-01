@@ -1018,11 +1018,11 @@ void ViewPager::DataSetChanged()
             i--;
 
             if (!isUpdating) {
-                mAdapter->StartUpdate(IView::Probe(this));
+                mAdapter->StartUpdate(IViewGroup::Probe(this));
                 isUpdating = TRUE;
             }
 
-            mAdapter->DestroyItem(IView::Probe(this), ii->mPosition, ii->mObject);
+            mAdapter->DestroyItem(IViewGroup::Probe(this), ii->mPosition, ii->mObject);
             needPopulate = TRUE;
 
             if (mCurItem == ii->mPosition) {
@@ -1045,7 +1045,7 @@ void ViewPager::DataSetChanged()
     }
 
     if (isUpdating) {
-        mAdapter->FinishUpdate(IView::Probe(this));
+        mAdapter->FinishUpdate(IViewGroup::Probe(this));
     }
 
     AutoPtr<ICollections> coll;
@@ -1111,7 +1111,7 @@ ECode ViewPager::Populate(
         return NOERROR;
     }
 
-    mAdapter->StartUpdate(IView::Probe(this));
+    mAdapter->StartUpdate(IViewGroup::Probe(this));
 
     Int32 pageLimit = mOffscreenPageLimit;
     Int32 startPos = Elastos::Core::Math::Max(0, mCurItem - pageLimit);
@@ -1180,7 +1180,7 @@ ECode ViewPager::Populate(
                 }
                 if (pos == ii->mPosition && !ii->mScrolling) {
                     mItems->Remove(itemIndex);
-                    mAdapter->DestroyItem(IView::Probe(this), pos, ii->mObject);
+                    mAdapter->DestroyItem(IViewGroup::Probe(this), pos, ii->mObject);
                     if (DEBUG) {
                         Slogger::I(TAG, "populate() - destroyItem() with pos: %d view: %s", pos, TO_CSTR(ii->mObject));
                     }
@@ -1290,10 +1290,10 @@ ECode ViewPager::Populate(
         }
     }
 
-    AutoPtr<IView> v = IView::Probe(this);
-    mAdapter->SetPrimaryItem(IViewGroup::Probe(this), mCurItem, curItem != NULL ? curItem->mObject : NULL);
+    AutoPtr<IViewGroup> vg = IViewGroup::Probe(this);
+    mAdapter->SetPrimaryItem(vg, mCurItem, curItem != NULL ? curItem->mObject : NULL);
 
-    mAdapter->FinishUpdate(v);
+    mAdapter->FinishUpdate(vg);
 
     // Check width measurement of current pages and drawing sort order.
     // Update LayoutParams as needed.

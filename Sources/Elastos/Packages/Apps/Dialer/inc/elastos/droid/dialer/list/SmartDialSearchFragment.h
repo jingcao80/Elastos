@@ -23,6 +23,8 @@ class SmartDialSearchFragment
 public:
     CAR_INTERFACE_DECL();
 
+    CARAPI constructor();
+
     /**
      * Creates a SmartDialCursorLoader object to load query results.
      */
