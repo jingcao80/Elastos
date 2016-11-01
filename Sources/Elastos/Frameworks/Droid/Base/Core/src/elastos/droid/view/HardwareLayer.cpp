@@ -170,8 +170,6 @@ ECode HardwareLayer::SetSurfaceTexture(
 
 ECode HardwareLayer::UpdateSurfaceTexture()
 {
-    Int64 ptr;
-    mFinalizer->Get(&ptr);
     return mRenderer->PushLayerUpdate(this);;
 }
 

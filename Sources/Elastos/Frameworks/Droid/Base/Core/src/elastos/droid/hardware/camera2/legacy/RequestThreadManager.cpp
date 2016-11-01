@@ -67,6 +67,7 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Arrays;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
@@ -212,20 +213,23 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
     AutoPtr<IRequestHolder> holder = IRequestHolder::Probe(obj);
     AutoPtr<IInterface> obj2;
     captureInfo->GetSecond((IInterface**)&obj2);
-    AutoPtr<IInteger64> timestampObj = IInteger64::Probe(obj2);
     Int64 timestamp;
-    timestampObj->GetValue(&timestamp);
+    IInteger64::Probe(obj2)->GetValue(&timestamp);
 
     AutoPtr<ICollection> targets;
     holder->GetHolderTargets((ICollection**)&targets);
-    AutoPtr<ArrayOf<IInterface*> > array;
-    targets->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<ISurface> s = ISurface::Probe((*array)[i]);
+
+    ICollection* jpegSurfaceIds = ICollection::Probe(mHost->mJpegSurfaceIds);
+    Boolean hasNext;
+    AutoPtr<IIterator> it;
+    targets->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> sobj;
+        it->GetNext((IInterface**)&sobj);
+        ISurface* s = ISurface::Probe(sobj);
 
         //try {
-        Boolean result = LegacyCameraDevice::ContainsSurfaceId(s,
-                ICollection::Probe(mHost->mJpegSurfaceIds));
+        Boolean result = LegacyCameraDevice::ContainsSurfaceId(s, jpegSurfaceIds);
         ECode ec = NOERROR;
         if (result) {
             Logger::I(mHost->TAG, String("Producing jpeg buffer..."));
@@ -268,9 +272,6 @@ ECode RequestThreadManager::CameraPictureCallback::OnPictureTaken(
                 }
             }
         }
-        //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-        //Log.w(TAG, "Surface abandoned, dropping frame. ", e);
-        //}
     }
 
     return mHost->mReceivedJpeg->Open();
@@ -350,13 +351,11 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             AutoPtr<ConfigureHolder> config = (ConfigureHolder*)IObject::Probe(obj);
-            Int32 sizes;
+            Int32 sizes = 0;
             if (config->mSurfaces != NULL) {
                 config->mSurfaces->GetSize(&sizes);
             }
-            else {
-                sizes = 0;
-            }
+
             Logger::I(mHost->TAG, "Configure outputs: %d surfaces configured.", sizes);
 
             //try {
@@ -375,12 +374,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                 Logger::E(mHost->TAG, "Timed out while queueing configure request.");
                 mHost->mCaptureCollector->FailAll();
             }
-            //} catch (InterruptedException e) {
-            // Log.e(TAG, "Interrupted while waiting for requests to complete.");
-            // mDeviceState.setError(
-            //         CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
-            // break;
-            //}
 
             mHost->ConfigureOutputs(config->mSurfaces);
             config->mCondition->Open();
@@ -419,12 +412,6 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
                     Logger::E(mHost->TAG, "Timed out while waiting for prior requests to complete.");
                     mHost->mCaptureCollector->FailAll();
                 }
-                //} catch (InterruptedException e) {
-                // Log.e(TAG, "Interrupted while waiting for requests to complete: ", e);
-                // mDeviceState.setError(
-                //         CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
-                // break;
-                //}
 
                 {
                     AutoLock syncLock(mHost->mIdleLock);
@@ -801,9 +788,11 @@ ECode RequestThreadManager::constructor(
 void RequestThreadManager::CreateDummySurface()
 {
     if (mDummyTexture == NULL || mDummySurface == NULL) {
+        mDummyTexture = NULL;
         CSurfaceTexture::New(/*ignored*/0, (ISurfaceTexture**)&mDummyTexture);
         // TODO: use smallest default sizes
         mDummyTexture->SetDefaultBufferSize(640, 480);
+        mDummySurface = NULL;
         CSurface::New(mDummyTexture, (ISurface**)&mDummySurface);
     }
     return;
@@ -937,22 +926,23 @@ ECode RequestThreadManager::ConfigureOutputs(
 
     AutoPtr<IInterface> facingObj;
     mCharacteristics->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&facingObj);
-    AutoPtr<IInteger32> intObj = IInteger32::Probe(facingObj);
     Int32 facing;
-    intObj->GetValue(&facing);
+    IInteger32::Probe(facingObj)->GetValue(&facing);
 
     AutoPtr<IInterface> orientationObj;
     mCharacteristics->Get(CameraCharacteristics::SENSOR_ORIENTATION, (IInterface**)&orientationObj);
-    intObj = NULL;
-    intObj = IInteger32::Probe(orientationObj);
     Int32 orientation;
-    intObj->GetValue(&orientation);
+    IInteger32::Probe(orientationObj)->GetValue(&orientation);
 
+    Int32 width, height;
+    Boolean hasNext;
     if (outputs != NULL) {
-        AutoPtr<ArrayOf<IInterface*> > array;
-        outputs->ToArray((ArrayOf<IInterface*>**)&array);
-        for (Int32 i = 0; i < array->GetLength(); i++) {
-            AutoPtr<ISurface> s = ISurface::Probe((*array)[i]);
+        AutoPtr<IIterator> it;
+        outputs->GetIterator((IIterator**)&it);
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            ISurface* s = ISurface::Probe(obj);
 
             //try {
             Int32 format;
@@ -971,8 +961,8 @@ ECode RequestThreadManager::ConfigureOutputs(
                                 ILegacyMetadataMapper::HAL_PIXEL_FORMAT_RGBA_8888);
                     }
                     Int64 id = LegacyCameraDevice::GetSurfaceId(s);
-                    AutoPtr<IInteger64> obj = CoreUtils::Convert(id);
-                    mJpegSurfaceIds->Add(TO_IINTERFACE(obj));
+                    AutoPtr<IInteger64> idObj = CoreUtils::Convert(id);
+                    mJpegSurfaceIds->Add(idObj);
                     mCallbackOutputs->Add(s);
                     break;
                 }
@@ -980,10 +970,6 @@ ECode RequestThreadManager::ConfigureOutputs(
                     mPreviewOutputs->Add(s);
                     break;
             }
-            //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-            //Log.w(TAG, "Surface abandoned, skipping...", e);
-            //}
-
         }
     }
 
@@ -1016,15 +1002,18 @@ ECode RequestThreadManager::ConfigureOutputs(
         outputs->GetSize(&oSize);
         AutoPtr<IList> outputSizes;
         CArrayList::New(oSize, (IList**)&outputSizes);
-        for (Int32 i = 0; i < size; i++) {
+
+        AutoPtr<IIterator> it;
+        mPreviewOutputs->GetIterator((IIterator**)&it);
+        while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
-            mPreviewOutputs->Get(i, (IInterface**)&obj);
-            AutoPtr<ISurface> s = ISurface::Probe(obj);
+            it->GetNext((IInterface**)&obj);
+            ISurface* s = ISurface::Probe(obj);
 
             //try {
-            AutoPtr<ISize> _size;
-            ec = LegacyCameraDevice::GetSurfaceSize(s, (ISize**)&_size);
-            outputSizes->Add(TO_IINTERFACE(_size));
+            AutoPtr<ISize> sizeObj;
+            ec = LegacyCameraDevice::GetSurfaceSize(s, (ISize**)&sizeObj);
+            outputSizes->Add(sizeObj);
             //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
             if (FAILED(ec)) {
                 Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
@@ -1047,9 +1036,7 @@ ECode RequestThreadManager::ConfigureOutputs(
         // Use smallest preview dimension with same aspect ratio as sensor that is >= than all
         // of the configured output dimensions.  If none exists, fall back to using the largest
         // supported preview size.
-        Int32 height;
         largestOutput->GetHeight(&height);
-        Int32 width;
         largestOutput->GetWidth(&width);
         Int64 largestOutputArea = height * (Int64)width;
         AutoPtr<ISize> bestPreviewDimen;
@@ -1057,22 +1044,18 @@ ECode RequestThreadManager::ConfigureOutputs(
 
         Int32 length;
         supportedPreviewSizes->GetSize(&length);
-        for (Int32 i = 0; i < length; i++) {\
+        for (Int32 i = 0; i < length; i++) {
             AutoPtr<IInterface> obj;
             supportedPreviewSizes->Get(0, (IInterface**)&obj);
             AutoPtr<ISize> s = ISize::Probe(obj);
 
-            Int32 width;
             s->GetWidth(&width);
-            Int32 height;
             s->GetHeight(&height);
             Int64 currArea = width * height;
 
-            Int32 width2;
-            bestPreviewDimen->GetWidth(&width2);
-            Int32 height2;
-            bestPreviewDimen->GetHeight(&height2);
-            Int64 bestArea = width2 * height2;
+            bestPreviewDimen->GetWidth(&width);
+            bestPreviewDimen->GetHeight(&height);
+            Int64 bestArea = width * height;
             if (CheckAspectRatiosMatch(largestJpegDimen, s) && (currArea < bestArea &&
                     currArea >= largestOutputArea)) {
                 bestPreviewDimen = s;
@@ -1081,15 +1064,12 @@ ECode RequestThreadManager::ConfigureOutputs(
         }
 
         mIntermediateBufferSize = bestPreviewDimen;
-
         mIntermediateBufferSize->GetWidth(&width);
         mIntermediateBufferSize->GetHeight(&height);
         mParams->SetPreviewSize(width, height);
 
         if (DEBUG) {
-            String str;
-            IObject::Probe(bestPreviewDimen)->ToString(&str);
-            Logger::D(TAG, "Intermediate buffer selected with dimens: %s", str.string());
+            Logger::D(TAG, "Intermediate buffer selected with dimens: %s", TO_CSTR(bestPreviewDimen));
         }
     }
     else {
@@ -1100,19 +1080,15 @@ ECode RequestThreadManager::ConfigureOutputs(
     }
 
     AutoPtr<ISize> smallestSupportedJpegSize;
-    CalculatePictureSize(ICollection::Probe(mCallbackOutputs), mParams,
-            (ISize**)&smallestSupportedJpegSize);
+    CalculatePictureSize(ICollection::Probe(mCallbackOutputs), mParams, (ISize**)&smallestSupportedJpegSize);
     if (smallestSupportedJpegSize != NULL) {
         /*
          * Set takePicture size to the smallest supported JPEG size large enough
          * to scale/crop out of for the bounding rectangle of the configured JPEG sizes.
          */
-        String str;
-        IObject::Probe(smallestSupportedJpegSize)->ToString(&str);
-        Logger::I(TAG, "configureOutputs - set take picture size to %s", str.string());
-        Int32 width;
+        Logger::I(TAG, "configureOutputs - set take picture size to %s", TO_CSTR(smallestSupportedJpegSize));
+        Int32 width, height;
         smallestSupportedJpegSize->GetWidth(&width);
-        Int32 height;
         smallestSupportedJpegSize->GetHeight(&height);
         mParams->SetPictureSize(width, height);
     }
@@ -1139,19 +1115,18 @@ void RequestThreadManager::ResetJpegSurfaceFormats(
     if (!USE_BLOB_FORMAT_OVERRIDE || surfaces == NULL) {
         return;
     }
-    AutoPtr<ArrayOf<IInterface*> > array;
-    surfaces->ToArray((ArrayOf<IInterface*>**)&array);
 
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<ISurface> s = ISurface::Probe((*array)[i]);
-
-        //try {
+    Boolean hasNext;
+    AutoPtr<IIterator> it;
+    surfaces->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        ISurface* s = ISurface::Probe(obj);
         ECode ec = LegacyCameraDevice::SetSurfaceFormat(s, ILegacyMetadataMapper::HAL_PIXEL_FORMAT_BLOB);
-        //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
-            Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
+            Logger::W(TAG, "Surface %s abandoned, skipping...%08x", TO_CSTR(s), ec);
         }
-        //}
     }
     return;
 }
@@ -1164,6 +1139,8 @@ ECode RequestThreadManager::CalculatePictureSize(
     VALIDATE_NOT_NULL(size);
     *size = NULL;
 
+    ICollection* jpegSurfaceIds = ICollection::Probe(mJpegSurfaceIds);
+
     /*
      * Find the largest JPEG size (if any), from the configured outputs:
      * - the api1 picture size should be set to the smallest legal size that's at least as large
@@ -1172,14 +1149,16 @@ ECode RequestThreadManager::CalculatePictureSize(
     AutoPtr<IList> configuredJpegSizes;
     CArrayList::New((IList**)&configuredJpegSizes);
 
-    AutoPtr<ArrayOf<IInterface*> > array;
-    callbackOutputs->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<ISurface> callbackSurface = ISurface::Probe((*array)[i]);
+    AutoPtr<IIterator> it;
+    callbackOutputs->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        ISurface* callbackSurface = ISurface::Probe(obj);
 
         //try {
-        Boolean result = LegacyCameraDevice::ContainsSurfaceId(callbackSurface,
-                ICollection::Probe(mJpegSurfaceIds));
+        Boolean result = LegacyCameraDevice::ContainsSurfaceId(callbackSurface, jpegSurfaceIds);
         if (!result) {
             continue; // Ignore non-JPEG callback formats
         }
@@ -1188,13 +1167,13 @@ ECode RequestThreadManager::CalculatePictureSize(
         ECode ec = LegacyCameraDevice::GetSurfaceSize(callbackSurface, (ISize**)&jpegSize);
         if (FAILED(ec)) {
             Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
+            continue;
         }
-        configuredJpegSizes->Add(TO_IINTERFACE(jpegSize));
-        //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-        //Log.w(TAG, "Surface abandoned, skipping...", e);
-        //}
+
+        configuredJpegSizes->Add(jpegSize);
     }
 
+    Int32 width, height;
     Boolean result;
     configuredJpegSizes->IsEmpty(&result);
     if (!result) {
@@ -1212,11 +1191,9 @@ ECode RequestThreadManager::CalculatePictureSize(
         for (Int32 i = 0; i < num; i++) {
             AutoPtr<IInterface> obj;
             configuredJpegSizes->Get(i, (IInterface**)&obj);
-            AutoPtr<ISize> jpegSize = ISize::Probe(obj);
+            ISize* jpegSize = ISize::Probe(obj);
 
-            Int32 width;
             jpegSize->GetWidth(&width);
-            Int32 height;
             jpegSize->GetHeight(&height);
             maxConfiguredJpegWidth = width > maxConfiguredJpegWidth ?
                     width : maxConfiguredJpegWidth;
@@ -1245,55 +1222,43 @@ ECode RequestThreadManager::CalculatePictureSize(
         for (Int32 i = 0; i < num; i++) {
             AutoPtr<IInterface> obj;
             supportedJpegSizes->Get(i, (IInterface**)&obj);
-            AutoPtr<ISize> supportedJpegSize = ISize::Probe(obj);
+            ISize* supportedJpegSize = ISize::Probe(obj);
 
-            Int32 width;
             supportedJpegSize->GetWidth(&width);
-            Int32 height;
             supportedJpegSize->GetHeight(&height);
             if (width >= maxConfiguredJpegWidth &&
                 height >= maxConfiguredJpegHeight) {
-                candidateSupportedJpegSizes->Add(TO_IINTERFACE(supportedJpegSize));
+                candidateSupportedJpegSizes->Add(obj);
             }
         }
 
         Boolean res;
         candidateSupportedJpegSizes->IsEmpty(&res);
         if (res) {
-            // throw new AssertionError(
-            //         "Could not find any supported JPEG sizes large enough to fit " +
-            //         smallestBoundJpegSize);
-            String str;
-            IObject::Probe(smallestBoundJpegSize)->ToString(&str);
-            Logger::E(TAG, "Could not find any supported JPEG sizes large enough to fit %s", str.string());
+            Logger::E(TAG, "Could not find any supported JPEG sizes large enough to fit %s",
+                TO_CSTR(smallestBoundJpegSize));
             return E_ASSERTION_ERROR;
         }
 
-        AutoPtr<IUtilsSizeAreaComparator> comp;
-        CUtilsSizeAreaComparator::New((IUtilsSizeAreaComparator**)&comp);
+        AutoPtr<IComparator> comp;
+        CUtilsSizeAreaComparator::New((IComparator**)&comp);
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         AutoPtr<IInterface> obj;
-        helper->Min(ICollection::Probe(candidateSupportedJpegSizes),
-                IComparator::Probe(comp), (IInterface**)&obj);
+        helper->Min(ICollection::Probe(candidateSupportedJpegSizes), comp, (IInterface**)&obj);
         AutoPtr<ISize> smallestSupportedJpegSize = ISize::Probe(obj);
 
         smallestSupportedJpegSize->Equals(smallestBoundJpegSize, &res);
         if (!res) {
-            String str;
-            IObject::Probe(smallestSupportedJpegSize)->ToString(&str);
-            String str2;
-            IObject::Probe(smallestBoundJpegSize)->ToString(&str2);
             Logger::W(TAG, "configureOutputs - Will need to crop picture %s into "
-                            "smallest bound size %s",
-                            str.string(), str2.string());
+                "smallest bound size %s",
+                TO_CSTR(smallestSupportedJpegSize), TO_CSTR(smallestBoundJpegSize));
         }
 
         *size = smallestSupportedJpegSize;
         REFCOUNT_ADD(*size);
     }
 
-    *size = NULL;
     return NOERROR;
 }
 
@@ -1301,9 +1266,8 @@ Boolean RequestThreadManager::CheckAspectRatiosMatch(
     /* [in] */ ISize* a,
     /* [in] */ ISize* b)
 {
-    Int32 width;
+    Int32 width, height;
     a->GetWidth(&width);
-    Int32 height;
     a->GetHeight(&height);
     Float aAspect = width / (float) height;
 
@@ -1336,15 +1300,13 @@ AutoPtr<ArrayOf<Int32> > RequestThreadManager::GetPhotoPreviewFpsRange(
 
         AutoPtr<IInterface> obj2;
         rate->Get(IParameters::PREVIEW_FPS_MIN_INDEX, (IInterface**)&obj2);
-        AutoPtr<IInteger32> intObj = IInteger32::Probe(obj2);
         Int32 minFps;
-        intObj->GetValue(&minFps);
+        IInteger32::Probe(obj2)->GetValue(&minFps);
 
         AutoPtr<IInterface> obj3;
         rate->Get(IParameters::PREVIEW_FPS_MAX_INDEX, (IInterface**)&obj3);
-        AutoPtr<IInteger32> intObj2 = IInteger32::Probe(obj3);
         Int32 maxFps;
-        intObj2->GetValue(&maxFps);
+        IInteger32::Probe(obj3)->GetValue(&maxFps);
 
         if (maxFps > bestMax || (maxFps == bestMax && minFps > bestMin)) {
             bestMin = minFps;
@@ -1364,9 +1326,8 @@ AutoPtr<ArrayOf<Int32> > RequestThreadManager::GetPhotoPreviewFpsRange(
     for (Int32 i = 0; i< length; i++) {
         AutoPtr<IInterface> obj4;
         array->Get(i, (IInterface**)&obj4);
-        AutoPtr<IInteger32> intObj3 = IInteger32::Probe(obj4);
         Int32 value;
-        intObj3->GetValue(&value);
+        IInteger32::Probe(obj4)->GetValue(&value);
 
         (*res)[i] = value;
     }
@@ -1426,8 +1387,9 @@ ECode RequestThreadManager::SubmitCaptureRequests(
 
     AutoPtr<IHandler> handler;
     mRequestThread->WaitAndGetHandler((IHandler**)&handler);
-    Int32 ret;
-    {    AutoLock syncLock(mIdleLock);
+    Int32 ret = 0;
+    {
+        AutoLock syncLock(mIdleLock);
         mRequestQueue->Submit(requests, repeating, frameNumber, &ret);
         Boolean result;
         handler->SendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST, &result);

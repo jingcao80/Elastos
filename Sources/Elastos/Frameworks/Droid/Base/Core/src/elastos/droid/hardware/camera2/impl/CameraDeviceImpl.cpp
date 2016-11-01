@@ -1428,11 +1428,13 @@ ECode CameraDeviceImpl::ConfigureOutputsChecked(
 
         // Add all new streams
         {
-            AutoPtr<ArrayOf<IInterface*> > array;
-            addSet->ToArray((ArrayOf<IInterface*>**)&array);
-            addSet->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<ISurface> s = ISurface::Probe((*array)[i]);
+            AutoPtr<IIterator> it;
+            addSet->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                ISurface* s = ISurface::Probe(obj);
 
                 // TODO: remove width,height,format since we are ignoring
                 // it.
@@ -1723,7 +1725,7 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = 0;
+    *result = -1;
 
     // Need a valid handler, or current thread needs to have a looper, if
     // callback is valid
@@ -1747,10 +1749,13 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
 
-        AutoPtr<ArrayOf<IInterface*> > array;
-        coll->ToArray((ArrayOf<IInterface*>**)&array);
-        for (Int32 i = 0; i < array->GetLength(); i++) {
-            AutoPtr<ISurface> surface = ISurface::Probe((*array)[i]);
+        AutoPtr<IIterator> it;
+        coll->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> surObj;
+            it->GetNext((IInterface**)&surObj);
+            ISurface* surface = ISurface::Probe(surObj);
             if (surface == NULL) {
                 Logger::E(TAG, "Null Surface targets are not allowed");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1758,7 +1763,8 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
         }
     }
 
-    {    AutoLock syncLock(mInterfaceLock);
+    {
+        AutoLock syncLock(mInterfaceLock);
         FAIL_RETURN(CheckIfCameraClosedOrInError())
         Int32 requestId;
 
@@ -1775,18 +1781,18 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
             lastFrameNumberRef->GetNumber(&number);
             Logger::V(TAG, "last frame number %d" + number);
         }
-        //} catch (CameraRuntimeException e) {
         if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
             //throw e.asChecked();
             return ec;
         }
-        //} catch (RemoteException e) {
-        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        else if (ec == (ECode)E_REMOTE_EXCEPTION) {
             // impossible
             *result = -1;
             return NOERROR;
         }
-        //}
+        else if (FAILED(ec)) {
+            return ec;
+        }
 
         if (callback != NULL) {
             AutoPtr<ICameraDeviceImplCaptureCallbackHolder> holder;
@@ -1856,7 +1862,6 @@ ECode CameraDeviceImpl::SetRepeatingBurst(
     *result = 0;
 
     if (requests == NULL) {
-        //throw new IllegalArgumentException("At least one request must be given");
         Logger::E(TAG, "At least one request must be given");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1864,7 +1869,6 @@ ECode CameraDeviceImpl::SetRepeatingBurst(
     Boolean _result;
     requests->IsEmpty(&_result);
     if (_result) {
-        //throw new IllegalArgumentException("At least one request must be given");
         Logger::E(TAG, "At least one request must be given");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -1874,43 +1878,41 @@ ECode CameraDeviceImpl::SetRepeatingBurst(
 
 ECode CameraDeviceImpl::StopRepeating()
 {
-    {    AutoLock syncLock(mInterfaceLock);
-        FAIL_RETURN(CheckIfCameraClosedOrInError())
-        if (mRepeatingRequestId != REQUEST_ID_NONE) {
+    AutoLock syncLock(mInterfaceLock);
+    FAIL_RETURN(CheckIfCameraClosedOrInError())
+    if (mRepeatingRequestId != REQUEST_ID_NONE) {
 
-            Int32 requestId = mRepeatingRequestId;
-            mRepeatingRequestId = REQUEST_ID_NONE;
+        Int32 requestId = mRepeatingRequestId;
+        mRepeatingRequestId = REQUEST_ID_NONE;
 
-            // Queue for deletion after in-flight requests finish
-            AutoPtr<IInterface> tmp;
-            mCaptureCallbackMap->Get(requestId, (IInterface**)&tmp);
-            if (tmp != NULL) {
-                AutoPtr<IInteger32> obj = CoreUtils::Convert(requestId);
-                mRepeatingRequestIdDeletedList->Add(TO_IINTERFACE(obj));
-            }
+        // Queue for deletion after in-flight requests finish
+        AutoPtr<IInterface> tmp;
+        mCaptureCallbackMap->Get(requestId, (IInterface**)&tmp);
+        if (tmp != NULL) {
+            AutoPtr<IInteger32> obj = CoreUtils::Convert(requestId);
+            mRepeatingRequestIdDeletedList->Add(TO_IINTERFACE(obj));
+        }
 
-            //try {
-            AutoPtr<ILongParcelable> lastFrameNumberRef = new LongParcelable();
-            Int32 result;
-            mRemoteDevice->CancelRequest(requestId, /*out*/lastFrameNumberRef, &result);
-            Int64 lastFrameNumber;
-            lastFrameNumberRef->GetNumber(&lastFrameNumber);
+        AutoPtr<ILongParcelable> lastFrameNumberRef = new LongParcelable();
+        Int32 result;
+        mRemoteDevice->CancelRequest(requestId, /*out*/lastFrameNumberRef, &result);
+        Int64 lastFrameNumber;
+        lastFrameNumberRef->GetNumber(&lastFrameNumber);
 
-            ECode ec = CheckEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
-
-            //} catch (CameraRuntimeException e) {
-            if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
-                //throw e.asChecked();
-                return ec;
-            }
-            //} catch (RemoteException e) {
-            if (ec == (ECode)E_REMOTE_EXCEPTION) {
-                // impossible
-                return NOERROR;
-            }
-            //}
+        ECode ec = CheckEarlyTriggerSequenceComplete(requestId, lastFrameNumber);
+        if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
+            //throw e.asChecked();
+            return ec;
+        }
+        else if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            // impossible
+            return NOERROR;
+        }
+        else if (FAILED(ec)) {
+            return ec;
         }
     }
+
     return NOERROR;
 }
 
@@ -1920,23 +1922,22 @@ ECode CameraDeviceImpl::WaitUntilIdle()
     FAIL_RETURN(CheckIfCameraClosedOrInError())
 
     if (mRepeatingRequestId != REQUEST_ID_NONE) {
-        //throw new IllegalStateException("Active repeating request ongoing");
         Logger::E(TAG, "Active repeating request ongoing");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     //try {
     Int32 result;
     ECode ec = mRemoteDevice->WaitUntilIdle(&result);
-    //} catch (CameraRuntimeException e) {
     if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
         return ec;
     }
-    //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
         // impossible
         return NOERROR;
     }
-    //}
+    else if (FAILED(ec)) {
+        return ec;
+    }
     return NOERROR;
 }
 
@@ -1964,16 +1965,16 @@ ECode CameraDeviceImpl::Flush()
         ec = CheckEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
         mRepeatingRequestId = REQUEST_ID_NONE;
     }
-    //} catch (CameraRuntimeException e) {
     if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
         return ec;
     }
-    //} catch (RemoteException e) {
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+    else if (ec == (ECode)E_REMOTE_EXCEPTION) {
         // impossible
         return NOERROR;
     }
-    //}
+    else if (FAILED(ec)) {
+        return ec;
+    }
 
     return NOERROR;
 }

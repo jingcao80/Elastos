@@ -47,15 +47,15 @@ ECode CImageFormat::IsPublicFormat(
 {
     VALIDATE_NOT_NULL(is);
     switch (format) {
-        case RGB_565:
-        case NV16:
-        case YUY2:
-        case YV12:
-        case JPEG:
-        case NV21:
-        case YUV_420_888:
-        case RAW_SENSOR:
-        case RAW10: {
+        case IImageFormat::RGB_565:
+        case IImageFormat::NV16:
+        case IImageFormat::YUY2:
+        case IImageFormat::YV12:
+        case IImageFormat::JPEG:
+        case IImageFormat::NV21:
+        case IImageFormat::YUV_420_888:
+        case IImageFormat::RAW_SENSOR:
+        case IImageFormat::RAW10: {
             *is = TRUE;
             return NOERROR;
         }

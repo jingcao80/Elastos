@@ -3063,7 +3063,7 @@ ECode HardwareCamera::Reconnect()
 ECode HardwareCamera::SetPreviewTexture(
     /* [in] */ ISurfaceTexture* _surfaceTexture)
 {
-    Logger::V(TAG, "setPreviewTexture");
+    Logger::V(TAG, "setPreviewTexture: %s", TO_CSTR(_surfaceTexture));
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 

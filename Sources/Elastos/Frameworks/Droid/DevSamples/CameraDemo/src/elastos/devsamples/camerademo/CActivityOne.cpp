@@ -841,6 +841,7 @@ ECode CActivityOne::SetUpCameraOutputs(
         // We fit the aspect ratio of TextureView to the size of preview we picked.
         mPreviewSize->GetWidth(&w);
         mPreviewSize->GetHeight(&h);
+        Logger::I(TAG, " >> TextureView SetAspectRatio: (%d, %d)", w, h);
         if (orientation == IConfiguration::ORIENTATION_LANDSCAPE) {
             ((CAutoFitTextureView*)mTextureView.Get())->SetAspectRatio(w, h);
         }

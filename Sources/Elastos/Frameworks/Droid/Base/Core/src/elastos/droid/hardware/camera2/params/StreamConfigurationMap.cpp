@@ -594,10 +594,11 @@ ECode StreamConfigurationMap::CheckArgumentFormat(
 
     AutoPtr<IImageFormat> helper;
     CImageFormat::AcquireSingleton((IImageFormat**)&helper);
-    Boolean res1;
-    helper->IsPublicFormat(format, &res1);
-    if (!res1 && !(PixelFormat::IsPublicFormat(format))) {
+    Boolean res;
+    helper->IsPublicFormat(format, &res);
+    if (!res && !(PixelFormat::IsPublicFormat(format))) {
         Logger::E(TAG, "format 0x%x was not defined in either ImageFormat or PixelFormat", format);
+        Debug::DumpBacktrace();
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

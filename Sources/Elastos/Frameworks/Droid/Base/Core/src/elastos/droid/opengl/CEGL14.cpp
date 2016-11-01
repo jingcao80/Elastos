@@ -1013,6 +1013,7 @@ ECode CEGL14::EglCreateContext(
         LOGD("EglCreateContext: share_context_native == null")
         returnEcode = E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+
     bool attrib_list_sentinel = FALSE;
     EGLint *attrib_list_base = (EGLint *) 0;
     Int32 _remaining;
@@ -1295,26 +1296,33 @@ AutoPtr<IInterface> CEGL14::ToEGLHandle(
     /* [in] */ REIID riid,
     /* [in] */ void* handle)
 {
-    if (riid == EIID_IEGLContext && (EGLContext)handle == EGL_NO_CONTEXT) {
-        return eglNoContextObject;
-    } else if (riid == EIID_IEGLContext) {
+    if (riid == EIID_IEGLContext) {
+        if ((EGLContext)handle == EGL_NO_CONTEXT) {
+            return eglNoContextObject;
+        }
+
         return EGLContextWrapper::CreateInstance(reinterpret_cast<Int64>(handle));
     }
 
-    if (riid == EIID_IEGLDisplay && (EGLDisplay)handle == EGL_NO_DISPLAY) {
-        return eglNoDisplayObject;
-    } else if (riid == EIID_IEGLDisplay) {
+    if (riid == EIID_IEGLDisplay) {
+        if ((EGLDisplay)handle == EGL_NO_DISPLAY) {
+            return eglNoDisplayObject;
+        }
+
         return EGLDisplayWrapper::CreateInstance(reinterpret_cast<Int64>(handle));
     }
 
-    if (riid == EIID_IEGLSurface && (EGLSurface)handle == EGL_NO_SURFACE) {
-        return eglNoSurfaceObject;
-    } else if (riid == EIID_IEGLSurface) {
+    if (riid == EIID_IEGLSurface) {
+        if ((EGLSurface)handle == EGL_NO_SURFACE) {
+            return eglNoContextObject;
+        }
+
         return EGLSurfaceWrapper::CreateInstance(reinterpret_cast<Int64>(handle));
     }
 
-    if (riid == EIID_IEGLConfig)
+    if (riid == EIID_IEGLConfig) {
         return EGLConfigWrapper::CreateInstance(reinterpret_cast<Int64>(handle));
+    }
 
     return NULL;
 }

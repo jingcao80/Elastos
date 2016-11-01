@@ -42,6 +42,8 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+static const String TAG("TextureView");
+
 // ----------------------------------------------------------------------------
 // Native layer
 // ----------------------------------------------------------------------------
@@ -97,6 +99,7 @@ TextureView::OnFrameAvailableListener::OnFrameAvailableListener(
 ECode TextureView::OnFrameAvailableListener::OnFrameAvailable(
     /* [in] */ ISurfaceTexture* surfaceTexture)
 {
+    Logger::I(TAG, " >> OnFrameAvailableListener::OnFrameAvailable");
     mHost->UpdateLayer();
     mHost->Invalidate();
     return NOERROR;
@@ -105,7 +108,7 @@ ECode TextureView::OnFrameAvailableListener::OnFrameAvailable(
 //========================================================================================
 //              TextureView::
 //========================================================================================
-//const String TextureView::LOG_TAG("TextureView");
+//const String TextureView::TAG("TextureView");
 
 CAR_INTERFACE_IMPL(TextureView, View, ITextureView)
 
@@ -189,7 +192,7 @@ ECode TextureView::OnAttachedToWindow()
 
     Boolean bIsAcc = FALSE;
     if (IsHardwareAccelerated(&bIsAcc), !bIsAcc) {
-        Logger::W(LOG_TAG,
+        Logger::W(TAG,
             "A TextureView or a subclass can only be used with hardware acceleration enabled.");
     }
 
@@ -275,6 +278,7 @@ ECode TextureView::BuildLayer()
 ECode TextureView::Draw(
     /* [in] */ ICanvas* canvas)
 {
+    Logger::I(TAG, " >> Draw");
     // NOTE: Maintain this carefully (see View.java)
     mPrivateFlags = (mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
 
@@ -330,6 +334,7 @@ AutoPtr<IHardwareLayer> TextureView::GetHardwareLayer()
         mAttachInfo->mHardwareRenderer->CreateTextureLayer((IHardwareLayer**)&mLayer);
         if (!mUpdateSurface) {
             // Create a new SurfaceTexture for the layer.
+            mSurface = NULL;
             CSurfaceTexture::New(FALSE, (ISurfaceTexture**)&mSurface);
             mLayer->SetSurfaceTexture(mSurface);
         }
@@ -396,10 +401,8 @@ ECode TextureView::OnVisibilityChanged(
 
 void TextureView::UpdateLayer()
 {
-    {
-        AutoLock lock(mLock);
-        mUpdateLayer = TRUE;
-    }
+    AutoLock lock(mLock);
+    mUpdateLayer = TRUE;
 }
 
 void TextureView::UpdateLayerAndInvalidate()
@@ -434,6 +437,7 @@ void TextureView::ApplyUpdate()
     mLayer->Prepare(w, h, mOpaque, &bRes);
     mLayer->UpdateSurfaceTexture();
 
+    Logger::I(TAG, " >> ApplyUpdate: (%d, %d), opaque: %d, result: %d", w, h, mOpaque, bRes);
     if (mListener != NULL) {
         mListener->OnSurfaceTextureUpdated(mSurface);
     }
@@ -493,14 +497,13 @@ ECode TextureView::GetBitmap(
     VALIDATE_NOT_NULL(result)
 
     Boolean bIsAvail = FALSE;
-    if ((IsAvailable(&bIsAvail), bIsAvail) && width > 0 && height > 0) {
+    if (width > 0 && height > 0 & (IsAvailable(&bIsAvail), bIsAvail)) {
         AutoPtr<IResources> res;
         GetResources((IResources**)&res);
         AutoPtr<IDisplayMetrics> dm;
         res->GetDisplayMetrics((IDisplayMetrics**)&dm);
         AutoPtr<IBitmap> bmp;
-        CBitmap::CreateBitmap(dm,
-                width, height, BitmapConfig_ARGB_8888, (IBitmap**)&bmp);
+        CBitmap::CreateBitmap(dm, width, height, BitmapConfig_ARGB_8888, (IBitmap**)&bmp);
         return GetBitmap(bmp, result);
     }
     *result = NULL;

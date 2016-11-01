@@ -311,7 +311,7 @@ CARAPI CaptureCollector::CaptureHolder::Equals(
 CAR_INTERFACE_IMPL(CaptureCollector, Object, ICaptureCollector)
 
 const String CaptureCollector::TAG("CaptureCollector");
-const Boolean CaptureCollector::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean CaptureCollector::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 
 const Int32 CaptureCollector::FLAG_RECEIVED_JPEG = 1;
 const Int32 CaptureCollector::FLAG_RECEIVED_JPEG_TS = 2;

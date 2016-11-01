@@ -49,6 +49,7 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger64;
 using Elastos::Core::StringBuilder;
 using Elastos::IO::EIID_ICloseable;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
@@ -378,6 +379,7 @@ ECode LegacyCameraDevice::ConfigureOutputs(
     /* [in] */ IList* outputs,
     /* [out] */ Int32* value)
 {
+    Logger::I(TAG, " >> Start ConfigureOutputs");
     VALIDATE_NOT_NULL(value);
     *value = 0;
 
@@ -489,6 +491,7 @@ ECode LegacyCameraDevice::ConfigureOutputs(
         return NOERROR;
     }
     *value = ICameraBinderDecorator::ICameraBinderDecorator_NO_ERROR;
+    Logger::I(TAG, " >> End ConfigureOutputs");
     return NOERROR;
 }
 
@@ -541,10 +544,13 @@ ECode LegacyCameraDevice::SubmitRequestList(
             return NOERROR;
         }
 
-        AutoPtr<ArrayOf<IInterface*> > array;
-        targets->ToArray((ArrayOf<IInterface*>**)&array);
-        for (Int32 i = 0; i < array->GetLength(); i++) {
-            AutoPtr<ISurface> surface = ISurface::Probe((*array)[i]);
+        AutoPtr<IIterator> it;
+        targets->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> surObj;
+            it->GetNext((IInterface**)&surObj);
+            ISurface* surface = ISurface::Probe(surObj);
 
             if (surface == NULL) {
                 Logger::E(TAG, "submitRequestList - Null Surface targets are not allowed");
@@ -853,7 +859,6 @@ static android::sp<ANativeWindow> getNativeWindow(
 Int32 LegacyCameraDevice::NativeDetectSurfaceType(
     /* [in] */ ISurface* surface)
 {
-    Logger::V("LegacyCameraDevice", "nativeDetectSurfaceType");
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
         Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window from surface.", __FUNCTION__);
@@ -862,10 +867,12 @@ Int32 LegacyCameraDevice::NativeDetectSurfaceType(
     int32_t fmt = 0;
     android::status_t err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &fmt);
     if(err != android::NO_ERROR) {
-        Logger::E("LegacyCameraDevice", "%s: Error while querying surface pixel format %s (%d).", __FUNCTION__, strerror(-err),
-                err);
+        Logger::E("LegacyCameraDevice", "%s: Error while querying surface pixel format %s (%d).",
+            __FUNCTION__, strerror(-err), err);
         return err;
     }
+
+    Logger::V("LegacyCameraDevice", "nativeDetectSurfaceType: %d, %x", fmt, fmt);
     return fmt;
 }
 
@@ -1328,7 +1335,6 @@ ECode LegacyCameraDevice::NativeProduceFrame(
     Byte* pixels = pixelBuffer->GetPayload();
 
     if (pixels == NULL) {
-        //jniThrowNullPointerException(env, "pixels");
         Logger::E("LegacyCameraDevice", "jniThrowNullPointerException: pixels");
         *result = DONT_CARE;
         return E_NULL_POINTER_EXCEPTION;
@@ -1351,7 +1357,7 @@ Int32 LegacyCameraDevice::NativeSetSurfaceFormat(
     /* [in] */ ISurface* surface,
     /* [in] */ Int32 pixelFormat)
 {
-    Logger::V("LegacyCameraDevice", "nativeSetSurfaceType");
+    Logger::V("LegacyCameraDevice", "nativeSetSurfaceType: %d, %x", pixelFormat, pixelFormat);
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
         Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
@@ -1372,17 +1378,17 @@ Int32 LegacyCameraDevice::NativeSetSurfaceDimens(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    Logger::V("LegacyCameraDevice", "nativeSetSurfaceDimens");
+    Logger::V("LegacyCameraDevice", "nativeSetSurfaceDimens:(%d, %d)", width, height);
     android::sp<ANativeWindow> anw;
     if ((anw = getNativeWindow(surface)) == NULL) {
         Logger::E("LegacyCameraDevice", "%s: Could not retrieve native window "
-                "from surface.", __FUNCTION__);
+            "from surface.", __FUNCTION__);
         return android::BAD_VALUE;
     }
     android::status_t err = native_window_set_buffers_dimensions(anw.get(), width, height);
     if (err != android::NO_ERROR) {
         Logger::E("LegacyCameraDevice", "%s: Error while setting surface "
-                "dimens %s (%d).", __FUNCTION__, strerror(-err), err);
+            "dimens %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
 
@@ -1391,8 +1397,7 @@ Int32 LegacyCameraDevice::NativeSetSurfaceDimens(
     err = native_window_set_buffers_user_dimensions(anw.get(), width, height);
     if (err != android::NO_ERROR) {
         Logger::E("LegacyCameraDevice", "%s: Error while setting surface user "
-                "dimens %s (%d).", __FUNCTION__, strerror(-err),
-                err);
+            "dimens %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
     return android::NO_ERROR;

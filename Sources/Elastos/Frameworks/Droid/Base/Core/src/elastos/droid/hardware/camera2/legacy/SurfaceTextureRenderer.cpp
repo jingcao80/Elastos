@@ -69,7 +69,7 @@ namespace Legacy {
 CAR_INTERFACE_IMPL(SurfaceTextureRenderer, Object, ISurfaceTextureRenderer)
 
 const String SurfaceTextureRenderer::TAG("SurfaceTextureRenderer");// = SurfaceTextureRenderer.class.getSimpleName();
-const Boolean SurfaceTextureRenderer::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean SurfaceTextureRenderer::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 SurfaceTextureRenderer::GL_MATRIX_SIZE = 16;
 const Int32 SurfaceTextureRenderer::VERTEX_POS_SIZE = 3;
 const Int32 SurfaceTextureRenderer::VERTEX_UV_SIZE = 2;
@@ -322,29 +322,25 @@ ECode SurfaceTextureRenderer::DrawFrame(
     FAIL_RETURN(CheckGlError(String("onDrawFrame start")))
     st->GetTransformMatrix(mSTMatrix);
 
+    Logger::I(TAG, " >> start DrawFrame %s: (%d, %d)", TO_CSTR(st), width, height);
+
     AutoPtr<IMatrix> matrix;
     CMatrix::AcquireSingleton((IMatrix**)&matrix);
     matrix->SetIdentityM(mMVPMatrix, /*smOffset*/0);
 
     // Find intermediate buffer dimensions
     AutoPtr<ISize> dimens;
-    //try {
     ECode ec = LegacyCameraDevice::GetTextureSize(st, (ISize**)&dimens);
-    //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
     if (FAILED(ec)) {
-        // Should never hit this.
-        //throw new IllegalStateException("Surface abandoned, skipping drawFrame...", e);
         Logger::E(TAG, "Surface abandoned, skipping drawFrame... %d", ec);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-    //}
-    Int32 texWidth;
+
+    Int32 texWidth, texHeight;
     dimens->GetWidth(&texWidth);
-    Int32 texHeight;
     dimens->GetHeight(&texHeight);
 
     if (texWidth <= 0 || texHeight <= 0) {
-        //throw new IllegalStateException("Illegal intermediate texture with dimension of 0");
         Logger::E(TAG, "Illegal intermediate texture with dimension of 0");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -362,13 +358,10 @@ ECode SurfaceTextureRenderer::DrawFrame(
 
     // Find scaling factor from pillerboxed/letterboxed output dimensions to intermediate
     // buffer dimensions.
-    Float width2;
+    Float width2, width3, height2, height3;
     intermediate->GetWidth(&width2);
-    Float width3;
-    output->GetWidth(&width3);
-    Float height2;
     intermediate->GetHeight(&height2);
-    Float height3;
+    output->GetWidth(&width3);
     output->GetHeight(&height3);
 
     Float scaleX = width2 / width3;
@@ -379,9 +372,9 @@ ECode SurfaceTextureRenderer::DrawFrame(
     matrix->ScaleM(mMVPMatrix, /*offset*/0, /*x*/scaleY, /*y*/scaleX, /*z*/1);
 
     if (DEBUG) {
-        Logger::D(TAG, "Scaling factors (S_x = %f,S_y = %f) used for %fx%f surface,"
-                "intermediate buffer size is %fx%f", scaleX, scaleY, width,
-                height, texWidth, texHeight);
+        Logger::D(TAG, "Scaling factors (S_x = %f,S_y = %f) used for (%d x %d) surface,"
+            "intermediate buffer size is (%d x %d)", scaleX, scaleY, width,
+            height, texWidth, texHeight);
     }
 
     AutoPtr<IGLES20> gles20;
@@ -421,6 +414,8 @@ ECode SurfaceTextureRenderer::DrawFrame(
             /*offset*/ 0);
 
     gles20->GlDrawArrays(IGLES20::_GL_TRIANGLE_STRIP, /*offset*/ 0, /*count*/ 4);
+
+    Logger::I(TAG, " >> End DrawFrame %s: (%d, %d)", TO_CSTR(st), width, height);
     return CheckGlError(String("glDrawArrays"));
 }
 
@@ -428,7 +423,6 @@ ECode SurfaceTextureRenderer::InitializeGLState()
 {
     FAIL_RETURN(CreateProgram(VERTEX_SHADER, FRAGMENT_SHADER, &mProgram))
     if (mProgram == 0) {
-        //throw new IllegalStateException("failed creating program");
         Logger::E(TAG, "failed creating program");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -437,14 +431,13 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     gles20->GlGetAttribLocation(mProgram, String("aPosition"), &maPositionHandle);
     FAIL_RETURN(CheckGlError(String("glGetAttribLocation aPosition")))
     if (maPositionHandle == -1) {
-        //throw new IllegalStateException("Could not get attrib location for aPosition");
         Logger::E(TAG, "Could not get attrib location for aPosition");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
     gles20->GlGetAttribLocation(mProgram, String("aTextureCoord"), &maTextureHandle);
     FAIL_RETURN(CheckGlError(String("glGetAttribLocation aTextureCoord")))
     if (maTextureHandle == -1) {
-        //throw new IllegalStateException("Could not get attrib location for aTextureCoord");
         Logger::E(TAG, "Could not get attrib location for aTextureCoord");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -452,7 +445,6 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     gles20->GlGetUniformLocation(mProgram, String("uMVPMatrix"), &muMVPMatrixHandle);
     FAIL_RETURN(CheckGlError(String("glGetUniformLocation uMVPMatrix")))
     if (muMVPMatrixHandle == -1) {
-        //throw new IllegalStateException("Could not get attrib location for uMVPMatrix");
         Logger::E(TAG, "Could not get attrib location for uMVPMatrix");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -460,7 +452,6 @@ ECode SurfaceTextureRenderer::InitializeGLState()
     gles20->GlGetUniformLocation(mProgram, String("uSTMatrix"), &muSTMatrixHandle);
     FAIL_RETURN(CheckGlError(String("glGetUniformLocation uSTMatrix")))
     if (muSTMatrixHandle == -1) {
-        //throw new IllegalStateException("Could not get attrib location for uSTMatrix");
         Logger::E(TAG, "Could not get attrib location for uSTMatrix");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -502,15 +493,11 @@ void SurfaceTextureRenderer::ClearState()
 
 ECode SurfaceTextureRenderer::ConfigureEGLContext()
 {
+    Logger::I(TAG, " >> Start ConfigureEGLContext");
     AutoPtr<IEGL14> egl14;
     CEGL14::AcquireSingleton((IEGL14**)&egl14);
     egl14->EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEGLDisplay);
-    AutoPtr<IEGL14Helper> helper;
-    CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
-    AutoPtr<IEGLDisplay> display;
-    helper->GetNoDisplay((IEGLDisplay**)&display);
-    if (mEGLDisplay == display) {
-        //throw new IllegalStateException("No EGL14 display");
+    if (mEGLDisplay == CEGL14::eglNoDisplayObject) {
         Logger::E(TAG, "No EGL14 display");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -519,7 +506,6 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
     Boolean result;
     egl14->EglInitialize(mEGLDisplay, version, /*offset*/ 0, version, /*offset*/ 1, &result);
     if (!result) {
-        //throw new IllegalStateException("Cannot initialize EGL14");
         Logger::E(TAG, "Cannot initialize EGL14");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -555,8 +541,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT | EGL_WINDOW_BIT,
             EGL_NONE
         };
-        AutoPtr<ArrayOf<Int32> > attribList2 = ArrayOf<Int32>::Alloc(
-            _attribList2, sizeof(_attribList2) / sizeof(Int32));
+        AutoPtr<ArrayOf<Int32> > attribList2 = ArrayOf<Int32>::Alloc(_attribList2, ArraySize(_attribList2));
         egl14->EglChooseConfig(mEGLDisplay, attribList2, /*offset*/ 0, configs, /*offset*/ 0,
                 configs->GetLength(), numConfigs, /*offset*/ 0, &res);
         FAIL_RETURN(CheckEglError(String("eglCreateContext RGB888 ES2")));
@@ -571,19 +556,20 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
     egl14->EglCreateContext(mEGLDisplay, (*configs)[0], CEGL14::eglNoContextObject,
            attrib_list, /*offset*/ 0, (IEGLContext**)&mEGLContext);
     FAIL_RETURN(CheckEglError(String("eglCreateContext")))
-    AutoPtr<IEGLContext> context;
-    helper->GetNoContext((IEGLContext**)&context);
-    if(mEGLContext == context) {
-        //throw new IllegalStateException("No EGLContext could be made");
+    if(mEGLContext == CEGL14::eglNoContextObject) {
         Logger::E(TAG, "No EGLContext could be made");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
+    Logger::I(TAG, " >> End ConfigureEGLContext");
     return NOERROR;
 }
 
 ECode SurfaceTextureRenderer::ConfigureEGLOutputSurfaces(
     /* [in] */ ICollection* surfaces)
 {
+    Logger::I(TAG, " >> Start ConfigureEGLOutputSurfaces");
+
     if (surfaces == NULL) {
         Logger::E(TAG, "No Surfaces were provided to draw to");
         return E_ILLEGAL_STATE_EXCEPTION;
@@ -618,20 +604,22 @@ ECode SurfaceTextureRenderer::ConfigureEGLOutputSurfaces(
         AutoPtr<IEGLSurface> eglSurface;
         ECode ec = egl14->EglCreateWindowSurface(mEGLDisplay, mConfigs,
             holder->mSurface, surfaceAttribs, /*offset*/ 0, (IEGLSurface**)&eglSurface);
-        holder->mEglSurface = eglSurface;
-        FAIL_RETURN(CheckEglError(String("eglCreateWindowSurface")))
-        //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
             Logger::W(TAG, "Surface abandoned, skipping...%08x", ec);
+            continue;
         }
-        //}
+
+        holder->mEglSurface = eglSurface;
+        FAIL_RETURN(CheckEglError(String("eglCreateWindowSurface")))
     }
+    Logger::I(TAG, " >> End ConfigureEGLOutputSurfaces");
     return NOERROR;
 }
 
 ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
         /* [in] */ ICollection* surfaces)
 {
+    Logger::I(TAG, " >> Start ConfigureEGLPbufferSurfaces");
     if (surfaces == NULL) {
         //throw new IllegalStateException("No Surfaces were provided to draw to");
         Logger::E(TAG, "No Surfaces were provided to draw to");
@@ -657,9 +645,8 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
         //try {
         AutoPtr<ISize> size;
         LegacyCameraDevice::GetSurfaceSize(holder->mSurface, (ISize**)&size);
-        Int32 width;
+        Int32 width, height;
         size->GetWidth(&width);
-        Int32 height;
         size->GetHeight(&height);
         Int32 length = width * height;
         // Find max surface size, ensure PBuffer can hold this many pixels
@@ -680,20 +667,19 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
         ECode ec;
         ec = egl14->EglCreatePbufferSurface(mEGLDisplay, mConfigs,
                 surfaceAttribs, 0, (IEGLSurface**)&eglSurface);
-        holder->mEglSurface = eglSurface;
-        FAIL_RETURN(CheckEglError(String("eglCreatePbufferSurface")))
-        //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
             Logger::W(TAG, "Surface abandoned, skipping...%d", ec);
+            continue;
         }
-        //}
+
+        holder->mEglSurface = eglSurface;
+        FAIL_RETURN(CheckEglError(String("eglCreatePbufferSurface")))
     }
 
     AutoPtr<IByteBufferHelper> helper;
     CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
     AutoPtr<IByteBuffer> bBuffer;
-    helper->AllocateDirect(maxLength * PBUFFER_PIXEL_BYTES,
-            (IByteBuffer**)&bBuffer);
+    helper->AllocateDirect(maxLength * PBUFFER_PIXEL_BYTES, (IByteBuffer**)&bBuffer);
 
     AutoPtr<IByteOrderHelper> helper2;
     CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&helper2);
@@ -702,6 +688,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
 
     bBuffer->SetOrder(bOrder);
     mPBufferPixels = bBuffer;
+    Logger::I(TAG, " >> End ConfigureEGLPbufferSurfaces");
     return NOERROR;
 }
 
@@ -951,19 +938,26 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
         }
     }
 
-    AutoPtr<ArrayOf<IInterface*> > array;
-    surfaces->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IInterface> obj = (*array)[i];
-        AutoPtr<ISurface> s = ISurface::Probe(obj);
+    ECode ec = NOERROR;
+    AutoPtr<IIterator> it;
+    surfaces->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        ISurface* s = ISurface::Probe(obj);
 
         // If pixel conversions aren't handled by egl, use a pbuffer
         //try {
         Boolean result = LegacyCameraDevice::NeedsConversion(s);
-        ECode ec = NOERROR;
         if (result) {
             // Always override to YV12 output for YUV surface formats.
             ec = LegacyCameraDevice::SetSurfaceFormat(s, IImageFormat::YV12);
+            if (FAILED(ec)) {
+                Logger::W(TAG, "Surface abandoned, skipping configuration... %d", ec);
+                continue;
+            }
+
             AutoPtr<EGLSurfaceHolder> holder = new EGLSurfaceHolder();
             holder->mSurface = s;
             mConversionSurfaces->Add(TO_IINTERFACE(holder));
@@ -973,11 +967,7 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
             holder->mSurface = s;
             mSurfaces->Add(TO_IINTERFACE(holder));
         }
-        //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-        if (FAILED(ec)) {
-            Logger::W(TAG, "Surface abandoned, skipping configuration... %d", ec);
-        }
-        //}
+
     }
 
     // Set up egl display
@@ -1021,12 +1011,10 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
 ECode SurfaceTextureRenderer::DrawIntoSurfaces(
     /* [in] */ ICaptureCollector* targetCollector)
 {
+    Logger::I(TAG, " >> start DrawIntoSurfaces: %s", TO_CSTR(targetCollector));
     Int32 size;
-    mSurfaces->GetSize(&size);
-    Int32 size2;
-    mConversionSurfaces->GetSize(&size2);
-    if ((mSurfaces == NULL || size == 0)
-            && (mConversionSurfaces == NULL || size2 == 0)) {
+    if ((mSurfaces == NULL || (mSurfaces->GetSize(&size), size == 0))
+        && (mConversionSurfaces == NULL || (mConversionSurfaces->GetSize(&size), size == 0))) {
         return NOERROR;
     }
 
@@ -1069,35 +1057,38 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
 
     AutoPtr<IList> targetSurfaceIds;
     LegacyCameraDevice::GetSurfaceIds(targetSurfaces, (IList**)&targetSurfaceIds);
+    ICollection* targetIds = ICollection::Probe(targetSurfaceIds);
+    Logger::I(TAG, " >> Get target surfaces: %s", TO_CSTR(targetSurfaceIds));
 
+    mSurfaces->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mSurfaces->Get(i, (IInterface**)&obj);
         AutoPtr<EGLSurfaceHolder> holder = (EGLSurfaceHolder*)IObject::Probe(obj);
 
-        Boolean result = LegacyCameraDevice::ContainsSurfaceId(holder->mSurface,
-                ICollection::Probe(targetSurfaceIds));
+        Boolean result = LegacyCameraDevice::ContainsSurfaceId(holder->mSurface, targetIds);
         if (result) {
+            Logger::I(TAG, " >> Draw Surface %d: %s", i, TO_CSTR(holder->mSurface));
+
             MakeCurrent(holder->mEglSurface);
             //try {
-            LegacyCameraDevice::SetSurfaceDimens(holder->mSurface, holder->mWidth,
-                    holder->mHeight);
+            LegacyCameraDevice::SetSurfaceDimens(holder->mSurface, holder->mWidth, holder->mHeight);
             AutoPtr<IInterface> obj;
             captureHolder->GetSecond((IInterface**)&obj);
-            AutoPtr<IInteger64> num = IInteger64::Probe(obj);
             Int64 second;
-            num->GetValue(&second);
+            IInteger64::Probe(obj)->GetValue(&second);
             ECode ec = LegacyCameraDevice::SetNextTimestamp(holder->mSurface, second);
             DrawFrame(mSurfaceTexture, holder->mWidth, holder->mHeight);
             Boolean res;
             SwapBuffers(holder->mEglSurface, &res);
-            //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
             if (FAILED(ec)) {
                 Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
-            //}
         }
     }
+
+    AutoPtr<IGLES20> gles20;
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
 
     mConversionSurfaces->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
@@ -1105,14 +1096,14 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
         mConversionSurfaces->Get(i, (IInterface**)&obj);
         AutoPtr<EGLSurfaceHolder> holder = (EGLSurfaceHolder*)IObject::Probe(obj);
 
-        Boolean result = LegacyCameraDevice::ContainsSurfaceId(holder->mSurface,
-                ICollection::Probe(targetSurfaceIds));
+        Boolean result = LegacyCameraDevice::ContainsSurfaceId(holder->mSurface, targetIds);
         if (result) {
+            Logger::I(TAG, " >> Draw ConversionSurface %d: %s", i, TO_CSTR(holder->mSurface));
+
             MakeCurrent(holder->mEglSurface);
             DrawFrame(mSurfaceTexture, holder->mWidth, holder->mHeight);
             IBuffer::Probe(mPBufferPixels)->Clear();
-            AutoPtr<IGLES20> gles20;
-            CGLES20::AcquireSingleton((IGLES20**)&gles20);
+
             gles20->GlReadPixels(/*x*/ 0, /*y*/ 0, holder->mWidth, holder->mHeight,
                     IGLES20::_GL_RGBA, IGLES20::_GL_UNSIGNED_BYTE, IBuffer::Probe(mPBufferPixels));
             FAIL_RETURN(CheckGlError(String("glReadPixels")))
@@ -1125,17 +1116,15 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
             }
             AutoPtr<IInterface> obj;
             captureHolder->GetSecond((IInterface**)&obj);
-            AutoPtr<IInteger64> num = IInteger64::Probe(obj);
             Int64 second;
-            num->GetValue(&second);
+            IInteger64::Probe(obj)->GetValue(&second);
             ec = LegacyCameraDevice::SetNextTimestamp(holder->mSurface, second);
             if (FAILED(ec)) {
                 Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
             AutoPtr<ArrayOf<Byte> > array;
             mPBufferPixels->GetArray((ArrayOf<Byte>**)&array);
-            ec = LegacyCameraDevice::ProduceFrame(holder->mSurface, array,
-                    holder->mWidth, holder->mHeight, format);
+            ec = LegacyCameraDevice::ProduceFrame(holder->mSurface, array, holder->mWidth, holder->mHeight, format);
             if (FAILED(ec)) {
                 Logger::W(TAG, "Surface abandoned, dropping frame. %d", ec);
             }
@@ -1155,6 +1144,7 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
     if (doTiming) {
         EndGlTiming();
     }
+    Logger::I(TAG, " >> End DrawIntoSurfaces: %s", TO_CSTR(targetCollector));
     return NOERROR;
 }
 
