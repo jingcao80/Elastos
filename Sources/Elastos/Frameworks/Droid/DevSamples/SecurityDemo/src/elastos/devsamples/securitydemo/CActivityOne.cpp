@@ -2,6 +2,8 @@
 #include "elastos/devsamples/securitydemo/CActivityOne.h"
 #include "org/apache/harmony/security/fortress/Services.h"
 #include "elastos/devsamples/securitydemo/Test.h"
+#include "elastos/devsamples/securitydemo/ElastosKeyStoreTest.h"
+#include "elastos/devsamples/securitydemo/ElastosKeyPairGeneratorTest.h"
 #include "R.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Security.h>
@@ -124,6 +126,12 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::Button12) {
         return mHost->ButtonCSecureRandom();
+    }
+    else if (id == R::id::Button13) {
+        return mHost->ButtonElastosKeyPairGenerator();
+    }
+    else if (id == R::id::Button14) {
+        return mHost->ButtonElastosKeyStore();
     }
     else if (id == R::id::signaturetest) {
         return mHost->SignatureTest();
@@ -293,6 +301,12 @@ ECode CActivityOne::OnCreate(
     view->SetOnClickListener(l.Get());
 
     view = FindViewById(R::id::Button12);
+    view->SetOnClickListener(l.Get());
+
+    view = FindViewById(R::id::Button13);
+    view->SetOnClickListener(l.Get());
+
+    view = FindViewById(R::id::Button14);
     view->SetOnClickListener(l.Get());
 
     view = NULL;
@@ -720,6 +734,18 @@ ECode CActivityOne::ButtonCSecureRandom()
     // }
 
     return NOERROR;
+}
+
+ECode CActivityOne::ButtonElastosKeyPairGenerator()
+{
+    AutoPtr<ElastosKeyPairGeneratorTest> text = new ElastosKeyPairGeneratorTest(this);
+    return text->TestKeyPairGenerator_Initialize_Params_Encrypted_Success();
+}
+
+ECode CActivityOne::ButtonElastosKeyStore()
+{
+    AutoPtr<ElastosKeyStoreTest> test = new ElastosKeyStoreTest();
+    return test->TestKeyStore_Aliases_Encrypted_Success();
 }
 
 ECode CActivityOne::SignatureTest()

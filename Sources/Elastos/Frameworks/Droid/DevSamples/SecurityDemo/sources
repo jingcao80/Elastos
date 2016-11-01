@@ -13,13 +13,17 @@ SOURCES = Elastos.DevSamples.SecurityDemo.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Org.Conscrypt.cpp
 SOURCES += CActivityOne.cpp
 SOURCES += Test.cpp
+SOURCES += ElastosKeyPairGeneratorTest.cpp
+SOURCES += ElastosKeyStoreTest.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_TARGETS)/Org.Conscrypt.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += -lm -licuuc -llog
 

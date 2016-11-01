@@ -64,6 +64,8 @@ private:
     CARAPI Button7Function();// CertificateFactory
 
     CARAPI ButtonCSecureRandom();
+    CARAPI ButtonElastosKeyPairGenerator();
+    CARAPI ButtonElastosKeyStore();
 
     CARAPI SignatureTest();
 
