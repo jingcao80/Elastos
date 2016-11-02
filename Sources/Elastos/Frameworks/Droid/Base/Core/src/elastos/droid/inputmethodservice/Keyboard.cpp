@@ -1,7 +1,6 @@
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include <Elastos.CoreLibrary.External.h>
-#include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/utility/CTypedValue.h"
@@ -13,17 +12,17 @@
 #include <elastos/core/Character.h>
 #include <elastos/core/StringUtils.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::Character;
-using Elastos::Core::CString;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Droid::R;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::ITypedValue;
+using Elastos::Droid::R;
+using Elastos::Core::StringUtils;
+using Elastos::Core::Character;
+using Elastos::Core::CString;
 using Elastos::Utility::CArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -49,7 +48,9 @@ Keyboard::Row::Row(
     , mRowEdgeFlags(0)
     , mMode(0)
     , mParent(parent)
-{}
+{
+    CArrayList::New((IArrayList**)&mKeys);
+}
 
 Keyboard::Row::Row(
     /* [in] */ IResources* res,
@@ -63,6 +64,8 @@ Keyboard::Row::Row(
     , mMode(0)
     , mParent(parent)
 {
+    CArrayList::New((IArrayList**)&mKeys);
+
     AutoPtr<ArrayOf<Int32> > layout = TO_ATTRS_ARRAYOF(R::styleable::Keyboard);
 
     AutoPtr<ITypedArray> a;
@@ -338,23 +341,12 @@ Keyboard::Key::Key(
 Keyboard::Key::~Key()
 {}
 
-/**
- * Informs the key that it has been pressed, in case it needs to change its appearance or
- * state.
- * @see #onReleased(Boolean)
- */
 ECode Keyboard::Key::OnPressed()
 {
     mPressed = !mPressed;
     return NOERROR;
 }
 
-/**
- * Changes the pressed state of the key. If it is a sticky key, it will also change the
- * toggled state of the key if the finger was release inside.
- * @param inside whether the finger was released inside the key
- * @see #onPressed()
- */
 ECode Keyboard::Key::OnReleased(
     /* [in] */ Boolean inside)
 {
@@ -668,156 +660,30 @@ Keyboard::Keyboard()
     , mCellWidth(0)
     , mCellHeight(0)
     , mProximityThreshold(0)
-{
-    mShiftKeys = ArrayOf<Key*>::Alloc(2);
-    mShiftKeys->Set(0, NULL);
-    mShiftKeys->Set(1, NULL);
-    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
-    (*mShiftKeyIndices)[0] = -1;
-    (*mShiftKeyIndices)[1] = -1;
-}
+{}
 
-Keyboard::Keyboard(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 xmlLayoutResId)
-    : mDefaultHorizontalGap(0)
-    , mDefaultWidth(0)
-    , mDefaultHeight(0)
-    , mDefaultVerticalGap(0)
-    , mShifted(FALSE)
-    , mKeyWidth(0)
-    , mKeyHeight(0)
-    , mTotalHeight(0)
-    , mTotalWidth(0)
-    , mDisplayWidth(0)
-    , mDisplayHeight(0)
-    , mKeyboardMode(0)
-    , mCellWidth(0)
-    , mCellHeight(0)
-    , mProximityThreshold(0)
-{
-    mShiftKeys = ArrayOf<Key*>::Alloc(2);
-    mShiftKeys->Set(0, NULL);
-    mShiftKeys->Set(1, NULL);
-    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
-    (*mShiftKeyIndices)[0] = -1;
-    (*mShiftKeyIndices)[1] = -1;
-    ASSERT_SUCCEEDED(Init(context, xmlLayoutResId));
-}
-
-Keyboard::Keyboard(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 xmlLayoutResId,
-    /* [in] */ Int32 modeId,
-    /* [in] */ Int32 width,
-    /* [in] */ Int32 height)
-    : mDefaultHorizontalGap(0)
-    , mDefaultWidth(0)
-    , mDefaultHeight(0)
-    , mDefaultVerticalGap(0)
-    , mShifted(FALSE)
-    , mKeyWidth(0)
-    , mKeyHeight(0)
-    , mTotalHeight(0)
-    , mTotalWidth(0)
-    , mDisplayWidth(0)
-    , mDisplayHeight(0)
-    , mKeyboardMode(0)
-    , mCellWidth(0)
-    , mCellHeight(0)
-    , mProximityThreshold(0)
-{
-    mShiftKeys = ArrayOf<Key*>::Alloc(2);
-    mShiftKeys->Set(0, NULL);
-    mShiftKeys->Set(1, NULL);
-    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
-    (*mShiftKeyIndices)[0] = -1;
-    (*mShiftKeyIndices)[1] = -1;
-
-    ASSERT_SUCCEEDED(Init(context, xmlLayoutResId, modeId, width, height));
-}
-
-Keyboard::Keyboard(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 xmlLayoutResId,
-    /* [in] */ Int32 modeId)
-    : mDefaultHorizontalGap(0)
-    , mDefaultWidth(0)
-    , mDefaultHeight(0)
-    , mDefaultVerticalGap(0)
-    , mShifted(FALSE)
-    , mKeyWidth(0)
-    , mKeyHeight(0)
-    , mTotalHeight(0)
-    , mTotalWidth(0)
-    , mDisplayWidth(0)
-    , mDisplayHeight(0)
-    , mKeyboardMode(0)
-    , mCellWidth(0)
-    , mCellHeight(0)
-    , mProximityThreshold(0)
-{
-    mShiftKeys = ArrayOf<Key*>::Alloc(2);
-    mShiftKeys->Set(0, NULL);
-    mShiftKeys->Set(1, NULL);
-    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
-    (*mShiftKeyIndices)[0] = -1;
-    (*mShiftKeyIndices)[1] = -1;
-
-    ASSERT_SUCCEEDED(Init(context, xmlLayoutResId, modeId));
-}
-
-Keyboard::Keyboard(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 layoutTemplateResId,
-    /* [in] */ ICharSequence* characters,
-    /* [in] */ Int32 columns,
-    /* [in] */ Int32 horizontalPadding)
-    : mDefaultHorizontalGap(0)
-    , mDefaultWidth(0)
-    , mDefaultHeight(0)
-    , mDefaultVerticalGap(0)
-    , mShifted(FALSE)
-    , mKeyWidth(0)
-    , mKeyHeight(0)
-    , mTotalHeight(0)
-    , mTotalWidth(0)
-    , mDisplayWidth(0)
-    , mDisplayHeight(0)
-    , mKeyboardMode(0)
-    , mCellWidth(0)
-    , mCellHeight(0)
-    , mProximityThreshold(0)
-{
-    mShiftKeys = ArrayOf<Key*>::Alloc(2);
-    mShiftKeys->Set(0, NULL);
-    mShiftKeys->Set(1, NULL);
-    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
-    (*mShiftKeyIndices)[0] = -1;
-    (*mShiftKeyIndices)[1] = -1;
-
-    ASSERT_SUCCEEDED(Init(context, layoutTemplateResId, characters, columns, horizontalPadding));
-}
-
-Keyboard::~Keyboard()
-{
-    mGridNeighbors = NULL;
-}
-
-ECode Keyboard::Init(
+ECode Keyboard::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 xmlLayoutResId)
 {
-    return Init(context, xmlLayoutResId, 0);
+    return constructor(context, xmlLayoutResId, 0);
 }
 
-ECode Keyboard::Init(
+ECode Keyboard::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 xmlLayoutResId,
     /* [in] */ Int32 modeId,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
+    mShiftKeys = ArrayOf<Key*>::Alloc(2);
+    mShiftKeys->Set(0, NULL);
+    mShiftKeys->Set(1, NULL);
+    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
+    (*mShiftKeyIndices)[0] = -1;
+    (*mShiftKeyIndices)[1] = -1;
+    CArrayList::New((IArrayList**)&mRows);
+
     mDisplayWidth = width;
     mDisplayHeight = height;
 
@@ -825,6 +691,8 @@ ECode Keyboard::Init(
     mDefaultWidth = mDisplayWidth / 10;
     mDefaultVerticalGap = 0;
     mDefaultHeight = mDefaultWidth;
+    CArrayList::New((IList**)&mKeys);
+    CArrayList::New((IList**)&mModifierKeys);
     mKeyboardMode = modeId;
 
     AutoPtr<IResources> res;
@@ -835,11 +703,19 @@ ECode Keyboard::Init(
     return NOERROR;
 }
 
-ECode Keyboard::Init(
+ECode Keyboard::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 xmlLayoutResId,
     /* [in] */ Int32 modeId)
 {
+    mShiftKeys = ArrayOf<Key*>::Alloc(2);
+    mShiftKeys->Set(0, NULL);
+    mShiftKeys->Set(1, NULL);
+    mShiftKeyIndices = ArrayOf<Int32>::Alloc(2);
+    (*mShiftKeyIndices)[0] = -1;
+    (*mShiftKeyIndices)[1] = -1;
+    CArrayList::New((IArrayList**)&mRows);
+
     AutoPtr<IResources> res;
     FAIL_RETURN(context->GetResources((IResources**)&res));
     AutoPtr<IDisplayMetrics> dm;
@@ -852,6 +728,8 @@ ECode Keyboard::Init(
     mDefaultWidth = mDisplayWidth / 10;
     mDefaultVerticalGap = 0;
     mDefaultHeight = mDefaultWidth;
+    CArrayList::New((IList**)&mKeys);
+    CArrayList::New((IList**)&mModifierKeys);
     mKeyboardMode = modeId;
     AutoPtr<IXmlResourceParser> parser;
     FAIL_RETURN(res->GetXml(xmlLayoutResId, (IXmlResourceParser**)&parser));
@@ -859,14 +737,14 @@ ECode Keyboard::Init(
     return NOERROR;
 }
 
-ECode Keyboard::Init(
+ECode Keyboard::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 layoutTemplateResId,
     /* [in] */ ICharSequence* characters,
     /* [in] */ Int32 columns,
     /* [in] */ Int32 horizontalPadding)
 {
-    ASSERT_SUCCEEDED(Init(context, layoutTemplateResId));
+    constructor(context, layoutTemplateResId);
     Int32 x = 0;
     Int32 y = 0;
     Int32 column = 0;
@@ -902,30 +780,41 @@ ECode Keyboard::Init(
         (*key->mCodes)[0] = c;
         column++;
         x += key->mWidth + key->mGap;
-        mKeys.PushBack(key);
-        row->mKeys.PushBack(key);
+        mKeys->Add((IKeyboardKey*)key);
+        row->mKeys->Add((IKeyboardKey*)key);
         if (x > mTotalWidth) {
             mTotalWidth = x;
         }
     }
     mTotalHeight = y + mDefaultHeight;
-    mRows.PushBack(row);
+    mRows->Add((IKeyboardRow*)row);
     return NOERROR;
+}
+
+Keyboard::~Keyboard()
+{
+    mGridNeighbors = NULL;
 }
 
 void Keyboard::Resize(
     /* [in] */ Int32 newWidth,
     /* [in] */ Int32 newHeight)
 {
-    List< AutoPtr<Row> >::Iterator it;
-    for (it = mRows.Begin(); it != mRows.End(); ++it) {
-        AutoPtr<Row> row = *it;
+    Int32 numRows;
+    mRows->GetSize(&numRows);
+    for (Int32 rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+        AutoPtr<IInterface> obj;
+        mRows->Get(rowIndex, (IInterface**)&obj);
+        Row* row = (Row*)IKeyboardRow::Probe(obj);
+        Int32 numKeys;
+        row->mKeys->GetSize(&numKeys);
         Int32 totalGap = 0;
         Int32 totalWidth = 0;
-        List< AutoPtr<Key> >::Iterator kit;
-        for (kit = row->mKeys.Begin(); kit != row->mKeys.End(); ++kit) {
-            AutoPtr<Key> key = *kit;
-            if (kit != row->mKeys.Begin()) {
+        for (Int32 keyIndex = 0; keyIndex < numKeys; ++keyIndex) {
+            AutoPtr<IInterface> tmp;
+            row->mKeys->Get(keyIndex, (IInterface**)&tmp);
+            Key* key = (Key*)IKeyboardKey::Probe(tmp);
+            if (keyIndex > 0) {
                 totalGap += key->mGap;
             }
             totalWidth += key->mWidth;
@@ -933,8 +822,11 @@ void Keyboard::Resize(
         if (totalGap + totalWidth > newWidth) {
             Int32 x = 0;
             Float scaleFactor = (Float)(newWidth - totalGap) / totalWidth;
-            for (kit = row->mKeys.Begin(); kit != row->mKeys.End(); ++kit) {
-                AutoPtr<Key> key = *kit;
+            for (Int32 keyIndex = 0; keyIndex < numKeys; ++keyIndex) {
+                AutoPtr<IInterface> tmp;
+                row->mKeys->Get(keyIndex, (IInterface**)&tmp);
+                Key* key = (Key*)IKeyboardKey::Probe(tmp);
+
                 key->mWidth *= scaleFactor;
                 key->mX = x;
                 x += key->mWidth + key->mGap;
@@ -950,35 +842,20 @@ void Keyboard::Resize(
 ECode Keyboard::GetKeys(
     /* [out] */ IList** keys)
 {
-    assert(keys != NULL);
-    FAIL_RETURN(CArrayList::New(keys));
-    List< AutoPtr<Key> >::Iterator it;
-    Int32 i = 0;
-    for (it = mKeys.Begin(); it != mKeys.End(); it++) {
-        (*keys)->Set(i++, (IKeyboardKey*)(*it)->Probe(EIID_IKeyboardKey));
-    }
+    VALIDATE_NOT_NULL(keys)
+
+    *keys = mKeys;
+    REFCOUNT_ADD(*keys);
     return NOERROR;
-}
-
-List<AutoPtr<Keyboard::Key> >& Keyboard::GetKeys()
-{
-    return mKeys;
-}
-
-List<AutoPtr<Keyboard::Key> >& Keyboard::GetModifierKeys()
-{
-    return mModifierKeys;
 }
 
 ECode Keyboard::GetModifierKeys(
     /* [out] */ IList** keys)
 {
-    assert(keys != NULL);
-    Int32 i = 0;
-    List< AutoPtr<Key> >::Iterator it;
-    for (it = mModifierKeys.Begin(); it != mModifierKeys.End(); it++) {
-        (*keys)->Set(i++, (IKeyboardKey*)(*it)->Probe(EIID_IKeyboardKey));
-    }
+    VALIDATE_NOT_NULL(keys)
+
+    *keys = mModifierKeys;
+    REFCOUNT_ADD(*keys);
     return NOERROR;
 }
 
@@ -1112,15 +989,19 @@ void Keyboard::ComputeNearestNeighbors()
     mCellWidth = (w + GRID_WIDTH - 1) / GRID_WIDTH;
     mCellHeight = (h + GRID_HEIGHT - 1) / GRID_HEIGHT;
     mGridNeighbors = ArrayOf< AutoPtr<ArrayOf<Int32> > >::Alloc(GRID_SIZE);
-    AutoPtr< ArrayOf<Int32> > indices = ArrayOf<Int32>::Alloc(mKeys.GetSize());
+    Int32 size;
+    mKeys->GetSize(&size);
+    AutoPtr< ArrayOf<Int32> > indices = ArrayOf<Int32>::Alloc(size);
     Int32 gridWidth = GRID_WIDTH * mCellWidth;
     Int32 gridHeight = GRID_HEIGHT * mCellHeight;
     for (Int32 x = 0; x < gridWidth; x += mCellWidth) {
         for (Int32 y = 0; y < gridHeight; y += mCellHeight) {
-            Int32 count = 0, i = 0;
-            List< AutoPtr<Key> >::Iterator it;
-            for (it = mKeys.Begin(); it != mKeys.End(); ++it, ++i) {
-                AutoPtr<Key> key = *it;
+            Int32 count = 0;
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mKeys->Get(i, (IInterface**)&obj);
+                Key* key = (Key*)IKeyboardKey::Probe(obj);
+
                 Int32 dis1 = 0, dis2 = 0, dis3 = 0, dis4 = 0;
                 key->SquaredDistanceFrom(x, y, &dis1);
                 key->SquaredDistanceFrom(x + mCellWidth - 1, y, &dis2);
@@ -1210,7 +1091,7 @@ void Keyboard::LoadKeyboard(
                 inRow = TRUE;
                 x = 0;
                 currentRow = CreateRowFromXml(res, parser);
-                mRows.PushBack(currentRow);
+                mRows->Add((IKeyboardRow*)currentRow);
                 skipRow = currentRow->mMode != 0 && currentRow->mMode != mKeyboardMode;
                 if (skipRow) {
                     SkipToEndOfRow(parser);
@@ -1220,23 +1101,24 @@ void Keyboard::LoadKeyboard(
            else if (TAG_KEY.Equals(tag)) {
                 inKey = TRUE;
                 key = CreateKeyFromXml(res, currentRow, x, y, parser);
-                mKeys.PushBack(key);
+                mKeys->Add((IKeyboardKey*)key);
                 ArrayOf<Int32>* codes = key->mCodes;
                 if ((*codes)[0] == IKeyboard::KEYCODE_SHIFT) {
                     // Find available shift key slot and put this shift key in it
                     for (Int32 i = 0; i < mShiftKeys->GetLength(); i++) {
                         if ((*mShiftKeys)[i] == NULL) {
                             mShiftKeys->Set(i, key);
-                            (*mShiftKeyIndices)[i] = mKeys.GetSize() - 1;
+                            Int32 size;
+                            (*mShiftKeyIndices)[i] = (mKeys->GetSize(&size), size) - 1;
                             break;
                         }
                     }
-                    mModifierKeys.PushBack(key);
+                    mModifierKeys->Add((IKeyboardKey*)key);
                 }
                 else if ((*codes)[0] == IKeyboard::KEYCODE_ALT) {
-                    mModifierKeys.PushBack(key);
+                    mModifierKeys->Add((IKeyboardKey*)key);
                 }
-                currentRow->mKeys.PushBack(key);
+                currentRow->mKeys->Add((IKeyboardKey*)key);
             }
             else if (TAG_KEYBOARD.Equals(tag)) {
                 ParseKeyboardAttributes(res, parser);

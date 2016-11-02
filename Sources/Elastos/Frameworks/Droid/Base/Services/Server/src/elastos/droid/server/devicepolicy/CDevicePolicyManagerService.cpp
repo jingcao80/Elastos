@@ -5400,19 +5400,19 @@ ECode CDevicePolicyManagerService::GetEncryptionStatus(
     sysProp->Get(String("ro.crypto.state"), String("unsupported"), &status);
 
     if (status.EqualsIgnoreCase("encrypted")) {
-    Int64 token = Binder::ClearCallingIdentity();
-    // try {
-    Boolean isDeviceEncrypted;
-    AutoPtr<ILockPatternUtilsHelper> helper;
-    CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
-    ECode ec = helper->IsDeviceEncrypted(&isDeviceEncrypted);
-    *result = isDeviceEncrypted
-                ? IDevicePolicyManager::ENCRYPTION_STATUS_ACTIVE
-                : IDevicePolicyManager::ENCRYPTION_STATUS_INACTIVE;
-    // } finally {
-    Binder::RestoreCallingIdentity(token);
-    // }
-    if (FAILED(ec)) return ec;
+        Int64 token = Binder::ClearCallingIdentity();
+        // try {
+        Boolean isDeviceEncrypted;
+        AutoPtr<ILockPatternUtilsHelper> helper;
+        CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
+        ECode ec = helper->IsDeviceEncrypted(&isDeviceEncrypted);
+        *result = isDeviceEncrypted
+                    ? IDevicePolicyManager::ENCRYPTION_STATUS_ACTIVE
+                    : IDevicePolicyManager::ENCRYPTION_STATUS_INACTIVE;
+        // } finally {
+        Binder::RestoreCallingIdentity(token);
+        // }
+        if (FAILED(ec)) return ec;
     } else if (status.EqualsIgnoreCase("unencrypted")) {
         *result = IDevicePolicyManager::ENCRYPTION_STATUS_INACTIVE;
         return NOERROR;

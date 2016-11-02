@@ -789,8 +789,8 @@ void UsbDeviceManager::UsbHandler::UpdateUsbNotification()
 
             AutoPtr<IComponentName> componentName;
             CComponentName::New(
-                    String("com.android.settings"),
-                    String("com.android.settings.UsbSettings"),
+                    String("Elastos.Droid.Settings"),
+                    String("Elastos.Droid.Settings.CUsbSettings"),
                     (IComponentName**)&componentName);
             AutoPtr<IIntent> intent;
             AutoPtr<IIntentHelper> intentHelper;
@@ -873,8 +873,8 @@ void UsbDeviceManager::UsbHandler::UpdateAdbNotification()
 
             AutoPtr<IComponentName> componentName;
             CComponentName::New(
-                    String("com.android.settings"),
-                    String("com.android.settings.DevelopmentSettings"),
+                    String("Elastos.Droid.Settings"),
+                    String("Elastos.Droid.Settings.CDevelopmentSettings"),
                     (IComponentName**)&componentName);
             AutoPtr<IIntentHelper> intentHelper;
             CIntentHelper::AcquireSingleton((IIntentHelper**)&intentHelper);

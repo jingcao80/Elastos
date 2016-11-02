@@ -271,8 +271,8 @@ const String CMobileNetworkSettings::BUTTON_CELL_BROADCAST_SETTINGS("cell_broadc
 
 const Int32 CMobileNetworkSettings::sPreferredNetworkMode = IPhone::PREFERRED_NT_MODE;
 
-const String CMobileNetworkSettings::UP_ACTIVITY_PACKAGE("com.android.settings");
-const String CMobileNetworkSettings::UP_ACTIVITY_CLASS("com.android.settings.Settings$WirelessSettingsActivity");
+const String CMobileNetworkSettings::UP_ACTIVITY_PACKAGE("Elastos.Droid.Settings");
+const String CMobileNetworkSettings::UP_ACTIVITY_CLASS("Elastos.Droid.Settings.CSettingsWirelessSettingsActivity");
 
 const String CMobileNetworkSettings::sIface("rmnet0"); //TODO: this will go away
 

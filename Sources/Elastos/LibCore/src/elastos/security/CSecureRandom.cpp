@@ -24,8 +24,8 @@ namespace Security {
 
 static AutoPtr<IEngine> InitEngine()
 {
-    AutoPtr<CEngine> e;
-    CEngine::NewByFriend(String("SecureRandom")/*SERVICE*/, (CEngine**)&e);
+    AutoPtr<IEngine> e;
+    CEngine::New(String("SecureRandom")/*SERVICE*/, (IEngine**)&e);
     return e;
 }
 
@@ -97,12 +97,14 @@ ECode CSecureRandom::GetInstance(
     /* [out] */ ISecureRandom** result) /*throws NoSuchAlgorithmException*/
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (algorithm.IsNull()) {
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ISpiAndProvider> sap;
-    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    FAIL_RETURN(ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap))
     AutoPtr<IInterface> spi;
     sap->GetSpi((IInterface**)&spi);
     AutoPtr<IProvider> p;
@@ -116,6 +118,8 @@ ECode CSecureRandom::GetInstance(
     /* [out] */ ISecureRandom** result) /*throws NoSuchAlgorithmException, NoSuchProviderException*/
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (provider.IsNull() || provider.IsEmpty()) {
         // throw new IllegalArgumentException();
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -139,6 +143,8 @@ ECode CSecureRandom::GetInstance(
     /* [out] */ ISecureRandom** result) /*throws NoSuchAlgorithmException*/
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (provider == NULL) {
         // throw new IllegalArgumentException("provider == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

@@ -20,8 +20,6 @@ namespace Droid {
 namespace Internal {
 namespace Widget {
 
-extern "C" const InterfaceID EIID_LatinKey;
-
 class PasswordEntryKeyboard
     : public Keyboard
     , public IPasswordEntryKeyboard
@@ -29,17 +27,17 @@ class PasswordEntryKeyboard
 public:
     class LatinKey
         : public Keyboard::Key
+        , public IPasswordEntryKeyboardLatinKey
     {
     public:
+        CAR_INTERFACE_DECL()
+
         LatinKey(
             /* [in] */ IResources* res,
             /* [in] */ Row* parent,
             /* [in] */ Int32 x,
             /* [in] */ Int32 y,
             /* [in] */ IXmlResourceParser* parser);
-
-        virtual CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
 
         CARAPI_(void) SetEnabled(
             /* [in] */ Boolean enabled);
@@ -169,7 +167,7 @@ private:
     AutoPtr<IDrawable> mShiftLockIcon;
 
     // These two arrays must be the same length
-    AutoPtr<ArrayOf<IDrawable *> > mOldShiftIcons;// = { NULL, NULL };
+    AutoPtr<ArrayOf<IDrawable*> > mOldShiftIcons;// = { NULL, NULL };
     AutoPtr<ArrayOf<Key*> > mShiftKeys;// = { NULL, NULL };
 
     AutoPtr<Key> mEnterKey;

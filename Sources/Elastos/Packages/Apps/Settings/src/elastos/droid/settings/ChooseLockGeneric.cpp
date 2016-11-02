@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.AccessibilityService.h"
 #include "elastos/droid/settings/ChooseLockGeneric.h"
-#include "elastos/droid/settings/EncryptionInterstitial.h"
+#include "elastos/droid/settings/CEncryptionInterstitial.h"
 #include "elastos/droid/settings/CChooseLockPassword.h"
 #include "elastos/droid/settings/CChooseLockPattern.h"
 #include "elastos/droid/os/Process.h"
@@ -221,7 +221,7 @@ void ChooseLockGeneric::ChooseLockGenericFragment::MaybeEnableEncryption(
         manager->IsEnabled(&accEn);
         Boolean required;
         mLockPatternUtils->IsCredentialRequiredToDecrypt(!accEn, &required);
-        AutoPtr<IIntent> intent = EncryptionInterstitial::CreateStartIntent(
+        AutoPtr<IIntent> intent = CEncryptionInterstitial::CreateStartIntent(
                 IContext::Probe(activity), quality, required);
         StartActivityForResult(intent, ENABLE_ENCRYPTION_REQUEST);
     }
@@ -248,8 +248,6 @@ ECode ChooseLockGeneric::ChooseLockGenericFragment::OnCreateView(
     Boolean onlyShowFallback;
     intent->GetBooleanExtra(ILockPatternUtils::LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, FALSE, &onlyShowFallback);
     if (onlyShowFallback) {
-        // AutoPtr<IViewHelper> helper;
-        // CViewHelper::AcquireSingleton((IViewHelper**)&helper);
         AutoPtr<IView> header;
         Elastos::Droid::View::View::Inflate(IContext::Probe(activity),
                 R::layout::weak_biometric_fallback_header, NULL, (IView**)&header);
@@ -284,7 +282,7 @@ ECode ChooseLockGeneric::ChooseLockGenericFragment::OnActivityResult(
     else if (requestCode == ENABLE_ENCRYPTION_REQUEST
             && resultCode == IActivity::RESULT_OK) {
         data->GetBooleanExtra(
-                EncryptionInterstitial::EXTRA_REQUIRE_PASSWORD, TRUE, &mRequirePassword);
+                CEncryptionInterstitial::EXTRA_REQUIRE_PASSWORD, TRUE, &mRequirePassword);
         UpdateUnlockMethodAndFinish(mEncryptionRequestQuality, mEncryptionRequestDisabled);
     }
     else {
@@ -429,7 +427,7 @@ void ChooseLockGeneric::ChooseLockGenericFragment::DisableUnusablePreferences(
             }
             if (!visible || (onlyShowFallback && !AllowedForFallback(key))) {
                 Boolean res;
-                IPreferenceGroup::Probe(entries)->RemovePreference(pref, &res);
+                _entries->RemovePreference(pref, &res);
             }
             else if (!enabled) {
                 pref->SetSummary(R::string::unlock_set_unlock_disabled_summary);

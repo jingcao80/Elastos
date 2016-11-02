@@ -3000,8 +3000,8 @@ AutoPtr<IIntent> CNetworkPolicyManagerService::BuildViewDataUsageIntent(
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
     AutoPtr<IComponentName> component;
-    CComponentName::New(String("com.android.settings"),
-            String("com.android.settings.Settings$DataUsageSummaryActivity"), (IComponentName**)&component);
+    CComponentName::New(String("Elastos.Droid.Settings"),
+            String("Elastos.Droid.Settings.CSettingsDataUsageSummaryActivity"), (IComponentName**)&component);
     intent->SetComponent(component);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     intent->PutExtra(INetworkPolicyManager::EXTRA_NETWORK_TEMPLATE, IParcelable::Probe(templ));

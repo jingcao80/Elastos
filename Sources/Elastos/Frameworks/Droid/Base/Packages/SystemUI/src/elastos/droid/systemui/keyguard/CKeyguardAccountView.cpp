@@ -146,8 +146,8 @@ ERROR:
     //}
 }
 
-const String CKeyguardAccountView::LOCK_PATTERN_PACKAGE("com.android.settings");
-const String CKeyguardAccountView::LOCK_PATTERN_CLASS(LOCK_PATTERN_PACKAGE + String(".ChooseLockGeneric"));
+const String CKeyguardAccountView::LOCK_PATTERN_PACKAGE("Elastos.Droid.Settings");
+const String CKeyguardAccountView::LOCK_PATTERN_CLASS(LOCK_PATTERN_PACKAGE + String(".CChooseLockGeneric"));
 
 CAR_OBJECT_IMPL(CKeyguardAccountView)
 

@@ -15,10 +15,10 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/Xml.h"
-#include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/R.h"
-#include <elastos/core/CoreUtils.h>
 #include "R.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragmentManager;
@@ -828,31 +828,31 @@ ECode SettingsActivity::OnCreate(
         if (buttonBar != NULL) {
             buttonBar->SetVisibility(IView::VISIBLE);
 
-            AutoPtr<IView> _view;
-            FindViewById(R::id::back_button, (IView**)&_view);
-            AutoPtr<IButton> backButton = IButton::Probe(_view);
+            AutoPtr<IView> backButtonTmp;
+            FindViewById(R::id::back_button, (IView**)&backButtonTmp);
+            AutoPtr<IButton> backButton = IButton::Probe(backButtonTmp);
             AutoPtr<OnCreateOnClickListener> myListener =
                     new OnCreateOnClickListener(this, 0);
-            _view->SetOnClickListener(myListener);
+            backButtonTmp->SetOnClickListener(myListener);
 
-            _view = NULL;
-            FindViewById(R::id::skip_button, (IView**)&_view);
-            AutoPtr<IButton> skipButton = IButton::Probe(_view);
+            AutoPtr<IView> skipButtonTmp;
+            FindViewById(R::id::skip_button, (IView**)&skipButtonTmp);
+            AutoPtr<IButton> skipButton = IButton::Probe(skipButtonTmp);
             AutoPtr<OnCreateOnClickListener> myListener1 =
                     new OnCreateOnClickListener(this, 1);
-            _view->SetOnClickListener(myListener1);
+            skipButtonTmp->SetOnClickListener(myListener1);
 
-            _view = NULL;
-            FindViewById(R::id::next_button, (IView**)&_view);
-            mNextButton = IButton::Probe(_view);
-            _view->SetOnClickListener(myListener1);
+            AutoPtr<IView> nextButtonTmp;
+            FindViewById(R::id::next_button, (IView**)&nextButtonTmp);
+            mNextButton = IButton::Probe(nextButtonTmp);
+            nextButtonTmp->SetOnClickListener(myListener1);
 
             // set our various button parameters
             if (intent->HasExtra(EXTRA_PREFS_SET_NEXT_TEXT, &res), res) {
                 String buttonText;
                 intent->GetStringExtra(EXTRA_PREFS_SET_NEXT_TEXT, &buttonText);
                 if (TextUtils::IsEmpty(buttonText)) {
-                    IView::Probe(mNextButton)->SetVisibility(IView::GONE);
+                    nextButtonTmp->SetVisibility(IView::GONE);
                 }
                 else {
                     ITextView::Probe(mNextButton)->SetText(CoreUtils::Convert(buttonText));
@@ -862,14 +862,14 @@ ECode SettingsActivity::OnCreate(
                 String buttonText;
                 intent->GetStringExtra(EXTRA_PREFS_SET_BACK_TEXT, &buttonText);
                 if (TextUtils::IsEmpty(buttonText)) {
-                    IView::Probe(backButton)->SetVisibility(IView::GONE);
+                    backButtonTmp->SetVisibility(IView::GONE);
                 }
                 else {
                     ITextView::Probe(backButton)->SetText(CoreUtils::Convert(buttonText));
                 }
             }
             if (intent->GetBooleanExtra(EXTRA_PREFS_SHOW_SKIP, FALSE, &res), res) {
-                IView::Probe(skipButton)->SetVisibility(IView::VISIBLE);
+                skipButtonTmp->SetVisibility(IView::VISIBLE);
             }
         }
     }

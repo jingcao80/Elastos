@@ -478,8 +478,9 @@ private:
         /* [in] */ Int32 type,
         /* [in] */ const String& password);
 
-    CARAPI_(String) GetSalt(
-        /* [in] */ Int32 userId);
+    CARAPI GetSalt(
+        /* [in] */ Int32 userId,
+        /* [out] */ String* result);
 
     static CARAPI_(String) ToHex(
         /* [in] */ ArrayOf<Byte>* ary);

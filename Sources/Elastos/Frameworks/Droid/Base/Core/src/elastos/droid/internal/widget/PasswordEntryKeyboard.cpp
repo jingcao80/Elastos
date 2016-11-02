@@ -2,12 +2,11 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/internal/widget/PasswordEntryKeyboard.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::R;
 using Elastos::Droid::InputMethodService::IKeyboard;
-
+using Elastos::Droid::InputMethodService::IKeyboardKey;
+using Elastos::Droid::R;
 using Elastos::Core::CString;
 using Elastos::Utility::Logging::Logger;
 
@@ -15,10 +14,6 @@ namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Widget {
-
-//0c08c3b7-3cd7-4772-8340-d42f0613bd47
-extern "C" const InterfaceID EIID_LatinKey =
-        { 0x0c08c3b7, 0x3cd7, 0x4772, { 0x83, 0x40, 0xd4, 0x2f, 0x06, 0x13, 0xbd, 0x47 } };
 
 const String PasswordEntryKeyboard::TAG("PasswordEntryKeyboard");
 
@@ -29,8 +24,11 @@ const Int32 PasswordEntryKeyboard::SHIFT_ON = 1;
 const Int32 PasswordEntryKeyboard::SHIFT_LOCKED = 2;
 
 //===============================================================
-// PasswordEntryKeyboard::LatinKey::
+// PasswordEntryKeyboard::LatinKey
 //===============================================================
+
+CAR_INTERFACE_IMPL(PasswordEntryKeyboard::LatinKey, Keyboard::Key, IPasswordEntryKeyboardLatinKey)
+
 PasswordEntryKeyboard::LatinKey::LatinKey(
     /* [in] */ IResources* res,
     /* [in] */ Row* parent,
@@ -39,23 +37,12 @@ PasswordEntryKeyboard::LatinKey::LatinKey(
     /* [in] */ IXmlResourceParser* parser)
     : Key(res, parent, x, y, parser)
     , mShiftLockEnabled(FALSE)
-    , mEnabled(FALSE)
+    , mEnabled(TRUE)
 {
     Int32 length = 0;
     if (mPopupCharacters != NULL && (mPopupCharacters->GetLength(&length), length) == 0) {
         // If there is a keyboard with no keys specified in popupCharacters
         mPopupResId = 0;
-    }
-}
-
-PInterface PasswordEntryKeyboard::LatinKey::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_LatinKey) {
-        return reinterpret_cast<PInterface>(this);
-    }
-    else {
-        return Key::Probe(riid);
     }
 }
 
@@ -89,7 +76,8 @@ ECode PasswordEntryKeyboard::LatinKey::IsInside(
 {
     VALIDATE_NOT_NULL(isInside)
     if (!mEnabled) {
-        return FALSE;
+        *isInside = FALSE;
+        return NOERROR;
     }
     Int32 code = (*mCodes)[0];
     if (code == KEYCODE_SHIFT || code == KEYCODE_DELETE) {
@@ -104,8 +92,9 @@ ECode PasswordEntryKeyboard::LatinKey::IsInside(
 }
 
 //===============================================================
-// PasswordEntryKeyboard::
+// PasswordEntryKeyboard
 //===============================================================
+
 CAR_INTERFACE_IMPL(PasswordEntryKeyboard, Keyboard, IPasswordEntryKeyboard)
 
 PasswordEntryKeyboard::PasswordEntryKeyboard()
@@ -133,7 +122,14 @@ ECode PasswordEntryKeyboard::constructor(
     /* [in] */ Int32 xmlLayoutResId,
     /* [in] */ Int32 mode)
 {
-//    super(context, xmlLayoutResId, mode);
+    mOldShiftIcons = ArrayOf<IDrawable*>::Alloc(2);
+    mOldShiftIcons->Set(0, NULL);
+    mOldShiftIcons->Set(1, NULL);
+    mShiftKeys = ArrayOf<Key*>::Alloc(2);
+    mShiftKeys->Set(0, NULL);
+    mShiftKeys->Set(1, NULL);
+
+    Keyboard::constructor(context, xmlLayoutResId, mode);
     Init(context);
     return NOERROR;
 }
@@ -145,8 +141,33 @@ ECode PasswordEntryKeyboard::constructor(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-//     super(context, xmlLayoutResId, mode, width, height);
+    mOldShiftIcons = ArrayOf<IDrawable*>::Alloc(2);
+    mOldShiftIcons->Set(0, NULL);
+    mOldShiftIcons->Set(1, NULL);
+    mShiftKeys = ArrayOf<Key*>::Alloc(2);
+    mShiftKeys->Set(0, NULL);
+    mShiftKeys->Set(1, NULL);
+
+    Keyboard::constructor(context, xmlLayoutResId, mode, width, height);
     Init(context);
+    return NOERROR;
+}
+
+ECode PasswordEntryKeyboard::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 layoutTemplateResId,
+    /* [in] */ ICharSequence* characters,
+    /* [in] */ Int32 columns,
+    /* [in] */ Int32 horizontalPadding)
+{
+    mOldShiftIcons = ArrayOf<IDrawable*>::Alloc(2);
+    mOldShiftIcons->Set(0, NULL);
+    mOldShiftIcons->Set(1, NULL);
+    mShiftKeys = ArrayOf<Key*>::Alloc(2);
+    mShiftKeys->Set(0, NULL);
+    mShiftKeys->Set(1, NULL);
+
+    Keyboard::constructor(context, layoutTemplateResId, characters, columns, horizontalPadding);
     return NOERROR;
 }
 
@@ -159,17 +180,6 @@ void PasswordEntryKeyboard::Init(
     context->GetDrawable(R::drawable::sym_keyboard_shift_locked, (IDrawable**)&mShiftLockIcon);
     res->GetDimensionPixelOffset(
             R::dimen::password_keyboard_spacebar_vertical_correction, &sSpacebarVerticalCorrection);
-}
-
-ECode PasswordEntryKeyboard::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ Int32 layoutTemplateResId,
-    /* [in] */ ICharSequence* characters,
-    /* [in] */ Int32 columns,
-    /* [in] */ Int32 horizontalPadding)
-{
-//     super(context, layoutTemplateResId, characters, columns, horizontalPadding);
-    return NOERROR;
 }
 
 AutoPtr<Keyboard::Key> PasswordEntryKeyboard::CreateKeyFromXml(
@@ -240,11 +250,14 @@ ECode PasswordEntryKeyboard::EnableShiftLock()
     for (Int32 j = 0; j < indices->GetLength(); j++) {
         Int32 index = (*indices)[j];
         if (index >= 0 && i < mShiftKeys->GetLength()) {
-            List<AutoPtr<Key> > keys = GetKeys();
-            mShiftKeys->Set(i, keys[index]);
-            if ((*mShiftKeys)[i]->Probe(EIID_LatinKey)) {
-                AutoPtr<LatinKey> latinKey = reinterpret_cast<LatinKey*>((*mShiftKeys)[i]->Probe(EIID_LatinKey));
-                latinKey->EnableShiftLock();
+            AutoPtr<IList> keys;
+            GetKeys((IList**)&keys);
+            AutoPtr<IInterface> obj;
+            keys->Get(index, (IInterface**)&obj);
+            mShiftKeys->Set(i, (Key*)IKeyboardKey::Probe(obj));
+            if (IPasswordEntryKeyboardLatinKey::Probe(obj) != NULL) {
+                ((LatinKey*)(*mShiftKeys)[i])->EnableShiftLock();
+
             }
             mOldShiftIcons->Set(i, (*mShiftKeys)[i]->mIcon);
             i++;
@@ -294,8 +307,8 @@ ECode PasswordEntryKeyboard::SetShifted(
             }
         }
         else {
-            Keyboard::SetShifted(shiftState, rst);
-            return NOERROR;
+            // Keyboard::SetShifted(shiftState, rst);
+            // return NOERROR;
         }
     }
     *rst = shiftChanged;

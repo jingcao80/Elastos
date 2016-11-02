@@ -2308,7 +2308,7 @@ void CTethering::ShowTetheredNotification(
 
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent **)&intent);
-    intent->SetClassName(String("com.android.settings"), String("com.android.settings.TetherSettings"));
+    intent->SetClassName(String("Elastos.Droid.Settings"), String("Elastos.Droid.Settings.CTetherSettings"));
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NO_HISTORY);
 
     AutoPtr<IPendingIntentHelper> helper;

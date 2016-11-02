@@ -1116,7 +1116,7 @@ ECode SecuritySettings::OnPreferenceChange(
             ECode ec = secure->PutInt32(GetContentResolver(),
                     ISettingsSecure::LOCK_SCREEN_LOCK_AFTER_TIMEOUT, timeout, &suc);
             if (FAILED(ec)) {
-                Logger::E("SecuritySettings", "could not persist lockAfter timeout setting %0x08", ec);
+                Logger::E("SecuritySettings", "could not persist lockAfter timeout setting 0x%08x", ec);
             }
         // } catch (NumberFormatException e) {
         //     Logger::E("SecuritySettings", "could not persist lockAfter timeout setting", e);
