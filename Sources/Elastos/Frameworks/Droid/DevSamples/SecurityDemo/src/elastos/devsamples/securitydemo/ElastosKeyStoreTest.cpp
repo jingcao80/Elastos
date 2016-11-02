@@ -274,6 +274,7 @@ ElastosKeyStoreTest::ElastosKeyStoreTest()
     Elastos::Droid::KeyStore::Security::CKeyStoreHelper::AcquireSingleton(
             (Elastos::Droid::KeyStore::Security::IKeyStoreHelper**)&helper);
     helper->GetInstance((Elastos::Droid::KeyStore::Security::IKeyStore**)&mAndroidKeyStore);
+    assert(mAndroidKeyStore != NULL);
 
     Boolean res;
     mAndroidKeyStore->Reset(&res);
@@ -284,7 +285,7 @@ ElastosKeyStoreTest::ElastosKeyStoreTest()
 
     AutoPtr<Elastos::Security::IKeyStoreHelper> helper2;
     Elastos::Security::CKeyStoreHelper::AcquireSingleton((Elastos::Security::IKeyStoreHelper**)&helper2);
-    helper2->GetInstance(String("AndroidKeyStore"), (Elastos::Security::IKeyStore**)&mKeyStore);
+    helper2->GetInstance(String("ElastosKeyStore"), (Elastos::Security::IKeyStore**)&mKeyStore);
 }
 
 ECode ElastosKeyStoreTest::SetupPassword()
@@ -371,6 +372,7 @@ ECode ElastosKeyStoreTest::TestKeyStore_Aliases_Encrypted_Success()
     array4->Set(0, TEST_ALIAS_1);
     array4->Set(1, TEST_ALIAS_2);
     AssertAliases(array4);
+    Logger::E("ElastosKeyStoreTest", "=====[snow=====TestKeyStore_Aliases_Encrypted_Success return");
     return NOERROR;
 }
 

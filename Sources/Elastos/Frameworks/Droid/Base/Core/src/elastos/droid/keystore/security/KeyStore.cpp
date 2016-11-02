@@ -3,6 +3,7 @@
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/text/TextUtils.h"
+#include "_Org.Conscrypt.h"
 #include <binder/Parcel.h>
 #include <binder/IServiceManager.h>
 
@@ -12,6 +13,7 @@ using Elastos::Droid::Security::EIID_IIKeystoreService;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::IByte;
 using Elastos::Utility::Logging::Logger;
+using Org::Conscrypt::INativeCrypto;
 
 namespace Elastos {
 namespace Droid {
@@ -113,18 +115,22 @@ ECode KeyStore::KeystoreServiceWrapper::Saw(
 {
     VALIDATE_NOT_NULL(ret);
     *ret = NULL;
+
     if (mKeystoreService.get() != NULL) {
         android::Vector<android::String16> matches;
         mKeystoreService->saw(android::String16(name), uid, &matches);
         Int32 size = matches.size();
+        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
+
         if (size > 0) {
-            *ret = ArrayOf<String>::Alloc(size);
             android::Vector<android::String16>::const_iterator it = matches.begin();
             Int32 i = 0;
             for (; it != matches.end(); ++it) {
-                (*ret)->Set(i++, TextUtils::String16ToString(*it));
+                array->Set(i++, TextUtils::String16ToString(*it));
             }
         }
+        *ret = array;
+        REFCOUNT_ADD(*ret);
     }
     return NOERROR;
 }
@@ -480,15 +486,17 @@ Int32 KeyStore::GetKeyTypeForAlgorithm(
     /* [in] */ const String& keyType)
 {
     if (String("RSA").EqualsIgnoreCase(keyType)) {
-        return 6/*TODO INativeCrypto::EVP_PKEY_RSA*/;
-    } else if (String("DSA").EqualsIgnoreCase(keyType)) {
-        return 116/*TODO INativeCrypto::EVP_PKEY_DSA*/;
-    } else if (String("EC").EqualsIgnoreCase(keyType)) {
-        return 408/*TODO INativeCrypto::EVP_PKEY_EC*/;
-    } else {
+        return INativeCrypto::EVP_PKEY_RSA;
+    }
+    else if (String("DSA").EqualsIgnoreCase(keyType)) {
+        return INativeCrypto::EVP_PKEY_DSA;
+    }
+    else if (String("EC").EqualsIgnoreCase(keyType)) {
+        return INativeCrypto::EVP_PKEY_EC;
+    }
+    else {
         //throw new IllegalArgumentException("Unsupported key type: " + keyType);
         Logger::E("KeyStore", "GetKeyTypeForAlgorithm, Unsupported key type: %s", keyType.string());
-        assert(0);
         return -1;
     }
 }
@@ -505,14 +513,23 @@ ECode KeyStore::State(
     //}
 
     switch (ret) {
-        case NO_ERROR: return KeyStoreState_UNLOCKED;
-        case LOCKED: return KeyStoreState_LOCKED;
-        case UNINITIALIZED: return KeyStoreState_UNINITIALIZED;
+        case NO_ERROR: {
+            *result = KeyStoreState_UNLOCKED;
+            break;
+        }
+        case LOCKED: {
+            *result = KeyStoreState_LOCKED;
+            break;
+        }
+        case UNINITIALIZED: {
+            *result = KeyStoreState_UNINITIALIZED;
+            break;
+        }
         default: //throw new AssertionError(mError);
             Logger::E("KeyStore", "State");
-            assert(0);
-            return KeyStoreState_UNLOCKED;
+            *result = KeyStoreState_UNLOCKED;
     }
+    return NOERROR;
 }
 
 ECode KeyStore::IsUnlocked(
