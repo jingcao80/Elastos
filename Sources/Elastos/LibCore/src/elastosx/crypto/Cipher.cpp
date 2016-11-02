@@ -172,7 +172,7 @@ ECode Cipher::Init(
     //        (jurisdiction policy files)
     AutoPtr<ICipherSpi> spi;
     GetSpi(key, (ICipherSpi**)&spi);
-    spi->EngineInit(opmode, key, random);
+    FAIL_RETURN(spi->EngineInit(opmode, key, random));
     mMode = opmode;
     return NOERROR;
 }
@@ -203,7 +203,7 @@ ECode Cipher::Init(
     //        (jurisdiction policy files)
     AutoPtr<ICipherSpi> spi;
     GetSpi(key, (ICipherSpi**)&spi);
-    spi->EngineInit(opmode, key, params, random);
+    FAIL_RETURN(spi->EngineInit(opmode, key, params, random));
     mMode = opmode;
     return NOERROR;
 }
@@ -234,7 +234,7 @@ ECode Cipher::Init(
     //        (jurisdiction policy files)
     AutoPtr<ICipherSpi> spi;
     GetSpi(key, (ICipherSpi**)&spi);
-    spi->EngineInit(opmode, key, params, random);
+    FAIL_RETURN(spi->EngineInit(opmode, key, params, random));
     mMode = opmode;
     return NOERROR;
 }

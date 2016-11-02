@@ -82,18 +82,18 @@ String OpenSSLCipher::ModeToString(
     /* [in] */ OpenSSLCipher::Mode mode)
 {
     switch (mode) {
-        case MODE_CBC: return String("MODE_CBC");
-        case MODE_CFB: return String("MODE_CFB");
-        case MODE_CFB1: return String("MODE_CFB1");
-        case MODE_CFB8: return String("MODE_CFB8");
-        case MODE_CFB128: return String("MODE_CFB128");
-        case MODE_CTR: return String("MODE_CTR");
-        case MODE_CTS: return String("MODE_CTS");
-        case MODE_ECB: return String("MODE_ECB");
-        case MODE_OFB: return String("MODE_OFB");
-        case MODE_OFB64: return String("MODE_OFB64");
-        case MODE_OFB128: return String("MODE_OFB128");
-        case MODE_PCBC: return String("MODE_PCBC");
+        case MODE_CBC: return String("CBC");
+        case MODE_CFB: return String("CFB");
+        case MODE_CFB1: return String("CFB1");
+        case MODE_CFB8: return String("CFB8");
+        case MODE_CFB128: return String("CFB128");
+        case MODE_CTR: return String("CTR");
+        case MODE_CTS: return String("CTS");
+        case MODE_ECB: return String("ECB");
+        case MODE_OFB: return String("OFB");
+        case MODE_OFB64: return String("OFB64");
+        case MODE_OFB128: return String("OFB128");
+        case MODE_PCBC: return String("PCBC");
     }
     return String(NULL);
 }

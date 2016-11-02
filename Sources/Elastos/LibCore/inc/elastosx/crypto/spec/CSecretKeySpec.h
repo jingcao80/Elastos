@@ -8,6 +8,7 @@
 using Elastos::IO::ISerializable;
 using Elastos::IO::EIID_ISerializable;
 using Elastosx::Crypto::ISecretKey;
+using Elastos::Security::IKey;
 using Elastos::Security::Spec::IKeySpec;
 using Elastos::Security::Spec::EIID_IKeySpec;
 
@@ -19,6 +20,7 @@ CarClass(CSecretKeySpec)
     , public Object
     , public ISecretKeySpec
     , public ISecretKey
+    , public IKey
     , public IKeySpec
     , public ISerializable
 {

@@ -50,6 +50,7 @@ module
     interface Elastos.IO.IFilterOutputStream;
     interface Elastos.IO.ISerializable;
     interface Elastos.Core.ICloneable;
+    interface Elastos.Security.IKey;
     interface Elastos.Security.IProvider;
     interface Elastos.Security.IAlgorithmParameters;
     interface Elastos.Security.Spec.IAlgorithmParameterSpec;
@@ -441,7 +442,9 @@ module
 
             interface ISecretKeySpec;
             interface ISecretKey;
+            interface IKey;
             interface IKeySpec;
+            interface ISerializable;
         }
 
     }
