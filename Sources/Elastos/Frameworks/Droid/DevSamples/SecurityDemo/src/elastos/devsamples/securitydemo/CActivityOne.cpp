@@ -1,7 +1,7 @@
 
 #include "elastos/devsamples/securitydemo/CActivityOne.h"
 #include "org/apache/harmony/security/fortress/Services.h"
-#include "elastos/devsamples/securitydemo/Signaturetest.h"
+#include "elastos/devsamples/securitydemo/Test.h"
 #include "R.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Security.h>
@@ -127,6 +127,9 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::signaturetest) {
         return mHost->SignatureTest();
+    }
+    else if (id == R::id::ciphertest) {
+        return mHost->CipherTest();
     }
 
     String data = String("testtesttest");
@@ -294,6 +297,10 @@ ECode CActivityOne::OnCreate(
 
     view = NULL;
     view = FindViewById(R::id::signaturetest);
+    view->SetOnClickListener(l.Get());
+
+    view = NULL;
+    view = FindViewById(R::id::ciphertest);
     view->SetOnClickListener(l.Get());
 
     //TODO : To be deleted.
@@ -718,6 +725,11 @@ ECode CActivityOne::ButtonCSecureRandom()
 ECode CActivityOne::SignatureTest()
 {
     return SignatureTest::MD5WithRSA();
+}
+
+ECode CActivityOne::CipherTest()
+{
+    return CipherTest::AesECBNoPadding();
 }
 
 } // namespace SecurityDemo

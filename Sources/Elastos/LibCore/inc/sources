@@ -125,6 +125,7 @@ EXPORT_HEADERS += libcore/utility/EmptyArray.h
 EXPORT_HEADERS += elastos/droid/system/Os.h
 EXPORT_HEADERS += elastos/droid/system/OsConstants.h
 
+EXPORT_HEADERS += elastosx/crypto/Cipher.h
 EXPORT_HEADERS += elastosx/crypto/CipherSpi.h
 EXPORT_HEADERS += elastosx/crypto/MacSpi.h
 EXPORT_HEADERS += elastosx/crypto/KeyAgreementSpi.h

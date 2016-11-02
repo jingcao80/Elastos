@@ -66,6 +66,9 @@ private:
     CARAPI ButtonCSecureRandom();
 
     CARAPI SignatureTest();
+
+    CARAPI CipherTest();
+
 private:
 };
 

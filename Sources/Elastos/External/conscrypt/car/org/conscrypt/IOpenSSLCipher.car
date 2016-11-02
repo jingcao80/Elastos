@@ -23,6 +23,15 @@ module
      * @Involve
      * interface ICipherSpi
      * interface IOpenSSLCipher
+     * interface IOpenSSLCipherAES
+     */
+    interface IOpenSSLCipherAESECBNoPadding {
+    }
+
+    /*
+     * @Involve
+     * interface ICipherSpi
+     * interface IOpenSSLCipher
      */
     interface IOpenSSLCipherDESEDE {
     }

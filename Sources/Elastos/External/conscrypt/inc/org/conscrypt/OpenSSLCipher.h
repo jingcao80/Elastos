@@ -288,11 +288,16 @@ private:
 
 class OpenSSLCipher_AES
     : public OpenSSLCipher
+    , public IOpenSSLCipherAES
 {
 public:
-    OpenSSLCipher_AES(
-        /* [in] */ OpenSSLCipher::Mode mode,
-        /* [in] */ OpenSSLCipher::Padding padding);
+    CAR_INTERFACE_DECL();
+
+    CARAPI constructor(
+        /* [in] */ Mode mode,
+        /* [in] */ Padding padding);
+
+    OpenSSLCipher_AES();
 
     // @Override
     virtual CARAPI CheckSupportedKeySize(
@@ -328,8 +333,10 @@ class OpenSSLCipher_AES_CBC
     : public OpenSSLCipher_AES
 {
 public:
-    OpenSSLCipher_AES_CBC(
-        /* [in] */ OpenSSLCipher::Padding padding);
+    OpenSSLCipher_AES_CBC();
+
+    CARAPI constructor(
+        /* [in] */ Padding padding);
 };
 
 class OpenSSLCipher_AES_CBC_NoPadding
@@ -337,6 +344,8 @@ class OpenSSLCipher_AES_CBC_NoPadding
 {
 public:
     OpenSSLCipher_AES_CBC_NoPadding();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_AES_CBC_PKCS5Padding
@@ -344,6 +353,8 @@ class OpenSSLCipher_AES_CBC_PKCS5Padding
 {
 public:
     OpenSSLCipher_AES_CBC_PKCS5Padding();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_AES_CFB
@@ -351,6 +362,8 @@ class OpenSSLCipher_AES_CFB
 {
 public:
     OpenSSLCipher_AES_CFB();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_AES_CTR
@@ -358,21 +371,30 @@ class OpenSSLCipher_AES_CTR
 {
 public:
     OpenSSLCipher_AES_CTR();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_AES_ECB
     : public OpenSSLCipher_AES
 {
 public:
-    OpenSSLCipher_AES_ECB(
-        /* [in] */ OpenSSLCipher::Padding padding);
+    OpenSSLCipher_AES_ECB();
+
+    CARAPI constructor(
+        /* [in] */ Padding padding);
 };
 
 class OpenSSLCipher_AES_ECB_NoPadding
     : public OpenSSLCipher_AES_ECB
+    , public IOpenSSLCipherAESECBNoPadding
 {
 public:
+    CAR_INTERFACE_DECL();
+
     OpenSSLCipher_AES_ECB_NoPadding();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_AES_ECB_PKCS5Padding
@@ -380,6 +402,8 @@ class OpenSSLCipher_AES_ECB_PKCS5Padding
 {
 public:
     OpenSSLCipher_AES_ECB_PKCS5Padding();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_AES_OFB
@@ -387,6 +411,8 @@ class OpenSSLCipher_AES_OFB
 {
 public:
     OpenSSLCipher_AES_OFB();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_DESEDE

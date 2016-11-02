@@ -20,7 +20,7 @@ using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 namespace Elastosx {
 namespace Crypto {
 
-class Cipher
+class ECO_PUBLIC Cipher
     : public Object
     , public ICipher
 {

@@ -49,10 +49,7 @@ public:
     private:
         SpiAndProvider(
             /* [in] */ IInterface* spi,
-            /* [in] */ IProvider* provider)
-            : mSpi(spi)
-            , mProvider(provider)
-        {}
+            /* [in] */ IProvider* provider);
 
     public:
         AutoPtr<IInterface> mSpi;

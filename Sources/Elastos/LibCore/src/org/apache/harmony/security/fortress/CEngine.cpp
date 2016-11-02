@@ -19,6 +19,13 @@ namespace Fortress {
 // CEngine::SpiAndProvider
 //---------------------------------------------------
 CAR_INTERFACE_IMPL(CEngine::SpiAndProvider, Object, ISpiAndProvider)
+CEngine::SpiAndProvider::SpiAndProvider(
+    /* [in] */ IInterface* spi,
+    /* [in] */ IProvider* provider)
+    : mSpi(spi)
+    , mProvider(provider)
+{}
+
 CEngine::SpiAndProvider::~SpiAndProvider()
 {
     Logger::D("SpiAndProvider", "[TODO wanli] ~SpiAndProvider =================1, this=[%p]", this);

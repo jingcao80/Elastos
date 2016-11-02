@@ -152,6 +152,7 @@ SOURCES += CPlatform.cpp
 SOURCES += COpenSSLMacHmacMD5.cpp
 SOURCES += OpenSSLKeyGeneratorTest.cpp
 SOURCES += COpenSSLKeyGeneratorTest.cpp
+SOURCES += COpenSSLCipherAESECBNoPadding.cpp
 
 SOURCES += Elastos.CoreLibrary.cpp
 

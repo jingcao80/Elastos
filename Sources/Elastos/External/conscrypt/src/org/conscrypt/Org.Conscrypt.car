@@ -98,6 +98,7 @@ module
     using interface Elastos.Security.IKeyFactorySpi;
     using interface Elastos.Security.IKeyPairGeneratorSpi;
     using interface Elastos.Security.ISecureRandomSpi;
+    using interface Elastosx.Crypto.ICipherSpi;
     using interface Elastosx.Crypto.IKeyGeneratorSpi;
     using interface Elastos.Security.Cert.IX509Certificate;
     using interface Elastos.Security.Cert.IX509CRLEntry;
@@ -855,6 +856,15 @@ module
 
         interface IPublicKey;
         interface IX509PublicKey;
+    }
+
+    class COpenSSLCipherAESECBNoPadding {
+        constructor();
+
+        interface IOpenSSLCipherAESECBNoPadding;
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
     }
 
     } // namespace Conscrypt

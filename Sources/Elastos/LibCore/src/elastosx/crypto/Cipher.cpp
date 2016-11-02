@@ -854,7 +854,7 @@ ECode Cipher::GetSpi(
 ECode Cipher::GetSpi(
     /* [out] */ ICipherSpi** spi)
 {
-    return GetSpi(spi);
+    return GetSpi(NULL, spi);
 }
 
 ECode Cipher::TryCombinations(

@@ -698,12 +698,15 @@ ECode OpenSSLCipher::DoFinalInternal(
 //==============================================================================
 
 const Int32 OpenSSLCipher_AES::AES_BLOCK_SIZE;
+CAR_INTERFACE_IMPL(OpenSSLCipher_AES, OpenSSLCipher, IOpenSSLCipherAES)
+OpenSSLCipher_AES::OpenSSLCipher_AES()
+{}
 
-OpenSSLCipher_AES::OpenSSLCipher_AES(
+ECode OpenSSLCipher_AES::constructor(
     /* [in] */ OpenSSLCipher::Mode mode,
     /* [in] */ OpenSSLCipher::Padding padding)
 {
-    OpenSSLCipher::constructor(mode, padding);
+    return OpenSSLCipher::constructor(mode, padding);
 }
 
 ECode OpenSSLCipher_AES::CheckSupportedKeySize(
@@ -786,10 +789,14 @@ ECode OpenSSLCipher_AES::GetCipherBlockSize(
 //  OpenSSLCipher_AES_CBC
 //==============================================================================
 
-OpenSSLCipher_AES_CBC::OpenSSLCipher_AES_CBC(
-    /* [in] */ OpenSSLCipher::Padding padding)
-    : OpenSSLCipher_AES(MODE_CBC, padding)
+OpenSSLCipher_AES_CBC::OpenSSLCipher_AES_CBC()
 {
+}
+
+ECode OpenSSLCipher_AES_CBC::constructor(
+    /* [in] */ Padding padding)
+{
+    return OpenSSLCipher_AES::constructor(MODE_CBC, padding);
 }
 
 //==============================================================================
@@ -797,8 +804,12 @@ OpenSSLCipher_AES_CBC::OpenSSLCipher_AES_CBC(
 //==============================================================================
 
 OpenSSLCipher_AES_CBC_NoPadding::OpenSSLCipher_AES_CBC_NoPadding()
-    : OpenSSLCipher_AES_CBC(PADDING_NOPADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_CBC_NoPadding::constructor()
+{
+    return OpenSSLCipher_AES_CBC::constructor(PADDING_NOPADDING);
 }
 
 //==============================================================================
@@ -806,8 +817,12 @@ OpenSSLCipher_AES_CBC_NoPadding::OpenSSLCipher_AES_CBC_NoPadding()
 //==============================================================================
 
 OpenSSLCipher_AES_CBC_PKCS5Padding::OpenSSLCipher_AES_CBC_PKCS5Padding()
-    : OpenSSLCipher_AES_CBC(PADDING_PKCS5PADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_CBC_PKCS5Padding::constructor()
+{
+    return OpenSSLCipher_AES_CBC::constructor(PADDING_PKCS5PADDING);
 }
 
 //==============================================================================
@@ -815,8 +830,12 @@ OpenSSLCipher_AES_CBC_PKCS5Padding::OpenSSLCipher_AES_CBC_PKCS5Padding()
 //==============================================================================
 
 OpenSSLCipher_AES_CFB::OpenSSLCipher_AES_CFB()
-    : OpenSSLCipher_AES(MODE_CFB, PADDING_NOPADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_CFB::constructor()
+{
+    return OpenSSLCipher_AES::constructor(MODE_CFB, PADDING_NOPADDING);
 }
 
 //==============================================================================
@@ -824,27 +843,39 @@ OpenSSLCipher_AES_CFB::OpenSSLCipher_AES_CFB()
 //==============================================================================
 
 OpenSSLCipher_AES_CTR::OpenSSLCipher_AES_CTR()
-    : OpenSSLCipher_AES(MODE_CTR, PADDING_NOPADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_CTR::constructor()
+{
+    return OpenSSLCipher_AES::constructor(MODE_CTR, PADDING_NOPADDING);
 }
 
 //==============================================================================
 //  OpenSSLCipher_AES_ECB
 //==============================================================================
 
-OpenSSLCipher_AES_ECB::OpenSSLCipher_AES_ECB(
-    /* [in] */ OpenSSLCipher::Padding padding)
-    : OpenSSLCipher_AES(MODE_ECB, padding)
+OpenSSLCipher_AES_ECB::OpenSSLCipher_AES_ECB()
 {
+}
+
+ECode OpenSSLCipher_AES_ECB::constructor(
+    /* [in] */ Padding padding)
+{
+    return OpenSSLCipher_AES::constructor(MODE_ECB, padding);
 }
 
 //==============================================================================
 //  OpenSSLCipher_AES_ECB_NoPadding
 //==============================================================================
-
+CAR_INTERFACE_IMPL(OpenSSLCipher_AES_ECB_NoPadding, OpenSSLCipher_AES_ECB, IOpenSSLCipherAESECBNoPadding);
 OpenSSLCipher_AES_ECB_NoPadding::OpenSSLCipher_AES_ECB_NoPadding()
-    : OpenSSLCipher_AES_ECB(PADDING_NOPADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_ECB_NoPadding::constructor()
+{
+    return OpenSSLCipher_AES_ECB::constructor(PADDING_NOPADDING);
 }
 
 //==============================================================================
@@ -852,8 +883,12 @@ OpenSSLCipher_AES_ECB_NoPadding::OpenSSLCipher_AES_ECB_NoPadding()
 //==============================================================================
 
 OpenSSLCipher_AES_ECB_PKCS5Padding::OpenSSLCipher_AES_ECB_PKCS5Padding()
-    : OpenSSLCipher_AES_ECB(PADDING_PKCS5PADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_ECB_PKCS5Padding::constructor()
+{
+    return OpenSSLCipher_AES_ECB::constructor(PADDING_PKCS5PADDING);
 }
 
 //==============================================================================
@@ -861,8 +896,12 @@ OpenSSLCipher_AES_ECB_PKCS5Padding::OpenSSLCipher_AES_ECB_PKCS5Padding()
 //==============================================================================
 
 OpenSSLCipher_AES_OFB::OpenSSLCipher_AES_OFB()
-    : OpenSSLCipher_AES(MODE_OFB, PADDING_NOPADDING)
 {
+}
+
+ECode OpenSSLCipher_AES_OFB::constructor()
+{
+    return OpenSSLCipher_AES::constructor(MODE_OFB, PADDING_NOPADDING);
 }
 
 //==============================================================================

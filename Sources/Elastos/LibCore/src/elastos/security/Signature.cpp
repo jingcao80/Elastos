@@ -166,7 +166,9 @@ ECode SignatureImpl::GetSpi(
     /* [in] */ IKey* key,
     /* [out] */ SignatureSpi** spi)
 {
-    {    AutoLock syncLock(mInitLock);
+    {
+        AutoLock syncLock(mInitLock);
+        *spi = NULL;
         if (mSpiImpl != NULL && key == NULL) {
             *spi = mSpiImpl;
             REFCOUNT_ADD(*spi);
@@ -220,7 +222,7 @@ AutoPtr<IEngine> Signature::Init_ENGINE()
 }
 
 Signature::Signature()
-    : mState(0)
+    : mState(UNINITIALIZED)
 {}
 
 Signature::~Signature()

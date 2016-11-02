@@ -1,6 +1,6 @@
 
-#ifndef __Elastos_DevSamples_SecurityDemo_SignatureTest_H__
-#define __Elastos_DevSamples_SecurityDemo_SignatureTest_H__
+#ifndef __Elastos_DevSamples_SecurityDemo_Test_H__
+#define __Elastos_DevSamples_SecurityDemo_Test_H__
 
 #include "Elastos.DevSamples.SecurityDemo.h"
 
@@ -14,8 +14,14 @@ public:
     static CARAPI MD5WithRSA();
 };
 
+class CipherTest
+{
+public:
+    static CARAPI AesECBNoPadding();
+};
+
 } // namespace SecurityDemo
 } // namespace DevSamples
 } // namespace Elastos
 
-#endif // __Elastos_DevSamples_SecurityDemo_SignatureTest_H__
+#endif // __Elastos_DevSamples_SecurityDemo_Test_H__

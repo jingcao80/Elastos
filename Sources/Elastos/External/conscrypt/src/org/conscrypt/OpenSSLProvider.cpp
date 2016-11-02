@@ -205,7 +205,7 @@ OpenSSLProvider::OpenSSLProvider(
      * than 64 bits. We solve this confusion by making PKCS7Padding an
      * alias for PKCS5Padding.
      */
-    Put(CoreUtils::Convert("Cipher.AES/ECB/NoPadding"), CoreUtils::Convert(prefix + "OpenSSLCipher$AES$ECB$NoPadding"), (IInterface**)&res);
+    Put(CoreUtils::Convert("Cipher.AES/ECB/NoPadding"), CoreUtils::Convert(prefix + "COpenSSLCipherAESECBNoPadding"), (IInterface**)&res);
     Put(CoreUtils::Convert("Cipher.AES/ECB/PKCS5Padding"), CoreUtils::Convert(prefix + "OpenSSLCipher$AES$ECB$PKCS5Padding"), (IInterface**)&res);
     Put(CoreUtils::Convert("Alg.Alias.Cipher.AES/ECB/PKCS7Padding"), CoreUtils::Convert("AES/ECB/PKCS5Padding"), (IInterface**)&res);
     Put(CoreUtils::Convert("Cipher.AES/CBC/NoPadding"), CoreUtils::Convert(prefix + "OpenSSLCipher$AES$CBC$NoPadding"), (IInterface**)&res);
