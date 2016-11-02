@@ -210,6 +210,7 @@ ECode CChooseLockPassword::ChooseLockPasswordFragment::constructor()
 {
     mUiStage = Stage::INTRODUCTION;
     mHandler = new MyHandler(this);
+    mHandler->constructor();
     return Fragment::constructor();
 }
 
@@ -547,6 +548,7 @@ String CChooseLockPassword::ChooseLockPasswordFragment::ValidatePassword(
 
 void CChooseLockPassword::ChooseLockPasswordFragment::HandleNext()
 {
+    Slogger::I("CChooseLockPassword", " >> HandleNext: %s", TO_CSTR(mUiStage));
     if (mDone) return;
 
     AutoPtr<ICharSequence> cs;

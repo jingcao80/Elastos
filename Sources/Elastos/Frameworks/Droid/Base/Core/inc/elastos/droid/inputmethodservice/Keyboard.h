@@ -4,9 +4,8 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.InputMethodService.h"
-
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
@@ -14,11 +13,10 @@ using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::InputMethodService::IKeyboard;
-
 using Elastos::Core::Object;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IList;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -124,7 +122,7 @@ public:
         /** Vertical gap following this row. */
         Int32 mVerticalGap;
 
-        List< AutoPtr<Key> > mKeys;
+        AutoPtr<IArrayList> mKeys;// List<<Key>
 
         /**
          * Edge flags for this row of keys. Possible values that can be assigned are
@@ -375,12 +373,14 @@ public:
 public:
     CAR_INTERFACE_DECL()
 
+    Keyboard();
+
     /**
      * Creates a keyboard from the given xml key layout file.
      * @param context the application or service context
      * @param xmlLayoutResId the resource file that contains the keyboard layout and keys.
      */
-    Keyboard(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 xmlLayoutResId);
 
@@ -393,7 +393,7 @@ public:
      * @param width sets width of keyboard
      * @param height sets height of keyboard
      */
-    Keyboard(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 xmlLayoutResId,
         /* [in] */ Int32 modeId,
@@ -407,7 +407,7 @@ public:
      * @param xmlLayoutResId the resource file that contains the keyboard layout and keys.
      * @param modeId keyboard mode identifier
      */
-    Keyboard(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 xmlLayoutResId,
         /* [in] */ Int32 modeId);
@@ -426,7 +426,7 @@ public:
      * number of keys that can fit in a row, it will be ignored. If this number is -1, the
      * keyboard will fit as many keys as possible in each row.
      */
-    Keyboard(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 layoutTemplateResId,
         /* [in] */ ICharSequence* characters,
@@ -490,31 +490,6 @@ public:
         /* [in] */ Int32 defValue);
 
 protected:
-    Keyboard();
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ Int32 xmlLayoutResId);
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ Int32 xmlLayoutResId,
-        /* [in] */ Int32 modeId,
-        /* [in] */ Int32 width,
-        /* [in] */ Int32 height);
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ Int32 xmlLayoutResId,
-        /* [in] */ Int32 modeId);
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ Int32 layoutTemplateResId,
-        /* [in] */ ICharSequence* characters,
-        /* [in] */ Int32 columns,
-        /* [in] */ Int32 horizontalPadding);
-
     virtual CARAPI GetHorizontalGap(
         /* [out] */ Int32* hGap);
 
@@ -549,10 +524,6 @@ protected:
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ IXmlResourceParser* parser);
-
-    virtual CARAPI_(List<AutoPtr<Key> >&) GetKeys();
-
-    virtual CARAPI_(List<AutoPtr<Key> >&) GetModifierKeys();
 
 private:
     CARAPI_(void) ComputeNearestNeighbors();
@@ -617,10 +588,10 @@ private:
     Int32 mTotalWidth;
 
     /** List of keys in this keyboard */
-    List< AutoPtr<Key> > mKeys;
+    AutoPtr<IList> mKeys;// List<Key>
 
     /** List of modifier keys such as Shift & Alt, if any */
-    List< AutoPtr<Key> > mModifierKeys;
+    AutoPtr<IList> mModifierKeys; //List<Key>
 
     /** Width of the screen available to fit the keyboard */
     Int32 mDisplayWidth;
@@ -643,7 +614,7 @@ private:
     /** Number of key widths from current touch point to search for nearest keys. */
     static Float SEARCH_DISTANCE;
 
-    List< AutoPtr<Row> > mRows;
+    AutoPtr<IArrayList> mRows; //ArrayList<Row>
 
     friend class KeyboardView;
 };

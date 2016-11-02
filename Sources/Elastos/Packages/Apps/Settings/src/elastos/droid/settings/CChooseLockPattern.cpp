@@ -652,6 +652,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::PostClearPatternRunnable()
 
 void CChooseLockPattern::ChooseLockPatternFragment::SaveChosenPatternAndFinish()
 {
+    Slogger::I("CChooseLockPattern", " >> enter ChooseLockPatternFragment::SaveChosenPatternAndFinish ");
     if (mDone) return;
     AutoPtr<ILockPatternUtils> utils = mChooseLockSettingsHelper->Utils();
     Boolean lockVirgin;
@@ -680,6 +681,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::SaveChosenPatternAndFinish()
     activity->Finish();
     mDone = TRUE;
     StartActivity(CRedactionInterstitial::CreateStartIntent(IContext::Probe(activity)));
+    Slogger::I("CChooseLockPattern", " << leave ChooseLockPatternFragment::SaveChosenPatternAndFinish ");
 }
 
 //===============================================================================

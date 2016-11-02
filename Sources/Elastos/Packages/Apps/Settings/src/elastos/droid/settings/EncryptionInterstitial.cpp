@@ -4,6 +4,7 @@
 #include "elastos/droid/R.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::AccessibilityService::IAccessibilityServiceInfo;
 using Elastos::Droid::App::IAlertDialog;
@@ -21,6 +22,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManagerHelper;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::Widget::ICheckable;
 using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -235,6 +237,7 @@ ECode EncryptionInterstitial::EncryptionInterstitialFragment::OnCreateDialog(
         }
         default: return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    return NOERROR;
 }
 
 void EncryptionInterstitial::EncryptionInterstitialFragment::SetRequirePasswordState(

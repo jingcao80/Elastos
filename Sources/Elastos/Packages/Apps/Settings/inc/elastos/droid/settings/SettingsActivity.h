@@ -74,6 +74,8 @@ public:
         , public IPreferenceManagerOnPreferenceTreeClickListener
     {
     public:
+        TO_STRING_IMPL("SettingsActivity::InnerListener")
+
         CAR_INTERFACE_DECL()
 
         InnerListener(
@@ -161,6 +163,8 @@ private:
         , public IViewOnClickListener
     {
     public:
+        TO_STRING_IMPL("SettingsActivity::OnCreateOnClickListener")
+
         CAR_INTERFACE_DECL();
 
         OnCreateOnClickListener(
@@ -183,6 +187,8 @@ private:
         , public ISharedPreferencesOnSharedPreferenceChangeListener
     {
     public:
+        TO_STRING_IMPL("SettingsActivity::OnResumeOnSharedPreferenceChangeListener")
+
         CAR_INTERFACE_DECL();
 
         OnResumeOnSharedPreferenceChangeListener(

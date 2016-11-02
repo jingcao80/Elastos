@@ -1354,7 +1354,6 @@ ECode Fragment::StartActivity(
     /* [in] */ IBundle* options)
 {
     VALIDATE_NOT_NULL(intent);
-    VALIDATE_NOT_NULL(options);
 
     if (mActivity == NULL) {
         Slogger::E(TAG, "Fragment  not attached to Activity");

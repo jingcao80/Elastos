@@ -1546,20 +1546,21 @@ ECode KeyboardView::OnLongPress(
             AutoPtr<_OnKeyboardActionListener> listener = new _OnKeyboardActionListener(this);
             mMiniKeyboard->SetOnKeyboardActionListener(listener);
             //mInputView.setSuggest(mSuggest);
-            AutoPtr<IKeyboard> keyboard;
+            AutoPtr<Keyboard> keyboard;
             AutoPtr<ICharSequence> popupCharacters;
             popupKey->GetPopupCharacters((ICharSequence**)&popupCharacters);
             if (popupCharacters != NULL) {
                 Int32 l = 0, r = 0;
                 GetPaddingLeft(&l);
                 GetPaddingRight(&r);
-                keyboard = new Keyboard(context, popupKeyboardId,
-                        popupCharacters, -1, l + r);
+                keyboard = new Keyboard();
+                keyboard->constructor(context, popupKeyboardId, popupCharacters, -1, l + r);
             }
             else {
-                keyboard = new Keyboard(context, popupKeyboardId);
+                keyboard = new Keyboard();
+                keyboard->constructor(context, popupKeyboardId);
             }
-            ((KeyboardView*)mMiniKeyboard.Get())->SetKeyboard(keyboard);
+            ((KeyboardView*)mMiniKeyboard.Get())->SetKeyboard((IKeyboard*)keyboard);
             ((KeyboardView*)mMiniKeyboard.Get())->SetPopupParent(this);
             Int32 w = 0, h = 0;
             GetWidth(&w);

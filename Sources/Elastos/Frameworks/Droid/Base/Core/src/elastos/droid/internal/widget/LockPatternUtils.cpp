@@ -69,6 +69,9 @@ using Elastos::Core::StringUtils;
 using Elastos::Security::CMessageDigestHelper;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::IMessageDigest;
+using Elastos::Security::ISecureRandom;
+using Elastos::Security::ISecureRandomHelper;
+using Elastos::Security::CSecureRandomHelper;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Slogger;
@@ -946,7 +949,9 @@ Boolean LockPatternUtils::IsDeviceEncryptionEnabled()
 {
     String status;
     SystemProperties::Get(String("ro.crypto.state"), String("unsupported"), &status);
-    return String("encrypted").EqualsIgnoreCase(status);
+    Slogger::I(TAG, " >> TODO  set property ro.crypto.state to encrypted");
+    return TRUE;
+    // return status.EqualsIgnoreCase("encrypted");
 }
 
 ECode LockPatternUtils::ClearEncryptionPassword()
@@ -1101,22 +1106,30 @@ ECode LockPatternUtils::PatternToHash(
     return NOERROR;
 }
 
-String LockPatternUtils::GetSalt(
-    /* [in] */ Int32 userId)
+ECode LockPatternUtils::GetSalt(
+    /* [in] */ Int32 userId,
+    /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     Int64 salt = GetInt64(LOCK_PASSWORD_SALT_KEY, 0, userId);
-    assert(0 && "TODO");
-    // if (salt == 0) {
-    //     try {
-    //         salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
-    //         setLong(LOCK_PASSWORD_SALT_KEY, salt, userId);
-    //         Log.v(TAG, "Initialized lock password salt for user: " + userId);
-    //     } catch (NoSuchAlgorithmException e) {
-    //         // Throw an exception rather than storing a password we'll never be able to recover
-    //         throw new IllegalStateException("Couldn't get SecureRandom number", e);
-    //     }
-    // }
-    return StringUtils::ToHexString(salt);
+    if (salt == 0) {
+        AutoPtr<ISecureRandomHelper> helper;
+        CSecureRandomHelper::AcquireSingleton((ISecureRandomHelper**)&helper);
+        AutoPtr<ISecureRandom> sr;
+        ECode ec = helper->GetInstance(String("SHA1PRNG"), (ISecureRandom**)&sr);
+        if (FAILED(ec)) { //NoSuchAlgorithmException
+            // Throw an exception rather than storing a password we'll never be able to recover
+            Slogger::D(TAG, "Couldn't get SecureRandom number 0x%08x", ec);
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        IRandom::Probe(sr)->NextInt64(&salt);
+        SetInt64(LOCK_PASSWORD_SALT_KEY, salt, userId);
+        Slogger::V(TAG, "Initialized lock password salt for user: %d", userId);
+    }
+    *result = StringUtils::ToHexString(salt);
+    return NOERROR;
 }
 
 ECode LockPatternUtils::PasswordToHash(
@@ -1130,14 +1143,22 @@ ECode LockPatternUtils::PasswordToHash(
     if (password.IsNullOrEmpty()) {
         return NOERROR;
     }
+
     String algo;
     AutoPtr<ArrayOf<Byte> > hashed;
-    AutoPtr<ArrayOf<Byte> > saltedPassword = (password + GetSalt(userId)).GetBytes();
+    String salt;
+    ECode ec = GetSalt(userId, &salt);
+    if (FAILED(ec)) {
+        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<Byte> > saltedPassword = (password + salt).GetBytes();
     AutoPtr<IMessageDigestHelper> helper;
     CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
     AutoPtr<IMessageDigest> md;
     algo = "SHA-1";
-    ECode ec = helper->GetInstance(algo, (IMessageDigest**)&md);
+    ec = helper->GetInstance(algo, (IMessageDigest**)&md);
     if (FAILED(ec)) {
         Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
         return NOERROR;

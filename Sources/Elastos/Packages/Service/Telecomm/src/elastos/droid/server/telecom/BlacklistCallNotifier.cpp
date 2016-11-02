@@ -131,8 +131,8 @@ ECode BlacklistCallNotifier::NotifyBlacklistedItem(
     // Get the intent to open Blacklist settings if user taps on content ready
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
-    intent->SetClassName(String("com.android.settings"),
-            String("com.android.settings.blacklist.BlacklistSettings"));
+    intent->SetClassName(String("Elastos.Droid.Settings"),
+            String("Elastos.Droid.Settings.Blacklist.CBlacklistSettings"));
     AutoPtr<IPendingIntentHelper> pendingIntentHelper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&pendingIntentHelper);
     AutoPtr<IPendingIntent> blSettingsIntent;

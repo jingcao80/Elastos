@@ -1923,7 +1923,7 @@ ECode ActivityStackSupervisor::StartActivityLocked(
             appInfo->GetUid(&userId);
         }
 
-        // Slogger::I(TAG, "START u%d {%s} from uid %d", userId, TO_CSTR(intent), callingPid);
+        Slogger::I(TAG, "START u%d {%s} from uid %d", userId, TO_CSTR(intent), callingPid);
     }
 
     AutoPtr<ActivityRecord> sourceRecord;
