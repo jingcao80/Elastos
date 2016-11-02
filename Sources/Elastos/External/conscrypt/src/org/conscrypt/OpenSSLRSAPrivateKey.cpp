@@ -7,9 +7,12 @@
 #include "COpenSSLKey.h"
 #include "COpenSSLRSAPrivateCrtKey.h"
 #include "COpenSSLRSAPrivateKey.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IByte;
 using Elastos::Core::StringBuilder;
 using Elastos::Math::CBigInteger;
 using Elastos::Security::IKey;
@@ -40,12 +43,27 @@ ECode OpenSSLRSAPrivateKey::constructor(
 
 ECode OpenSSLRSAPrivateKey::constructor(
     /* [in] */ IOpenSSLKey* key,
-    /* [in] */ ArrayOf<Handle32>* params)
+    /* [in] */ ArrayOf<IArrayOf*>* params)
 {
     constructor(key);
     mKey = key;
-    assert(0 && "TODO");
-    // ReadParams(params);
+
+    AutoPtr<ArrayOf<AutoPtr<ArrayOf<Byte> > > > array = ArrayOf<AutoPtr<ArrayOf<Byte> > >::Alloc(params->GetLength());
+    for (Int32 i = 0; i < params->GetLength(); i++) {
+        AutoPtr<IArrayOf> iArrayOf = (*params)[i];
+        Int32 len;
+        iArrayOf->GetLength(&len);
+        AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(len);
+        for (Int32 j = 0; j < len; j++) {
+            AutoPtr<IInterface> obj;
+            iArrayOf->Get(j, (IInterface**)&obj);
+            AutoPtr<IByte> iB = IByte::Probe(obj);
+            iB->GetValue(&(*bytes)[j]);
+        }
+        array->Set(i, bytes);
+    }
+
+    ReadParams(array);
     mFetchedParams = TRUE;
     return NOERROR;
 }
@@ -119,15 +137,19 @@ AutoPtr<IOpenSSLRSAPrivateKey> OpenSSLRSAPrivateKey::GetInstance(
             (ArrayOf<Byte>**)&((*params)[5]),
             (ArrayOf<Byte>**)&((*params)[6]),
             (ArrayOf<Byte>**)&((*params)[7]));
+
+    AutoPtr<ArrayOf<IArrayOf*> > array = ArrayOf<IArrayOf*>::Alloc(params->GetLength());
+    for (Int32 i = 0; i < params->GetLength(); i++) {
+        array->Set(i, CoreUtils::ConvertByteArray((*params)[i]));
+    }
+
     if ((*params)[1] != NULL) {
         AutoPtr<IOpenSSLRSAPrivateKey> res;
-        assert(0 && "TODO");
-        // COpenSSLRSAPrivateCrtKey::New(key, params, (IOpenSSLRSAPrivateKey**)&res);
+        COpenSSLRSAPrivateCrtKey::New(key, array, (IOpenSSLRSAPrivateKey**)&res);
         return res;
     }
     AutoPtr<IOpenSSLRSAPrivateKey> res;
-    assert(0 && "TODO");
-    // COpenSSLRSAPrivateKey::New(key, params, (IOpenSSLRSAPrivateKey**)&res);
+    COpenSSLRSAPrivateKey::New(key, array, (IOpenSSLRSAPrivateKey**)&res);
     return res;
 }
 

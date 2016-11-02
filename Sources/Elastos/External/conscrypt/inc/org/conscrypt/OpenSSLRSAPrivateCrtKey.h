@@ -6,6 +6,7 @@
 #include "OpenSSLRSAPrivateKey.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::IArrayOf;
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
 using Elastos::Math::IBigInteger;
@@ -28,7 +29,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IOpenSSLKey* key,
-        /* [in] */ ArrayOf<Handle32>* params);
+        /* [in] */ ArrayOf<IArrayOf*>* params);
 
     CARAPI constructor(
         /* [in] */ IRSAPrivateCrtKeySpec* rsaKeySpec);

@@ -25,7 +25,7 @@ ECode OpenSSLRSAPrivateCrtKey::constructor(
 
 ECode OpenSSLRSAPrivateCrtKey::constructor(
     /* [in] */ IOpenSSLKey* key,
-    /* [in] */ ArrayOf<Handle32>* params)
+    /* [in] */ ArrayOf<IArrayOf*>* params)
 {
     OpenSSLRSAPrivateKey::constructor(key, params);
     return NOERROR;

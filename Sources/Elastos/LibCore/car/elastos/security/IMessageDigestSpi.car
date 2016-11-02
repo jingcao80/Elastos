@@ -1,0 +1,102 @@
+
+module
+{
+    interface Elastos.IO.IByteBuffer;
+
+    namespace Elastos {
+    namespace Security {
+
+    [deprecated]
+    interface IMessageDigestSpi {
+        /**
+         * Returns the engine digest length in bytes. If the implementation does not
+         * implement this function {@code 0} is returned.
+         *
+         * @return the digest length in bytes, or {@code 0}.
+         */
+        EngineGetDigestLength(
+            [out] Int32* result);
+
+        /**
+         * Updates this {@code MessageDigestSpi} using the given {@code byte}.
+         *
+         * @param input
+         *            the {@code byte} to update this {@code MessageDigestSpi} with.
+         * @see #engineReset()
+         */
+        EngineUpdate(
+            [in] Byte input);
+
+        /**
+         * Updates this {@code MessageDigestSpi} using the given {@code byte[]}.
+         *
+         * @param input
+         *            the {@code byte} array.
+         * @param offset
+         *            the index of the first byte in {@code input} to update from.
+         * @param len
+         *            the number of bytes in {@code input} to update from.
+         * @throws IllegalArgumentException
+         *             if {@code offset} or {@code len} are not valid in respect to
+         *             {@code input}.
+         */
+        EngineUpdate(
+            [in] ArrayOf<Byte>* input,
+            [in] Int32 offset,
+            [in] Int32 len);
+
+        /**
+         * Updates this {@code MessageDigestSpi} using the given {@code input}.
+         *
+         * @param input
+         *            the {@code ByteBuffer}.
+         */
+        EngineUpdate(
+            [in] IByteBuffer* input);
+
+        /**
+         * Computes and returns the final hash value for this
+         * {@link MessageDigestSpi}. After the digest is computed the receiver is
+         * reset.
+         *
+         * @return the computed one way hash value.
+         * @see #engineReset()
+         */
+        EngineDigest(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Computes and stores the final hash value for this
+         * {@link MessageDigestSpi}. After the digest is computed the receiver is
+         * reset.
+         *
+         * @param buf
+         *            the buffer to store the result in.
+         * @param offset
+         *            the index of the first byte in {@code buf} to store in.
+         * @param len
+         *            the number of bytes allocated for the digest.
+         * @return the number of bytes written to {@code buf}.
+         * @throws DigestException
+         *             if an error occures.
+         * @throws IllegalArgumentException
+         *             if {@code offset} or {@code len} are not valid in respect to
+         *             {@code buf}.
+         * @see #engineReset()
+         */
+        EngineDigest(
+            [in] ArrayOf<Byte>* buf,
+            [in] Int32 offset,
+            [in] Int32 len,
+            [out] Int32* result);
+
+        /**
+         * Puts this {@code MessageDigestSpi} back in an initial state, such that it
+         * is ready to compute a one way hash value.
+         */
+        EngineReset();
+    }
+
+    } // namespace Security
+    } // namespace Elastos
+}

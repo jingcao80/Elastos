@@ -75,6 +75,7 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLX509CertificateFactory.car");
     merge("../../../car/org/conscrypt/IX509PublicKey.car");
 
+    using interface Elastos.Core.IArrayOf;
     using interface Elastos.Core.ICloneable;
     using interface Elastos.IO.IByteArrayOutputStream;
     using interface Elastos.IO.ICloseable;
@@ -553,7 +554,7 @@ module
 
         constructor(
             [in] IOpenSSLKey* key,
-            [in] ArrayOf<Handle32>* params);
+            [in] ArrayOf<IArrayOf*>* params);
 
         constructor(
             [in] IRSAPrivateCrtKeySpec* rsaKeySpec);
@@ -575,7 +576,7 @@ module
 
         constructor(
             [in] IOpenSSLKey* key,
-            [in] ArrayOf<Handle32>* params);
+            [in] ArrayOf<IArrayOf*>* params);
 
         constructor(
             [in] IRSAPrivateKeySpec* rsaKeySpec);

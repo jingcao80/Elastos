@@ -121,6 +121,7 @@ module
     merge("security/IKeyStore.car");
     merge("security/IKeyStoreSpi.car");
     merge("security/IMessageDigest.car");
+    merge("security/IMessageDigestSpi.car");
     merge("security/IPermission.car");
     merge("security/IPermissionCollection.car");
     merge("security/IPolicy.car");
@@ -345,6 +346,10 @@ module
 
         interface IKeyPair;
         interface ISerializable;
+    }
+
+    singleton class CKeyPairGeneratorHelper {
+        interface IKeyPairGeneratorHelper;
     }
 
     [deprecated]

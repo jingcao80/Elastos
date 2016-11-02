@@ -56,18 +56,18 @@ protected:
 private:
     // MessageDigestImpl ctor
     MessageDigestImpl(
-        /* [in] */ MessageDigestSpi* messageDigestSpi,
+        /* [in] */ IMessageDigestSpi* messageDigestSpi,
         /* [in] */ IProvider* provider,
         /* [in] */ const String& algorithm);
 
 private:
     // MessageDigestSpi implementation
-    AutoPtr<MessageDigestSpi> mSpiImpl;
+    AutoPtr<IMessageDigestSpi> mSpiImpl;
 };
 
 CAR_INTERFACE_IMPL(MessageDigestImpl, MessageDigest, ICloneable)
 MessageDigestImpl::MessageDigestImpl(
-    /* [in] */ MessageDigestSpi* messageDigestSpi,
+    /* [in] */ IMessageDigestSpi* messageDigestSpi,
     /* [in] */ IProvider* provider,
     /* [in] */ const String& algorithm)
     : MessageDigest(algorithm)
@@ -160,7 +160,7 @@ ECode MessageDigest::GetInstance(
         REFCOUNT_ADD(*instance);
         return NOERROR;
     }
-    *instance = new MessageDigestImpl((MessageDigestSpi*)(IObject*)spi.Get(), provider, algorithm);
+    *instance = new MessageDigestImpl(IMessageDigestSpi::Probe(spi), provider, algorithm);
     REFCOUNT_ADD(*instance);
     return NOERROR;
 }
@@ -211,7 +211,7 @@ ECode MessageDigest::GetInstance(
         REFCOUNT_ADD(*instance);
         return NOERROR;
     }
-    *instance = new MessageDigestImpl((MessageDigestSpi*)(IObject*)spi.Get(), provider, algorithm);
+    *instance = new MessageDigestImpl(IMessageDigestSpi::Probe(spi), provider, algorithm);
     REFCOUNT_ADD(*instance);
     return NOERROR;
 }

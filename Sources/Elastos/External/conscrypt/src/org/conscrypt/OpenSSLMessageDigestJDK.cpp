@@ -2,6 +2,7 @@
 #include "_Org.Conscrypt.h"
 #include "OpenSSLMessageDigestJDK.h"
 #include "COpenSSLMessageDigestJDK.h"
+#include "OpenSSLDigestContext.h"
 #include "NativeCrypto.h"
 
 using Elastos::Core::EIID_ICloneable;
@@ -174,7 +175,7 @@ ECode OpenSSLMessageDigestJDKSHA512::constructor()
 //=========================================
 // OpenSSLMessageDigestJDK::
 //=========================================
-CAR_INTERFACE_IMPL_2(OpenSSLMessageDigestJDK, Object, IOpenSSLMessageDigestJDK, ICloneable)
+CAR_INTERFACE_IMPL_2(OpenSSLMessageDigestJDK, MessageDigestSpi, IOpenSSLMessageDigestJDK, ICloneable)
 
 ECode OpenSSLMessageDigestJDK::constructor(
     /* [in] */ Int64 evp_md,
@@ -204,9 +205,9 @@ void OpenSSLMessageDigestJDK::ResetContext()
 {
     Int64 ctx = 0;
     NativeCrypto::EVP_MD_CTX_create(&ctx);
-    assert(0 && "TODO");
-    AutoPtr<IOpenSSLDigestContext> ctxLocal;// = new OpenSSLDigestContext(ctx);
-    NativeCrypto::EVP_MD_CTX_init(ctxLocal);
+    AutoPtr<OpenSSLDigestContext> ctxLocal = new OpenSSLDigestContext();
+    ctxLocal->constructor(ctx);
+    NativeCrypto::EVP_MD_CTX_init(IOpenSSLDigestContext::Probe(ctxLocal));
     Int32 res = 0;
     NativeCrypto::EVP_DigestInit(ctxLocal, mEvp_md, &res);
     mCtx = ctxLocal;
@@ -261,9 +262,9 @@ ECode OpenSSLMessageDigestJDK::Clone(
     VALIDATE_NOT_NULL(object)
     Int64 ctx = 0;
     NativeCrypto::EVP_MD_CTX_create(&ctx);
-    assert(0 && "TODO");
-    AutoPtr<IOpenSSLDigestContext> ctxCopy;// = new OpenSSLDigestContext(ctx);
-    NativeCrypto::EVP_MD_CTX_init(ctxCopy);
+    AutoPtr<OpenSSLDigestContext> ctxCopy = new OpenSSLDigestContext();
+    ctxCopy->constructor(ctx);
+    NativeCrypto::EVP_MD_CTX_init(IOpenSSLDigestContext::Probe(ctxCopy));
     Int32 res = 0;
     NativeCrypto::EVP_MD_CTX_copy(ctxCopy, mCtx, &res);
     AutoPtr<IOpenSSLMessageDigestJDK> result;
