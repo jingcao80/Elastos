@@ -75,6 +75,8 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
+        Builder();
+
         /**
          * Creates a new instance of the {@code Builder} with the given
          * {@code context}. The {@code context} passed in may be used to pop up
@@ -163,15 +165,14 @@ public:
         AutoPtr<IContext> mContext;
 
         String mKeystoreAlias;
-        String mKeyType;// = "RSA";
-        Int32 mKeySize;// = -1;
+        String mKeyType;
+        Int32 mKeySize;
         AutoPtr<IAlgorithmParameterSpec> mSpec;
         AutoPtr<IX500Principal> mSubjectDN;
         AutoPtr<IBigInteger> mSerialNumber;
         AutoPtr<IDate> mStartDate;
         AutoPtr<IDate> mEndDate;
         Int32 mFlags;
-
     };
 
 public:

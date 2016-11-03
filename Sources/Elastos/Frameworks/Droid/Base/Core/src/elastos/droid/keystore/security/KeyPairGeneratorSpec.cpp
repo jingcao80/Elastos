@@ -2,11 +2,12 @@
 #include "elastos/droid/keystore/security/KeyStore.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
+#include "_Org.Conscrypt.h"
 
 using Elastos::Droid::Text::TextUtils;
 
 //import com.android.org.conscrypt.NativeCrypto;
-//TODO using Org::Conscrypt::INativeCrypto;
+using Org::Conscrypt::INativeCrypto;
 //
 //import android.content.Context;
 //import android.text.TextUtils;
@@ -32,6 +33,14 @@ namespace KeyStore {
 namespace Security {
 
 CAR_INTERFACE_IMPL(KeyPairGeneratorSpec::Builder, Object, IKeyPairGeneratorSpecBuilder);
+
+KeyPairGeneratorSpec::Builder::Builder()
+    : mKeystoreAlias(NULL)
+    , mKeyType(String("RSA"))
+    , mKeySize(-1)
+    , mFlags(0)
+{
+}
 
 ECode KeyPairGeneratorSpec::Builder::constructor(
     /* [in] */ IContext* context)
@@ -64,7 +73,8 @@ ECode KeyPairGeneratorSpec::Builder::SetKeyType(
         //throw new NullPointerException("keyType == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetKeyType(), keyType == null");
         assert(0);
-    } else {
+    }
+    else {
         //try {
         KeyStore::GetKeyTypeForAlgorithm(keyType);
         //} catch (IllegalArgumentException e) {
@@ -160,7 +170,7 @@ ECode KeyPairGeneratorSpec::Builder::Build(
     AutoPtr<KeyPairGeneratorSpec> kpgs = new KeyPairGeneratorSpec();
     kpgs->constructor(mContext, mKeystoreAlias, mKeyType, mKeySize, mSpec,
             mSubjectDN, mSerialNumber, mStartDate, mEndDate, mFlags);
-    *spec = kpgs;
+    *spec = IKeyPairGeneratorSpec::Probe(kpgs);
     REFCOUNT_ADD(*spec);
     return NOERROR;
 }
@@ -205,31 +215,37 @@ ECode KeyPairGeneratorSpec::constructor(
     if (context == NULL) {
         //throw new IllegalArgumentException("context == null");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), context == null");
-        assert(0);
-    } else if (TextUtils::IsEmpty(keyStoreAlias)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (TextUtils::IsEmpty(keyStoreAlias)) {
         //throw new IllegalArgumentException("keyStoreAlias must not be empty");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), keyStoreAlias must not be empty");
-        assert(0);
-    } else if (subjectDN == NULL) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (subjectDN == NULL) {
         //throw new IllegalArgumentException("subjectDN == null");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), subjectDN == null");
-        assert(0);
-    } else if (serialNumber == NULL) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (serialNumber == NULL) {
         //throw new IllegalArgumentException("serialNumber == null");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), serialNumber == null");
-        assert(0);
-    } else if (startDate == NULL) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (startDate == NULL) {
         //throw new IllegalArgumentException("startDate == null");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), startDate == null");
-        assert(0);
-    } else if (endDate == NULL) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (endDate == NULL) {
         //throw new IllegalArgumentException("endDate == null");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), endDate == null");
-        assert(0);
-    } else if (endDate->IsBefore(startDate, &bTmp), bTmp) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (endDate->IsBefore(startDate, &bTmp), bTmp) {
         //throw new IllegalArgumentException("endDate < startDate");
         Logger::E("KeyPairGeneratorSpec", "KeyPairGeneratorSpec(), startDate == null");
-        assert(0);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Int32 keyTypeInt = KeyStore::GetKeyTypeForAlgorithm(keyType);
@@ -258,13 +274,15 @@ ECode KeyPairGeneratorSpec::GetDefaultKeySizeForType(
 {
     VALIDATE_NOT_NULL(result);
     *result = -1;
-    if (keyType == 116/* TODO INativeCrypto::EVP_PKEY_DSA*/) {
+    if (keyType == INativeCrypto::EVP_PKEY_DSA) {
         *result = DSA_DEFAULT_KEY_SIZE;
         return NOERROR;
-    } else if (keyType == 408/*TODO INativeCrypto::EVP_PKEY_EC*/) {
+    }
+    else if (keyType == INativeCrypto::EVP_PKEY_EC) {
         *result = EC_DEFAULT_KEY_SIZE;
         return NOERROR;
-    } else if (keyType == 6/*TODO INativeCrypto::EVP_PKEY_RSA*/) {
+    }
+    else if (keyType == INativeCrypto::EVP_PKEY_RSA) {
         *result = RSA_DEFAULT_KEY_SIZE;
         return NOERROR;
     }
@@ -278,29 +296,29 @@ ECode KeyPairGeneratorSpec::CheckValidKeySize(
     /* [in] */ Int32 keyType,
     /* [in] */ Int32 keySize)
 {
-    if (keyType == 116/*TODO INativeCrypto::EVP_PKEY_DSA*/) {
+    if (keyType == INativeCrypto::EVP_PKEY_DSA) {
         if (keySize < DSA_MIN_KEY_SIZE || keySize > DSA_MAX_KEY_SIZE) {
             //throw new IllegalArgumentException("DSA keys must be >= " + DSA_MIN_KEY_SIZE + " and <= " + DSA_MAX_KEY_SIZE);
             Logger::E("KeyPairGeneratorSpec", "CheckValidKeySize, DSA keys must be between %d and %d", DSA_MIN_KEY_SIZE, DSA_MAX_KEY_SIZE);
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-    } else if (keyType == 408/*TODO INativeCrypto::EVP_PKEY_EC*/) {
+    }
+    else if (keyType == INativeCrypto::EVP_PKEY_EC) {
         if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
             //throw new IllegalArgumentException("EC keys must be >= " + EC_MIN_KEY_SIZE + " and <= " + EC_MAX_KEY_SIZE);
             Logger::E("KeyPairGeneratorSpec", "CheckValidKeySize, EC keys must be between %d and %d", EC_MIN_KEY_SIZE, EC_MAX_KEY_SIZE);
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
 
         }
-    } else if (keyType == 6/*TODO INativeCrypto::EVP_PKEY_RSA*/) {
+    }
+    else if (keyType == INativeCrypto::EVP_PKEY_RSA) {
         if (keySize < RSA_MIN_KEY_SIZE || keySize > RSA_MAX_KEY_SIZE) {
             //throw new IllegalArgumentException("RSA keys must be >= " + RSA_MIN_KEY_SIZE + " and <= " + RSA_MAX_KEY_SIZE);
             Logger::E("KeyPairGeneratorSpec", "CheckValidKeySize, RSA keys must be between %d and %d", RSA_MIN_KEY_SIZE, RSA_MAX_KEY_SIZE);
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-    } else {
+    }
+    else {
         //throw new IllegalArgumentException("Invalid key type " + keyType);
         Logger::E("KeyPairGeneratorSpec", "CheckValidKeySize, Invalid key type %d", keyType);
         assert(0);
@@ -314,14 +332,15 @@ ECode KeyPairGeneratorSpec::CheckCorrectParametersSpec(
     /* [in] */ Int32 keySize,
     /* [in] */ IAlgorithmParameterSpec* spec)
 {
-    if (keyType == 116/*TODO INativeCrypto::EVP_PKEY_DSA*/ && spec != NULL) {
+    if (keyType == INativeCrypto::EVP_PKEY_DSA && spec != NULL) {
         if (IDSAParameterSpec::Probe(spec) == NULL) {
             //throw new IllegalArgumentException("DSA keys must have DSAParameterSpec specified");
             Logger::E("KeyPairGeneratorSpec", "CheckCorrectParametersSpec, DSA keys must have DSAParameterSpec specified");
             assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-    } else if (keyType == 6/*TODO INativeCrypto::EVP_PKEY_RSA*/ && spec != NULL) {
+    }
+    else if (keyType == INativeCrypto::EVP_PKEY_RSA && spec != NULL) {
         if (IRSAKeyGenParameterSpec::Probe(spec) != NULL) {
             AutoPtr<IRSAKeyGenParameterSpec> rsaSpec = IRSAKeyGenParameterSpec::Probe(spec);
             Int32 keysize;
@@ -334,7 +353,8 @@ ECode KeyPairGeneratorSpec::CheckCorrectParametersSpec(
                 assert(0);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
-        } else {
+        }
+        else {
             //throw new IllegalArgumentException("RSA may only use RSAKeyGenParameterSpec");
             Logger::E("KeyPairGeneratorSpec", "CheckCorrectParametersSpec, RSA may only use RSAKeyGenParameterSpec");
             assert(0);

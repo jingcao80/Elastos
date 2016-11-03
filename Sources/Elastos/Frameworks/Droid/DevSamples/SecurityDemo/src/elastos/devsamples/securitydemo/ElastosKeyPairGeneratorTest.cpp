@@ -48,7 +48,7 @@ static AutoPtr<IX500Principal> initTEST_DN_1()
     return tmp;
 }
 
-AutoPtr<IX500Principal> ElastosKeyPairGeneratorTest::TEST_DN_1;// = initTEST_DN_1();
+AutoPtr<IX500Principal> ElastosKeyPairGeneratorTest::TEST_DN_1 = initTEST_DN_1();
 
 static AutoPtr<IX500Principal> initTEST_DN_2()
 {
@@ -57,7 +57,7 @@ static AutoPtr<IX500Principal> initTEST_DN_2()
     return tmp;
 }
 
-AutoPtr<IX500Principal> ElastosKeyPairGeneratorTest::TEST_DN_2;// = initTEST_DN_2();
+AutoPtr<IX500Principal> ElastosKeyPairGeneratorTest::TEST_DN_2 = initTEST_DN_2();
 
 static AutoPtr<IBigInteger> initTEST_SERIAL_1()
 {
@@ -127,7 +127,7 @@ ElastosKeyPairGeneratorTest::ElastosKeyPairGeneratorTest(
     mAndroidKeyStore->IsUnlocked(&res);
     assert(res == FALSE);
 
-    KeyPairGenerator::GetInstance(String("RSA"), String("AndroidKeyStore"), (IKeyPairGenerator**)&mGenerator);
+    KeyPairGenerator::GetInstance(String("RSA"), String("ElastosKeyStore"), (IKeyPairGenerator**)&mGenerator);
 }
 
 ECode ElastosKeyPairGeneratorTest::SetupPassword()
@@ -163,6 +163,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_Initialize_Params_Encryp
     builder->Build((IKeyPairGeneratorSpec**)&spec);
 
     mGenerator->Initialize(IAlgorithmParameterSpec::Probe(spec));
+    Logger::E("ElastosKeyPairGeneratorTest", "=====[snow=====TestKeyPairGenerator_Initialize_Params_Encrypted_Success return");
     return NOERROR;
 }
 

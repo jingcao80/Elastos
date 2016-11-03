@@ -202,7 +202,7 @@ static AutoPtr<IX500Principal> initTEST_DN_1()
     return tmp;
 }
 
-AutoPtr<IX500Principal> ElastosKeyStoreTest::TEST_DN_1;// = initTEST_DN_1();
+AutoPtr<IX500Principal> ElastosKeyStoreTest::TEST_DN_1 = initTEST_DN_1();
 
 static AutoPtr<IX500Principal> initTEST_DN_2()
 {
@@ -211,7 +211,7 @@ static AutoPtr<IX500Principal> initTEST_DN_2()
     return tmp;
 }
 
-AutoPtr<IX500Principal> ElastosKeyStoreTest::TEST_DN_2;// = initTEST_DN_2();
+AutoPtr<IX500Principal> ElastosKeyStoreTest::TEST_DN_2 = initTEST_DN_2();
 
 static AutoPtr<IBigInteger> initTEST_SERIAL_1()
 {

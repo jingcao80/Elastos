@@ -118,7 +118,7 @@ ECode KeyPairGenerator::GetInstance(
     /* [out] */ IKeyPairGenerator** result) /*throws NoSuchAlgorithmException, NoSuchProviderException*/
 {
     VALIDATE_NOT_NULL(result);
-    if (provider == NULL || provider.IsEmpty()) {
+    if (provider.IsNull() || provider.IsEmpty()) {
         // throw new IllegalArgumentException();
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -127,6 +127,7 @@ ECode KeyPairGenerator::GetInstance(
     CSecurity::AcquireSingleton((ISecurity**)&security);
     AutoPtr<IProvider> impProvider;
     security->GetProvider(provider, (IProvider**)&impProvider);
+
     if (impProvider == NULL) {
         // throw new NoSuchProviderException(provider);
         return E_NO_SUCH_PROVIDER_EXCEPTION;
@@ -144,7 +145,7 @@ ECode KeyPairGenerator::GetInstance(
         // throw new IllegalArgumentException("provider == NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    if (algorithm == NULL) {
+    if (algorithm.IsNull()) {
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }

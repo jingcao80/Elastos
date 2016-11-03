@@ -420,7 +420,6 @@ AutoPtr<IASN1Sequence> CAttributeTypeAndValue::InitASN1()
     return cls;
 }
 
-AutoPtr<Object> CAttributeTypeAndValue::sTMP = InitValues();
 AutoPtr<IObjectIdentifier> CAttributeTypeAndValue::DC;
 AutoPtr<IObjectIdentifier> CAttributeTypeAndValue::EMAILADDRESS;
 AutoPtr<IHashMap> CAttributeTypeAndValue::RFC1779_NAMES;
@@ -448,6 +447,7 @@ const Int32 CAttributeTypeAndValue::SIZE = 10;
 INIT_PROI_4 AutoPtr<ArrayOf<ArrayOf<IObjectIdentifier*>* > > CAttributeTypeAndValue::KNOWN_OIDS;
 INIT_PROI_4 AutoPtr<IASN1Type> CAttributeTypeAndValue::sAttributeValue = InitAttributeValue();
 INIT_PROI_5 AutoPtr<IASN1Sequence> CAttributeTypeAndValue::ASN1 = InitASN1();
+AutoPtr<Object> CAttributeTypeAndValue::sTMP = InitValues();
 
 CAR_OBJECT_IMPL(CAttributeTypeAndValue)
 CAR_INTERFACE_IMPL(CAttributeTypeAndValue, Object, IAttributeTypeAndValue)
