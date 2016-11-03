@@ -1,15 +1,13 @@
 
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Net.h"
-#include "elastos/droid/content/CCursorLoader.h"
+#include "elastos/droid/content/CursorLoader.h"
 #include "elastos/droid/content/CLoaderForceLoadContentObserver.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/Arrays.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Database::IContentObserver;
-
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Arrays;
 using Elastos::IO::ICloseable;
 
@@ -17,17 +15,15 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
-CAR_INTERFACE_IMPL_3(CCursorLoader, AsyncTaskLoader, ICursorLoader, IAsyncTaskLoader, ILoader)
+CAR_INTERFACE_IMPL(CursorLoader, AsyncTaskLoader, ICursorLoader)
 
-CAR_OBJECT_IMPL(CCursorLoader)
-
-CCursorLoader::CCursorLoader()
+CursorLoader::CursorLoader()
 {}
 
-CCursorLoader::~CCursorLoader()
+CursorLoader::~CursorLoader()
 {}
 
-ECode CCursorLoader::constructor(
+ECode CursorLoader::constructor(
     /* [in] */ IContext* context)
 {
     FAIL_RETURN(AsyncTaskLoader::constructor(context));
@@ -35,7 +31,7 @@ ECode CCursorLoader::constructor(
     return NOERROR;
 }
 
-ECode CCursorLoader::constructor(
+ECode CursorLoader::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IUri* uri,
     /* [in] */ ArrayOf<String>* projection,
@@ -53,7 +49,7 @@ ECode CCursorLoader::constructor(
     return NOERROR;
 }
 
-ECode CCursorLoader::DeliverResult(
+ECode CursorLoader::DeliverResult(
     /* [in] */ IInterface* data)
 {
     if (ICursor::Probe(data) == NULL) return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -82,122 +78,122 @@ ECode CCursorLoader::DeliverResult(
     return NOERROR;
 }
 
-ECode CCursorLoader::DeliverCancellation()
+ECode CursorLoader::DeliverCancellation()
 {
     return Loader::DeliverCancellation();
 }
 
-ECode CCursorLoader::GetContext(
+ECode CursorLoader::GetContext(
     /* [out] */ IContext** context)
 {
     return Loader::GetContext(context);
 }
 
-ECode CCursorLoader::GetId(
+ECode CursorLoader::GetId(
     /* [out] */ Int32* id)
 {
     return Loader::GetId(id);
 }
 
-ECode CCursorLoader::RegisterListener(
+ECode CursorLoader::RegisterListener(
     /* [in] */ Int32 id,
     /* [in] */ ILoaderOnLoadCompleteListener* listener)
 {
     return Loader::RegisterListener(id, listener);
 }
 
-ECode CCursorLoader::UnregisterListener(
+ECode CursorLoader::UnregisterListener(
     /* [in] */ ILoaderOnLoadCompleteListener* listener)
 {
     return Loader::UnregisterListener(listener);
 }
 
-ECode CCursorLoader::RegisterOnLoadCanceledListener(
+ECode CursorLoader::RegisterOnLoadCanceledListener(
     /* [in] */ ILoaderOnLoadCanceledListener* listener)
 {
     return Loader::RegisterOnLoadCanceledListener(listener);
 }
 
-ECode CCursorLoader::UnregisterOnLoadCanceledListener(
+ECode CursorLoader::UnregisterOnLoadCanceledListener(
     /* [in] */ ILoaderOnLoadCanceledListener* listener)
 {
     return Loader::UnregisterOnLoadCanceledListener(listener);
 }
 
-ECode CCursorLoader::IsStarted(
+ECode CursorLoader::IsStarted(
     /* [out] */ Boolean* isStarted)
 {
     return Loader::IsStarted(isStarted);
 }
 
-ECode CCursorLoader::IsAbandoned(
+ECode CursorLoader::IsAbandoned(
     /* [out] */ Boolean* isAbandoned)
 {
     return Loader::IsAbandoned(isAbandoned);
 }
 
-ECode CCursorLoader::IsReset(
+ECode CursorLoader::IsReset(
     /* [out] */ Boolean* isReset)
 {
     return Loader::IsReset(isReset);
 }
 
-ECode CCursorLoader::StartLoading()
+ECode CursorLoader::StartLoading()
 {
     return Loader::StartLoading();
 }
 
-ECode CCursorLoader::CancelLoad(
+ECode CursorLoader::CancelLoad(
     /* [out] */ Boolean* succeeded)
 {
     return Loader::CancelLoad(succeeded);
 }
 
-ECode CCursorLoader::ForceLoad()
+ECode CursorLoader::ForceLoad()
 {
     return Loader::ForceLoad();
 }
 
-ECode CCursorLoader::StopLoading()
+ECode CursorLoader::StopLoading()
 {
     return Loader::StopLoading();
 }
 
-ECode CCursorLoader::Abandon()
+ECode CursorLoader::Abandon()
 {
     return Loader::Abandon();
 }
 
-ECode CCursorLoader::Reset()
+ECode CursorLoader::Reset()
 {
     return Loader::Reset();
 }
 
-ECode CCursorLoader::TakeContentChanged(
+ECode CursorLoader::TakeContentChanged(
     /* [out] */ Boolean* succeeded)
 {
     return Loader::TakeContentChanged(succeeded);
 }
 
-ECode CCursorLoader::OnContentChanged()
+ECode CursorLoader::OnContentChanged()
 {
     return Loader::OnContentChanged();
 }
 
-ECode CCursorLoader::DataToString(
+ECode CursorLoader::DataToString(
     /* [in] */ IInterface* data,
     /* [out] */ String* str)
 {
     return Loader::DataToString(data, str);
 }
 
-ECode CCursorLoader::ToString(
+ECode CursorLoader::ToString(
     /* [out] */ String* str)
 {
     return Loader::ToString(str);
 }
 
-ECode CCursorLoader::Dump(
+ECode CursorLoader::Dump(
     /* [in] */ const String& prefix,
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* writer,
@@ -230,13 +226,13 @@ ECode CCursorLoader::Dump(
     return NOERROR;
 }
 
-ECode CCursorLoader::SetUpdateThrottle(
+ECode CursorLoader::SetUpdateThrottle(
     /* [in] */ Int64 delayMS)
 {
     return AsyncTaskLoader::SetUpdateThrottle(delayMS);
 }
 
-ECode CCursorLoader::OnCanceled(
+ECode CursorLoader::OnCanceled(
     /* [in] */ IInterface* data)
 {
     if (ICursor::Probe(data) == NULL) return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -247,11 +243,11 @@ ECode CCursorLoader::OnCanceled(
     return NOERROR;
 }
 
-ECode CCursorLoader::LoadInBackground(
+ECode CursorLoader::LoadInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoLock lock(mCCursorLoaderLock);
+    AutoLock lock(mCursorLoaderLock);
     Boolean isCanceled = FALSE;
     if ((IsLoadInBackgroundCanceled(&isCanceled), isCanceled)) {
 //        throw new OperationCanceledException();
@@ -311,10 +307,10 @@ ECode CCursorLoader::LoadInBackground(
     // }
 }
 
-ECode CCursorLoader::CancelLoadInBackground()
+ECode CursorLoader::CancelLoadInBackground()
 {
     AsyncTaskLoader::CancelLoadInBackground();
-    AutoLock lock(mCCursorLoaderLock);
+    AutoLock lock(mCursorLoaderLock);
 
     if (NULL != mCancellationSignal) {
         FAIL_RETURN(mCancellationSignal->Cancel());
@@ -323,18 +319,18 @@ ECode CCursorLoader::CancelLoadInBackground()
     return NOERROR;
 }
 
-ECode CCursorLoader::IsLoadInBackgroundCanceled(
+ECode CursorLoader::IsLoadInBackgroundCanceled(
     /* [out] */ Boolean* isCanceled)
 {
     return AsyncTaskLoader::IsLoadInBackgroundCanceled(isCanceled);
 }
 
-ECode CCursorLoader::WaitForLoader()
+ECode CursorLoader::WaitForLoader()
 {
     return AsyncTaskLoader::WaitForLoader();
 }
 
-ECode CCursorLoader::GetUri(
+ECode CursorLoader::GetUri(
     /* [out] */ IUri** uri)
 {
     VALIDATE_NOT_NULL(uri)
@@ -343,14 +339,14 @@ ECode CCursorLoader::GetUri(
     return NOERROR;
 }
 
-ECode CCursorLoader::SetUri(
+ECode CursorLoader::SetUri(
     /* [in] */ IUri* uri)
 {
     mUri = uri;
     return NOERROR;
 }
 
-ECode CCursorLoader::GetProjection(
+ECode CursorLoader::GetProjection(
     /* [out, callee] */ ArrayOf<String>** projection)
 {
     VALIDATE_NOT_NULL(projection)
@@ -359,14 +355,14 @@ ECode CCursorLoader::GetProjection(
     return NOERROR;
 }
 
-ECode CCursorLoader::SetProjection(
+ECode CursorLoader::SetProjection(
     /* [in] */ ArrayOf<String>* projection)
 {
     mProjection = projection;
     return NOERROR;
 }
 
-ECode CCursorLoader::GetSelection(
+ECode CursorLoader::GetSelection(
     /* [out] */ String* selection)
 {
     VALIDATE_NOT_NULL(selection)
@@ -374,14 +370,14 @@ ECode CCursorLoader::GetSelection(
     return NOERROR;
 }
 
-ECode CCursorLoader::SetSelection(
+ECode CursorLoader::SetSelection(
     /* [in] */ const String& selection)
 {
     mSelection = selection;
     return NOERROR;
 }
 
-ECode CCursorLoader::GetSelectionArgs(
+ECode CursorLoader::GetSelectionArgs(
     /* [out, callee] */ ArrayOf<String>** selectionArgs)
 {
     VALIDATE_NOT_NULL(selectionArgs)
@@ -390,14 +386,14 @@ ECode CCursorLoader::GetSelectionArgs(
     return NOERROR;
 }
 
-ECode CCursorLoader::SetSelectionArgs(
+ECode CursorLoader::SetSelectionArgs(
     /* [in] */ ArrayOf<String>* selectionArgs)
 {
     mSelectionArgs = selectionArgs;
     return NOERROR;
 }
 
-ECode CCursorLoader::GetSortOrder(
+ECode CursorLoader::GetSortOrder(
     /* [out] */ String* sortOrder)
 {
     VALIDATE_NOT_NULL(sortOrder)
@@ -405,14 +401,14 @@ ECode CCursorLoader::GetSortOrder(
     return NOERROR;
 }
 
-ECode CCursorLoader::SetSortOrder(
+ECode CursorLoader::SetSortOrder(
     /* [in] */ const String& sortOrder)
 {
     mSortOrder = sortOrder;
     return NOERROR;
 }
 
-ECode CCursorLoader::OnStartLoading()
+ECode CursorLoader::OnStartLoading()
 {
     if (NULL != mCursor) {
         FAIL_RETURN(DeliverResult(TO_IINTERFACE(mCursor)));
@@ -424,14 +420,14 @@ ECode CCursorLoader::OnStartLoading()
     return NOERROR;
 }
 
-ECode CCursorLoader::OnStopLoading()
+ECode CursorLoader::OnStopLoading()
 {
     // Attempt to cancel the current load task if possible.
     Boolean ret = FALSE;
     return CancelLoad(&ret);
 }
 
-ECode CCursorLoader::OnReset()
+ECode CursorLoader::OnReset()
 {
     FAIL_RETURN(Loader::OnReset());
     // Ensure the loader is stopped

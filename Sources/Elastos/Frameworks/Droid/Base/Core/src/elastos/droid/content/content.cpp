@@ -8,6 +8,7 @@
 #include "elastos/droid/content/CSyncAdaptersCache.h"
 #include "elastos/droid/content/CSyncActivityTooManyDeletes.h"
 #include "elastos/droid/content/CIntentSenderFinishedDispatcher.h"
+#include "elastos/droid/content/CCursorLoader.h"
 #include "elastos/droid/content/res/CThemeConfig.h"
 #include "elastos/droid/content/res/CAppTheme.h"
 
@@ -23,6 +24,7 @@ CAR_OBJECT_IMPL(CIntent)
 CAR_OBJECT_IMPL(CIntentFilter)
 CAR_OBJECT_IMPL(CRestrictionEntry)
 CAR_OBJECT_IMPL(CSyncAdaptersCache)
+CAR_OBJECT_IMPL(CCursorLoader)
 CAR_OBJECT_IMPL(CSyncActivityTooManyDeletes)
 CAR_OBJECT_IMPL(CIntentSenderFinishedDispatcher)
 

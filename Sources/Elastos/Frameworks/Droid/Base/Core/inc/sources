@@ -41,6 +41,7 @@ EXPORT_HEADERS += elastos/droid/content/IntentFilter.h
 EXPORT_HEADERS += elastos/droid/content/ContextWrapper.h
 EXPORT_HEADERS += elastos/droid/content/Context.h
 EXPORT_HEADERS += elastos/droid/content/ContentProvider.h
+EXPORT_HEADERS += elastos/droid/content/CursorLoader.h
 EXPORT_HEADERS += elastos/droid/content/pm/PackageParser.h
 EXPORT_HEADERS += elastos/droid/content/pm/PackageUserState.h
 EXPORT_HEADERS += elastos/droid/content/pm/RegisteredServicesCache.h
