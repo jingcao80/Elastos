@@ -23,7 +23,6 @@ module
     merge("car/elastos/droid/contacts/common/list/PinnedHeaderListView.car");
     merge("car/elastos/droid/contacts/common/list/PinnedHeaderListAdapter.car");
     merge("car/elastos/droid/contacts/common/list/IndexerListAdapter.car");
-    merge("car/elastos/droid/contacts/common/list/DefaultContactListAdapter.car");
     merge("car/elastos/droid/contacts/common/list/ExtendedPhoneDirectoriesManager.car");
     merge("car/elastos/droid/contacts/common/list/AccountFilterActivity.car");
     merge("car/elastos/droid/contacts/common/list/AutoScrollListView.car");
@@ -33,6 +32,7 @@ module
     merge("car/elastos/droid/contacts/common/list/ViewPagerTabs.car");
     merge("car/elastos/droid/contacts/common/list/ContactTileView.car");
     merge("car/elastos/droid/contacts/common/list/ContactListAdapter.car");
+    merge("car/elastos/droid/contacts/common/list/ProfileAndContactsLoader.car");
     merge("car/elastos/droid/contacts/common/model/AccountTypeManager.car");
     merge("car/elastos/droid/contacts/common/model/ValuesDelta.car");
     merge("car/elastos/droid/contacts/common/model/account/AccountTypeWithDataSet.car");

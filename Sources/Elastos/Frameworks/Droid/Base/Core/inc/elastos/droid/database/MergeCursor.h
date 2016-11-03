@@ -16,12 +16,12 @@ namespace Database {
  * may be different if that is desired. Calls to getColumns, getColumnIndex, etc will return the
  * value for the row that the MergeCursor is currently pointing at.
  */
-class MergeCursor
+class ECO_PUBLIC MergeCursor
     : public AbstractCursor
     , public IMergeCursor
 {
 private:
-    class MyDataSetObserver
+    class ECO_LOCAL MyDataSetObserver
         : public DataSetObserver
     {
     public:

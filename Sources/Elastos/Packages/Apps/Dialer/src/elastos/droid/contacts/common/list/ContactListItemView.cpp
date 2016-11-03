@@ -6,6 +6,7 @@
 #include "elastos/droid/contacts/common/ContactPresenceIconUtil.h"
 #include "elastos/droid/contacts/common/ContactStatusUtil.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
+#include "elastos/droid/contacts/common/list/DefaultContactListAdapter.h"
 #include "elastos/droid/contacts/common/util/ViewUtil.h"
 #include "elastos/droid/contacts/common/util/SearchUtil.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -1369,7 +1370,7 @@ void ContactListItemView::ShowSnippet(
         if (!snippet.IsNull()) {
             Int32 from = 0;
             Int32 to = snippet.GetLength();
-            Int32 start = snippet.IndexOf(IDefaultContactListAdapter::SNIPPET_START_MATCH);
+            Int32 start = snippet.IndexOf(DefaultContactListAdapter::SNIPPET_START_MATCH);
             if (start == -1) {
                 snippet = String(NULL);
             }
@@ -1378,7 +1379,7 @@ void ContactListItemView::ShowSnippet(
                 if (firstNl != -1) {
                     from = firstNl + 1;
                 }
-                Int32 end = snippet.LastIndexOf(IDefaultContactListAdapter::SNIPPET_END_MATCH);
+                Int32 end = snippet.LastIndexOf(DefaultContactListAdapter::SNIPPET_END_MATCH);
                 if (end != -1) {
                     Int32 lastNl = snippet.IndexOf('\n', end);
                     if (lastNl != -1) {
@@ -1389,8 +1390,8 @@ void ContactListItemView::ShowSnippet(
                 StringBuilder sb;
                 for (Int32 i = from; i < to; i++) {
                     Char32 c = snippet.GetChar(i);
-                    if (c != IDefaultContactListAdapter::SNIPPET_START_MATCH &&
-                            c != IDefaultContactListAdapter::SNIPPET_END_MATCH) {
+                    if (c != DefaultContactListAdapter::SNIPPET_START_MATCH &&
+                            c != DefaultContactListAdapter::SNIPPET_END_MATCH) {
                         sb.AppendChar(c);
                     }
                 }
