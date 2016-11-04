@@ -30,3 +30,6 @@ SOURCES += CViewPagerTabs.cpp
 SOURCES += ViewPagerTabStrip.cpp
 SOURCES += ContactEntry.cpp
 SOURCES += ContactTileView.cpp
+SOURCES += ContactListAdapter.cpp
+SOURCES += DefaultContactListAdapter.cpp
+SOURCES += ProfileAndContactsLoader.cpp

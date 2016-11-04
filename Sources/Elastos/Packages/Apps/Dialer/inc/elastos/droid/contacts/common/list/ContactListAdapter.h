@@ -40,6 +40,8 @@ protected:
         static const AutoPtr<ArrayOf<String> > CONTACT_PROJECTION_ALTERNATIVE;
         static const AutoPtr<ArrayOf<String> > FILTER_PROJECTION_PRIMARY;
         static const AutoPtr<ArrayOf<String> > FILTER_PROJECTION_ALTERNATIVE;
+
+        friend class ContactListAdapter;
     };
 
 public:

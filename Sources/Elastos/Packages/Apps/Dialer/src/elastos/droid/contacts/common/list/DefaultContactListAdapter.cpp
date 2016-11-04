@@ -51,13 +51,17 @@ ECode DefaultContactListAdapter::ConfigureLoader(
 {
     AutoPtr<IProfileAndContactsLoader> l = IProfileAndContactsLoader::Probe(loader);
     if (l != NULL) {
-        ((ProfileAndContactsLoader*)l.Get())->SetLoadProfile(ShouldIncludeProfile());
+        Boolean  result;
+        ShouldIncludeProfile(&result);
+        ((ProfileAndContactsLoader*)l.Get())->SetLoadProfile(result);
     }
 
     AutoPtr<IContactListFilter> filter;
     GetFilter((IContactListFilter**)&filter);
-    if (IsSearchMode()) {
-        String query = GetQueryString();
+    Boolean isSearchMode;
+    if (IsSearchMode(&isSearchMode), isSearchMode) {
+        String query;
+        GetQueryString(&query);
         if (query.IsNull()) {
             query = String("");
         }
@@ -76,12 +80,12 @@ ECode DefaultContactListAdapter::ConfigureLoader(
         else {
             AutoPtr<IContactsContractContacts> contacts;
             CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
-            AutoPtr<IUri> uri;
-            contacts->GetCONTENT_FILTER_URI((IUri**)&uri);
+            AutoPtr<IUri> contentUri;
+            contacts->GetCONTENT_FILTER_URI((IUri**)&contentUri);
             AutoPtr<IUriBuilder> builder;
-            uri->BuildUpon((IUriBuilder**)&builder);
+            contentUri->BuildUpon((IUriBuilder**)&builder);
             builder->AppendPath(query);      // Builder will encode the query
-            builder.->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY,
+            builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY,
                     StringUtils::ToString(directoryId));
             if (directoryId != IContactsContractDirectory::DEFAULT
                     && directoryId != IContactsContractDirectory::LOCAL_INVISIBLE) {
@@ -149,20 +153,22 @@ void DefaultContactListAdapter::ConfigureUri(
         }
     }
 
-    if (directoryId == IContactsContractDirectory::DEFAULT && IsSectionHeaderDisplayEnabled()) {
+    Boolean isEnabled;
+    if (directoryId == IContactsContractDirectory::DEFAULT && (IsSectionHeaderDisplayEnabled(&isEnabled), isEnabled)) {
         uri = ContactListAdapter::BuildSectionIndexerUri(uri);
     }
 
     // The "All accounts" filter is the same as the entire contents of Directory.DEFAULT
     if (filter != NULL
-            && (filter->GetFilterType(&filterType), filterType != IContactListFilter::FILTER_TYPE_CUSTOM
-            && (filter->GetFilterType(&filterType), filterType != IContactListFilter::FILTER_TYPE_SINGLE_CONTACT) {
+            && (filter->GetFilterType(&filterType), filterType != IContactListFilter::FILTER_TYPE_CUSTOM)
+            && (filter->GetFilterType(&filterType), filterType != IContactListFilter::FILTER_TYPE_SINGLE_CONTACT)) {
         AutoPtr<IUriBuilder> builder;
         uri->BuildUpon((IUriBuilder**)&builder);
         builder->AppendQueryParameter(
                 IContactsContract::DIRECTORY_PARAM_KEY, StringUtils::ToString(IContactsContractDirectory::DEFAULT));
         if (filter->GetFilterType(&filterType), filterType == IContactListFilter::FILTER_TYPE_ACCOUNT) {
-            filter->AddAccountQueryParameterToUrl(builder);
+            AutoPtr<IUriBuilder> out;
+            filter->AddAccountQueryParameterToUrl(builder, (IUriBuilder**)&out);
         }
         uri = NULL;
         builder->Build((IUri**)&uri);
@@ -211,7 +217,7 @@ void DefaultContactListAdapter::ConfigureSelection(
         case IContactListFilter::FILTER_TYPE_CUSTOM: {
             selection.Append(IContactsContractContactsColumns::IN_VISIBLE_GROUP + "=1");
             if (IsCustomFilterForPhoneNumbersOnly()) {
-                selection.Append(" AND ")
+                selection.Append(" AND ");
                 selection.Append(IContactsContractContactsColumns::HAS_PHONE_NUMBER + "=1");
             }
             break;
@@ -234,21 +240,29 @@ void DefaultContactListAdapter::BindView(
     ContactListAdapter::BindView(itemView, partition, cursor, position);
     AutoPtr<ContactListItemView> view = (ContactListItemView*)IContactListItemView::Probe(itemView);
 
-    view->SetHighlightedPrefix(IsSearchMode() ? GetUpperCaseQueryString() : String(NULL));
+    Boolean isSearchMode;
+    String str(NULL);
+    if (IsSearchMode(&isSearchMode), isSearchMode) {
+        GetUpperCaseQueryString(&str);
+    }
+    view->SetHighlightedPrefix(str);
 
-    if (IsSelectionVisible()) {
+    Boolean isVisible;
+    if (IsSelectionVisible(&isVisible), isVisible) {
         view->SetActivated(IsSelectedContact(partition, cursor));
     }
 
     BindSectionHeaderAndDivider(view, position, cursor);
 
-    if (IsQuickContactEnabled()) {
+    Boolean isEnabled;
+    if (IsQuickContactEnabled(&isEnabled), isEnabled) {
         BindQuickContact(view, partition, cursor, ContactQuery::CONTACT_PHOTO_ID,
                 ContactQuery::CONTACT_PHOTO_URI, ContactQuery::CONTACT_ID,
                 ContactQuery::CONTACT_LOOKUP_KEY, ContactQuery::CONTACT_DISPLAY_NAME);
     }
     else {
-        if (GetDisplayPhotos()) {
+        Boolean result;
+        if (GetDisplayPhotos(&result), result) {
             BindPhoto(view, partition, cursor);
         }
     }
@@ -256,7 +270,7 @@ void DefaultContactListAdapter::BindView(
     BindNameAndViewId(view, cursor);
     BindPresenceAndStatusMessage(view, cursor);
 
-    if (IsSearchMode()) {
+    if (IsSearchMode(&isSearchMode), isSearchMode) {
         BindSearchSnippet(view, cursor);
     }
     else {

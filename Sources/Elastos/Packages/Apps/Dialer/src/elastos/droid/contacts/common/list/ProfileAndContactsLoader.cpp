@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include <Elastos.CoreLibrary.IO.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::CMatrixCursor;
@@ -48,7 +49,7 @@ ProfileAndContactsLoader::ProfileAndContactsLoader()
 ECode ProfileAndContactsLoader::constructor(
     /* [in] */ IContext* context)
 {
-    return CursorLoader::constructor(context)
+    return CursorLoader::constructor(context);
 }
 
 void ProfileAndContactsLoader::SetLoadProfile(
@@ -72,7 +73,7 @@ ECode ProfileAndContactsLoader::LoadInBackground(
     *result = NULL;
 
     // First load the profile, if enabled.
-    List<AutoPtr<ICursor> > cursors;
+    Elastos::Utility::Etl::List<AutoPtr<ICursor> > cursors;
     if (mLoadProfile) {
         cursors.PushBack(ICursor::Probe(LoadProfile()));
     }
@@ -89,7 +90,7 @@ ECode ProfileAndContactsLoader::LoadInBackground(
     AutoPtr<ICursor> contactsCursor = cursor;
     cursors.PushBack(contactsCursor);
     AutoPtr<ArrayOf<ICursor*> > cursorsArray = ArrayOf<ICursor*>::Alloc(cursors.GetSize());
-    List<AutoPtr<ICursor> >::Iterator it = cursors.Begin();
+    Elastos::Utility::Etl::List<AutoPtr<ICursor> >::Iterator it = cursors.Begin();
     for (Int32 i = 0; it != cursors.End(); ++it, ++i) {
         cursorsArray->Set(i, *it);
     }
@@ -118,7 +119,7 @@ AutoPtr<IMatrixCursor> ProfileAndContactsLoader::LoadProfile()
     // try {
     AutoPtr<IMatrixCursor> matrix;
     CMatrixCursor::New(mProjection, (IMatrixCursor**)&matrix);
-    AutoPtr<ArrayOf<IInterface*> > row = ArrayOf<IInterface*>::Alloc(mProjection->GetLength();
+    AutoPtr<ArrayOf<IInterface*> > row = ArrayOf<IInterface*>::Alloc(mProjection->GetLength());
     Boolean result;
     while (cursor->MoveToNext(&result), result) {
         for (Int32 i = 0; i < row->GetLength(); i++) {
@@ -128,7 +129,7 @@ AutoPtr<IMatrixCursor> ProfileAndContactsLoader::LoadProfile()
             CString::New(str, (ICharSequence**)&cs);
             row->Set(i, cs);
         }
-        matrix->AddRow(row);
+        matrix->AddRow(*row);
     }
     ICloseable::Probe(cursor)->Close();
     return matrix;

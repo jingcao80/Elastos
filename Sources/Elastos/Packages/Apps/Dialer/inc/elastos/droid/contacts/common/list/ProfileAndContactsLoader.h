@@ -28,7 +28,7 @@ class ProfileAndContactsLoader
 {
 private:
     class MyMergeCursor
-        : public MergeCursorusing Elastos::Droid::Os::CBundle;
+        : public MergeCursor
     {
     public:
         MyMergeCursor(

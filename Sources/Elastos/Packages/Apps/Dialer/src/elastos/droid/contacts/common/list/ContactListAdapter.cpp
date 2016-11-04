@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/contacts/common/list/ContactListAdapter.h"
 #include "elastos/droid/contacts/common/list/ContactListItemView.h"
 #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
@@ -197,9 +198,9 @@ AutoPtr<IUri> ContactListAdapter::GetContactUri(
     GetPartitionForPosition(position, &partitionIndex);
     AutoPtr<IInterface> item;
     GetItem(position, (IInterface**)&item);
-    AutoPtr<ICursor> item = ICursor::Probe(item);
     if (item != NULL) {
-        return GetContactUri(partitionIndex, item)
+        AutoPtr<ICursor> cursor = ICursor::Probe(item);
+        return GetContactUri(partitionIndex, cursor);
     }
     return NULL;
 }
@@ -218,7 +219,7 @@ AutoPtr<IUri> ContactListAdapter::GetContactUri(
     contacts->GetLookupUri(contactId, lookupKey, (IUri**)&uri);
     AutoPtr<ICompositeCursorAdapterPartition> temp;
     GetPartition(partitionIndex, (ICompositeCursorAdapterPartition**)&temp);
-    Int64 directoryId = ((DirectoryPartition*)partition.Get())->GetDirectoryId();
+    Int64 directoryId = ((DirectoryPartition*)temp.Get())->GetDirectoryId();
     if (directoryId != IContactsContractDirectory::DEFAULT) {
         AutoPtr<IUriBuilder> builder;
         uri->BuildUpon((IUriBuilder**)&builder);
@@ -264,36 +265,46 @@ AutoPtr<IView> ContactListAdapter::NewView(
     AutoPtr<IView> temp = ContactEntryListAdapter::NewView(context, partition, cursor, position, parent);
     AutoPtr<ContactListItemView> view = (ContactListItemView*)IContactListItemView::Probe(temp);
     view->SetUnknownNameText(mUnknownNameText);
-    view->SetQuickContactEnabled(IsQuickContactEnabled());
-    view->SetAdjustSelectionBoundsEnabled(IsAdjustSelectionBoundsEnabled());
-    view->SetActivatedStateSupported(IsSelectionVisible());
+    Boolean isEnabled;
+    IsQuickContactEnabled(&isEnabled);
+    view->SetQuickContactEnabled(isEnabled);
+    IsAdjustSelectionBoundsEnabled(&isEnabled);
+    view->SetAdjustSelectionBoundsEnabled(isEnabled);
+    Boolean isVisible;
+    IsSelectionVisible(&isVisible);
+    view->SetActivatedStateSupported(isVisible);
     view->SetPhotoPosition(mPhotoPosition);
     return temp;
 }
 
 void ContactListAdapter::BindSectionHeaderAndDivider(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ Int32 position,
     /* [in] */ ICursor* cursor)
 {
-    view->SetIsSectionHeaderEnabled(IsSectionHeaderDisplayEnabled());
-    if (IsSectionHeaderDisplayEnabled()) {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
+    Boolean isEnabled;
+    IsSectionHeaderDisplayEnabled(&isEnabled);
+    view->SetIsSectionHeaderEnabled(isEnabled);
+    if (isEnabled) {
         AutoPtr<IIndexerListAdapterPlacement> temp;
         GetItemPlacementInSection(position, (IIndexerListAdapterPlacement**)&temp);
         AutoPtr<Placement> placement = (Placement*)temp.Get();
         view->SetSectionHeader(placement->mSectionHeader);
     }
     else {
-        view->SetSectionHeader(NULL);
+        view->SetSectionHeader(String(NULL));
     }
 }
 
 void ContactListAdapter::BindPhoto(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ Int32 partitionIndex,
     /* [in] */ ICursor* cursor)
 {
-    if (!IsPhotoSupported(partitionIndex)) {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
+    Boolean isSupported;
+    if (IsPhotoSupported(partitionIndex, &isSupported), !isSupported) {
         view->RemovePhotoView();
         return;
     }
@@ -335,9 +346,10 @@ void ContactListAdapter::BindPhoto(
 }
 
 void ContactListAdapter::BindNameAndViewId(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ ICursor* cursor)
 {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
     Int32 order;
     GetContactNameDisplayOrder(&order);
     view->ShowDisplayName(
@@ -348,17 +360,19 @@ void ContactListAdapter::BindNameAndViewId(
 }
 
 void ContactListAdapter::BindPresenceAndStatusMessage(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ ICursor* cursor)
 {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
     view->ShowPresenceAndStatusMessage(cursor, ContactQuery::CONTACT_PRESENCE_STATUS,
             ContactQuery::CONTACT_CONTACT_STATUS);
 }
 
 void ContactListAdapter::BindSearchSnippet(
-    /* [in] */ IContactListItemView* view,
+    /* [in] */ IContactListItemView* _view,
     /* [in] */ ICursor* cursor)
 {
+    AutoPtr<ContactListItemView> view = (ContactListItemView*)_view;
     view->ShowSnippet(cursor, ContactQuery::CONTACT_SNIPPET);
 }
 
@@ -464,7 +478,7 @@ ECode ContactListAdapter::ChangeCursor(
     /* [in] */ Int32 partition,
     /* [in] */ ICursor* cursor)
 {
-    ContactEntryListAdapter::ChangeCursor(partitionIndex, cursor);
+    ContactEntryListAdapter::ChangeCursor(partition, cursor);
 
     // Check if a profile exists
     Int32 count;
@@ -475,6 +489,7 @@ ECode ContactListAdapter::ChangeCursor(
         cursor->GetInt32(ContactQuery::CONTACT_IS_USER_PROFILE, &value);
         SetProfileExists(value == 1);
     }
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<String> > ContactListAdapter::GetProjection(
