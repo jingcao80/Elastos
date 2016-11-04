@@ -9,6 +9,8 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace Security {
 
+CAR_INTERFACE_IMPL(MessageDigestSpi, Object, IMessageDigestSpi)
+
 ECode MessageDigestSpi::EngineGetDigestLength(
     /* [out] */ Int32* len)
 {

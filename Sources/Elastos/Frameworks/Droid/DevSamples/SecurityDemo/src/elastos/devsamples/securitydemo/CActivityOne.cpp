@@ -12,22 +12,34 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.KeyStore.h"
 #include "elastos/security/KeyPairGenerator.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::StringUtils;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::IInputStream;
+using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::CKeyFactoryHelper;
+using Elastos::Security::CKeyPairGeneratorHelper;
 using Elastos::Security::CKeyStoreHelper;
+using Elastos::Security::CMessageDigestHelper;
 using Elastos::Security::CSignatureHelper;
 using Elastos::Security::IKey;
+using Elastos::Security::IKeyFactory;
+using Elastos::Security::IKeyFactoryHelper;
+using Elastos::Security::IKeyPairGenerator;
+using Elastos::Security::IKeyPairGeneratorHelper;
 using Elastos::Security::IKeyStore;
 using Elastos::Security::IKeyStoreHelper;
 using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::IKeyFactory;
+using Elastos::Security::IMessageDigest;
+using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::IPrincipal;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
@@ -58,6 +70,7 @@ using Elastos::Security::Spec::IECPoint;
 using Elastos::Security::Spec::CECPoint;
 using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
+using Elastos::Security::Spec::IX509EncodedKeySpec;
 using Elastos::Utility::Logging::Logger;
 using Org::Apache::Harmony::Security::Fortress::Services;
 
@@ -117,6 +130,15 @@ ECode CActivityOne::MyListener::OnClick(
 
     if (id == R::id::Button2) {
         return mHost->Button2Function();
+    }
+    else if (id == R::id::Button3) {
+        return mHost->Button3Function();
+    }
+    else if (id == R::id::Button4) {
+        return mHost->Button4Function();
+    }
+    else if (id == R::id::Button5) {
+        return mHost->Button5Function();
     }
     else if (id == R::id::Button6) {
         return mHost->Button6Function();
@@ -282,16 +304,23 @@ ECode CActivityOne::OnCreate(
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::main);
 
-    // AutoPtr<IView> view = FindViewById(R::id::ImageView);
-    // IImageView* imageView = IImageView::Probe(view);
-    // imageView->SetImageResource(R::drawable::earth);
-    // imageView->SetScaleType(Elastos::Droid::Widget::ImageViewScaleType_FIT_CENTER);
-
     AutoPtr<IView> view = FindViewById(R::id::Button1);
     AutoPtr<MyListener> l = new MyListener(this);
     view->SetOnClickListener(l.Get());
 
     view = FindViewById(R::id::Button2);
+    view->SetOnClickListener(l.Get());
+
+    view = NULL;
+    view = FindViewById(R::id::Button3);
+    view->SetOnClickListener(l.Get());
+
+    view = NULL;
+    view = FindViewById(R::id::Button4);
+    view->SetOnClickListener(l.Get());
+
+    view = NULL;
+    view = FindViewById(R::id::Button5);
     view->SetOnClickListener(l.Get());
 
     view = FindViewById(R::id::Button6);
@@ -453,6 +482,97 @@ ECode CActivityOne::Button2Function()
     }
 
     Logger::E(TAG, "leliang end Button2Function");
+    return NOERROR;
+}
+
+ECode CActivityOne::Button3Function()   //MessageDigest
+{
+    Logger::D(TAG, "begin Button3Function");
+    Services::Initialize();
+
+    AutoPtr<IMessageDigestHelper> mdHelper;
+    CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&mdHelper);
+    AutoPtr<IMessageDigest> md;
+    Logger::D(TAG, "begin GetInstance");
+    mdHelper->GetInstance(String("SHA-1"), (IMessageDigest**)&md);
+
+    String text("abc");
+    AutoPtr<ArrayOf<Byte> > data = text.GetBytes();
+    md->Update(data);
+    AutoPtr<ArrayOf<Byte> > resultData;
+    md->Digest((ArrayOf<Byte>**)&resultData);
+    for (Int32 i = 0; i < resultData->GetLength(); i++) {
+        Logger::D(TAG, "resultData %d is : %x", i, (*resultData)[i]);
+    }
+    String resultStr = StringUtils::ToHexString(*resultData);
+
+    Logger::D(TAG, "=====end Button3Function===== \nresult string is : %s", resultStr.string());
+    return NOERROR;
+}
+
+ECode CActivityOne::Button4Function()   //KeyPairGenerator
+{
+    Logger::D(TAG, "begin Button4Function");
+    Services::Initialize();
+
+    AutoPtr<IKeyPairGeneratorHelper> kpgHelper;
+    CKeyPairGeneratorHelper::AcquireSingleton((IKeyPairGeneratorHelper**)&kpgHelper);
+    AutoPtr<IKeyPairGenerator> keyPairGenerator;
+    Logger::D(TAG, "begin GetInstance");
+    kpgHelper->GetInstance(String("RSA"), String("ElastosOpenSSL"), (IKeyPairGenerator**)&keyPairGenerator);
+
+    keyPairGenerator->Initialize(1024);
+
+    AutoPtr<IKeyPair> keyPair;
+    keyPairGenerator->GenerateKeyPair((IKeyPair**)&keyPair);
+
+    AutoPtr<IPublicKey> publicKey;
+    keyPair->GetPublic((IPublicKey**)&publicKey);
+
+    AutoPtr<IPrivateKey> privateKey;
+    keyPair->GetPrivate((IPrivateKey**)&privateKey);
+
+    AutoPtr<ArrayOf<Byte> > publicEncoded;
+    IKey::Probe(publicKey)->GetEncoded((ArrayOf<Byte>**)&publicEncoded);
+    String publicStr = StringUtils::ToHexString(*publicEncoded);
+    mPublicEncoded = publicEncoded;
+
+    AutoPtr<ArrayOf<Byte> > privateEncoded;
+    IKey::Probe(privateKey)->GetEncoded((ArrayOf<Byte>**)&privateEncoded);
+    String privateStr = StringUtils::ToHexString(*privateEncoded);
+    mPrivateEncoded = privateEncoded;
+
+    Logger::D(TAG, "=====end Button4Function===== \npublicKey string is : %s, \nprivateKey string is : %s",
+            publicStr.string(), privateStr.string());
+    return NOERROR;
+}
+
+ECode CActivityOne::Button5Function()   //KeyFactory
+{
+    Logger::D(TAG, "begin Button5Function");
+    Services::Initialize();
+
+    AutoPtr<IKeyFactoryHelper> kfHelper;
+    CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
+    AutoPtr<IKeyFactory> keyFactory;
+    Logger::D(TAG, "begin GetInstance");
+    kfHelper->GetInstance(String("RSA"), (IKeyFactory**)&keyFactory);
+
+    if (mPublicEncoded == NULL || mPrivateEncoded == NULL) {
+        Logger::D(TAG, "\n=====Please run button4 first=====\n");
+        return NOERROR;
+    }
+    AutoPtr<IX509EncodedKeySpec> x509Spec;
+    CX509EncodedKeySpec::New(mPublicEncoded, (IX509EncodedKeySpec**)&x509Spec);
+    AutoPtr<IPublicKey> publicKey;
+    keyFactory->GeneratePublic(IKeySpec::Probe(x509Spec), (IPublicKey**)&publicKey);
+
+    AutoPtr<IPKCS8EncodedKeySpec> pkcs8Spec;
+    CPKCS8EncodedKeySpec::New(mPrivateEncoded, (IPKCS8EncodedKeySpec**)&pkcs8Spec);
+    AutoPtr<IPrivateKey> privateKey;
+    keyFactory->GeneratePrivate(IKeySpec::Probe(pkcs8Spec), (IPrivateKey**)&privateKey);
+
+    Logger::D(TAG, "=====end Button5Function=====");
     return NOERROR;
 }
 

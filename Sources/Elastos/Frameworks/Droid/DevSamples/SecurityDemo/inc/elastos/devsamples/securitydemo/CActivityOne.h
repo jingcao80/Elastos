@@ -60,6 +60,9 @@ private:
         /* [in] */ IIntent *data);
 
     CARAPI Button2Function();// MAC test
+    CARAPI Button3Function();// MessageDigest
+    CARAPI Button4Function();// KeyPairGenerator
+    CARAPI Button5Function();// KeyFactory
     CARAPI Button6Function();// KeyAgreement test
     CARAPI Button7Function();// CertificateFactory
 
@@ -72,6 +75,10 @@ private:
     CARAPI CipherTest();
 
 private:
+    AutoPtr<ArrayOf<Byte> > mPublicEncoded;
+
+    AutoPtr<ArrayOf<Byte> > mPrivateEncoded;
+
 };
 
 } // namespace SecurityDemo

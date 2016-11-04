@@ -96,10 +96,10 @@ ECode OpenSSLRSAKeyFactory::EngineGeneratePrivate(
         return NOERROR;
     }
     else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
-        assert(0 && "TODO");
-        // *priKey = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
-        //         INativeCrypto::EVP_PKEY_RSA);
-        // REFCOUNT_ADD(*priKey)
+        AutoPtr<IPrivateKey> pkey = OpenSSLKey::GetPrivateKey(
+                IPKCS8EncodedKeySpec::Probe(keySpec), INativeCrypto::EVP_PKEY_RSA);
+        *priKey = pkey;
+        REFCOUNT_ADD(*priKey)
         return NOERROR;
     }
     Logger::E("OpenSSLRSAKeyFactory", "EngineGeneratePrivate Must use RSAPrivateKeySpec or PKCS8EncodedKeySpec");

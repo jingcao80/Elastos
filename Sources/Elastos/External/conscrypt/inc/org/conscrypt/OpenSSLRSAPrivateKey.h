@@ -5,6 +5,7 @@
 #include "_Org.Conscrypt.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Core::IArrayOf;
 using Elastos::Security::IKey;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::Interfaces::IRSAKey;
@@ -36,7 +37,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IOpenSSLKey* key,
-        /* [in] */ ArrayOf<Handle32>* params);
+        /* [in] */ ArrayOf<IArrayOf*>* params);
 
     CARAPI constructor(
         /* [in] */ IRSAPrivateKeySpec* rsaKeySpec);

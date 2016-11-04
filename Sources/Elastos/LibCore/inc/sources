@@ -112,6 +112,7 @@ EXPORT_HEADERS += elastos/io/Writer.h
 
 EXPORT_HEADERS += elastos/security/KeyPairGenerator.h
 EXPORT_HEADERS += elastos/security/KeyPairGeneratorSpi.h
+EXPORT_HEADERS += elastos/security/MessageDigestSpi.h
 EXPORT_HEADERS += elastos/security/KeyStoreSpi.h
 EXPORT_HEADERS += elastos/security/cert/CertificateFactorySpi.h
 EXPORT_HEADERS += elastos/security/Provider.h

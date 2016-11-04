@@ -58,6 +58,7 @@ SOURCES += CKeyFactoryHelper.cpp
 SOURCES += CKeyPair.cpp
 SOURCES += KeyPairGeneratorSpi.cpp
 SOURCES += KeyPairGenerator.cpp
+SOURCES += CKeyPairGeneratorHelper.cpp
 SOURCES += CKeyRep.cpp
 SOURCES += KeyStore.cpp
 SOURCES += CKeyStoreHelper.cpp

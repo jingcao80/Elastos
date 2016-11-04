@@ -4,9 +4,11 @@
 
 #include "Org.Conscrypt.h"
 #include <elastos/core/Object.h>
+#include "elastos/security/MessageDigestSpi.h"
 
 using Elastos::Core::Object;
 using Elastos::Core::ICloneable;
+using Elastos::Security::MessageDigestSpi;
 
 namespace Org {
 namespace Conscrypt {
@@ -15,7 +17,7 @@ namespace Conscrypt {
  * Implements the JDK MessageDigest interface using OpenSSL's EVP API.
  */
 class OpenSSLMessageDigestJDK
-    : public Object // public MessageDigestSpi
+    : public MessageDigestSpi
     , public IOpenSSLMessageDigestJDK
     , public ICloneable
 {
