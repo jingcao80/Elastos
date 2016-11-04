@@ -157,14 +157,15 @@ ECode SignatureTest::MD5WithRSA()
     // String text("123");
     // AutoPtr<ArrayOf<Byte> > bytes = text.GetBytes();
     AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(Vector2Data, sizeof(Vector2Data)/sizeof(Vector2Data[0]));
-    sig->Update(bytes);
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================4");
+    ec = sig->Update(bytes);
+    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================4, ec =[0x%08x]", ec);
 
     Boolean isVerified = FALSE;
     AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::Alloc(MD5withRSA_Vector2Signature
             , sizeof(MD5withRSA_Vector2Signature)/sizeof(MD5withRSA_Vector2Signature[0]));
     Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================5");
-    sig->Verify(bytes2, &isVerified);
+    ec = sig->Verify(bytes2, &isVerified);
+    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================6, ec =[0x%08x]", ec);
     assert("Signature must match expected signature" && isVerified);
     return NOERROR;
 }

@@ -15,7 +15,7 @@ namespace Conscrypt {
 //=========================================
 // OpenSSLSignatureRawRSA::
 //=========================================
-CAR_INTERFACE_IMPL(OpenSSLSignatureRawRSA, Object, IOpenSSLSignatureRawRSA)
+CAR_INTERFACE_IMPL(OpenSSLSignatureRawRSA, SignatureSpi, IOpenSSLSignatureRawRSA)
 
 ECode OpenSSLSignatureRawRSA::EngineUpdate(
     /* [in] */ Byte input)
@@ -114,7 +114,7 @@ ECode OpenSSLSignatureRawRSA::EngineInitVerify(
 }
 
 ECode OpenSSLSignatureRawRSA::EngineSetParameter(
-    /* [in] */ String param,
+    /* [in] */ const String& param,
     /* [in] */ IInterface* value)
 {
     return NOERROR;
@@ -128,14 +128,14 @@ ECode OpenSSLSignatureRawRSA::EngineSign(
         // This can't actually happen, but you never know...
         // throw new SignatureException("Need RSA private key");
         *sign = NULL;
-        return NOERROR;
+        return E_SIGNATURE_EXCEPTION;
     }
 
     if (mInputIsTooLong) {
         // throw new SignatureException("input length " + mInputOffset + " != "
         //         + mInputBuffer->GetLength() + " (modulus size)");
         *sign = NULL;
-        return NOERROR;
+        return E_SIGNATURE_EXCEPTION;
     }
 
     AutoPtr<ArrayOf<Byte> > outputBuffer = ArrayOf<Byte>::Alloc(mInputBuffer->GetLength());
@@ -163,7 +163,7 @@ ECode OpenSSLSignatureRawRSA::EngineVerify(
         // This can't actually happen, but you never know...
         // throw new SignatureException("Need RSA public key");
         *result = FALSE;
-        return NOERROR;
+        return E_SIGNATURE_EXCEPTION;
     }
 
     if (mInputIsTooLong) {

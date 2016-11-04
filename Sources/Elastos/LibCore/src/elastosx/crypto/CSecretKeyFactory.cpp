@@ -80,6 +80,7 @@ ECode CSecretKeyFactory::GetInstance(
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
+    assert(0 && "TODO");
 //TODO: Need IEngine
     // AutoPtr<IEngine.SpiAndProvider> sap = ENGINE.getInstance(algorithm, NULL);
     // return new SecretKeyFactory((SecretKeyFactorySpi) sap.spi, sap.provider, algorithm);

@@ -3,10 +3,11 @@
 #define __ORG_CONSCRYPT_OPENSSLSIGNATURERAWRSA_H__
 
 #include "_Org.Conscrypt.h"
-#include <elastos/core/Object.h>
+#include "elastos/security/SignatureSpi.h"
 
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
+using Elastos::Security::SignatureSpi;
 
 namespace Org {
 namespace Conscrypt {
@@ -16,7 +17,7 @@ namespace Conscrypt {
  * generation and verification using OpenSSL.
  */
 class OpenSSLSignatureRawRSA
-    : public Object // public SignatureSpi
+    : public SignatureSpi
     , public IOpenSSLSignatureRawRSA
 {
 public:
@@ -41,7 +42,7 @@ public:
         /* [in] */ IPublicKey* publicKey);
 
     CARAPI EngineSetParameter(
-        /* [in] */ String param,
+        /* [in] */ const String& param,
         /* [in] */ IInterface* value);
 
     CARAPI EngineSign(

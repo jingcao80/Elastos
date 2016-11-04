@@ -32,6 +32,7 @@ ECode CertStore:: GetInstance(
     if (type.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
+    assert(0 && "TODO");
     //Apache...Todo
     /*
     try {

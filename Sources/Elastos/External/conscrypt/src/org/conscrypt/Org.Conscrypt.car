@@ -96,6 +96,7 @@ module
     using interface Elastos.Security.IPrivateKey;
     using interface Elastos.Security.IPublicKey;
     using interface Elastos.Security.ISecureRandom;
+    using interface Elastos.Security.ISignatureSpi;
     using interface Elastos.Security.IKeyFactorySpi;
     using interface Elastos.Security.IKeyPairGeneratorSpi;
     using interface Elastos.Security.ISecureRandomSpi;
@@ -664,59 +665,113 @@ module
     }
 
     class COpenSSLSignature {
+        constructor(
+            [in] Int64 algorithm,
+            [in] EngineType engineType);
+
         interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureMD5RSA {
+        constructor();
+
         interface IOpenSSLSignatureMD5RSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA1RSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA1RSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA224RSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA224RSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA256RSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA256RSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA384RSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA384RSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA512RSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA512RSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA1DSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA1DSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA1ECDSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA1ECDSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA224ECDSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA224ECDSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA256ECDSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA256ECDSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA384ECDSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA384ECDSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureSHA512ECDSA {
+        constructor();
+
         interface IOpenSSLSignatureSHA512ECDSA;
+        interface IOpenSSLSignature;
+        interface ISignatureSpi;
     }
 
     class COpenSSLSignatureRawRSA {
         interface IOpenSSLSignatureRawRSA;
+        interface ISignatureSpi;
     }
 
     [local]

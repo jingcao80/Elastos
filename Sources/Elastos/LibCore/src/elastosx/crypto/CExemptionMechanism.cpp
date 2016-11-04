@@ -165,6 +165,7 @@ ECode CExemptionMechanism::GetInstance(
         // throw new NULLPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
+    assert(0 && "TODO");
 //TODO: Need IEngine
     // Engine.SpiAndProvider sap = ENGINE.getInstance(algorithm, NULL);
     // return new ExemptionMechanism((ExemptionMechanismSpi) sap.spi, sap.provider, algorithm);

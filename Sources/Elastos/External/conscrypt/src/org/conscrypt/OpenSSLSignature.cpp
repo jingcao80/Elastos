@@ -441,6 +441,7 @@ ECode OpenSSLSignature::EngineVerify(
 {
     VALIDATE_NOT_NULL(result)
     if (mKey == NULL) {
+        *result = FALSE;
         // This can't actually happen, but you never know...
         // throw new SignatureException("Need DSA or RSA public key");
         return E_SIGNATURE_EXCEPTION;

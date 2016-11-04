@@ -48,6 +48,7 @@ ECode CertPathBuilder::GetInstance(
     if (algorithm.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
+    assert(0 && "TODO");
     //APACHE...Todo
 /*
     Engine.SpiAndProvider sap = ENGINE.getInstance(algorithm, null);
