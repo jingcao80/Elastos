@@ -505,7 +505,6 @@ module
 
         interface IICountryDetector;
         interface IBinder;
-        interface IRunnable;
     }
 
     [local]

@@ -43,7 +43,7 @@
 #include <elastos/utility/logging/Slogger.h>
 
 // using Elastos::Droid::KeyStore::Security::CKeyChain;
-// using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 // using Elastos::Droid::Os::CEnvironment;
 // using Elastos::Droid::Os::CServiceManager;
 // using Elastos::Droid::Utility::CPrintWriterPrinter;
@@ -3621,8 +3621,10 @@ ECode CDevicePolicyManagerService::RequireSecureKeyguard(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-   if (!mHasFeature) {
-        *result = FALSE;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (!mHasFeature) {
         return NOERROR;
     }
 
@@ -3643,13 +3645,10 @@ ECode CDevicePolicyManagerService::RequireSecureKeyguard(
 
     // Keystore.isEmpty() requires system UID
     Int64 token = Binder::ClearCallingIdentity();
-    // try {
     ECode ec;
     do {
         AutoPtr<IKeyStoreHelper> helper;
-        // TODO: Waiting for CKeyStoreHelper
-        assert(0);
-        // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+        CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
         AutoPtr<IKeyStore> keyStore;
         ec = helper->GetInstance((IKeyStore**)&keyStore);
         if (FAILED(ec)) break;
@@ -3658,14 +3657,11 @@ ECode CDevicePolicyManagerService::RequireSecureKeyguard(
         if (FAILED(ec)) break;
         if (!isEmpty) {
             *result = TRUE;
-            return NOERROR;
+            break;
         }
     } while(FALSE);
-    // } finally {
-    Binder::RestoreCallingIdentity(token);
-    // }
 
-    *result = FALSE;
+    Binder::RestoreCallingIdentity(token);
     return NOERROR;
 }
 

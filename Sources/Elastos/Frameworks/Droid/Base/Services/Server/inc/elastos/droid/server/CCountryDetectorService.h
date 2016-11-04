@@ -30,8 +30,21 @@ CarClass(CCountryDetectorService)
     , public Object
     , public IICountryDetector
     , public IBinder
-    , public IRunnable
 {
+private:
+    class InnerRunnable
+        : public Runnable
+    {
+    public:
+        InnerRunnable(
+            /* [in] */ CCountryDetectorService* host);
+
+        CARAPI Run();
+
+    private:
+        CCountryDetectorService* mHost;
+    };
+
 public:
     class CountryDetectedRunnable
         : public Runnable

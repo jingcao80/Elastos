@@ -30,12 +30,12 @@ private:
     {
     public:
         MyRunnable(
-            /* [in] */ IWeakReference* host);
+            /* [in] */ CPendingIntentFinishedDispatcher* host);
 
         CARAPI Run();
 
     private:
-        AutoPtr<IWeakReference> mWeakHost;
+        AutoPtr<CPendingIntentFinishedDispatcher> mHost;    // hold host
     };
 
 public:

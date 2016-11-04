@@ -30,6 +30,16 @@ namespace Server {
 const String CCountryDetectorService::TAG("CountryDetector");
 const Boolean CCountryDetectorService::DEBUG = FALSE;
 
+CCountryDetectorService::InnerRunnable::InnerRunnable(
+    /* [in] */ CCountryDetectorService* host)
+    : mHost(host)
+{}
+
+CCountryDetectorService::InnerRunnable::Run()
+{
+    return mHost->Run();
+}
+
 ECode CCountryDetectorService::CountryDetectedRunnable::Run()
 {
     mHost->NotifyReceivers(mCountry);
@@ -84,7 +94,7 @@ ECode CCountryDetectorService::LocationBasedDetectorListener::OnCountryDetected(
     return mHost->mHandler->Post(runnable, &result);
 }
 
-CAR_INTERFACE_IMPL_3(CCountryDetectorService, Object, IICountryDetector, IBinder, IRunnable)
+CAR_INTERFACE_IMPL_2(CCountryDetectorService, Object, IICountryDetector, IBinder)
 
 CAR_OBJECT_IMPL(CCountryDetectorService)
 
@@ -187,8 +197,9 @@ ECode CCountryDetectorService::SystemRunning()
     CBackgroundThreadHelper::AcquireSingleton((IBackgroundThreadHelper**)&helper);
     AutoPtr<IHandler> hander;
     helper->GetHandler((IHandler**)&hander);
+    AutoPtr<InnerRunnable> runnable = new InnerRunnable(this);
     Boolean bval;
-    hander->Post(this, &bval);
+    hander->Post(runnable, &bval);
     return NOERROR;
 }
 

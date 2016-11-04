@@ -11,20 +11,15 @@ using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Content::EIID_IIntentReceiver;
 
 CPendingIntentFinishedDispatcher::MyRunnable::MyRunnable(
-    /* [in] */ IWeakReference* host)
-    : mWeakHost(host)
+    /* [in] */ CPendingIntentFinishedDispatcher* host)
+    : mHost(host)
 {}
 
 CPendingIntentFinishedDispatcher::MyRunnable::Run()
 {
-    AutoPtr<IIntentReceiver> rrObj;
-    mWeakHost->Resolve(EIID_IIntentReceiver, (IInterface**)&rrObj);
-    if (rrObj == NULL) {
-        return NOERROR;
-    }
-
-    CPendingIntentFinishedDispatcher* host = (CPendingIntentFinishedDispatcher*)rrObj.Get();
-    return host->Run();
+    ECode ec = mHost->Run();
+    mHost = NULL;       // release ref-count
+    return ec;
 }
 
 CAR_INTERFACE_IMPL_2(CPendingIntentFinishedDispatcher, Object, IIntentReceiver, IBinder)
@@ -74,9 +69,7 @@ ECode CPendingIntentFinishedDispatcher::PerformReceive(
         FAIL_RETURN(Run());
     }
     else {
-        AutoPtr<IWeakReference> wr;
-        GetWeakReference((IWeakReference**)&wr);
-        AutoPtr<IRunnable> runnable = new MyRunnable(wr);
+        AutoPtr<IRunnable> runnable = new MyRunnable(this);
         mHandler->Post(runnable, &result);
     }
     return NOERROR;

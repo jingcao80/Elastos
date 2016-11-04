@@ -408,6 +408,10 @@ void TwilightService::LocationHandler::UpdateTwilightState()
         }
     }
 
+    if (nextUpdate - now <= 0) {
+        nextUpdate = now + 12 * IDateUtils::HOUR_IN_MILLIS;
+    }
+
     if (DEBUG) {
         Slogger::D(TAG, "Next update in %d ms", (nextUpdate - now));
     }

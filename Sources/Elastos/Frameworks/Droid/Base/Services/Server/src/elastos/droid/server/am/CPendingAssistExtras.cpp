@@ -40,10 +40,10 @@ ECode CPendingAssistExtras::Run()
 {
     Slogger::W("ActivityManager", "getAssistContextExtras failed: timeout retrieving from %s",
             mActivity->ToString().string());
-    {    AutoLock syncLock(this);
-        mHaveResult = TRUE;
-        NotifyAll();
-    }
+
+    AutoLock syncLock(this);
+    mHaveResult = TRUE;
+    NotifyAll();
     return NOERROR;
 }
 
