@@ -228,6 +228,13 @@ ECode CallLogAdapter::AccessibilityDelegate::OnRequestSendAccessibilityEvent(
 //=================================================================
 // CallLogAdapter::CallLogAdapterHandler
 //=================================================================
+CallLogAdapter::CallLogAdapterHandler::CallLogAdapterHandler(
+    /* [in] */ CallLogAdapter* host)
+    : mHost(host)
+{
+    Handler::constructor(FALSE);
+}
+
 ECode CallLogAdapter::CallLogAdapterHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {

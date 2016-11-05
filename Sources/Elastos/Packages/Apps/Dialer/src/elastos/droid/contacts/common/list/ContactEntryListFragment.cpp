@@ -2,6 +2,7 @@
 #include "elastos/droid/contacts/common/list/ContactEntryListFragment.h"
 #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
 #include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
+#include "elastos/droid/contacts/common/ContactPhotoManager.h"
 #include "elastos/droid/contacts/common/util/ContactListViewUtils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/widget/ListView.h"
@@ -10,6 +11,8 @@
 #include "Elastos.Droid.Provider.h"
 
 using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
+using Elastos::Droid::Common::Widget::ICompositeCursorAdapter;
+using Elastos::Droid::Common::Widget::ICompositeCursorAdapterPartition;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListFragment;
 using Elastos::Droid::Contacts::Common::Util::ContactListViewUtils;
 using Elastos::Droid::Contacts::Common::Preference::EIID_IContactsPreferencesChangeListener;
@@ -29,6 +32,7 @@ using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::EIID_IAbsListViewOnScrollListener;
 using Elastos::Droid::Widget::ListView;
 using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::IBaseAdapter;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::Logging::Logger;
@@ -56,6 +60,12 @@ ContactEntryListFragment::SIMStateReceiver::OnReceive(
 //=================================================================
 // ContactEntryListFragment::DelayedDirectorySearchHandler
 //=================================================================
+ContactEntryListFragment::DelayedDirectorySearchHandler::DelayedDirectorySearchHandler(
+    /* [in] */ ContactEntryListFragment* host)
+    : mHost(host)
+{
+    Handler::constructor(FALSE);
+}
 
 ContactEntryListFragment::DelayedDirectorySearchHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -101,6 +111,7 @@ CAR_INTERFACE_IMPL_4(ContactEntryListFragment::InnerListener, Object
 
 ContactEntryListFragment::InnerListener::InnerListener(
     /* [in] */ ContactEntryListFragment* host)
+    : mHost(host)
 {}
 
 ECode ContactEntryListFragment::InnerListener::OnScroll(
@@ -251,8 +262,7 @@ ECode ContactEntryListFragment::SetEnabled(
                 ReloadData();
             }
             else {
-                assert(0);
-                // mAdapter->ClearPartitions();
+                ICompositeCursorAdapter::Probe(mAdapter)->ClearPartitions();
             }
         }
     }
@@ -325,8 +335,7 @@ ECode ContactEntryListFragment::OnCreate(
     AnalyticsFragment::OnCreate(savedState);
     RestoreSavedState(savedState);
     mAdapter = CreateListAdapter();
-    // TODO: ContactsPreferences not implemented
-    // mContactsPrefs = new ContactsPreferences(mContext);
+    mContactsPrefs = new ContactsPreferences(mContext);
     RestoreSavedState(savedState);
 
     AutoPtr<IIntentFilter> filter;
@@ -373,8 +382,7 @@ ECode ContactEntryListFragment::OnStart()
 {
     AnalyticsFragment::OnStart();
 
-    // TODO: no ContactsPreferences
-    // mContactsPrefs->RegisterChangeListener(mPreferencesChangeListener);
+    mContactsPrefs->RegisterChangeListener(mPreferencesChangeListener);
 
     mForceLoad = LoadPreferences();
 
@@ -393,31 +401,32 @@ void ContactEntryListFragment::StartLoading()
     }
 
     ConfigureAdapter();
-    assert(0);
     Int32 partitionCount;
-    // mAdapter->GetPartitionCount(&partitionCount);
+    AutoPtr<ICompositeCursorAdapter> adapter = ICompositeCursorAdapter::Probe(mAdapter);
+    adapter->GetPartitionCount(&partitionCount);
     for (Int32 i = 0; i < partitionCount; i++) {
-        // TODO: no com.android.common.widget.CompositeCursorAdapter;
-        // Partition partition = mAdapter.getPartition(i);
-        // if (partition instanceof DirectoryPartition) {
-        //     DirectoryPartition directoryPartition = (DirectoryPartition)partition;
-        //     if (directoryPartition.getStatus() == DirectoryPartition.STATUS_NOT_LOADED) {
-        //         if (directoryPartition.isPriorityDirectory() || !mLoadPriorityDirectoriesOnly) {
-        //             startLoadingDirectoryPartition(i);
-        //         }
-        //     }
-        // } else {
-        AutoPtr<ILoaderManager> lm;
-        GetLoaderManager((ILoaderManager**)&lm);
-        AutoPtr<ILoader> l;
-        lm->InitLoader(i, NULL, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
-        // }
+        AutoPtr<ICompositeCursorAdapterPartition> temp;
+        adapter->GetPartition(i, (ICompositeCursorAdapterPartition**)&temp);
+        AutoPtr<IDirectoryPartition> partition = IDirectoryPartition::Probe(temp);
+        if (partition != NULL) {
+            AutoPtr<DirectoryPartition> directoryPartition = (DirectoryPartition*)partition.Get();
+            if (directoryPartition->GetStatus() == DirectoryPartition::STATUS_NOT_LOADED) {
+                if (directoryPartition->IsPriorityDirectory() || !mLoadPriorityDirectoriesOnly) {
+                    StartLoadingDirectoryPartition(i);
+                }
+            }
+        }
+        else {
+            AutoPtr<ILoaderManager> lm;
+            GetLoaderManager((ILoaderManager**)&lm);
+            AutoPtr<ILoader> l;
+            lm->InitLoader(i, NULL, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+        }
     }
 
     // Next time this method is called, we should start loading non-priority directories
     mLoadPriorityDirectoriesOnly = FALSE;
-    // TODO: no com.android.common.widget.CompositeCursorAdapter;
-    // mAdapter->NotifyDataSetChanged();
+    IBaseAdapter::Probe(mAdapter)->NotifyDataSetChanged();
 }
 
 ECode ContactEntryListFragment::OnCreateLoader(
@@ -462,31 +471,28 @@ ECode ContactEntryListFragment::CreateCursorLoader(
 void ContactEntryListFragment::StartLoadingDirectoryPartition(
     /* [in] */ Int32 partitionIndex)
 {
-    // TODO: no ICompositeCursorAdapter;
-    assert(0);
-    // AutoPtr<IPartition> temp;
-    // ICompositeCursorAdapter::Probe(mAdapter)->GetPartition(partitionIndex, (IPartition**)&temp);
-    // AutoPtr<IDirectoryPartition> partition = IDirectoryPartition::Probe(temp);
-    // partition->SetStatus(IDirectoryPartition::STATUS_LOADING);
-    // Int64 directoryId;
-    // partition->GetDirectoryId(&directoryId);
-    // if (mForceLoad) {
-    //     if (directoryId == IContactsContractDirectory::DEFAULT) {
-    //         LoadDirectoryPartition(partitionIndex, partition);
-    //     }
-    //     else {
-    //         LoadDirectoryPartitionDelayed(partitionIndex, partition);
-    //     }
-    // }
-    // else {
-    //     AutoPtr<IBundle> args;
-    //     CBundle::New((IBundle**)&args);
-    //     args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
-    //     AutoPtr<ILoaderManager> lm;
-    //     GetLoaderManager((ILoaderManager**)&lm);
-    //     AutoPtr<ILoader> l;
-    //     lm->InitLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
-    // }
+    AutoPtr<ICompositeCursorAdapterPartition> temp;
+    ICompositeCursorAdapter::Probe(mAdapter)->GetPartition(partitionIndex, (ICompositeCursorAdapterPartition**)&temp);
+    AutoPtr<DirectoryPartition> partition = (DirectoryPartition*)(IDirectoryPartition::Probe(temp));
+    partition->SetStatus(IDirectoryPartition::STATUS_LOADING);
+    Int64 directoryId = partition->GetDirectoryId();
+    if (mForceLoad) {
+        if (directoryId == IContactsContractDirectory::DEFAULT) {
+            LoadDirectoryPartition(partitionIndex, partition);
+        }
+        else {
+            LoadDirectoryPartitionDelayed(partitionIndex, partition);
+        }
+    }
+    else {
+        AutoPtr<IBundle> args;
+        CBundle::New((IBundle**)&args);
+        args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
+        AutoPtr<ILoaderManager> lm;
+        GetLoaderManager((ILoaderManager**)&lm);
+        AutoPtr<ILoader> l;
+        lm->InitLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+    }
 }
 
 void ContactEntryListFragment::LoadDirectoryPartitionDelayed(
@@ -574,9 +580,7 @@ ECode ContactEntryListFragment::OnLoaderReset(
 {
     Int32 id;
     if (loader->GetId(&id), id >= 0) {
-        // TODO: no CompositeCursorAdapter and then no function ChangeCursor
-        assert(0);
-        // mAdapter->ChangeCursor(id, NULL);
+        ICompositeCursorAdapter::Probe(mAdapter)->ChangeCursor(id, NULL);
     }
     else {
         mAdapter->ChangeCursor(NULL);
@@ -588,17 +592,15 @@ void ContactEntryListFragment::OnPartitionLoaded(
     /* [in] */ Int32 partitionIndex,
     /* [in] */ ICursor* data)
 {
-    // Int32 count;
-    assert(0);
-    // TODO: no CompositeCursorAdapter and then no function GetPartitionCount
-    // if (mAdapter->GetPartitionCount(&count), partitionIndex >= count) {
-    //     // When we get unsolicited data, ignore it.  This could happen
-    //     // when we are switching from search mode to the default mode.
-    //     return;
-    // }
+    AutoPtr<ICompositeCursorAdapter> adapter = ICompositeCursorAdapter::Probe(mAdapter);
+    Int32 count;
+    if (adapter->GetPartitionCount(&count), partitionIndex >= count) {
+        // When we get unsolicited data, ignore it.  This could happen
+        // when we are switching from search mode to the default mode.
+        return;
+    }
 
-    // TODO: no CompositeCursorAdapter and then no function ChangeCursor
-    // mAdapter->ChangeCursor(partitionIndex, data);
+    adapter->ChangeCursor(partitionIndex, data);
     SetProfileHeader();
 
     Boolean isLoading;
@@ -642,9 +644,8 @@ ECode ContactEntryListFragment::IsLoadingDirectoryList(
 ECode ContactEntryListFragment::OnStop()
 {
     AnalyticsFragment::OnStop();
-    // TODO: no ContactsPreferences
-    // mContactsPrefs->UnregisterChangeListener();
-    // mAdapter->ClearPartitions();
+    mContactsPrefs->UnregisterChangeListener();
+    ICompositeCursorAdapter::Probe(mAdapter)->ClearPartitions();
     return NOERROR;
 }
 
@@ -966,17 +967,16 @@ ECode ContactEntryListFragment::SetDirectoryResultLimit(
 Boolean ContactEntryListFragment::LoadPreferences()
 {
     Boolean changed = FALSE;
-    // TODO: no ContactsPreferences
-    // if (GetContactNameDisplayOrder() != mContactsPrefs->GetDisplayOrder()) {
-    //     SetContactNameDisplayOrder(mContactsPrefs->GetDisplayOrder());
-    //     changed = TRUE;
-    // }
+    if (GetContactNameDisplayOrder() != mContactsPrefs->GetDisplayOrder()) {
+        SetContactNameDisplayOrder(mContactsPrefs->GetDisplayOrder());
+        changed = TRUE;
+    }
 
-    // Int32 sort;
-    // if (GetSortOrder(&sort), sort != mContactsPrefs->GetSortOrder()) {
-    //     SetSortOrder(mContactsPrefs->GetSortOrder());
-    //     changed = TRUE;
-    // }
+    Int32 sort;
+    if (GetSortOrder(&sort), sort != mContactsPrefs->GetSortOrder()) {
+        SetSortOrder(mContactsPrefs->GetSortOrder());
+        changed = TRUE;
+    }
 
     return changed;
 }
@@ -994,8 +994,7 @@ ECode ContactEntryListFragment::OnCreateView(
     IsSearchMode(&searchMode);
     mAdapter->SetSearchMode(searchMode);
     mAdapter->ConfigureDefaultPartition(FALSE, searchMode);
-    // TODO: no contactphotomanager
-    // mAdapter->SetPhotoLoader(mPhotoManager);
+    mAdapter->SetPhotoLoader(mPhotoManager);
     IAdapterView::Probe(mListView)->SetAdapter(IAdapter::Probe(mAdapter));
 
     if (IsSearchMode(&searchMode), !searchMode) {
@@ -1081,17 +1080,15 @@ void ContactEntryListFragment::ConfigurePhotoLoader()
 {
     Boolean isEnabled;
     if ((IsPhotoLoaderEnabled(&isEnabled), isEnabled) && mContext != NULL) {
-        // TODO: no ContactPhotoManager
-        // if (mPhotoManager == NULL) {
-        //     mPhotoManager = ContactPhotoManager::GetInstance(mContext);
-        // }
+        if (mPhotoManager == NULL) {
+            mPhotoManager = ContactPhotoManager::GetInstance(mContext);
+        }
         if (mListView != NULL) {
             AutoPtr<InnerListener> listener = new InnerListener(this);
             IAbsListView::Probe(mListView)->SetOnScrollListener(listener);
         }
         if (mAdapter != NULL) {
-            // TODO: no ContactPhotoManager
-            // mAdapter->SetPhotoLoader(mPhotoManager);
+            mAdapter->SetPhotoLoader(mPhotoManager);
         }
     }
 }
@@ -1131,12 +1128,10 @@ ECode ContactEntryListFragment::OnScrollStateChanged(
 {
     Boolean isEnabled;
     if (scrollState == IAbsListViewOnScrollListener::SCROLL_STATE_FLING) {
-        assert(0);
-        // mPhotoManager->Pause();
+        mPhotoManager->Pause();
     }
     else if (IsPhotoLoaderEnabled(&isEnabled), isEnabled) {
-        assert(0);
-        // mPhotoManager->Resume();
+        mPhotoManager->Resume();
     }
     return NOERROR;
 }

@@ -191,9 +191,7 @@ private:
     {
     public:
         CallLogAdapterHandler(
-            /* [in] */ CallLogAdapter* host)
-            : mHost(host)
-        {}
+            /* [in] */ CallLogAdapter* host);
 
         TO_STRING_IMPL("CallLogAdapter::CallLogAdapterHandler")
 

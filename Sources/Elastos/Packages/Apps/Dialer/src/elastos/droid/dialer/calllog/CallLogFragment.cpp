@@ -607,17 +607,18 @@ ECode CallLogFragment::ConfigureScreenFromIntent(
 
 ECode CallLogFragment::OnStart()
 {
+    // TODO:
     // Start the empty loader now to defer other fragments.  We destroy it when both calllog
     // and the voicemail status are fetched.
-    AutoPtr<ILoaderManager> manager;
-    GetLoaderManager((ILoaderManager**)&manager);
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
-    AutoPtr<EmptyLoader::Callback> callback = new EmptyLoader::Callback(IContext::Probe(activity));
-    AutoPtr<ILoader> loader;
-    manager->InitLoader(EMPTY_LOADER_ID, NULL,
-            (ILoaderManagerLoaderCallbacks*)callback, (ILoader**)&loader);
-    mEmptyLoaderRunning = TRUE;
+    // AutoPtr<ILoaderManager> manager;
+    // GetLoaderManager((ILoaderManager**)&manager);
+    // AutoPtr<IActivity> activity;
+    // GetActivity((IActivity**)&activity);
+    // AutoPtr<EmptyLoader::Callback> callback = new EmptyLoader::Callback(IContext::Probe(activity));
+    // AutoPtr<ILoader> loader;
+    // manager->InitLoader(EMPTY_LOADER_ID, NULL,
+    //         (ILoaderManagerLoaderCallbacks*)callback, (ILoader**)&loader);
+    // mEmptyLoaderRunning = TRUE;
     return AnalyticsListFragment::OnStart();
 }
 

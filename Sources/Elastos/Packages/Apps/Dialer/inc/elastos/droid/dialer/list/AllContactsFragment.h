@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_ALLCONTACTSFRAGMENT_H__
 
 #include "elastos/droid/contacts/common/list/ContactEntryListFragment.h"
-// #include "elastos/droid/contacts/common/list/DefaultContactListAdapters.h"
+#include "elastos/droid/contacts/common/list/DefaultContactListAdapter.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Os.h"
@@ -11,7 +11,7 @@
 
 using Elastos::Droid::Contacts::Common::List::ContactEntryListFragment;
 using Elastos::Droid::Contacts::Common::List::IContactEntryListAdapter;
-// using Elastos::Droid::Contacts::Common::List::DefaultContactListAdapters;
+using Elastos::Droid::Contacts::Common::List::DefaultContactListAdapter;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Os::IBundle;
 
@@ -28,26 +28,26 @@ class AllContactsFragment
     , public IAllContactsFragment
 {
 private:
-    // class MyDefaultContactListAdapter
-    //     : public DefaultContactListAdapter
-    // {
-    // public:
-    //     MyDefaultContactListAdapter(
-    //         /* [in] */ AllContactsFragment* host)
-    //         : mHost(host)
-    //     {}
+    class MyDefaultContactListAdapter
+        : public DefaultContactListAdapter
+    {
+    public:
+        MyDefaultContactListAdapter(
+            /* [in] */ AllContactsFragment* host)
+            : mHost(host)
+        {}
 
-    // protected:
-    //     // @Override
-    //     CARAPI BindView(
-    //         /* [in] */ IView* itemView,
-    //         /* [in] */ Int32 partition,
-    //         /* [in] */ ICursor* cursor,
-    //         /* [in] */ Int32 position);
+    protected:
+        // @Override
+        CARAPI_(void) BindView(
+            /* [in] */ IView* itemView,
+            /* [in] */ Int32 partition,
+            /* [in] */ ICursor* cursor,
+            /* [in] */ Int32 position);
 
-    // private:
-    //     AllContactsFragment* mHost;
-    // };
+    private:
+        AllContactsFragment* mHost;
+    };
 
 public:
     AllContactsFragment();

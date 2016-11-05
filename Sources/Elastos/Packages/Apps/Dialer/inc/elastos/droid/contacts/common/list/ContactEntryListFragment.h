@@ -3,7 +3,6 @@
 #define __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTENTRYLISTFRAGMENT_H__
 
 #include "elastos/droid/contacts/common/preference/ContactsPreferences.h"
-// #include "elastos/droid/contacts/common/list/ContactPhotoManager.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/dialerbind/analytics/AnalyticsFragment.h"
@@ -121,9 +120,7 @@ private:
     {
     public:
         DelayedDirectorySearchHandler(
-            /* [in] */ ContactEntryListFragment* host)
-            : mHost(host)
-        {}
+            /* [in] */ ContactEntryListFragment* host);
 
         TO_STRING_IMPL("ContactEntryListFragment::DelayedDirectorySearchHandler")
 
@@ -531,7 +528,7 @@ private:
     Int32 mSortOrder;
     Int32 mDirectoryResultLimit;
 
-    // AutoPtr<ContactPhotoManager> mPhotoManager;
+    AutoPtr<IContactPhotoManager> mPhotoManager;
     AutoPtr<ContactsPreferences> mContactsPrefs;
 
     Boolean mForceLoad;
