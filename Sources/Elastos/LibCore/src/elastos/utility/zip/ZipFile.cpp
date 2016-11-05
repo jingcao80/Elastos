@@ -13,12 +13,15 @@
 #include "CLinkedHashMap.h"
 #include "CString.h"
 #include "HeapBufferIterator.h"
+#include "CCloseGuardHelper.h"
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::IDataInputStream;
 using Elastos::IO::CDataInputStream;
 using Elastos::IO::IDataInput;
@@ -265,6 +268,9 @@ CAR_INTERFACE_IMPL_2(ZipFile, Object, IZipFile, ICloseable)
 ZipFile::ZipFile()
 {
     CLinkedHashMap::New((IMap**)&mEntries);
+    AutoPtr<ICloseGuardHelper> cgHelper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&cgHelper);
+    cgHelper->Get((ICloseGuard**)&mGuard);
 }
 
 ZipFile::~ZipFile()

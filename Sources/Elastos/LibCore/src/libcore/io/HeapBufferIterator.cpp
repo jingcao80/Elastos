@@ -92,7 +92,7 @@ ECode HeapBufferIterator::ReadInt16(
     /* [out] */ Int16* result)
 {
     *result = Memory::PeekInt16(mBuffer, mOffset + mPosition, mOrder);
-    mPosition += sizeof(Int32);
+    mPosition += sizeof(Int16);
     return NOERROR;
 }
 

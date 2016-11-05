@@ -17,6 +17,7 @@
 #include "elastos/droid/internal/os/RuntimeInit.h"
 #include "elastos/droid/webkit/WebViewFactory.h"
 #include "elastos/droid/opengl/CEGL14.h"
+#include "org/apache/harmony/security/fortress/Services.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -228,6 +229,8 @@ void CZygoteInit::Preload()
     // Ask the WebViewFactory to do any initialization that must run in the zygote process,
     // for memory sharing purposes.
     WebViewFactory::PrepareWebViewInZygote();
+    // Security initialization, because interdependence between Elastos.CoreLibrary.eco and Org.Conscrypt.eco
+    Org::Apache::Harmony::Security::Fortress::Services::Initialize();
     Logger::D(TAG, "end preload");
 }
 

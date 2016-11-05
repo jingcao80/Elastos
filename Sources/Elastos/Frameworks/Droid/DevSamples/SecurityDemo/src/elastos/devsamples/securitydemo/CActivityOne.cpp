@@ -347,7 +347,7 @@ ECode CActivityOne::OnCreate(
     view->SetOnClickListener(l.Get());
 
     //TODO : To be deleted.
-    Services::Initialize();
+    //Services::Initialize();
 
     return NOERROR;
 }
@@ -579,7 +579,7 @@ ECode CActivityOne::Button5Function()   //KeyFactory
 ECode CActivityOne::Button6Function()// KeyAgreement
 {
     Logger::E(TAG, "leliang begin Button6Function ");
-    Services::Initialize();
+    //Services::Initialize();
     AutoPtr<IKeyAgreementHelper> kaHelper;
     CKeyAgreementHelper::AcquireSingleton((IKeyAgreementHelper**)&kaHelper);
     AutoPtr<IKeyAgreement> ka;
@@ -762,7 +762,7 @@ ECode CActivityOne::Button6Function()// KeyAgreement
 ECode CActivityOne::Button7Function()// Certificate
 {
     Logger::E(TAG, "leliang begin Button7Function");
-    Services::Initialize();
+    //Services::Initialize();
     AutoPtr<ICertificateFactoryHelper> cfHelper;
     CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfHelper);
     AutoPtr<ICertificateFactory> cf;
@@ -825,7 +825,7 @@ ECode CActivityOne::ButtonCSecureRandom()
 {
     //setprop elastos.class.path /system/lib/Elastos.Droid.Core.eco:/system/lib/Org.Conscrypt.eco
     Logger::E(TAG, "snow begin ButtonCSecureRandom");
-    Services::Initialize();
+    //Services::Initialize();
 
     const String algorithm("SHA1PRNG"); // algorithm's name
 
