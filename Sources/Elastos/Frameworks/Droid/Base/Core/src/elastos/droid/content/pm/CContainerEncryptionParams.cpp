@@ -48,25 +48,29 @@ ECode CContainerEncryptionParams::constructor(
     /* [in] */ Int64 encryptedDataStart,
     /* [in] */ Int64 dataEnd)
 {
-    assert(0 && "TODO");
-    // if (TextUtils.isEmpty(encryptionAlgorithm)) {
-    //     throw new NullPointerException("algorithm == null");
-    // } else if (encryptionSpec == null) {
-    //     throw new NullPointerException("encryptionSpec == null");
-    // } else if (encryptionKey == null) {
-    //     throw new NullPointerException("encryptionKey == null");
-    // }
+    if (encryptionAlgorithm.IsEmpty()) {
+        // throw new NullPointerException("algorithm == null");
+        return E_NULL_POINTER_EXCEPTION;
+    } else if (encryptionSpec == NULL) {
+        // throw new NullPointerException("encryptionSpec == null");
+        return E_NULL_POINTER_EXCEPTION;
+    } else if (encryptionKey == NULL) {
+        // throw new NullPointerException("encryptionKey == null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
 
-    // if (!TextUtils.isEmpty(macAlgorithm)) {
-    //     if (macKey == null) {
-    //         throw new NullPointerException("macKey == null");
-    //     }
-    // }
+    if (!macAlgorithm.IsEmpty()) {
+        if (macKey == NULL) {
+            // throw new NullPointerException("macKey == null");
+            return E_NULL_POINTER_EXCEPTION;
+        }
+    }
 
-    // if (!(encryptionSpec instanceof IvParameterSpec)) {
-    //     throw new InvalidAlgorithmParameterException(
-    //             "Unknown parameter spec class; must be IvParameters");
-    // }
+    if (IIvParameterSpec::Probe(encryptionSpec) == NULL) {
+        // throw new InvalidAlgorithmParameterException(
+        //         "Unknown parameter spec class; must be IvParameters");
+        return E_INVALID_ALGORITHM_PARAMETER_EXCEPTION;
+    }
 
     mEncryptionAlgorithm = encryptionAlgorithm;
     mEncryptionSpec = IIvParameterSpec::Probe(encryptionSpec);

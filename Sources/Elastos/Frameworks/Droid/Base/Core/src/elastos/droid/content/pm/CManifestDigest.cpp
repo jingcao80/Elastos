@@ -17,7 +17,7 @@ using Elastos::IO::CBufferedInputStream;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::Arrays;
 using Elastos::Security::IDigestInputStream;
-//using Elastos::Security::CDigestInputStream;
+using Elastos::Security::CDigestInputStream;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::CMessageDigestHelper;
@@ -61,8 +61,7 @@ ECode CManifestDigest::FromInputStream(
     CBufferedInputStream::New(fileIs, (IBufferedInputStream**)&bis);
 
     AutoPtr<IDigestInputStream> dis;
-    assert(0 && "TODO");
-    //CDigestInputStream::New(bis, md, (IDigestInputStream**)&dis);
+    CDigestInputStream::New(IInputStream::Probe(bis), md, (IDigestInputStream**)&dis);
 
     // try {
     AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(8192);
