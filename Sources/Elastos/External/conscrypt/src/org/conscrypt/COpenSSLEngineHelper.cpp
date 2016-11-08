@@ -6,7 +6,7 @@ namespace Conscrypt {
 
 CAR_SINGLETON_IMPL(COpenSSLEngineHelper)
 
-CAR_INTERFACE_IMPL(COpenSSLEngineHelper, Singleton, IOpenSSLEngine)
+CAR_INTERFACE_IMPL(COpenSSLEngineHelper, Singleton, IOpenSSLEngineHelper)
 
 ECode COpenSSLEngineHelper::GetInstance(
     /* [in] */ const String& engine,

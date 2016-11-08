@@ -825,7 +825,7 @@ ECode CActivityOne::ButtonCSecureRandom()
 {
     //setprop elastos.class.path /system/lib/Elastos.Droid.Core.eco:/system/lib/Org.Conscrypt.eco
     Logger::E(TAG, "snow begin ButtonCSecureRandom");
-    //Services::Initialize();
+    Services::Initialize();
 
     const String algorithm("SHA1PRNG"); // algorithm's name
 
@@ -858,8 +858,21 @@ ECode CActivityOne::ButtonCSecureRandom()
 
 ECode CActivityOne::ButtonElastosKeyPairGenerator()
 {
+    //setprop elastos.class.path /system/lib/Elastos.Droid.Core.eco:/system/lib/Org.Conscrypt.eco
+    Services::Initialize();
+
     AutoPtr<ElastosKeyPairGeneratorTest> text = new ElastosKeyPairGeneratorTest(this);
-    return text->TestKeyPairGenerator_Initialize_Params_Encrypted_Success();
+
+
+    //return text->TestKeyPairGenerator_Initialize_Params_Encrypted_Success();                                 //OK
+
+    //return text->TestKeyPairGenerator_Initialize_KeySize_Encrypted_Failure();                                //OK
+
+    //return text->TestKeyPairGenerator_Initialize_KeySizeAndSecureRandom_Encrypted_Failure();                 //OK
+
+    //return text->TestKeyPairGenerator_Initialize_ParamsAndSecureRandom_Encrypted_Failure();                  //OK
+
+    return text->TestKeyPairGenerator_GenerateKeyPair_Encrypted_Success();
 }
 
 ECode CActivityOne::ButtonElastosKeyStore()
