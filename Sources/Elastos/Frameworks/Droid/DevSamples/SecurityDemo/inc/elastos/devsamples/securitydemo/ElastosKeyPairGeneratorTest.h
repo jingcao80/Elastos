@@ -7,7 +7,9 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Core::Object;
+using Elastos::Security::IKeyPair;
 using Elastos::Security::IKeyPairGenerator;
+using Elastos::Security::Spec::IAlgorithmParameterSpec;
 using Elastos::Math::IBigInteger;
 using Elastos::Utility::IDate;
 using Elastosx::Security::Auth::X500::IX500Principal;
@@ -25,12 +27,61 @@ public:
 
     CARAPI TestKeyPairGenerator_Initialize_Params_Encrypted_Success();
 
+    CARAPI TestKeyPairGenerator_Initialize_KeySize_Encrypted_Failure();
+
+    CARAPI TestKeyPairGenerator_Initialize_KeySizeAndSecureRandom_Encrypted_Failure();
+
+    CARAPI TestKeyPairGenerator_Initialize_ParamsAndSecureRandom_Encrypted_Failure();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_Encrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_DSA_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_DSA_2048_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_DSA_SpecifiedParams_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_EC_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_EC_P521_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_RSA_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_RSA_WithParams_Unencrypted_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_Replaced_Success();
+
+    CARAPI TestKeyPairGenerator_GenerateKeyPair_Replaced_UnencryptedToEncrypted_Success();
+
 private:
     CARAPI SetupPassword();
 
     static CARAPI_(AutoPtr<IDate>) initNOW();
 
     static CARAPI_(AutoPtr<IDate>) initNOW_PLUS_10_YEARS();
+
+    CARAPI_(Boolean) IsEquals(
+        /* [in] */ IInterface* expected,
+        /* [in] */ IInterface* actual);
+
+    CARAPI AssertEquals(
+        /* [in] */ IInterface* expected,
+        /* [in] */ IInterface* actual);
+
+    static AssertDateEquals(
+        /* [in] */ IDate* date1,
+        /* [in] */ IDate* date2);
+
+    CARAPI AssertKeyPairCorrect(
+        /* [in] */ IKeyPair* pair,
+        /* [in] */ const String& alias,
+        /* [in] */ const String& keyType,
+        /* [in] */ Int32 keySize,
+        /* [in] */ IAlgorithmParameterSpec* spec,
+        /* [in] */ IX500Principal* dn,
+        /* [in] */ IBigInteger* serial,
+        /* [in] */ IDate* start,
+        /* [in] */ IDate* end);
 
 private:
     AutoPtr<IContext> mContext;

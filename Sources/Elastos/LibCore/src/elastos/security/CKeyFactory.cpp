@@ -38,7 +38,7 @@ ECode CKeyFactory::GetInstance(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    if (algorithm == NULL) {
+    if (algorithm.IsNull()) {
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }

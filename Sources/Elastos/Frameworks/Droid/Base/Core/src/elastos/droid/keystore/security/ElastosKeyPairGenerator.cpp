@@ -82,10 +82,13 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
     String privateKeyAlias = Credentials::USER_PRIVATE_KEY + alias;
     Int32 keySize;
     mSpec->GetKeySize(&keySize);
-    Int32 argsLen = args->GetLength();
-    AutoPtr<ArrayOf<IArrayOf*> > args2 = ArrayOf<IArrayOf*>::Alloc(argsLen);
-    for (Int32 i = 0; i < argsLen; ++i) {
-        args2->Set(i, CoreUtils::ConvertByteArray((*args)[i]));
+    AutoPtr<ArrayOf<IArrayOf*> > args2;
+    if (args != NULL) {
+        Int32 argsLen = args->GetLength();
+        args2 = ArrayOf<IArrayOf*>::Alloc(argsLen);
+        for (Int32 i = 0; i < argsLen; ++i) {
+            args2->Set(i, CoreUtils::ConvertByteArray((*args)[i]));
+        }
     }
 
     mSpec->GetFlags(&flags);
