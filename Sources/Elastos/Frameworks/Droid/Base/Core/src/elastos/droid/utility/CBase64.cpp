@@ -656,14 +656,7 @@ ECode CBase64::Encode(
     encoder->Process(input, offset, len, TRUE);
     assert(encoder->mOp == output_len);
 
-    AutoPtr<ArrayOf<Byte> > temp = ArrayOf<Byte>::Alloc(output_len);
-    if (!temp) {
-        return E_OUT_OF_MEMORY;
-    }
-
-    memcpy(temp->GetPayload(), encoder->mOutput->GetPayload(), sizeof(Byte) * output_len);
-
-    delete encoder;
+    *result = encoder->mOutput;
     REFCOUNT_ADD(*result);
 
     return NOERROR;

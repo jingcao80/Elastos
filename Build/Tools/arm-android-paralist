@@ -575,5 +575,8 @@
   Elastos/Frameworks/Droid/DevSamples/TextViewDemo Elastos.DevSamples.TextViewDemo.car
   Elastos/Frameworks/Droid/DevSamples/TextViewDemo R.cpp
 < Elastos/Frameworks/Droid/DevSamples/TextViewDemo
+  Elastos/Frameworks/Droid/DevSamples/SecurityDemo Elastos.DevSamples.SecurityDemo.car
+  Elastos/Frameworks/Droid/DevSamples/SecurityDemo R.cpp
+< Elastos/Frameworks/Droid/DevSamples/SecurityDemo
 
 > Elastos

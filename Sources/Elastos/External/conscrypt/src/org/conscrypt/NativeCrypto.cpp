@@ -738,7 +738,7 @@ static Boolean ArrayToBignum(ArrayOf<Byte>* source, BIGNUM** dest, ECode* ec)
         NATIVE_TRACE("ArrayToBignum(%p, %p) => NULL", source, dest);
         return FALSE;
     }
-    const unsigned char* tmp = reinterpret_cast<const unsigned char*>(source);
+    const unsigned char* tmp = reinterpret_cast<const unsigned char*>(source->GetPayload());
     size_t tmpSize = source->GetLength();
 
     /* if the array is empty, it is zero. */
@@ -816,7 +816,7 @@ static ECode BignumToArray(const BIGNUM* source, const char* sourceName, ArrayOf
         *tmp = 0x00;
     }
 
-    NATIVE_TRACE("bignumToArray(%p, %s) => %p", source, sourceName, bytes);
+    NATIVE_TRACE("bignumToArray(%p, %s) => %p", source, sourceName, bytes.Get());
     *result = bytes;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1806,7 +1806,7 @@ ECode NativeCrypto::ENGINE_load_private_key(
         return ThrowExceptionIfNecessary("ENGINE_load_private_key");
     }
 
-    NATIVE_TRACE("ENGINE_load_private_key(%p, %s) => %p", e, is.string(), pkey.get());
+    NATIVE_TRACE("ENGINE_load_private_key(%p, %s) => %p", e, id.string(), pkey.get());
     *result = reinterpret_cast<uintptr_t>(pkey.release());
     return NOERROR;
 }
@@ -1962,8 +1962,8 @@ ECode NativeCrypto::EVP_PKEY_new_RSA(
 {
     VALIDATE_NOT_NULL(result);
 
-    NATIVE_TRACE("EVP_PKEY_new_RSA(n=%p, e=%p, d=%p, p=%p, q=%p, dmp1=%p, dmq1=%p, iqmp=%p)",
-            n, e, d, p, q, dmp1, dmq1, iqmp);
+    NATIVE_TRACE("EVP_PKEY_new_RSA(n=%p, n.size = %d, e=%p, d=%p, p=%p, q=%p, dmp1=%p, dmq1=%p, iqmp=%p)",
+            n, n->GetLength(), e, d, p, q, dmp1, dmq1, iqmp);
 
     Unique_RSA rsa(RSA_new());
     if (rsa.get() == NULL) {
@@ -4610,7 +4610,7 @@ ECode NativeCrypto::EVP_get_cipherbyname(
 {
     VALIDATE_NOT_NULL(result);
 
-    NATIVE_TRACE("EVP_get_cipherbyname(%p)", algorithm);
+    NATIVE_TRACE("EVP_get_cipherbyname(%s)", algorithm.string());
     if (algorithm.IsNull()) {
         NATIVE_TRACE("EVP_get_cipherbyname => threw exception algorithm == null");
         *result = -1;
@@ -6652,11 +6652,11 @@ ECode NativeCrypto::X509_CRL_get_ext(
 {
     VALIDATE_NOT_NULL(result);
     X509_CRL* crl = reinterpret_cast<X509_CRL*>(static_cast<uintptr_t>(x509crlRef));
-    NATIVE_TRACE("X509_CRL_get_ext(%p, %p)", crl, oid);
+    NATIVE_TRACE("X509_CRL_get_ext(%p, %s)", crl, oid.string());
     ECode ec = NOERROR;
     X509_EXTENSION* ext = X509Type_get_ext<X509_CRL, X509_CRL_get_ext_by_OBJ, ::X509_CRL_get_ext>(
             crl, oid, &ec);
-    NATIVE_TRACE("X509_CRL_get_ext(%p, %p) => %p", crl, oid, ext);
+    NATIVE_TRACE("X509_CRL_get_ext(%p, %s) => %p", crl, oid.string(), ext);
     *result = reinterpret_cast<uintptr_t>(ext);
     return ec;
 }
@@ -6803,7 +6803,7 @@ ECode NativeCrypto::X509_REVOKED_get_ext_oid(
 {
     VALIDATE_NOT_NULL(result);
     X509_REVOKED* revoked = reinterpret_cast<X509_REVOKED*>(static_cast<uintptr_t>(x509RevokedRef));
-    NATIVE_TRACE("X509_REVOKED_get_ext_oid(%p, %p)", revoked, oid);
+    NATIVE_TRACE("X509_REVOKED_get_ext_oid(%p, %s)", revoked, oid.string());
     return X509Type_get_ext_oid<X509_REVOKED, X509_REVOKED_get_ext_by_OBJ, ::X509_REVOKED_get_ext>(
             revoked, oid, result);
 }
@@ -6832,11 +6832,11 @@ ECode NativeCrypto::X509_REVOKED_get_ext(
 {
     VALIDATE_NOT_NULL(result);
     X509_REVOKED* revoked = reinterpret_cast<X509_REVOKED*>(static_cast<uintptr_t>(x509RevokedRef));
-    NATIVE_TRACE("X509_REVOKED_get_ext(%p, %p)", revoked, oid);
+    NATIVE_TRACE("X509_REVOKED_get_ext(%p, %s)", revoked, oid.string());
     ECode ec = NOERROR;
     X509_EXTENSION* ext = X509Type_get_ext<X509_REVOKED, X509_REVOKED_get_ext_by_OBJ,
             ::X509_REVOKED_get_ext>(revoked, oid, &ec);
-    NATIVE_TRACE("X509_REVOKED_get_ext(%p, %p) => %p", revoked, oid, ext);
+    NATIVE_TRACE("X509_REVOKED_get_ext(%p, %s) => %p", revoked, oid.string(), ext);
     *result = reinterpret_cast<uintptr_t>(ext);
     return ec;
 }
@@ -6920,7 +6920,7 @@ ECode NativeCrypto::ASN1_TIME_to_Calendar(
     /* [in] */ ICalendar* cal)
 {
     ASN1_TIME* asn1Time = reinterpret_cast<ASN1_TIME*>(static_cast<uintptr_t>(asn1TimeRef));
-    NATIVE_TRACE("ASN1_TIME_to_Calendar(%p, %p)", asn1Time, calendar);
+    NATIVE_TRACE("ASN1_TIME_to_Calendar(%p, %p)", asn1Time, cal);
 
     if (asn1Time == NULL) {
         return E_NULL_POINTER_EXCEPTION;
@@ -7031,7 +7031,7 @@ ECode NativeCrypto::BIO_read(
     }
 
     outputBytes->Copy(reinterpret_cast<Byte*>(buffer.get()), read);
-    NATIVE_TRACE("BIO_read(%p, %p) => %d", bio, outBytes, read);
+    NATIVE_TRACE("BIO_read(%p, %p) => %d", bio, outputBytes, read);
     *result = read;
     return NOERROR;
 }
@@ -7651,7 +7651,7 @@ static int client_cert_cb(SSL* ssl, X509** x509Out, EVP_PKEY** pkeyOut)
     keyTypes->Copy(reinterpret_cast<const Byte*>(ctype), ctype_num);
 
     NATIVE_TRACE("ssl=%p clientCertificateRequested calling clientCertificateRequested "
-              "keyTypes=%p issuers=%p", ssl, keyTypes, issuers);
+              "keyTypes=%p issuers=%p", ssl, keyTypes.Get(), issuers.Get());
     ECode ec = sslHandshakeCallbacks->ClientCertificateRequested(keyTypes, issuers);
 
     if (FAILED(ec)) {
@@ -8081,7 +8081,7 @@ ECode NativeCrypto::SSL_get_tls_channel_id(
         return ThrowSSLExceptionWithSslErrors(ssl, SSL_ERROR_NONE, "Error getting Channel ID");
     }
 
-    NATIVE_TRACE("ssl=%p NativeCrypto_NativeCrypto_SSL_get_tls_channel_id() => %p", ssl, javaBytes);
+    NATIVE_TRACE("ssl=%p NativeCrypto_NativeCrypto_SSL_get_tls_channel_id() => %p", ssl, bytes.Get());
     *result = bytes;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -8845,8 +8845,8 @@ ECode NativeCrypto::SSL_set_tlsext_host_name(
 {
     ECode ec;
     SSL* ssl = to_SSL(ssl_address, TRUE, &ec);
-    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_set_tlsext_host_name hostname=%p",
-              ssl, hostname);
+    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_set_tlsext_host_name hostname=%s",
+              ssl, hostname.string());
     if (ssl == NULL) {
         return ec;
     }
@@ -9098,7 +9098,7 @@ ECode NativeCrypto::SSL_do_handshake(
     }
 
     int ret = SSL_set_fd(ssl, fd.Get());
-    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_do_handshake s=%d", ssl, fd.get());
+    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_do_handshake s=%d", ssl, fd.Get());
 
     if (ret != 1) {
         SSL_clear(ssl);
@@ -9451,7 +9451,7 @@ ECode NativeCrypto::SSL_get_certificate(
     }
 
     AutoPtr< ArrayOf<Int64> > refArray = getCertificateRefs(chain.get());
-    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_get_certificate => %p", ssl, refArray);
+    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_get_certificate => %p", ssl, refArray.Get());
     *result = refArray;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -9500,7 +9500,7 @@ ECode NativeCrypto::SSL_get_peer_cert_chain(
         chain = chain_copy.get();
     }
     AutoPtr< ArrayOf<Int64> > refArray = getCertificateRefs(chain);
-    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_get_peer_cert_chain => %p", ssl, refArray);
+    NATIVE_TRACE("ssl=%p NativeCrypto_SSL_get_peer_cert_chain => %p", ssl, refArray.Get());
     *result = refArray;
     REFCOUNT_ADD(*result);
     return NOERROR;
