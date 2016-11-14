@@ -61,7 +61,7 @@ AutoPtr<IASN1Type> CGeneralNames::initASN1()
     return tmp;
 }
 
-INIT_PROI_6 AutoPtr<IASN1Type> CGeneralNames::ASN1 = initASN1();
+INIT_PROI_7 AutoPtr<IASN1Type> CGeneralNames::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CGeneralNames)
 

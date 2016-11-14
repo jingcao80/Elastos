@@ -16,6 +16,15 @@ CARAPI ASN1TypeCollection::constructor(
     /* [in] */ ArrayOf<IASN1Type*>* type)
 {
     FAIL_RETURN(ASN1Constructed::constructor(tagNumber));
+#if defined(_DEBUG)
+     assert(type != NULL);
+     for (Int32 i = 0; i < type->GetLength(); i++) {
+        if ((*type)[i] == NULL) {
+            Logger::E("ASN1TypeCollection", "this = %s, type[%d] = NULL", TO_CSTR(this), i);
+            assert(0);
+        }
+     }
+#endif
     mType = type;
     mOPTIONAL = ArrayOf<Boolean>::Alloc(type->GetLength());
     mDEFAULT = ArrayOf<IInterface*>::Alloc(type->GetLength());

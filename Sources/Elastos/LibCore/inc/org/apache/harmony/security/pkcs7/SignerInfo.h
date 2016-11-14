@@ -1,15 +1,20 @@
 
-#ifndef __ORG_APACHE_HARMONY_SECURITY_PKCS7_CSIGNERINFO_H__
-#define __ORG_APACHE_HARMONY_SECURITY_PKCS7_CSIGNERINFO_H__
+#ifndef __ORG_APACHE_HARMONY_SECURITY_PKCS7_SIGNERINFO_H__
+#define __ORG_APACHE_HARMONY_SECURITY_PKCS7_SIGNERINFO_H__
 
-#include "_Org_Apache_Harmony_Security_Pkcs7_CSignerInfo.h"
-#include <ASN1SequenceMacro.h>
-#include <elastos/core/Object.h>
+#include "AuthenticatedAttributes.h"
+#include "asn1/ASN1Sequence.h"
+#include "Elastos.CoreLibrary.Extensions.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-using Elastos::Core::Object;
-using Elastosx::Security::Auth::X500::IX500Principal;
 using Elastos::Math::IBigInteger;
 using Elastos::Utility::IList;
+using Elastosx::Security::Auth::X500::IX500Principal;
+using Org::Apache::Harmony::Security::Asn1::ASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
+using Org::Apache::Harmony::Security::Asn1::IASN1Type;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
+using Org::Apache::Harmony::Security::X509::IAlgorithmIdentifier;
 
 namespace Org {
 namespace Apache {
@@ -17,49 +22,44 @@ namespace Harmony {
 namespace Security {
 namespace Pkcs7 {
 
-CarClass(CSignerInfo)
-    , public Object
+class SignerInfo
+    : public Object
     , public ISignerInfo
 {
 private:
-    friend class ASN1SequenceDerived1;
-    friend class ASN1SequenceDerived2;
     class ASN1SequenceDerived1
         : public ASN1Sequence
-        , public IASN1Sequence
-        , public ElRefBase
     {
     public:
-        CAR_INTERFACE_DECL()
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
 
-        ASN1SEQUENCE_METHODS_DECL()
-
-        ASN1SequenceDerived1(
-            /* [in] */ ArrayOf<IASN1Type *>* type);
+        TO_STRING_IMPL("SignerInfo::ASN1SequenceDerived1")
     };
 
     class ASN1SequenceDerived2
         : public ASN1Sequence
-        , public IASN1Sequence
-        , public ElRefBase
     {
     public:
-        CAR_INTERFACE_DECL()
-
-        ASN1SEQUENCE_METHODS_DECL()
-
-        ASN1SequenceDerived2(
+        CARAPI constructor(
             /* [in] */ ArrayOf<IASN1Type *>* type);
+
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
+
+        CARAPI GetValues(
+            /* [in] */ IInterface* object,
+            /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("SignerInfo::ASN1SequenceDerived2")
     };
 
 public:
-    CAR_OBJECT_DECL()
-
     CAR_INTERFACE_DECL()
 
     static CARAPI_(AutoPtr<IASN1Sequence>) InitStatic();
-
-    CSignerInfo();
 
     CARAPI GetIssuer(
         /* [out] */ IX500Principal** issuer);
@@ -70,7 +70,13 @@ public:
     CARAPI GetDigestAlgorithm(
         /* [out] */ String* algorithm);
 
+    CARAPI GetDigestAlgorithmName(
+        /* [out] */ String* algorithm);
+
     CARAPI GetDigestEncryptionAlgorithm(
+        /* [out] */ String* digestEncryptionAlgorithm);
+
+    CARAPI GetDigestEncryptionAlgorithmName(
         /* [out] */ String* digestEncryptionAlgorithm);
 
     CARAPI GetAuthenticatedAttributes(
@@ -86,11 +92,11 @@ public:
         /* [out] */ String* str);
 
 private:
-    CSignerInfo(
+    SignerInfo(
         /* [in] */ Int32 version,
         /* [in] */ ArrayOf<IInterface*>* issuerAndSerialNumber,
         /* [in] */ IAlgorithmIdentifier* digestAlgorithm,
-        /* [in] */ IAuthenticatedAttributes* authenticatedAttributes,
+        /* [in] */ AuthenticatedAttributes* authenticatedAttributes,
         /* [in] */ IAlgorithmIdentifier* digestEncryptionAlgorithm,
         /* [in] */ ArrayOf<Byte>* encryptedDigest,
         /* [in] */ IList* unauthenticatedAttributes);
@@ -104,7 +110,7 @@ private:
     AutoPtr<IX500Principal> mIssuer;
     AutoPtr<IBigInteger> mSerialNumber;
     AutoPtr<IAlgorithmIdentifier> mDigestAlgorithm;
-    AutoPtr<IAuthenticatedAttributes> mAuthenticatedAttributes;
+    AutoPtr<AuthenticatedAttributes> mAuthenticatedAttributes;
     AutoPtr<IAlgorithmIdentifier> mDigestEncryptionAlgorithm;
     AutoPtr<ArrayOf<Byte> > mEncryptedDigest;
     AutoPtr<IList> mUnauthenticatedAttributes;
@@ -116,4 +122,4 @@ private:
 } // namespace Apache
 } // namespace Org
 
-#endif // __ORG_APACHE_HARMONY_SECURITY_PKCS7_CSIGNERINFO_H__
+#endif // __ORG_APACHE_HARMONY_SECURITY_PKCS7_SIGNERINFO_H__

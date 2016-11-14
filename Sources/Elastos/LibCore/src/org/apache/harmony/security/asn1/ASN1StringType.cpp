@@ -87,13 +87,13 @@ ECode ASN1StringUTF8Type::SetEncodingContent(
 //------------------------------------------------------
 //  ASN1StringType
 //------------------------------------------------------
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::BMPSTRING = new ASN1StringType(IASN1Constants::TAG_BMPSTRING);
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::IA5STRING = new ASN1StringType(IASN1Constants::TAG_IA5STRING);
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::GENERALSTRING = new ASN1StringType(IASN1Constants::TAG_GENERALSTRING);
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::PRINTABLESTRING = new ASN1StringType(IASN1Constants::TAG_PRINTABLESTRING);
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::TELETEXSTRING = new ASN1StringUTF8Type(IASN1Constants::TAG_TELETEXSTRING);
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::UNIVERSALSTRING = new ASN1StringType(IASN1Constants::TAG_UNIVERSALSTRING);
-INIT_PROI_2 const AutoPtr<IASN1StringType> ASN1StringType::UTF8STRING = new ASN1StringUTF8Type(IASN1Constants::TAG_UTF8STRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::BMPSTRING = new ASN1StringType(IASN1Constants::TAG_BMPSTRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::IA5STRING = new ASN1StringType(IASN1Constants::TAG_IA5STRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::GENERALSTRING = new ASN1StringType(IASN1Constants::TAG_GENERALSTRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::PRINTABLESTRING = new ASN1StringType(IASN1Constants::TAG_PRINTABLESTRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::TELETEXSTRING = new ASN1StringUTF8Type(IASN1Constants::TAG_TELETEXSTRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::UNIVERSALSTRING = new ASN1StringType(IASN1Constants::TAG_UNIVERSALSTRING);
+INIT_PROI_3 const AutoPtr<IASN1StringType> ASN1StringType::UTF8STRING = new ASN1StringUTF8Type(IASN1Constants::TAG_UTF8STRING);
 
 ASN1StringType::ASN1StringType(
     /* [in] */ Int32 tagNumber)

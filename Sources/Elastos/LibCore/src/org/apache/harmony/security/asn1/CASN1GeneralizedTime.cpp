@@ -19,7 +19,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-AutoPtr<IASN1Type> CASN1GeneralizedTime::sASN1 = Init();
+INIT_PROI_3 AutoPtr<IASN1Type> CASN1GeneralizedTime::sASN1 = Init();
 
 String CASN1GeneralizedTime::GEN_PATTERN("yyyyMMddHHmmss.SSS");
 

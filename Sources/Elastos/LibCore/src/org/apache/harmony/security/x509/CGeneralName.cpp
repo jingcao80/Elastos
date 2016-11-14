@@ -170,6 +170,18 @@ ECode CGeneralName::MyASN1Choice::GetDecodedObject(
     return NOERROR;
 }
 
+
+ECode CGeneralName::MyASN1SequenceOf::Decode(
+    /* [in] */ IBerInputStream* bis,
+    /* [out] */ IInterface** object)
+{
+    VALIDATE_NOT_NULL(object);
+
+    AutoPtr<IInterface> obj;
+    ASN1SequenceOf::Decode(bis, (IInterface**)&obj);
+    return IList::Probe(obj)->Get(0, object);
+}
+
 AutoPtr<IASN1Choice> CGeneralName::initASN1()
 {
     AutoPtr<IASN1Implicit> implicit0;
@@ -219,19 +231,6 @@ AutoPtr<IASN1Choice> CGeneralName::initASN1()
     return IASN1Choice::Probe(tmp);
 }
 
-INIT_PROI_6 AutoPtr<IASN1Choice> CGeneralName::ASN1 = initASN1();
-
-ECode CGeneralName::MyASN1SequenceOf::Decode(
-    /* [in] */ IBerInputStream* bis,
-    /* [out] */ IInterface** object)
-{
-    VALIDATE_NOT_NULL(object);
-
-    AutoPtr<IInterface> obj;
-    ASN1SequenceOf::Decode(bis, (IInterface**)&obj);
-    return IList::Probe(obj)->Get(0, object);
-}
-
 AutoPtr<IASN1SequenceOf> CGeneralName::initNAME_ASN1()
 {
     AutoPtr<ASN1SequenceOf> tmp = new MyASN1SequenceOf();
@@ -239,7 +238,8 @@ AutoPtr<IASN1SequenceOf> CGeneralName::initNAME_ASN1()
     return tmp;
 }
 
-INIT_PROI_5 AutoPtr<IASN1SequenceOf> CGeneralName::NAME_ASN1 = initNAME_ASN1();
+INIT_PROI_6 AutoPtr<IASN1SequenceOf> CGeneralName::NAME_ASN1 = initNAME_ASN1();
+INIT_PROI_6 AutoPtr<IASN1Choice> CGeneralName::ASN1 = initASN1();
 
 AutoPtr<ArrayOf<IASN1Type*> > CGeneralName::initNameASN1()
 {

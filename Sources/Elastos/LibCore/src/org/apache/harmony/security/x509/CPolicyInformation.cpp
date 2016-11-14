@@ -65,7 +65,7 @@ ECode CPolicyInformation::ASN1SequenceWrapper::GetDecodedObject(
     return NOERROR;
 }
 
-AutoPtr<IASN1Sequence> CPolicyInformation::ASN1 = InitASN1();
+INIT_PROI_4 AutoPtr<IASN1Sequence> CPolicyInformation::ASN1 = InitASN1();
 CAR_OBJECT_IMPL(CPolicyInformation)
 CAR_INTERFACE_IMPL(CPolicyInformation, Object, IPolicyInformation)
 

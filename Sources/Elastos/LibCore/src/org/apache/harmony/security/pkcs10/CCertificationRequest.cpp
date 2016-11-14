@@ -75,7 +75,7 @@ ECode CCertificationRequest::ASN1SequenceDerived::constructor(
     return ASN1Sequence::constructor(type);
 }
 
-AutoPtr<IASN1Sequence> CCertificationRequest::ASN1 = InitStatic();
+INIT_PROI_7 AutoPtr<IASN1Sequence> CCertificationRequest::ASN1 = InitStatic();
 
 AutoPtr<IASN1Sequence> CCertificationRequest::InitStatic()
 {

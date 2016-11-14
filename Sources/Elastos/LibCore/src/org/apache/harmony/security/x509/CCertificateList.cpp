@@ -94,7 +94,7 @@ AutoPtr<IASN1Sequence> CCertificateList::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CCertificateList::ASN1 = initASN1();
+INIT_PROI_7 AutoPtr<IASN1Sequence> CCertificateList::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCertificateList)
 

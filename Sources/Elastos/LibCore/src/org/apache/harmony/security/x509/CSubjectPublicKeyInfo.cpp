@@ -64,7 +64,7 @@ ECode CSubjectPublicKeyInfo::ASN1SequenceWrapper::GetValues(
     return NOERROR;
 }
 
-AutoPtr<IASN1Sequence> CSubjectPublicKeyInfo::ASN1 = InitASN1();
+INIT_PROI_5 AutoPtr<IASN1Sequence> CSubjectPublicKeyInfo::ASN1 = InitASN1();
 CAR_OBJECT_IMPL(CSubjectPublicKeyInfo)
 CAR_INTERFACE_IMPL(CSubjectPublicKeyInfo, Object, ISubjectPublicKeyInfo)
 AutoPtr<IASN1Sequence> CSubjectPublicKeyInfo::InitASN1()

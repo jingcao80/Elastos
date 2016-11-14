@@ -39,6 +39,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [out] */ ICollection** values);
+
+        TO_STRING_IMPL("CInfoAccessSyntax::MyASN1Sequence")
     };
 
 public:

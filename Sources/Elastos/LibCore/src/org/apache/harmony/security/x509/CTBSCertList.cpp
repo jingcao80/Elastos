@@ -173,7 +173,7 @@ ECode CTBSCertList::RevokedCertificate::ASN1SequenceWrapper2::GetValues(
     return NOERROR;
 }
 
-AutoPtr<IASN1Sequence> CTBSCertList::RevokedCertificate::ASN1 = CTBSCertList::RevokedCertificate::InitASN1();
+INIT_PROI_6 AutoPtr<IASN1Sequence> CTBSCertList::RevokedCertificate::ASN1 = CTBSCertList::RevokedCertificate::InitASN1();
 AutoPtr<IASN1Sequence> CTBSCertList::RevokedCertificate::InitASN1()
 {
     AutoPtr<ASN1SequenceWrapper2> a = new ASN1SequenceWrapper2();
@@ -290,7 +290,7 @@ void CTBSCertList::RevokedCertificate::DumpValue(
     // }
 }
 
-AutoPtr<IASN1Sequence> CTBSCertList::ASN1 = InitASN1();
+INIT_PROI_6 AutoPtr<IASN1Sequence> CTBSCertList::ASN1 = InitASN1();
 
 CAR_OBJECT_IMPL(CTBSCertList)
 CAR_INTERFACE_IMPL(CTBSCertList, Object, ITBSCertList)

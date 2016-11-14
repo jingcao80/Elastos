@@ -36,6 +36,8 @@ private:
         CARAPI GetDecodedObject(
             /* [in] */ IBerInputStream* bis,
             /* [out] */ IInterface** object);
+
+        TO_STRING_IMPL("CExtension::MyASN1OctetString")
     };
 
     class MyASN1Sequence
@@ -49,6 +51,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("CExtension::MyASN1Sequence")
     };
 
 public:

@@ -43,6 +43,8 @@ private:
         CARAPI GetDecodedObject(
             /* [in] */ IBerInputStream* in,
             /* [out] */ IInterface** result);
+
+        TO_STRING_IMPL("CPrivateKeyUsagePeriod::ASN1SequenceWrapper")
     };
 
 public:

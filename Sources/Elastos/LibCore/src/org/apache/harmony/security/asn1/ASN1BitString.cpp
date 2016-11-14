@@ -10,7 +10,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-AutoPtr<IASN1Type> ASN1BitString::sASN1 = Init();
+INIT_PROI_3 AutoPtr<IASN1Type> ASN1BitString::sASN1 = Init();
 
 CAR_INTERFACE_IMPL(ASN1BitString, ASN1StringType, IASN1BitString)
 AutoPtr<IASN1Type> ASN1BitString::Init()

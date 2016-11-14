@@ -92,7 +92,7 @@ AutoPtr<IASN1Sequence> CDistributionPoint::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CDistributionPoint::ASN1 = initASN1();
+INIT_PROI_9 AutoPtr<IASN1Sequence> CDistributionPoint::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CDistributionPoint)
 

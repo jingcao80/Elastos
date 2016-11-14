@@ -85,6 +85,8 @@ private:
         CARAPI GetEncodedLength(
             /* [in] */ IBerOutputStream* out,
             /* [out] */ Int32* result);
+
+        TO_STRING_IMPL("CAttributeTypeAndValue::ASN1TypeCls")
     };
 
     class ASN1SequenceCls: public ASN1Sequence
@@ -105,6 +107,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("CAttributeTypeAndValue::ASN1SequenceCls")
     };
 
 public:

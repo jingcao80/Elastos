@@ -26,7 +26,7 @@ static AutoPtr<IASN1Integer> InitStatic()
     return ai;
 }
 
-INIT_PROI_7 AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
+INIT_PROI_3 AutoPtr<IASN1Integer> CASN1Integer::ASN1 = InitStatic();
 
 CAR_OBJECT_IMPL(CASN1Integer)
 CAR_INTERFACE_IMPL(CASN1Integer, ASN1Primitive, IASN1Integer)
@@ -123,8 +123,10 @@ ECode CASN1Integer::GetDecodedObject(
     VALIDATE_NOT_NULL(object)
     Int32 length, contentOffset;
     bis->GetLength(&length);
+    AutoPtr<ArrayOf<Byte> > bytesEncoded = ArrayOf<Byte>::Alloc(length);
+    AutoPtr<ArrayOf<Byte> > buffer;
+    bis->GetBuffer((ArrayOf<Byte>**)&buffer);
     bis->GetContentOffset(&contentOffset);
-    AutoPtr<ArrayOf<Byte> > buffer, bytesEncoded = ArrayOf<Byte>::Alloc(length);
     bytesEncoded->Copy(0, buffer, contentOffset, length);
     AutoPtr<IArrayOf> arr;
     CArrayOf::New(EIID_IByte, length, (IArrayOf**)&arr);

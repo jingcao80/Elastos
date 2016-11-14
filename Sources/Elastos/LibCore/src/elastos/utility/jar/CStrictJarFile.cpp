@@ -130,16 +130,18 @@ ECode CStrictJarFile::constructor(
     }
 
     CManifest::New((IManifest**)&mManifest);
-    FAIL_GOTO(((CManifest*)mManifest.Get())->constructor(bytes, TRUE), _EXIT_)
+    ec = ((CManifest*)mManifest.Get())->constructor(bytes, TRUE);
+    FAIL_GOTO(ec, _EXIT_)
     mVerifier = new JarVerifier(fileName, mManifest, metaEntries);
 
-    FAIL_GOTO(mVerifier->ReadCertificates(&mIsSigned), _EXIT_)
+    ec = mVerifier->ReadCertificates(&mIsSigned);
+    FAIL_GOTO(ec, _EXIT_)
     if (mIsSigned)
-        FAIL_GOTO(mVerifier->IsSignedJar(&mIsSigned), _EXIT_)
+        ec = mVerifier->IsSignedJar(&mIsSigned);
     // } catch (IOException ioe) {
 _EXIT_:
-    NativeClose(mNativeHandle);
     if (FAILED(ec)) {
+        NativeClose(mNativeHandle);
         return ec;
     }
     // }

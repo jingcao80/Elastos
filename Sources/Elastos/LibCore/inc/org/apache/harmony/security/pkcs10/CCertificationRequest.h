@@ -37,6 +37,8 @@ private:
             /* [in] */ ArrayOf<IASN1Type *>* type);
 
         ASN1SequenceDerived();
+
+        TO_STRING_IMPL("CCertificationRequest::ASN1SequenceDerived")
     };
 
 public:

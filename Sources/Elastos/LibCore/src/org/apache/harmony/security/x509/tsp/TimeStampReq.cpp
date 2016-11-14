@@ -215,7 +215,7 @@ AutoPtr<IASN1Sequence> TimeStampReq::initASN1()
     AutoPtr<IASN1Implicit> implicit;
     CASN1Implicit::New(0, CExtensions::ASN1, (IASN1Implicit**)&implicit);
 
-    AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(10);
+    AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(6);
     array->Set(0, IASN1Type::Probe(instance)); // version
     array->Set(1, IASN1Type::Probe(CMessageImprint::ASN1)); // messageImprint
     array->Set(2, type); // reqPolicy

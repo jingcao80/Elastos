@@ -43,6 +43,9 @@ public:
         CARAPI GetDecodedObject(
             /* [in] */ IBerInputStream* in,
             /* [out] */ IInterface** result);
+
+        TO_STRING_IMPL("CPolicyConstraints::ASN1SequenceWrapper")
+
     };
 
 public:

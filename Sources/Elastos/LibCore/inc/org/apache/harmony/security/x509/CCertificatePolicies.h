@@ -38,6 +38,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [out] */ ICollection** coll);
+
+        TO_STRING_IMPL("CCertificatePolicies::MyASN1SequenceOf")
     };
 
 public:

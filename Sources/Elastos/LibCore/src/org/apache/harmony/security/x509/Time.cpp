@@ -48,7 +48,7 @@ ECode Time::ASN1ChoiceWrapper::GetObjectToEncode(
 }
 
 const Int64 Time::JAN_01_2050 = 2524608000000L;
-AutoPtr<IASN1Choice> Time::ASN1 = InitASN1();
+INIT_PROI_4 AutoPtr<IASN1Choice> Time::ASN1 = InitASN1();
 AutoPtr<IASN1Choice> Time::InitASN1()
 {
     AutoPtr<ASN1ChoiceWrapper> a = new ASN1ChoiceWrapper();

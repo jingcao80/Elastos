@@ -62,7 +62,7 @@ AutoPtr<IASN1Type> CCertificatePolicies::initASN1()
     return IASN1Type::Probe(seq);
 }
 
-AutoPtr<IASN1Type> CCertificatePolicies::ASN1 = initASN1();
+INIT_PROI_5 AutoPtr<IASN1Type> CCertificatePolicies::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CCertificatePolicies)
 

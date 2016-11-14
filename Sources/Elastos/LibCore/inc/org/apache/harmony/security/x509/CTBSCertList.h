@@ -49,6 +49,8 @@ public:
             CARAPI GetValues(
                 /* [in] */ IInterface* object,
                 /* [in] */ ArrayOf<IInterface*>* values);
+
+            TO_STRING_IMPL("CTBSCertList::ASN1SequenceWrapper2")
         };
 
     public:
@@ -121,6 +123,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("CTBSCertList::ASN1SequenceWrapper1")
     };
 
 public:

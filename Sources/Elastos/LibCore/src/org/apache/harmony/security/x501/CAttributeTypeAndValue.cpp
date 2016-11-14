@@ -446,7 +446,7 @@ const Int32 CAttributeTypeAndValue::CAPACITY = 10;
 const Int32 CAttributeTypeAndValue::SIZE = 10;
 INIT_PROI_4 AutoPtr<ArrayOf<ArrayOf<IObjectIdentifier*>* > > CAttributeTypeAndValue::KNOWN_OIDS;
 INIT_PROI_4 AutoPtr<IASN1Type> CAttributeTypeAndValue::sAttributeValue = InitAttributeValue();
-INIT_PROI_5 AutoPtr<IASN1Sequence> CAttributeTypeAndValue::ASN1 = InitASN1();
+INIT_PROI_4 AutoPtr<IASN1Sequence> CAttributeTypeAndValue::ASN1 = InitASN1();
 AutoPtr<Object> CAttributeTypeAndValue::sTMP = InitValues();
 
 CAR_OBJECT_IMPL(CAttributeTypeAndValue)

@@ -40,6 +40,8 @@ private:
 
         CARAPI constructor(
             /* [in] */ ArrayOf<IASN1Type *>* type);
+
+        TO_STRING_IMPL("CCertificationRequestInfo::ASN1SequenceDerived")
     };
 
 public:

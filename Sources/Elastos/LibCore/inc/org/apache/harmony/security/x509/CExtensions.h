@@ -42,6 +42,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [out] */ ICollection** values);
+
+        TO_STRING_IMPL("CExtensions::MyASN1SequenceOf")
     };
 
 public:

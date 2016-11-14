@@ -54,6 +54,8 @@ public:
         CARAPI GetDecodedObject(
             /* [in] */ IBerInputStream* in,
             /* [out] */ IInterface** result);
+
+        TO_STRING_IMPL("CValidity::ASN1SequenceWrapper")
     };
 
 public:

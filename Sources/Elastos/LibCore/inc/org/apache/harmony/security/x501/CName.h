@@ -39,6 +39,8 @@ private:
             /* [in] */ IASN1SetOf* set);
 
         ASN1SequenceOfDerived();
+
+        TO_STRING_IMPL("CName::ASN1SequenceDerived")
     };
 
 public:

@@ -5,9 +5,9 @@
 #include "CASN1Integer.h"
 #include "CASN1SetOf.h"
 #include "CASN1Implicit.h"
-// #include "CName.h"
+#include "CName.h"
 #include "CSubjectPublicKeyInfoHelper.h"
-// #include "CAttributeTypeAndValueHelper.h"
+#include "CAttributeTypeAndValue.h"
 #include "StringBuilder.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -24,9 +24,8 @@ using Org::Apache::Harmony::Security::Asn1::IASN1Type;
 using Org::Apache::Harmony::Security::Asn1::IASN1SequenceOf;
 using Org::Apache::Harmony::Security::Asn1::IASN1Integer;
 using Org::Apache::Harmony::Security::Asn1::IASN1Implicit;
-// using Org::Apache::Harmony::Security::X501::CName;
-// using Org::Apache::Harmony::Security::X501::CAttributeTypeAndValueHelper;
-using Org::Apache::Harmony::Security::X501::IAttributeTypeAndValueHelper;
+using Org::Apache::Harmony::Security::X501::CName;
+using Org::Apache::Harmony::Security::X501::CAttributeTypeAndValue;
 using Org::Apache::Harmony::Security::X501::IName;
 using Org::Apache::Harmony::Security::X509::CSubjectPublicKeyInfoHelper;
 using Org::Apache::Harmony::Security::X509::ISubjectPublicKeyInfoHelper;
@@ -98,30 +97,21 @@ ECode CCertificationRequestInfo::ASN1SequenceDerived::constructor(
 CCertificationRequestInfo::ASN1SequenceDerived::ASN1SequenceDerived()
 {}
 
-AutoPtr<IASN1Sequence> CCertificationRequestInfo::ASN1 = InitStatic();
+INIT_PROI_6 AutoPtr<IASN1Sequence> CCertificationRequestInfo::ASN1 = InitStatic();
 
 AutoPtr<IASN1Sequence> CCertificationRequestInfo::InitStatic()
 {
     AutoPtr<IASN1Integer> instance;
     CASN1Integer::GetInstance((IASN1Integer**)&instance);
-
-    Logger::D("CCertificationRequestInfo", "TODO: Need CName");
-    AutoPtr<IASN1SequenceOf> aso/* = CName::ASN1*/;
+    AutoPtr<IASN1SequenceOf> aso = CName::ASN1;
     AutoPtr<ISubjectPublicKeyInfoHelper> spih;
     CSubjectPublicKeyInfoHelper::AcquireSingleton((ISubjectPublicKeyInfoHelper**)&spih);
     AutoPtr<IASN1Sequence> as;
     spih->GetASN1((IASN1Sequence**)&as);
-    AutoPtr<IAttributeTypeAndValueHelper> atvh;
-    Logger::D("CCertificationRequestInfo", "TODO: Need CAttributeTypeAndValueHelper");
-    // CAttributeTypeAndValueHelper::AcquireSingleton((IAttributeTypeAndValueHelper**)&atvh);
-    AutoPtr<IASN1Sequence> asn1Seq;
-    if (atvh != NULL) {
-        atvh->GetASN1((IASN1Sequence**)&asn1Seq);
-    }
-    AutoPtr<IASN1SetOf> asn1SetOf;
-    CASN1SetOf::New(IASN1Type::Probe(asn1Seq), (IASN1SetOf**)&asn1SetOf);
+    AutoPtr<IASN1Type> asn1SetOf;
+    CASN1SetOf::New(IASN1Type::Probe(CAttributeTypeAndValue::ASN1), (IASN1Type**)&asn1SetOf);
     AutoPtr<IASN1Implicit> asn1Imp;
-    CASN1Implicit::New(0, IASN1Type::Probe(asn1SetOf), (IASN1Implicit**)&asn1Imp);
+    CASN1Implicit::New(0, asn1SetOf, (IASN1Implicit**)&asn1Imp);
     AutoPtr<ArrayOf<IASN1Type*> > seq = ArrayOf<IASN1Type*>::Alloc(4);
     seq->Set(0, IASN1Type::Probe(instance));
     seq->Set(1, IASN1Type::Probe(aso));

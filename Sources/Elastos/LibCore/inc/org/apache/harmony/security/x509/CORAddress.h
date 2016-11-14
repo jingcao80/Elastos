@@ -36,6 +36,8 @@ private:
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values);
 
+        TO_STRING_IMPL("CORAddress::MyASN1Sequence")
+
     private:
         Object mFoo;
     };
@@ -47,6 +49,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values) { return NOERROR;}
+
+        TO_STRING_IMPL("CORAddress::MyASN1Sequence2")
     };
 
 public:

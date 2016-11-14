@@ -60,7 +60,7 @@ AutoPtr<IASN1Sequence> CORAddress::initASN1()
     return IASN1Sequence::Probe(tmp2);
 }
 
-INIT_PROI_4 AutoPtr<IASN1Sequence> CORAddress::ASN1 = initASN1();
+INIT_PROI_3 AutoPtr<IASN1Sequence> CORAddress::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CORAddress)
 

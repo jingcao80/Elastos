@@ -39,6 +39,8 @@ private:
         CARAPI GetValues(
         /* [in] */ IInterface* object,
         /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("TSTInfo::MyASN1Sequence")
     };
 
 private:
@@ -53,6 +55,8 @@ private:
         CARAPI GetValues(
         /* [in] */ IInterface* object,
         /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("TSTInfo::MyASN1Sequence2")
     };
 
 public:
