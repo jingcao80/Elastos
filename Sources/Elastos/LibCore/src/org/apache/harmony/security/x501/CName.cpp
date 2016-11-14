@@ -65,8 +65,8 @@ ECode CName::ASN1SequenceOfDerived::constructor(
 CName::ASN1SequenceOfDerived::ASN1SequenceOfDerived()
 {}
 
-INIT_PROI_6 AutoPtr<IASN1SetOf> CName::ASN1_RDN = InitASN1_RDN();
-AutoPtr<IASN1SequenceOf> CName::ASN1 = InitASN1();
+INIT_PROI_5 AutoPtr<IASN1SetOf> CName::ASN1_RDN = InitASN1_RDN();
+INIT_PROI_5 AutoPtr<IASN1SequenceOf> CName::ASN1 = InitASN1();
 
 CAR_OBJECT_IMPL(CName)
 CAR_INTERFACE_IMPL(CName, Object, IName)

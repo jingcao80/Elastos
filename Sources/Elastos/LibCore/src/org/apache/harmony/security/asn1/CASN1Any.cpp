@@ -117,7 +117,8 @@ ECode CASN1Any::GetDecodedObject(
     bis->GetTagOffset(&tagOffset);
     AutoPtr<ArrayOf<Byte> > bytesEncoded = ArrayOf<Byte>::Alloc(offset- tagOffset);
     bytesEncoded->Copy(0, ((BerInputStream*)bis)->mBuffer, tagOffset, bytesEncoded->GetLength());
-    *object = CoreUtils::ConvertByteArray(bytesEncoded);
+    AutoPtr<IArrayOf> temp = CoreUtils::ConvertByteArray(bytesEncoded);
+    *object = temp;
     REFCOUNT_ADD(*object)
     return NOERROR;
 }

@@ -37,6 +37,8 @@ private:
         CARAPI Decode(
             /* [in] */ IBerInputStream* bis,
             /* [out] */ IInterface** object);
+
+        TO_STRING_IMPL("CGeneralName::MyASN1SequenceOf")
     };
 
     class MyASN1Choice

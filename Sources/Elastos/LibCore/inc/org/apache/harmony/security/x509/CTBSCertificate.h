@@ -40,6 +40,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("CTBSCertificate::ASN1SequenceWrapper")
     };
 
 public:

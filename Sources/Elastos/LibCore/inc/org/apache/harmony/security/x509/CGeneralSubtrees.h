@@ -37,6 +37,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [out] */ ICollection** values);
+
+        TO_STRING_IMPL("CGeneralSubtrees::MyASN1Sequence")
     };
 
 public:

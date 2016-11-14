@@ -159,7 +159,7 @@ ECode CTBSCertificate::ASN1SequenceWrapper::GetValues(
     return NOERROR;
 }
 
-AutoPtr<IASN1Sequence> CTBSCertificate::ASN1 = InitASN1();
+INIT_PROI_6 AutoPtr<IASN1Sequence> CTBSCertificate::ASN1 = InitASN1();
 
 CAR_OBJECT_IMPL(CTBSCertificate)
 CAR_INTERFACE_IMPL(CTBSCertificate, Object, ITBSCertificate)
@@ -192,8 +192,8 @@ AutoPtr<IASN1Sequence> CTBSCertificate::InitASN1()
     AutoPtr<IASN1Implicit> ai;
     CASN1Implicit::New(1, tmp, (IASN1Implicit**)&ai),
     at->Set(7, IASN1Type::Probe(ai));
-    CASN1Implicit::New(2, tmp, (IASN1Implicit**)&ai),
     ai = NULL;
+    CASN1Implicit::New(2, tmp, (IASN1Implicit**)&ai),
     at->Set(8, IASN1Type::Probe(ai));
 
     ae = NULL;

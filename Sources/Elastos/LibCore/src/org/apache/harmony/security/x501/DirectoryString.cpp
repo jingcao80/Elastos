@@ -53,7 +53,7 @@ AutoPtr<IASN1Choice> DirectoryString::Init()
     return ac;
 }
 
-INIT_PROI_3 AutoPtr<IASN1Choice> DirectoryString::ASN1 = Init();
+INIT_PROI_4 AutoPtr<IASN1Choice> DirectoryString::ASN1 = Init();
 
 }
 }

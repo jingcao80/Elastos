@@ -38,6 +38,8 @@ private:
         CARAPI GetValues(
             /* [in] */ IInterface* object,
             /* [out] */ ICollection** values);
+
+        TO_STRING_IMPL("CGeneralNames::MyASN1SequenceOf")
     };
 
 public:

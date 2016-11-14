@@ -86,7 +86,7 @@ AutoPtr<IASN1Sequence> CMessageImprint::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CMessageImprint::ASN1 = initASN1();
+INIT_PROI_5 AutoPtr<IASN1Sequence> CMessageImprint::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CMessageImprint)
 

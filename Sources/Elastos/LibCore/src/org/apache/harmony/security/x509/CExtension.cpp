@@ -209,7 +209,7 @@ AutoPtr<IASN1Sequence> CExtension::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> CExtension::ASN1 = initASN1();
+INIT_PROI_4 AutoPtr<IASN1Sequence> CExtension::ASN1 = initASN1();
 
 static AutoPtr<ArrayOf<Int32> > initSUBJ_DIRECTORY_ATTRS()
 {

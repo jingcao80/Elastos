@@ -15,7 +15,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-AutoPtr<IASN1Enumerated> CASN1Enumerated::sASN1 = Init();
+INIT_PROI_3 AutoPtr<IASN1Enumerated> CASN1Enumerated::sASN1 = Init();
 
 CAR_OBJECT_IMPL(CASN1Enumerated)
 

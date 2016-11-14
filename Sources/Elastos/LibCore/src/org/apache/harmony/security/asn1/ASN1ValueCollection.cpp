@@ -21,6 +21,7 @@ ECode ASN1ValueCollection::constructor(
 {
     ASN1Constructed::constructor(tagNumber);
     mType = type;
+    assert(mType != NULL);
     return NOERROR;
 }
 

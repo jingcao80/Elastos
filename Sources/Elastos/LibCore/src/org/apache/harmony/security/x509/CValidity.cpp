@@ -44,7 +44,7 @@ ECode CValidity::ASN1SequenceWrapper::GetValues(
     return NOERROR;
 }
 
-AutoPtr<IASN1Sequence> CValidity::ASN1 = InitASN1();
+INIT_PROI_5 AutoPtr<IASN1Sequence> CValidity::ASN1 = InitASN1();
 
 CAR_OBJECT_IMPL(CValidity)
 CAR_INTERFACE_IMPL(CValidity, Object, IValidity)

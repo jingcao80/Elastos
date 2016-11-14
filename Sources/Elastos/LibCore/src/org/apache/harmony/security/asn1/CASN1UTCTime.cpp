@@ -33,7 +33,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-AutoPtr<IASN1UTCTime> CASN1UTCTime::ASN1 = InitStatic();
+INIT_PROI_3 AutoPtr<IASN1UTCTime> CASN1UTCTime::ASN1 = InitStatic();
 
 CAR_OBJECT_IMPL(CASN1UTCTime)
 CAR_INTERFACE_IMPL(CASN1UTCTime, ASN1Time, IASN1UTCTime)

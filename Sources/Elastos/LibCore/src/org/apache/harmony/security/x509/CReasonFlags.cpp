@@ -86,7 +86,7 @@ const String CReasonFlags::REASONS[] = {
 };
 
 
-INIT_PROI_7 AutoPtr<IASN1BitString> CReasonFlags::ASN1 = InitASN1();
+INIT_PROI_3 AutoPtr<IASN1BitString> CReasonFlags::ASN1 = InitASN1();
 CAR_OBJECT_IMPL(CReasonFlags)
 CAR_INTERFACE_IMPL(CReasonFlags, Object, IReasonFlags)
 

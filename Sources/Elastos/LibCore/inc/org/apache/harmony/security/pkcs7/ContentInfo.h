@@ -26,8 +26,10 @@ private:
         : public ASN1Sequence
     {
     public:
-        ASN1SequenceDerived(
+        CARAPI constructor(
             /* [in] */ ArrayOf<IASN1Type*>* type);
+
+        TO_STRING_IMPL("ContentInfo::ASN1SequenceDerived")
 
     protected:
         CARAPI GetValues(
@@ -63,7 +65,7 @@ private:
         /* [in] */ IInterface* content,
         /* [in] */ ArrayOf<Byte>* encoding);
 
-    static CARAPI_(AutoPtr<ArrayOf<Int32> >) InitStatic();
+    static CARAPI_(AutoPtr<IASN1Sequence>) InitStatic();
 
 public:
     // OIDs
@@ -74,7 +76,7 @@ public:
     static AutoPtr< ArrayOf<Int32> > DIGESTED_DATA;
     static AutoPtr< ArrayOf<Int32> > ENCRYPTED_DATA;
 
-    AutoPtr< IArrayOf > mOid;
+    AutoPtr< ArrayOf<Int32> > mOid;
     AutoPtr<IInterface> mContent;
     AutoPtr< ArrayOf<Byte> > mEncoding;
 

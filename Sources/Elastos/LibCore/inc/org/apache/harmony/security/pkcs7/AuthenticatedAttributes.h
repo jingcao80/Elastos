@@ -2,8 +2,10 @@
 #ifndef __ORG_APACHE_HARMONY_SECURITY_PKCS7_AUTHENTICATEDATTRIBUTES_H__
 #define __ORG_APACHE_HARMONY_SECURITY_PKCS7_AUTHENTICATEDATTRIBUTES_H__
 
-#include <cmdef.h>
+#include "asn1/ASN1SetOf.h"
 
+using Org::Apache::Harmony::Security::Asn1::ASN1SetOf;
+using Org::Apache::Harmony::Security::Asn1::IBerInputStream;
 using Elastos::Utility::IList;
 
 namespace Org {
@@ -12,37 +14,19 @@ namespace Harmony {
 namespace Security {
 namespace Pkcs7 {
 
-class AuthenticatedAttributes
- : public ElLightRefBase
- , public IInterface
+class AuthenticatedAttributes : public Object
 {
 private:
-    class ASN1SetOfDerived
-        : public ASN1SetOf
-        , public IASN1SetOf
-        , public ElLightRefBase {
+    class ASN1SetOfDerived : public ASN1SetOf
+    {
     public:
-        CAR_INTERFACE_DECL()
-
-        ASN1TYPE_METHODS_DECL()
-
-        CARAPI SetType(
-            /* [in] */ IASN1Type* type);
-
-        CARAPI GetType(
-            /* [out] */ IASN1Type** type);
-
-        CARAPI GetValues(
-            /* [in] */ IInterface* object,
-            /* [out] */ ICollection** values);
-
-        ASN1SetOfDerived(
-            /* [in] */ IASN1Type* type);
+        CARAPI GetDecodedObject(
+            /* [in] */ IBerInputStream* bis,
+            /* [out] */ IInterface** object);
     };
-public:
-    static AutoPtr<IASN1SetOf> InitStatic();
 
-    CAR_INTERFACE_DECL()
+public:
+    static AutoPtr<ASN1SetOf> InitStatic();
 
     CARAPI GetAttributes(
         /* [out] */ IList** attributes);
@@ -50,13 +34,15 @@ public:
     CARAPI GetEncoded(
         /* [out, callee] */ ArrayOf<Byte>** encoded);
 
+    TO_STRING_IMPL("AuthenticatedAttributes")
+
 private:
     AuthenticatedAttributes(
         /* [in] */ ArrayOf<Byte>* encoding,
         /* [in] */ IList* authenticatedAttributes);
 
 public:
-    static AutoPtr<IASN1SetOf> ASN1;
+    static AutoPtr<ASN1SetOf> ASN1;
 
 private:
     AutoPtr<ArrayOf<Byte> > mEncoding;

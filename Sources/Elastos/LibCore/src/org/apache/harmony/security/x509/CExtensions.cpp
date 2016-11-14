@@ -77,7 +77,7 @@ AutoPtr<IASN1Type> CExtensions::initASN1()
     return IASN1Type::Probe(tmp);
 }
 
-AutoPtr<IASN1Type> CExtensions::ASN1 = initASN1();
+INIT_PROI_5 AutoPtr<IASN1Type> CExtensions::ASN1 = initASN1();
 
 static AutoPtr<IList> initSUPPORTED_CRITICAL()
 {

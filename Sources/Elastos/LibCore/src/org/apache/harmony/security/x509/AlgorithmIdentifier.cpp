@@ -117,7 +117,7 @@ AutoPtr<IASN1Sequence> AlgorithmIdentifier::initASN1()
     return IASN1Sequence::Probe(tmp);
 }
 
-AutoPtr<IASN1Sequence> AlgorithmIdentifier::ASN1 = initASN1();
+INIT_PROI_4 AutoPtr<IASN1Sequence> AlgorithmIdentifier::ASN1 = initASN1();
 
 CAR_INTERFACE_IMPL(AlgorithmIdentifier, Object, IAlgorithmIdentifier)
 

@@ -39,6 +39,8 @@ private:
             /* [in] */ ArrayOf<IASN1Type *>* type);
 
         ASN1SequenceDerived();
+
+        TO_STRING_IMPL("CPrivateKeyInfo::ASN1SequenceDerived")
     };
 
 public:

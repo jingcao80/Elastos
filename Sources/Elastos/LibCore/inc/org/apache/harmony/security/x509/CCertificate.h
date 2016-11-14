@@ -35,6 +35,8 @@ private:
         CARAPI GetValues(
         /* [in] */ IInterface* object,
         /* [in] */ ArrayOf<IInterface*>* values);
+
+        TO_STRING_IMPL("CCertificate::MyASN1Sequence")
     };
 
 public:

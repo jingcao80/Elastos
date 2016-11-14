@@ -12,7 +12,7 @@ namespace Harmony {
 namespace Security {
 namespace Asn1 {
 
-AutoPtr<IASN1Type> CASN1Boolean::sASN1 = InitStatic();
+INIT_PROI_3 AutoPtr<IASN1Type> CASN1Boolean::sASN1 = InitStatic();
 
 CAR_OBJECT_IMPL(CASN1Boolean)
 CAR_INTERFACE_IMPL(CASN1Boolean, ASN1Primitive, IASN1Boolean)

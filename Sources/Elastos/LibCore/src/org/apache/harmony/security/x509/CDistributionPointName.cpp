@@ -106,7 +106,7 @@ AutoPtr<IASN1Choice> CDistributionPointName::initASN1()
     return IASN1Choice::Probe(tmp);
 }
 
-INIT_PROI_7 AutoPtr<IASN1Choice> CDistributionPointName::ASN1 = initASN1();
+INIT_PROI_8 AutoPtr<IASN1Choice> CDistributionPointName::ASN1 = initASN1();
 
 CAR_OBJECT_IMPL(CDistributionPointName)
 

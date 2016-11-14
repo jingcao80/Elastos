@@ -184,6 +184,9 @@ _ELASTOS_NAMESPACE_END
 #define INIT_PROI_5 __attribute__ ((init_priority (2500)))
 #define INIT_PROI_6 __attribute__ ((init_priority (3000)))
 #define INIT_PROI_7 __attribute__ ((init_priority (3500)))
+#define INIT_PROI_8 __attribute__ ((init_priority (4000)))
+#define INIT_PROI_9 __attribute__ ((init_priority (4500)))
+#define INIT_PROI_10 __attribute__ ((init_priority (5000)))
 
 //---- CAR_INLINE ----
 #ifdef _GNUC
