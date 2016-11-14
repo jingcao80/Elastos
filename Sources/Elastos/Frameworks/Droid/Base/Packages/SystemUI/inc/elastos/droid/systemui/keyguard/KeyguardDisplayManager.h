@@ -8,7 +8,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/app/Presentation.h>
 #include <elastos/droid/media/MediaRouterSimpleCallback.h>
 
@@ -23,7 +23,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Core::IRunnable;

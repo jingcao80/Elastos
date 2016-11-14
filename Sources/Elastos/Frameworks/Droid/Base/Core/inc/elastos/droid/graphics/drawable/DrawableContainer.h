@@ -3,10 +3,10 @@
 #define __ELASTOS_DROID_GRAPHICS_DRAWABLE_DRAWABLECONTAINER_H__
 
 #include "elastos/droid/graphics/drawable/Drawable.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <Elastos.Droid.Utility.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
 
 namespace Elastos {

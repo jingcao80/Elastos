@@ -4,7 +4,7 @@
 
 #include "_Elastos_Droid_Server_Media_CKeyEventWakeLockReceiver.h"
 #include "elastos/droid/os/ResultReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentOnFinished;
@@ -12,7 +12,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::ResultReceiver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

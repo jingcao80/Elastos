@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_MEDIA_TV_TVINPUTSERVICESESSION_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -11,7 +11,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IDispatcherState;
 using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::IInputEventReceiver;

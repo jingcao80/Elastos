@@ -8,7 +8,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
@@ -20,7 +20,7 @@ using Elastos::Droid::Internal::App::IProcessState;
 using Elastos::Droid::Internal::App::IServiceState;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IParcelFileDescriptor;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::View::IApplicationToken;
 using Elastos::Core::Thread;

@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/hardware/camera2/CameraDevice.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Object.h>
@@ -15,7 +15,7 @@
 using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateCallback;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Core::Object;
 using Elastos::Utility::IList;

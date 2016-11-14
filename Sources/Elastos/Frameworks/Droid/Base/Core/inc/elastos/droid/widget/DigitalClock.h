@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/widget/TextView.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Database::ContentObserver;

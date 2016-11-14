@@ -7,7 +7,7 @@
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetHost.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Graphics::IPointF;
 using Elastos::Droid::Graphics::Drawable::ITransitionDrawable;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Core::Object;
 using Elastos::Core::Thread;

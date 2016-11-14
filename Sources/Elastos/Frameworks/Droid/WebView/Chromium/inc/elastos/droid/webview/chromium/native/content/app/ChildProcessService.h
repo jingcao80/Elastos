@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/webkit/webview/chromium/native/content/app/ChromiumLinkerParams.h"
 #include "elastos/droid/app/Service.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Core::IThread;
 using Elastos::Droid::App::IService;
@@ -15,7 +15,7 @@ using Elastos::Droid::Graphics::ISurfaceTexture;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IParcelFileDescriptor;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 // import android.os.RemoteException;
 // import android.util.Log;
 using Elastos::Droid::View::ISurface;

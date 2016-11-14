@@ -3,10 +3,10 @@
 #define __ELASTOS_DROID_SERVER_DREAMS_DREAMCONTROLLER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <Elastos.Droid.Content.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IIWindowManager;

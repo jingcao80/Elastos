@@ -3,14 +3,12 @@
 
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
-#include <elastos/core/Object.h>
 #include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Core::Object;
+using Elastos::Core::Runnable;
 using Elastos::Utility::IList;
 
 namespace Elastos {

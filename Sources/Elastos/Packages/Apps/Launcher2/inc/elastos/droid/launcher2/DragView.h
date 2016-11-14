@@ -3,7 +3,7 @@
 
 #include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
@@ -17,7 +17,7 @@ using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::View;
 using Elastos::Core::Object;
 

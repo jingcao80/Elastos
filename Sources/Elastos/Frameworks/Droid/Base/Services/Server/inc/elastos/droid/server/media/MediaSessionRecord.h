@@ -8,7 +8,7 @@
 #include "elastos/droid/server/media/CSessionController.h"
 #include "elastos/droid/server/media/CMediaSession.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/List.h>
 
@@ -26,7 +26,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Core::ICharSequence;

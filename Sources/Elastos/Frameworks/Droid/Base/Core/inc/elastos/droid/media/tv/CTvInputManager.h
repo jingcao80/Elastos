@@ -6,14 +6,14 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::View::IInputChannel;

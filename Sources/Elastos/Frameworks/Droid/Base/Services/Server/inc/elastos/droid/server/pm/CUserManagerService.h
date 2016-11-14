@@ -7,14 +7,14 @@
 #include "Elastos.Droid.Internal.h"
 #include "_Elastos_Droid_Server_Pm_CUserManagerService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IIUserManager;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;

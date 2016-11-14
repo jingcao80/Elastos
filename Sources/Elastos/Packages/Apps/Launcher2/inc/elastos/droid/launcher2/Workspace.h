@@ -10,7 +10,7 @@
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
@@ -36,7 +36,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPointF;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::View::IView;

@@ -3,7 +3,7 @@
 
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
@@ -21,7 +21,7 @@ using Elastos::Droid::Os::IIPowerManager;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Handler;
 using Elastos::Core::Object;
 using Elastos::Core::Thread;

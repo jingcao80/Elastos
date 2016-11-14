@@ -14,7 +14,7 @@
 #include "_Elastos_Droid_Media_CMediaPlayer.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IBitmap;
@@ -24,7 +24,7 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::IO::IFileDescriptor;

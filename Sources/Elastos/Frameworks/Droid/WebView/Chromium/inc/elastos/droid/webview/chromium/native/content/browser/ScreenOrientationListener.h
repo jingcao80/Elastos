@@ -10,10 +10,10 @@
 #include "Elastos.Droid.Hardware.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/webkit/webview/chromium/native/base/ObserverList.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Content::IComponentCallbacks;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IConfiguration;

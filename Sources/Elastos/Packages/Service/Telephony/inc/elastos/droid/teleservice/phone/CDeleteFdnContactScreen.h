@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/content/AsyncQueryHandler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Os.h"
@@ -17,7 +17,7 @@ using Elastos::Droid::Content::AsyncQueryHandler;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
 

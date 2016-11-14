@@ -5,9 +5,9 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Os.h"
 #include "_Elastos_Droid_App_CActivityOptions.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;

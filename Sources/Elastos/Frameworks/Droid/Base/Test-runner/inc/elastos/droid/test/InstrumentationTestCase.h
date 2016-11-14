@@ -5,13 +5,13 @@
 #include <elastos/droid/ext/frameworkdef.h>
 #include <_Elastos.Droid.Test.h>
 #include <eunit/framework/TestCase.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Core::IRunnable;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IInstrumentation;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Eunit::Framework::TestCase;
 

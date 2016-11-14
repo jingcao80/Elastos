@@ -4,9 +4,9 @@
 
 #include "Elastos.CoreLibrary.Apache.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Core::IRunnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IThread;
 using Elastos::Utility::IQueue;
 
@@ -27,8 +27,7 @@ namespace Tsccm {
  * on to a handler for appropriate processing.
  */
 class RefQueueWorker
-    : public Object
-    , public IRunnable
+    : public Runnable
 {
 public:
     /**
@@ -40,8 +39,6 @@ public:
     RefQueueWorker(
         /* [in] */ IQueue* queue,
         /* [in] */ IRefQueueHandler* handler);
-
-    CAR_INTERFACE_DECL()
 
     /**
      * The main loop of this worker.

@@ -4,7 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos.Droid.Server.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/location/CountryDetectorBase.h"
 #include "elastos/droid/telephony/PhoneStateListener.h"
 #include "elastos/utility/TimerTask.h"
@@ -13,7 +13,7 @@
 
 using Elastos::Droid::Location::ICountry;
 using Elastos::Droid::Location::ICountryListener;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Telephony::IPhoneStateListener;
 using Elastos::Droid::Telephony::ITelephonyManager;

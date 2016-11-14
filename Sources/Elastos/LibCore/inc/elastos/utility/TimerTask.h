@@ -2,17 +2,16 @@
 #define __ELASTOS_UTILITY_TIMERTASK_H__
 
 #include "Elastos.CoreLibrary.Utility.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Core::IRunnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Utility {
 
 class ECO_PUBLIC TimerTask
-    : public Object
+    : public Runnable
     , public ITimerTask
-    , public IRunnable
 {
 protected:
     /**

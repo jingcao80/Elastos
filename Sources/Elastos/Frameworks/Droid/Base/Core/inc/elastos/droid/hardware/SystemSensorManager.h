@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_HARDWARE_SYSTEMSENSORMANAGER_H__
 
 #include "elastos/droid/hardware/SensorManager.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/NativeMessageQueue.h"
 #include <elastos/utility/etl/List.h>
@@ -13,7 +13,7 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::ILocalSocket;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IMessageQueue;
 using Elastos::Droid::Os::MessageQueue;
 using Elastos::Droid::Os::NativeMessageQueue;

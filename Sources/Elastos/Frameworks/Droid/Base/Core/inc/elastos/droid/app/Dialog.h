@@ -5,7 +5,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/os/Handler.h>
 
 using Elastos::Core::ICharSequence;
@@ -20,7 +20,7 @@ using Elastos::Droid::Content::IDialogInterfaceOnKeyListener;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::View::IWindow;

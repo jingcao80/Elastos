@@ -10,14 +10,14 @@
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Animation::IValueAnimator;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Core::Object;

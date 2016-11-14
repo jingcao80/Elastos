@@ -9,7 +9,7 @@
 #include "elastos/droid/server/display/AutomaticBrightnessController.h"
 #include "elastos/droid/server/display/RampAnimator.h"
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Server::Lights::ILightsManager;
 
@@ -24,7 +24,7 @@ using Elastos::Droid::Hardware::ISensorManager;
 using Elastos::Droid::Hardware::Display::IDisplayPowerCallbacks;
 using Elastos::Droid::Hardware::Display::IDisplayPowerRequest;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;

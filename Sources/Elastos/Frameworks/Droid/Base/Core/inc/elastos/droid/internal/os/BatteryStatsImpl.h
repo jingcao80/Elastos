@@ -8,7 +8,7 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/os/BatteryStats.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/utility/CArrayMap.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/HashMap.h>
@@ -20,7 +20,7 @@ using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Os::IWorkSource;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::BatteryStats;
 using Elastos::Droid::Os::IBatteryStatsCounter;
 using Elastos::Droid::Os::IBatteryStatsInt64Counter;

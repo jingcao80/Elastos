@@ -3,9 +3,9 @@
 #define __ELASTOS_DROID_CONTENT_RES_CTHEMEPROCESSINGLISTENER_H__
 
 #include "_Elastos_Droid_Content_Res_CThemeProcessingListener.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

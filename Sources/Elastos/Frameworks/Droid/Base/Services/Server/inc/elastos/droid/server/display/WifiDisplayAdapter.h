@@ -6,7 +6,7 @@
 #include "elastos/droid/server/display/DisplayDevice.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Content::IIntent;

@@ -10,7 +10,7 @@
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/AsyncTask.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.App.h"
@@ -55,7 +55,7 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Text::ISpannableStringBuilder;
 using Elastos::Droid::View::IViewGroup;

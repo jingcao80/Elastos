@@ -8,7 +8,7 @@
 #include "elastos/droid/speech/tts/AudioPlaybackHandler.h"
 //#include "elastos/droid/os/HandlerThread.h"
 #include "elastos/droid/os/Looper.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/speech/tts/SynthesisRequest.h"
 #include "elastos/droid/speech/tts/AbstractSynthesisCallback.h"
 #include "elastos/droid/speech/tts/EventLoggerV1.h"
@@ -24,7 +24,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Speech::Tts::IITextToSpeechService;
 using Elastos::Droid::App::Service;
 using Elastos::Net::IURI;

@@ -14,7 +14,7 @@
 #include <_Elastos.Droid.Server.h>
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/media/projection/CMediaProjection.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/HashMap.h>
 
@@ -29,7 +29,7 @@ using Elastos::Droid::Media::Projection::IMediaProjectionInfo;
 using Elastos::Droid::Media::Projection::IIMediaProjectionWatcherCallback;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::IWatchdogMonitor;
 using Elastos::Droid::Server::SystemService;
 using Elastos::Utility::Etl::HashMap;

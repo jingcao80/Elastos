@@ -4,7 +4,7 @@
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::IO::IFile;
 using Elastos::IO::IInputStream;
@@ -12,7 +12,7 @@ using Elastos::IO::IOutputStream;
 using Elastos::Utility::IMap;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::Http::IHeaders;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

@@ -3,12 +3,12 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CHECKLONGPRESSHELPER_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Core::Object;

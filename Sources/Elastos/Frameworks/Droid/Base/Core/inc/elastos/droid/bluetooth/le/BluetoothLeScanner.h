@@ -5,12 +5,12 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/bluetooth/BluetoothGattCallbackWrapper.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Bluetooth::BluetoothGattCallbackWrapper;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
 using Elastos::Droid::Bluetooth::IIBluetoothGatt;

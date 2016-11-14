@@ -7,7 +7,7 @@
 #include "elastos/droid/teleservice/services/telephony/sip/SipSharedPreferences.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipProfileDb.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipAccountRegistry.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
@@ -17,7 +17,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::PreferenceActivity;

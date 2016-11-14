@@ -8,9 +8,7 @@
 #include "cutils/log.h"
 #endif
 
-#include <elastos/core/AutoLock.h>
 #include "elastos/utility/CArrayList.h"
-
 using Elastos::Utility::CArrayList;
 
 namespace Elastos {
@@ -36,7 +34,7 @@ const ThreadState Thread::STATE_MAP[] = {
     ThreadState_RUNNABLE        // SUSPENDED
 };
 
-CAR_INTERFACE_IMPL_2(Thread, Object, IThread, IRunnable)
+CAR_INTERFACE_IMPL(Thread, Runnable, IThread)
 
 Thread::Thread()
     : mNativeThread(NULL)

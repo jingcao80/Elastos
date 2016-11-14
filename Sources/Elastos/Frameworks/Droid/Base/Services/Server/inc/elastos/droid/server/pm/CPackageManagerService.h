@@ -11,7 +11,7 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/FileObserver.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Net.h>
@@ -86,7 +86,7 @@ using Elastos::Droid::Content::Pm::IElSignatureParser;
 using Elastos::Droid::Content::Res::IThemeConfig;
 using Elastos::Droid::Internal::App::IIMediaContainerService;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::IFileObserver;

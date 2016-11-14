@@ -4,10 +4,10 @@
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/utility/etl/HashMap.h>
-#include <elastos/core/Object.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Utility::Etl::HashMap;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

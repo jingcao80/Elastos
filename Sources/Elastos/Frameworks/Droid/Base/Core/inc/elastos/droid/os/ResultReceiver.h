@@ -5,10 +5,10 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/os/Runnable.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Internal::Os::IIResultReceiver;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

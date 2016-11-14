@@ -15,7 +15,7 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
@@ -44,7 +44,7 @@ using Elastos::Droid::Os::IIPowerManager;
 using Elastos::Droid::Os::ILowPowerModeListener;
 using Elastos::Droid::Os::IPowerManagerInternal;
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Server::Lights::Light;
 using Elastos::Droid::Server::Lights::LightsManager;

@@ -3,7 +3,7 @@
 
 #include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/FrameLayout.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.AppWidget.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::AppWidget::IAppWidgetHostView;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Core::Object;

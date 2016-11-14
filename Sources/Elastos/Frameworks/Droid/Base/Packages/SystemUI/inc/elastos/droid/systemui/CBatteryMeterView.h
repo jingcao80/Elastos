@@ -5,7 +5,7 @@
 #include "_Elastos_Droid_SystemUI_CBatteryMeterView.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/view/View.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
@@ -15,7 +15,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Graphics::IRectF;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::View;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IBatteryController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IBatteryStateChangeCallback;

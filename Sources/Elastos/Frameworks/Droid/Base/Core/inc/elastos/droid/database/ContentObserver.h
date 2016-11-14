@@ -4,12 +4,12 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Database::IContentObserver;
 
 namespace Elastos {

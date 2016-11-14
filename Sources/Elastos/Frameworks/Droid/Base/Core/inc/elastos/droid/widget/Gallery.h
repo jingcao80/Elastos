@@ -3,12 +3,12 @@
 #define __ELASTOS_DROID_WIDGET_GALLERY_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/widget/AbsSpinner.h"
 #include "elastos/droid/widget/Scroller.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IGestureDetector;
 using Elastos::Droid::View::IGestureDetectorOnGestureListener;
 using Elastos::Droid::View::IKeyEvent;

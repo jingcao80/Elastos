@@ -7,14 +7,14 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Preference.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/BaseAdapter.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::Drawable:: IDrawable;
 using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Droid::Widget::IBaseAdapter;

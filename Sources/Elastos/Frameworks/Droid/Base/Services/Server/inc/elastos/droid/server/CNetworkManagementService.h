@@ -15,7 +15,7 @@
 #include <elastos/core/Thread.h>
 #include <elastos/droid/net/NetworkUtils.h>
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/telephony/PhoneStateListener.h"
 #include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.Content.h>
@@ -58,7 +58,7 @@ using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Os::INetworkActivityListener;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::IRemoteCallbackList;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::INativeDaemonConnectorCallbacks;
 using Elastos::Droid::Server::IWatchdogMonitor;
 using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;

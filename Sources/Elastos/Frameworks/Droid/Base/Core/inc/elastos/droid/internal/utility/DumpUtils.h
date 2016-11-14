@@ -2,10 +2,10 @@
 #define __ELASTOS_DROID_INTERNAL_UTILITY_DUMPUTILS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IStringWriter;
 

@@ -3,7 +3,7 @@
 
 #include "Elastos.Droid.Animation.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/View.h"
 // #include "elastos/droid/view/ViewPropertyAnimatorRT.h"
 #include <elastos/utility/etl/HashMap.h>
@@ -14,7 +14,7 @@ using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::IValueAnimator;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::View;
 using Elastos::Core::IRunnable;

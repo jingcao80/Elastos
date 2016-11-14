@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_CAssetAtlasService.h"
 #include "elastos/droid/server/SystemService.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Content.h>
@@ -26,7 +26,7 @@ using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::IPorterDuffXfermode;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Utility::IInt64SparseArray;

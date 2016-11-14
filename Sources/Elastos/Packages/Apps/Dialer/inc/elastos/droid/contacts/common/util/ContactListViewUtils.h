@@ -4,10 +4,10 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::View::IView;
 

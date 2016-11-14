@@ -5,7 +5,7 @@
 #include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/keyguard/PagedView.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::SystemUI::Keyguard::PagedView;

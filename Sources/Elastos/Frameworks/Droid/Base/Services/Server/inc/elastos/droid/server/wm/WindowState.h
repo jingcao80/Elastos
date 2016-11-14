@@ -4,7 +4,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/server/wm/CSession.h"
 #include "elastos/droid/server/wm/WindowToken.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::View::IWindowState;
 using Elastos::Droid::View::IIWindowId;
@@ -22,7 +22,7 @@ using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Os::IRemoteCallbackList;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Input::IInputWindowHandle;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;

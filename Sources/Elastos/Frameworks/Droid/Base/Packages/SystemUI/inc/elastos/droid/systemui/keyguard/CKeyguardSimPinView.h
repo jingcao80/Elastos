@@ -4,7 +4,7 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardSimPinView.h"
 #include "elastos/droid/systemui/keyguard/KeyguardPinBasedInputView.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Thread.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -13,7 +13,7 @@ using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IProgressDialog;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::Thread;
 using Elastos::Core::IRunnable;
 

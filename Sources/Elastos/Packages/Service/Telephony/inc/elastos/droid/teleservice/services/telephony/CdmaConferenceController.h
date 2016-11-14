@@ -6,10 +6,10 @@
 #include "elastos/droid/teleservice/services/telephony/CdmaConference.h"
 #include "elastos/droid/teleservice/services/telephony/CdmaConnection.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Telecom.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Telecom::IDisconnectCause;
 using Elastos::Droid::Telecom::Connection;
 using Elastos::Droid::Telecom::Conference;

@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_WIDGET_TOOLBAR__
 
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/widget/RtlSpacingHelper.h"
 #include "elastos/droid/app/ActionBarLayoutParams.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Internal::View::Menu::ISubMenuBuilder;
 using Elastos::Droid::Internal::View::Menu::IMenuItemImpl;
 using Elastos::Droid::Internal::Widget::IDecorToolbar;
 using Elastos::Droid::Internal::Widget::IToolbarWidgetWrapper;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IMenuItem;

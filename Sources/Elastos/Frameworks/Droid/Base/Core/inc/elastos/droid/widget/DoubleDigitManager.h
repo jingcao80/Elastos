@@ -3,10 +3,10 @@
 #define __ELASTOS_DROID_WIDGET_DOUBLEDIGITMANAGER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Core::IInteger32;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

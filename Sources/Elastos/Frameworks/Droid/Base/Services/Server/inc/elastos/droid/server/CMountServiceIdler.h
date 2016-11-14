@@ -4,10 +4,10 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_CMountServiceIdler.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/app/job/JobService.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::App::Job::IJobInfo;
 using Elastos::Droid::App::Job::IJobParameters;
 using Elastos::Droid::App::Job::IJobScheduler;

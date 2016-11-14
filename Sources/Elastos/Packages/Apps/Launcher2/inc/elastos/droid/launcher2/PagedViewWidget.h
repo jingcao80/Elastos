@@ -3,7 +3,7 @@
 
 #include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/LinearLayout.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.AppWidget.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::LinearLayout;

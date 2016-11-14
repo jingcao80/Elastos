@@ -3,7 +3,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -14,7 +14,7 @@ using Elastos::Droid::Graphics::ITypeface;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IRunnable;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::IArrayList;

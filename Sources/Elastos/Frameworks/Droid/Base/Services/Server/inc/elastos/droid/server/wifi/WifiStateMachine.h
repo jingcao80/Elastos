@@ -23,7 +23,7 @@
 #include "elastos/droid/internal/utility/StateMachine.h"
 #include "elastos/droid/net/NetworkAgent.h"
 #include "elastos/droid/net/NetworkFactory.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/wifi/p2p/WifiP2pServiceImpl.h"
 #include "elastos/droid/server/wifi/SupplicantStateTracker.h"
 #include "elastos/droid/server/wifi/WifiTrafficPoller.h"
@@ -62,7 +62,7 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Net::INetlinkTracker;
 using Elastos::Droid::Server::Net::INetlinkTrackerCallback;
 using Elastos::Droid::Server::Wifi::P2p::WifiP2pServiceImpl;

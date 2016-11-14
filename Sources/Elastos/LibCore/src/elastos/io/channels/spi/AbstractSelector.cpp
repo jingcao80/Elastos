@@ -6,10 +6,8 @@
 #include "CAtomicBoolean.h"
 #include "AutoLock.h"
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 
@@ -21,8 +19,6 @@ namespace Spi {
 //==================================================================
 //　WakeupRunnable
 //==================================================================
-
-CAR_INTERFACE_IMPL(AbstractSelector::WakeupRunnable, Object, IRunnable)
 
 AbstractSelector::WakeupRunnable::WakeupRunnable(
     /* [in] */ AbstractSelector* selector)

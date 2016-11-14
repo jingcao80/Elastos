@@ -4,7 +4,7 @@
 #include "_Elastos_Droid_Media_Tv_CTvInputManagerSession.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/utility/Pools.h"
 #include "elastos/droid/view/InputEventSender.h"
 #include <elastos/core/Object.h>
@@ -17,7 +17,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::Pools;
 using Elastos::Droid::View::IInputChannel;

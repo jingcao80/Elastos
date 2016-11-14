@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CDMA_CDMAPHONE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Registrant.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
@@ -76,7 +76,7 @@ using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Os::IRegistrant;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;

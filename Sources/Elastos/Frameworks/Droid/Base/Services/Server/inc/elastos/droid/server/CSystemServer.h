@@ -27,9 +27,9 @@
 #include "elastos/droid/server/CThemeService.h"
 #include "elastos/droid/server/NetworkTimeUpdateService.h"
 #include <elastos/core/Singleton.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageManager;

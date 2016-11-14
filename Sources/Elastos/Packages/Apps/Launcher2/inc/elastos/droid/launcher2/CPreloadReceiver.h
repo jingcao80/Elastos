@@ -4,14 +4,14 @@
 #include "_Elastos_Droid_Launcher2_CPreloadReceiver.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::BroadcastReceiver;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

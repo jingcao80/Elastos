@@ -8,12 +8,12 @@
 #include "Elastos.Droid.Os.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 #include <camera/ICameraService.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Utility::IArrayMap;

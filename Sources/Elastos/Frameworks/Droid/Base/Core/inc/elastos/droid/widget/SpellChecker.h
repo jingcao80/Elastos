@@ -6,9 +6,9 @@
 #include "Elastos.Droid.Text.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Utility.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::Method::IWordIterator;
 using Elastos::Droid::Text::Style::ISpellCheckSpan;

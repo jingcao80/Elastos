@@ -6,11 +6,11 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/widget/FrameLayout.h>
 
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::Widget::FrameLayout;

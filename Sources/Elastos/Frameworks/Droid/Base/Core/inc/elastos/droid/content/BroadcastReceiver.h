@@ -3,11 +3,11 @@
 #define __ELASTOS_DROID_CONTENT_BROADCASTRECEIVER_H__
 
 #include "Elastos.Droid.Content.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;

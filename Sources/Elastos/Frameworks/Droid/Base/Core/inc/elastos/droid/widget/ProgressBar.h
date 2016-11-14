@@ -3,14 +3,14 @@
 #define __ELASTOS_DROID_WIDGET_PROGRESSBAR_H__
 
 #include "elastos/droid/R.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/utility/Pools.h"
 #include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::R;
 using Elastos::Droid::Graphics::Drawable::Shapes::IShape;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::Pools;
 using Elastos::Droid::View::IView;
 

@@ -4,7 +4,7 @@
 
 #include <Elastos.Droid.Content.h>
 #include "elastos/droid/server/media/CProviderCallback.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IComponentName;
@@ -12,7 +12,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Media::IRemoteDisplayState;
 using Elastos::Droid::Media::IIRemoteDisplayProvider;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 
 namespace Elastos {

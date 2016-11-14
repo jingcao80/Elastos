@@ -6,7 +6,7 @@
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "elastos/droid/utility/FloatProperty.h"
 #include <elastos/droid/view/ViewGroup.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"
@@ -19,7 +19,7 @@ using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::ICanvas;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IMotionEvent;

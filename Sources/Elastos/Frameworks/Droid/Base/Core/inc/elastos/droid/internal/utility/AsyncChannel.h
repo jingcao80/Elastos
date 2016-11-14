@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -14,7 +14,7 @@ using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Utility::IStack;
 

@@ -6,7 +6,7 @@
 #include "elastos/droid/widget/HorizontalScrollView.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/LinearLayout.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IActionBarTab;
 using Elastos::Droid::Animation::IAnimatorListener;
@@ -16,7 +16,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::BaseAdapter;

@@ -6,9 +6,9 @@
 #include "elastos/droid/systemui/statusbar/ActivatableNotificationView.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.View.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Service::Notification::IStatusBarNotification;
 using Elastos::Droid::View::IViewStub;
 using Elastos::Droid::View::IViewStubOnInflateListener;

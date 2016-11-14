@@ -8,7 +8,7 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/TwilightCalculator.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.Location.h>
@@ -25,7 +25,7 @@ using Elastos::Droid::Location::ILocationListener;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::SystemService;
 using Elastos::Droid::Server::TwilightCalculator;
 using Elastos::Utility::Etl::List;

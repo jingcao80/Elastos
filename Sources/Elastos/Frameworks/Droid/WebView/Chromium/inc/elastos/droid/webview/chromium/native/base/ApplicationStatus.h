@@ -5,14 +5,14 @@
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/webkit/webview/chromium/native/base/BaseChromiumApplication.h"
 #include "elastos/droid/webkit/webview/chromium/native/base/ObserverList.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IApplication;
 using Elastos::Droid::App::IActivityLifecycleCallbacks;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 using Elastos::Core::IInteger32;
 using Elastos::Core::IRunnable;

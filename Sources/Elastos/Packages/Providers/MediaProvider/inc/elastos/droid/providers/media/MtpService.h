@@ -8,7 +8,7 @@
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/droid/app/Service.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -24,7 +24,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Storage::IStorageEventListener;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::IStorageVolume;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {

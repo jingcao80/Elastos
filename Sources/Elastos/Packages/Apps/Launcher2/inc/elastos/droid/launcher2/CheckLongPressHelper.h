@@ -6,9 +6,9 @@
 #include <elastos/core/Object.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Core::Object;
 

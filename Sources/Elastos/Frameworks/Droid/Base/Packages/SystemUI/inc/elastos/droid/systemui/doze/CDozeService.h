@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Hardware.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/service/dreams/DreamService.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
@@ -21,7 +21,7 @@ using Elastos::Droid::Hardware::ITriggerEvent;
 using Elastos::Droid::Hardware::ITriggerEventListener;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::StatusBar::Phone::DozeParameters;
 using Elastos::Droid::Service::Dreams::DreamService;
 

@@ -4,13 +4,13 @@
 #include "_Elastos_Droid_Media_Projection_CMediaProjectionManager.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/media/projection/CMediaProjection.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IBinder;

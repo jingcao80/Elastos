@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SERVER_USB_USBHOSTMANAGER_H__
 
 #include "elastos/droid/server/usb/UsbSettingsManager.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Hardware::Usb::IUsbConfiguration;
@@ -12,7 +12,7 @@ using Elastos::Droid::Hardware::Usb::IUsbEndpoint;
 using Elastos::Droid::Hardware::Usb::IUsbInterface;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IParcelFileDescriptor;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

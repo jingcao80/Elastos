@@ -7,11 +7,11 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewOnLayoutChangeListener;

@@ -9,14 +9,14 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Core::IRunnable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Utility::IArrayList;
 
 namespace Elastos {

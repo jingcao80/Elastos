@@ -4,7 +4,7 @@
 #include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/DropTarget.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Graphics.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IPointF;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IVibrator;

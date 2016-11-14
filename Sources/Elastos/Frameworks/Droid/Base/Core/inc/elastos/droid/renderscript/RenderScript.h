@@ -4,12 +4,12 @@
 
 #include "Elastos.Droid.RenderScript.h"
 #include "elastos/droid/RenderScript/ProgramStore.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Thread.h>
 
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Graphics::ISurfaceTexture;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::Thread;
 using Elastos::Utility::Concurrent::Locks::IReentrantReadWriteLock;
 using Elastos::IO::IFile;

@@ -5,7 +5,7 @@
 #include "elastos/droid/internal/telephony/CallTracker.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/RegistrantList.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 // import android.telephony.DisconnectCause;
 // import android.telephony.PhoneNumberUtils;
@@ -29,7 +29,7 @@ using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::RegistrantList;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IArrayList;

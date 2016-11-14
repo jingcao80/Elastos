@@ -9,7 +9,7 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IActivityManagerInternal;
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -20,7 +20,7 @@ using Elastos::Droid::Hardware::Input::IInputManagerInternal;
 using Elastos::Droid::Internal::App::IIAppOpsService;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Server::Power::ISuspendBlocker;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IWorkSource;

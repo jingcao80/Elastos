@@ -2,8 +2,9 @@
 #define __ELASTOS_IO_CHANNELS_SPI_ABSTRACTSELECTOR_H__
 
 #include "Selector.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Core::IRunnable;
+using Elastos::Core::Runnable;
 using Elastos::IO::Channels::Selector;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
 
@@ -24,12 +25,9 @@ class AbstractSelector
 {
 protected:
     class WakeupRunnable
-        : public Object
-        , public IRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
         WakeupRunnable(
             /* [in] */ AbstractSelector* selector);
 

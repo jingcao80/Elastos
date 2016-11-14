@@ -4,7 +4,7 @@
 
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/utility/FloatProperty.h>
 #include <elastos/droid/utility/Pools.h>
 #include <elastos/droid/utility/Int64SparseInt64Array.h>
@@ -33,7 +33,7 @@ using Elastos::Droid::Graphics::IOutline;
 using Elastos::Droid::Graphics::BitmapConfig;
 using Elastos::Droid::Graphics::PorterDuffMode;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;

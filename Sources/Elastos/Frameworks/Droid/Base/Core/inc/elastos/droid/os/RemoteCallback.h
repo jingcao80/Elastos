@@ -3,8 +3,9 @@
 #define __ELASTOS_DROID_OS_REMOTECALLBACK_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
+
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

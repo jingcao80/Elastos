@@ -5,13 +5,13 @@
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardPINView.h"
 #include "elastos/droid/systemui/keyguard/KeyguardPinBasedInputView.h"
 #include "elastos/droid/systemui/keyguard/AppearAnimationUtils.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.View.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IRunnable;
 
 namespace Elastos {

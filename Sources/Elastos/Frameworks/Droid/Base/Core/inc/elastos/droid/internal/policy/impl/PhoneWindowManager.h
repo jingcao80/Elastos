@@ -17,7 +17,7 @@
 #include "elastos/droid/internal/policy/impl/WindowOrientationListener.h"
 #include "elastos/droid/service/gesture/EdgeGestureManager.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/UEventObserver.h"
 #include "elastos/droid/utility/SparseArray.h"
 #include "elastos/droid/view/InputEventReceiver.h"
@@ -58,7 +58,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IVibrator;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::UEventObserver;
 using Elastos::Droid::Os::IUEvent;
 using Elastos::Droid::Service::Dreams::IDreamManagerInternal;

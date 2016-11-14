@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_APP_EXIT_TRANSITION_COORDINATOR_H__
 
 #include "elastos/droid/app/ActivityTransitionCoordinator.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/transition/Transition.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
@@ -13,7 +13,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Transition::ITransition;
 using Elastos::Droid::View::IViewGroup;
 

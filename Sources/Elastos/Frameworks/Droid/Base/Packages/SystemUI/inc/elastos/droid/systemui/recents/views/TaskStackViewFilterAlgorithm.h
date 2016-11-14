@@ -5,9 +5,9 @@
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "elastos/droid/systemui/recents/model/Task.h"
 #include "elastos/droid/systemui/recents/views/ViewPool.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IHashMap;
 

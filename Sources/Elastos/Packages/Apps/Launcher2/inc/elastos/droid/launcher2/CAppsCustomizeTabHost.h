@@ -4,7 +4,7 @@
 #include "_Elastos_Droid_Launcher2_CAppsCustomizeTabHost.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/TabHost.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Launcher2::AppsCustomizePagedViewContentType;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;

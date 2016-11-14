@@ -9,7 +9,7 @@
 #include "elastos/droid/view/InputEventSender.h"
 #include "elastos/droid/view/inputmethod/CControlledInputConnectionWrapper.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/utility/Pools.h"
 #include <elastos/core/Object.h>
 
@@ -17,7 +17,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IResultReceiver;

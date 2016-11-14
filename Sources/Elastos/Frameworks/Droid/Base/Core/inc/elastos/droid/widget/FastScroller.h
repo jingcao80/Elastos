@@ -4,7 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/utility/Int32Property.h"
 
 #include <elastos/core/Object.h>
@@ -21,7 +21,7 @@ using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::Int32Property;
 using Elastos::Droid::Utility::IProperty;
 using Elastos::Droid::View::IMotionEvent;

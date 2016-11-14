@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SERVER_CONNECTIVITY_PAC_MANAGER_H__
 
 #include <elastos/droid/content/BroadcastReceiver.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include "_Elastos.Droid.Server.h"
 #include <Elastos.Droid.Net.h>
 
@@ -20,7 +20,7 @@ using Elastos::Droid::Content::IServiceConnection;
 // using Elastos::Droid::Net::IIProxyService;
 using Elastos::Droid::Net::IProxyInfo;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IServiceManager;

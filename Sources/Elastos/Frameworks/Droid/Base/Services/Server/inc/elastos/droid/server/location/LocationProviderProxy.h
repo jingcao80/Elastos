@@ -9,7 +9,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/server/ServiceWatcher.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Internal::Location::IILocationProvider;
@@ -20,7 +20,7 @@ using Elastos::Droid::Internal::Location::IProviderRequest;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Location::ILocationProviderInterface;
 using Elastos::Droid::Server::ServiceWatcher;
 using Elastos::IO::IFileDescriptor;

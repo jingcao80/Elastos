@@ -7,7 +7,7 @@
 #include "_Elastos_Droid_Settings_CDeviceAdminAdd.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/os/RemoteCallback.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IAppOpsManager;
@@ -19,7 +19,7 @@ using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::RemoteCallback;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewGroup;

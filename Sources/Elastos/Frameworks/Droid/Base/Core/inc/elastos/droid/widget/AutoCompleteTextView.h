@@ -4,12 +4,12 @@
 
 #include "elastos/droid/widget/EditText.h"
 #include "elastos/droid/widget/ListView.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/database/DataSetObserver.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Database::DataSetObserver;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::Object;
 
 namespace Elastos {

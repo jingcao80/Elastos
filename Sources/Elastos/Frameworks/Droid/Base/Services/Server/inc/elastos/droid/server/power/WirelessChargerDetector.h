@@ -8,13 +8,13 @@
 #include <Elastos.Droid.Os.h>
 #include <_Elastos.Droid.Server.h>
 #include "elastos/droid/ext/frameworkdef.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Hardware::ISensorManager;
 using Elastos::Droid::Hardware::ISensor;
 using Elastos::Droid::Hardware::ISensorEventListener;
 using Elastos::Droid::Hardware::ISensorEvent;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Server::Power::ISuspendBlocker;
 using Elastos::Core::IRunnable;

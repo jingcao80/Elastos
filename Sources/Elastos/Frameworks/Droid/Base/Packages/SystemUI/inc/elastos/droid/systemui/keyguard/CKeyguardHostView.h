@@ -7,7 +7,7 @@
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 #include "elastos/droid/widget/RemoteViews.h"
 #include "elastos/droid/view/View.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
@@ -30,7 +30,7 @@ using Elastos::Droid::View::View;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IViewOnClickListener;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Widget::RemoteViews;
 using Elastos::Droid::Widget::IRemoteViewsOnClickHandler;

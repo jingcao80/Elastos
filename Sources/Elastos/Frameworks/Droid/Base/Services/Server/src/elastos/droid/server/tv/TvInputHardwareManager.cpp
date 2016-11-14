@@ -9,7 +9,7 @@
 #include <Elastos.Droid.Utility.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/net/ReturnOutValue.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/os/ServiceManager.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
@@ -38,7 +38,7 @@ using Elastos::Droid::Media::IAudioPortConfig;
 using Elastos::Droid::Media::Tv::EIID_IITvInputHardware;
 using Elastos::Droid::Media::Tv::ITvInputManager;
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Server::SystemService;
 using Elastos::Droid::Utility::CArrayMap;

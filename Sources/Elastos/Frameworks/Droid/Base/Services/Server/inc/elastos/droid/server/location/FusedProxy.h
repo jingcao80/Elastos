@@ -4,7 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos.Droid.Server.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/location/FusedLocationHardwareSecure.h"
 #include "elastos/droid/server/ServiceWatcher.h"
 #include "Elastos.Droid.Content.h"
@@ -16,7 +16,7 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Hardware::Location::IIFusedLocationHardware;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Location::FusedLocationHardwareSecure;
 using Elastos::Droid::Server::ServiceWatcher;
 

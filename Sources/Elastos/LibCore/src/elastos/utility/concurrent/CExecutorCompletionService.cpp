@@ -4,8 +4,6 @@
 #include "CFutureTask.h"
 #include "AbstractExecutorService.h"
 
-using Elastos::Core::EIID_IRunnable;
-
 namespace Elastos {
 namespace Utility {
 namespace Concurrent {

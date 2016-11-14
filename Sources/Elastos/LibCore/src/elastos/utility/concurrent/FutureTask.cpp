@@ -12,7 +12,6 @@
 using Elastos::Core::ISystem;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::Concurrent::Locks::LockSupport;
 using Elastos::Utility::Concurrent::Locks::ILockSupport;
 using Elastos::Utility::Concurrent::Locks::CLockSupport;
@@ -23,7 +22,7 @@ namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 
-CAR_INTERFACE_IMPL_2(FutureTask, Object, IRunnableFuture, IRunnable)
+CAR_INTERFACE_IMPL(FutureTask, Runnable, IRunnableFuture)
 
 const Int32 FutureTask::NEW          = 0;
 const Int32 FutureTask::COMPLETING   = 1;

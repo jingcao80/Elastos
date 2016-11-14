@@ -4,11 +4,11 @@
 #include "_Elastos.Droid.TeleService.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

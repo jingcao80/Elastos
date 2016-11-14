@@ -6,7 +6,7 @@
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/view/View.h>
 #include <elastos/droid/view/ViewGroup.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
@@ -22,7 +22,7 @@ using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::IView;

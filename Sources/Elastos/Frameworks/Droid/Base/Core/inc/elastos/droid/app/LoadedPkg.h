@@ -8,11 +8,11 @@
 #define HASH_FOR_CONTENT
 #include "elastos/droid/ext/frameworkhash.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;

@@ -4,7 +4,7 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardAccountView.h"
 #include "elastos/droid/widget/LinearLayout.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Accounts.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::App::IProgressDialog;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Text::ITextWatcher;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Utility::IAttributeSet;

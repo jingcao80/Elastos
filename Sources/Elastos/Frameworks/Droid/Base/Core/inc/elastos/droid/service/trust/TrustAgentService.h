@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Service.h"
 #include "elastos/droid/app/Service.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Os::Handler;
@@ -14,7 +14,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;
 

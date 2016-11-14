@@ -2,10 +2,11 @@
 #ifndef __ELASTOS_CORE_THREAD_H__
 #define __ELASTOS_CORE_THREAD_H__
 
-#include <elastos/core/Object.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/NativeThread.h>
 
 using Elastos::Utility::IList;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Core {
@@ -61,9 +62,8 @@ struct NativeThread;
 class ThreadGroup;
 
 class ECO_PUBLIC Thread
-    : public Object
+    : public Runnable
     , public IThread
-    , public IRunnable
 {
 private:
     /** Park states */

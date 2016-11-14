@@ -8,7 +8,7 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/app/Service.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/systemui/screenshot/GlobalScreenshot.h"
 
 using Elastos::Droid::App::Service;
@@ -18,7 +18,7 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

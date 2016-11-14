@@ -4,11 +4,11 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IRunnable;
 using Elastos::Core::IThread;
 

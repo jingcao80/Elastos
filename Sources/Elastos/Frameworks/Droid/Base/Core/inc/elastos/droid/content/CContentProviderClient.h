@@ -4,7 +4,7 @@
 
 #include "_Elastos_Droid_Content_CContentProviderClient.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Database::ICursor;
@@ -13,7 +13,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ICancellationSignal;
 using Elastos::Droid::Os::IParcelFileDescriptor;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 using Elastos::Core::ICloseGuard;
 using Elastos::Utility::IArrayList;

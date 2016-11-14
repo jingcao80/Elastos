@@ -8,7 +8,7 @@
 #include "elastos/droid/ext/frameworkhash.h"
 #include "elastos/droid/server/am/ConnectionRecord.h"
 #include "Elastos.Droid.App.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 
@@ -21,7 +21,7 @@ using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Internal::App::IServiceState;
 using Elastos::Droid::Internal::Os::IBatteryStatsImplUidPkgServ;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::List;
 

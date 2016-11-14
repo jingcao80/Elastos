@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkdef.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -14,7 +14,7 @@ using Elastos::Droid::Internal::Policy::IIKeyguardService;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IOnKeyguardExitResult;
 using Elastos::Droid::View::IView;
 

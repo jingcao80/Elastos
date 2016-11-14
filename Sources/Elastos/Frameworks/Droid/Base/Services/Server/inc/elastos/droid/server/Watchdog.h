@@ -3,7 +3,7 @@
 
 #include <elastos/droid/ext/frameworkext.h>
 #include <_Elastos.Droid.Server.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/server/am/CActivityManagerService.h>
@@ -14,7 +14,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.IO.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IDebug;
 using Elastos::Droid::Os::IHandler;

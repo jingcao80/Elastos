@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_COMMANDS_AM_AM_H__
 
 #include "elastos/droid/internal/os/BaseCommand.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
@@ -22,7 +22,7 @@ using Elastos::Droid::Content::IIntentReceiver;
 using Elastos::Droid::Internal::Os::BaseCommand;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IComparator;

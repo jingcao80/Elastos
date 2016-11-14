@@ -120,7 +120,6 @@ EXPORT_HEADERS += elastos/droid/os/Handler.h
 EXPORT_HEADERS += elastos/droid/os/HandlerThread.h
 EXPORT_HEADERS += elastos/droid/os/HandlerRunnable.h
 EXPORT_HEADERS += elastos/droid/os/Looper.h
-EXPORT_HEADERS += elastos/droid/os/Runnable.h
 EXPORT_HEADERS += elastos/droid/os/Process.h
 EXPORT_HEADERS += elastos/droid/os/Binder.h
 EXPORT_HEADERS += elastos/droid/os/UserHandle.h

@@ -6,11 +6,11 @@
 #include "_Elastos_Droid_Media_Projection_CMediaProjection.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Hardware::Display::IVirtualDisplayCallback;
 using Elastos::Droid::Hardware::Display::IVirtualDisplay;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::View::ISurface;

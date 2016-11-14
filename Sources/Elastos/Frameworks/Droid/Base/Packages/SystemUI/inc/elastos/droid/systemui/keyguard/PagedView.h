@@ -6,7 +6,7 @@
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewGroup.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -24,7 +24,7 @@ using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPointF;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::View::View;
 using Elastos::Droid::View::IView;

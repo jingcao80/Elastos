@@ -8,7 +8,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include <elastos/core/Thread.h>
@@ -23,7 +23,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnTouchListener;

@@ -1,14 +1,13 @@
 
-#ifndef __ELASTOS_DROID_OS_RUNNABLE_H__
-#define __ELASTOS_DROID_OS_RUNNABLE_H__
+#ifndef __ELASTOS_CORE_RUNNABLE_H__
+#define __ELASTOS_CORE_RUNNABLE_H__
 
 #include <elastos/core/Object.h>
 
 using Elastos::Core::IRunnable;
 
 namespace Elastos {
-namespace Droid {
-namespace Os {
+namespace Core {
 
 class ECO_PUBLIC Runnable
     : public Object
@@ -22,8 +21,7 @@ public:
     virtual ~Runnable();
 };
 
-} // namespace Os
-} // namespace Droid
+} // namespace Core
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_OS_RUNNABLE_H__
+#endif //__ELASTOS_CORE_RUNNABLE_H__

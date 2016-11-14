@@ -3,7 +3,6 @@
 #include "elastos/core/Thread.h"
 #include "elastos/utility/logging/Logger.h"
 
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::Thread;
 using Elastos::Utility::Logging::Logger;
 
@@ -32,8 +31,6 @@ RefQueueWorker::RefQueueWorker(
     mRefQueue   = queue;
     mRefHandler = handler;
 }
-
-CAR_INTERFACE_IMPL(RefQueueWorker, Object, IRunnable)
 
 ECode RefQueueWorker::Run()
 {

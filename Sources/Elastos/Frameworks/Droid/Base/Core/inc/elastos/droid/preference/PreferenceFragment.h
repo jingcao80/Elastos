@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::Content::IIntent;
@@ -18,7 +18,7 @@ using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Preference::IPreferenceManagerOnPreferenceTreeClickListener;
 
 namespace Elastos {

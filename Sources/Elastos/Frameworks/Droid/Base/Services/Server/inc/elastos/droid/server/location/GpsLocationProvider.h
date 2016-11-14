@@ -18,7 +18,7 @@
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/location/GpsMeasurementsProvider.h"
 #include "elastos/droid/server/location/GpsNavigationMessageProvider.h"
 #include "elastos/droid/server/location/GpsStatusListenerHelper.h"
@@ -58,7 +58,7 @@ using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Location::GpsMeasurementsProvider;
 using Elastos::Droid::Server::Location::GpsNavigationMessageProvider;
 using Elastos::Droid::Server::Location::GpsStatusListenerHelper;

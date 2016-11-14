@@ -5,9 +5,9 @@
 #include "_Elastos_Droid_SystemUI_CDessertCaseDream.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/service/dreams/DreamService.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Service::Dreams::DreamService;
 using Elastos::Droid::Widget::IFrameLayout;
 

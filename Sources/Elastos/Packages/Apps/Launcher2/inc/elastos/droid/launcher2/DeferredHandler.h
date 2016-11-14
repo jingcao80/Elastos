@@ -4,7 +4,7 @@
 #include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
@@ -13,7 +13,7 @@
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IIdleHandler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IMessageQueue;
 using Elastos::Core::Object;
 using Elastos::Core::IRunnable;

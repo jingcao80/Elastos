@@ -4,7 +4,7 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardPasswordView.h"
 #include "elastos/droid/systemui/keyguard/KeyguardAbsKeyInputView.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
@@ -13,7 +13,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::ITextWatcher;
 using Elastos::Droid::View::IView;

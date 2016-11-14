@@ -2,10 +2,9 @@
 #define __ELASTOS_IO_CHANNELS_SPI_ELASTOS_IO_CHANNELS_ABSTRACTINTERRUPTIBLECHANNEL_H__
 
 #include "Elastos.CoreLibrary.IO.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Core::Object;
-using Elastos::Core::IRunnable;
+using Elastos::Core::Runnable;
 using Elastos::IO::ICloseable;
 
 namespace Elastos {
@@ -32,14 +31,11 @@ class AbstractInterruptibleChannel
 {
 private:
     class ActionRunnable
-        : public Object
-        , public IRunnable
+        : public Runnable
     {
     public:
         ActionRunnable(
             /* [in] */ AbstractInterruptibleChannel *channel);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 

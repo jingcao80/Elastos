@@ -3,9 +3,9 @@
 #define __ELASTOS_DROID_SYSTEMUI_QS_TILES_FLASHLIGHTTILE_H__
 
 #include "elastos/droid/systemui/qs/QSTile.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IFlashlightController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IFlashlightListener;
 

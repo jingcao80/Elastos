@@ -5,11 +5,10 @@
 #include "_Elastos_Droid_Os_CPowerManagerWakeLock.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/os/Runnable.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Core::IRunnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

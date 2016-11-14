@@ -3,10 +3,10 @@
 #define __ELASTOS_DROID_INCALLUI_CALLTIMER_H__
 
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

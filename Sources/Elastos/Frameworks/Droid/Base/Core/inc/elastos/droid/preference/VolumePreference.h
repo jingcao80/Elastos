@@ -6,7 +6,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/preference/SeekBarDialogPreference.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Database::IContentObserver;
@@ -14,7 +14,7 @@ using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::IRingtone;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::Widget::ISeekBarOnSeekBarChangeListener;

@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 #include "_Elastos.Droid.Settings.h"
 
@@ -15,7 +15,7 @@ using Elastos::Droid::Net::IStaticIpConfiguration;
 using Elastos::Droid::Net::IpConfigurationIpAssignment;
 using Elastos::Droid::Net::IpConfigurationProxySettings;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Text::ITextWatcher;
 using Elastos::Droid::Text::INoCopySpan;
 using Elastos::Droid::Text::IEditable;

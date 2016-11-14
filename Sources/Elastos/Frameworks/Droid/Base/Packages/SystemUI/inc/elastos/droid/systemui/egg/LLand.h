@@ -10,7 +10,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/widget/ImageView.h"
 #include "elastos/droid/view/ViewOutlineProvider.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::IOutline;
 using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::Egg::IGameView;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IKeyEvent;

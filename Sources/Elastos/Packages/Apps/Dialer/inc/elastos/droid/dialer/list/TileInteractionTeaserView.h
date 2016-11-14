@@ -3,7 +3,7 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/droid/widget/FrameLayout.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 
@@ -12,7 +12,7 @@ using Elastos::Droid::Animation::IAnimatorListener;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::FrameLayout;

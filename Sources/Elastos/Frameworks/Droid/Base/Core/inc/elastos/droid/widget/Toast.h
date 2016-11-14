@@ -6,13 +6,13 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IITransientNotification;
 using Elastos::Droid::App::IINotificationManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IWindowManager;

@@ -4,7 +4,7 @@
 
 #include "elastos/droid/net/NetworkFactory.h"
 #include "elastos/droid/net/NetworkAgent.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/net/BaseNetworkObserver.h"
 
 using Elastos::Droid::Content::IContext;
@@ -18,7 +18,7 @@ using Elastos::Droid::Net::IStaticIpConfiguration;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
 using Elastos::Droid::Server::Net::BaseNetworkObserver;
 using Elastos::IO::IFileDescriptor;

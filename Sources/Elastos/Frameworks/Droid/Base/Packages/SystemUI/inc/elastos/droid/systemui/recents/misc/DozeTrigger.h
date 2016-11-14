@@ -5,11 +5,11 @@
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Core::IRunnable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

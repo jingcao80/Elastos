@@ -3,10 +3,10 @@
 #define __ELASTOS_DROID_WEBKIT_WEBVIEW_CHROMIUM_CONTENT_BROWSER_BINDINGMANAGERIMPL_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/webkit/webview/chromium/native/content/browser/BindingManager.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
 
 // import android.util.Log;

@@ -4,13 +4,13 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos.Droid.Server.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/ServiceWatcher.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Hardware::Location::IActivityRecognitionHardware;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::ServiceWatcher;
 
 namespace Elastos {

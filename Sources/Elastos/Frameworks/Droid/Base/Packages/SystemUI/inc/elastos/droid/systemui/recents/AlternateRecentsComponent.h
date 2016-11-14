@@ -10,7 +10,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
 #include "elastos/droid/systemui/recents/views/TaskViewTransform.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::IRecentsComponentCallbacks;
 using Elastos::Droid::SystemUI::Recents::RecentsConfiguration;
 using Elastos::Droid::SystemUI::Recents::Misc::SystemServicesProxy;

@@ -3,14 +3,14 @@
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_PHONE_TICKER_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Service::Notification::IStatusBarNotification;
 using Elastos::Droid::Text::IStaticLayout;
 using Elastos::Droid::Text::ITextPaint;

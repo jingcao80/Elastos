@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/AsyncResult.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
@@ -15,7 +15,7 @@ using Elastos::Droid::App::Activity;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::View::IView;

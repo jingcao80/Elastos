@@ -3,12 +3,12 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Content.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Content::ISharedPreferencesOnSharedPreferenceChangeListener;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 using Elastos::IO::IFile;
 using Elastos::IO::IFileOutputStream;

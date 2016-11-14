@@ -7,7 +7,7 @@
 #define _ELASTOS_DROID_WEBKIT_WEBVIEW_CHROMIUM_CONTENT_BROWSER_LOCATIONPROVIDERADAPTER_H_
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/webkit/webview/chromium/native/content/browser/LocationProviderFactory.h"
 
 // package org.chromium.content.browser;
@@ -15,7 +15,7 @@
 // import com.google.common.annotations.VisibleForTesting;
 // import org.chromium.base.CalledByNative;
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Content::IContext;
 //using Elastos::Utility::Concurrent::IFutureTask;
 

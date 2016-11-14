@@ -9,7 +9,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/server/location/CountryDetectorBase.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/TimerTask.h>
@@ -20,7 +20,7 @@ using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::ILocationListener;
 using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Location::CountryDetectorBase;
 using Elastos::Core::IThread;
 using Elastos::Utility::IList;

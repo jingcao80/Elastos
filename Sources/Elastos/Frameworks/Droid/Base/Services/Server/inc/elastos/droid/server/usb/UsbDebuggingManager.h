@@ -4,7 +4,7 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.IO.h>
@@ -12,7 +12,7 @@
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Net::ILocalSocket;

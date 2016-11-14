@@ -29,7 +29,7 @@
 #include "elastos/droid/server/SystemServiceManager.h"
 #include <elastos/droid/os/FileObserver.h>
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/internal/content/PackageMonitor.h>
 // #include <binder/IPermissionController.h>
 #include <elastos/core/StringBuilder.h>
@@ -107,7 +107,7 @@ using Elastos::Droid::Os::IDebugMemoryInfo;
 using Elastos::Droid::Os::IStrictModeViolationInfo;
 using Elastos::Droid::Os::IRemoteCallbackList;
 using Elastos::Droid::Os::IUpdateLock;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::ProcessMap;
 using Elastos::Droid::Server::IntentResolver;
 using Elastos::Droid::Server::CAppOpsService;

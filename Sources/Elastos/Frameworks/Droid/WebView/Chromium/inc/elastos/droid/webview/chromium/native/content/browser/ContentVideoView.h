@@ -11,10 +11,10 @@
 #include "elastos/droid/webkit/webview/chromium/native/ui/base/ViewElastos.h"
 #include "elastos/droid/webkit/webview/chromium/native/ui/base/ViewElastosDelegate.h"
 #include "elastos/droid/widget/LinearLayout.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Core::IRunnable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::Content::IContext;

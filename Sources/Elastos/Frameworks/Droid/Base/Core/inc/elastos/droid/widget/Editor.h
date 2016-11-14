@@ -11,7 +11,7 @@
 #include "elastos/droid/text/style/CSuggestionSpan.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/PopupWindow.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/HandlerRunnable.h"
 #include "elastos/droid/R.h"
@@ -23,7 +23,7 @@ using Elastos::Droid::Content::UndoOperation;
 using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Os::HandlerRunnable;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::EIID_IBundle;
 using Elastos::Droid::Text::ISpanWatcher;

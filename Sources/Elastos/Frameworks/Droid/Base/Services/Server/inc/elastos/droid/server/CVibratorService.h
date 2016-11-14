@@ -5,14 +5,14 @@
 #include "_Elastos_Droid_Server_CVibratorService.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/database/ContentObserver.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.Hardware.h>
 #include <Elastos.Droid.Internal.h>
 
 using Elastos::Droid::Os::IWorkSource;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::IIVibratorService;

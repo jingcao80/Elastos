@@ -4,7 +4,7 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/dialer/list/DragDropController.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/widget/GridView.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IDragEvent;
 using Elastos::Droid::View::IMotionEvent;

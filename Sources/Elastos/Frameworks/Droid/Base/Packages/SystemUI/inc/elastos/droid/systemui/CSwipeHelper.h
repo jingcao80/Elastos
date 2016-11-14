@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IValueAnimator;
@@ -15,7 +15,7 @@ using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::View::Animation::IInterpolator;

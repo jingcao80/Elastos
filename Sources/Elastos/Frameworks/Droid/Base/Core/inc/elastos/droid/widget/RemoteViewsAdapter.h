@@ -7,7 +7,7 @@
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/os/CHandlerThread.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
@@ -29,7 +29,7 @@ using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerCallback;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IBinder;

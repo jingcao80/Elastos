@@ -4,7 +4,7 @@
 
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/concurrent/FutureTask.h>
 
 using Elastos::Core::IRunnable;

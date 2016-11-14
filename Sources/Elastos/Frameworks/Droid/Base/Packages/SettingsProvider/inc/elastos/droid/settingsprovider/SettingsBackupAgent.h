@@ -6,7 +6,7 @@
 #include <Elastos.Droid.Wifi.h>
 #include "elastos/droid/settingsprovider/SettingsHelper.h"
 // #include "elastos/droid/app/backup/BackupAgentHelper.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/etl/List.h>
 
@@ -17,7 +17,7 @@ using Elastos::Droid::App::Backup::IFullBackupDataOutput;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IParcelFileDescriptor;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::IO::IFile;
 using Elastos::IO::IWriter;

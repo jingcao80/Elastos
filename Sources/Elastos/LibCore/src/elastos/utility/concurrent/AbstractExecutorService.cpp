@@ -7,7 +7,6 @@
 #include "CArrayList.h"
 
 using Elastos::Core::ISystem;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::CArrayList;
 
 namespace Elastos {

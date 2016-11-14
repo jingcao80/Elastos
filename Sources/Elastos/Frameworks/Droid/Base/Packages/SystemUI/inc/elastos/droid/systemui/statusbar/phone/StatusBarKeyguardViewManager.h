@@ -5,11 +5,11 @@
 #include "_Elastos.Droid.SystemUI.h"
 #include "elastos/droid/systemui/statusbar/phone/KeyguardBouncer.h"
 #include "Elastos.Droid.Os.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Internal::Policy::IIKeyguardShowCallback;
 using Elastos::Core::Object;
 

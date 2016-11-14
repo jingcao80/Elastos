@@ -7,12 +7,12 @@
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/app/Service.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Service::Dreams::IIDreamManager;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::IActionMode;

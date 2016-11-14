@@ -5,13 +5,13 @@
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/systemui/SystemUI.h"
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Storage::IStorageEventListener;
 using Elastos::Droid::Os::Storage::IStorageManager;
 

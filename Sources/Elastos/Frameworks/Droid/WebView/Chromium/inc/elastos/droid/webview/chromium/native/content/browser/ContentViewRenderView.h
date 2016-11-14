@@ -5,13 +5,13 @@
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/FrameLayout.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/webkit/webview/chromium/native/content/browser/ContentReadbackHandler.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Droid::View::ISurfaceHolderCallback;

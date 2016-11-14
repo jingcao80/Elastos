@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Widget.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/view/View.h>
 
 using Elastos::Droid::Content::IUndoManager;

@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/launcher2/CheckLongPressHelper.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/LinearLayout.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Animation.h"
@@ -26,7 +26,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;

@@ -4,7 +4,7 @@
 
 #include "elastos/droid/server/am/BroadcastRecord.h"
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Content::IIntent;
@@ -13,7 +13,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IRunnable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;

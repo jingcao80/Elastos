@@ -6,7 +6,7 @@
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 #include "elastos/droid/view/View.h"
 #include <elastos/droid/widget/FrameLayout.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Transition.h"
@@ -23,7 +23,7 @@ using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::IRemoteController;
 using Elastos::Droid::Media::IRemoteControllerMetadataEditor;
 using Elastos::Droid::Media::IRemoteControllerOnClientUpdateListener;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Transition::ITransitionSet;
 using Elastos::Droid::View::View;
 using Elastos::Droid::View::IView;

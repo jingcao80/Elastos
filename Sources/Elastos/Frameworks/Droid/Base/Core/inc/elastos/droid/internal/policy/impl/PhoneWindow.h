@@ -10,7 +10,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/os/CBundle.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/Window.h"
 #include "elastos/droid/view/GestureDetector.h"
 #include "elastos/droid/widget/FrameLayout.h"
@@ -44,7 +44,7 @@ using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Transition::IScene;
 using Elastos::Droid::Transition::ITransition;
 using Elastos::Droid::Transition::ITransitionManager;

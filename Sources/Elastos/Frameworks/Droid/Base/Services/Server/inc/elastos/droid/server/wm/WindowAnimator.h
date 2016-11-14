@@ -5,12 +5,12 @@
 #include "elastos/droid/server/wm/WindowState.h"
 #include "elastos/droid/server/wm/WindowToken.h"
 #include "elastos/droid/server/wm/ScreenRotationAnimation.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;

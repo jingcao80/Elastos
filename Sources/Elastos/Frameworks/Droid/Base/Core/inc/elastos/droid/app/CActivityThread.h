@@ -15,14 +15,14 @@
 #include "elastos/droid/app/CResultInfo.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/app/LoadedPkg.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;

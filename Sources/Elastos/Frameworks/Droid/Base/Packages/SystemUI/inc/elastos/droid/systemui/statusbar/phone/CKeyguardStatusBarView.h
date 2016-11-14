@@ -3,12 +3,12 @@
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_CKEYGUARDSTATUSBARVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Phone_CKeyguardStatusBarView.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/widget/RelativeLayout.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IBatteryController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IBatteryStateChangeCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IKeyguardUserSwitcher;

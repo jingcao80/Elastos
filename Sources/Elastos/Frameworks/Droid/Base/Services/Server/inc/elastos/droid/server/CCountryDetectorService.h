@@ -7,14 +7,14 @@
 #include "elastos/droid/ext/frameworkext.h"
 #define HASH_FOR_OS
 #include "elastos/droid/ext/frameworkhash.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <Elastos.Droid.Content.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Location::IICountryDetector;
 using Elastos::Droid::Location::ICountryListener;
 using Elastos::Droid::Location::IICountryListener;

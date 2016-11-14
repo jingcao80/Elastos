@@ -9,14 +9,14 @@
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/database/DataSetObserver.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Database::DataSetObserver;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::Keyguard::AppearAnimationUtils;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IKeyguardStatusBarView;
 using Elastos::Droid::SystemUI::StatusBar::Phone::INotificationPanelView;

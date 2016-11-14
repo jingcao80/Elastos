@@ -4,10 +4,10 @@
 
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "Elastos.Droid.View.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IActivity;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 
 namespace Elastos {

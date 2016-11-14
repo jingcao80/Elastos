@@ -10,7 +10,7 @@
 #include <Elastos.Droid.Internal.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/InputEventReceiver.h"
 #include "elastos/droid/server/AttributeCache.h"
 #include "elastos/droid/server/wm/WindowState.h"
@@ -67,7 +67,7 @@ using Elastos::Droid::Os::IIRemoteCallback;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IPowerManagerInternal;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::ILowPowerModeListener;
 using Elastos::Droid::Server::IWatchdogMonitor;
 using Elastos::Droid::Server::Display::CDisplayManagerService;

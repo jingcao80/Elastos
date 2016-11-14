@@ -4,13 +4,13 @@
 #include "_Elastos_Droid_SystemUI_StatusBar_Policy_CKeyButtonView.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Media.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/widget/ImageView.h>
 
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Media::IAudioManager;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::ImageView;
 using Elastos::Droid::Widget::ImageViewScaleType;

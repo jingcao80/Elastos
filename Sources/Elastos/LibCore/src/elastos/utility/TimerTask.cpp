@@ -2,12 +2,10 @@
 #include "TimerTask.h"
 #include "AutoLock.h"
 
-using Elastos::Core::EIID_IRunnable;
-
 namespace Elastos {
 namespace Utility {
 
-CAR_INTERFACE_IMPL_2(TimerTask, Object, ITimerTask, IRunnable)
+CAR_INTERFACE_IMPL(TimerTask, Runnable, ITimerTask)
 
 TimerTask::TimerTask()
     : mCancelled(FALSE)

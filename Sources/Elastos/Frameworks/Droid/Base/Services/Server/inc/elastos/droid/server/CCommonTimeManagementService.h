@@ -6,13 +6,13 @@
 #include "elastos/droid/server/net/BaseNetworkObserver.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 //#include "elastos/droid/os/CommonTimeConfig.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Net.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IINetworkManagementService;
 using Elastos::Droid::Net::IINetworkManagementEventObserver;
 using Elastos::Droid::Content::IContext;

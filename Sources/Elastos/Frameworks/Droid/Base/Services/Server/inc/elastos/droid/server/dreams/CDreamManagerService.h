@@ -6,14 +6,14 @@
 #include "elastos/droid/server/dreams/DreamController.h"
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Service.h>
 #include <Elastos.Droid.Os.h>
 
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerInternal;
 using Elastos::Droid::Os::IPowerManagerWakeLock;

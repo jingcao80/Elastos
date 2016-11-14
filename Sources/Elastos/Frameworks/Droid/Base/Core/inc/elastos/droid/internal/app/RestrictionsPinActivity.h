@@ -6,10 +6,10 @@
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/internal/app/AlertActivity.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IUserManager;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::INoCopySpan;
 using Elastos::Droid::Text::ITextWatcher;

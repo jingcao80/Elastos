@@ -6,7 +6,7 @@
 #include "elastos/droid/widget/ListPopupWindow.h"
 #include "elastos/droid/internal/view/menu/BaseMenuPresenter.h"
 #include "elastos/droid/internal/view/menu/MenuPopupHelper.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Utility::Etl::HashMap;
@@ -23,7 +23,7 @@ using Elastos::Droid::Internal::View::Menu::IMenuItemView;
 using Elastos::Droid::Internal::View::Menu::IMenuItemImpl;
 using Elastos::Droid::Internal::View::Menu::IMenuPresenterCallback;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::IOnGlobalLayoutListener;

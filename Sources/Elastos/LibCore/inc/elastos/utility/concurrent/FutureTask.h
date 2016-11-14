@@ -5,7 +5,7 @@
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include <elastos/core/Thread.h>
 
-using Elastos::Core::IRunnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IThread;
 using Elastos::Core::Object;
 using Elastos::Core::Thread;
@@ -15,9 +15,8 @@ namespace Utility {
 namespace Concurrent {
 
 class ECO_PUBLIC FutureTask
-    : public Object
+    : public Runnable
     , public IRunnableFuture
-    , public IRunnable
 {
 public:
     CAR_INTERFACE_DECL()

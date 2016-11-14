@@ -4,10 +4,10 @@
 
 #include "_Elastos_Droid_SystemUI_CDessertCase.h"
 #include <elastos/droid/app/Activity.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Activity;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::IDessertCaseView;
 
 namespace Elastos {

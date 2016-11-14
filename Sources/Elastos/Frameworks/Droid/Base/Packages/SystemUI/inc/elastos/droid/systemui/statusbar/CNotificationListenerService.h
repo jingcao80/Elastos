@@ -3,10 +3,10 @@
 #define  __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CNOTIFICATIONLISTENERSERVICE_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_CNotificationListenerService.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/service/notification/NotificationListenerService.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Service::Notification::INotificationListenerServiceRankingMap;
 using Elastos::Droid::Service::Notification::IStatusBarNotification;
 using Elastos::Droid::Service::Notification::NotificationListenerService;

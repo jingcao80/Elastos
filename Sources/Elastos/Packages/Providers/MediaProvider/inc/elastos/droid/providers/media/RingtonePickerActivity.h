@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/internal/app/AlertActivity.h>
 
 using Elastos::Droid::Content::IDialogInterface;
@@ -18,7 +18,7 @@ using Elastos::Droid::Media::IRingtoneManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IAdapterViewOnItemSelectedListener;

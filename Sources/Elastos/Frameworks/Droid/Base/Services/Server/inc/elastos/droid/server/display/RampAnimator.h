@@ -3,9 +3,9 @@
 #define __ELASTOS_DROID_SERVER_DISPLAY_RAMPANIMATOR_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Utility::IInt32Property;
 using Elastos::Droid::View::IChoreographer;

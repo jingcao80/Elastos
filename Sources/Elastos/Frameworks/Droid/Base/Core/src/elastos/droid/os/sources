@@ -75,7 +75,6 @@ SOURCES += RemoteCallback.cpp
 SOURCES += RemoteCallbackList.cpp
 SOURCES += CRemoteCallbackList.cpp
 SOURCES += ResultReceiver.cpp
-SOURCES += Runnable.cpp
 SOURCES += SELinux.cpp
 SOURCES += ServiceManager.cpp
 SOURCES += CServiceManager.cpp

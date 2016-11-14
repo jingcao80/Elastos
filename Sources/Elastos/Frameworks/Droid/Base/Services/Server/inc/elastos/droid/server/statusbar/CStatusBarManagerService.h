@@ -5,13 +5,13 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/content/BroadcastReceiver.h"
 // #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include <Elastos.Droid.Internal.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Content::IContext;

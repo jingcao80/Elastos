@@ -7,13 +7,13 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/server/display/ColorFade.h"
 #include "elastos/droid/server/lights/Light.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/utility/Int32Property.h>
 #include <elastos/droid/utility/FloatProperty.h>
 #include <elastos/core/Thread.h>
 
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Server::Lights::Light;
 using Elastos::Droid::Server::Lights::ILight;
 using Elastos::Droid::View::IChoreographer;

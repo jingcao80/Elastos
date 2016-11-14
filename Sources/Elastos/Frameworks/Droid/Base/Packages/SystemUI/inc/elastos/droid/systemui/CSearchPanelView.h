@@ -12,7 +12,7 @@ using Elastos::Droid::App::IActivityOptions;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Media::IAudioAttributes;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IImageView;

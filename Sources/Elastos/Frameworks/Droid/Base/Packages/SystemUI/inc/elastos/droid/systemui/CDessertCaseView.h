@@ -5,7 +5,7 @@
 #include "_Elastos_Droid_SystemUI_CDessertCaseView.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/widget/FrameLayout.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
@@ -15,7 +15,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPoint;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::ISparseArray;

@@ -6,13 +6,13 @@
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/core/Thread.h>
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <Elastos.Droid.Bluetooth.h>
 #include <Elastos.Droid.Os.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IRemoteCallbackList;
 using Elastos::Droid::Content::BroadcastReceiver;

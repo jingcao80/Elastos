@@ -11,7 +11,7 @@
 #include <elastos/droid/hardware/camera2/CameraCaptureSession.h>
 #include <elastos/droid/hardware/camera2/CameraDevice.h>
 #include <elastos/droid/hardware/camera2/CameraManager.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::ISurfaceTexture;
@@ -25,7 +25,7 @@ using Elastos::Droid::Hardware::Camera2::ICameraDeviceStateCallback;
 using Elastos::Droid::Hardware::Camera2::ICameraManager;
 using Elastos::Droid::Hardware::Camera2::ICameraManagerAvailabilityCallback;
 using Elastos::Droid::Hardware::Camera2::ICaptureRequest;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::ISurface;
 using Elastos::Core::Object;
 using Elastos::Droid::Utility::ISize;

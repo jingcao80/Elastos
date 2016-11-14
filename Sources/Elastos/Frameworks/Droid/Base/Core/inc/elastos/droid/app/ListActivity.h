@@ -4,9 +4,9 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Activity.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IAdapterView;

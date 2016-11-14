@@ -4,7 +4,7 @@
 #include "_Elastos.Droid.Launcher2.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/core/Object.h>
@@ -17,7 +17,7 @@ using Elastos::Droid::View::IOnDrawListener;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Core::Object;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {

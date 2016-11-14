@@ -4,9 +4,9 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Fragment.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::Widget::IListView;

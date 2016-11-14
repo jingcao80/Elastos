@@ -6,7 +6,7 @@
 #include "elastos/droid/systemui/keyguard/AppearAnimationUtils.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/droid/widget/LinearLayout.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/CountDownTimer.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Internal::Widget::ILockPatternView;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Internal::Widget::IOnPatternListener;
 using Elastos::Droid::Internal::Widget::ILockPatternViewCellState;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::ICountDownTimer;
 using Elastos::Droid::Os::CountDownTimer;
 using Elastos::Droid::View::IView;

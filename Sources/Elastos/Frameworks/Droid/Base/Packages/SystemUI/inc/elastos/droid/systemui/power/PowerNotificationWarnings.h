@@ -8,7 +8,7 @@
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::INotificationBuilder;
 using Elastos::Droid::App::INotificationManager;
@@ -22,7 +22,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::Power::IPowerUIWarningsUI;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneStatusBar;
 using Elastos::Droid::SystemUI::StatusBar::Phone::ISystemUIDialog;

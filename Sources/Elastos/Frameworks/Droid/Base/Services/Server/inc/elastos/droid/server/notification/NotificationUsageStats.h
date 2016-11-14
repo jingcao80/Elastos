@@ -6,7 +6,7 @@
 #include "elastos/droid/server/notification/ManagedServices.h"
 #include "elastos/droid/database/sqlite/SQLiteOpenHelper.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Database::ContentObserver;

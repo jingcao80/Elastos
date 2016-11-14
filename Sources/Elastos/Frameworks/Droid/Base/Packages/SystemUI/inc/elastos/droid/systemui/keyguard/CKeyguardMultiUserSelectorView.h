@@ -4,7 +4,7 @@
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardMultiUserSelectorView.h"
 #include <elastos/droid/widget/FrameLayout.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Utility.h"
@@ -12,7 +12,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IUserInfo;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;

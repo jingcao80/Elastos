@@ -6,7 +6,7 @@
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include <elastos/droid/widget/TextView.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::TextView;

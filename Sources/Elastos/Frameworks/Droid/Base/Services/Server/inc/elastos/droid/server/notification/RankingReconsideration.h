@@ -4,7 +4,7 @@
 
 #include "elastos/droid/server/notification/NotificationRecord.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::IComparator;
 using Elastos::Utility::Concurrent::ITimeUnit;
 

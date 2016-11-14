@@ -25,6 +25,7 @@ SOURCES += Thread.cpp
 SOURCES += NativeThread.cpp
 SOURCES += Object.cpp
 SOURCES += Singleton.cpp
+SOURCES += Runnable.cpp
 SOURCES += ClassLoader.cpp
 
 SOURCES += exportext.cpp

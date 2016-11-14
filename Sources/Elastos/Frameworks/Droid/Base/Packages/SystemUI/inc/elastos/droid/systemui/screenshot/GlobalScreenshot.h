@@ -14,7 +14,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "elastos/droid/os/AsyncTask.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
@@ -29,7 +29,7 @@ using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::IPointF;
 using Elastos::Droid::Media::IMediaActionSound;
 using Elastos::Droid::Os::AsyncTask;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IMotionEvent;

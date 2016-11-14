@@ -8,7 +8,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
@@ -16,7 +16,7 @@ using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Core::Object;
 using Elastos::Core::IRunnable;

@@ -8,7 +8,7 @@
 #include "elastos/droid/launcher2/Workspace.h"
 #include "elastos/droid/launcher2/PagedViewCellLayout.h"
 #include "elastos/droid/os/AsyncTask.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Os::AsyncTask;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;

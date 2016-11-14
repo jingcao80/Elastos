@@ -4,7 +4,7 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Utility::ILocale;

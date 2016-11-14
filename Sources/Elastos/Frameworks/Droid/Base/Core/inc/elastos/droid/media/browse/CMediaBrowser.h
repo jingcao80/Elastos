@@ -7,12 +7,12 @@
 #include "_Elastos_Droid_Media_Browse_CMediaBrowser.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;

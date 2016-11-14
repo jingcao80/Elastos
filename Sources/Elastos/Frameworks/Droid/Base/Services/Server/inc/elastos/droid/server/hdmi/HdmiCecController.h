@@ -9,7 +9,7 @@
 #include <Elastos.Droid.Internal.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 
 using Elastos::Core::IInteger32;
 using Elastos::Core::IRunnable;
@@ -18,7 +18,7 @@ using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
 using Elastos::Droid::Internal::Utility::IPredicate;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessageQueue;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::IList;
 

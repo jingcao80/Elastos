@@ -9,7 +9,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
 #include "elastos/droid/systemui/recents/model/BitmapLruCache.h"
@@ -25,7 +25,7 @@ using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::Recents::Misc::SystemServicesProxy;
 using Elastos::Droid::SystemUI::Recents::Model::BitmapLruCache;
 using Elastos::Droid::SystemUI::Recents::Model::DrawableLruCache;

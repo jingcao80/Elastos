@@ -7,14 +7,14 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/database/DataSetObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/view/ViewGroup.h"
 
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::IViewGroupLayoutParams;

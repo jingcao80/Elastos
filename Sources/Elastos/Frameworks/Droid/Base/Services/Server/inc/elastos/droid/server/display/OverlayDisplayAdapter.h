@@ -5,13 +5,13 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/display/DisplayAdapter.h"
 #include "elastos/droid/server/display/DisplayDevice.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/database/ContentObserver.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Utility::Etl::List;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Graphics::ISurfaceTexture;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Utility::Regex::IPattern;

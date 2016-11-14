@@ -6,7 +6,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
 
@@ -20,7 +20,7 @@ using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IActivityInfo;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IPersistableBundle;
 using Elastos::Droid::Os::IBinder;

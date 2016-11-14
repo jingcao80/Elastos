@@ -3,14 +3,14 @@
 #define __ELASTOS_DROID_INTERNAL_OS_CZYGOTEINIT_H__
 
 #include "_Elastos_Droid_Internal_Os_CZygoteInit.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/internal/os/ZygoteConnection.h"
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Net::ILocalServerSocket;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::Singleton;
 using Elastos::IO::IFileDescriptor;
 

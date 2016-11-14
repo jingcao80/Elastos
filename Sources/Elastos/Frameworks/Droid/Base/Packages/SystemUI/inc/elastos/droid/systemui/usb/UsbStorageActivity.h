@@ -9,7 +9,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IDialog;
@@ -20,7 +20,7 @@ using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageEventListener;
 using Elastos::Droid::Os::Storage::IStorageManager;

@@ -6,14 +6,14 @@
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/systemui/keyguard/KeyguardWidgetFrame.h"
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IPoint;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;

@@ -5,7 +5,7 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/lights/Light.h"
 #include "elastos/droid/os/UEventObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include <Elastos.Droid.Content.h>
@@ -13,7 +13,7 @@
 #include <batteryservice/IBatteryPropertiesListener.h>
 
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::UEventObserver;
 using Elastos::Droid::Os::IBatteryProperties;

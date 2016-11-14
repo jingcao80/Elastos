@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_APP_LAUNCHER_ACTIVITY_H__
 
 #include "elastos/droid/app/ListActivity.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "elastos/droid/widget/Filter.h"
 

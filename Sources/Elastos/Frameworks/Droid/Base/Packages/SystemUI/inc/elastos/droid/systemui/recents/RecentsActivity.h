@@ -10,7 +10,7 @@
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/appwidget/AppWidgetHost.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/systemui/recents/AlternateRecentsComponent.h"
 #include "elastos/droid/systemui/recents/RecentsAppWidgetHost.h"
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
@@ -27,7 +27,7 @@ using Elastos::Droid::AppWidget::IAppWidgetHostView;
 using Elastos::Droid::AppWidget::IAppWidgetProviderInfo;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::Recents::AlternateRecentsComponent;
 using Elastos::Droid::SystemUI::Recents::IAlternateRecentsComponent;
 using Elastos::Droid::SystemUI::Recents::IRecentsAppWidgetHostCallbacks;

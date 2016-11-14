@@ -7,7 +7,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/internal/utility/State.h>
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/utility/Xml.h>
 
 using Elastos::Core::IRunnable;
@@ -16,7 +16,7 @@ using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Media::Tv::ITvContentRating;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Utility::IList;

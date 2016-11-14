@@ -13,7 +13,7 @@
 #include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/net/Uri.h>
 #include <elastos/droid/os/Build.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/os/UserHandle.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -46,7 +46,7 @@ using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;

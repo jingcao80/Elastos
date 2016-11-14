@@ -9,6 +9,7 @@ EXPORT_HEADERS += elastos/core/Object.h
 EXPORT_HEADERS += elastos/core/AutoLock.h
 EXPORT_HEADERS += elastos/core/Singleton.h
 EXPORT_HEADERS += elastos/core/Thread.h
+EXPORT_HEADERS += elastos/core/Runnable.h
 EXPORT_HEADERS += elastos/core/Math.h
 EXPORT_HEADERS += elastos/core/StrictMath.h
 EXPORT_HEADERS += elastos/core/Character.h

@@ -9,7 +9,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IAlertDialog;
@@ -17,7 +17,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneQSTileHost;
 using Elastos::Droid::SystemUI::StatusBar::Policy::ISecurityController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::ISecurityControllerCallback;

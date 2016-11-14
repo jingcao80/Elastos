@@ -3,7 +3,6 @@
 #include "AutoLock.h"
 
 using Elastos::Core::Thread;
-using Elastos::Core::EIID_IRunnable;
 
 namespace Elastos {
 namespace IO {
@@ -13,8 +12,6 @@ namespace Spi {
 //==========================================================
 //       AbstractInterruptibleChannel::ActionRunnable
 //==========================================================
-
-CAR_INTERFACE_IMPL(AbstractInterruptibleChannel::ActionRunnable, Object, IRunnable)
 
 AbstractInterruptibleChannel::ActionRunnable::ActionRunnable(
     /* [in] */ AbstractInterruptibleChannel* channel)

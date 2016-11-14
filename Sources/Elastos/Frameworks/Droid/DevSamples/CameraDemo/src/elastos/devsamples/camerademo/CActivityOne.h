@@ -7,13 +7,13 @@
 #include <Elastos.Droid.Media.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/view/OrientationEventListener.h>
 #include "elastos/droid/hardware/camera2/CameraDevice.h"
 #include "elastos/droid/hardware/camera2/CameraCaptureSession.h"
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::Utility::ISize;

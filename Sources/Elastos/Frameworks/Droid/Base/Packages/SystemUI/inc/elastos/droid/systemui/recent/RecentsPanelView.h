@@ -10,7 +10,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/systemui/recent/TaskDescription.h"
 #include "elastos/droid/widget/FrameLayout.h"
 #include "elastos/droid/widget/BaseAdapter.h"
@@ -21,7 +21,7 @@ using Elastos::Droid::Animation::ILayoutTransition;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::SystemUI::Recent::IRecentsCallback;
 using Elastos::Droid::SystemUI::Recent::IRecentsScrollView;
 using Elastos::Droid::SystemUI::Recent::IRecentTasksLoader;

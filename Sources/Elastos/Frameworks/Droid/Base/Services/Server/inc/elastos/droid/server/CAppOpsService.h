@@ -3,7 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_CAppOpsService.h"
-#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/server/PermissionDialogReqQueue.h>
 #include <elastos/droid/utility/SparseArray.h>
@@ -22,7 +22,7 @@
 using Elastos::Droid::App::IActivityThread;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;

@@ -6,7 +6,7 @@
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/CountDownTimer.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 #include "Elastos.Droid.Content.h"
@@ -29,7 +29,7 @@ using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Os::CountDownTimer;
 using Elastos::Droid::Os::ICountDownTimer;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;

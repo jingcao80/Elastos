@@ -4,14 +4,14 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Core::ICloneable;

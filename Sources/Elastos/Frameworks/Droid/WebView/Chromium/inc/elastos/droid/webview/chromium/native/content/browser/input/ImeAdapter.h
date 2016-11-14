@@ -4,13 +4,13 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/webkit/webview/chromium/native/content/browser/input/AdapterInputConnection.h"
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IResultReceiver;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::ISpannableString;

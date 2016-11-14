@@ -9,7 +9,7 @@
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IStatusBarManager;
@@ -20,7 +20,7 @@ using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Telecom::ITelecomManager;

@@ -7,13 +7,13 @@
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkhash.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Location::ICountryListener;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Core::Object;
 using Elastos::Utility::IHashMap;
 

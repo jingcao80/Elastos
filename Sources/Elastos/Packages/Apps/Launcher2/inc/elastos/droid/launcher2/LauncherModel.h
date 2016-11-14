@@ -9,7 +9,7 @@
 #include "elastos/droid/launcher2/ItemInfo.h"
 #include "elastos/droid/launcher2/FolderInfo.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
@@ -34,7 +34,7 @@ using Elastos::Droid::Content::Pm::ILauncherAppsCallback;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IUserManager;

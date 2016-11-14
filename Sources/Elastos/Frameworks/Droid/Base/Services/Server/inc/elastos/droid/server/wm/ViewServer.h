@@ -3,9 +3,9 @@
 
 #include "_Elastos.Droid.Server.h"
 #include <Elastos.CoreLibrary.Net.h>
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Net::IServerSocket;
 using Elastos::Net::ISocket;
 using Elastos::Core::IThread;

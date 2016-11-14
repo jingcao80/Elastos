@@ -12,7 +12,7 @@
 #include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
 #include "elastos/droid/dialer/calllog/CallLogListItemViews.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Runnable.h>
 
 using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::Animation::IAnimator;
@@ -24,7 +24,7 @@ using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsListFragment;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::Runnable;
+using Elastos::Core::Runnable;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
