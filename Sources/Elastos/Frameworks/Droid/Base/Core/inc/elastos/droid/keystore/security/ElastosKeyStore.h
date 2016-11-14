@@ -146,9 +146,6 @@ private:
     CARAPI_(Boolean) IsCertificateEntry(
         /* [in] */ const String& alias);
 
-public:
-    static const String NAME;// = "AndroidKeyStore";
-
 private:
     AutoPtr<IKeyStore> mKeyStore;
 

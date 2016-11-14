@@ -24,9 +24,6 @@ public:
     ElastosKeyStoreProvider();
 
     CARAPI constructor();
-
-public:
-    static const String PROVIDER_NAME;// = "AndroidKeyStore";
 };
 
 }// namespace Elastos

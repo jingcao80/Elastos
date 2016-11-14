@@ -10,7 +10,7 @@ namespace KeyStore {
 namespace Security {
 
 CAR_INTERFACE_IMPL(ElastosKeyStoreProvider, Elastos::Security::Provider, IElastosKeyStoreProvider);
-const String ElastosKeyStoreProvider::PROVIDER_NAME("ElastosKeyStore");
+
 ElastosKeyStoreProvider::ElastosKeyStoreProvider()
 {}
 

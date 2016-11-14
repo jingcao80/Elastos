@@ -67,8 +67,6 @@ namespace Security {
 
 CAR_INTERFACE_IMPL(ElastosKeyStore, KeyStoreSpi, IElastosKeyStore);
 
-const String ElastosKeyStore::NAME("ElastosKeyStore");
-
 ECode ElastosKeyStore::constructor()
 {
     return NOERROR;
