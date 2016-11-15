@@ -26,11 +26,6 @@ CEngine::SpiAndProvider::SpiAndProvider(
     , mProvider(provider)
 {}
 
-CEngine::SpiAndProvider::~SpiAndProvider()
-{
-    Logger::D("SpiAndProvider", "[TODO wanli] ~SpiAndProvider =================1, this=[%p]", this);
-}
-
 ECode CEngine::SpiAndProvider::SetSpi(
     /* [in] */ IInterface* spi)
 {

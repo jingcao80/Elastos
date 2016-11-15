@@ -12,14 +12,10 @@ namespace Security {
 
 CAR_INTERFACE_IMPL(SignatureSpi, Object, ISignatureSpi)
 SignatureSpi::SignatureSpi()
-{
- Logger::D("SignatureSpi", "[TODO wanli] SignatureSpi =================1, this=[%p]", this);
-}
+{}
 
 SignatureSpi::~SignatureSpi()
-{
-    Logger::D("SignatureSpi", "[TODO wanli] ~SignatureSpi =================1, this=[%p]", this);
-}
+{}
 
 ECode SignatureSpi::EngineInitSign(
     /* [in] */ IPrivateKey* privateKey,

@@ -23,7 +23,7 @@ public:
 
     Signature();
 
-    ~Signature();
+    virtual ~Signature();
 
     /**
      * Returns a new instance of {@code Signature} that utilizes the specified

@@ -226,9 +226,7 @@ Signature::Signature()
 {}
 
 Signature::~Signature()
-{
-    Logger::D("Signature", "[TODO wanli] ~Signature =================1, this=[%p]", this);
-}
+{}
 
 ECode Signature::constructor(
     /* [in] */ const String& algorithm)

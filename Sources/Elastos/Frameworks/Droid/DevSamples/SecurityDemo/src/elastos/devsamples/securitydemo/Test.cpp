@@ -12,11 +12,14 @@ using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::CSignatureHelper;
 using Elastos::Security::IKeyFactory;
 using Elastos::Security::IKeyFactoryHelper;
+using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
+using Elastos::Security::Spec::CRSAPrivateKeySpec;
 using Elastos::Security::Spec::CRSAPublicKeySpec;
 using Elastos::Security::Spec::IKeySpec;
+using Elastos::Security::Spec::IRSAPrivateKeySpec;
 using Elastos::Security::Spec::IRSAPublicKeySpec;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
@@ -67,7 +70,7 @@ static AutoPtr<IBigInteger> InitRSA_2048_modulus()
         (Byte) 0x69,
     };
 
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::AllocInplace(data, sizeof(data)/sizeof(data[0]));
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(data, sizeof(data)/sizeof(data[0]));
     AutoPtr<IBigInteger> obj;
     CBigInteger::New(*bytes, (IBigInteger**)&obj);
     return obj;
@@ -79,7 +82,7 @@ static AutoPtr<IBigInteger> InitRSA_2048_publicExponent()
         (Byte) 0x01, (Byte) 0x00, (Byte) 0x01,
     };
 
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::AllocInplace(data, sizeof(data)/sizeof(data[0]));
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(data, sizeof(data)/sizeof(data[0]));
     AutoPtr<IBigInteger> obj;
     CBigInteger::New(*bytes, (IBigInteger**)&obj);
     return obj;
@@ -132,40 +135,104 @@ static Byte MD5withRSA_Vector2Signature[] = {
     (Byte) 0x02, (Byte) 0xaf, (Byte) 0x8f, (Byte) 0x59, (Byte) 0xe5, (Byte) 0x67, (Byte) 0x25, (Byte) 0x00,
 };
 
+static AutoPtr<IBigInteger> InitRSA_2048_privateExponent()
+{
+    Byte data[] = {
+        (Byte) 0x37, (Byte) 0x78, (Byte) 0x47, (Byte) 0x76, (Byte) 0xa5, (Byte) 0xf1, (Byte) 0x76, (Byte) 0x98,
+        (Byte) 0xf5, (Byte) 0xac, (Byte) 0x96, (Byte) 0x0d, (Byte) 0xfb, (Byte) 0x83, (Byte) 0xa1, (Byte) 0xb6,
+        (Byte) 0x75, (Byte) 0x64, (Byte) 0xe6, (Byte) 0x48, (Byte) 0xbd, (Byte) 0x05, (Byte) 0x97, (Byte) 0xcf,
+        (Byte) 0x8a, (Byte) 0xb8, (Byte) 0x08, (Byte) 0x71, (Byte) 0x86, (Byte) 0xf2, (Byte) 0x66, (Byte) 0x9c,
+        (Byte) 0x27, (Byte) 0xa9, (Byte) 0xec, (Byte) 0xbd, (Byte) 0xd4, (Byte) 0x80, (Byte) 0xf0, (Byte) 0x19,
+        (Byte) 0x7a, (Byte) 0x80, (Byte) 0xd0, (Byte) 0x73, (Byte) 0x09, (Byte) 0xe6, (Byte) 0xc6, (Byte) 0xa9,
+        (Byte) 0x6f, (Byte) 0x92, (Byte) 0x53, (Byte) 0x31, (Byte) 0xe5, (Byte) 0x7f, (Byte) 0x8b, (Byte) 0x4a,
+        (Byte) 0xc6, (Byte) 0xf4, (Byte) 0xd4, (Byte) 0x5e, (Byte) 0xda, (Byte) 0x45, (Byte) 0xa2, (Byte) 0x32,
+        (Byte) 0x69, (Byte) 0xc0, (Byte) 0x9f, (Byte) 0xc4, (Byte) 0x28, (Byte) 0xc0, (Byte) 0x7a, (Byte) 0x4e,
+        (Byte) 0x6e, (Byte) 0xdf, (Byte) 0x73, (Byte) 0x8a, (Byte) 0x15, (Byte) 0xde, (Byte) 0xc9, (Byte) 0x7f,
+        (Byte) 0xab, (Byte) 0xd2, (Byte) 0xf2, (Byte) 0xbb, (Byte) 0x47, (Byte) 0xa1, (Byte) 0x4f, (Byte) 0x20,
+        (Byte) 0xea, (Byte) 0x72, (Byte) 0xfc, (Byte) 0xfe, (Byte) 0x4c, (Byte) 0x36, (Byte) 0xe0, (Byte) 0x1a,
+        (Byte) 0xda, (Byte) 0x77, (Byte) 0xbd, (Byte) 0x13, (Byte) 0x7c, (Byte) 0xd8, (Byte) 0xd4, (Byte) 0xda,
+        (Byte) 0x10, (Byte) 0xbb, (Byte) 0x16, (Byte) 0x2e, (Byte) 0x94, (Byte) 0xa4, (Byte) 0x66, (Byte) 0x29,
+        (Byte) 0x71, (Byte) 0xf1, (Byte) 0x75, (Byte) 0xf9, (Byte) 0x85, (Byte) 0xfa, (Byte) 0x18, (Byte) 0x8f,
+        (Byte) 0x05, (Byte) 0x6c, (Byte) 0xb9, (Byte) 0x7e, (Byte) 0xe2, (Byte) 0x81, (Byte) 0x6f, (Byte) 0x43,
+        (Byte) 0xab, (Byte) 0x9d, (Byte) 0x37, (Byte) 0x47, (Byte) 0x61, (Byte) 0x24, (Byte) 0x86, (Byte) 0xcd,
+        (Byte) 0xa8, (Byte) 0xc1, (Byte) 0x61, (Byte) 0x96, (Byte) 0xc3, (Byte) 0x08, (Byte) 0x18, (Byte) 0xa9,
+        (Byte) 0x95, (Byte) 0xec, (Byte) 0x85, (Byte) 0xd3, (Byte) 0x84, (Byte) 0x67, (Byte) 0x79, (Byte) 0x12,
+        (Byte) 0x67, (Byte) 0xb3, (Byte) 0xbf, (Byte) 0x21, (Byte) 0xf2, (Byte) 0x73, (Byte) 0x71, (Byte) 0x0a,
+        (Byte) 0x69, (Byte) 0x25, (Byte) 0x86, (Byte) 0x25, (Byte) 0x76, (Byte) 0x84, (Byte) 0x1c, (Byte) 0x5b,
+        (Byte) 0x67, (Byte) 0x12, (Byte) 0xc1, (Byte) 0x2d, (Byte) 0x4b, (Byte) 0xd2, (Byte) 0x0a, (Byte) 0x2f,
+        (Byte) 0x32, (Byte) 0x99, (Byte) 0xad, (Byte) 0xb7, (Byte) 0xc1, (Byte) 0x35, (Byte) 0xda, (Byte) 0x5e,
+        (Byte) 0x95, (Byte) 0x15, (Byte) 0xab, (Byte) 0xda, (Byte) 0x76, (Byte) 0xe7, (Byte) 0xca, (Byte) 0xf2,
+        (Byte) 0xa3, (Byte) 0xbe, (Byte) 0x80, (Byte) 0x55, (Byte) 0x1d, (Byte) 0x07, (Byte) 0x3b, (Byte) 0x78,
+        (Byte) 0xbf, (Byte) 0x11, (Byte) 0x62, (Byte) 0xc4, (Byte) 0x8a, (Byte) 0xd2, (Byte) 0xb7, (Byte) 0xf4,
+        (Byte) 0x74, (Byte) 0x3a, (Byte) 0x02, (Byte) 0x38, (Byte) 0xee, (Byte) 0x4d, (Byte) 0x25, (Byte) 0x2f,
+        (Byte) 0x7d, (Byte) 0x5e, (Byte) 0x7e, (Byte) 0x65, (Byte) 0x33, (Byte) 0xcc, (Byte) 0xae, (Byte) 0x64,
+        (Byte) 0xcc, (Byte) 0xb3, (Byte) 0x93, (Byte) 0x60, (Byte) 0x07, (Byte) 0x5a, (Byte) 0x2f, (Byte) 0xd1,
+        (Byte) 0xe0, (Byte) 0x34, (Byte) 0xec, (Byte) 0x3a, (Byte) 0xe5, (Byte) 0xce, (Byte) 0x9c, (Byte) 0x40,
+        (Byte) 0x8c, (Byte) 0xcb, (Byte) 0xf0, (Byte) 0xe2, (Byte) 0x5e, (Byte) 0x41, (Byte) 0x14, (Byte) 0x02,
+        (Byte) 0x16, (Byte) 0x87, (Byte) 0xb3, (Byte) 0xdd, (Byte) 0x47, (Byte) 0x54, (Byte) 0xae, (Byte) 0x81,
+    };
+
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(data, sizeof(data)/sizeof(data[0]));
+    AutoPtr<IBigInteger> obj;
+    CBigInteger::New(*bytes, (IBigInteger**)&obj);
+    return obj;
+}
+
+static AutoPtr<IBigInteger> RSA_2048_privateExponent = InitRSA_2048_privateExponent();
+
 ECode SignatureTest::MD5WithRSA()
 {
+    ECode ec = NOERROR;
     AutoPtr<IKeyFactoryHelper> helper;
     CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&helper);
     AutoPtr<IKeyFactory> kf;
-    helper->GetInstance(String("RSA"), (IKeyFactory**)&kf);
-    AutoPtr<IRSAPublicKeySpec> keySpec;
-    CRSAPublicKeySpec::New(RSA_2048_modulus, RSA_2048_publicExponent, (IRSAPublicKeySpec**)&keySpec);
-    AutoPtr<IPublicKey> pubKey;
-    kf->GeneratePublic(IKeySpec::Probe(keySpec), (IPublicKey**)&pubKey);
-    assert(pubKey != NULL);
+    ec = helper->GetInstance(String("RSA"), (IKeyFactory**)&kf);
+    ASSERT_SUCCEEDED(ec);
+
+    //Sign
+    AutoPtr<IRSAPrivateKeySpec> privateKeySpec;
+    CRSAPrivateKeySpec::New(RSA_2048_modulus,
+            RSA_2048_privateExponent, (IRSAPrivateKeySpec**)&privateKeySpec);
+    AutoPtr<IPrivateKey> privKey;
+    kf->GeneratePrivate(IKeySpec::Probe(privateKeySpec), (IPrivateKey**)&privKey);
 
     AutoPtr<ISignatureHelper> sh;
     CSignatureHelper::AcquireSingleton((ISignatureHelper**)&sh);
     AutoPtr<ISignature> sig;
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================1");
-    ECode ec = sh->GetInstance(String("MD5withRSA"), (ISignature**)&sig);
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================2, ec =[0x%08x]", ec);
-    ec = sig->InitVerify(pubKey);
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================3, ec =[0x%08x]", ec);
+    ec = sh->GetInstance(String("MD5withRSA"), (ISignature**)&sig);
+    ASSERT_SUCCEEDED(ec);
 
-    // AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(Vector2Data, sizeof(Vector2Data)/sizeof(Vector2Data[0]));
-    // String text("123");
-    // AutoPtr<ArrayOf<Byte> > bytes = text.GetBytes();
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::AllocInplace(Vector2Data, sizeof(Vector2Data)/sizeof(Vector2Data[0]));
+    sig->InitSign(privKey);
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(Vector2Data
+            , sizeof(Vector2Data)/sizeof(Vector2Data[0]));
     ec = sig->Update(bytes);
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================4, ec =[0x%08x]", ec);
+    ASSERT_SUCCEEDED(ec);
+
+    AutoPtr<ArrayOf<Byte> > signature;
+    ec = sig->Sign((ArrayOf<Byte>**)&signature);
+    ASSERT_SUCCEEDED(ec);
+    assert(signature != NULL && "Signature must not be null");
+
+    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::Alloc(MD5withRSA_Vector2Signature
+            , sizeof(MD5withRSA_Vector2Signature)/sizeof(MD5withRSA_Vector2Signature[0]));
+    Boolean e = Arrays::Equals(signature, bytes2);
+    assert("Signature should match expected" && e);
+
+    //Verify
+    AutoPtr<IRSAPublicKeySpec> keySpec;
+    CRSAPublicKeySpec::New(RSA_2048_modulus, RSA_2048_publicExponent, (IRSAPublicKeySpec**)&keySpec);
+    AutoPtr<IPublicKey> pubKey;
+    ec = kf->GeneratePublic(IKeySpec::Probe(keySpec), (IPublicKey**)&pubKey);
+    ASSERT_SUCCEEDED(ec);
+    assert(pubKey != NULL);
+
+    ec = sig->InitVerify(pubKey);
+    ASSERT_SUCCEEDED(ec);
+    ec = sig->Update(bytes);
 
     Boolean isVerified = FALSE;
-    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::AllocInplace(MD5withRSA_Vector2Signature
-            , sizeof(MD5withRSA_Vector2Signature)/sizeof(MD5withRSA_Vector2Signature[0]));
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================5");
     ec = sig->Verify(bytes2, &isVerified);
-    Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================6, ec =[0x%08x]", ec);
+    ASSERT_SUCCEEDED(ec);
     assert("Signature must match expected signature" && isVerified);
     return NOERROR;
 }
@@ -183,7 +250,7 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
             (Byte) 0x8a, (Byte) 0x41, (Byte) 0x55, (Byte) 0x5f,
     };
 
-    AutoPtr<ArrayOf<Byte> > bytes1 = ArrayOf<Byte>::AllocInplace(AES_128_KEY
+    AutoPtr<ArrayOf<Byte> > bytes1 = ArrayOf<Byte>::Alloc(AES_128_KEY
             , sizeof(AES_128_KEY)/sizeof(AES_128_KEY[0]));
 
     String provider("ElastosOpenSSL");
@@ -191,10 +258,37 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
     CSecretKeySpec::New(bytes1, String("AES"), (ISecretKey**)&key);
     AutoPtr<ICipher> c;
 
-    //Cipher.AES/ECB/NoPadding
-    ECode ec = Cipher::GetInstance(String("AES/ECB/NoPadding"), provider, (ICipher**)&c);
-    // ECode ec = Cipher::GetInstance(String("Cipher.AES/ECB/NoPadding"), provider, (ICipher**)&c);
-    Logger::D("Test", "[TODO wanli] AesECBNoPadding ===============ec=[0x%08x]", ec);
+    //1. AES/ECB/NoPadding
+    String transformation("AES/ECB/NoPadding");
+    //2. AES/ECB/PKCS5Padding
+    // transformation = String("AES/ECB/PKCS5Padding");
+    // //3. AES/CBC/NoPadding
+    // transformation = String("AES/CBC/NoPadding");
+    // //4. AES/CBC/PKCS5Padding
+    // transformation = String("AES/CBC/PKCS5Padding");
+    // //5. AES/CFB/NoPadding
+    // transformation = String("AES/CFB/NoPadding");
+    // //6. AES/CTR/NoPadding
+    // transformation = String("AES/CTR/NoPadding");
+    // //7. AES/OFB/NoPadding
+    // transformation = String("AES/OFB/NoPadding");
+    // //8. DESEDE/ECB/NoPadding
+    // transformation = String("DESEDE/ECB/NoPadding");
+    // //9. DESEDE/ECB/PKCS5Padding
+    // transformation = String("DESEDE/ECB/PKCS5Padding");
+    // //10. DESEDE/CBC/NoPadding
+    // transformation = String("DESEDE/CBC/NoPadding");
+    // //11. DESEDE/CBC/PKCS5Padding
+    // transformation = String("DESEDE/CBC/PKCS5Padding");
+    // //12. DESEDE/CFB/NoPadding
+    // transformation = String("DESEDE/CFB/NoPadding");
+    // //13. DESEDE/OFB/NoPadding
+    // transformation = String("DESEDE/OFB/NoPadding");
+    // //14. ARC4
+    // transformation = String("ARC4");
+
+    ECode ec = Cipher::GetInstance(transformation, provider, (ICipher**)&c);
+    ASSERT_SUCCEEDED(ec);
     AutoPtr<IProvider> p;
     c->GetProvider((IProvider**)&p);
     String n;
@@ -214,7 +308,7 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
     Int32 length = sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded) /
         sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded[0]);
 
-    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::AllocInplace(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded
+    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::Alloc(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded
             , length);
 
     for (Int32 i = 0; i < length - 1; i++) {
@@ -243,7 +337,7 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
     length = sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted) /
         sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted[0]);
 
-    AutoPtr<ArrayOf<Byte> > bytes3 = ArrayOf<Byte>::AllocInplace(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted
+    AutoPtr<ArrayOf<Byte> > bytes3 = ArrayOf<Byte>::Alloc(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted
             , length);
 
     assert(Arrays::Equals(bytes3, output));

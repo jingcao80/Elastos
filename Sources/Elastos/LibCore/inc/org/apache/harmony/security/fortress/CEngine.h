@@ -32,8 +32,6 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        ~SpiAndProvider();
-
         CARAPI SetSpi(
             /* [in] */ IInterface* spi);
 
