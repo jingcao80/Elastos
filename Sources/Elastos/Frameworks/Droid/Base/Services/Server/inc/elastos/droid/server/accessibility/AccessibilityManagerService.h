@@ -690,7 +690,7 @@ private:
         Int32 mWindowId;
         Int32 mUserId;
         AutoPtr<IIAccessibilityInteractionConnection> mConnection;
-        AutoPtr<AccessibilityManagerService> mHost;
+        AccessibilityManagerService* mHost;
     };
 
     class MainHandler
@@ -961,7 +961,7 @@ private:
         }
 
     private:
-        AutoPtr<AccessibilityManagerService> mHost;
+        AccessibilityManagerService* mHost;
     };
 
     /*used in function ShowEnableTouchExplorationDialog()*/

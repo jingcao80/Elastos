@@ -149,7 +149,7 @@ public:
             /* [out] */ String* res);
 
     private:
-        AutoPtr<CDeviceStorageMonitorService> mHost;
+        CDeviceStorageMonitorService* mHost;
     };
 
     class CacheFileDeletedObserver

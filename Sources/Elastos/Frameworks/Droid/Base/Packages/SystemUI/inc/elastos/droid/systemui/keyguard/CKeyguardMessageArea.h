@@ -116,7 +116,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
         AutoPtr<ICharSequence> mTextToAnnounce;
     };
 

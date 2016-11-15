@@ -97,7 +97,7 @@ private:
         CARAPI Test();
 
     private:
-        AutoPtr<JSActName> mHost;
+        JSActName* mHost;
     };
 
 public:

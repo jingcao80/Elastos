@@ -84,16 +84,14 @@ AudioPortEventHandler::EventHandler::EventHandler(
     /* [in] */ AudioPortEventHandler* host)
     : Handler(looper)
 {
-    AutoPtr<IWeakReference> wr;
-    host->GetWeakReference((IWeakReference**)&wr);
-    mHost = wr;
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 ECode AudioPortEventHandler::EventHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IInterface> o;
-    mHost->Resolve(EIID_IInterface, (IInterface**)&o);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&o);
     AudioPortEventHandler* host = (AudioPortEventHandler*)IObject::Probe(o);
 
     if (host == NULL) {

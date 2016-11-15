@@ -164,7 +164,7 @@ private:
             /* [in] */ IIntent* intent);
 
     private:
-        AutoPtr<TwilightService> mHost;
+        TwilightService* mHost;
     };
 
     // A LocationListener to initialize the network location provider. The location updates

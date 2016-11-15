@@ -245,7 +245,7 @@ private:
             /* [in] */ IIntent* intent);
 
     private:
-        AutoPtr<GpsLocationProvider> mHost;
+        GpsLocationProvider* mHost;
     };
 
 public:

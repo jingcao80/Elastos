@@ -105,7 +105,7 @@ public:
             /* [in] */ Boolean isChecked);
 
     private:
-        AutoPtr<CWifiSetting> mHost;
+        CWifiSetting* mHost;
         Int32 mRef;
     };
 

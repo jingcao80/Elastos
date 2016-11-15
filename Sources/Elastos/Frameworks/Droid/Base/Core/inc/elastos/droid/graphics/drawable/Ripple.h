@@ -63,7 +63,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<Ripple> mHost;
+        AutoPtr<Ripple> mHost;  // hold host
     };
 
 public:

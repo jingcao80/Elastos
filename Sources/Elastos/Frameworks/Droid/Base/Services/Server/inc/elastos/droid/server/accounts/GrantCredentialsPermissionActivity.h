@@ -63,7 +63,7 @@ private:
 
         private:
             AutoPtr<ICharSequence> mAuthTokenLabel;
-            AutoPtr<OnCreateAccountManagerCallback> mHost;
+            OnCreateAccountManagerCallback* mHost;
         };
 
     public:
@@ -78,7 +78,7 @@ private:
 
     private:
         AutoPtr<ITextView> mAuthTokenTypeView;
-        AutoPtr<GrantCredentialsPermissionActivity> mHost;
+        GrantCredentialsPermissionActivity* mHost;
     };
 
 public:

@@ -75,7 +75,7 @@ public:
             /* [in] */ Int64 id,
             /* [out] */ Boolean* result);
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
 protected:

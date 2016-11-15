@@ -124,15 +124,15 @@ AutoCompleteTextView::PopupDataSetObserver::PopupDataSetObserver(
     /* [in] */ AutoCompleteTextView* host)
 {
     if (host != NULL) {
-        host->GetWeakReference((IWeakReference**)&mHost);
+        host->GetWeakReference((IWeakReference**)&mWeakHost);
     }
 }
 
 ECode AutoCompleteTextView::PopupDataSetObserver::OnChanged()
 {
-    if (mHost != NULL) {
+    if (mWeakHost != NULL) {
         AutoPtr<IInterface> obj;
-        mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         AutoPtr<IAutoCompleteTextView> tmp = IAutoCompleteTextView::Probe(obj);
         AutoCompleteTextView* impl = (AutoCompleteTextView*)tmp.Get();
         if (impl != NULL && impl->mAdapter != NULL) {

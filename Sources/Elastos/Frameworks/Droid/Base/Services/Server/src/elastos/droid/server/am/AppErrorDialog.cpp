@@ -28,7 +28,7 @@ AppErrorDialog::MyHandler::MyHandler(
     /* [in] */ AppErrorDialog* host)
     : Handler(FALSE)
 {
-    host->GetWeakReference((IWeakReference**)&mHost);
+    host->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 AppErrorDialog::MyHandler::~MyHandler()
@@ -38,7 +38,7 @@ ECode AppErrorDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IAlertDialog> dialog;
-    mHost->Resolve(EIID_IAlertDialog, (IInterface**)&dialog);
+    mWeakHost->Resolve(EIID_IAlertDialog, (IInterface**)&dialog);
     if (dialog == NULL) return NOERROR;
 
     AppErrorDialog* host = (AppErrorDialog*)dialog.Get();

@@ -51,7 +51,7 @@ public:
         /* [in] */ Handle32 monkey);
 
 private:
-    AutoPtr<Monkey> mHost;
+    Monkey* mHost;
 };
 
 } // namespace Monkey

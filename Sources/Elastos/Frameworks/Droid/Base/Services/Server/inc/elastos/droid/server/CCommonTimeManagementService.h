@@ -63,7 +63,7 @@ public:
         CARAPI InterfaceRemoved(
             /* [in] */ const String& iface);
     private:
-        AutoPtr<CCommonTimeManagementService> mHost;
+        CCommonTimeManagementService* mHost;
     };
 
     /*
@@ -126,7 +126,7 @@ private:
 
         TO_STRING_IMPL("CCommonTimeManagementService::ConnectivityMangerObserver: ")
     private:
-        AutoPtr<CCommonTimeManagementService> mHost;
+        CCommonTimeManagementService* mHost;
     };
 
 /*
@@ -147,7 +147,7 @@ private:
         CARAPI OnServerDied();
 
     private:
-        AutoPtr<CCommonTimeManagementService> mHost;
+        CCommonTimeManagementService* mHost;
     };
 
     class StaticInitializer

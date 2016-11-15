@@ -102,7 +102,7 @@ public:
         }
 
     private:
-        AutoPtr<CMainActivity> mHost;
+        CMainActivity* mHost;
         Int32 mRef;
     };
 

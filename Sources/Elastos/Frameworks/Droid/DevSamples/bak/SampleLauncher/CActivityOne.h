@@ -48,7 +48,7 @@ public:
             /* [in] */ Int64 id);
 
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
         Int32 mRef;
     };
 

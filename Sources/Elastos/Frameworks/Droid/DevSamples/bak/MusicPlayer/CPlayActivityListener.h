@@ -20,7 +20,7 @@ public:
     CARAPI OnCompletion();
 
 private:
-    AutoPtr<IWeakReference> mHost;
+    AutoPtr<IWeakReference> mWeakHost;
 
 };
 

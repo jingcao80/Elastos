@@ -132,7 +132,7 @@ public:
     private:
         //private final
         AutoPtr<IIRecognitionListener> mListener;
-        AutoPtr<RecognitionService> mHost;
+        RecognitionService* mHost;
     };
 
 private:
@@ -170,7 +170,7 @@ public:
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
     private:
-        AutoPtr<RecognitionService> mHost;
+        RecognitionService* mHost;
     };
 
 private:

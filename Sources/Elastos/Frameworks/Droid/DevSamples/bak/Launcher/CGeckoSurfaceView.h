@@ -108,7 +108,7 @@ public:
             /* [in] */ ISurfaceHolder* holder);
 
     private:
-        AutoPtr<CGeckoSurfaceView> mHost;
+        CGeckoSurfaceView* mHost;
     };
 
     class MyTouchDelegate
@@ -135,7 +135,7 @@ public:
             /* [out] */ Boolean* result);
 
     private:
-        AutoPtr<CGeckoSurfaceView> mHost;
+        CGeckoSurfaceView* mHost;
     };
 
 public:

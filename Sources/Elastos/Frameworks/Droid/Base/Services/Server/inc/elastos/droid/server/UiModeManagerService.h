@@ -89,7 +89,7 @@ private:
 
         TO_STRING_IMPL("UiModeManagerService::ResultReceiver: ")
     private:
-        AutoPtr<UiModeManagerService> mHost;
+        UiModeManagerService* mHost;
     };
 
     class DockModeReceiver
@@ -106,7 +106,7 @@ private:
 
         TO_STRING_IMPL("UiModeManagerService::DockModeReceiver: ")
     private:
-        AutoPtr<UiModeManagerService> mHost;
+        UiModeManagerService* mHost;
     };
 
     class BatteryReceiver
@@ -123,7 +123,7 @@ private:
 
         TO_STRING_IMPL("UiModeManagerService::BatteryReceiver: ")
     private:
-        AutoPtr<UiModeManagerService> mHost;
+        UiModeManagerService* mHost;
     };
 
     class MyTwilightListener
@@ -140,7 +140,7 @@ private:
         CARAPI OnTwilightStateChanged();
 
     private:
-        AutoPtr<UiModeManagerService> mHost;
+        UiModeManagerService* mHost;
     };
 
 public:

@@ -3134,8 +3134,8 @@ ECode CActivityManagerService::UpdateCpuStats()
 
 ECode CActivityManagerService::UpdateCpuStatsNow()
 {
-    // disable for detecting memory leak
-    return NOERROR;
+    // enable for detecting memory leak
+    // return NOERROR;
 
     AutoLock lock(mProcessCpuTracker);
     mProcessCpuMutexFree->Set(FALSE);
@@ -5640,11 +5640,11 @@ Boolean CActivityManagerService::MoveAffiliatedTasksToFront(
 ECode CActivityManagerService::AddRecentTaskLocked(
     /* [in] */ TaskRecord* task)
 {
-    Slogger::I(TAG, " >> AddRecentTaskLocked MemoryDumper::Dump()");
-    MemoryDumper::Dump();
+    // Slogger::I(TAG, " >> AddRecentTaskLocked MemoryDumper::Dump()");
+    // MemoryDumper::Dump();
 
-    // disable for detecting memory leak
-    return NOERROR;
+    // enable for detecting memory leak
+    // return NOERROR;
 
     Boolean isAffiliated = task->mAffiliatedTaskId != task->mTaskId
             || task->mNextAffiliateTaskId != -1 || task->mPrevAffiliateTaskId != -1;
@@ -10981,8 +10981,8 @@ ECode CActivityManagerService::AddAppTask(
         }
 
         // disable for detecting memory leak
-        // task->mInRecents = TRUE;
-        // mRecentTasks->PushBack(task);
+        task->mInRecents = TRUE;
+        mRecentTasks->PushBack(task);
         r->mTask->mStack->AddTask(task, FALSE, FALSE);
 
         task->SetLastThumbnail(thumbnail);
@@ -14304,8 +14304,8 @@ ECode CActivityManagerService::LoadResourcesOnSystemReady()
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     res->GetBoolean(R::bool_::config_hasRecents, &mHasRecents);
-    // disable for detecting memory leak.
-    mHasRecents = FALSE;
+    // enable for detecting memory leak.
+    // mHasRecents = FALSE;
     res->GetDimensionPixelSize(R::dimen::thumbnail_width, &mThumbnailWidth);
     res->GetDimensionPixelSize(R::dimen::thumbnail_height, &mThumbnailHeight);
     return NOERROR;

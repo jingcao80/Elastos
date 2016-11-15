@@ -47,7 +47,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<CZoomActivity> mHost;
+        CZoomActivity* mHost;
         AutoPtr<IView> mView;
     };
 

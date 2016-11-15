@@ -110,7 +110,7 @@ private:
             /* [in] */ IValueAnimator* animation);
 
     private:
-        AutoPtr<SwipeHelper> mHost;
+        SwipeHelper* mHost;
         AutoPtr<IView> mView;
         Boolean mCanAnimViewBeDismissed;
     };

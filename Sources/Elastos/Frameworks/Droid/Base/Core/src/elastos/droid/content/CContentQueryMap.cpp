@@ -28,7 +28,7 @@ namespace Content {
 //=========================================================================
 CContentQueryMap::KeepUpdatedContentObserver::KeepUpdatedContentObserver(
     /* [in] */ IWeakReference* host)
-    : mHost(host)
+    : mWeakHost(host)
 {
 }
 
@@ -40,7 +40,7 @@ ECode CContentQueryMap::KeepUpdatedContentObserver::OnChange(
     // to the observers.  Otherwise, we'll just set mDirty and
     // let it query lazily when they ask for the values.
     AutoPtr<IContentQueryMap> map;
-    mHost->Resolve(EIID_IContentQueryMap, (IInterface**)&map);
+    mWeakHost->Resolve(EIID_IContentQueryMap, (IInterface**)&map);
     if (map != NULL) {
         Int32 count = 0;
         IObservable* observable = IObservable::Probe(map.Get());

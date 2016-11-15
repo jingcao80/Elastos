@@ -125,7 +125,7 @@ private:
         CARAPI OnInvalidated();
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class PopupWindowOnDismissListener

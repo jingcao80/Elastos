@@ -52,7 +52,7 @@ public:
             CARAPI Run();
 
         private:
-            AutoPtr<EdgeGestureActivationListener> mHost;
+            EdgeGestureActivationListener* mHost;
             Int32 mTouchX, mTouchY, mPositionIndex, mFlags;
         };
     public:

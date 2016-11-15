@@ -50,7 +50,7 @@ public:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<CGsmConnection> mHost;
+        CGsmConnection* mHost;
     };
 
 public:

@@ -30,7 +30,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 public:

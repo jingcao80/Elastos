@@ -41,7 +41,7 @@ public:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<CActivityTwo> mHost;
+        CActivityTwo* mHost;
         Int32 mRef;
     };
 

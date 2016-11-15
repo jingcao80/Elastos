@@ -90,7 +90,7 @@ public:
             /* [in] */ Int32 checkedId);
 
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
 public:

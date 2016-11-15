@@ -160,7 +160,7 @@ public:
 
     virtual ECode Run();
 private:
-    AutoPtr<ActionPopupWindow> mHost;
+    ActionPopupWindow* mHost;
 };
 
 class InsertionHandleViewHiderRunnable

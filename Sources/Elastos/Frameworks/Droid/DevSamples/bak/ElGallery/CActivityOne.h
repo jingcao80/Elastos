@@ -43,7 +43,7 @@ public:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
         Int32 mRef;
     };
 

@@ -54,7 +54,7 @@ private:
         CARAPI DispatchPrimaryClipChanged();
 
     private:
-        AutoPtr<CClipboardManager> mHost;
+        CClipboardManager* mHost;
     };
 
 public:

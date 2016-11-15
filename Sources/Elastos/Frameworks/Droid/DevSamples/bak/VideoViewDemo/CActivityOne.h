@@ -47,7 +47,7 @@ public:
             /* [in] */ IMediaPlayer* mp);
 
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
 protected:

@@ -90,7 +90,7 @@ private:
             /* [in] */ Int32 position,
             /* [in] */ Int64 id);
     private:
-        AutoPtr<ChooseAccountActivity> mHost;
+        ChooseAccountActivity* mHost;
     };
 
 public:

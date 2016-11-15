@@ -179,7 +179,7 @@ private:
     Boolean mHeld;
     AutoPtr<IWorkSource> mWorkSource;
     AutoPtr<IRunnable> mReleaser;
-    AutoPtr<CPowerManager> mHost;
+    AutoPtr<CPowerManager> mPm;   // hold powermanager
     String mHistoryTag;
     String mTraceName;
 };

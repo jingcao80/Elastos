@@ -274,7 +274,7 @@ private:
 
         private:
             AutoPtr<IAccountManagerCallback> mCallback;
-            AutoPtr<Future2Task> mHost;
+            Future2Task* mHost;
         };
 
     public:
@@ -470,7 +470,7 @@ private:
                 /* [in] */ IAccountManagerFuture* future);
 
         private:
-            AutoPtr<GetAuthTokenByTypeAndFeaturesTask> mHost;
+            GetAuthTokenByTypeAndFeaturesTask* mHost;
         };
 
     public:

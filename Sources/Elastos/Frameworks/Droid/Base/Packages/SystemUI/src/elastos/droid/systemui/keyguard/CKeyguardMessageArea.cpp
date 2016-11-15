@@ -119,14 +119,14 @@ CKeyguardMessageArea::AnnounceRunnable::AnnounceRunnable(
     /* [in] */ IView* host,
     /* [in] */ ICharSequence* textToAnnounce)
 {
-    IWeakReferenceSource::Probe(host)->GetWeakReference((IWeakReference**)&mHost);
+    IWeakReferenceSource::Probe(host)->GetWeakReference((IWeakReference**)&mWeakHost);
     mTextToAnnounce = textToAnnounce;
 }
 
 ECode CKeyguardMessageArea::AnnounceRunnable::Run()
 {
     AutoPtr<IInterface> obj;
-    mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<IView> host = IView::Probe(obj);
     if (host != NULL) {
         host->AnnounceForAccessibility(mTextToAnnounce);

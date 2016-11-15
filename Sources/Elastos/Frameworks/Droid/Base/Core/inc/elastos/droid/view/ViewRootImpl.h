@@ -219,7 +219,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class WindowInputEventReceiver
@@ -243,7 +243,7 @@ private:
         CARAPI Dispose();
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class ConsumeBatchedInputRunnable
@@ -256,7 +256,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class InvalidateOnAnimationRunnable
@@ -288,7 +288,7 @@ private:
         AutoPtr<ArrayOf<IView*> > mTempViews;
         AutoPtr<ArrayOf<View::AttachInfo::InvalidateInfo*> > mTempViewRects;
 
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 

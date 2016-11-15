@@ -21,7 +21,7 @@ BaseErrorDialog::MyHandler::MyHandler(
     /* [in] */ BaseErrorDialog* service)
 {
     Handler::constructor();
-    service->GetWeakReference((IWeakReference**)&mHost);
+    service->GetWeakReference((IWeakReference**)&mWeakHost);
 }
 
 ECode BaseErrorDialog::MyHandler::HandleMessage(
@@ -31,7 +31,7 @@ ECode BaseErrorDialog::MyHandler::HandleMessage(
     msg->GetWhat(&what);
 
     AutoPtr<IAlertDialog> dialog;
-    mHost->Resolve(EIID_IAlertDialog, (IInterface**)&dialog);
+    mWeakHost->Resolve(EIID_IAlertDialog, (IInterface**)&dialog);
     if (dialog == NULL) return NOERROR;
 
     BaseErrorDialog* host = (BaseErrorDialog*)dialog.Get();

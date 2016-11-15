@@ -52,7 +52,7 @@ public:
         AutoPtr<ISocket> mClient;
         Boolean mNeedWindowListUpdate;
         Boolean mNeedFocusedWindowUpdate;
-        AutoPtr<ViewServer> mHost;
+        ViewServer* mHost;
         Object mLock;
     };
 public:

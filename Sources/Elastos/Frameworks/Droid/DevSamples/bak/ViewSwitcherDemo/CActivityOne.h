@@ -111,7 +111,7 @@ public:
         CARAPI OnClick(
             /* [in] */ IView* v);
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
     class TextSwitcherListener
@@ -136,7 +136,7 @@ public:
         CARAPI OnClick(
             /* [in] */ IView* v);
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
 
@@ -174,7 +174,7 @@ public:
         CARAPI OnClick(
             /* [in] */ IView* v);
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
 protected:

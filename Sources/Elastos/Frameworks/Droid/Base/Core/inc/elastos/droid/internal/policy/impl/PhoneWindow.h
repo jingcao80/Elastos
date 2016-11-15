@@ -532,7 +532,7 @@ private:
         CARAPI_(Boolean) IsDestroyed();
 
     protected:
-        AutoPtr<PhoneWindow> mHost;
+        AutoPtr<PhoneWindow> mHost; // hold host
 
     private:
 

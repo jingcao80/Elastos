@@ -102,7 +102,7 @@ private:
         AutoPtr<IUri> mQueryUri;
         AutoPtr<ICallerInfo> mCallerInfo;
 
-        AutoPtr<CCallerInfoAsyncQuery> mHost;
+        CCallerInfoAsyncQuery* mHost;
     };
 
 public:

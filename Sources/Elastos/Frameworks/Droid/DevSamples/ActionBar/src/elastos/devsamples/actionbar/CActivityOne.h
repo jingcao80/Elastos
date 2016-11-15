@@ -29,7 +29,7 @@ public:
     //         /* [in] */ IView* v);
 
     // private:
-    //     AutoPtr<CActivityOne> mHost;
+    //     CActivityOne* mHost;
     // };
 
 public:

@@ -156,7 +156,7 @@ public:
 
 private:
     static String TAG;
-    AutoPtr<CMediaController> mHost;
+    CMediaController* mHost;
 };
 
 } // namespace Session

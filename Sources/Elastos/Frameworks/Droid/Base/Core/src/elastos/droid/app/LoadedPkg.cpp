@@ -131,7 +131,7 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
             }
             SendFinished(mgr);
         }
-        mHost = NULL;
+        mHost = NULL;   // release ref-count
         return NOERROR;
     }
     // Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "broadcastReceiveReg");
@@ -160,7 +160,7 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
             // Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             Slogger::E(CActivityThread::TAG, "Error receiving broadcast %s in %s ec: 0x%08x",
                 TO_CSTR(intent), TO_CSTR(mHost->mReceiver), ec);
-            mHost = NULL;
+            mHost = NULL;   // release ref-count
             return E_RUNTIME_EXCEPTION;
             // throw new RuntimeException(
             //     "Error receiving broadcast " + intent
@@ -190,7 +190,7 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
     }
 
     // Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-    mHost = NULL;
+    mHost = NULL;   // release ref-count
     return NOERROR;
 }
 

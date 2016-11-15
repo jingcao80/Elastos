@@ -170,27 +170,35 @@ INIT_PROI_4 AutoPtr<IASN1Sequence> ContentInfo::ASN1 = InitStatic();
 
 AutoPtr<IASN1Sequence> ContentInfo::InitStatic()
 {
-    static Int32 data[] = {1, 2, 840, 113549, 1, 7, 1};
-    DATA = ArrayOf<Int32>::Alloc(data, sizeof(data)/sizeof(data[0]));
+    Int32 data[] = {1, 2, 840, 113549, 1, 7, 1};
+    Int32 size = ArraySize(data);
+    DATA = ArrayOf<Int32>::Alloc(size);
+    DATA->Copy(data, size);
 
-    static Int32 signedData[] = {1, 2, 840, 113549, 1, 7, 2};
-    SIGNED_DATA = ArrayOf<Int32>::Alloc(signedData, sizeof(signedData)/sizeof(signedData[0]));
+    Int32 signedData[] = {1, 2, 840, 113549, 1, 7, 2};
+    size = ArraySize(signedData);
+    SIGNED_DATA = ArrayOf<Int32>::Alloc(size);
+    SIGNED_DATA->Copy(signedData, size);
 
-    static Int32 envelopedData[] = {1, 2, 840, 113549, 1, 7, 3};
-    ENVELOPED_DATA = ArrayOf<Int32>::Alloc(envelopedData,
-        sizeof(envelopedData)/sizeof(envelopedData[0]));
+    Int32 envelopedData[] = {1, 2, 840, 113549, 1, 7, 3};
+    size = ArraySize(envelopedData);
+    ENVELOPED_DATA = ArrayOf<Int32>::Alloc(size);
+    ENVELOPED_DATA->Copy(envelopedData, size);
 
-    static Int32 signedAndEnvelopedData[] = {1, 2, 840, 113549, 1, 7, 4};
-    SIGNED_AND_ENVELOPED_DATA = ArrayOf<Int32>::Alloc(signedAndEnvelopedData,
-        sizeof(signedAndEnvelopedData)/sizeof(signedAndEnvelopedData[0]));
+    Int32 signedAndEnvelopedData[] = {1, 2, 840, 113549, 1, 7, 4};
+    size = ArraySize(signedAndEnvelopedData);
+    SIGNED_AND_ENVELOPED_DATA = ArrayOf<Int32>::Alloc(size);
+    SIGNED_AND_ENVELOPED_DATA->Copy(signedAndEnvelopedData, size);
 
-    static Int32 digestedData[] = {1, 2, 840, 113549, 1, 7, 5};
-    DIGESTED_DATA = ArrayOf<Int32>::Alloc(digestedData,
-        sizeof(digestedData)/sizeof(digestedData[0]));
+    Int32 digestedData[] = {1, 2, 840, 113549, 1, 7, 5};
+    size = ArraySize(digestedData);
+    DIGESTED_DATA = ArrayOf<Int32>::Alloc(size);
+    DIGESTED_DATA->Copy(digestedData, size);
 
-    static Int32 encryptedData[] = {1, 2, 840, 113549, 1, 7, 6};
-    ENCRYPTED_DATA = ArrayOf<Int32>::Alloc(encryptedData,
-        sizeof(encryptedData)/sizeof(encryptedData[0]));
+    Int32 encryptedData[] = {1, 2, 840, 113549, 1, 7, 6};
+    size = ArraySize(encryptedData);
+    ENCRYPTED_DATA = ArrayOf<Int32>::Alloc(size);
+    ENCRYPTED_DATA->Copy(encryptedData, size);
 
     AutoPtr<ArrayOf<IASN1Type*> > arg = ArrayOf<IASN1Type*>::Alloc(2);
     AutoPtr<IASN1Type> inst;

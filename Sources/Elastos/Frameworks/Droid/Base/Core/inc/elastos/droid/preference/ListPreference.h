@@ -45,7 +45,7 @@ private:
             /* [in] */ Int32 which);
 
     private:
-        AutoPtr<ListPreference> mHost;
+        ListPreference* mHost;
     };
 
 public:

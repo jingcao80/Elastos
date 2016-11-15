@@ -24,7 +24,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<RouterSettingFactory> mHost;
+        RouterSettingFactory* mHost;
     };
 
 

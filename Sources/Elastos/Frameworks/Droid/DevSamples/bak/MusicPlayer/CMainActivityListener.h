@@ -22,7 +22,7 @@ public:
     CARAPI Run();
 
 private:
-    AutoPtr<IWeakReference> mHost;
+    AutoPtr<IWeakReference> mWeakHost;
 
 };
 

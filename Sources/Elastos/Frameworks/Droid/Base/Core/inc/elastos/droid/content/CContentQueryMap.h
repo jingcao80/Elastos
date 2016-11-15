@@ -88,7 +88,7 @@ public:
             /* [in] */ Boolean selfChange);
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
 protected:

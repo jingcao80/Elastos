@@ -49,7 +49,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<CLayoutChangesActivity> mHost;
+        CLayoutChangesActivity* mHost;
         AutoPtr<IView> mView;
     };
 

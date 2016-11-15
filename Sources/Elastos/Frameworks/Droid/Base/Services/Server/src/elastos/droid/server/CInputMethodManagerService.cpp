@@ -172,14 +172,14 @@ CAR_INTERFACE_IMPL(CInputMethodManagerService::MyHandlerCallerCallback, Object, 
 
 CInputMethodManagerService::MyHandlerCallerCallback::MyHandlerCallerCallback(
     /* [in] */ IWeakReference* host)
-    : mHost(host)
+    : mWeakHost(host)
 {}
 
 ECode CInputMethodManagerService::MyHandlerCallerCallback::ExecuteMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IHandlerCallback> cb;
-    mHost->Resolve(EIID_IHandlerCallback, (IInterface**)&cb);
+    mWeakHost->Resolve(EIID_IHandlerCallback, (IInterface**)&cb);
     if (cb != NULL) {
         Boolean result;
         return cb->HandleMessage(msg, &result);

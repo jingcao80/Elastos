@@ -86,7 +86,7 @@ public:
             /* [in] */ Int32 which);
 
     private:
-        AutoPtr<GeckoApp> mHost;
+        GeckoApp* mHost;
     };
 
 public:

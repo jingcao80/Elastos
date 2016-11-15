@@ -48,7 +48,7 @@ CPowerManagerWakeLock::~CPowerManagerWakeLock()
     if (mHeld) {
         // Log.wtf(TAG, "WakeLock finalized while still held: " + mTag);
         // try {
-        mHost->mService->ReleaseWakeLock(mToken, 0);
+        mPm->mService->ReleaseWakeLock(mToken, 0);
         // } catch (RemoteException e) {
         // }
     }
@@ -75,7 +75,7 @@ ECode CPowerManagerWakeLock::AcquireLock(
     AutoLock lock(mTokenLock);
     AcquireLocked();
     Boolean result;
-    return mHost->mHandler->PostDelayed(mReleaser, timeout, &result);
+    return mPm->mHandler->PostDelayed(mReleaser, timeout, &result);
 }
 
 void CPowerManagerWakeLock::AcquireLocked()
@@ -87,9 +87,9 @@ void CPowerManagerWakeLock::AcquireLocked()
         // power manager without the keyguard knowing.  A subsequent call to acquire
         // should immediately acquire the wake lock once again despite never having
         // been explicitly released by the keyguard.
-        mHost->mHandler->RemoveCallbacks(mReleaser);
+        mPm->mHandler->RemoveCallbacks(mReleaser);
         // try {
-        mHost->mService->AcquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource, mHistoryTag);
+        mPm->mService->AcquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource, mHistoryTag);
         // } catch (RemoteException e) {
         // }
         mHeld = TRUE;
@@ -106,10 +106,10 @@ ECode CPowerManagerWakeLock::ReleaseLock(
 {
     AutoLock lock(mTokenLock);
     if (!mRefCounted || --mCount == 0) {
-        mHost->mHandler->RemoveCallbacks(mReleaser);
+        mPm->mHandler->RemoveCallbacks(mReleaser);
         if (mHeld) {
             // try {
-            mHost->mService->ReleaseWakeLock(mToken, flags);
+            mPm->mService->ReleaseWakeLock(mToken, flags);
             // } catch (RemoteException e) {
             // }
             mHeld = FALSE;
@@ -159,7 +159,7 @@ ECode CPowerManagerWakeLock::SetWorkSource(
 
     if (changed && mHeld) {
         // try {
-        mHost->mService->UpdateWakeLockWorkSource(mToken, mWorkSource, mHistoryTag);
+        mPm->mService->UpdateWakeLockWorkSource(mToken, mWorkSource, mHistoryTag);
         // } catch (RemoteException e) {
         // }
     }
@@ -211,7 +211,7 @@ ECode CPowerManagerWakeLock::constructor(
     mPackageName = packageName;
     mTag = tag;
     FAIL_RETURN(CBinder::New((IBinder**)&mToken));
-    mHost = (CPowerManager*)host;
+    mPm = (CPowerManager*)host;
     mReleaser = new ReleaseRunnable(this);
 
     StringBuilder sb("WakeLock(");

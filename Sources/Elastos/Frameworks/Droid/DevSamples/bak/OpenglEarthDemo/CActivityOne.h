@@ -51,7 +51,7 @@ public:
     CARAPI OnDrawFrame(
         /* [in] */ IGL10* gl);
 
-    AutoPtr<CActivityOne> mHost;
+    CActivityOne* mHost;
     AutoPtr<Earth> earth;
     AutoPtr<Moon> moon;
     AutoPtr<Celestial> cSmall;

@@ -235,8 +235,8 @@ static Byte _FAKE_RSA_CA_1[] = {
     (Byte) 0xf1, (Byte) 0x61
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_RSA_CA_1 = ArrayOf<Byte>::Alloc(_FAKE_RSA_CA_1
-        , sizeof(_FAKE_RSA_CA_1)/sizeof(_FAKE_RSA_CA_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_RSA_CA_1 = ArrayOf<Byte>::AllocInplace(_FAKE_RSA_CA_1
+        , ArraySize(_FAKE_RSA_CA_1));
 
 /**
  * Generated from above and converted with:
@@ -352,8 +352,8 @@ static Byte _FAKE_RSA_KEY_1[] = {
     (Byte) 0x9c, (Byte) 0xce, (Byte) 0xa1, (Byte) 0x87, (Byte) 0x11, (Byte) 0x51
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_RSA_KEY_1 = ArrayOf<Byte>::Alloc(_FAKE_RSA_KEY_1
-        , sizeof(_FAKE_RSA_KEY_1)/sizeof(_FAKE_RSA_KEY_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_RSA_KEY_1 = ArrayOf<Byte>::AllocInplace(_FAKE_RSA_KEY_1
+        , ArraySize(_FAKE_RSA_KEY_1));
 
 /**
  * Generated from above and converted with:
@@ -474,8 +474,8 @@ static Byte _FAKE_RSA_USER_1[] = {
     (Byte) 0x08, (Byte) 0x41, (Byte) 0x0a, (Byte) 0xf3, (Byte) 0x72
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_RSA_USER_1 = ArrayOf<Byte>::Alloc(_FAKE_RSA_USER_1
-        , sizeof(_FAKE_RSA_USER_1)/sizeof(_FAKE_RSA_USER_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_RSA_USER_1 = ArrayOf<Byte>::AllocInplace(_FAKE_RSA_USER_1
+        , ArraySize(_FAKE_RSA_USER_1));
 
 /*
  * The keys and certificates below are generated with:
@@ -598,8 +598,8 @@ static Byte _FAKE_EC_CA_1[] = {
     (Byte) 0x9b, (Byte) 0xc9, (Byte) 0x0d, (Byte) 0xee
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_EC_CA_1 = ArrayOf<Byte>::Alloc(_FAKE_EC_CA_1
-        , sizeof(_FAKE_EC_CA_1)/sizeof(_FAKE_EC_CA_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_EC_CA_1 = ArrayOf<Byte>::AllocInplace(_FAKE_EC_CA_1
+        , ArraySize(_FAKE_EC_CA_1));
 
 /**
  * Generated from above and converted with:
@@ -632,8 +632,8 @@ static Byte _FAKE_EC_KEY_1[] = {
     (Byte) 0x88, (Byte) 0x0c, (Byte) 0x5e, (Byte) 0x0c, (Byte) 0xb2, (Byte) 0x38
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_EC_KEY_1 = ArrayOf<Byte>::Alloc(_FAKE_EC_KEY_1
-        , sizeof(_FAKE_EC_KEY_1)/sizeof(_FAKE_EC_KEY_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_EC_KEY_1 = ArrayOf<Byte>::AllocInplace(_FAKE_EC_KEY_1
+        , ArraySize(_FAKE_EC_KEY_1));
 
 /**
  * Generated from above and converted with:
@@ -743,8 +743,8 @@ static Byte _FAKE_EC_USER_1[] = {
     (Byte) 0x7e, (Byte) 0xde, (Byte) 0xb2
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_EC_USER_1 = ArrayOf<Byte>::Alloc(_FAKE_EC_USER_1
-        , sizeof(_FAKE_EC_USER_1)/sizeof(_FAKE_EC_USER_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_EC_USER_1 = ArrayOf<Byte>::AllocInplace(_FAKE_EC_USER_1
+        , ArraySize(_FAKE_EC_USER_1));
 
 /*
  * The keys and certificates below are generated with:
@@ -875,8 +875,8 @@ static Byte _FAKE_DSA_CA_1[] = {
     (Byte) 0xab, (Byte) 0x50, (Byte) 0xe4, (Byte) 0x45, (Byte) 0xe5, (Byte) 0x11
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_DSA_CA_1 = ArrayOf<Byte>::Alloc(_FAKE_DSA_CA_1
-        , sizeof(_FAKE_DSA_CA_1)/sizeof(_FAKE_DSA_CA_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_DSA_CA_1 = ArrayOf<Byte>::AllocInplace(_FAKE_DSA_CA_1
+        , ArraySize(_FAKE_DSA_CA_1));
 
 /**
  * Generated from above and converted with: openssl pkcs8 -topk8 -outform d
@@ -941,8 +941,8 @@ static Byte _FAKE_DSA_KEY_1[] = {
     (Byte) 0xf6, (Byte) 0x54, (Byte) 0x4c, (Byte) 0x12, (Byte) 0xe8, (Byte) 0x22
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_DSA_KEY_1 = ArrayOf<Byte>::Alloc(_FAKE_DSA_KEY_1
-        , sizeof(_FAKE_DSA_KEY_1)/sizeof(_FAKE_DSA_KEY_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_DSA_KEY_1 = ArrayOf<Byte>::AllocInplace(_FAKE_DSA_KEY_1
+        , ArraySize(_FAKE_DSA_KEY_1));
 
 /**
  * Generated from above and converted with: openssl x509 -outform d -in
@@ -1114,8 +1114,8 @@ static Byte _FAKE_DSA_USER_1[] = {
     (Byte) 0xed, (Byte) 0x2c
 };
 
-static AutoPtr<ArrayOf<Byte> > FAKE_DSA_USER_1 = ArrayOf<Byte>::Alloc(_FAKE_DSA_USER_1
-        , sizeof(_FAKE_DSA_USER_1)/sizeof(_FAKE_DSA_USER_1[0]));
+static AutoPtr<ArrayOf<Byte> > FAKE_DSA_USER_1 = ArrayOf<Byte>::AllocInplace(_FAKE_DSA_USER_1
+        , ArraySize(_FAKE_DSA_USER_1));
 
 const String ElastosKeyStoreTest::TEST_ALIAS_1("test1");
 

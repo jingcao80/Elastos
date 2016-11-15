@@ -44,7 +44,7 @@ private:
             /* [in] */ Int64 id);
 
     private:
-        AutoPtr<ListActivity> mHost;
+        ListActivity* mHost;
     };
 
     class RequestRunnable
@@ -69,7 +69,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<ListActivity> mHost;
+        ListActivity* mHost;
     };
 
 public:

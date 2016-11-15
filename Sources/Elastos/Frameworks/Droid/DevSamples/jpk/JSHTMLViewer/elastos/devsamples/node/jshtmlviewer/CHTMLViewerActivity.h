@@ -72,7 +72,7 @@ public:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<JSActName> mHost;
+        JSActName* mHost;
     };
 
 public:

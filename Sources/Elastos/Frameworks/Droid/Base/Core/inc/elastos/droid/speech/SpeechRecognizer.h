@@ -118,7 +118,7 @@ private:
                 /* [in] */ IMessage* msg);
 
         private:
-            AutoPtr<SpeechRecognizerInternalListener> mHost;
+            SpeechRecognizerInternalListener* mHost;
         };
 
     public:

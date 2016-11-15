@@ -39,7 +39,7 @@ private:
             /* [in] */ Float size);
 
     private:
-        AutoPtr<JSActName> mHost;
+        JSActName* mHost;
     };
 
 public:

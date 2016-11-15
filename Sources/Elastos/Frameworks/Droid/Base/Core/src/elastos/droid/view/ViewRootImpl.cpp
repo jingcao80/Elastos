@@ -487,13 +487,13 @@ ECode ViewRootImpl::ViewRootHandler::HandleMessage(
 //=======================================================================================
 ViewRootImpl::TraversalRunnable::TraversalRunnable(
     /* [in] */ IWeakReference* host)
-    : mHost(host)
+    : mWeakHost(host)
 {}
 
 ECode ViewRootImpl::TraversalRunnable::Run()
 {
     AutoPtr<IInterface> obj;
-    mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
         IViewRootImpl* viewRoot = IViewRootImpl::Probe(obj);
         viewRoot->DoTraversal();
@@ -510,16 +510,16 @@ ECode ViewRootImpl::WindowInputEventReceiver::constructor(
     /* [in] */ ILooper* looper,
     /* [in] */ IWeakReference* viewRootImpl)
 {
-    mHost = viewRootImpl;
+    mWeakHost = viewRootImpl;
     return InputEventReceiver::constructor(inputChannel, looper);
 }
 
 ECode ViewRootImpl::WindowInputEventReceiver::OnInputEvent(
     /* [in] */ IInputEvent* event)
 {
-    if (mHost != NULL) {
+    if (mWeakHost != NULL) {
         AutoPtr<IInterface> obj;
-        mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj) {
             AutoPtr<IViewRootImpl> viewRoot = IViewRootImpl::Probe(obj);
             viewRoot->EnqueueInputEvent(event, this, 0, TRUE);
@@ -531,9 +531,9 @@ ECode ViewRootImpl::WindowInputEventReceiver::OnInputEvent(
 
 ECode ViewRootImpl::WindowInputEventReceiver::OnBatchedInputEventPending()
 {
-    if (mHost != NULL) {
+    if (mWeakHost != NULL) {
         AutoPtr<IInterface> obj;
-        mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj) {
             ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             if (viewRoot->mUnbufferedInputDispatch) {
@@ -549,13 +549,12 @@ ECode ViewRootImpl::WindowInputEventReceiver::OnBatchedInputEventPending()
 
 ECode ViewRootImpl::WindowInputEventReceiver::Dispose()
 {
-    if (mHost != NULL) {
+    if (mWeakHost != NULL) {
         AutoPtr<IInterface> obj;
-        mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj) {
             ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             viewRoot->UnscheduleConsumeBatchedInput();
-            mHost = NULL;
         }
     }
 
@@ -567,13 +566,13 @@ ECode ViewRootImpl::WindowInputEventReceiver::Dispose()
 //=======================================================================================
 ViewRootImpl::ConsumeBatchedInputRunnable::ConsumeBatchedInputRunnable(
     /* [in] */ IWeakReference* host)
-    : mHost(host)
+    : mWeakHost(host)
 {}
 
 ECode ViewRootImpl::ConsumeBatchedInputRunnable::Run()
 {
     AutoPtr<IInterface> obj;
-    mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (obj) {
         Int64 timeNanos;
         ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
@@ -590,7 +589,7 @@ ECode ViewRootImpl::ConsumeBatchedInputRunnable::Run()
 ViewRootImpl::InvalidateOnAnimationRunnable::InvalidateOnAnimationRunnable(
     /* [in] */ IWeakReference* host)
     : mPosted(FALSE)
-    , mHost(host)
+    , mWeakHost(host)
 {}
 
 void ViewRootImpl::InvalidateOnAnimationRunnable::AddView(
@@ -629,7 +628,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::RemoveView(
     }
 
     AutoPtr<IInterface> obj;
-    mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
     if (mPosted && mViews.IsEmpty() && mViewRects.IsEmpty() && obj != NULL) {
         ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
         viewRoot->mChoreographer->RemoveCallbacks(
@@ -692,7 +691,7 @@ void ViewRootImpl::InvalidateOnAnimationRunnable::PostIfNeededLocked()
 {
     if (!mPosted) {
         AutoPtr<IInterface> obj;
-        mHost->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mWeakHost->Resolve(EIID_IInterface, (IInterface**)&obj);
         if (obj != NULL) {
             ViewRootImpl* viewRoot = (ViewRootImpl*)IViewRootImpl::Probe(obj);
             viewRoot->mChoreographer->PostCallback(

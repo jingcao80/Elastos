@@ -638,7 +638,7 @@ private:
 
         TO_STRING_IMPL("CAccountManagerService::PurgeOldGrantsAllBroadcastReceiver: ")
     private:
-        AutoPtr<CAccountManagerService> mHost;
+        CAccountManagerService* mHost;
     };
 
     class OnUserRemovedBroadcastReceiver
@@ -654,7 +654,7 @@ private:
 
         TO_STRING_IMPL("CAccountManagerService::OnUserRemovedBroadcastReceiver: ")
     private:
-        AutoPtr<CAccountManagerService> mHost;
+        CAccountManagerService* mHost;
     };
 
 public:

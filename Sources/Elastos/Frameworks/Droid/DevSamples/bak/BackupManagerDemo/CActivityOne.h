@@ -55,7 +55,7 @@ public:
             /* [in] */ ICompoundButton* buttonView,
             /* [in] */ Boolean isChecked);
     private:
-        AutoPtr<CActivityOne> mHost;
+        CActivityOne* mHost;
     };
 
 protected:

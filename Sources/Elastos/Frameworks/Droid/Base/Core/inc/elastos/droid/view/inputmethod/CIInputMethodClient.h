@@ -43,7 +43,7 @@ public:
         /* [in] */ Int32 sequenceNumber);
 
 private:
-    AutoPtr<CInputMethodManager> mHost;
+    CInputMethodManager* mHost;
 };
 
 } // namespace InputMethod

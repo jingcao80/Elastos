@@ -38,7 +38,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<HeavyWeightSwitcherActivity> mHost;
+        HeavyWeightSwitcherActivity* mHost;
     };
 
     class SwitchNewListener
@@ -57,7 +57,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<HeavyWeightSwitcherActivity> mHost;
+        HeavyWeightSwitcherActivity* mHost;
     };
 
     class CancelListener
@@ -76,7 +76,7 @@ private:
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<HeavyWeightSwitcherActivity> mHost;
+        HeavyWeightSwitcherActivity* mHost;
     };
 
 public:

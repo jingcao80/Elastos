@@ -124,7 +124,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<IWeakReference> mHost;
+        AutoPtr<IWeakReference> mWeakHost;
     };
 
     class VisibleServiceConnection

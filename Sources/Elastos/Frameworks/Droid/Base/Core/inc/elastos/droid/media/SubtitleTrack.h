@@ -138,7 +138,7 @@ public:
         // simplistic, inefficient implementation
         AutoPtr<ISortedMap> mCues;
 
-        AutoPtr<SubtitleTrack> mHost;
+        SubtitleTrack* mHost;
     };
 
     /** @hide */

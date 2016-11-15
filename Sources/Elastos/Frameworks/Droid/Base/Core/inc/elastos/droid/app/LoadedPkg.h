@@ -70,7 +70,7 @@ public:
         public:
             AutoPtr<IIntent> mCurIntent;
             Boolean mOrdered;
-            AutoPtr<ReceiverDispatcher> mHost;
+            AutoPtr<ReceiverDispatcher> mHost;  // hold host
         };
 
     public:
