@@ -23,7 +23,7 @@ ECode COpenSSLProvider::constructor()
 ECode COpenSSLProvider::constructor(
     /* [in] */ const String& providerName)
 {
-    Logger::E("leliang", "TODO remove this COpenSSLProvider::constructor begin");
+    //Logger::E("leliang", "TODO remove this COpenSSLProvider::constructor begin");
     FAIL_RETURN(Provider::constructor(providerName, 1.0, String("Elastos's OpenSSL-backed security provider")))
 
     // Make sure the platform is initialized.
@@ -267,7 +267,7 @@ ECode COpenSSLProvider::constructor(
     Put("Alg.Alias.CertificateFactory.X.509", "X509");
     Put("KeyGenerator.HMACMD5", prefix + "COpenSSLKeyGeneratorTest");
 
-    Logger::E("leliang", "TODO remove this COpenSSLProvider::constructor end");
+    //Logger::E("leliang", "TODO remove this COpenSSLProvider::constructor end");
     return NOERROR;
 }
 

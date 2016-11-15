@@ -93,6 +93,7 @@ module
     using interface Elastos.Security.Interfaces.IECKey;
     using interface Elastos.Security.Spec.IECPrivateKeySpec;
     using interface Elastos.Security.Spec.IECPublicKeySpec;
+    using interface Elastos.Security.IMessageDigestSpi;
     using interface Elastos.Security.IPrivateKey;
     using interface Elastos.Security.IPublicKey;
     using interface Elastos.Security.ISecureRandom;
@@ -388,6 +389,7 @@ module
 
         interface IOpenSSLECKeyPairGenerator;
         interface IKeyPairGenerator;
+        interface IKeyPairGeneratorSpi;
     }
 
     singleton class COpenSSLECPointContextHelper {
@@ -488,6 +490,31 @@ module
         interface IOpenSSLMac;
     }
 
+    class COpenSSLMacHmacSHA1 {
+        interface IMacSpi;
+        interface IOpenSSLMac;
+    }
+
+    class COpenSSLMacHmacSHA224 {
+        interface IMacSpi;
+        interface IOpenSSLMac;
+    }
+
+    class COpenSSLMacHmacSHA256 {
+        interface IMacSpi;
+        interface IOpenSSLMac;
+    }
+
+    class COpenSSLMacHmacSHA384 {
+        interface IMacSpi;
+        interface IOpenSSLMac;
+    }
+
+    class COpenSSLMacHmacSHA512 {
+        interface IMacSpi;
+        interface IOpenSSLMac;
+    }
+
     class COpenSSLMessageDigestJDK {
         constructor(
             [in] Int64 evp_md,
@@ -498,6 +525,7 @@ module
             [in] Int32 size,
             [in] IOpenSSLDigestContext* ctx);
 
+        interface IMessageDigestSpi;
         interface IOpenSSLMessageDigestJDK;
         interface ICloneable;
     }
@@ -506,36 +534,54 @@ module
         constructor();
 
         interface IOpenSSLMessageDigestJDKMD5;
+        interface IMessageDigestSpi;
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
     }
 
     class COpenSSLMessageDigestJDKSHA1 {
         constructor();
 
         interface IOpenSSLMessageDigestJDKSHA1;
+        interface IMessageDigestSpi;
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
     }
 
     class COpenSSLMessageDigestJDKSHA224 {
         constructor();
 
         interface IOpenSSLMessageDigestJDKSHA224;
+        interface IMessageDigestSpi;
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
     }
 
     class COpenSSLMessageDigestJDKSHA256 {
         constructor();
 
         interface IOpenSSLMessageDigestJDKSHA256;
+        interface IMessageDigestSpi;
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
     }
 
     class COpenSSLMessageDigestJDKSHA384 {
         constructor();
 
         interface IOpenSSLMessageDigestJDKSHA384;
+        interface IMessageDigestSpi;
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
     }
 
     class COpenSSLMessageDigestJDKSHA512 {
         constructor();
 
         interface IOpenSSLMessageDigestJDKSHA512;
+        interface IMessageDigestSpi;
+        interface IOpenSSLMessageDigestJDK;
+        interface ICloneable;
     }
 
     class COpenSSLRSAKeyFactory {
@@ -914,6 +960,20 @@ module
         interface IX509PublicKey;
     }
 
+    class COpenSSLCipherRSARaw {
+        constructor();
+
+        interface IOpenSSLCipherRSA;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherRSAPKCS1 {
+        constructor();
+
+        interface IOpenSSLCipherRSA;
+        interface ICipherSpi;
+    }
+
     class COpenSSLCipherAESECBNoPadding {
         constructor();
 
@@ -922,6 +982,106 @@ module
         interface IOpenSSLCipher;
         interface ICipherSpi;
     }
+
+    class COpenSSLCipherAESECBPKCS5Padding {
+        constructor();
+
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherAESCBCNoPadding {
+        constructor();
+
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherAESCBCPKCS5Padding {
+        constructor();
+
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherAESCFB {
+        constructor();
+
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherAESCTR {
+        constructor();
+
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherAESOFB {
+        constructor();
+
+        interface IOpenSSLCipherAES;
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherDESEDEECBNoPadding {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherDESEDEECBPKCS5Padding {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherDESEDECBCNoPadding {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherDESEDECBCPKCS5Padding {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherDESEDECFB {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherDESEDEOFB {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+    class COpenSSLCipherARC4 {
+        constructor();
+
+        interface IOpenSSLCipher;
+        interface ICipherSpi;
+    }
+
+
+
 
     } // namespace Conscrypt
     } // namespace Org

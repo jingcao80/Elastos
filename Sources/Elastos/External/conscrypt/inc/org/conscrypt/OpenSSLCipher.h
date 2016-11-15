@@ -460,6 +460,8 @@ class OpenSSLCipher_DESEDE_CBC
 public:
     OpenSSLCipher_DESEDE_CBC(
         /* [in] */ OpenSSLCipher::Padding padding);
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_DESEDE_CBC_NoPadding
@@ -481,6 +483,8 @@ class OpenSSLCipher_DESEDE_CFB
 {
 public:
     OpenSSLCipher_DESEDE_CFB();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_DESEDE_ECB
@@ -489,6 +493,8 @@ class OpenSSLCipher_DESEDE_ECB
 public:
     OpenSSLCipher_DESEDE_ECB(
         /* [in] */ OpenSSLCipher::Padding padding);
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_DESEDE_ECB_NoPadding
@@ -510,6 +516,8 @@ class OpenSSLCipher_DESEDE_OFB
 {
 public:
     OpenSSLCipher_DESEDE_OFB();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipher_ARC4
@@ -517,6 +525,8 @@ class OpenSSLCipher_ARC4
 {
 public:
     OpenSSLCipher_ARC4();
+
+    CARAPI constructor();
 
 protected:
     // @Override

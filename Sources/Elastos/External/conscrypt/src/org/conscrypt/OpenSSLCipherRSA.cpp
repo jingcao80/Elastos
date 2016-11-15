@@ -34,6 +34,11 @@ OpenSSLCipherRSA_PKCS1::OpenSSLCipherRSA_PKCS1()
     OpenSSLCipherRSA::constructor(INativeCrypto::RSA_PKCS1_PADDING);
 }
 
+ECode OpenSSLCipherRSA_PKCS1::constructor()
+{
+    return NOERROR;
+}
+
 //==============================================================================
 //  OpenSSLCipherRSA_Raw
 //==============================================================================
@@ -43,6 +48,10 @@ OpenSSLCipherRSA_Raw::OpenSSLCipherRSA_Raw()
     OpenSSLCipherRSA::constructor(INativeCrypto::RSA_NO_PADDING);
 }
 
+ECode OpenSSLCipherRSA_Raw::constructor()
+{
+    return NOERROR;
+}
 //==============================================================================
 //  OpenSSLCipherRSA
 //==============================================================================

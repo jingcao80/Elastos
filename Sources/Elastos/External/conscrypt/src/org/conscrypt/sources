@@ -153,6 +153,26 @@ SOURCES += COpenSSLMacHmacMD5.cpp
 SOURCES += OpenSSLKeyGeneratorTest.cpp
 SOURCES += COpenSSLKeyGeneratorTest.cpp
 SOURCES += COpenSSLCipherAESECBNoPadding.cpp
+SOURCES += COpenSSLCipherRSAPKCS1.cpp
+SOURCES += COpenSSLCipherRSARaw.cpp
+SOURCES += COpenSSLCipherAESCBCNoPadding.cpp
+SOURCES += COpenSSLCipherAESCFB.cpp
+SOURCES += COpenSSLCipherAESECBPKCS5Padding.cpp
+SOURCES += COpenSSLCipherAESCBCPKCS5Padding.cpp
+SOURCES += COpenSSLCipherAESCTR.cpp
+SOURCES += COpenSSLCipherAESOFB.cpp
+SOURCES += COpenSSLCipherARC4.cpp
+SOURCES += COpenSSLCipherDESEDECBCPKCS5Padding.cpp
+SOURCES += COpenSSLCipherDESEDEECBNoPadding.cpp
+SOURCES += COpenSSLCipherDESEDEOFB.cpp
+SOURCES += COpenSSLCipherDESEDECBCNoPadding.cpp
+SOURCES += COpenSSLCipherDESEDECFB.cpp
+SOURCES += COpenSSLCipherDESEDEECBPKCS5Padding.cpp
+SOURCES += COpenSSLMacHmacSHA1.cpp
+SOURCES += COpenSSLMacHmacSHA224.cpp
+SOURCES += COpenSSLMacHmacSHA256.cpp
+SOURCES += COpenSSLMacHmacSHA384.cpp
+SOURCES += COpenSSLMacHmacSHA512.cpp
 
 SOURCES += Elastos.CoreLibrary.cpp
 

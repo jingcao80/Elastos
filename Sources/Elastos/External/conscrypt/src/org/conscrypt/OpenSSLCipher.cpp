@@ -1010,6 +1010,10 @@ OpenSSLCipher_DESEDE_CBC::OpenSSLCipher_DESEDE_CBC(
 {
 }
 
+ECode OpenSSLCipher_DESEDE_CBC::constructor()
+{
+    return NOERROR;
+}
 //==============================================================================
 //  OpenSSLCipher_DESEDE_CBC_NoPadding
 //==============================================================================
@@ -1037,6 +1041,11 @@ OpenSSLCipher_DESEDE_CFB::OpenSSLCipher_DESEDE_CFB()
 {
 }
 
+ECode OpenSSLCipher_DESEDE_CFB::constructor()
+{
+    return NOERROR;
+}
+
 //==============================================================================
 //  OpenSSLCipher_DESEDE_ECB
 //==============================================================================
@@ -1045,6 +1054,11 @@ OpenSSLCipher_DESEDE_ECB::OpenSSLCipher_DESEDE_ECB(
     /* [in] */ OpenSSLCipher::Padding padding)
     : OpenSSLCipher_DESEDE(MODE_ECB, padding)
 {
+}
+
+ECode OpenSSLCipher_DESEDE_ECB::constructor()
+{
+    return NOERROR;
 }
 
 //==============================================================================
@@ -1074,13 +1088,22 @@ OpenSSLCipher_DESEDE_OFB::OpenSSLCipher_DESEDE_OFB()
 {
 }
 
+ECode OpenSSLCipher_DESEDE_OFB::constructor()
+{
+    return NOERROR;
+}
+
 //==============================================================================
 //  OpenSSLCipher_ARC4
 //==============================================================================
 
 OpenSSLCipher_ARC4::OpenSSLCipher_ARC4()
 {
-    return;
+}
+
+ECode OpenSSLCipher_ARC4::constructor()
+{
+    return NOERROR;
 }
 
 ECode OpenSSLCipher_ARC4::GetBaseCipherName(

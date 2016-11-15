@@ -177,6 +177,8 @@ class OpenSSLCipherRSA_PKCS1
 {
 public:
     OpenSSLCipherRSA_PKCS1();
+
+    CARAPI constructor();
 };
 
 class OpenSSLCipherRSA_Raw
@@ -184,6 +186,8 @@ class OpenSSLCipherRSA_Raw
 {
 public:
     OpenSSLCipherRSA_Raw();
+
+    CARAPI constructor();
 };
 
 
