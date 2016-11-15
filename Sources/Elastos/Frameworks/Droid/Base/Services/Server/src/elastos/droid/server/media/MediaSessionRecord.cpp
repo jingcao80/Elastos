@@ -342,6 +342,7 @@ ECode MediaSessionRecord::MessageHandler::HandleMessage(
             break;
         case MSG_DESTROYED:
             mHost->PushSessionDestroyed();
+            mHost->Release();
     }
     return NOERROR;
 }
@@ -356,6 +357,7 @@ void MediaSessionRecord::MessageHandler::Post(
     /* [in] */ Int32 what,
     /* [in] */ IObject* obj)
 {
+    if (what == MSG_DESTROYED) mHost->AddRef();
     AutoPtr<IMessage> msg;
     ObtainMessage(what, obj, (IMessage**)&msg);
     msg->SendToTarget();
@@ -366,6 +368,7 @@ void MediaSessionRecord::MessageHandler::Post(
     /* [in] */ IObject* obj,
     /* [in] */ IBundle* data)
 {
+    if (what == MSG_DESTROYED) mHost->AddRef();
     AutoPtr<IMessage> msg;
     ObtainMessage(what, obj, (IMessage**)&msg);
     msg->SetData(data);
