@@ -7,6 +7,7 @@
 
 using Elastos::Security::IPublicKey;
 using Elastos::Security::IKey;
+using Elastos::Security::Interfaces::IRSAKey;
 using Elastos::Security::Interfaces::IRSAPublicKey;
 using Elastos::Security::Spec::IRSAPublicKeySpec;
 using Elastos::Math::IBigInteger;
@@ -22,6 +23,7 @@ class OpenSSLRSAPublicKey
     , public IRSAPublicKey
     , public IPublicKey
     , public IKey
+    , public IRSAKey
     , public ISerializable
     , public IOpenSSLKeyHolder
     , public IOpenSSLRSAPublicKey

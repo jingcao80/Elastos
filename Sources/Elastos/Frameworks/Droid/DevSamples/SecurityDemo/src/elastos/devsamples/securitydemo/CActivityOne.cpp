@@ -939,7 +939,6 @@ ECode CActivityOne::ButtonElastosKeyPairGenerator()
 
     AutoPtr<ElastosKeyPairGeneratorTest> text = new ElastosKeyPairGeneratorTest(this);
 
-
     //return text->TestKeyPairGenerator_Initialize_Params_Encrypted_Success();                                 //OK
 
     //return text->TestKeyPairGenerator_Initialize_KeySize_Encrypted_Failure();                                //OK
@@ -948,12 +947,15 @@ ECode CActivityOne::ButtonElastosKeyPairGenerator()
 
     //return text->TestKeyPairGenerator_Initialize_ParamsAndSecureRandom_Encrypted_Failure();                  //OK
 
-    return text->TestKeyPairGenerator_GenerateKeyPair_Encrypted_Success();
+    //return text->TestKeyPairGenerator_GenerateKeyPair_Encrypted_Success();                                   //OK
+
+    return text->TestKeyPairGenerator_GenerateKeyPair_DSA_Unencrypted_Success();
 }
 
 ECode CActivityOne::ButtonElastosKeyStore()
 {
     AutoPtr<ElastosKeyStoreTest> test = new ElastosKeyStoreTest();
+
     return test->TestKeyStore_Aliases_Encrypted_Success();
 }
 

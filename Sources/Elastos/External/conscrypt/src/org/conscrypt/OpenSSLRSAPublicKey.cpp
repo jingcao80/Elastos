@@ -12,6 +12,7 @@ using Elastos::Math::CBigInteger;
 using Elastos::Security::EIID_IPublicKey;
 using Elastos::Security::EIID_IKey;
 using Elastos::Security::Interfaces::IRSAKey;
+using Elastos::Security::Interfaces::EIID_IRSAKey;
 using Elastos::Security::Interfaces::EIID_IRSAPublicKey;
 
 namespace Org {
@@ -22,8 +23,8 @@ namespace Conscrypt {
 //=========================================
 Int64 OpenSSLRSAPublicKey::mSerialVersionUID = 123125005824688292L;
 
-CAR_INTERFACE_IMPL_6(OpenSSLRSAPublicKey, Object, IRSAPublicKey, IPublicKey, \
-    IKey, ISerializable, IOpenSSLKeyHolder, IOpenSSLRSAPublicKey)
+CAR_INTERFACE_IMPL_7(OpenSSLRSAPublicKey, Object, IRSAPublicKey, IPublicKey, \
+    IKey, IRSAKey, ISerializable, IOpenSSLKeyHolder, IOpenSSLRSAPublicKey)
 
 ECode OpenSSLRSAPublicKey::constructor(
     /* [in] */ IOpenSSLKey* key)
