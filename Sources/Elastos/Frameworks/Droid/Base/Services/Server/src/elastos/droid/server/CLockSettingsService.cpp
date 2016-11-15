@@ -82,7 +82,7 @@ static AutoPtr<ArrayOf<String> > InitCOLUMNS_FOR_QUERY()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
     array->Set(0, String("value")/*COLUMN_VALUE*/);
-    return NOERROR;
+    return array;
 }
 
 static AutoPtr<ArrayOf<String> > InitVALID_SETTINGS()
@@ -117,7 +117,7 @@ static AutoPtr<ArrayOf<String> > InitVALID_SETTINGS()
 
 AutoPtr<ArrayOf<String> > InitREAD_PROFILE_PROTECTED_SETTINGS()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(16);
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
     array->Set(0, ISettingsSecure::LOCK_SCREEN_OWNER_INFO_ENABLED);
     array->Set(1, ISettingsSecure::LOCK_SCREEN_OWNER_INFO);
     return array;
@@ -596,7 +596,7 @@ ECode CLockSettingsService::GetInt64(
     VALIDATE_NOT_NULL(res);
     *res = 0;
 
-    CheckReadPermission(key, userId);
+    FAIL_RETURN(CheckReadPermission(key, userId));
 
     String value;
     FAIL_RETURN(ReadFromDb(key, String(NULL), userId, &value))

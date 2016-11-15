@@ -1779,7 +1779,7 @@ ECode LockPatternUtils::IsSecure(
             || (isPassword && (SavedPasswordExists(&tmp), tmp));
 
     Int32 data = 0;
-    *result = secure && (GetActiveProfileLockMode(&data), data) == IProfileLockMode::DEFAULT;
+    *result = secure && (GetActiveProfileLockMode(&data), data == IProfileLockMode::DEFAULT);
     return NOERROR;
 }
 
