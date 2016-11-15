@@ -286,12 +286,7 @@ ECode CPendingIntent::GetHashCode(
     /* [out] */ Int32* hash)
 {
     VALIDATE_NOT_NULL(hash);
-    *hash = 0;
-
-    IObject* obj = IObject::Probe(mTarget.Get());
-    if (obj != NULL) {
-        return obj->GetHashCode(hash);
-    }
+    *hash = Object::GetHashCode(mTarget);
     return NOERROR;
 }
 
@@ -302,22 +297,20 @@ ECode CPendingIntent::Equals(
     VALIDATE_NOT_NULL(rst);
     *rst = FALSE;
 
-    if (o == NULL){
+    IPendingIntent* temp = IPendingIntent::Probe(o);
+    if (temp == NULL){
         return NOERROR;
     }
 
-    AutoPtr<IPendingIntent> temp = IPendingIntent::Probe(o);
-    if (temp != NULL) {
-        if(temp.Get() == (IPendingIntent*)this) {
-            *rst = TRUE;
-            return NOERROR;
-        }
+    if(temp == (IPendingIntent*)this) {
+        *rst = TRUE;
+        return NOERROR;
+    }
 
-        AutoPtr<IIIntentSender> target;
-        temp->GetTarget((IIIntentSender**)&target);
-        if(target.Get() == mTarget) {
-            *rst = TRUE;
-        }
+    AutoPtr<IIIntentSender> target;
+    temp->GetTarget((IIIntentSender**)&target);
+    if(target.Get() == mTarget) {
+        *rst = TRUE;
     }
     return NOERROR;
 }

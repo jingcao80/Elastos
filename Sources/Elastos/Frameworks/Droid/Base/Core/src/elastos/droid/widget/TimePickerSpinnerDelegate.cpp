@@ -1132,8 +1132,11 @@ void TimePickerSpinnerDelegate::UpdateHeaderSeparator()
 
     String separatorText;
     // See http://www.unicode.org/reports/tr35/tr35-dates.html for hour formats
-    Char32 hourFormatsTmp[] = {'H', 'h', 'K', 'k'};
-    AutoPtr< ArrayOf<Char32> > hourFormats = ArrayOf<Char32>::Alloc(static_cast<Char32*>(hourFormatsTmp), 4);
+    AutoPtr< ArrayOf<Char32> > hourFormats = ArrayOf<Char32>::Alloc(4);
+    hourFormats->Set(0, 'H');
+    hourFormats->Set(1, 'h');
+    hourFormats->Set(2, 'K');
+    hourFormats->Set(3, 'k');
     Int32 hIndex = LastIndexOfAny(bestDateTimePattern, hourFormats);
     if (hIndex == -1) {
         // Default case
@@ -1415,8 +1418,8 @@ void TimePickerSpinnerDelegate::UpdateDisplay(
         OnValidationChanged(TRUE);
     }
     else {
-        Boolean enteredZerosTmp[] = {FALSE, FALSE};
-        AutoPtr< ArrayOf<Boolean> > enteredZeros = ArrayOf<Boolean>::Alloc(static_cast<Boolean*>(enteredZerosTmp), 2);
+        AutoPtr< ArrayOf<Boolean> > enteredZeros = ArrayOf<Boolean>::Alloc(2);
+        enteredZeros->Set(0, FALSE); enteredZeros->Set(1, FALSE);
         AutoPtr< ArrayOf<Int32> > values = GetEnteredTime(enteredZeros);
         String hourFormat = (*enteredZeros)[0] ? String("%02d") : String("%2d");
         String minuteFormat = ((*enteredZeros)[1]) ? String("%02d") : String("%2d");

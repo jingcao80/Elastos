@@ -1032,16 +1032,19 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
         AutoPtr<IXmlResourceParser> parser;
         FAIL_GOTO(ec = resources->GetXml(workspaceResourceId,
                 (IXmlResourceParser**)&parser), ERROR1)
-        AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
-        BeginDocument(IXmlPullParser::Probe(parser), TAG_FAVORITES);
+        IXmlPullParser* p = IXmlPullParser::Probe(parser);
+        AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(p);
+        BeginDocument(p, TAG_FAVORITES);
 
         Int32 depth;
-        IXmlPullParser::Probe(parser)->GetDepth(&depth);
+        p->GetDepth(&depth);
 
         Int32 type;
         Int32 _depth;
-        while (((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
-                (IXmlPullParser::Probe(parser)->GetDepth(&_depth), _depth) > depth) &&
+        AutoPtr<ArrayOf<Int32> > attrIds =
+            TO_ATTRS_ARRAYOF(Elastos::Droid::Launcher2::R::styleable::Favorite);
+        while (((p->Next(&type), type) != IXmlPullParser::END_TAG ||
+                (p->GetDepth(&_depth), _depth) > depth) &&
                 type != IXmlPullParser::END_DOCUMENT) {
 
             if (type != IXmlPullParser::START_TAG) {
@@ -1050,11 +1053,7 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
 
             Boolean added = FALSE;
             String name;
-            IXmlPullParser::Probe(parser)->GetName(&name);
-
-            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
-                ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
+            p->GetName(&name);
             AutoPtr<ITypedArray> a;
             FAIL_GOTO(ec = mContext->ObtainStyledAttributes(attrs, attrIds,
                     (ITypedArray**)&a), ERROR1)
@@ -1139,19 +1138,17 @@ ECode LauncherProvider::DatabaseHelper::LoadFavorites(
                 CArrayList::New((IArrayList**)&folderItems);
 
                 Int32 folderDepth;
-                IXmlPullParser::Probe(parser)->GetDepth(&folderDepth);
+                p->GetDepth(&folderDepth);
                 Int32 dep;
-                while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
-                        (IXmlPullParser::Probe(parser)->GetDepth(&dep), dep) > folderDepth) {
+                AutoPtr<ArrayOf<Int32> > attrIds =
+                    TO_ATTRS_ARRAYOF(Elastos::Droid::Launcher2::R::styleable::Favorite);
+                while ((p->Next(&type), type) != IXmlPullParser::END_TAG ||
+                        (p->GetDepth(&dep), dep) > folderDepth) {
                     if (type != IXmlPullParser::START_TAG) {
                         continue;
                     }
                     String folder_item_name;
-                    IXmlPullParser::Probe(parser)->GetName(&folder_item_name);
-
-                    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Favorite),
-                            ArraySize(Elastos::Droid::Launcher2::R::styleable::Favorite));
+                    p->GetName(&folder_item_name);
                     AutoPtr<ITypedArray> ar;
                     FAIL_GOTO(ec = mContext->ObtainStyledAttributes(attrs, attrIds,
                             (ITypedArray**)&ar), ERROR1)
@@ -1480,24 +1477,23 @@ ECode LauncherProvider::DatabaseHelper::AddAppWidget(
             Elastos::Droid::Launcher2::R::styleable::Favorite_spanY, 0, &spanY);
 
         // Read the extras
+        IXmlPullParser* p = IXmlPullParser::Probe(parser);
         AutoPtr<IBundle> extras;
         CBundle::New((IBundle**)&extras);
         Int32 widgetDepth;
-        IXmlPullParser::Probe(parser)->GetDepth(&widgetDepth);
+        p->GetDepth(&widgetDepth);
         Int32 dep;
-        while ((IXmlPullParser::Probe(parser)->Next(&type), type) != IXmlPullParser::END_TAG ||
-                (IXmlPullParser::Probe(parser)->GetDepth(&dep), dep) > widgetDepth) {
+        AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(Elastos::Droid::Launcher2::R::styleable::Extra);
+        while ((p->Next(&type), type) != IXmlPullParser::END_TAG ||
+                (p->GetDepth(&dep), dep) > widgetDepth) {
             if (type != IXmlPullParser::START_TAG) {
                 continue;
             }
 
-            AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-                    const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::Extra),
-                    ArraySize(Elastos::Droid::Launcher2::R::styleable::Extra));
             AutoPtr<ITypedArray> ar;
             mContext->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&ar);
             String name;
-            IXmlPullParser::Probe(parser)->GetName(&name);
+            p->GetName(&name);
             if (TAG_EXTRA.Equals(name)) {
                 String key;
                 ar->GetString(Elastos::Droid::Launcher2::R::styleable::Extra_key,

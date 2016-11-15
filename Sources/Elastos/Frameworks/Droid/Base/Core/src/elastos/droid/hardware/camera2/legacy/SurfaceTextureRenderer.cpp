@@ -541,7 +541,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT | EGL_WINDOW_BIT,
             EGL_NONE
         };
-        AutoPtr<ArrayOf<Int32> > attribList2 = ArrayOf<Int32>::Alloc(_attribList2, ArraySize(_attribList2));
+        AutoPtr<ArrayOf<Int32> > attribList2 = ArrayOf<Int32>::AllocInplace(_attribList2, ArraySize(_attribList2));
         egl14->EglChooseConfig(mEGLDisplay, attribList2, /*offset*/ 0, configs, /*offset*/ 0,
                 configs->GetLength(), numConfigs, /*offset*/ 0, &res);
         FAIL_RETURN(CheckEglError(String("eglCreateContext RGB888 ES2")));

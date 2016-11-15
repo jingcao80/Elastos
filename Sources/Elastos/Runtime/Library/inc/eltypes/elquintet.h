@@ -227,7 +227,7 @@ public:
         Type2Flag<T>::Flag());
     }
 
-    static ArrayOf<T> *Alloc(T *pBuf, Int32 capacity) {
+    static ArrayOf<T> *AllocInplace(T *pBuf, Int32 capacity) {
         return (ArrayOf<T> *)_ArrayOf_Alloc_Box(
             pBuf, capacity * sizeof(T), Type2Flag<T>::Flag());
     }
@@ -249,11 +249,6 @@ public:
             }
         }
         return -1;
-    }
-
-    ArrayOf(T *pBuf, Int32 capacity) {
-        _CarQuintet_Init(this, pBuf, capacity * sizeof(T),
-                        capacity * sizeof(T), Type2Flag<T>::Flag());
     }
 
 private:

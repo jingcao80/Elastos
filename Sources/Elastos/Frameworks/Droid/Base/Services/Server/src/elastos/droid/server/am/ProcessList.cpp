@@ -166,21 +166,24 @@ ProcessList::ProcessList()
         BACKUP_APP_ADJ, CACHED_APP_MIN_ADJ, CACHED_APP_MAX_ADJ
     };
     Int32 size = ArraySize(oomAdj);
-    mOomAdj = ArrayOf<Int32>::Alloc(oomAdj, size);
+    mOomAdj = ArrayOf<Int32>::Alloc(size);
+    mOomAdj->Copy(oomAdj, size);
 
     Int32 oomMinFreeLow[] = {
         12288, 18432, 24576,
         36864, 43008, 49152
     };
     size = ArraySize(oomMinFreeLow);
-    mOomMinFreeLow = ArrayOf<Int32>::Alloc(oomMinFreeLow, size);
+    mOomMinFreeLow = ArrayOf<Int32>::Alloc(size);
+    mOomMinFreeLow->Copy(oomMinFreeLow, size);
 
     Int32 oomMinFreeHigh[] =  {
         73728, 92160, 110592,
         129024, 147456, 184320
     };
     size = ArraySize(oomMinFreeHigh);
-    mOomMinFreeHigh = ArrayOf<Int32>::Alloc(oomMinFreeHigh, size);
+    mOomMinFreeHigh = ArrayOf<Int32>::Alloc(size);
+    mOomMinFreeHigh->Copy(oomMinFreeHigh, size);
 
     mOomMinFree = ArrayOf<Int32>::Alloc(mOomAdj->GetLength());
 
@@ -189,7 +192,8 @@ ProcessList::ProcessList()
         40962, 49152, 57342
     };
     size = ArraySize(oomMinFreeLowRam);
-    mOomMinFreeLowRam = ArrayOf<Int32>::Alloc(oomMinFreeLowRam, size);
+    mOomMinFreeLowRam = ArrayOf<Int32>::Alloc(size);
+    mOomMinFreeLowRam->Copy(oomMinFreeLowRam, size);
 
     AutoPtr<IMemInfoReader> minfo;
     CMemInfoReader::New((IMemInfoReader**)&minfo);

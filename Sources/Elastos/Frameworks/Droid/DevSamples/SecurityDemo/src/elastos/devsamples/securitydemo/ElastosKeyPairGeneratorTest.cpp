@@ -382,7 +382,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
         (Byte) 0x0A, (Byte) 0x8F, (Byte) 0x9E, (Byte) 0x59, (Byte) 0x2C, (Byte) 0x44,
         (Byte) 0xB5, (Byte) 0xF9, (Byte) 0x53, (Byte) 0x43,
     };
-    AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(barray, sizeof(barray)/sizeof(barray[0]));
+    AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::AllocInplace(barray, sizeof(barray)/sizeof(barray[0]));
     AutoPtr<IBigInteger> p;
     CBigInteger::New(1, *array, (IBigInteger**)&p);
 
@@ -394,7 +394,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
         (Byte) 0x56, (Byte) 0x26, (Byte) 0x60, (Byte) 0x89, (Byte) 0x11, (Byte) 0xAC,
         (Byte) 0xA8, (Byte) 0xE5,
     };
-    AutoPtr<ArrayOf<Byte> > array2 = ArrayOf<Byte>::Alloc(barray2, sizeof(barray2)/sizeof(barray2[0]));
+    AutoPtr<ArrayOf<Byte> > array2 = ArrayOf<Byte>::AllocInplace(barray2, sizeof(barray2)/sizeof(barray2[0]));
     AutoPtr<IBigInteger> q;
     CBigInteger::New(1, *array2, (IBigInteger**)&q);
 
@@ -443,7 +443,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
         (Byte) 0x52, (Byte) 0xEC, (Byte) 0x75, (Byte) 0x91, (Byte) 0x02, (Byte) 0x11,
         (Byte) 0xA3, (Byte) 0x64, (Byte) 0x26, (Byte) 0xCA,
     };
-    AutoPtr<ArrayOf<Byte> > array3 = ArrayOf<Byte>::Alloc(barray3, sizeof(barray3)/sizeof(barray3[0]));
+    AutoPtr<ArrayOf<Byte> > array3 = ArrayOf<Byte>::AllocInplace(barray3, sizeof(barray3)/sizeof(barray3[0]));
     AutoPtr<IBigInteger> g;
     CBigInteger::New(1, *array3, (IBigInteger**)&g);
 

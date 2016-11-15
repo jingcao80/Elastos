@@ -485,7 +485,8 @@ const AutoPtr<ArrayOf<Int32Array> > View::InitViewStateSets()
         R::attr::state_drag_hovered,      VIEW_STATE_DRAG_HOVERED
     };
 
-    VIEW_STATE_IDS = ArrayOf<Int32>::Alloc(TEMP_VIEW_STATE_IDS, 20);
+    VIEW_STATE_IDS = ArrayOf<Int32>::Alloc(20);
+    VIEW_STATE_IDS->Copy(TEMP_VIEW_STATE_IDS, 20);
 
     const Int32 vdsLen = sizeof(R::styleable::ViewDrawableStates) / sizeof(Int32);
     if ((VIEW_STATE_IDS->GetLength() / 2) != vdsLen) {

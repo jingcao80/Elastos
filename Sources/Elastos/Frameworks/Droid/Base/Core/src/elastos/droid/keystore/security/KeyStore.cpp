@@ -58,8 +58,9 @@ ECode KeyStore::KeystoreServiceWrapper::Get(
         size_t len = 0;
         int32_t ret = mKeystoreService->get(android::String16(name), &data, &len);
         if (ret == 1) {
-            *bytes = ArrayOf<Byte>::Alloc(data, len);
+            *bytes = ArrayOf<Byte>::Alloc(len);
             REFCOUNT_ADD(*bytes);
+            (*bytes)->Copy(data, len);
             free(data);
         }
     }

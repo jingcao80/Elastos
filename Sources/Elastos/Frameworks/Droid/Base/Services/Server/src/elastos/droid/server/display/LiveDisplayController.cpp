@@ -417,7 +417,8 @@ AutoPtr<ArrayOf<Double> > InitColorTable()
         0.65053187, 0.76917889, 1.00000000,
         0.64994941, 0.76876866, 1.00000000,
         0.64937392, 0.76836326, 1.00000000};
-    AutoPtr<ArrayOf<Double> > temp = ArrayOf<Double>::Alloc(table, 579);
+    AutoPtr<ArrayOf<Double> > temp = ArrayOf<Double>::Alloc(579);
+    temp->Copy(table, 579);
     return temp;
 }
 const AutoPtr<ArrayOf<Double> > LiveDisplayController::sColorTable = InitColorTable();

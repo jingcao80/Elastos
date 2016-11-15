@@ -253,7 +253,6 @@ AutoPtr<IHdmiDeviceInfo> HdmiUtils::CloneHdmiDeviceInfo(
 
 AutoPtr<ArrayOf<Int32> > HdmiUtils::InitADDRESS_TO_TYPE()
 {
-    AutoPtr<ArrayOf<Int32> > rev;
     Int32 ADDRESS_TO_TYPE[] = {
         IHdmiDeviceInfo::DEVICE_TV,  // ADDR_TV
         IHdmiDeviceInfo::DEVICE_RECORDER,  // ADDR_RECORDER_1
@@ -271,13 +270,15 @@ AutoPtr<ArrayOf<Int32> > HdmiUtils::InitADDRESS_TO_TYPE()
         IHdmiDeviceInfo::DEVICE_RESERVED,
         IHdmiDeviceInfo::DEVICE_TV,  // ADDR_SPECIFIC_USE
     };
-    rev = ArrayOf<Int32>::Alloc(ADDRESS_TO_TYPE, sizeof(ADDRESS_TO_TYPE)/sizeof(Int32));
+
+    Int32 size = ArraySize(ADDRESS_TO_TYPE);
+    AutoPtr<ArrayOf<Int32> > rev = ArrayOf<Int32>::Alloc(size);
+    rev->Copy(ADDRESS_TO_TYPE, size);
     return rev;
 }
 
 AutoPtr<ArrayOf<String> > HdmiUtils::InitDEFAULT_NAMES()
 {
-    AutoPtr<ArrayOf<String> > rev;
     String DEFAULT_NAMES[] = {
         String("TV"),
         String("Recorder_1"),
@@ -295,7 +296,10 @@ AutoPtr<ArrayOf<String> > HdmiUtils::InitDEFAULT_NAMES()
         String("Reserved_2"),
         String("Secondary_TV"),
     };
-    rev = ArrayOf<String>::Alloc(DEFAULT_NAMES, sizeof(DEFAULT_NAMES)/sizeof(String));
+
+    Int32 size = ArraySize(DEFAULT_NAMES);
+    AutoPtr<ArrayOf<String> > rev = ArrayOf<String>::Alloc(size);
+    rev->Copy(DEFAULT_NAMES, size);
     return rev;
 }
 

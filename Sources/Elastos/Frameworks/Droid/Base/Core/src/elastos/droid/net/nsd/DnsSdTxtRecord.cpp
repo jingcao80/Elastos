@@ -60,12 +60,14 @@ ECode DnsSdTxtRecord::Set(
     Int32 valLen = 0;
 
     if (!value.IsNull()) {
-        valBytes = ArrayOf<Byte>::Alloc((Byte*)value.string(), value.GetByteLength());
+        valBytes = ArrayOf<Byte>::Alloc(value.GetByteLength());
+        valBytes->Copy((Byte*)value.string(), value.GetByteLength());
         valLen = valBytes->GetLength();
     }
 
     // try {
-        keyBytes = ArrayOf<Byte>::Alloc((Byte*)key.string(), key.GetByteLength());
+        keyBytes = ArrayOf<Byte>::Alloc(key.GetByteLength());
+        keyBytes->Copy((Byte*)key.string(), key.GetByteLength());
     // }
     // catch (java.io.UnsupportedEncodingException e) {
     //     Logger::E("key should be US-ASCII");

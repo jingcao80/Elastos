@@ -647,7 +647,8 @@ AutoPtr< ArrayOf<Byte> > CBluetoothDevice::ConvertPinToBytes(
         return NULL;
     }
     // try {
-    AutoPtr< ArrayOf<Byte> > pinBytes = ArrayOf<Byte>::Alloc((Byte*)const_cast<char*>(pin.string()), pin.GetByteLength());
+    AutoPtr< ArrayOf<Byte> > pinBytes = ArrayOf<Byte>::Alloc(pin.GetByteLength());
+    pinBytes->Copy((Byte*)pin.string(), pin.GetByteLength());
     // pinBytes = pin.getBytes("UTF-8");
     // } catch (UnsupportedEncodingException uee) {
     //     Log.e(TAG, "UTF-8 not supported?!?");  // this should not happen

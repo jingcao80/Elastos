@@ -523,105 +523,103 @@ INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_NOTIFICATION_URI
 INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_ALARM_ALERT_URI
     = InitSystemDefaultUri(ISettingsSystem::ALARM_ALERT);
 
-static String sSystemSettingsToBackup[] = {
-    ISettingsSystem::STAY_ON_WHILE_PLUGGED_IN,   // moved to global
-    ISettingsSystem::WIFI_USE_STATIC_IP,
-    ISettingsSystem::WIFI_STATIC_IP,
-    ISettingsSystem::WIFI_STATIC_GATEWAY,
-    ISettingsSystem::WIFI_STATIC_NETMASK,
-    ISettingsSystem::WIFI_STATIC_DNS1,
-    ISettingsSystem::WIFI_STATIC_DNS2,
-    ISettingsSystem::BLUETOOTH_DISCOVERABILITY,
-    ISettingsSystem::BLUETOOTH_DISCOVERABILITY_TIMEOUT,
-    ISettingsSystem::BLUETOOTH_ACCEPT_ALL_FILES,
-    ISettingsSystem::DIM_SCREEN,
-    ISettingsSystem::SCREEN_OFF_TIMEOUT,
-    ISettingsSystem::SCREEN_BRIGHTNESS,
-    ISettingsSystem::SCREEN_BRIGHTNESS_MODE,
-    ISettingsSystem::SCREEN_AUTO_BRIGHTNESS_ADJ,
-    ISettingsSystem::VIBRATE_INPUT_DEVICES,
-    ISettingsSystem::MODE_RINGER_STREAMS_AFFECTED,
-    ISettingsSystem::VOLUME_VOICE,
-    ISettingsSystem::VOLUME_SYSTEM,
-    ISettingsSystem::VOLUME_RING,
-    ISettingsSystem::VOLUME_MUSIC,
-    ISettingsSystem::VOLUME_ALARM,
-    ISettingsSystem::VOLUME_NOTIFICATION,
-    ISettingsSystem::VOLUME_BLUETOOTH_SCO,
-    ISettingsSystem::VOLUME_VOICE + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::VOLUME_SYSTEM + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::VOLUME_RING + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::VOLUME_MUSIC + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::VOLUME_ALARM + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::VOLUME_NOTIFICATION + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::VOLUME_BLUETOOTH_SCO + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
-    ISettingsSystem::TEXT_AUTO_REPLACE,
-    ISettingsSystem::TEXT_AUTO_CAPS,
-    ISettingsSystem::TEXT_AUTO_PUNCTUATE,
-    ISettingsSystem::TEXT_SHOW_PASSWORD,
-    ISettingsSystem::AUTO_TIME,                  // moved to global
-    ISettingsSystem::AUTO_TIME_ZONE,             // moved to global
-    ISettingsSystem::TIME_12_24,
-    ISettingsSystem::DATE_FORMAT,
-    ISettingsSystem::DTMF_TONE_WHEN_DIALING,
-    ISettingsSystem::DTMF_TONE_TYPE_WHEN_DIALING,
-    ISettingsSystem::HEARING_AID,
-    ISettingsSystem::TTY_MODE,
-    ISettingsSystem::SOUND_EFFECTS_ENABLED,
-    ISettingsSystem::HAPTIC_FEEDBACK_ENABLED,
-    ISettingsSystem::POWER_SOUNDS_ENABLED,       // moved to global
-    ISettingsSystem::DOCK_SOUNDS_ENABLED,        // moved to global
-    ISettingsSystem::LOCKSCREEN_SOUNDS_ENABLED,
-    ISettingsSystem::SHOW_WEB_SUGGESTIONS,
-    ISettingsSystem::NOTIFICATION_LIGHT_PULSE,
-    ISettingsSystem::SIP_CALL_OPTIONS,
-    ISettingsSystem::SIP_RECEIVE_CALLS,
-    ISettingsSystem::POINTER_SPEED,
-    ISettingsSystem::VIBRATE_WHEN_RINGING,
-    ISettingsSystem::RINGTONE,
-    ISettingsSystem::NOTIFICATION_SOUND,
-    ISettingsSystem::SYSTEM_PROFILES_ENABLED,
-    ISettingsSystem::PHONE_BLACKLIST_ENABLED,
-    ISettingsSystem::PHONE_BLACKLIST_NOTIFY_ENABLED,
-    ISettingsSystem::PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
-    ISettingsSystem::PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE,
-    ISettingsSystem::PHONE_BLACKLIST_REGEX_ENABLED,
-    ISettingsSystem::STATUS_BAR_BATTERY_STYLE,
-    ISettingsSystem::STATUS_BAR_SHOW_BATTERY_PERCENT,
-    ISettingsSystem::INCREASING_RING,
-    ISettingsSystem::INCREASING_RING_START_VOLUME,
-    ISettingsSystem::INCREASING_RING_RAMP_UP_TIME,
-    ISettingsSystem::DISPLAY_TEMPERATURE_NIGHT,
-    ISettingsSystem::DISPLAY_TEMPERATURE_DAY,
-    ISettingsSystem::DISPLAY_TEMPERATURE_MODE,
-    ISettingsSystem::DISPLAY_AUTO_OUTDOOR_MODE,
-    ISettingsSystem::LIVE_DISPLAY_HINTED
-};
-
 static AutoPtr<ArrayOf<String> > InitSystemSettingsToBackup()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        const_cast<String *>(sSystemSettingsToBackup),
-        ArraySize(sSystemSettingsToBackup));
+    String sSystemSettingsToBackup[] = {
+        ISettingsSystem::STAY_ON_WHILE_PLUGGED_IN,   // moved to global
+        ISettingsSystem::WIFI_USE_STATIC_IP,
+        ISettingsSystem::WIFI_STATIC_IP,
+        ISettingsSystem::WIFI_STATIC_GATEWAY,
+        ISettingsSystem::WIFI_STATIC_NETMASK,
+        ISettingsSystem::WIFI_STATIC_DNS1,
+        ISettingsSystem::WIFI_STATIC_DNS2,
+        ISettingsSystem::BLUETOOTH_DISCOVERABILITY,
+        ISettingsSystem::BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+        ISettingsSystem::BLUETOOTH_ACCEPT_ALL_FILES,
+        ISettingsSystem::DIM_SCREEN,
+        ISettingsSystem::SCREEN_OFF_TIMEOUT,
+        ISettingsSystem::SCREEN_BRIGHTNESS,
+        ISettingsSystem::SCREEN_BRIGHTNESS_MODE,
+        ISettingsSystem::SCREEN_AUTO_BRIGHTNESS_ADJ,
+        ISettingsSystem::VIBRATE_INPUT_DEVICES,
+        ISettingsSystem::MODE_RINGER_STREAMS_AFFECTED,
+        ISettingsSystem::VOLUME_VOICE,
+        ISettingsSystem::VOLUME_SYSTEM,
+        ISettingsSystem::VOLUME_RING,
+        ISettingsSystem::VOLUME_MUSIC,
+        ISettingsSystem::VOLUME_ALARM,
+        ISettingsSystem::VOLUME_NOTIFICATION,
+        ISettingsSystem::VOLUME_BLUETOOTH_SCO,
+        ISettingsSystem::VOLUME_VOICE + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::VOLUME_SYSTEM + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::VOLUME_RING + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::VOLUME_MUSIC + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::VOLUME_ALARM + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::VOLUME_NOTIFICATION + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::VOLUME_BLUETOOTH_SCO + ISettingsSystem::APPEND_FOR_LAST_AUDIBLE,
+        ISettingsSystem::TEXT_AUTO_REPLACE,
+        ISettingsSystem::TEXT_AUTO_CAPS,
+        ISettingsSystem::TEXT_AUTO_PUNCTUATE,
+        ISettingsSystem::TEXT_SHOW_PASSWORD,
+        ISettingsSystem::AUTO_TIME,                  // moved to global
+        ISettingsSystem::AUTO_TIME_ZONE,             // moved to global
+        ISettingsSystem::TIME_12_24,
+        ISettingsSystem::DATE_FORMAT,
+        ISettingsSystem::DTMF_TONE_WHEN_DIALING,
+        ISettingsSystem::DTMF_TONE_TYPE_WHEN_DIALING,
+        ISettingsSystem::HEARING_AID,
+        ISettingsSystem::TTY_MODE,
+        ISettingsSystem::SOUND_EFFECTS_ENABLED,
+        ISettingsSystem::HAPTIC_FEEDBACK_ENABLED,
+        ISettingsSystem::POWER_SOUNDS_ENABLED,       // moved to global
+        ISettingsSystem::DOCK_SOUNDS_ENABLED,        // moved to global
+        ISettingsSystem::LOCKSCREEN_SOUNDS_ENABLED,
+        ISettingsSystem::SHOW_WEB_SUGGESTIONS,
+        ISettingsSystem::NOTIFICATION_LIGHT_PULSE,
+        ISettingsSystem::SIP_CALL_OPTIONS,
+        ISettingsSystem::SIP_RECEIVE_CALLS,
+        ISettingsSystem::POINTER_SPEED,
+        ISettingsSystem::VIBRATE_WHEN_RINGING,
+        ISettingsSystem::RINGTONE,
+        ISettingsSystem::NOTIFICATION_SOUND,
+        ISettingsSystem::SYSTEM_PROFILES_ENABLED,
+        ISettingsSystem::PHONE_BLACKLIST_ENABLED,
+        ISettingsSystem::PHONE_BLACKLIST_NOTIFY_ENABLED,
+        ISettingsSystem::PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
+        ISettingsSystem::PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE,
+        ISettingsSystem::PHONE_BLACKLIST_REGEX_ENABLED,
+        ISettingsSystem::STATUS_BAR_BATTERY_STYLE,
+        ISettingsSystem::STATUS_BAR_SHOW_BATTERY_PERCENT,
+        ISettingsSystem::INCREASING_RING,
+        ISettingsSystem::INCREASING_RING_START_VOLUME,
+        ISettingsSystem::INCREASING_RING_RAMP_UP_TIME,
+        ISettingsSystem::DISPLAY_TEMPERATURE_NIGHT,
+        ISettingsSystem::DISPLAY_TEMPERATURE_DAY,
+        ISettingsSystem::DISPLAY_TEMPERATURE_MODE,
+        ISettingsSystem::DISPLAY_AUTO_OUTDOOR_MODE,
+        ISettingsSystem::LIVE_DISPLAY_HINTED
+    };
+
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(ArraySize(sSystemSettingsToBackup));
+    array->Copy(sSystemSettingsToBackup, ArraySize(sSystemSettingsToBackup));
     return array;
 }
 
 INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::System::SETTINGS_TO_BACKUP
     = InitSystemSettingsToBackup();
 
-static String sSystemCLONE_TO_MANAGED_PROFILE[] = {
-    ISettingsSystem::DATE_FORMAT,
-    ISettingsSystem::HAPTIC_FEEDBACK_ENABLED,
-    ISettingsSystem::SOUND_EFFECTS_ENABLED,
-    ISettingsSystem::TEXT_SHOW_PASSWORD,
-    ISettingsSystem::TIME_12_24
-};
-
 static AutoPtr<ArrayOf<String> > initSystemCLONE_TO_MANAGED_PROFILE()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        const_cast<String *>(sSystemCLONE_TO_MANAGED_PROFILE),
-        ArraySize(sSystemCLONE_TO_MANAGED_PROFILE));
+    String sSystemCLONE_TO_MANAGED_PROFILE[] = {
+        ISettingsSystem::DATE_FORMAT,
+        ISettingsSystem::HAPTIC_FEEDBACK_ENABLED,
+        ISettingsSystem::SOUND_EFFECTS_ENABLED,
+        ISettingsSystem::TEXT_SHOW_PASSWORD,
+        ISettingsSystem::TIME_12_24
+    };
+
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(ArraySize(sSystemCLONE_TO_MANAGED_PROFILE));
+    array->Copy(sSystemCLONE_TO_MANAGED_PROFILE, ArraySize(sSystemCLONE_TO_MANAGED_PROFILE));
     return array;
 }
 
@@ -1171,58 +1169,58 @@ static AutoPtr<IUri> InitSecureCONTENTURI()
 }
 INIT_PROI_3 const AutoPtr<IUri> Settings::Secure::CONTENT_URI = InitSecureCONTENTURI();
 
-static String sSecureSettingsToBackup[] = {
-    ISettingsSecure::BUGREPORT_IN_POWER_MENU,                            // moved to global
-    ISettingsSecure::ALLOW_MOCK_LOCATION,
-    ISettingsSecure::PARENTAL_CONTROL_ENABLED,
-    ISettingsSecure::PARENTAL_CONTROL_REDIRECT_URL,
-    ISettingsSecure::USB_MASS_STORAGE_ENABLED,                           // moved to global
-    ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
-    ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-    ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
-    ISettingsSecure::ACCESSIBILITY_SCRIPT_INJECTION,
-    ISettingsSecure::BACKUP_AUTO_RESTORE,
-    ISettingsSecure::ENABLED_ACCESSIBILITY_SERVICES,
-    ISettingsSecure::TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-    ISettingsSecure::TOUCH_EXPLORATION_ENABLED,
-    ISettingsSecure::ACCESSIBILITY_ENABLED,
-    ISettingsSecure::ACCESSIBILITY_SPEAK_PASSWORD,
-    ISettingsSecure::ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_ENABLED,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_LOCALE,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_TYPEFACE,
-    ISettingsSecure::ACCESSIBILITY_CAPTIONING_FONT_SCALE,
-    ISettingsSecure::TTS_USE_DEFAULTS,
-    ISettingsSecure::TTS_DEFAULT_RATE,
-    ISettingsSecure::TTS_DEFAULT_PITCH,
-    ISettingsSecure::TTS_DEFAULT_SYNTH,
-    ISettingsSecure::TTS_DEFAULT_LANG,
-    ISettingsSecure::TTS_DEFAULT_COUNTRY,
-    ISettingsSecure::TTS_ENABLED_PLUGINS,
-    ISettingsSecure::TTS_DEFAULT_LOCALE,
-    ISettingsSecure::WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
-    ISettingsSecure::WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
-    ISettingsSecure::WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
-    ISettingsSecure::MOUNT_PLAY_NOTIFICATION_SND,
-    ISettingsSecure::MOUNT_UMS_AUTOSTART,
-    ISettingsSecure::MOUNT_UMS_PROMPT,
-    ISettingsSecure::MOUNT_UMS_NOTIFY_ENABLED,
-    ISettingsSecure::UI_NIGHT_MODE,
-    ISettingsSecure::SLEEP_TIMEOUT,
-    ISettingsSecure::PRIVACY_GUARD_DEFAULT,
-    ISettingsSecure::ADVANCED_REBOOT,
-    ISettingsSecure::DEVELOPMENT_SHORTCUT
-};
 
 static AutoPtr<ArrayOf<String> > InitSecureSettingsToBackup()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        const_cast<String *>(sSecureSettingsToBackup),
-        ArraySize(sSecureSettingsToBackup));
+    String sSecureSettingsToBackup[] = {
+        ISettingsSecure::BUGREPORT_IN_POWER_MENU,                            // moved to global
+        ISettingsSecure::ALLOW_MOCK_LOCATION,
+        ISettingsSecure::PARENTAL_CONTROL_ENABLED,
+        ISettingsSecure::PARENTAL_CONTROL_REDIRECT_URL,
+        ISettingsSecure::USB_MASS_STORAGE_ENABLED,                           // moved to global
+        ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+        ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+        ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
+        ISettingsSecure::ACCESSIBILITY_SCRIPT_INJECTION,
+        ISettingsSecure::BACKUP_AUTO_RESTORE,
+        ISettingsSecure::ENABLED_ACCESSIBILITY_SERVICES,
+        ISettingsSecure::TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+        ISettingsSecure::TOUCH_EXPLORATION_ENABLED,
+        ISettingsSecure::ACCESSIBILITY_ENABLED,
+        ISettingsSecure::ACCESSIBILITY_SPEAK_PASSWORD,
+        ISettingsSecure::ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_ENABLED,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_LOCALE,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_TYPEFACE,
+        ISettingsSecure::ACCESSIBILITY_CAPTIONING_FONT_SCALE,
+        ISettingsSecure::TTS_USE_DEFAULTS,
+        ISettingsSecure::TTS_DEFAULT_RATE,
+        ISettingsSecure::TTS_DEFAULT_PITCH,
+        ISettingsSecure::TTS_DEFAULT_SYNTH,
+        ISettingsSecure::TTS_DEFAULT_LANG,
+        ISettingsSecure::TTS_DEFAULT_COUNTRY,
+        ISettingsSecure::TTS_ENABLED_PLUGINS,
+        ISettingsSecure::TTS_DEFAULT_LOCALE,
+        ISettingsSecure::WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
+        ISettingsSecure::WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
+        ISettingsSecure::WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
+        ISettingsSecure::MOUNT_PLAY_NOTIFICATION_SND,
+        ISettingsSecure::MOUNT_UMS_AUTOSTART,
+        ISettingsSecure::MOUNT_UMS_PROMPT,
+        ISettingsSecure::MOUNT_UMS_NOTIFY_ENABLED,
+        ISettingsSecure::UI_NIGHT_MODE,
+        ISettingsSecure::SLEEP_TIMEOUT,
+        ISettingsSecure::PRIVACY_GUARD_DEFAULT,
+        ISettingsSecure::ADVANCED_REBOOT,
+        ISettingsSecure::DEVELOPMENT_SHORTCUT
+    };
+
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(ArraySize(sSecureSettingsToBackup));
+    array->Copy(sSecureSettingsToBackup, ArraySize(sSecureSettingsToBackup));
     return array;
 }
 INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Secure::SETTINGS_TO_BACKUP = InitSecureSettingsToBackup();
@@ -1400,17 +1398,12 @@ static AutoPtr<ArrayOf<String> > initSecureCLONE_TO_MANAGED_PROFILE()
 INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Secure::CLONE_TO_MANAGED_PROFILE
     = initSecureCLONE_TO_MANAGED_PROFILE();
 
-static String sNavigationRingTargets[] = {
-    String("navigation_ring_targets_0"),
-    String("navigation_ring_targets_1"),
-    String("navigation_ring_targets_2"),
-};
-
 static AutoPtr<ArrayOf<String> > initNAVIGATION_RING_TARGETS()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        const_cast<String *>(sNavigationRingTargets),
-        ArraySize(sNavigationRingTargets));
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(3);
+    array->Set(0, String("navigation_ring_targets_0"));
+    array->Set(1, String("navigation_ring_targets_1"));
+    array->Set(2, String("navigation_ring_targets_2"));
     return array;
 }
 
@@ -1980,31 +1973,29 @@ static AutoPtr<IUri> InitGlobalCONTENTURI()
 }
 INIT_PROI_3 const AutoPtr<IUri> Settings::Global::CONTENT_URI = InitGlobalCONTENTURI();
 
-static String sGlobalSettingsToBackup[] = {
-    ISettingsGlobal::BUGREPORT_IN_POWER_MENU,
-    ISettingsGlobal::STAY_ON_WHILE_PLUGGED_IN,
-    ISettingsGlobal::WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
-    ISettingsGlobal::AUTO_TIME,
-    ISettingsGlobal::AUTO_TIME_ZONE,
-    ISettingsGlobal::POWER_SOUNDS_ENABLED,
-    ISettingsGlobal::DOCK_SOUNDS_ENABLED,
-    ISettingsGlobal::USB_MASS_STORAGE_ENABLED,
-    ISettingsGlobal::ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
-    ISettingsGlobal::WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-    ISettingsGlobal::WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
-    ISettingsGlobal::WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
-    ISettingsGlobal::WIFI_NUM_OPEN_NETWORKS_KEPT,
-    ISettingsGlobal::EMERGENCY_TONE,
-    ISettingsGlobal::CALL_AUTO_RETRY,
-    ISettingsGlobal::DOCK_AUDIO_MEDIA_ENABLED
-};
-
 static AutoPtr<ArrayOf<String> > InitGlobalSettingsToBackup()
 {
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(
-        const_cast<String *>(sGlobalSettingsToBackup),
-        ArraySize(sGlobalSettingsToBackup));
+    String sGlobalSettingsToBackup[] = {
+        ISettingsGlobal::BUGREPORT_IN_POWER_MENU,
+        ISettingsGlobal::STAY_ON_WHILE_PLUGGED_IN,
+        ISettingsGlobal::WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
+        ISettingsGlobal::AUTO_TIME,
+        ISettingsGlobal::AUTO_TIME_ZONE,
+        ISettingsGlobal::POWER_SOUNDS_ENABLED,
+        ISettingsGlobal::DOCK_SOUNDS_ENABLED,
+        ISettingsGlobal::USB_MASS_STORAGE_ENABLED,
+        ISettingsGlobal::ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
+        ISettingsGlobal::WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+        ISettingsGlobal::WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
+        ISettingsGlobal::WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
+        ISettingsGlobal::WIFI_NUM_OPEN_NETWORKS_KEPT,
+        ISettingsGlobal::EMERGENCY_TONE,
+        ISettingsGlobal::CALL_AUTO_RETRY,
+        ISettingsGlobal::DOCK_AUDIO_MEDIA_ENABLED
+    };
 
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(ArraySize(sGlobalSettingsToBackup));
+    array->Copy(sGlobalSettingsToBackup, ArraySize(sGlobalSettingsToBackup));
     return array;
 }
 

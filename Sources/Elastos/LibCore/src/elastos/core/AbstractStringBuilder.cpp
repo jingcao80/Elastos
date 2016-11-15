@@ -155,8 +155,8 @@ Int32 AbstractStringBuilder::GetLength()
 {
     if (!mIsCounted) {
         mIsCounted = TRUE;
-        ArrayOf<Byte> bytes((Byte *)mString, mByteCount);
-        Character::GetCharCount(bytes, 0, mByteCount, &mCharCount);
+        String str(mString, mByteCount);
+        mCharCount = str.GetLength();
     }
 
     return mCharCount;

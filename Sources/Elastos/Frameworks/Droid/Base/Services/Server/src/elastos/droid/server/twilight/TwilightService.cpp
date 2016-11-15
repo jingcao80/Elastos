@@ -358,9 +358,8 @@ void TwilightService::LocationHandler::UpdateTwilightState()
     system->GetCurrentTimeMillis(&now);
 
     // calculate yesterday's twilight
-    Double latitude;
+    Double latitude, longitude;
     mLocation->GetLatitude(&latitude);
-    Double longitude;
     mLocation->GetLongitude(&longitude);
     mTwilightCalculator->CalculateTwilight(now - IDateUtils::DAY_IN_MILLIS,
             latitude, longitude);

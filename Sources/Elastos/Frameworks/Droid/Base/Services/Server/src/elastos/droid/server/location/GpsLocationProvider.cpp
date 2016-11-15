@@ -3703,7 +3703,8 @@ static AutoPtr<IGpsNavigationMessage> translate_gps_navigation_message(GpsNaviga
     navigationMessageObject->SetMessageId(message->message_id);
     navigationMessageObject->SetSubmessageId(message->submessage_id);
 
-    AutoPtr<ArrayOf<Byte> > dataArray = ArrayOf<Byte>::Alloc((Byte*)data, dataLength);
+    AutoPtr<ArrayOf<Byte> > dataArray = ArrayOf<Byte>::Alloc(dataLength);
+    dataArray->Copy(data, dataLength);
     navigationMessageObject->SetData(dataArray);
 
     return navigationMessageObject;

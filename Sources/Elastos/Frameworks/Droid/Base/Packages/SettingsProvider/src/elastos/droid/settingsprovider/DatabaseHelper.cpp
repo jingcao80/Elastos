@@ -617,13 +617,22 @@ ECode DatabaseHelper::OnUpgrade(
         // try {
         db->CompileStatement(String("INSERT OR IGNORE INTO system(name,value) VALUES(?,?);"),
                 (ISQLiteStatement**)&stmt);
-        AutoPtr<IAudioManagerHelper> helper;
-        assert(0 && "TODO");
-        // CAudioManagerHelper::AcquireSingleton((IAudioManagerHelper**)&helper);
-        AutoPtr< ArrayOf<Int32> > volume;
-        // helper->GetDefaultStreamVolume((ArrayOf<Int32>**)&volume);
+        // see AudioManager::DEFAULT_STREAM_VOLUME
+        static Int32 DEFAULT_STREAM_VOLUME[] = {
+            4,  // STREAM_VOICE_CALL
+            7,  // STREAM_SYSTEM
+            5,  // STREAM_RING
+            11, // STREAM_MUSIC
+            6,  // STREAM_ALARM
+            5,  // STREAM_NOTIFICATION
+            7,  // STREAM_BLUETOOTH_SCO
+            7,  // STREAM_SYSTEM_ENFORCED
+            11, // STREAM_DTMF
+            11,  // STREAM_TTS
+            4   // STREAM_INCALL_MUSIC
+        };
         LoadSetting(stmt, ISettingsSystem::VOLUME_BLUETOOTH_SCO,
-                CoreUtils::Convert((*volume)[IAudioManager::STREAM_BLUETOOTH_SCO]));
+                CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_BLUETOOTH_SCO]));
         db->SetTransactionSuccessful();
         // } finally {
         db->EndTransaction();
@@ -2393,10 +2402,8 @@ void DatabaseHelper::LoadVolumeLevels(
     db->CompileStatement(String("INSERT OR IGNORE INTO system(name,value) VALUES(?,?);"),
             (ISQLiteStatement**)&stmt);
 
-    Logger::W(TAG, "TODO: LoadVolumeLevels need CAudioManagerHelper");
-    // AutoPtr<IAudioManagerHelper> helper;
-    // CAudioManagerHelper::AcquireSingleton((IAudioManagerHelper**)&helper);
-    static Int32 DEFAULT_STREAM_VOLUME[] = { // TODO: delete
+    // see AudioManager::DEFAULT_STREAM_VOLUME
+    static Int32 DEFAULT_STREAM_VOLUME[] = {
         4,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         5,  // STREAM_RING
@@ -2409,24 +2416,20 @@ void DatabaseHelper::LoadVolumeLevels(
         11,  // STREAM_TTS
         4   // STREAM_INCALL_MUSIC
     };
-    AutoPtr< ArrayOf<Int32> > volume = ArrayOf<Int32>::Alloc(DEFAULT_STREAM_VOLUME,
-        sizeof(DEFAULT_STREAM_VOLUME) / sizeof(Int32));
-    // helper->GetDefaultStreamVolume((ArrayOf<Int32>**)&volume);
-
     LoadSetting(stmt, ISettingsSystem::VOLUME_MUSIC,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_MUSIC]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_MUSIC]));
     LoadSetting(stmt, ISettingsSystem::VOLUME_RING,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_RING]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_RING]));
     LoadSetting(stmt, ISettingsSystem::VOLUME_SYSTEM,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_SYSTEM]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_SYSTEM]));
     LoadSetting(stmt, ISettingsSystem::VOLUME_VOICE,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_VOICE_CALL]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_VOICE_CALL]));
     LoadSetting(stmt, ISettingsSystem::VOLUME_ALARM,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_ALARM]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_ALARM]));
     LoadSetting(stmt, ISettingsSystem::VOLUME_NOTIFICATION,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_NOTIFICATION]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_NOTIFICATION]));
     LoadSetting(stmt, ISettingsSystem::VOLUME_BLUETOOTH_SCO,
-            CoreUtils::Convert((*volume)[IAudioManager::STREAM_BLUETOOTH_SCO]));
+            CoreUtils::Convert(DEFAULT_STREAM_VOLUME[IAudioManager::STREAM_BLUETOOTH_SCO]));
 
     // By default:
     // - ringtones, notification, system and music streams are affected by ringer mode

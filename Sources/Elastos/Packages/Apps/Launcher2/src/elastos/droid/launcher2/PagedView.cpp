@@ -231,9 +231,8 @@ ECode PagedView::constructor(
 {
     FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyle));
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::PagedView),
-            ArraySize(Elastos::Droid::Launcher2::R::styleable::PagedView));
+    AutoPtr<ArrayOf<Int32> > attrIds =
+        TO_ATTRS_ARRAYOF(Elastos::Droid::Launcher2::R::styleable::PagedView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
     Int32 size;

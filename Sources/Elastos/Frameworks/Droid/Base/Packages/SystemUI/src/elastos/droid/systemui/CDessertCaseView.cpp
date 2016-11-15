@@ -206,7 +206,9 @@ Boolean CDessertCaseView::InitStatic()
             0.f,  0.f,  0.f,  0.f, 255.f,
             1.f,  0.f,  0.f,  0.f, 0.f
     };
-    MASK = ArrayOf<Float>::Alloc(array_MASK, sizeof(array_MASK) / sizeof(array_MASK[0]));
+    Int32 size = ArraySize(array_MASK);
+    MASK = ArrayOf<Float>::Alloc(size);
+    MASK->Copy(array_MASK, size);
 
     Float array_ALPHA_MASK[] = {
             0.f,  0.f,  0.f,  0.f, 255.f,
@@ -214,7 +216,9 @@ Boolean CDessertCaseView::InitStatic()
             0.f,  0.f,  0.f,  0.f, 255.f,
             0.f,  0.f,  0.f,  1.f, 0.f
     };
-    ALPHA_MASK = ArrayOf<Float>::Alloc(array_ALPHA_MASK, sizeof(array_ALPHA_MASK) / sizeof(array_ALPHA_MASK[0]));
+    size = ArraySize(array_ALPHA_MASK);
+    ALPHA_MASK = ArrayOf<Float>::Alloc(size);
+    ALPHA_MASK->Copy(array_ALPHA_MASK, size);
 
     Float array_WHITE_MASK[] = {
             0.f,  0.f,  0.f,  0.f, 255.f,
@@ -222,7 +226,9 @@ Boolean CDessertCaseView::InitStatic()
             0.f,  0.f,  0.f,  0.f, 255.f,
             -1.f,  0.f,  0.f,  0.f, 255.f
     };
-    WHITE_MASK = ArrayOf<Float>::Alloc(array_WHITE_MASK, sizeof(array_WHITE_MASK) / sizeof(array_WHITE_MASK[0]));
+    size = ArraySize(array_WHITE_MASK);
+    WHITE_MASK = ArrayOf<Float>::Alloc(size);
+    WHITE_MASK->Copy(array_WHITE_MASK, size);
     return TRUE;
 }
 

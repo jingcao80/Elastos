@@ -816,7 +816,7 @@ ECode VoiceInteractionSession::DoDestroy()
 ECode VoiceInteractionSession::InitViews()
 {
     mInitialized = TRUE;
-    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+    AutoPtr< ArrayOf<Int32> > attrIds = ArrayOf<Int32>::AllocInplace(
         const_cast<Int32 *>(R::styleable::VoiceInteractionSession),
         sizeof(R::styleable::VoiceInteractionSession)/sizeof(R::styleable::VoiceInteractionSession[0]));
     mContext->ObtainStyledAttributes(attrIds, (ITypedArray**)&mThemeAttrs);

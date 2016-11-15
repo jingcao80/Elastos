@@ -2102,9 +2102,9 @@ void AlarmManagerService::RemoveImpl(
     if (operation == NULL) {
         return;
     }
-    {    AutoLock syncLock(mLock);
-        RemoveLocked(operation);
-    }
+
+    AutoLock syncLock(mLock);
+    RemoveLocked(operation);
 }
 
 ECode AlarmManagerService::SetImpl(
@@ -2787,14 +2787,17 @@ void AlarmManagerService::RemoveLocked(
 Boolean AlarmManagerService::RemoveWithStatusLocked(
     /* [in] */ IPendingIntent* operation)
 {
+    IArrayList* alarmList;
+    Alarm* alarm;
+    Int64 alarmSeconds = 0, alarmNanoseconds = 0;
     Boolean didRemove = FALSE;
+
     Int32 size = 0;
     for (Int32 i = (mAlarmBatches->GetSize(&size), size) - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mAlarmBatches->Get(i, (IInterface**)&obj);
         Batch* b = (Batch*)IObject::Probe(obj);
-        AutoPtr<IArrayList> alarmList = b->mAlarms;
-        AutoPtr<Alarm> alarm;
+        alarmList = b->mAlarms;
         Int32 lSize = 0;
         for (Int32 j = (alarmList->GetSize(&lSize), lSize) - 1; j >= 0; j--) {
             AutoPtr<IInterface> p;
@@ -2802,11 +2805,9 @@ Boolean AlarmManagerService::RemoveWithStatusLocked(
             alarm = (Alarm*)IObject::Probe(p);
             if (alarm->mType == IAlarmManager::RTC_POWEROFF_WAKEUP
                 && Object::Equals(alarm->mOperation, operation)) {
-                Int64 alarmSeconds = 0, alarmNanoseconds = 0;
                 alarmSeconds = alarm->mWhen / 1000;
                 alarmNanoseconds = (alarm->mWhen % 1000) * 1000 * 1000;
-                Slogger::W(TAG,"Clear alarm type=%d,alarmSeconds=%lld", alarm->mType,
-                    alarmSeconds);
+                Slogger::W(TAG,"Clear alarm type=%d,alarmSeconds=%lld", alarm->mType, alarmSeconds);
                 Native_Clear(mNativeData, alarm->mType, alarmSeconds, alarmNanoseconds);
                 mNextRtcWakeup = 0;
             }

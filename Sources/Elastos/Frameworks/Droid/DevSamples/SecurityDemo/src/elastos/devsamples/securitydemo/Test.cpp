@@ -67,7 +67,7 @@ static AutoPtr<IBigInteger> InitRSA_2048_modulus()
         (Byte) 0x69,
     };
 
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(data, sizeof(data)/sizeof(data[0]));
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::AllocInplace(data, sizeof(data)/sizeof(data[0]));
     AutoPtr<IBigInteger> obj;
     CBigInteger::New(*bytes, (IBigInteger**)&obj);
     return obj;
@@ -79,7 +79,7 @@ static AutoPtr<IBigInteger> InitRSA_2048_publicExponent()
         (Byte) 0x01, (Byte) 0x00, (Byte) 0x01,
     };
 
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(data, sizeof(data)/sizeof(data[0]));
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::AllocInplace(data, sizeof(data)/sizeof(data[0]));
     AutoPtr<IBigInteger> obj;
     CBigInteger::New(*bytes, (IBigInteger**)&obj);
     return obj;
@@ -156,12 +156,12 @@ ECode SignatureTest::MD5WithRSA()
     // AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(Vector2Data, sizeof(Vector2Data)/sizeof(Vector2Data[0]));
     // String text("123");
     // AutoPtr<ArrayOf<Byte> > bytes = text.GetBytes();
-    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(Vector2Data, sizeof(Vector2Data)/sizeof(Vector2Data[0]));
+    AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::AllocInplace(Vector2Data, sizeof(Vector2Data)/sizeof(Vector2Data[0]));
     ec = sig->Update(bytes);
     Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================4, ec =[0x%08x]", ec);
 
     Boolean isVerified = FALSE;
-    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::Alloc(MD5withRSA_Vector2Signature
+    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::AllocInplace(MD5withRSA_Vector2Signature
             , sizeof(MD5withRSA_Vector2Signature)/sizeof(MD5withRSA_Vector2Signature[0]));
     Logger::D("SignatureTest", "[TODO wanli] MD5withRSA==========================5");
     ec = sig->Verify(bytes2, &isVerified);
@@ -183,7 +183,7 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
             (Byte) 0x8a, (Byte) 0x41, (Byte) 0x55, (Byte) 0x5f,
     };
 
-    AutoPtr<ArrayOf<Byte> > bytes1 = ArrayOf<Byte>::Alloc(AES_128_KEY
+    AutoPtr<ArrayOf<Byte> > bytes1 = ArrayOf<Byte>::AllocInplace(AES_128_KEY
             , sizeof(AES_128_KEY)/sizeof(AES_128_KEY[0]));
 
     String provider("ElastosOpenSSL");
@@ -214,7 +214,7 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
     Int32 length = sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded) /
         sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded[0]);
 
-    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::Alloc(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded
+    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::AllocInplace(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded
             , length);
 
     for (Int32 i = 0; i < length - 1; i++) {
@@ -243,7 +243,7 @@ ECode CipherTest::AesECBNoPadding() /*throws Exception*/
     length = sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted) /
         sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted[0]);
 
-    AutoPtr<ArrayOf<Byte> > bytes3 = ArrayOf<Byte>::Alloc(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted
+    AutoPtr<ArrayOf<Byte> > bytes3 = ArrayOf<Byte>::AllocInplace(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted
             , length);
 
     assert(Arrays::Equals(bytes3, output));

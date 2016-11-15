@@ -529,9 +529,8 @@ ECode CAppsCustomizePagedView::constructor(
     CArrayList::New((IArrayList**)&mRunningTasks);
 
     // Save the default widget preview background
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::AppsCustomizePagedView),
-            ArraySize(Elastos::Droid::Launcher2::R::styleable::AppsCustomizePagedView));
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(
+        Elastos::Droid::Launcher2::R::styleable::AppsCustomizePagedView);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
 

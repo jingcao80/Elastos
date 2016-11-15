@@ -586,7 +586,9 @@ ECode CCursorNative::GetBlob(
             jboolean isCopy;
             jbyte* jblob = env->GetByteArrayElements(jblobs, &isCopy);
             Util::CheckErrorAndLog(env, "GetBlob", "Fail GetByteArrayElements %d", __LINE__);
-            *blob = ArrayOf<Byte>::Alloc((Byte*)jblob, (Int32)jcount);
+            *blob = ArrayOf<Byte>::Alloc((Int32)jcount);
+            REFCOUNT_ADD(*blob)
+            (*blob)->Copy((Byte*)jblob, (Int32)jcount);
         }
         env->DeleteLocalRef(jblobs);
     }

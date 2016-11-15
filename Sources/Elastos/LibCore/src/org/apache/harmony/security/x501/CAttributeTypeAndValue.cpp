@@ -254,72 +254,89 @@ AutoPtr<Object> CAttributeTypeAndValue::InitValues()
     CHashMap::New(10, (IHashMap**)&RFC2459_NAMES);
 
     Int32 va[] = { 2, 5, 4, 6 };
-    AutoPtr<ArrayOf<Int32> > vs = ArrayOf<Int32>::Alloc(va, 4);
+    AutoPtr<ArrayOf<Int32> > vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(va, 4);
     CObjectIdentifierInUtils::New(vs, String("C"), RFC1779_NAMES, (IObjectIdentifier**)&C);
 
     Int32 cns[] = { 2, 5, 4, 3 };
-    vs = ArrayOf<Int32>::Alloc(cns, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(cns, 4);
     CObjectIdentifierInUtils::New(vs, String("CN"), RFC1779_NAMES, (IObjectIdentifier**)&CN);
 
     Int32 dcs[] = { 0, 9, 2342, 19200300, 100, 1, 25 };
-    vs = ArrayOf<Int32>::Alloc(dcs, 7);
+    vs = ArrayOf<Int32>::Alloc(7);
+    vs->Copy(dcs, 7);
     CObjectIdentifierInUtils::New(vs, String("DC"), RFC2253_NAMES, (IObjectIdentifier**)&DC);
 
     Int32 dnqs[] = { 2, 5, 4, 46 };
-    vs = ArrayOf<Int32>::Alloc(dnqs, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(dnqs, 4);
     CObjectIdentifierInUtils::New(vs, String("DNQ"), RFC2459_NAMES, (IObjectIdentifier**)&DNQ);
     CObjectIdentifierInUtils::New(vs, String("DNQUALIFIER"), RFC2459_NAMES, (IObjectIdentifier**)&DNQUALIFIER);
 
     Int32 eas[] = { 1, 2, 840, 113549, 1, 9, 1 };
-    vs = ArrayOf<Int32>::Alloc(eas, 7);
+    vs = ArrayOf<Int32>::Alloc(7);
+    vs->Copy(eas, 7);
     CObjectIdentifierInUtils::New(vs, String("EMAILADDRESS"), RFC2459_NAMES, (IObjectIdentifier**)&EMAILADDRESS);
 
     Int32 gs[] = { 2, 5, 4, 44 };
-    vs = ArrayOf<Int32>::Alloc(gs, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(gs, 7);
     CObjectIdentifierInUtils::New(vs, String("GENERATION"), RFC2459_NAMES, (IObjectIdentifier**)&GENERATION);
 
     Int32 gns[] = { 2, 5, 4, 42 };
-    vs = ArrayOf<Int32>::Alloc(gns, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(gns, 4);
     CObjectIdentifierInUtils::New(vs, String("GIVENNAME"), RFC2459_NAMES, (IObjectIdentifier**)&GIVENNAME);
 
     Int32 is[] = { 2, 5, 4, 43 };
-    vs = ArrayOf<Int32>::Alloc(is, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(is, 4);
     CObjectIdentifierInUtils::New(vs, String("INITIALS"), RFC2459_NAMES, (IObjectIdentifier**)&INITIALS);
 
     Int32 ls[] = { 2, 5, 4, 7 };
-    vs = ArrayOf<Int32>::Alloc(ls, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(ls, 4);
     CObjectIdentifierInUtils::New(vs, String("L"), RFC1779_NAMES, (IObjectIdentifier**)&L);
 
     Int32 os[] = { 2, 5, 4, 10 };
-    vs = ArrayOf<Int32>::Alloc(os, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(os, 4);
     CObjectIdentifierInUtils::New(vs, String("O"), RFC1779_NAMES, (IObjectIdentifier**)&O);
 
     Int32 ous[] = { 2, 5, 4, 11 };
-    vs = ArrayOf<Int32>::Alloc(ous, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(ous, 4);
     CObjectIdentifierInUtils::New(vs, String("OU"), RFC1779_NAMES, (IObjectIdentifier**)&OU);
 
     Int32 ss[] = { 2, 5, 4, 5 };
-    vs = ArrayOf<Int32>::Alloc(ss, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(ss, 4);
     CObjectIdentifierInUtils::New(vs, String("SERIALNUMBER"), RFC2459_NAMES, (IObjectIdentifier**)&SERIALNUMBER);
 
     Int32 sts[] = { 2, 5, 4, 8 };
-    vs = ArrayOf<Int32>::Alloc(sts, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(sts, 4);
     CObjectIdentifierInUtils::New(vs, String("ST"), RFC1779_NAMES, (IObjectIdentifier**)&ST);
 
     Int32 streets[] = { 2, 5, 4, 9 };
-    vs = ArrayOf<Int32>::Alloc(streets, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(streets, 4);
     CObjectIdentifierInUtils::New(vs, String("STREET"), RFC1779_NAMES, (IObjectIdentifier**)&STREET);
 
     Int32 sns[] = { 2, 5, 4, 4 };
-    vs = ArrayOf<Int32>::Alloc(sns, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(sns, 4);
     CObjectIdentifierInUtils::New(vs, String("SURNAME"), RFC2459_NAMES, (IObjectIdentifier**)&SURNAME);
 
     Int32 ts[] = { 2, 5, 4, 12 };
-    vs = ArrayOf<Int32>::Alloc(ts, 4);
+    vs = ArrayOf<Int32>::Alloc(4);
+    vs->Copy(ts, 4);
     CObjectIdentifierInUtils::New(vs, String("T"), RFC2459_NAMES, (IObjectIdentifier**)&T);
 
     Int32 uids[] = { 0, 9, 2342, 19200300, 100, 1, 1 };
-    vs = ArrayOf<Int32>::Alloc(uids, 7);
+    vs = ArrayOf<Int32>::Alloc(7);
+    vs->Copy(uids, 7);
     CObjectIdentifierInUtils::New(vs, String("UID"), RFC2253_NAMES, (IObjectIdentifier**)&UID);
 
     KNOWN_OIDS = ArrayOf<ArrayOf<IObjectIdentifier*>* >::Alloc(SIZE);

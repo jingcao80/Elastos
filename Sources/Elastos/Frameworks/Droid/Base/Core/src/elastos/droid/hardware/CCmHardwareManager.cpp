@@ -28,7 +28,8 @@ static AutoPtr<IList> InitBOOLEAN_FEATURES()
         ICmHardwareManager::FEATURE_TAP_TO_WAKE,
         ICmHardwareManager::FEATURE_TOUCH_HOVERING
     };
-    AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(_array, sizeof(_array) / sizeof(Int32));
+    AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(7);
+    array->Copy(_array, 7);
     AutoPtr<IList> list;
     Arrays::AsList(array, (IList**)&list);
     return list;

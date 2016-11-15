@@ -376,7 +376,9 @@ AutoPtr<ArrayOf<HdmiCecKeycode::KeycodeEntry*> > HdmiCecKeycode::InitKEYCODE_ENT
         // RESERVED
         // Add a new key mapping here if new keycode is introduced.
     };
-    AutoPtr<ArrayOf<KeycodeEntry*> > rev = ArrayOf<KeycodeEntry*>::Alloc(tmp, sizeof(tmp)/sizeof(KeycodeEntry*));
+    Int32 size = ArraySize(tmp);
+    AutoPtr<ArrayOf<KeycodeEntry*> > rev = ArrayOf<KeycodeEntry*>::Alloc(size);
+    rev->Copy(tmp, size);
     return rev;
 }
 

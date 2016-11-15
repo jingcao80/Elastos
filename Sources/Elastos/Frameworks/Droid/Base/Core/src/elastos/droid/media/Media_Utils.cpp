@@ -77,6 +77,9 @@ android::status_t Media_Utils::ConvertMessageToMap(
     AutoPtr<IHashMap> returnMap;
     CHashMap::New( (IHashMap**)&returnMap);
 
+    AutoPtr<IByteBufferHelper> helper;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+
     for (Int32 i = 0; i < msg->countEntries(); i++) {
         android::AMessage::Type valueType;
         const char *key = msg->getEntryNameAt(i,&valueType);
@@ -119,12 +122,11 @@ android::status_t Media_Utils::ConvertMessageToMap(
                 android::sp<android::ABuffer> val;
                 msg->findBuffer(key, &val);
                 Int32 size = val->size();
-                ArrayOf<Byte> bytes((Byte*)val->data(), size);
+                AutoPtr<ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc(size);
+                bytes->Copy((Byte*)val->data(), size);
 
-                AutoPtr<IByteBufferHelper> helper;
-                CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
                 AutoPtr<IByteBuffer> buffer;
-                helper->Wrap(&bytes, (IByteBuffer**)&buffer);
+                helper->Wrap(bytes, (IByteBuffer**)&buffer);
                 valueObj = buffer->Probe(EIID_IInterface);
                 break;
             }
@@ -139,7 +141,7 @@ android::status_t Media_Utils::ConvertMessageToMap(
                 AutoPtr<ICharSequence> csLeft;
                 CString::New(strLeft, (ICharSequence**)&csLeft);
                 CInteger32::New(left, (IInteger32**)&tmpInt);
-                returnMap->Put(csLeft ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csLeft, tmpInt);
 
                 String strTop;
                 strLeft.AppendFormat("%s-top", key);
@@ -147,7 +149,7 @@ android::status_t Media_Utils::ConvertMessageToMap(
                 CString::New(strTop, (ICharSequence**)&csTop);
                 tmpInt = NULL;
                 CInteger32::New(top, (IInteger32**)&tmpInt);
-                returnMap->Put(csTop ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csTop, tmpInt);
 
                 String strRight;
                 strLeft.AppendFormat("%s-right", key);
@@ -155,7 +157,7 @@ android::status_t Media_Utils::ConvertMessageToMap(
                 CString::New(strRight, (ICharSequence**)&csRight);
                 tmpInt = NULL;
                 CInteger32::New(right, (IInteger32**)&tmpInt);
-                returnMap->Put(csRight ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csRight, tmpInt);
 
                 String strBottom;
                 strLeft.AppendFormat("%s-bottom", key);
@@ -163,7 +165,7 @@ android::status_t Media_Utils::ConvertMessageToMap(
                 CString::New(strBottom, (ICharSequence**)&csBottom);
                 tmpInt = NULL;
                 CInteger32::New(bottom, (IInteger32**)&tmpInt);
-                returnMap->Put(csBottom ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csBottom, tmpInt);
                 break;
             }
 

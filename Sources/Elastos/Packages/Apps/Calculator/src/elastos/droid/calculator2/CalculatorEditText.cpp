@@ -107,10 +107,7 @@ ECode CalculatorEditText::constructor(
     EditText::constructor(context, attrs, defStyle);
 
     AutoPtr<IAttributeSet> attbs = attrs;
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-        const_cast<Int32 *>(R::styleable::CalculatorEditText),
-        ArraySize(R::styleable::CalculatorEditText));
-
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::CalculatorEditText);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attbs.Get(), attrIds.Get(), defStyle, 0, (ITypedArray**)&a);
 

@@ -1855,9 +1855,7 @@ String Index::GetDataKey(
     /* [in] */ IAttributeSet* attrs)
 {
     using Elastos::Droid::R;
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Preference),
-            ArraySize(R::styleable::Preference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::Preference);
     return GetData(context, attrs, attrsId, R::styleable::Preference_key);
 }
 
@@ -1866,9 +1864,7 @@ String Index::GetDataTitle(
     /* [in] */ IAttributeSet* attrs)
 {
     using Elastos::Droid::R;
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Preference),
-            ArraySize(R::styleable::Preference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::Preference);
     return GetData(context, attrs, attrsId, R::styleable::Preference_title);
 }
 
@@ -1877,9 +1873,7 @@ String Index::GetDataSummary(
     /* [in] */ IAttributeSet* attrs)
 {
     using Elastos::Droid::R;
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Preference),
-            ArraySize(R::styleable::Preference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::Preference);
     return GetData(context, attrs, attrsId, R::styleable::Preference_summary);
 }
 
@@ -1888,9 +1882,7 @@ String Index::GetDataSummaryOn(
     /* [in] */ IAttributeSet* attrs)
 {
     using Elastos::Droid::R;
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::CheckBoxPreference),
-            ArraySize(R::styleable::CheckBoxPreference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::CheckBoxPreference);
     return GetData(context, attrs, attrsId, R::styleable::CheckBoxPreference_summaryOn);
 }
 
@@ -1899,9 +1891,7 @@ String Index::GetDataSummaryOff(
     /* [in] */ IAttributeSet* attrs)
 {
     using Elastos::Droid::R;
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::CheckBoxPreference),
-            ArraySize(R::styleable::CheckBoxPreference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::CheckBoxPreference);
     return GetData(context, attrs, attrsId, R::styleable::CheckBoxPreference_summaryOff);
 }
 
@@ -1910,9 +1900,7 @@ String Index::GetDataEntries(
     /* [in] */ IAttributeSet* attrs)
 {
     using Elastos::Droid::R;
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::ListPreference),
-            ArraySize(R::styleable::ListPreference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::ListPreference);
     return GetDataEntries(context, attrs, attrsId, R::styleable::ListPreference_entries);
 }
 
@@ -1920,9 +1908,7 @@ String Index::GetDataKeywords(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    AutoPtr< ArrayOf<Int32> > attrsId = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(R::styleable::Preference),
-            ArraySize(R::styleable::Preference));
+    AutoPtr< ArrayOf<Int32> > attrsId = TO_ATTRS_ARRAYOF(R::styleable::Preference);
     return GetData(context, attrs, attrsId, R::styleable::Preference_keywords);
 }
 

@@ -976,9 +976,8 @@ ECode CellLayout::constructor(
     SetClipToPadding(FALSE);
     mLauncher = ILauncher::Probe(context);
 
-    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
-            const_cast<Int32 *>(Elastos::Droid::Launcher2::R::styleable::CellLayout),
-            ArraySize(Elastos::Droid::Launcher2::R::styleable::CellLayout));
+    AutoPtr<ArrayOf<Int32> > attrIds =
+        TO_ATTRS_ARRAYOF(Elastos::Droid::Launcher2::R::styleable::CellLayout);
     AutoPtr<ITypedArray> a;
     context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a);
 
