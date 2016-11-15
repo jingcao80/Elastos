@@ -69,7 +69,7 @@ namespace Legacy {
 CAR_INTERFACE_IMPL(SurfaceTextureRenderer, Object, ISurfaceTextureRenderer)
 
 const String SurfaceTextureRenderer::TAG("SurfaceTextureRenderer");// = SurfaceTextureRenderer.class.getSimpleName();
-const Boolean SurfaceTextureRenderer::DEBUG = TRUE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+const Boolean SurfaceTextureRenderer::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
 const Int32 SurfaceTextureRenderer::GL_MATRIX_SIZE = 16;
 const Int32 SurfaceTextureRenderer::VERTEX_POS_SIZE = 3;
 const Int32 SurfaceTextureRenderer::VERTEX_UV_SIZE = 2;

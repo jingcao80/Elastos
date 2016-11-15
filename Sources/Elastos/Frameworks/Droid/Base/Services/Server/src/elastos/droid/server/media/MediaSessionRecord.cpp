@@ -397,22 +397,12 @@ const Boolean MediaSessionRecord::DEBUG;
 const Int32 MediaSessionRecord::ACTIVE_BUFFER;
 const Int32 MediaSessionRecord::OPTIMISTIC_VOLUME_TIMEOUT;
 
-CAR_INTERFACE_IMPL(MediaSessionRecord, Object, IProxyDeathRecipient)
+CAR_INTERFACE_IMPL_2(MediaSessionRecord, Object, IMediaSessionRecord, IProxyDeathRecipient)
 
-MediaSessionRecord::MediaSessionRecord(
-    /* [in] */ Int32 ownerPid,
-    /* [in] */ Int32 ownerUid,
-    /* [in] */ Int32 userId,
-    /* [in] */ const String& ownerPackageName,
-    /* [in] */ IISessionCallback* cb,
-    /* [in] */ const String& tag,
-    /* [in] */ MediaSessionService* service,
-    /* [in] */ IHandler* handler)
-    : mOwnerPid(ownerPid)
-    , mOwnerUid(ownerUid)
-    , mUserId(userId)
-    , mPackageName(ownerPackageName)
-    , mTag(tag)
+MediaSessionRecord::MediaSessionRecord()
+    : mOwnerPid(0)
+    , mOwnerUid(0)
+    , mUserId(0)
     , mFlags(0)
     , mRatingType(0)
     , mLastActiveTime(0)
@@ -423,10 +413,27 @@ MediaSessionRecord::MediaSessionRecord(
     , mOptimisticVolume(-1)
     , mIsActive(FALSE)
     , mDestroyed(FALSE)
+{}
+
+ECode MediaSessionRecord::constructor(
+    /* [in] */ Int32 ownerPid,
+    /* [in] */ Int32 ownerUid,
+    /* [in] */ Int32 userId,
+    /* [in] */ const String& ownerPackageName,
+    /* [in] */ IISessionCallback* cb,
+    /* [in] */ const String& tag,
+    /* [in] */ MediaSessionService* service,
+    /* [in] */ IHandler* handler)
 {
-    mClearOptimisticVolumeRunnable = (IRunnable*)new ClearOptimisticVolumeRunnable(this);
-    CSessionController::NewByFriend((Handle64)this, (CSessionController**)&mController);
-    CMediaSession::NewByFriend((Handle64)this, (CMediaSession**)&mSession);
+    mOwnerPid = ownerPid;
+    mOwnerUid = ownerUid;
+    mUserId = userId;
+    mPackageName = ownerPackageName;
+    mTag = tag;
+
+    mClearOptimisticVolumeRunnable = new ClearOptimisticVolumeRunnable(this);
+    CSessionController::NewByFriend(this, (CSessionController**)&mController);
+    CMediaSession::NewByFriend(this, (CMediaSession**)&mSession);
     mSessionCb = new SessionCb(cb);
     mService = service;
     AutoPtr<ILooper> looper;
@@ -442,6 +449,7 @@ MediaSessionRecord::MediaSessionRecord(
     CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&builder);
     builder->SetUsage(IAudioAttributes::USAGE_MEDIA);
     builder->Build((IAudioAttributes**)&mAudioAttrs);
+    return NOERROR;
 }
 
 AutoPtr<IISession> MediaSessionRecord::GetSessionBinder()
@@ -661,13 +669,12 @@ ECode MediaSessionRecord::ProxyDied()
 
 void MediaSessionRecord::OnDestroy()
 {
-    {    AutoLock syncLock(mLock);
-        if (mDestroyed) {
-            return;
-        }
-        mDestroyed = TRUE;
-        mHandler->Post(MessageHandler::MSG_DESTROYED);
+    AutoLock syncLock(mLock);
+    if (mDestroyed) {
+        return;
     }
+    mDestroyed = TRUE;
+    mHandler->Post(MessageHandler::MSG_DESTROYED);
 }
 
 AutoPtr<IISessionCallback> MediaSessionRecord::GetCallback()

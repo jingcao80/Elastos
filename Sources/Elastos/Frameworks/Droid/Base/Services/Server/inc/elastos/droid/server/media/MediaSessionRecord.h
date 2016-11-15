@@ -45,6 +45,7 @@ class MediaSessionService;
  */
 class MediaSessionRecord
     : public Object
+    , public IMediaSessionRecord
     , public IProxyDeathRecipient
 {
 public:
@@ -177,7 +178,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    MediaSessionRecord(
+    MediaSessionRecord();
+
+    CARAPI constructor(
         /* [in] */ Int32 ownerPid,
         /* [in] */ Int32 ownerUid,
         /* [in] */ Int32 userId,
@@ -417,7 +420,7 @@ private:
     AutoPtr<CSessionController> mController;
     AutoPtr<CMediaSession> mSession;
     AutoPtr<SessionCb> mSessionCb;
-    AutoPtr<MediaSessionService> mService;
+    MediaSessionService* mService;
 
     Object mLock;
     List<AutoPtr<IISessionControllerCallback> > mControllerCallbacks;

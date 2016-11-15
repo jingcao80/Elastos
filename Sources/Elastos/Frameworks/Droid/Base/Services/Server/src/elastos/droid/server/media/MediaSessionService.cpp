@@ -305,17 +305,15 @@ ECode MediaSessionService::EnforcePhoneStatePermission(
 void MediaSessionService::SessionDied(
     /* [in] */ MediaSessionRecord* session)
 {
-    {    AutoLock syncLock(mLock);
-        DestroySessionLocked(session);
-    }
+    AutoLock syncLock(mLock);
+    DestroySessionLocked(session);
 }
 
 void MediaSessionService::DestroySession(
     /* [in] */ MediaSessionRecord* session)
 {
-    {    AutoLock syncLock(mLock);
-        DestroySessionLocked(session);
-    }
+    AutoLock syncLock(mLock);
+    DestroySessionLocked(session);
 }
 
 void MediaSessionService::UpdateUser()
@@ -392,6 +390,7 @@ void MediaSessionService::DestroyUserLocked(
 void MediaSessionService::DestroySessionLocked(
     /* [in] */ MediaSessionRecord* session)
 {
+    AutoPtr<MediaSessionRecord> record = session; // hold ref-count
     Int32 userId = session->GetUserId();
     HashMap<Int32, AutoPtr<UserRecord> >::Iterator it = mUserRecords.Find(userId);
     AutoPtr<UserRecord> user;
@@ -558,8 +557,8 @@ ECode MediaSessionService::CreateSessionLocked(
     VALIDATE_NOT_NULL(record)
     *record = NULL;
 
-    AutoPtr<MediaSessionRecord> session = new MediaSessionRecord(callerPid, callerUid, userId,
-            callerPackageName, cb, tag, this, mHandler);
+    AutoPtr<MediaSessionRecord> session = new MediaSessionRecord();
+    session->constructor(callerPid, callerUid, userId, callerPackageName, cb, tag, this, mHandler);
     // try {
     AutoPtr<IBinder> b = IBinder::Probe(cb);
     AutoPtr<IProxy> proxy = (IProxy*)b->Probe(EIID_IProxy);
