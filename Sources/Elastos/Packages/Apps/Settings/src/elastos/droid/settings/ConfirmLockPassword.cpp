@@ -372,7 +372,7 @@ void ConfirmLockPassword::ConfirmLockPasswordFragment::ShowError(
     AutoPtr<ICharSequence> text;
     mHeaderText->GetText((ICharSequence**)&text);
     IView::Probe(mHeaderText)->AnnounceForAccessibility(text);
-    mPasswordEntry->SetText(NULL);
+    mPasswordEntry->SetText((ICharSequence*)NULL);
     mHandler->RemoveCallbacks(mResetErrorRunnable);
     if (timeout != 0) {
         Boolean res;
