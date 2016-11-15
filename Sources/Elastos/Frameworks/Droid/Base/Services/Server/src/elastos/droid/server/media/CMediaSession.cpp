@@ -31,7 +31,7 @@ CAR_INTERFACE_IMPL_2(CMediaSession, Object, IISession, IBinder)
 CAR_OBJECT_IMPL(CMediaSession)
 
 ECode CMediaSession::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ IMediaSessionRecord* host)
 {
     mHost = (MediaSessionRecord*)host;
     return NOERROR;
@@ -39,7 +39,8 @@ ECode CMediaSession::constructor(
 
 ECode CMediaSession::Destroy()
 {
-    mHost->mService->DestroySession(mHost);
+    AutoPtr<MediaSessionRecord> record = mHost;
+    record->mService->DestroySession(record);
     return NOERROR;
 }
 

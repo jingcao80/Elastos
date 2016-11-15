@@ -34,7 +34,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 host);
+        /* [in] */ IMediaSessionRecord* host);
 
     CARAPI Destroy();
 

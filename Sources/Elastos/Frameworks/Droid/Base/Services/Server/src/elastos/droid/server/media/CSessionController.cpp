@@ -24,7 +24,7 @@ CAR_INTERFACE_IMPL_2(CSessionController, Object, IISessionController, IBinder)
 CAR_OBJECT_IMPL(CSessionController)
 
 ECode CSessionController::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ IMediaSessionRecord* host)
 {
     mHost = (MediaSessionRecord*)host;
     return NOERROR;

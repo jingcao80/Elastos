@@ -334,7 +334,6 @@ void CSwipeHelper::UpdateSwipeProgressFromOffset(
     /* [in] */ IView* animView,
     /* [in] */ Boolean dismissable)
 {
-    Logger::I(TAG, " >> UpdateSwipeProgressFromOffset:: %s", TO_CSTR(animView));
     Float swipeProgress = GetSwipeProgressForOffset(animView);
     Boolean result = FALSE;
     mCallback->UpdateSwipeProgress(animView, dismissable, swipeProgress, &result);
