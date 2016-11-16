@@ -11,7 +11,9 @@ namespace SecurityDemo {
 class SignatureTest
 {
 public:
-    static CARAPI MD5WithRSA();
+    static CARAPI SignatureWithRSA();
+    static CARAPI SignatureWithEC();
+    static CARAPI SignatureWithDSA();
 };
 
 class CipherTest

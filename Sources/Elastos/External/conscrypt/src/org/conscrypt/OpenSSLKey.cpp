@@ -12,6 +12,8 @@
 #include "COpenSSLECPrivateKey.h"
 #include "org/conscrypt/COpenSSLDHPublicKey.h"
 #include "org/conscrypt/COpenSSLDSAPublicKey.h"
+#include "org/conscrypt/COpenSSLDHPrivateKey.h"
+#include "org/conscrypt/COpenSSLDSAPrivateKey.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::IKey;
@@ -232,7 +234,7 @@ AutoPtr<IPublicKey> OpenSSLKey::GetPublicKey(
 
     AutoPtr<IPublicKey> res;
     key->GetPublicKey((IPublicKey**)&res);
-    Logger::E("OpenSSLKey", "GetPublicKey, res:%p", res.Get());
+    //Logger::E("OpenSSLKey", "GetPublicKey, res:%p", res.Get());
     return res;
 }
 
@@ -252,18 +254,16 @@ ECode OpenSSLKey::GetPrivateKey(
         }
         case INativeCrypto::EVP_PKEY_DH: {
             AutoPtr<IOpenSSLDHPrivateKey> p;
-            assert(0 && "TODO");
-            // = new OpenSSLDHPrivateKey(this);
+            COpenSSLDHPrivateKey::New(this, (IOpenSSLDHPrivateKey**)&p);
             *result = IPrivateKey::Probe(p);
             REFCOUNT_ADD(*result)
             return NOERROR;
         }
         case INativeCrypto::EVP_PKEY_DSA: {
-            assert(0 && "TODO");
-            // AutoPtr<IOpenSSLDSAPrivateKey> p;
-            // = new OpenSSLDSAPrivateKey(this);
-            // *result = IPrivateKey::Probe(p);
-            // REFCOUNT_ADD(*result)
+            AutoPtr<IOpenSSLDSAPrivateKey> p;
+            COpenSSLDSAPrivateKey::New(this, (IOpenSSLDSAPrivateKey**)&p);
+            *result = IPrivateKey::Probe(p);
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
         case INativeCrypto::EVP_PKEY_EC: {
@@ -275,6 +275,7 @@ ECode OpenSSLKey::GetPrivateKey(
         }
         default: {
             // throw new NoSuchAlgorithmException("unknown PKEY type");
+            Logger::E("OpenSSLKey", "unknown PKEY type, line:%d", __LINE__);
             return NOERROR;
         }
     }

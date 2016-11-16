@@ -10,7 +10,7 @@ using Elastos::Core::StringBuilder;
 using Elastos::Math::CBigInteger;
 using Elastos::Security::Interfaces::EIID_IDSAKey;
 using Elastos::Security::Interfaces::EIID_IDSAPublicKey;
-using Elastos::Security::Spec::EIID_IPublicKey;
+using Elastos::Security::EIID_IPublicKey;
 
 namespace Org {
 namespace Conscrypt {

@@ -3,6 +3,7 @@
 #include "org/conscrypt/OpenSSLDSAPrivateKey.h"
 #include "org/conscrypt/OpenSSLDSAPublicKey.h"
 #include "org/conscrypt/OpenSSLKey.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Security::EIID_IKeyFactorySpi;
 using Elastos::Security::Interfaces::IDSAKey;
@@ -10,6 +11,7 @@ using Elastos::Security::Spec::CDSAPrivateKeySpec;
 using Elastos::Security::Spec::CDSAPublicKeySpec;
 using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::CX509EncodedKeySpec;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -29,6 +31,7 @@ ECode OpenSSLDSAKeyFactory::EngineGeneratePublic(
     *result = NULL;
     if (keySpec == NULL) {
         // throw new InvalidKeySpecException("keySpec == NULL");
+        Logger::E("OpenSSLDSAKeyFactory", "line:%d, keySpec == NULL", __LINE__);
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
@@ -40,8 +43,9 @@ ECode OpenSSLDSAKeyFactory::EngineGeneratePublic(
         return NOERROR;
     }
     else if (IX509EncodedKeySpec::Probe(keySpec) != NULL) {
-        *result = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
+        AutoPtr<IPublicKey> tmp = OpenSSLKey::GetPublicKey(IX509EncodedKeySpec::Probe(keySpec),
                 INativeCrypto::EVP_PKEY_DSA);
+        *result = tmp;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
@@ -58,6 +62,7 @@ ECode OpenSSLDSAKeyFactory::EngineGeneratePrivate(
     *result = NULL;
     if (keySpec == NULL) {
         // throw new InvalidKeySpecException("keySpec == NULL");
+        Logger::E("OpenSSLDSAKeyFactory", "line:%d, keySpec == NULL", __LINE__);
         return E_INVALID_KEY_SPEC_EXCEPTION;
     }
 
@@ -69,8 +74,9 @@ ECode OpenSSLDSAKeyFactory::EngineGeneratePrivate(
         return NOERROR;
     }
     else if (IPKCS8EncodedKeySpec::Probe(keySpec) != NULL) {
-        *result = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
+        AutoPtr<IPrivateKey> tmp = OpenSSLKey::GetPrivateKey(IPKCS8EncodedKeySpec::Probe(keySpec),
                 INativeCrypto::EVP_PKEY_DSA);
+        *result = tmp;
         REFCOUNT_ADD(*result)
         return NOERROR;
     }

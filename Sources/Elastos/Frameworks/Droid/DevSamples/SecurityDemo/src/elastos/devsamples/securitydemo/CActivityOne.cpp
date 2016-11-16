@@ -448,7 +448,14 @@ ECode CActivityOne::Button2Function()
     CMacHelper::AcquireSingleton((IMacHelper**)&macHelper);
     AutoPtr<IMac> mac;
     //Logger::E(TAG, "leliang Button2Function, before macHelper->GetInstance");
-    macHelper->GetInstance(String("HMACMD5"), (IMac**)&mac);
+    //test history:
+    String algorithm("HmacSHA512");
+    // HMACMD5      ok
+    // HmacSHA224   ok
+    // HmacSHA256   ok
+    // HmacSHA384   ok
+    // HmacSHA512   ok
+    macHelper->GetInstance(algorithm, (IMac**)&mac);
     //Logger::E(TAG, "leliang Button2Function, after macHelper->GetInstance");
     //Logger::E(TAG, "leliang Button2Function, before mac->Init");
     mac->Init(IKey::Probe(sk));
@@ -459,6 +466,7 @@ ECode CActivityOne::Button2Function()
     //Logger::E(TAG, "leliang Button2Function, before mac->DoFinal");
     mac->DoFinal(input, (ArrayOf<Byte>**)&result);
     //Logger::E(TAG, "leliang Button2Function, after mac->DoFinal");
+    Logger::E(TAG, "leliang Button2Function, algorithm:%s, test:%s", algorithm.string(), test.string());
     if (result != NULL) {
         for (Int32 i = 0; i < result->GetLength(); ++i) {
             Logger::E(TAG, "result[%d]: 0x%x", i, (*result)[i]);
@@ -497,6 +505,7 @@ ECode CActivityOne::Button3Function()   //MessageDigest
     mdHelper->GetInstance(String("SHA-1"), (IMessageDigest**)&md);
 
     String text("abc");
+    //SHA-1: A9:99:3E:36:47:06:81:6A:BA:3E:25:71:78:50:C2:6C:9C:D0:D8:9D
     AutoPtr<ArrayOf<Byte> > data = text.GetBytes();
     md->Update(data);
     AutoPtr<ArrayOf<Byte> > resultData;
@@ -883,7 +892,10 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
 ECode CActivityOne::SignatureTest()
 {
-    return SignatureTest::MD5WithRSA();
+    //SignatureTest::SignatureWithRSA();
+    //SignatureTest::SignatureWithEC();
+    SignatureTest::SignatureWithDSA();
+    return NOERROR;
 }
 
 ECode CActivityOne::CipherTest()

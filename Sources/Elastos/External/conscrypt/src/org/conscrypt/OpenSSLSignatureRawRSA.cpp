@@ -147,6 +147,7 @@ ECode OpenSSLSignatureRawRSA::EngineSign(
             context, INativeCrypto::RSA_PKCS1_PADDING, &res);
     mInputOffset = 0;
     *sign = outputBuffer;
+    REFCOUNT_ADD(*sign);
     return NOERROR;
     // } catch (Exception ex) {
     //     throw new SignatureException(ex);
