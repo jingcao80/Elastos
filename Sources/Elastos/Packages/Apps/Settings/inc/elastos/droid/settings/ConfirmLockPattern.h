@@ -148,9 +148,9 @@ public:
 
     private:
         // how Int64 we wait to clear a wrong pattern
-        static const Int32 WRONG_PATTERN_CLEAR_TIMEOUT_MS;// = 2000;
+        static const Int32 WRONG_PATTERN_CLEAR_TIMEOUT_MS;
 
-        static const String KEY_NUM_WRONG_ATTEMPTS;// = "num_wrong_attempts";
+        static const String KEY_NUM_WRONG_ATTEMPTS;
 
         AutoPtr<ILockPatternView> mLockPatternView;
         AutoPtr<ILockPatternUtils> mLockPatternUtils;
@@ -202,11 +202,11 @@ public:
      * The view will use the system-defined resource strings for any labels that
      * the caller does not supply.
      */
-    static const String PACKAGE;// = "com.android.settings";
-    static const String HEADER_TEXT;// = PACKAGE + ".ConfirmLockPattern.header";
-    static const String FOOTER_TEXT;// = PACKAGE + ".ConfirmLockPattern.footer";
-    static const String HEADER_WRONG_TEXT;// = PACKAGE + ".ConfirmLockPattern.header_wrong";
-    static const String FOOTER_WRONG_TEXT;// = PACKAGE + ".ConfirmLockPattern.footer_wrong";
+    static const String PACKAGE;
+    static const String HEADER_TEXT;
+    static const String FOOTER_TEXT;
+    static const String HEADER_WRONG_TEXT;
+    static const String FOOTER_WRONG_TEXT;
 };
 
 } // namespace Settings

@@ -160,37 +160,37 @@ private:
     CARAPI_(void) ResetDialogState();
 
 private:
-    static const String TAG;// = "IccLockSettings";
-    static const Boolean DBG;// = TRUE;
+    static const String TAG;
+    static const Boolean DBG;
 
-    static const Int32 OFF_MODE;// = 0;
+    static const Int32 OFF_MODE;
     // State when enabling/disabling ICC lock
-    static const Int32 ICC_LOCK_MODE;// = 1;
+    static const Int32 ICC_LOCK_MODE;
     // State when entering the old pin
-    static const Int32 ICC_OLD_MODE;// = 2;
+    static const Int32 ICC_OLD_MODE;
     // State when entering the new pin - first time
-    static const Int32 ICC_NEW_MODE;// = 3;
+    static const Int32 ICC_NEW_MODE;
     // State when entering the new pin - second time
-    static const Int32 ICC_REENTER_MODE;// = 4;
+    static const Int32 ICC_REENTER_MODE;
 
     // Keys in xml file
-    static const String PIN_DIALOG;// = "sim_pin";
-    static const String PIN_TOGGLE;// = "sim_toggle";
+    static const String PIN_DIALOG;
+    static const String PIN_TOGGLE;
     // Keys in icicle
-    static const String DIALOG_STATE;// = "dialogState";
-    static const String DIALOG_PIN;// = "dialogPin";
-    static const String DIALOG_ERROR;// = "dialogError";
-    static const String ENABLE_TO_STATE;// = "enableState";
+    static const String DIALOG_STATE;
+    static const String DIALOG_PIN;
+    static const String DIALOG_ERROR;
+    static const String ENABLE_TO_STATE;
 
     // Save and restore inputted PIN code when configuration changed
     // (ex. portrait<-->landscape) during change PIN code
-    static const String OLD_PINCODE;// = "oldPinCode";
-    static const String NEW_PINCODE;// = "newPinCode";
+    static const String OLD_PINCODE;
+    static const String NEW_PINCODE;
 
-    static const Int32 MIN_PIN_LENGTH;// = 4;
-    static const Int32 MAX_PIN_LENGTH;// = 8;
+    static const Int32 MIN_PIN_LENGTH;
+    static const Int32 MAX_PIN_LENGTH;
     // Which dialog to show next when popped up
-    Int32 mDialogState;// = OFF_MODE;
+    Int32 mDialogState;
 
     String mPin;
     String mOldPin;

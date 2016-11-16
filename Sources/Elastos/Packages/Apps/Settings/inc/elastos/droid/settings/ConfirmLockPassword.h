@@ -192,8 +192,7 @@ public:
 
     private:
         static const String KEY_NUM_WRONG_CONFIRM_ATTEMPTS;
-                // = "confirm_lock_password_fragment.key_num_wrong_confirm_attempts";
-        static const Int64 ERROR_MESSAGE_TIMEOUT;// = 3000;
+        static const Int64 ERROR_MESSAGE_TIMEOUT;
         AutoPtr<ITextView> mPasswordEntry;
         AutoPtr<ILockPatternUtils> mLockPatternUtils;
         AutoPtr<ITextView> mHeaderText;
@@ -229,8 +228,8 @@ protected:
         /* [in] */ const String& fragmentName);
 
 public:
-    static const String PACKAGE;// = "com.android.settings";
-    static const String HEADER_TEXT;// = PACKAGE + ".ConfirmLockPattern.header";
+    static const String PACKAGE;
+    static const String HEADER_TEXT;
 };
 
 } // namespace Settings

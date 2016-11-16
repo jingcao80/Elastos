@@ -19,13 +19,13 @@ using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::RemoteCallback;
-using Elastos::Core::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::Runnable;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 
@@ -159,9 +159,9 @@ protected:
     virtual CARAPI_(Int32) GetEllipsizedLines();
 
 protected:
-    static const String TAG;// = "DeviceAdminAdd";
+    static const String TAG;
 
-    static const Int32 DIALOG_WARNING;// = 1;
+    static const Int32 DIALOG_WARNING;
 
     AutoPtr<IHandler> mHandler;
 
@@ -177,7 +177,7 @@ protected:
     AutoPtr<ITextView> mAddMsg;
     AutoPtr<ITextView> mProfileOwnerWarning;
     AutoPtr<IImageView> mAddMsgExpander;
-    Boolean mAddMsgEllipsized;// = TRUE;
+    Boolean mAddMsgEllipsized;
     AutoPtr<ITextView> mAdminWarning;
     AutoPtr<IViewGroup> mAdminPolicies;
     AutoPtr<IButton> mActionButton;
@@ -196,9 +196,9 @@ protected:
     Int32 mCurToastAppOpMode;
 
 private:
-    static const Int32 MAX_ADD_MSG_LINES_PORTRAIT;// = 5;
-    static const Int32 MAX_ADD_MSG_LINES_LANDSCAPE;// = 2;
-    static const Int32 MAX_ADD_MSG_LINES;// = 15;
+    static const Int32 MAX_ADD_MSG_LINES_PORTRAIT;
+    static const Int32 MAX_ADD_MSG_LINES_LANDSCAPE;
+    static const Int32 MAX_ADD_MSG_LINES;
 };
 
 } // namespace Settings

@@ -64,7 +64,7 @@ public:
             /* [in] */ Int32 which);
 
     private:
-        static const String ARG_PACKAGE_NAME;// = "package";
+        static const String ARG_PACKAGE_NAME;
     };
 
 private:
@@ -199,7 +199,7 @@ public:
     AutoPtr<IPreferenceScreen> mPreferenceScreen;
 
 private:
-    static const String TAG;// = "CUsageAccessSettings";
+    static const String TAG;
 
     static const AutoPtr< ArrayOf<String> > PM_USAGE_STATS_PERMISSION;
 

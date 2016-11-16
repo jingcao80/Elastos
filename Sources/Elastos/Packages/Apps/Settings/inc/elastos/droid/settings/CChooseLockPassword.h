@@ -235,29 +235,29 @@ public:
         CARAPI_(void) UpdateUi();
 
     protected:
-        static const Int32 RESULT_FINISHED;// = RESULT_FIRST_USER;
+        static const Int32 RESULT_FINISHED;
 
     private:
-        static const String KEY_FIRST_PIN;// = "first_pin";
-        static const String KEY_UI_STAGE;// = "ui_stage";
-        static const Int32 CONFIRM_EXISTING_REQUEST;// = 58;
-        static const Int64 ERROR_MESSAGE_TIMEOUT;// = 3000;
-        static const Int32 MSG_SHOW_ERROR;// = 1;
+        static const String KEY_FIRST_PIN;
+        static const String KEY_UI_STAGE;
+        static const Int32 CONFIRM_EXISTING_REQUEST;
+        static const Int64 ERROR_MESSAGE_TIMEOUT;
+        static const Int32 MSG_SHOW_ERROR;
 
         AutoPtr<ITextView> mPasswordEntry;
-        Int32 mPasswordMinLength;// = 4;
-        Int32 mPasswordMaxLength;// = 16;
-        Int32 mPasswordMinLetters;// = 0;
-        Int32 mPasswordMinUpperCase;// = 0;
-        Int32 mPasswordMinLowerCase;// = 0;
-        Int32 mPasswordMinSymbols;// = 0;
-        Int32 mPasswordMinNumeric;// = 0;
-        Int32 mPasswordMinNonLetter;// = 0;
+        Int32 mPasswordMinLength;
+        Int32 mPasswordMaxLength;
+        Int32 mPasswordMinLetters;
+        Int32 mPasswordMinUpperCase;
+        Int32 mPasswordMinLowerCase;
+        Int32 mPasswordMinSymbols;
+        Int32 mPasswordMinNumeric;
+        Int32 mPasswordMinNonLetter;
         AutoPtr<ILockPatternUtils> mLockPatternUtils;
-        Int32 mRequestedQuality;// = DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+        Int32 mRequestedQuality;
         AutoPtr<ChooseLockSettingsHelper> mChooseLockSettingsHelper;
-        AutoPtr<Stage> mUiStage;// = Stage_Introduction;
-        Boolean mDone;// = FALSE;
+        AutoPtr<Stage> mUiStage;
+        Boolean mDone;
         AutoPtr<ITextView> mHeaderText;
         String mFirstPin;
         AutoPtr<IKeyboardView> mKeyboardView;
@@ -303,14 +303,14 @@ protected:
         /* [in] */ const String& fragmentName);
 
 public:
-    static const String PASSWORD_MIN_KEY;// = "lockscreen.password_min";
-    static const String PASSWORD_MAX_KEY;// = "lockscreen.password_max";
-    static const String PASSWORD_MIN_LETTERS_KEY;// = "lockscreen.password_min_letters";
-    static const String PASSWORD_MIN_LOWERCASE_KEY;// = "lockscreen.password_min_lowercase";
-    static const String PASSWORD_MIN_UPPERCASE_KEY;// = "lockscreen.password_min_uppercase";
-    static const String PASSWORD_MIN_NUMERIC_KEY;// = "lockscreen.password_min_numeric";
-    static const String PASSWORD_MIN_SYMBOLS_KEY;// = "lockscreen.password_min_symbols";
-    static const String PASSWORD_MIN_NONLETTER_KEY;// = "lockscreen.password_min_nonletter";
+    static const String PASSWORD_MIN_KEY;
+    static const String PASSWORD_MAX_KEY;
+    static const String PASSWORD_MIN_LETTERS_KEY;
+    static const String PASSWORD_MIN_LOWERCASE_KEY;
+    static const String PASSWORD_MIN_UPPERCASE_KEY;
+    static const String PASSWORD_MIN_NUMERIC_KEY;
+    static const String PASSWORD_MIN_SYMBOLS_KEY;
+    static const String PASSWORD_MIN_NONLETTER_KEY;
 };
 
 } // namespace Settings

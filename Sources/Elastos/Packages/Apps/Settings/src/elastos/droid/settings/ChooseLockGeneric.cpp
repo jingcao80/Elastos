@@ -492,12 +492,10 @@ AutoPtr<IIntent> ChooseLockGeneric::ChooseLockGenericFragment::GetBiometricSenso
     CIntent::New((IIntent**)&fallBackIntent);
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    fallBackIntent->SetClass(IContext::Probe(activity),
-            ECLSID_CChooseLockGenericInternalActivity);
+    fallBackIntent->SetClass(IContext::Probe(activity), ECLSID_CChooseLockGenericInternalActivity);
     fallBackIntent->PutBooleanExtra(ILockPatternUtils::LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, TRUE);
     fallBackIntent->PutBooleanExtra(CONFIRM_CREDENTIALS, FALSE);
-    fallBackIntent->PutExtra(EXTRA_SHOW_FRAGMENT_TITLE,
-            R::string::backup_lock_settings_picker_title);
+    fallBackIntent->PutExtra(EXTRA_SHOW_FRAGMENT_TITLE, R::string::backup_lock_settings_picker_title);
 
     Boolean res;
     Boolean showTutorial = ALWAY_SHOW_TUTORIAL ||

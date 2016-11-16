@@ -512,41 +512,41 @@ private:
         /* [in] */ const String& packageName);
 
 public:
-    static const String ARG_PACKAGE_NAME;// = "package";
+    static const String ARG_PACKAGE_NAME;
 
     // Menu identifiers
-    static const Int32 UNINSTALL_ALL_USERS_MENU;// = 1;
+    static const Int32 UNINSTALL_ALL_USERS_MENU;
 
     // Result code identifiers
-    static const Int32 REQUEST_UNINSTALL;// = 1;
-    static const Int32 REQUEST_MANAGE_SPACE;// = 2;
+    static const Int32 REQUEST_UNINSTALL;
+    static const Int32 REQUEST_MANAGE_SPACE;
 
 private:
-    static const String TAG;// = "CInstalledAppDetails";
-    static const Boolean localLOGV;// = FALSE;
+    static const String TAG;
+    static const Boolean localLOGV;
 
     //internal constants used in Handler
-    static const Int32 OP_SUCCESSFUL;// = 1;
-    static const Int32 OP_FAILED;// = 2;
-    static const Int32 CLEAR_USER_DATA;// = 1;
-    static const Int32 CLEAR_CACHE;// = 3;
-    static const Int32 PACKAGE_MOVE;// = 4;
+    static const Int32 OP_SUCCESSFUL;
+    static const Int32 OP_FAILED;
+    static const Int32 CLEAR_USER_DATA;
+    static const Int32 CLEAR_CACHE;
+    static const Int32 PACKAGE_MOVE;
 
     // invalid size value used initially and also when size retrieval through PackageManager
     // fails for whatever reason
-    static const Int32 SIZE_INVALID;// = -1;
+    static const Int32 SIZE_INVALID;
 
     // Dialog identifiers used in showDialog
-    static const Int32 DLG_BASE;// = 0;
-    static const Int32 DLG_CLEAR_DATA;// = DLG_BASE + 1;
-    static const Int32 DLG_FACTORY_RESET;// = DLG_BASE + 2;
-    static const Int32 DLG_APP_NOT_FOUND;// = DLG_BASE + 3;
-    static const Int32 DLG_CANNOT_CLEAR_DATA;// = DLG_BASE + 4;
-    static const Int32 DLG_FORCE_STOP;// = DLG_BASE + 5;
-    static const Int32 DLG_MOVE_FAILED;// = DLG_BASE + 6;
-    static const Int32 DLG_DISABLE;// = DLG_BASE + 7;
-    static const Int32 DLG_DISABLE_NOTIFICATIONS;// = DLG_BASE + 8;
-    static const Int32 DLG_SPECIAL_DISABLE;// = DLG_BASE + 9;
+    static const Int32 DLG_BASE;
+    static const Int32 DLG_CLEAR_DATA;
+    static const Int32 DLG_FACTORY_RESET;
+    static const Int32 DLG_APP_NOT_FOUND;
+    static const Int32 DLG_CANNOT_CLEAR_DATA;
+    static const Int32 DLG_FORCE_STOP;
+    static const Int32 DLG_MOVE_FAILED;
+    static const Int32 DLG_DISABLE;
+    static const Int32 DLG_DISABLE_NOTIFICATIONS;
+    static const Int32 DLG_SPECIAL_DISABLE;
 
     AutoPtr<IPackageManager> mPm;
     AutoPtr<IUserManager> mUserManager;
@@ -566,14 +566,14 @@ private:
     AutoPtr<IButton> mUninstallButton;
     AutoPtr<IView> mMoreControlButtons;
     AutoPtr<IButton> mSpecialDisableButton;
-    Boolean mMoveInProgress;// = FALSE;
-    Boolean mUpdatedSysApp;// = FALSE;
+    Boolean mMoveInProgress;
+    Boolean mUpdatedSysApp;
     AutoPtr<IButton> mActivitiesButton;
     AutoPtr<IView> mScreenCompatSection;
     AutoPtr<ICheckBox> mAskCompatibilityCB;
     AutoPtr<ICheckBox> mEnableCompatibilityCB;
-    Boolean mCanClearData;// = TRUE;
-    Boolean mAppControlRestricted;// = FALSE;
+    Boolean mCanClearData;
+    Boolean mAppControlRestricted;
     AutoPtr<ITextView> mAppVersion;
     AutoPtr<ITextView> mTotalSize;
     AutoPtr<ITextView> mAppSize;
@@ -597,13 +597,13 @@ private:
 
     Boolean mDisableAfterUninstall;
 
-    Boolean mHaveSizes;// = FALSE;
-    Int64 mLastCodeSize;// = -1;
-    Int64 mLastDataSize;// = -1;
-    Int64 mLastExternalCodeSize;// = -1;
-    Int64 mLastExternalDataSize;// = -1;
-    Int64 mLastCacheSize;// = -1;
-    Int64 mLastTotalSize;// = -1;
+    Boolean mHaveSizes;
+    Int64 mLastCodeSize;
+    Int64 mLastDataSize;
+    Int64 mLastExternalCodeSize;
+    Int64 mLastExternalDataSize;
+    Int64 mLastCacheSize;
+    Int64 mLastTotalSize;
 
     // Resource strings
     AutoPtr<ICharSequence> mInvalidSizeStr;

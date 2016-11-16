@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_SETTINGS_ENCRYPTIONINTERSTITIAL_H__
 #define __ELASTOS_DROID_SETTINGS_ENCRYPTIONINTERSTITIAL_H__
 
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
 
 using Elastos::Droid::Settings::SettingsActivity;

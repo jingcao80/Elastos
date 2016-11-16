@@ -45,7 +45,7 @@ protected:
         /* [in] */ IIntent* data);
 
 public:
-    static const String TAG;// = ConfirmDeviceCredentialActivity.class->GetSimpleName();
+    static const String TAG;
 };
 
 } // namespace Settings

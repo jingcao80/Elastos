@@ -3985,6 +3985,8 @@ ECode CMountService::GetPasswordType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = 0;
+
     WaitForReady();
 
     AutoPtr<NativeDaemonEvent> event;
@@ -3993,8 +3995,10 @@ ECode CMountService::GetPasswordType(
             String("getpwtype"), (NativeDaemonEvent**)&event));
     Int32 length = ArraySize(CRYPTO_TYPES);
     for (Int32 i = 0; i < length; ++i) {
-        if (CRYPTO_TYPES[i].Equals(event->GetMessage()))
-            return i;
+        if (CRYPTO_TYPES[i].Equals(event->GetMessage())) {
+            *result = i;
+            return NOERROR;
+        }
     }
     Slogger::E(TAG, "unexpected return from cryptfs");
     return E_ILLEGAL_STATE_EXCEPTION;

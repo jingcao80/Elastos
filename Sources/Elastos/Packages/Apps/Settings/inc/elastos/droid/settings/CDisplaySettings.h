@@ -203,24 +203,24 @@ private:
 private:
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;
 
-    static const String TAG;// = "CDisplaySettings";
+    static const String TAG;
 
     /** If there is no setting in the provider, use this. */
-    static const Int32 FALLBACK_SCREEN_TIMEOUT_VALUE;// = 30000;
+    static const Int32 FALLBACK_SCREEN_TIMEOUT_VALUE;
 
-    static const String KEY_SCREEN_TIMEOUT;// = "screen_timeout";
-    static const String KEY_FONT_SIZE;// = "font_size";
-    static const String KEY_SCREEN_SAVER;// = "screensaver";
-    static const String KEY_LIFT_TO_WAKE;// = "lift_to_wake";
-    static const String KEY_DOZE;// = "doze";
-    static const String KEY_AUTO_BRIGHTNESS;// = "auto_brightness";
-    static const String KEY_AUTO_ROTATE;// = "auto_rotate";
+    static const String KEY_SCREEN_TIMEOUT;
+    static const String KEY_FONT_SIZE;
+    static const String KEY_SCREEN_SAVER;
+    static const String KEY_LIFT_TO_WAKE;
+    static const String KEY_DOZE;
+    static const String KEY_AUTO_BRIGHTNESS;
+    static const String KEY_AUTO_ROTATE;
 
-    static const Int32 DLG_GLOBAL_CHANGE_WARNING;// = 1;
+    static const Int32 DLG_GLOBAL_CHANGE_WARNING;
 
     AutoPtr<CWarnedListPreference> mFontSizePref;
 
-    AutoPtr<IConfiguration> mCurConfig;// = new Configuration();
+    AutoPtr<IConfiguration> mCurConfig;
 
     AutoPtr<IListPreference> mScreenTimeoutPreference;
     AutoPtr<IPreference> mScreenSaverPreference;

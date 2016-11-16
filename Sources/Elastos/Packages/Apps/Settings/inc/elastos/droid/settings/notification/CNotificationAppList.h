@@ -144,8 +144,7 @@ public:
             /* [in] */ Boolean sensitive);
 
     public:
-        static AutoPtr<IINotificationManager> sINM;// = IINotificationManager::Probe(
-                //ServiceManager::GetService(IContext::NOTIFICATION_SERVICE));
+        static AutoPtr<IINotificationManager> sINM;
     };
 
 private:
@@ -381,9 +380,9 @@ private:
     static const String SECTION_AFTER_Z;
     static const AutoPtr<IIntent> APP_NOTIFICATION_PREFS_CATEGORY_INTENT;
 
-    static const AutoPtr<IComparator> mRowComparator;// = new MyComparator<AppRow>();
+    static const AutoPtr<IComparator> mRowComparator;
 
-    AutoPtr<IHandler> mHandler;// = new Handler();
+    AutoPtr<IHandler> mHandler;
     // ArrayMap<String, AppRow> mRows = new ArrayMap<String, AppRow>();
     AutoPtr<IArrayMap> mRows;
     // ArrayList<AppRow> mSortedRows = new ArrayList<AppRow>();
@@ -396,15 +395,15 @@ private:
     AutoPtr<NotificationAppAdapter> mAdapter;
     AutoPtr< ArrayOf<ISignature*> > mSystemSignature;
     AutoPtr<IParcelable> mListViewState;
-    AutoPtr<Backend> mBackend;// = new Backend();
+    AutoPtr<Backend> mBackend;
     AutoPtr<CUserSpinnerAdapter> mProfileSpinnerAdapter;
 
     AutoPtr<IPackageManager> mPM;
     AutoPtr<IUserManager> mUM;
     AutoPtr<ILauncherApps> mLauncherApps;
 
-    AutoPtr<Runnable> mCollectAppsRunnable;// = new MyRunnable(0, this);
-    AutoPtr<Runnable> mRefreshAppsListRunnable;;// = new MyRunnable(1, this);
+    AutoPtr<Runnable> mCollectAppsRunnable;
+    AutoPtr<Runnable> mRefreshAppsListRunnable;
 };
 
 } // namespace Applications

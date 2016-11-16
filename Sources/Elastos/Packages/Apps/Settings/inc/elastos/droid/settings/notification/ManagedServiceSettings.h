@@ -276,9 +276,9 @@ private:
     AutoPtr<IHashSet> mEnabledServices;
     AutoPtr<ServiceListAdapter> mListAdapter;
 
-    AutoPtr<ContentObserver> mSettingsObserver;// = new MyContentObserver(new Handler(), this);
+    AutoPtr<ContentObserver> mSettingsObserver;
 
-    AutoPtr<BroadcastReceiver> mPackageReceiver;// = new MyBroadcastReceiver(this);
+    AutoPtr<BroadcastReceiver> mPackageReceiver;
 };
 
 } // namespace Notification

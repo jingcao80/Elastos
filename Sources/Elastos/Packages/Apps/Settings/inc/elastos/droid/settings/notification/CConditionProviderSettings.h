@@ -34,8 +34,8 @@ private:
     static CARAPI_(AutoPtr<ManagedServiceSettings::Config>) GetConditionProviderConfig();
 
 private:
-    static const String TAG;// = ConditionProviderSettings.class->GetSimpleName();
-    static const  AutoPtr<ManagedServiceSettings::Config> CONFIG;// = GetConditionProviderConfig();
+    static const String TAG;
+    static const  AutoPtr<ManagedServiceSettings::Config> CONFIG;
 };
 
 } // namespace Applications

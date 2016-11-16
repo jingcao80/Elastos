@@ -514,20 +514,20 @@ private:
         /* [in] */ IWifiDisplay* display);
 
 private:
-    static const String TAG;// = "CWifiDisplaySettings";
-    static const Boolean DEBUG;// = FALSE;
+    static const String TAG;
+    static const Boolean DEBUG;
 
-    static const Int32 MENU_ID_ENABLE_WIFI_DISPLAY;// = Menu.FIRST;
+    static const Int32 MENU_ID_ENABLE_WIFI_DISPLAY;
 
-    static const Int32 CHANGE_SETTINGS;// = 1 << 0;
-    static const Int32 CHANGE_ROUTES;// = 1 << 1;
-    static const Int32 CHANGE_WIFI_DISPLAY_STATUS;// = 1 << 2;
-    static const Int32 CHANGE_ALL;// = -1;
+    static const Int32 CHANGE_SETTINGS;
+    static const Int32 CHANGE_ROUTES;
+    static const Int32 CHANGE_WIFI_DISPLAY_STATUS;
+    static const Int32 CHANGE_ALL;
 
-    static const Int32 ORDER_CERTIFICATION;// = 1;
-    static const Int32 ORDER_CONNECTED;// = 2;
-    static const Int32 ORDER_AVAILABLE;// = 3;
-    static const Int32 ORDER_UNAVAILABLE;// = 4;
+    static const Int32 ORDER_CERTIFICATION;
+    static const Int32 ORDER_CONNECTED;
+    static const Int32 ORDER_AVAILABLE;
+    static const Int32 ORDER_UNAVAILABLE;
 
     AutoPtr<IHandler> mHandler;
 
@@ -549,7 +549,7 @@ private:
     AutoPtr<IPreferenceGroup> mCertCategory;
     Boolean mListen;
     Boolean mAutoGO;
-    Int32 mWpsConfig;// = IWpsInfo::INVALID;
+    Int32 mWpsConfig;
     Int32 mListenChannel;
     Int32 mOperatingChannel;
 

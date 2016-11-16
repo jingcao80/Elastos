@@ -501,10 +501,12 @@ AutoPtr<IPreferenceScreen> SecuritySettings::CreatePreferenceHierarchy()
         CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
         if (helper->IsDeviceEncryptionEnabled(&res), res) {
             // The device is currently encrypted.
+            Logger::I(TAG, "AddPreferencesFromResource, security_settings_encrypted");
             AddPreferencesFromResource(R::xml::security_settings_encrypted);
         }
         else {
             // This device supports encryption but isn't encrypted.
+            Logger::I(TAG, "AddPreferencesFromResource, security_settings_unencrypted");
             AddPreferencesFromResource(R::xml::security_settings_unencrypted);
         }
     }

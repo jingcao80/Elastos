@@ -22,11 +22,11 @@ using Elastos::Droid::Internal::Widget::DisplayMode_Animate;
 using Elastos::Droid::Internal::Widget::DisplayMode_Wrong;
 using Elastos::Droid::Internal::Widget::EIID_IOnPatternListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
-using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -209,18 +209,13 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternLis
     return IView::Probe(mHost->mLockPatternView)->RemoveCallbacks(mHost->mClearPatternRunnable, &res);
 }
 
-ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener::OnPatternCellAdded(
-    /* [in] */ IList* pattern)
-{
-    return NOERROR;
-}
-
 ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener::OnPatternDetected(
     /* [in] */ IList* pattern)
 {
+    Slogger::I("CChooseLockPatternFragment", ">> enter OnPatternDetected ");
     if (mHost->mUiStage == Stage::NEED_TO_CONFIRM || mHost->mUiStage == Stage::CONFIRM_WRONG) {
         if (mHost->mChosenPattern == NULL) {
-            Slogger::E("CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener",
+            Slogger::E("CChooseLockPatternFragment::LockPatternViewOnPatternListener",
                     "NULL chosen pattern in stage 'need to confirm");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -244,10 +239,17 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternLis
         }
     }
     else {
-        Slogger::E("CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener",
+        Slogger::E("CChooseLockPatternFragment::LockPatternViewOnPatternListener",
                 "Unexpected stage %s when entering the pattern.", TO_CSTR(mHost->mUiStage));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+    Slogger::I("CChooseLockPatternFragment", "<< leave OnPatternDetected ");
+    return NOERROR;
+}
+
+ECode CChooseLockPattern::ChooseLockPatternFragment::LockPatternViewOnPatternListener::OnPatternCellAdded(
+    /* [in] */ IList* pattern)
+{
     return NOERROR;
 }
 
@@ -321,6 +323,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnActivityResult(
     /* [in] */ Int32 resultCode,
     /* [in] */ IIntent* data)
 {
+    Slogger::I("CChooseLockPatternFragment", ">> enter OnActivityResult");
     Fragment::OnActivityResult(requestCode, resultCode, data);
     switch (requestCode) {
         case CONFIRM_EXISTING_REQUEST: {
@@ -334,6 +337,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnActivityResult(
             break;
         }
     }
+    Slogger::I("CChooseLockPatternFragment", "<< leave OnActivityResult");
     return NOERROR;
 }
 
@@ -346,7 +350,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnCreate(
     mChooseLockSettingsHelper = new ChooseLockSettingsHelper();
     mChooseLockSettingsHelper->constructor(activity);
     if (IChooseLockPattern::Probe(activity) == NULL) {
-        Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "Fragment contained in wrong activity");
+        Slogger::E("CChooseLockPatternFragment", "Fragment contained in wrong activity");
         return E_SECURITY_EXCEPTION;
     }
     return NOERROR;
@@ -360,6 +364,8 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnCreateView(
 {
     VALIDATE_NOT_NULL(result)
     *result = NULL;
+
+    Slogger::I("CChooseLockPatternFragment", ">> enter OnCreateView");
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -451,7 +457,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnCreateView(
         // restore from previous state
         String patternString;
         savedInstanceState->GetString(KEY_PATTERN_CHOICE, &patternString);
-        if (patternString != NULL) {
+        if (!patternString.IsNull()) {
             mChosenPattern = NULL;
             mChooseLockSettingsHelper->Utils()->StringToPattern(patternString, (IList**)&mChosenPattern);
         }
@@ -464,20 +470,21 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnCreateView(
 
     *result = view;
     REFCOUNT_ADD(*result)
+    Slogger::I("CChooseLockPatternFragment", "<< leave OnCreateView");
     return NOERROR;
 }
 
 ECode CChooseLockPattern::ChooseLockPatternFragment::OnClick(
     /* [in] */ IView* v)
 {
-    AutoPtr<Stage> uiStage = (Stage*)mUiStage.Get();
+    Slogger::I("CChooseLockPatternFragment", ">> enter OnClick ");
     if (v == IView::Probe(mFooterLeftButton)) {
-        if (uiStage->mLeftMode == LeftButtonMode::RETRY) {
+        if (mUiStage->mLeftMode == LeftButtonMode::RETRY) {
             mChosenPattern = NULL;
             mLockPatternView->ClearPattern();
             UpdateStage(Stage::INTRODUCTION);
         }
-        else if (uiStage->mLeftMode == LeftButtonMode::CANCEL) {
+        else if (mUiStage->mLeftMode == LeftButtonMode::CANCEL) {
             // They are canceling the entire wizard
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
@@ -485,31 +492,33 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnClick(
             activity->Finish();
         }
         else {
-            Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "left footer button pressed, but stage of %s doesn't make sense", TO_CSTR(mUiStage));
+            Slogger::E("CChooseLockPatternFragment",
+                    "left footer button pressed, but stage of %s doesn't make sense", TO_CSTR(mUiStage));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
     else if (v == IView::Probe(mFooterRightButton)) {
 
-        if (uiStage->mRightMode == RightButtonMode::CONTINUE) {
+        if (mUiStage->mRightMode == RightButtonMode::CONTINUE) {
             if (mUiStage != Stage::FIRST_CHOICE_VALID) {
-                Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "expected ui stage %s when button is %s",
+                Slogger::E("CChooseLockPatternFragment", "expected ui stage %s when button is %s",
                         TO_CSTR(Stage::FIRST_CHOICE_VALID), TO_CSTR(RightButtonMode::CONTINUE));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             UpdateStage(Stage::NEED_TO_CONFIRM);
         }
-        else if (uiStage->mRightMode == RightButtonMode::CONFIRM) {
+        else if (mUiStage->mRightMode == RightButtonMode::CONFIRM) {
             if (mUiStage != Stage::CHOICE_CONFIRMED) {
-                Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "expected ui stage %s when button is %s",
+                Slogger::E("CChooseLockPatternFragment", "expected ui stage %s when button is %s",
                         TO_CSTR(Stage::CHOICE_CONFIRMED), TO_CSTR(RightButtonMode::CONFIRM));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             SaveChosenPatternAndFinish();
         }
-        else if (uiStage->mRightMode == RightButtonMode::OK) {
+        else if (mUiStage->mRightMode == RightButtonMode::OK) {
             if (mUiStage != Stage::HELP_SCREEN) {
-                Slogger::E("CChooseLockPattern::ChooseLockPatternFragment", "Help screen is only mode with ok button, but stage is %s", TO_CSTR(mUiStage));
+                Slogger::E("CChooseLockPatternFragment",
+                        "Help screen is only mode with ok button, but stage is %s", TO_CSTR(mUiStage));
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
             mLockPatternView->ClearPattern();
@@ -517,6 +526,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnClick(
             UpdateStage(Stage::INTRODUCTION);
         }
     }
+    Slogger::I("CChooseLockPatternFragment", "<< leave OnClick ");
     return NOERROR;
 }
 
@@ -528,6 +538,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnKeyDown(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
+    Slogger::I("CChooseLockPatternFragment", ">> enter OnKeyDown ");
     Int32 data;
     if (keyCode == IKeyEvent::KEYCODE_BACK && (event->GetRepeatCount(&data), data == 0)) {
         if (mUiStage == Stage::HELP_SCREEN) {
@@ -541,6 +552,7 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnKeyDown(
         *result = TRUE;
         return NOERROR;
     }
+    Slogger::I("CChooseLockPatternFragment", "<< leave OnKeyDown ");
     return NOERROR;
 }
 
@@ -561,46 +573,47 @@ ECode CChooseLockPattern::ChooseLockPatternFragment::OnSaveInstanceState(
 void CChooseLockPattern::ChooseLockPatternFragment::UpdateStage(
     /* [in] */ Stage* stage)
 {
+    Slogger::I("CChooseLockPatternFragment", ">> enter UpdateStage ");
     AutoPtr<Stage> previousStage = mUiStage;
 
     mUiStage = stage;
 
     // header text, footer text, visibility and
     // enabled state all known from the stage
-    if (stage == Stage::CHOICE_TOO_SHORT) {
+    if (stage == Stage::CHOICE_TOO_SHORT.Get()) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, CoreUtils::Convert(ILockPatternUtils::MIN_LOCK_PATTERN_SIZE));
         String str;
-        resources->GetString(mUiStage->mHeaderMessage, args, &str);
+        resources->GetString(stage->mHeaderMessage, args, &str);
         mHeaderText->SetText(CoreUtils::Convert(str));
     }
     else {
-        mHeaderText->SetText(mUiStage->mHeaderMessage);
+        mHeaderText->SetText(stage->mHeaderMessage);
     }
-    if (mUiStage->mFooterMessage == ID_EMPTY_MESSAGE) {
+    if (stage->mFooterMessage == ID_EMPTY_MESSAGE) {
         mFooterText->SetText(CoreUtils::Convert(""));
     }
     else {
-        mFooterText->SetText(mUiStage->mFooterMessage);
+        mFooterText->SetText(stage->mFooterMessage);
     }
 
-    if (mUiStage->mLeftMode == LeftButtonMode::GONE) {
+    if (stage->mLeftMode == LeftButtonMode::GONE) {
         IView::Probe(mFooterLeftButton)->SetVisibility(IView::GONE);
     }
     else {
         IView* footerLeftButton = IView::Probe(mFooterLeftButton);
         footerLeftButton->SetVisibility(IView::VISIBLE);
-        mFooterLeftButton->SetText(mUiStage->mLeftMode->mText);
-        footerLeftButton->SetEnabled(mUiStage->mLeftMode->mEnabled);
+        mFooterLeftButton->SetText(stage->mLeftMode->mText);
+        footerLeftButton->SetEnabled(stage->mLeftMode->mEnabled);
     }
 
-    mFooterRightButton->SetText(mUiStage->mRightMode->mText);
-    IView::Probe(mFooterRightButton)->SetEnabled(mUiStage->mRightMode->mEnabled);
+    mFooterRightButton->SetText(stage->mRightMode->mText);
+    IView::Probe(mFooterRightButton)->SetEnabled(stage->mRightMode->mEnabled);
 
     // same for whether the patten is enabled
-    if (mUiStage->mPatternEnabled) {
+    if (stage->mPatternEnabled) {
         mLockPatternView->EnableInput();
     }
     else {
@@ -621,8 +634,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::UpdateStage(
         mLockPatternView->SetDisplayMode(DisplayMode_Wrong);
         PostClearPatternRunnable();
     }
-    else if (mUiStage == Stage::FIRST_CHOICE_VALID) {
-    }
+    else if (mUiStage == Stage::FIRST_CHOICE_VALID) {}
     else if (mUiStage == Stage::NEED_TO_CONFIRM) {
         mLockPatternView->ClearPattern();
     }
@@ -630,8 +642,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::UpdateStage(
         mLockPatternView->SetDisplayMode(DisplayMode_Wrong);
         PostClearPatternRunnable();
     }
-    else if (mUiStage == Stage::CHOICE_CONFIRMED) {
-    }
+    else if (mUiStage == Stage::CHOICE_CONFIRMED) {}
 
     // If the stage changed, announce the header for accessibility. This
     // is a no-op when accessibility is disabled.
@@ -640,6 +651,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::UpdateStage(
         mHeaderText->GetText((ICharSequence**)&cs);
         IView::Probe(mHeaderText)->AnnounceForAccessibility(cs);
     }
+    Slogger::I("CChooseLockPatternFragment", "<< leave UpdateStage ");
 }
 
 void CChooseLockPattern::ChooseLockPatternFragment::PostClearPatternRunnable()
@@ -652,7 +664,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::PostClearPatternRunnable()
 
 void CChooseLockPattern::ChooseLockPatternFragment::SaveChosenPatternAndFinish()
 {
-    Slogger::I("CChooseLockPattern", " >> enter ChooseLockPatternFragment::SaveChosenPatternAndFinish ");
+    Slogger::I("CChooseLockPatternFragment", ">> enter SaveChosenPatternAndFinish ");
     if (mDone) return;
     AutoPtr<ILockPatternUtils> utils = mChooseLockSettingsHelper->Utils();
     Boolean lockVirgin;
@@ -681,7 +693,7 @@ void CChooseLockPattern::ChooseLockPatternFragment::SaveChosenPatternAndFinish()
     activity->Finish();
     mDone = TRUE;
     StartActivity(CRedactionInterstitial::CreateStartIntent(IContext::Probe(activity)));
-    Slogger::I("CChooseLockPattern", " << leave ChooseLockPatternFragment::SaveChosenPatternAndFinish ");
+    Slogger::I("CChooseLockPatternFragment", "<< leave SaveChosenPatternAndFinish ");
 }
 
 //===============================================================================

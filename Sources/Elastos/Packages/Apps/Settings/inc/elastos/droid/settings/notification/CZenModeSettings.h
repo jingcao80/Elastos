@@ -519,37 +519,37 @@ private:
     static CARAPI_(Boolean) InitStatic();
 
 private:
-    static const String TAG;// = "CZenModeSettings";
-    static const Boolean DEBUG;// = TRUE;
+    static const String TAG;
+    static const Boolean DEBUG;
 
-    static const String KEY_ZEN_MODE;// = "zen_mode";
-    static const String KEY_IMPORTANT;// = "important";
-    static const String KEY_CALLS;// = "phone_calls";
-    static const String KEY_MESSAGES;// = "messages";
-    static const String KEY_STARRED;// = "starred";
-    static const String KEY_EVENTS;// = "events";
-    static const String KEY_ALARM_INFO;// = "alarm_info";
+    static const String KEY_ZEN_MODE;
+    static const String KEY_IMPORTANT;
+    static const String KEY_CALLS;
+    static const String KEY_MESSAGES;
+    static const String KEY_STARRED;
+    static const String KEY_EVENTS;
+    static const String KEY_ALARM_INFO;
 
-    static const String KEY_DOWNTIME;// = "downtime";
-    static const String KEY_DAYS;// = "days";
-    static const String KEY_START_TIME;// = "start_time";
-    static const String KEY_END_TIME;// = "end_time";
+    static const String KEY_DOWNTIME;
+    static const String KEY_DAYS;
+    static const String KEY_START_TIME;
+    static const String KEY_END_TIME;
 
-    static const String KEY_AUTOMATION;// = "automation";
-    static const String KEY_ENTRY;// = "entry";
-    static const String KEY_CONDITION_PROVIDERS;// = "manage_condition_providers";
+    static const String KEY_AUTOMATION;
+    static const String KEY_ENTRY;
+    static const String KEY_CONDITION_PROVIDERS;
 
-    static AutoPtr<SettingPrefWithCallback> PREF_ZEN_MODE;//
+    static AutoPtr<SettingPrefWithCallback> PREF_ZEN_MODE;
 
-    static const AutoPtr<ISimpleDateFormat> DAY_FORMAT;// = new SimpleDateFormat("EEE");
+    static const AutoPtr<ISimpleDateFormat> DAY_FORMAT;
 
     static const Boolean sInitStatic;
 
     // Enable indexing of searchable data
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;
 
-    AutoPtr<IHandler> mHandler;// = new Handler();
-    AutoPtr<SettingsObserver> mSettingsObserver;// = new SettingsObserver();
+    AutoPtr<IHandler> mHandler;
+    AutoPtr<SettingsObserver> mSettingsObserver;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IPackageManager> mPM;

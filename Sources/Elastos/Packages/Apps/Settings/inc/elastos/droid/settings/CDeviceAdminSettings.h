@@ -234,9 +234,9 @@ private:
         /* [in] */ IDeviceAdminInfo* adminInfo);
 
 protected:
-    static const String TAG;// = "DeviceAdminSettings";
+    static const String TAG;
 
-    static const Int32 DIALOG_WARNING;// = 1;
+    static const Int32 DIALOG_WARNING;
 
 private:
     AutoPtr<IDevicePolicyManager> mDPM;

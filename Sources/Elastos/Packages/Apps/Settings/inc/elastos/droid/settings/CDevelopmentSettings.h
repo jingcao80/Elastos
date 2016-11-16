@@ -411,82 +411,82 @@ public:
 private:
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;
 
-    static const String TAG;// = "DevelopmentSettings";
+    static const String TAG;
 
-    static const String ENABLE_ADB;// = "enable_adb";
-    static const String CLEAR_ADB_KEYS;// = "clear_adb_keys";
-    static const String ENABLE_TERMINAL;// = "enable_terminal";
-    static const String KEEP_SCREEN_ON;// = "keep_screen_on";
-    static const String BT_HCI_SNOOP_LOG;// = "bt_hci_snoop_log";
-    static const String ENABLE_OEM_UNLOCK;// = "oem_unlock_enable";
-    static const String ALLOW_MOCK_LOCATION;// = "allow_mock_location";
-    static const String HDCP_CHECKING_KEY;// = "hdcp_checking";
-    static const String HDCP_CHECKING_PROPERTY;// = "persist.sys.hdcp_checking";
-    static const String LOCAL_BACKUP_PASSWORD;// = "local_backup_password";
-    static const String HARDWARE_UI_PROPERTY;// = "persist.sys.ui.hw";
-    static const String MSAA_PROPERTY;// = "debug.egl.force_msaa";
-    static const String BUGREPORT;// = "bugreport";
-    static const String BUGREPORT_IN_POWER_KEY;// = "bugreport_in_power";
-    static const String OPENGL_TRACES_PROPERTY;// = "debug.egl.trace";
+    static const String ENABLE_ADB;
+    static const String CLEAR_ADB_KEYS;
+    static const String ENABLE_TERMINAL;
+    static const String KEEP_SCREEN_ON;
+    static const String BT_HCI_SNOOP_LOG;
+    static const String ENABLE_OEM_UNLOCK;
+    static const String ALLOW_MOCK_LOCATION;
+    static const String HDCP_CHECKING_KEY;
+    static const String HDCP_CHECKING_PROPERTY;
+    static const String LOCAL_BACKUP_PASSWORD;
+    static const String HARDWARE_UI_PROPERTY;
+    static const String MSAA_PROPERTY;
+    static const String BUGREPORT;
+    static const String BUGREPORT_IN_POWER_KEY;
+    static const String OPENGL_TRACES_PROPERTY;
 
-    static const String DEBUG_APP_KEY;// = "debug_app";
-    static const String WAIT_FOR_DEBUGGER_KEY;// = "wait_for_debugger";
-    static const String VERIFY_APPS_OVER_USB_KEY;// = "verify_apps_over_usb";
-    static const String DEBUG_VIEW_ATTRIBUTES;// = "debug_view_attributes";
-    static const String STRICT_MODE_KEY;// = "strict_mode";
-    static const String POINTER_LOCATION_KEY;// = "pointer_location";
-    static const String SHOW_TOUCHES_KEY;// = "show_touches";
-    static const String SHOW_SCREEN_UPDATES_KEY;// = "show_screen_updates";
-    static const String DISABLE_OVERLAYS_KEY;// = "disable_overlays";
-    static const String SIMULATE_COLOR_SPACE;// = "simulate_color_space";
-    static const String USE_NUPLAYER_KEY;// = "use_nuplayer";
-    static const String USB_AUDIO_KEY;// = "usb_audio";
-    static const String USE_AWESOMEPLAYER_PROPERTY;// = "persist.sys.media.use-awesome";
-    static const String SHOW_CPU_USAGE_KEY;// = "show_cpu_usage";
-    static const String FORCE_HARDWARE_UI_KEY;// = "force_hw_ui";
-    static const String FORCE_MSAA_KEY;// = "force_msaa";
-    static const String TRACK_FRAME_TIME_KEY;// = "track_frame_time";
-    static const String SHOW_NON_RECTANGULAR_CLIP_KEY;// = "show_non_rect_clip";
-    static const String SHOW_HW_SCREEN_UPDATES_KEY;// = "show_hw_screen_udpates";
-    static const String SHOW_HW_LAYERS_UPDATES_KEY;// = "show_hw_layers_udpates";
-    static const String DEBUG_HW_OVERDRAW_KEY;// = "debug_hw_overdraw";
-    static const String DEBUG_LAYOUT_KEY;// = "debug_layout";
-    static const String FORCE_RTL_LAYOUT_KEY;// = "force_rtl_layout_all_locales";
-    static const String WINDOW_ANIMATION_SCALE_KEY;// = "window_animation_scale";
-    static const String TRANSITION_ANIMATION_SCALE_KEY;// = "transition_animation_scale";
-    static const String ANIMATOR_DURATION_SCALE_KEY;// = "animator_duration_scale";
-    static const String OVERLAY_DISPLAY_DEVICES_KEY;// = "overlay_display_devices";
-    static const String DEBUG_DEBUGGING_CATEGORY_KEY;// = "debug_debugging_category";
-    static const String DEBUG_APPLICATIONS_CATEGORY_KEY;// = "debug_applications_category";
-    static const String WIFI_DISPLAY_CERTIFICATION_KEY;// = "wifi_display_certification";
-    static const String WIFI_VERBOSE_LOGGING_KEY;// = "wifi_verbose_logging";
-    static const String WIFI_AGGRESSIVE_HANDOVER_KEY;// = "wifi_aggressive_handover";
-    static const String WIFI_ALLOW_SCAN_WITH_TRAFFIC_KEY;// = "wifi_allow_scan_with_traffic";
-    static const String SELECT_LOGD_SIZE_KEY;// = "select_logd_size";
-    static const String SELECT_LOGD_SIZE_PROPERTY;// = "persist.logd.size";
-    static const String SELECT_LOGD_DEFAULT_SIZE_PROPERTY;// = "ro.logd.size";
+    static const String DEBUG_APP_KEY;
+    static const String WAIT_FOR_DEBUGGER_KEY;
+    static const String VERIFY_APPS_OVER_USB_KEY;
+    static const String DEBUG_VIEW_ATTRIBUTES;
+    static const String STRICT_MODE_KEY;
+    static const String POINTER_LOCATION_KEY;
+    static const String SHOW_TOUCHES_KEY;
+    static const String SHOW_SCREEN_UPDATES_KEY;
+    static const String DISABLE_OVERLAYS_KEY;
+    static const String SIMULATE_COLOR_SPACE;
+    static const String USE_NUPLAYER_KEY;
+    static const String USB_AUDIO_KEY;
+    static const String USE_AWESOMEPLAYER_PROPERTY;
+    static const String SHOW_CPU_USAGE_KEY;
+    static const String FORCE_HARDWARE_UI_KEY;
+    static const String FORCE_MSAA_KEY;
+    static const String TRACK_FRAME_TIME_KEY;
+    static const String SHOW_NON_RECTANGULAR_CLIP_KEY;
+    static const String SHOW_HW_SCREEN_UPDATES_KEY;
+    static const String SHOW_HW_LAYERS_UPDATES_KEY;
+    static const String DEBUG_HW_OVERDRAW_KEY;
+    static const String DEBUG_LAYOUT_KEY;
+    static const String FORCE_RTL_LAYOUT_KEY;
+    static const String WINDOW_ANIMATION_SCALE_KEY;
+    static const String TRANSITION_ANIMATION_SCALE_KEY;
+    static const String ANIMATOR_DURATION_SCALE_KEY;
+    static const String OVERLAY_DISPLAY_DEVICES_KEY;
+    static const String DEBUG_DEBUGGING_CATEGORY_KEY;
+    static const String DEBUG_APPLICATIONS_CATEGORY_KEY;
+    static const String WIFI_DISPLAY_CERTIFICATION_KEY;
+    static const String WIFI_VERBOSE_LOGGING_KEY;
+    static const String WIFI_AGGRESSIVE_HANDOVER_KEY;
+    static const String WIFI_ALLOW_SCAN_WITH_TRAFFIC_KEY;
+    static const String SELECT_LOGD_SIZE_KEY;
+    static const String SELECT_LOGD_SIZE_PROPERTY;
+    static const String SELECT_LOGD_DEFAULT_SIZE_PROPERTY;
 
-    static const String OPENGL_TRACES_KEY;// = "enable_opengl_traces";
+    static const String OPENGL_TRACES_KEY;
 
-    static const String IMMEDIATELY_DESTROY_ACTIVITIES_KEY;// = "immediately_destroy_activities";
+    static const String IMMEDIATELY_DESTROY_ACTIVITIES_KEY;
 
-    static const String APP_PROCESS_LIMIT_KEY;// = "app_process_limit";
+    static const String APP_PROCESS_LIMIT_KEY;
 
-    static const String SHOW_ALL_ANRS_KEY;// = "show_all_anrs";
+    static const String SHOW_ALL_ANRS_KEY;
 
-    static const String PROCESS_STATS;// = "proc_stats";
+    static const String PROCESS_STATS;
 
-    static const String TAG_CONFIRM_ENFORCE;// = "confirm_enforce";
+    static const String TAG_CONFIRM_ENFORCE;
 
-    static const String PACKAGE_MIME_TYPE;// = "application/vnd.android.package-archive";
+    static const String PACKAGE_MIME_TYPE;
 
-    static const String TERMINAL_APP_PACKAGE;// = "com.android.terminal";
+    static const String TERMINAL_APP_PACKAGE;
 
-    static const Int32 RESULT_DEBUG_APP;// = 1000;
+    static const Int32 RESULT_DEBUG_APP;
 
-    static const String PERSISTENT_DATA_BLOCK_PROP;// = "ro.frp.pst";
+    static const String PERSISTENT_DATA_BLOCK_PROP;
 
-    static String DEFAULT_LOG_RING_BUFFER_SIZE_IN_BYTES;// = "262144"; // 256K
+    static String DEFAULT_LOG_RING_BUFFER_SIZE_IN_BYTES;// 256K
 
     AutoPtr<IIWindowManager> mWindowManager;
     AutoPtr<IIBackupManager> mBackupManager;

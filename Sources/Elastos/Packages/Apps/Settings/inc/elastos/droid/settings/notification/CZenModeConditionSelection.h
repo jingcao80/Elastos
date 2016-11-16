@@ -72,7 +72,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        static const Int32 CONDITIONS;// = 1;
+        static const Int32 CONDITIONS;
 
         CZenModeConditionSelection* mHost;
     };
@@ -134,17 +134,17 @@ private:
         /* [in] */ ICondition* condition);
 
 private:
-    static const String TAG;// = "CZenModeConditionSelection";
-    static const Boolean DEBUG;// = TRUE;
+    static const String TAG;
+    static const Boolean DEBUG;
 
     AutoPtr<IINotificationManager> mNoMan;
-    AutoPtr<H> mHandler;// = new H();
+    AutoPtr<H> mHandler;
     AutoPtr<IContext> mContext;
     // List<Condition> mConditions;
     AutoPtr<IList> mConditions;
     AutoPtr<ICondition> mCondition;
 
-    AutoPtr<IIConditionListener> mListener;// = new IConditionListener->Stub()
+    AutoPtr<IIConditionListener> mListener;
 };
 
 } // namespace Applications

@@ -34,8 +34,8 @@ private:
     static CARAPI_(AutoPtr<ManagedServiceSettings::Config>) GetNotificationListenerConfig();
 
 private:
-    static const String TAG;//NotificationAccessSettings.class->GetSimpleName();
-    static const AutoPtr<ManagedServiceSettings::Config> CONFIG;// = GetNotificationListenerConfig();
+    static const String TAG;
+    static const AutoPtr<ManagedServiceSettings::Config> CONFIG;
 };
 
 } // namespace Applications

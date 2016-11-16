@@ -595,8 +595,8 @@ private:
         /* [in] */ IArrayList* titles); //ArrayList<String>
 
 private:
-    static const String TAG;// = "CTrustedCredentialsSettings";
-    static const String USER_ACTION;// = "com.android.settings.TRUSTED_CREDENTIALS_USER";
+    static const String TAG;
+    static const String USER_ACTION;
 
     AutoPtr<IUserManager> mUserManager;
 

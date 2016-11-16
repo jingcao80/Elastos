@@ -210,9 +210,9 @@ private:
         /* [in] */ const String& packageName);
 
 private:
-    static const String TAG;// = "CNotificationStation";
+    static const String TAG;
 
-    static const Boolean DEBUG;// = FALSE;
+    static const Boolean DEBUG;
 
     AutoPtr<IPackageManager> mPm;
     AutoPtr<IINotificationManager> mNoMan;

@@ -1192,7 +1192,7 @@ ECode CCryptKeeper::OnEditorAction(
         }
 
         // Now that we have the password clear the password field.
-        v->SetText(NULL);
+        v->SetText((ICharSequence*)NULL);
 
         // Disable the password entry and back keypress while checking the password. These
         // we either be re-enabled if the password was wrong or after the cooldown period.

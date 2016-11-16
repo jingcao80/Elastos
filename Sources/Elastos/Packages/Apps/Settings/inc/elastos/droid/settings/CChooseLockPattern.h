@@ -184,11 +184,11 @@ public:
 
             CARAPI OnPatternCleared();
 
-            CARAPI OnPatternCellAdded(
-                /* [in] */ IList* pattern);//List<Cell>
-
             CARAPI OnPatternDetected(
                 /* [in] */ IList* pattern); //List<LockPatternView.Cell>
+
+            CARAPI OnPatternCellAdded(
+                /* [in] */ IList* pattern);//List<Cell>
 
         private:
             CARAPI_(void) PatternInProgress();
@@ -280,8 +280,6 @@ public:
         CARAPI_(void) UpdateStage(
             /* [in] */ Stage* stage);
 
-        static CARAPI_(Boolean) InitStatic();
-
     private:
         // clear the wrong pattern unless they have started a new one
         // already
@@ -290,10 +288,10 @@ public:
         CARAPI_(void) SaveChosenPatternAndFinish();
 
     public:
-        static const Int32 CONFIRM_EXISTING_REQUEST;// = 55;
+        static const Int32 CONFIRM_EXISTING_REQUEST;
 
         // how Int64 after a confirmation message is shown before moving on
-        static const Int32 INFORMATION_MSG_TIMEOUT_MS;// = 3000;
+        static const Int32 INFORMATION_MSG_TIMEOUT_MS;
 
     protected:
         AutoPtr<ITextView> mHeaderText;
@@ -310,17 +308,17 @@ public:
 
     private:
         // how Int64 we wait to clear a wrong pattern
-        static const Int32 WRONG_PATTERN_CLEAR_TIMEOUT_MS;// = 2000;
+        static const Int32 WRONG_PATTERN_CLEAR_TIMEOUT_MS;
 
         static const Int32 ID_EMPTY_MESSAGE = -1;
 
-        static const String KEY_UI_STAGE;// = "uiStage";
-        static const String KEY_PATTERN_CHOICE;// = "chosenPattern";
+        static const String KEY_UI_STAGE;
+        static const String KEY_PATTERN_CHOICE;
 
         AutoPtr<ITextView> mFooterLeftButton;
         AutoPtr<ITextView> mFooterRightButton;
 
-        Byte mPatternSize;// = ILockPatternUtils::PATTERN_SIZE_DEFAULT;
+        Byte mPatternSize;
 
         /**
          * The patten used during the help screen to show how to draw a pattern.
@@ -328,8 +326,8 @@ public:
         AutoPtr<IList> mAnimatePattern;// List<LockPatternView.Cell>
 
 
-        AutoPtr<Stage> mUiStage;// = Stage_Introduction;
-        Boolean mDone;// = FALSE;
+        AutoPtr<Stage> mUiStage;
+        Boolean mDone;
 
         AutoPtr<ClearPatternRunnable> mClearPatternRunnable;
 
@@ -382,7 +380,7 @@ public:
      * behavior. So, now an activity does not finish itself until it gets this
      * result.
      */
-    static const Int32 RESULT_FINISHED;// = RESULT_FIRST_USER;
+    static const Int32 RESULT_FINISHED;
 };
 
 } // namespace Settings

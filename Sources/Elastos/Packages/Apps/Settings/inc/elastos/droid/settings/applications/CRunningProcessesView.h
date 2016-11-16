@@ -257,7 +257,7 @@ public:
 
     AutoPtr<IRunnable> mDataAvail;
 
-    AutoPtr<StringBuilder> mBuilder;// = new StringBuilder(128);
+    AutoPtr<StringBuilder> mBuilder;
 
     AutoPtr<RunningState::BaseItem> mCurSelected;
 

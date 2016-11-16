@@ -60,7 +60,7 @@ private:
         /* [in] */ const String& newPw);
 
 public:
-    static const String TAG;// = "CSetFullBackupPassword";
+    static const String TAG;
 
     AutoPtr<IIBackupManager> mBackupManager;
     AutoPtr<ITextView> mCurrentPw;
@@ -69,7 +69,7 @@ public:
     AutoPtr<IButton> mCancel;
     AutoPtr<IButton> mSet;
 
-    AutoPtr<IViewOnClickListener> mButtonListener;// = new MyOnClickListener(this);
+    AutoPtr<IViewOnClickListener> mButtonListener;
 };
 
 } // namespace Settings

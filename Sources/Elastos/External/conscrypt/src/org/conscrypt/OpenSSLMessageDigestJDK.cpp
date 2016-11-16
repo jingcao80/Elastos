@@ -1,6 +1,7 @@
 
 #include "_Org.Conscrypt.h"
 #include "OpenSSLMessageDigestJDK.h"
+#include "COpenSSLDigestContext.h"
 #include "COpenSSLMessageDigestJDK.h"
 #include "OpenSSLDigestContext.h"
 #include "NativeCrypto.h"
@@ -205,9 +206,10 @@ void OpenSSLMessageDigestJDK::ResetContext()
 {
     Int64 ctx = 0;
     NativeCrypto::EVP_MD_CTX_create(&ctx);
-    AutoPtr<OpenSSLDigestContext> ctxLocal = new OpenSSLDigestContext();
-    ctxLocal->constructor(ctx);
-    NativeCrypto::EVP_MD_CTX_init(IOpenSSLDigestContext::Probe(ctxLocal));
+
+    AutoPtr<IOpenSSLDigestContext> ctxLocal;
+    COpenSSLDigestContext::New(ctx, (IOpenSSLDigestContext**)&ctxLocal);
+    NativeCrypto::EVP_MD_CTX_init(ctxLocal);
     Int32 res = 0;
     NativeCrypto::EVP_DigestInit(ctxLocal, mEvp_md, &res);
     mCtx = ctxLocal;

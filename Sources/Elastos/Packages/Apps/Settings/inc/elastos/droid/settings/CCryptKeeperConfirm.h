@@ -11,12 +11,12 @@ using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::Fragment;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Core::Runnable;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IButton;
+using Elastos::Core::Runnable;
 
 namespace Elastos {
 namespace Droid {
@@ -102,7 +102,7 @@ private:
     CARAPI_(void) EstablishFinalConfirmationState();
 
 private:
-    static const String TAG;// = "CCryptKeeperConfirm";
+    static const String TAG;
 
     AutoPtr<IView> mContentView;
     AutoPtr<IButton> mFinalButton;

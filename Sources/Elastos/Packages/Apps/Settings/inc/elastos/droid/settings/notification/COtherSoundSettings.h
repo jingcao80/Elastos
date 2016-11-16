@@ -146,26 +146,26 @@ private:
         /* [in] */ IContext* context);
 
 private:
-    static const String TAG;// = "COtherSoundSettings";
+    static const String TAG;
 
-    static const Int32 DEFAULT_ON;// = 1;
+    static const Int32 DEFAULT_ON;
 
-    static const Int32 EMERGENCY_TONE_SILENT;// = 0;
-    static const Int32 EMERGENCY_TONE_ALERT;// = 1;
-    static const Int32 EMERGENCY_TONE_VIBRATE;// = 2;
-    static const Int32 DEFAULT_EMERGENCY_TONE;// = EMERGENCY_TONE_SILENT;
+    static const Int32 EMERGENCY_TONE_SILENT;
+    static const Int32 EMERGENCY_TONE_ALERT;
+    static const Int32 EMERGENCY_TONE_VIBRATE;
+    static const Int32 DEFAULT_EMERGENCY_TONE;
 
-    static const Int32 DOCK_AUDIO_MEDIA_DISABLED;// = 0;
-    static const Int32 DOCK_AUDIO_MEDIA_ENABLED;// = 1;
-    static const Int32 DEFAULT_DOCK_AUDIO_MEDIA;// = DOCK_AUDIO_MEDIA_DISABLED;
+    static const Int32 DOCK_AUDIO_MEDIA_DISABLED;
+    static const Int32 DOCK_AUDIO_MEDIA_ENABLED;
+    static const Int32 DEFAULT_DOCK_AUDIO_MEDIA;
 
-    static const String KEY_DIAL_PAD_TONES;// = "dial_pad_tones";
-    static const String KEY_SCREEN_LOCKING_SOUNDS;// = "screen_locking_sounds";
-    static const String KEY_DOCKING_SOUNDS;// = "docking_sounds";
-    static const String KEY_TOUCH_SOUNDS;// = "touch_sounds";
-    static const String KEY_VIBRATE_ON_TOUCH;// = "vibrate_on_touch";
-    static const String KEY_DOCK_AUDIO_MEDIA;// = "dock_audio_media";
-    static const String KEY_EMERGENCY_TONE;// = "emergency_tone";
+    static const String KEY_DIAL_PAD_TONES;
+    static const String KEY_SCREEN_LOCKING_SOUNDS;
+    static const String KEY_DOCKING_SOUNDS;
+    static const String KEY_TOUCH_SOUNDS;
+    static const String KEY_VIBRATE_ON_TOUCH;
+    static const String KEY_DOCK_AUDIO_MEDIA;
+    static const String KEY_EMERGENCY_TONE;
 
     static AutoPtr<ISettingPref> PREF_DIAL_PAD_TONES;
 
@@ -187,7 +187,7 @@ private:
 
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;
 
-    AutoPtr<SettingsObserver> mSettingsObserver;// = new SettingsObserver();
+    AutoPtr<SettingsObserver> mSettingsObserver;
 
     AutoPtr<IContext> mContext;
 };

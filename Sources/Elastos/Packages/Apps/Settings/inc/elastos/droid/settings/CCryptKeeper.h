@@ -20,7 +20,6 @@ using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Telecom::ITelecomManager;
@@ -38,6 +37,7 @@ using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::IOnEditorActionListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::IInteger32;
+using Elastos::Core::Runnable;
 using Elastos::Utility::IList;
 
 namespace Elastos {

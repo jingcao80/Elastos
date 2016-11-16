@@ -113,12 +113,13 @@ ECode MessageDigestImpl::Clone(
     VALIDATE_NOT_NULL(object)
     AutoPtr<IInterface> cloneObj;
     ICloneable::Probe(mSpiImpl)->Clone((IInterface**)&cloneObj);
-    MessageDigestSpi* spi = (MessageDigestSpi*)IObject::Probe(cloneObj);
+    IMessageDigestSpi* spi = IMessageDigestSpi::Probe(cloneObj);
     AutoPtr<IProvider> provider;
     GetProvider((IProvider**)&provider);
     String algorithm;
     GetAlgorithm(&algorithm);
-    *object = (IMessageDigest*)new MessageDigestImpl(spi, provider, algorithm);
+    AutoPtr<IMessageDigest> result = new MessageDigestImpl(spi, provider, algorithm);
+    *object = result;
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
@@ -160,7 +161,9 @@ ECode MessageDigest::GetInstance(
         REFCOUNT_ADD(*instance);
         return NOERROR;
     }
-    *instance = new MessageDigestImpl(IMessageDigestSpi::Probe(spi), provider, algorithm);
+
+    AutoPtr<IMessageDigest> result = new MessageDigestImpl(IMessageDigestSpi::Probe(spi), provider, algorithm);
+    *instance = result;
     REFCOUNT_ADD(*instance);
     return NOERROR;
 }
@@ -211,7 +214,9 @@ ECode MessageDigest::GetInstance(
         REFCOUNT_ADD(*instance);
         return NOERROR;
     }
-    *instance = new MessageDigestImpl(IMessageDigestSpi::Probe(spi), provider, algorithm);
+
+    AutoPtr<IMessageDigest> result = new MessageDigestImpl(IMessageDigestSpi::Probe(spi), provider, algorithm);
+    *instance = result;
     REFCOUNT_ADD(*instance);
     return NOERROR;
 }

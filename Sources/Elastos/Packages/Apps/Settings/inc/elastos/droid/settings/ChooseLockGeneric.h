@@ -147,9 +147,9 @@ public:
         static const String KEY_UNLOCK_SET_OFF;
         static const String KEY_UNLOCK_SET_NONE;
         static const String KEY_UNLOCK_SET_BIOMETRIC_WEAK;
-        static const String KEY_UNLOCK_SET_PIN;// = "unlock_set_pin";
-        static const String KEY_UNLOCK_SET_PASSWORD;// = "unlock_set_password";
-        static const String KEY_UNLOCK_SET_PATTERN;// = "unlock_set_pattern";
+        static const String KEY_UNLOCK_SET_PIN;
+        static const String KEY_UNLOCK_SET_PASSWORD;
+        static const String KEY_UNLOCK_SET_PATTERN;
         static const Int32 CONFIRM_EXISTING_REQUEST;
         static const Int32 FALLBACK_REQUEST;
         static const Int32 ENABLE_ENCRYPTION_REQUEST;

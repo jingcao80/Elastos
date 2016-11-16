@@ -87,17 +87,17 @@ private:
         /* [in] */ Int32 region);
 
 public:
-    static const Int32 REGION_RED;// = 1<<0;
-    static const Int32 REGION_YELLOW;// = 1<<1;
-    static const Int32 REGION_GREEN;// = 1<<2;
-    static const Int32 REGION_ALL;// = REGION_RED | REGION_YELLOW | REGION_GREEN;
+    static const Int32 REGION_RED;
+    static const Int32 REGION_YELLOW;
+    static const Int32 REGION_GREEN;
+    static const Int32 REGION_ALL;
 
 protected:
-    static const Int32 LEFT_COLOR;// = 0xff009688;
-    static const Int32 MIDDLE_COLOR;// = 0xff009688;
-    static const Int32 RIGHT_COLOR;// = 0xffced7db;
-    static const Int32 GRAY_COLOR;// = 0xff555555;
-    static const Int32 WHITE_COLOR;// = 0xffffffff;
+    static const Int32 LEFT_COLOR;
+    static const Int32 MIDDLE_COLOR;
+    static const Int32 RIGHT_COLOR;
+    static const Int32 GRAY_COLOR;
+    static const Int32 WHITE_COLOR;
 
     AutoPtr<IRect> mRect;
     AutoPtr<IPaint> mPaint;

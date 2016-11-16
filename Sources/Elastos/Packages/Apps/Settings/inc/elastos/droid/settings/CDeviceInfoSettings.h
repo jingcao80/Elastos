@@ -131,38 +131,38 @@ private:
         /* [in] */ IContext* context);
 
 protected:
-    static const Int32 TAPS_TO_BE_A_DEVELOPER;// = 7;
+    static const Int32 TAPS_TO_BE_A_DEVELOPER;
 
-    AutoPtr< ArrayOf<Int64> > mHits;// = new Int64[3];
+    AutoPtr< ArrayOf<Int64> > mHits;
     Int32 mDevHitCountdown;
     AutoPtr<IToast> mDevHitToast;
 
 private:
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;
 
-    static const String TAG;// = "CDeviceInfoSettings";
-    static const String FILENAME_PROC_VERSION;// = "/proc/version";
-    static const String FILENAME_MSV;// = "/sys/board_properties/soc/msv";
+    static const String TAG;
+    static const String FILENAME_PROC_VERSION;
+    static const String FILENAME_MSV;
 
-    static const String KEY_CONTAINER;// = "container";
-    static const String KEY_REGULATORY_INFO;// = "regulatory_info";
-    static const String KEY_TERMS;// = "terms";
-    static const String KEY_LICENSE;// = "license";
-    static const String KEY_COPYRIGHT;// = "copyright";
-    static const String KEY_SYSTEM_UPDATE_SETTINGS;// = "system_update_settings";
-    static const String PROPERTY_URL_SAFETYLEGAL;// = "ro.url.safetylegal";
-    static const String PROPERTY_SELINUX_STATUS;// = "ro.build.selinux";
-    static const String KEY_KERNEL_VERSION;// = "kernel_version";
-    static const String KEY_BUILD_NUMBER;// = "build_number";
-    static const String KEY_DEVICE_MODEL;// = "device_model";
-    static const String KEY_SELINUX_STATUS;// = "selinux_status";
-    static const String KEY_BASEBAND_VERSION;// = "baseband_version";
-    static const String KEY_FIRMWARE_VERSION;// = "firmware_version";
-    static const String KEY_UPDATE_SETTING;// = "additional_system_update_settings";
-    static const String KEY_EQUIPMENT_ID;// = "fcc_equipment_id";
-    static const String PROPERTY_EQUIPMENT_ID;// = "ro.ril.fccid";
-    static const String KEY_DEVICE_FEEDBACK;// = "device_feedback";
-    static const String KEY_SAFETY_LEGAL;// = "safetylegal";
+    static const String KEY_CONTAINER;
+    static const String KEY_REGULATORY_INFO;
+    static const String KEY_TERMS;
+    static const String KEY_LICENSE;
+    static const String KEY_COPYRIGHT;
+    static const String KEY_SYSTEM_UPDATE_SETTINGS;
+    static const String PROPERTY_URL_SAFETYLEGAL;
+    static const String PROPERTY_SELINUX_STATUS;
+    static const String KEY_KERNEL_VERSION;
+    static const String KEY_BUILD_NUMBER;
+    static const String KEY_DEVICE_MODEL;
+    static const String KEY_SELINUX_STATUS;
+    static const String KEY_BASEBAND_VERSION;
+    static const String KEY_FIRMWARE_VERSION;
+    static const String KEY_UPDATE_SETTING;
+    static const String KEY_EQUIPMENT_ID;
+    static const String PROPERTY_EQUIPMENT_ID;
+    static const String KEY_DEVICE_FEEDBACK;
+    static const String KEY_SAFETY_LEGAL;
 };
 
 } // namespace Settings

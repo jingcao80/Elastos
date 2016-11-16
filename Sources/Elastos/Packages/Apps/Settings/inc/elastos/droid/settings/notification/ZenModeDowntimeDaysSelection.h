@@ -64,9 +64,9 @@ public:
     static const AutoPtr< ArrayOf<Int32> > DAYS;
 
 private:
-    static const AutoPtr<ISimpleDateFormat> DAY_FORMAT;// = new SimpleDateFormat("EEEE");
+    static const AutoPtr<ISimpleDateFormat> DAY_FORMAT;
 
-    AutoPtr<ISparseBooleanArray> mDays;// = new SparseBooleanArray();
+    AutoPtr<ISparseBooleanArray> mDays;
     AutoPtr<ILinearLayout> mLayout;
 };
 

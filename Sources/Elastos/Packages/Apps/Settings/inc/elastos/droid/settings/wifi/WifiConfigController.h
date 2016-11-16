@@ -15,7 +15,6 @@ using Elastos::Droid::Net::IStaticIpConfiguration;
 using Elastos::Droid::Net::IpConfigurationIpAssignment;
 using Elastos::Droid::Net::IpConfigurationProxySettings;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Core::Runnable;
 using Elastos::Droid::Text::ITextWatcher;
 using Elastos::Droid::Text::INoCopySpan;
 using Elastos::Droid::Text::IEditable;
@@ -29,6 +28,7 @@ using Elastos::Droid::Widget::ICompoundButtonOnCheckedChangeListener;
 using Elastos::Droid::Widget::ISpinner;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::IWifiConfiguration;
+using Elastos::Core::Runnable;
 using Elastos::Net::IInet4Address;
 
 namespace Elastos {

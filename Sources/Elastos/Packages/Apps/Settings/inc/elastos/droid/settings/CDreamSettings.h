@@ -297,11 +297,11 @@ public:
     static const Boolean DEBUG = FALSE;
 
 private:
-    static const String TAG;// = DreamSettings.class->GetSimpleName();
-    static const Int32 DIALOG_WHEN_TO_DREAM;// = 1;
-    static const String PACKAGE_SCHEME;// = "package";
+    static const String TAG;
+    static const Int32 DIALOG_WHEN_TO_DREAM;
+    static const String PACKAGE_SCHEME;
 
-    AutoPtr<PackageReceiver> mPackageReceiver;// = new PackageReceiver();
+    AutoPtr<PackageReceiver> mPackageReceiver;
 
     IContext* mContext;
     AutoPtr<DreamBackend> mBackend;

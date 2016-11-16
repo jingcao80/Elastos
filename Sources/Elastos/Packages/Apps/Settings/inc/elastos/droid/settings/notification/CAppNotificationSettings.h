@@ -107,18 +107,18 @@ private:
         /* [in] */ Int32 uid);
 
 public:
-    static const String EXTRA_HAS_SETTINGS_INTENT;// = "has_settings_intent";
-    static const String EXTRA_SETTINGS_INTENT;// = "settings_intent";
+    static const String EXTRA_HAS_SETTINGS_INTENT;
+    static const String EXTRA_SETTINGS_INTENT;
 
 private:
-    static const String TAG;// = "AppNotificationSettings";
-    static const Boolean DEBUG;// = Logger::IsLoggable(TAG, Logger::__DEBUG);
+    static const String TAG;
+    static const Boolean DEBUG;
 
-    static const String KEY_BLOCK;// = "block";
-    static const String KEY_PRIORITY;// = "priority";
-    static const String KEY_SENSITIVE;// = "sensitive";
+    static const String KEY_BLOCK;
+    static const String KEY_PRIORITY;
+    static const String KEY_SENSITIVE;
 
-    AutoPtr<CNotificationAppList::Backend> mBackend;// = new Backend();
+    AutoPtr<CNotificationAppList::Backend> mBackend;
 
     AutoPtr<IContext> mContext;
     AutoPtr<ISwitchPreference> mBlock;

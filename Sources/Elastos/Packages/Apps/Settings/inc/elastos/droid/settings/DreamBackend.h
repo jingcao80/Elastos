@@ -130,7 +130,7 @@ private:
         /* [in] */ ArrayOf<IInterface*>* args);
 
 private:
-    static const String TAG;// = DreamSettings.class->GetSimpleName() + ".Backend";
+    static const String TAG;
 
     IContext* mContext;
     AutoPtr<IIDreamManager> mDreamManager;

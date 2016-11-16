@@ -236,7 +236,7 @@ public:
     // final ArrayList<ActiveDetail> mActiveDetails = new ArrayList<ActiveDetail>();
     AutoPtr<IArrayList> mActiveDetails;
 
-    AutoPtr<StringBuilder> mBuilder;// = new StringBuilder(128);
+    AutoPtr<StringBuilder> mBuilder;
 };
 
 } // namespace Applications

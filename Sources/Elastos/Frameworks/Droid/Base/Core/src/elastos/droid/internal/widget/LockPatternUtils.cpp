@@ -937,7 +937,7 @@ Boolean LockPatternUtils::IsDeviceEncrypted()
         return TRUE;
     }
     if (FAILED(mountService->GetPasswordType(&type))) {
-        Slogger::E(TAG, "Error getting encryption state");
+        Slogger::E(TAG, "Error getting encryption type");
         return TRUE;
     }
 
@@ -949,9 +949,7 @@ Boolean LockPatternUtils::IsDeviceEncryptionEnabled()
 {
     String status;
     SystemProperties::Get(String("ro.crypto.state"), String("unsupported"), &status);
-    Slogger::I(TAG, " >> TODO  set property ro.crypto.state to encrypted");
-    return TRUE;
-    // return status.EqualsIgnoreCase("encrypted");
+    return status.EqualsIgnoreCase("encrypted");
 }
 
 ECode LockPatternUtils::ClearEncryptionPassword()

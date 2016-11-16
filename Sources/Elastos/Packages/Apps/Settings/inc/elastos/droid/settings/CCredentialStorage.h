@@ -296,18 +296,18 @@ private:
     CARAPI_(Boolean) ConfirmKeyGuard();
 
 public:
-    static const String ACTION_UNLOCK;// = "com.android.credentials.UNLOCK";
-    static const String ACTION_INSTALL;// = "com.android.credentials.INSTALL";
-    static const String ACTION_RESET;// = "com.android.credentials.RESET";
+    static const String ACTION_UNLOCK;
+    static const String ACTION_INSTALL;
+    static const String ACTION_RESET;
 
     // This is the minimum acceptable password quality.  If the current password quality is
     // lower than this, keystore should not be activated.
-    static const Int32 MIN_PASSWORD_QUALITY;// = IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING;
+    static const Int32 MIN_PASSWORD_QUALITY;
 
 private:
-    static const String TAG;// = "CCredentialStorage";
+    static const String TAG;
 
-    static const Int32 CONFIRM_KEY_GUARD_REQUEST;// = 1;
+    static const Int32 CONFIRM_KEY_GUARD_REQUEST;
 
     AutoPtr<IKeyStore> mKeyStore;
 

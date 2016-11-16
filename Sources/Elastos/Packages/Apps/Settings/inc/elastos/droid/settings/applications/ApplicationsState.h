@@ -250,7 +250,7 @@ public:
     protected:
 
         // Rebuilding of app list.  Synchronized on mRebuildSync.
-        AutoPtr<Object> mRebuildSync;// = new Object();
+        AutoPtr<Object> mRebuildSync;
         Boolean mRebuildRequested;
         Boolean mRebuildAsync;
         AutoPtr<IApplicationsStateAppFilter> mRebuildFilter;
@@ -455,16 +455,15 @@ public:
 
 protected:
     static const String TAG;
-    static const Boolean DEBUG;// = FALSE;
-    static const Boolean DEBUG_LOCKING;// = FALSE;
+    static const Boolean DEBUG;
+    static const Boolean DEBUG_LOCKING;
 
-    static const Int32 SIZE_UNKNOWN;// = -1;
-    static const Int32 SIZE_INVALID;// = -2;
+    static const Int32 SIZE_UNKNOWN;
+    static const Int32 SIZE_INVALID;
 
     static const AutoPtr<IPattern> REMOVE_DIACRITICALS_PATTERN;
-           // = Pattern->Compile("\\p{InCombiningDiacriticalMarks}+");
 
-    static AutoPtr<Object> sLock;// = new Object();
+    static AutoPtr<Object> sLock;
     static AutoPtr<ApplicationsState> sInstance;
 
     AutoPtr<IContext> mContext;
@@ -477,20 +476,20 @@ protected:
 
     // Information about all applications.  Synchronize on mEntriesMap
     // to protect access to these.
-    AutoPtr<IArrayList> /*ArrayList<Session>*/ mSessions;// = new ArrayList<Session>();
-    AutoPtr<IArrayList> /*ArrayList<Session>*/ mRebuildingSessions;// = new ArrayList<Session>();
-    AutoPtr<InterestingConfigChanges> mInterestingConfigChanges;// = new InterestingConfigChanges();
-    AutoPtr<IHashMap> /*HashMap<String, AppEntry>*/ mEntriesMap;// = new HashMap<String, AppEntry>();
-    AutoPtr<IArrayList> /*ArrayList<AppEntry>*/ mAppEntries;// = new ArrayList<AppEntry>();
-    AutoPtr<IList> /*List<ApplicationInfo>*/ mApplications;// = new ArrayList<ApplicationInfo>();
+    AutoPtr<IArrayList> /*ArrayList<Session>*/ mSessions;
+    AutoPtr<IArrayList> /*ArrayList<Session>*/ mRebuildingSessions;
+    AutoPtr<InterestingConfigChanges> mInterestingConfigChanges;
+    AutoPtr<IHashMap> /*HashMap<String, AppEntry>*/ mEntriesMap;
+    AutoPtr<IArrayList> /*ArrayList<AppEntry>*/ mAppEntries;
+    AutoPtr<IList> /*List<ApplicationInfo>*/ mApplications;
     Int64 mCurId;// = 1;
     String mCurComputingSizePkg;
     Boolean mSessionsChanged;
 
     // Temporary for dispatching session callbacks.  Only touched by main thread.
-    AutoPtr<IArrayList> /*ArrayList<Session>*/ mActiveSessions;// = new ArrayList<Session>();
+    AutoPtr<IArrayList> /*ArrayList<Session>*/ mActiveSessions;
 
-    AutoPtr<MainHandler> mMainHandler;// = new MainHandler();
+    AutoPtr<MainHandler> mMainHandler;
 
     AutoPtr<IHandlerThread> mThread;
     AutoPtr<BackgroundHandler> mBackgroundHandler;
