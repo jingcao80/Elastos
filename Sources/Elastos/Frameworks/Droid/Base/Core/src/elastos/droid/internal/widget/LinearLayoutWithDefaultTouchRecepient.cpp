@@ -48,7 +48,7 @@ ECode LinearLayoutWithDefaultTouchRecepient::DispatchTouchEvent(
         return LinearLayout::DispatchTouchEvent(ev, result);
     }
 
-    if (LinearLayout::DispatchTouchEvent(ev, result)) {
+    if (LinearLayout::DispatchTouchEvent(ev, result), *result) {
         *result = TRUE;
         return NOERROR;
     }
