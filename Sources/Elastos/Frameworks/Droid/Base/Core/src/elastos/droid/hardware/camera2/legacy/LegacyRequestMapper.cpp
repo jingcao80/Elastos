@@ -52,9 +52,9 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
     AutoPtr<IParameters> params;
     legacyRequest->GetParameters((IParameters**)&params);
 
-    AutoPtr<IInterface> obj;
-    characteristics->Get(CameraCharacteristics::SENSOR_INFO_ACTIVE_ARRAY_SIZE, (IInterface**)&obj);
-    AutoPtr<IRect> activeArray = IRect::Probe(obj);
+    AutoPtr<IInterface> arrayObj;
+    characteristics->Get(CameraCharacteristics::SENSOR_INFO_ACTIVE_ARRAY_SIZE, (IInterface**)&arrayObj);
+    AutoPtr<IRect> activeArray = IRect::Probe(arrayObj);
 
     /*
      * scaler.cropRegion
@@ -89,9 +89,8 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         ParamsUtils::GetOrDefault(request,
                 CaptureRequest::COLOR_CORRECTION_ABERRATION_MODE,
                 /*defaultValue*/TO_IINTERFACE(res), (IInterface**)&obj);
-        AutoPtr<IInteger32> intObj = IInteger32::Probe(obj);
         Int32 aberrationMode;
-        intObj->GetValue(&aberrationMode);
+        IInteger32::Probe(obj)->GetValue(&aberrationMode);
 
         if (aberrationMode != ICameraMetadata::COLOR_CORRECTION_ABERRATION_MODE_FAST) {
             Logger::W(TAG, "convertRequestToMetadata - Ignoring unsupported "
@@ -107,10 +106,10 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
         AutoPtr<IInterface> obj;
         request->Get(CaptureRequest::CONTROL_AE_ANTIBANDING_MODE, (IInterface**)&obj);
         AutoPtr<IInteger32> antiBandingMode = IInteger32::Probe(obj);
-        Int32 value;
-        antiBandingMode->GetValue(&value);
         String legacyMode;
         if (antiBandingMode != NULL) {
+            Int32 value;
+            antiBandingMode->GetValue(&value);
             legacyMode = ConvertAeAntiBandingModeToLegacy(value);
         }
         else {
@@ -119,18 +118,13 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             AutoPtr<IList> list;
             Arrays::AsList(values, (IList**)&list);
             AutoPtr<ArrayOf<IInterface*> > values2 = ArrayOf<IInterface*>::Alloc(4);
-            AutoPtr<ICharSequence> charObj1 = CoreUtils::Convert(IParameters::ANTIBANDING_AUTO);
-            AutoPtr<ICharSequence> charObj2 = CoreUtils::Convert(IParameters::ANTIBANDING_OFF);
-            AutoPtr<ICharSequence> charObj3 = CoreUtils::Convert(IParameters::ANTIBANDING_50HZ);
-            AutoPtr<ICharSequence> charObj4 = CoreUtils::Convert(IParameters::ANTIBANDING_60HZ);
-            values2->Set(0, TO_IINTERFACE(charObj1));
-            values2->Set(1, TO_IINTERFACE(charObj2));
-            values2->Set(2, TO_IINTERFACE(charObj3));
-            values2->Set(3, TO_IINTERFACE(charObj4));
+            values2->Set(0, CoreUtils::Convert(IParameters::ANTIBANDING_AUTO));
+            values2->Set(1, CoreUtils::Convert(IParameters::ANTIBANDING_OFF));
+            values2->Set(2, CoreUtils::Convert(IParameters::ANTIBANDING_50HZ));
+            values2->Set(3, CoreUtils::Convert(IParameters::ANTIBANDING_60HZ));
             AutoPtr<IInterface> tmp;
             ListUtils::ListSelectFirstFrom(list, values2, (IInterface**)&tmp);
-            AutoPtr<ICharSequence> strObj = ICharSequence::Probe(tmp);
-            strObj->ToString(&legacyMode);
+            legacyMode = Object::ToString(tmp);
         }
 
         if (!legacyMode.IsNull()) {
@@ -162,14 +156,14 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
 
             // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
             if (maxNumMeteringAreas > 0) {
+                ICameraArea* ca;
                 Int32 size = 0;
                 meteringAreaList->GetSize(&size);
                 AutoPtr< ArrayOf<ICameraArea*> > array = ArrayOf<ICameraArea*>::Alloc(size);
                 for (Int32 i = 0; i < size; ++i) {
-                    AutoPtr<IInterface> obj;
+                    obj = NULL;
                     meteringAreaList->Get(i, (IInterface**)&obj);
-                    assert(obj != NULL);
-                    ICameraArea* ca = ICameraArea::Probe(obj);
+                    ca = ICameraArea::Probe(obj);
                     assert(ca != NULL);
                     array->Set(i, ca);
                 }
@@ -189,14 +183,14 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
 
             // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
             if (maxNumFocusAreas > 0) {
+                ICameraArea* ca;
                 Int32 size = 0, i = 0;
                 focusAreaList->GetSize(&size);
                 AutoPtr< ArrayOf<ICameraArea*> > array = ArrayOf<ICameraArea*>::Alloc(size);
                 for (Int32 i = 0; i < size; ++i) {
-                    AutoPtr<IInterface> obj;
+                    obj = NULL;
                     focusAreaList->Get(i, (IInterface**)&obj);
-                    assert(obj != NULL);
-                    ICameraArea* ca = ICameraArea::Probe(obj);
+                    ca = ICameraArea::Probe(obj);
                     assert(ca != NULL);
                     array->Set(i, ca);
                 }

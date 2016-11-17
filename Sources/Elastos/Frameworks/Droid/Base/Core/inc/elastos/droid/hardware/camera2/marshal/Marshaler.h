@@ -114,7 +114,7 @@ protected:
      * @throws NullPointerException if any args were {@code null}
      * @throws UnsupportedOperationException if the type mapping was not supported
      */
-    CARAPI constructor(
+    virtual CARAPI constructor(
         /* [in] */ IMarshalQueryable* query,
         /* [in] */ ITypeReference* typeReference,
         /* [in] */ Int32 nativeType);

@@ -152,7 +152,7 @@ ECode Preconditions::CheckArgumentInRange(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (value < lower) {
-        Logger::E(TAG, "%s is out of range of [%f, %f] (too low)", valueName.string(), lower, upper);
+        Logger::E(TAG, "%s (%.2f) is out of range of [%f, %f] (too low)", valueName.string(), value, lower, upper);
         android::CallStack stack;
         stack.update();
         Logger::E(TAG, "%s, E_ILLEGAL_ARGUMENT_EXCEPTION, backtrace:\n%s",
@@ -160,7 +160,7 @@ ECode Preconditions::CheckArgumentInRange(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (value > upper) {
-        Logger::E(TAG, "%s is out of range of [%f, %f] (too high)", valueName.string(), lower, upper);
+        Logger::E(TAG, "%s (%.2f) is out of range of [%f, %f] (too high)", valueName.string(), value, lower, upper);
         android::CallStack stack;
         stack.update();
         Logger::E(TAG, "%s, E_ILLEGAL_ARGUMENT_EXCEPTION, backtrace:\n%s",
@@ -178,7 +178,7 @@ ECode Preconditions::CheckArgumentInRange(
     /* [in] */ const String& valueName)
 {
     if (value < lower) {
-        Logger::E(TAG, "%s is out of range of [%d, %d] (too low)", valueName.string(), lower, upper);
+        Logger::E(TAG, "%s (%d) is out of range of [%d, %d] (too low)", valueName.string(), value, lower, upper);
         android::CallStack stack;
         stack.update();
         Logger::E(TAG, "%s, E_ILLEGAL_ARGUMENT_EXCEPTION, backtrace:\n%s",
@@ -186,7 +186,7 @@ ECode Preconditions::CheckArgumentInRange(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     else if (value > upper) {
-        Logger::E(TAG, "%s is out of range of [%d, %d] (too low)", valueName.string(), lower, upper);
+        Logger::E(TAG, "%s (%d) is out of range of [%d, %d] (too low)", valueName.string(), value, lower, upper);
         android::CallStack stack;
         stack.update();
         Logger::E(TAG, "%s, E_ILLEGAL_ARGUMENT_EXCEPTION, backtrace:\n%s",

@@ -14,12 +14,12 @@ namespace Camera2 {
 namespace Marshal {
 namespace Impl {
 
-MarshalQueryableMeteringRectangle::MarshalerMeteringRectangle::MarshalerMeteringRectangle(
+ECode MarshalQueryableMeteringRectangle::MarshalerMeteringRectangle::constructor(
     /* [in] */ ITypeReference* typeReference,
     /* [in] */ Int32 nativeType,
     /* [in] */ MarshalQueryableMeteringRectangle* host)
 {
-    Marshaler::constructor(host, typeReference, nativeType);
+    return Marshaler::constructor(host, typeReference, nativeType);
 }
 
 ECode MarshalQueryableMeteringRectangle::MarshalerMeteringRectangle::Marshal(
@@ -28,22 +28,15 @@ ECode MarshalQueryableMeteringRectangle::MarshalerMeteringRectangle::Marshal(
 {
     AutoPtr<IMeteringRectangle> rectangle = IMeteringRectangle::Probe(value);
 
-    Int32 xMin;
+    Int32 xMin, yMin, width, height, weight;
     rectangle->GetX(&xMin);
-
-    Int32 yMin;
     rectangle->GetY(&yMin);
-
-    Int32 width;
     rectangle->GetWidth(&width);
-    Int32 xMax = xMin + width;
-
-    Int32 height;
     rectangle->GetHeight(&height);
-    Int32 yMax = yMin + height;
-
-    Int32 weight;
     rectangle->GetMeteringWeight(&weight);
+
+    Int32 xMax = xMin + width;
+    Int32 yMax = yMin + height;
 
     buffer->PutInt32(xMin);
     buffer->PutInt32(yMin);
@@ -60,15 +53,11 @@ ECode MarshalQueryableMeteringRectangle::MarshalerMeteringRectangle::Unmarshal(
     VALIDATE_NOT_NULL(outface);
     *outface = NULL;
 
-    Int32 xMin;
+    Int32 xMin, yMin, xMax, yMax, weight;
     buffer->GetInt32(&xMin);
-    Int32 yMin;
     buffer->GetInt32(&yMin);
-    Int32 xMax;
     buffer->GetInt32(&xMax);
-    Int32 yMax;
     buffer->GetInt32(&yMax);
-    Int32 weight;
     buffer->GetInt32(&weight);
 
     Int32 width = xMax - xMin;
@@ -90,7 +79,7 @@ ECode MarshalQueryableMeteringRectangle::MarshalerMeteringRectangle::GetNativeSi
     return NOERROR;
 }
 
-const Int32 MarshalQueryableMeteringRectangle::SIZE = IMarshalHelpers::SIZEOF_INT32 * 4;
+const Int32 MarshalQueryableMeteringRectangle::SIZE = IMarshalHelpers::SIZEOF_INT32 * 5;
 
 CAR_INTERFACE_IMPL_2(MarshalQueryableMeteringRectangle, Object,
         IMarshalQueryableMeteringRectangle, IMarshalQueryable)
@@ -102,8 +91,9 @@ ECode MarshalQueryableMeteringRectangle::CreateMarshaler(
 {
     VALIDATE_NOT_NULL(outmar);
 
-    AutoPtr<IMarshaler> _outmar = new MarshalerMeteringRectangle(managedType, nativeType, this);
-    *outmar = _outmar;
+    AutoPtr<MarshalerMeteringRectangle> mmr = new MarshalerMeteringRectangle();
+    mmr->constructor(managedType, nativeType, this);
+    *outmar = mmr.Get();
     REFCOUNT_ADD(*outmar);
     return NOERROR;
 }

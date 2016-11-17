@@ -93,6 +93,9 @@ public:
         /* [in] */ IInterface* obj,
         /* [out] */ Boolean* e);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
     /**
      * Visible for CameraMetadataNative implementation only; do not use.
      *

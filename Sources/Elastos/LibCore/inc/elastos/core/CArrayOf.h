@@ -129,6 +129,9 @@ public:
         /* [in] */ IArrayOf* other,
         /* [out] */ Boolean* equals);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CARAPI_(Boolean) DeepEqualsElements(
         /* [in] */ IInterface* e1,

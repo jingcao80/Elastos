@@ -446,7 +446,7 @@ ECode RequestThreadManager::MyHandlerCallback::HandleMessage(
 
             Int32 size;
             requests->GetSize(&size);
-            Logger::I(mHost->TAG, " >> Get next burst %s, requests: %d", TO_CSTR(nextBurst), size);
+            //Logger::I(mHost->TAG, " >> Get next burst %s, request cout: %d", TO_CSTR(nextBurst), size);
             for (Int32 i = 0; i < size; i++) {
                 AutoPtr<IInterface> obj;
                 requests->Get(i, (IInterface**)&obj);

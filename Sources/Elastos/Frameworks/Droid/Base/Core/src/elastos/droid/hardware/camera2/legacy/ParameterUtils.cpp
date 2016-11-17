@@ -48,41 +48,37 @@ namespace Hardware {
 namespace Camera2 {
 namespace Legacy {
 
-static AutoPtr<IRect> initNORMALIZED_RECTANGLE_DEFAULT()
+static AutoPtr<IRect> InitNORMALIZED_RECTANGLE_DEFAULT()
 {
-    AutoPtr<CRect> rect;
-    CRect::NewByFriend(
+    AutoPtr<IRect> rect;
+    CRect::New(
         IParameterUtils::NORMALIZED_RECTANGLE_MIN,
         IParameterUtils::NORMALIZED_RECTANGLE_MIN,
         IParameterUtils::NORMALIZED_RECTANGLE_MAX,
         IParameterUtils::NORMALIZED_RECTANGLE_MAX,
-        (CRect**)&rect);
-    AutoPtr<IRect> rectDefault = (IRect*)rect.Get();
-    return rectDefault;
+        (IRect**)&rect);
+    return rect;
 }
 
-const AutoPtr<IRect> ParameterUtils::NORMALIZED_RECTANGLE_DEFAULT = initNORMALIZED_RECTANGLE_DEFAULT();
+const AutoPtr<IRect> ParameterUtils::NORMALIZED_RECTANGLE_DEFAULT = InitNORMALIZED_RECTANGLE_DEFAULT();
 
-static AutoPtr<ICameraArea> initCAMERA_AREA_DEFAULT()
+static AutoPtr<ICameraArea> InitCAMERA_AREA_DEFAULT()
 {
-    AutoPtr<CRect> rect;
-    CRect::NewByFriend(ParameterUtils::NORMALIZED_RECTANGLE_DEFAULT, (CRect**)&rect);
-    AutoPtr<IRect> iRect = (IRect*)rect.Get();
-    AutoPtr<ICameraArea> area = new HardwareCamera::Area(iRect, /*weight*/1);
+    AutoPtr<IRect> rect = InitNORMALIZED_RECTANGLE_DEFAULT();
+    AutoPtr<ICameraArea> area = new HardwareCamera::Area(rect, /*weight*/1);
     return area;
 }
 
-const AutoPtr<ICameraArea> ParameterUtils::CAMERA_AREA_DEFAULT = initCAMERA_AREA_DEFAULT();
+const AutoPtr<ICameraArea> ParameterUtils::CAMERA_AREA_DEFAULT = InitCAMERA_AREA_DEFAULT();
 
-static AutoPtr<IRect> initRECTANGLE_EMPTY()
+static AutoPtr<IRect> InitRECTANGLE_EMPTY()
 {
-    AutoPtr<CRect> rect;
-    CRect::NewByFriend(/*left*/0, /*top*/0, /*right*/0, /*bottom*/0, (CRect**)&rect);
-    AutoPtr<IRect> rectEmpty = (IRect*)rect.Get();
-    return rectEmpty;
+    AutoPtr<IRect> rect;
+    CRect::New(/*left*/0, /*top*/0, /*right*/0, /*bottom*/0, (IRect**)&rect);
+    return rect;
 }
 
-const AutoPtr<IRect> ParameterUtils::RECTANGLE_EMPTY = initRECTANGLE_EMPTY();
+const AutoPtr<IRect> ParameterUtils::RECTANGLE_EMPTY = InitRECTANGLE_EMPTY();
 
 const String ParameterUtils::TAG("ParameterUtils");
 const Boolean ParameterUtils::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
@@ -257,19 +253,15 @@ ECode ParameterUtils::WeightedRectangle::ToMetering(
             mRect,
             String("weight"));
 
-    Int32 left;
+    Int32 left, top, width, height;
     mRect->GetLeft(&left);
     Int32 x = ClipLower(left, /*lo*/0, mRect, String("left"));
-    Int32 top;
     mRect->GetTop(&top);
     Int32 y = ClipLower(top, /*lo*/0, mRect, String("top"));
-    Int32 width;
     mRect->GetWidth(&width);
     Int32 w = ClipLower(width, /*lo*/0, mRect, String("width"));
-    Int32 height;
     mRect->GetHeight(&height);
     Int32 h = ClipLower(height, /*lo*/0, mRect, String("height"));
-
     return CMeteringRectangle::New(x, y, w, h, weight, outmr);
 }
 

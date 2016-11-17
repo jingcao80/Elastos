@@ -44,7 +44,7 @@ private:
     protected:
         friend class MarshalQueryableMeteringRectangle;
 
-        MarshalerMeteringRectangle(
+        CARAPI constructor(
             /* [in] */ ITypeReference* typeReference,
             /* [in] */ Int32 nativeType,
             /* [in] */ MarshalQueryableMeteringRectangle* host);

@@ -44,7 +44,7 @@ private:
     protected:
         friend class MarshalQueryableRect;
 
-        MarshalerRect(
+        CARAPI constructor(
             /* [in] */ ITypeReference* typeReference,
             /* [in] */ Int32 nativeType,
             /* [in] */ MarshalQueryableRect* host);

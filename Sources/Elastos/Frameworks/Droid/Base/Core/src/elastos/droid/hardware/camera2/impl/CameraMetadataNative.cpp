@@ -922,7 +922,7 @@ ECode CameraMetadataNative::Get(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    // if (VERBOSE) Logger::I(TAG, "Get %s", TO_CSTR(key));
+    if (VERBOSE) Logger::I(TAG, "Get %s", TO_CSTR(key));
 
     FAIL_RETURN(Preconditions::CheckNotNull(key, String("key must not be null")))
 
@@ -931,10 +931,11 @@ ECode CameraMetadataNative::Get(
     sGetCommandMap->Get(key, (IInterface**)&obj);
     AutoPtr<IGetCommand> g = IGetCommand::Probe(obj);
     if (g != NULL) {
+        if (VERBOSE) Logger::I(TAG, "Get %s in command map. %s", TO_CSTR(key), TO_CSTR(g));
         return g->GetValue(this, key, result);
     }
 
-    // if (VERBOSE) Logger::I(TAG, "Get %s not in command map.", TO_CSTR(key));
+    if (VERBOSE) Logger::I(TAG, "Get %s not in command map.", TO_CSTR(key));
 
     obj = GetBase(key);
     *result = obj;
@@ -1066,7 +1067,7 @@ AutoPtr<IInterface> CameraMetadataNative::GetBase(
 AutoPtr<IInterface> CameraMetadataNative::GetBase(
     /* [in] */ ICameraMetadataNativeKey* key)
 {
-    // if (VERBOSE) Logger::V(TAG, " >> %s GetBase %s", TO_CSTR(this), TO_CSTR(key));
+    if (VERBOSE) Logger::V(TAG, " >> %s GetBase %s", TO_CSTR(this), TO_CSTR(key));
     Int32 tag;
     key->GetTag(&tag);
 
@@ -1093,7 +1094,7 @@ AutoPtr<IInterface> CameraMetadataNative::GetBase(
 
     AutoPtr<IInterface> outface;
     AutoPtr<IMarshaler> marshaler = GetMarshalerForKey(key);
-    // Logger::V(TAG, " >> GetMarshalerForKey: %s", TO_CSTR(marshaler));
+    if (VERBOSE) Logger::V(TAG, " >> GetBase: %s, key: %s", TO_CSTR(marshaler), TO_CSTR(key));
     marshaler->Unmarshal(buffer, (IInterface**)&outface);
     return outface;
 }

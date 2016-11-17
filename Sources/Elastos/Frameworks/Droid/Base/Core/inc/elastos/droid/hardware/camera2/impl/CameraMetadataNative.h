@@ -33,6 +33,8 @@ class GetCommand_AvailableFormats
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("GetCommand_AvailableFormats")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI GetValue(
@@ -47,6 +49,8 @@ class GetCommand_Faces
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("GetCommand_Faces")
 
     // @Override
     // @SuppressWarnings("unchecked")
@@ -63,6 +67,8 @@ class GetCommand_FaceRectangles
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("GetCommand_FaceRectangles")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI GetValue(
@@ -77,6 +83,8 @@ class GetCommand_StreamConfigurationMap
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("GetCommand_StreamConfigurationMap")
 
     // @Override
     // @SuppressWarnings("unchecked")
@@ -93,6 +101,8 @@ class GetCommand_MaxRegions
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("GetCommand_MaxRegions")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI GetValue(
@@ -107,6 +117,8 @@ class GetCommand_MaxNumOutputs
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("GetCommand_MaxNumOutputs")
 
     // @Override
     // @SuppressWarnings("unchecked")
@@ -123,6 +135,8 @@ class GetCommand_TonemapCurve
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("GetCommand_TonemapCurve")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI GetValue(
@@ -137,6 +151,8 @@ class GetCommand_GpsLocation
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("GetCommand_GpsLocation")
 
     // @Override
     // @SuppressWarnings("unchecked")
@@ -153,6 +169,8 @@ class GetCommand_LensShadingMap
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("GetCommand_LensShadingMap")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI GetValue(
@@ -168,6 +186,8 @@ class SetCommand_AvailableFormats
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("SetCommand_AvailableFormats")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI SetValue(
@@ -181,6 +201,8 @@ class SetCommand_FaceRectangles
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("SetCommand_FaceRectangles")
 
     // @Override
     // @SuppressWarnings("unchecked")
@@ -196,6 +218,8 @@ class SetCommand_Faces
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("SetCommand_Faces")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI SetValue(
@@ -210,6 +234,8 @@ class SetCommand_TonemapCurve
 public:
     CAR_INTERFACE_DECL()
 
+    TO_STRING_IMPL("SetCommand_TonemapCurve")
+
     // @Override
     // @SuppressWarnings("unchecked")
     CARAPI SetValue(
@@ -223,6 +249,8 @@ class SetCommand_GpsLocation
 {
 public:
     CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("SetCommand_GpsLocation")
 
     // @Override
     // @SuppressWarnings("unchecked")

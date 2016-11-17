@@ -76,6 +76,12 @@ ECode CArrayOf::GetTypeId(
     return NOERROR;
 }
 
+ECode CArrayOf::ToString(
+    /* [out] */ String* str)
+{
+    return DeepToString(str);
+}
+
 ECode CArrayOf::DeepToString(
     /* [out] */ String* str)
 {

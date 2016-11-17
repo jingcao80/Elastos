@@ -4,6 +4,7 @@
 #include "elastos/droid/hardware/camera2/CCaptureRequestKey.h"
 #include "elastos/droid/hardware/camera2/impl/CCameraMetadataNative.h"
 #include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Objects.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::CameraMetadataNativeKey;
@@ -30,6 +31,7 @@ using Elastos::Droid::Utility::ECLSID_CRange;
 using Elastos::Droid::Utility::EIID_ISize;
 using Elastos::Droid::Utility::EIID_IRational;
 using Elastos::Droid::Utility::EIID_IRange;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::ECLSID_CArrayOf;
 using Elastos::Core::ECLSID_CString;
 using Elastos::Core::ECLSID_CByte;
@@ -136,6 +138,17 @@ ECode CaptureRequestKey::GetNativeKey(
 
     *key = mKey;
     REFCOUNT_ADD(*key);
+    return NOERROR;
+}
+
+ECode CaptureRequestKey::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CaptureRequestKey:{");
+    sb += TO_CSTR(mKey);
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
