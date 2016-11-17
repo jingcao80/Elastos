@@ -60,8 +60,9 @@ public:
     /**
      * The default, permissive policy that doesn't prevent any operations.
      */
-    static AutoPtr<IBlockGuardPolicy> sPolicy;
+    static AutoPtr<IBlockGuardPolicy> LAX_POLICY;
 
+    static AutoPtr<IBlockGuardPolicy> sPolicy;
     static pthread_once_t sKeyOnce;
     static pthread_key_t sTlsKey;
     static Object sLock;
