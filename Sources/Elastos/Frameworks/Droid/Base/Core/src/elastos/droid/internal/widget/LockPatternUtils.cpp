@@ -370,6 +370,11 @@ ECode LockPatternUtils::CheckPasswordHistory(
     VALIDATE_NOT_NULL(result);
     AutoPtr<ArrayOf<Byte> > bytes;
     PasswordToHash(password, GetCurrentOrCallingUserId(), (ArrayOf<Byte>**)&bytes);
+    if (bytes == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
     String passwordHashString = String(*bytes);
     String passwordHistory = GetString(PASSWORD_HISTORY_KEY);
     if (passwordHistory.IsNullOrEmpty()) {
@@ -819,7 +824,7 @@ ECode LockPatternUtils::SaveLockPassword(
         if (userHandle == IUserHandle::USER_OWNER
                 && LockPatternUtils::IsDeviceEncryptionEnabled()) {
             Boolean value = FALSE;
-            if (IsCredentialRequiredToDecrypt(TRUE, &value), value) {
+            if (IsCredentialRequiredToDecrypt(TRUE, &value), !value) {
                 ClearEncryptionPassword();
             }
             else {
@@ -832,9 +837,10 @@ ECode LockPatternUtils::SaveLockPassword(
                 UpdateEncryptionPassword(type, password);
             }
         }
+        using Elastos::Core::Math;
         if (!isFallback) {
             DeleteGallery();
-            SetInt64(PASSWORD_TYPE_KEY, Elastos::Core::Math::Max(quality, computedQuality), userHandle);
+            SetInt64(PASSWORD_TYPE_KEY, Math::Max(quality, computedQuality), userHandle);
             if (computedQuality != IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED) {
                 Int32 letters = 0;
                 Int32 uppercase = 0;
@@ -861,7 +867,7 @@ ECode LockPatternUtils::SaveLockPassword(
                         nonletter++;
                     }
                 }
-                dpm->SetActivePasswordState(Elastos::Core::Math::Max(quality, computedQuality),
+                dpm->SetActivePasswordState(Math::Max(quality, computedQuality),
                         password.GetLength(), letters, uppercase, lowercase,
                         numbers, symbols, nonletter, userHandle);
             }
@@ -876,7 +882,7 @@ ECode LockPatternUtils::SaveLockPassword(
             // Case where it's a fallback for biometric weak
             SetInt64(PASSWORD_TYPE_KEY, IDevicePolicyManager::PASSWORD_QUALITY_BIOMETRIC_WEAK,
                     userHandle);
-            SetInt64(PASSWORD_TYPE_ALTERNATE_KEY, Elastos::Core::Math::Max(quality, computedQuality),
+            SetInt64(PASSWORD_TYPE_ALTERNATE_KEY, Math::Max(quality, computedQuality),
                     userHandle);
             FinishBiometricWeak();
             dpm->SetActivePasswordState(IDevicePolicyManager::PASSWORD_QUALITY_BIOMETRIC_WEAK,
@@ -900,7 +906,7 @@ ECode LockPatternUtils::SaveLockPassword(
             passwordHistory = String((char*)hash->GetPayload()) + "," + passwordHistory;
             // Cut it to contain passwordHistoryLength hashes
             // and passwordHistoryLength -1 commas.
-            passwordHistory = passwordHistory.Substring(0, Elastos::Core::Math::Min(hash->GetLength()
+            passwordHistory = passwordHistory.Substring(0, Math::Min(hash->GetLength()
                     * passwordHistoryLength + passwordHistoryLength - 1, passwordHistory
                     .GetLength()));
         }
@@ -1142,50 +1148,44 @@ ECode LockPatternUtils::PasswordToHash(
         return NOERROR;
     }
 
-    String algo;
+    AutoPtr<IMessageDigestHelper> helper;
+    AutoPtr<IMessageDigest> md;
+    AutoPtr<ArrayOf<Byte> > saltedPassword;
+    AutoPtr<ArrayOf<Byte> > sha1;
+    AutoPtr<ArrayOf<Byte> > md5;
     AutoPtr<ArrayOf<Byte> > hashed;
+    String algo;
     String salt;
     ECode ec = GetSalt(userId, &salt);
-    if (FAILED(ec)) {
-        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
-        return NOERROR;
-    }
+    FAIL_GOTO(ec, EXIT);
 
-    AutoPtr<ArrayOf<Byte> > saltedPassword = (password + salt).GetBytes();
-    AutoPtr<IMessageDigestHelper> helper;
+    saltedPassword = (password + salt).GetBytes();
     CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
-    AutoPtr<IMessageDigest> md;
     algo = "SHA-1";
     ec = helper->GetInstance(algo, (IMessageDigest**)&md);
-    if (FAILED(ec)) {
-        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
-        return NOERROR;
-    }
-    AutoPtr<ArrayOf<Byte> > sha1;
+    FAIL_GOTO(ec, EXIT);
+
     ec = md->Digest(saltedPassword, (ArrayOf<Byte>**)&sha1);
-    if (FAILED(ec)) {
-        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
-        return NOERROR;
-    }
+    FAIL_GOTO(ec, EXIT);
 
     algo = "MD5";
     md = NULL;
     ec = helper->GetInstance(algo, (IMessageDigest**)&md);
-    if (FAILED(ec)) {
-        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
-        return NOERROR;
-    }
-    AutoPtr<ArrayOf<Byte> > md5;
+    FAIL_GOTO(ec, EXIT);
+
     ec = md->Digest(saltedPassword, (ArrayOf<Byte>**)&md5);
-    if (FAILED(ec)) {
-        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
-        return NOERROR;
-    }
+    FAIL_GOTO(ec, EXIT);
 
     hashed = (ToHex(sha1) + ToHex(md5)).GetBytes();
     *arr = hashed;
     REFCOUNT_ADD(*arr);
     return NOERROR;
+
+EXIT:
+    if (FAILED(ec)) {
+        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
+        return NOERROR;
+    }
 }
 
 String LockPatternUtils::ToHex(
