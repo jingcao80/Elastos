@@ -917,20 +917,21 @@ ECode CLockSettingsService::CheckPattern(
     // Read all the bytes from the file
     AutoPtr<IRandomAccessFile> raf;
     CRandomAccessFile::New(GetLockPatternFilename(userId),
-        String("r"), (IRandomAccessFile**)&raf);
+            String("r"), (IRandomAccessFile**)&raf);
 
     Int64 len = 0;
     raf->GetLength(&len);
     AutoPtr<ArrayOf<Byte> > stored = ArrayOf<Byte>::Alloc((Int32)len);
     Int32 got = 0;
-    FAIL_GOTO(raf->Read(stored, 0, stored->GetLength(), &got), ERROR);
+    ECode ec = raf->Read(stored, 0, stored->GetLength(), &got);
     ICloseable::Probe(raf)->Close();
-    if (got <= 0) {
+    if (FAILED(ec) || got <= 0) {
+        if (FAILED(ec)) Slogger::E(TAG, "Cannot read file");
         *res = TRUE;
         return NOERROR;
     }
 
-    mLockPatternUtils->StringToPattern(pattern, (IList**)&list);
+    FAIL_RETURN(mLockPatternUtils->StringToPattern(pattern, (IList**)&list));
     mLockPatternUtils->PatternToHash(list, (ArrayOf<Byte>**)&bytes);
     matched = Arrays::Equals(stored, bytes);
     if (matched && !TextUtils::IsEmpty(pattern)) {
@@ -945,10 +946,6 @@ ECode CLockSettingsService::CheckPattern(
     //     Slogger::E(TAG, "Cannot read file " + ioe);
     //     return TRUE;
     // }
-ERROR:
-    ICloseable::Probe(raf)->Close();
-    *res = TRUE;
-    return NOERROR;
 }
 
 ECode CLockSettingsService::CheckPassword(
@@ -1027,7 +1024,7 @@ ECode CLockSettingsService::CheckVoldPassword(
     String password;
     service->GetPassword(&password);
     service->ClearPassword();
-    if (password == NULL) {
+    if (password.IsNull()) {
         return NOERROR;
     }
 

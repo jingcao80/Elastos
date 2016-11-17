@@ -1012,10 +1012,11 @@ ECode LockPatternUtils::StringToPattern(
 
     AutoPtr<ArrayOf<Byte> > bytes = string.GetBytes();
     for (Int32 i = 0; i < bytes->GetLength(); i++) {
-        Byte b = (*bytes)[i];
+        // add 1 when call PatternToString, so minus 1 here
+        Byte b = (*bytes)[i] - 1;
 
         AutoPtr<ILockPatternViewCell> cell;
-        helper->Of(b / size, b % size, size, (ILockPatternViewCell**)&cell);
+        FAIL_RETURN(helper->Of(b / size, b % size, size, (ILockPatternViewCell**)&cell));
         result->Add(cell);
     }
     *list = result;
@@ -1055,7 +1056,8 @@ ECode LockPatternUtils::PatternToString(
         Int32 row = 0, column = 0;
         cell->GetRow(&row);
         cell->GetColumn(&column);
-        (*res)[i] = (Byte) (row * patternGridSize + column);
+        // row and column may be 0, so add 1 to prevent (*res)[i] be 0
+        (*res)[i] = (Byte) (row * patternGridSize + column + 1);
     }
     *str = String(*res);
     return NOERROR;
@@ -1084,7 +1086,8 @@ ECode LockPatternUtils::PatternToHash(
 
         Byte size;
         GetLockPatternSize(&size);
-        (*res)[i] = (Byte) (row * size + column);
+        // row and column may be 0, so add 1 to prevent (*res)[i] be 0
+        (*res)[i] = (Byte) (row * size + column + 1);
     }
 
     AutoPtr<IMessageDigestHelper> helper;

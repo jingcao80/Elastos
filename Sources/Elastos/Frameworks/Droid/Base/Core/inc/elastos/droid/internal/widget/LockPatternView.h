@@ -55,10 +55,11 @@ public:
          * @param row The row of the cell.
          * @param column The column of the cell.
          */
-        static CARAPI_(AutoPtr<ILockPatternViewCell>) Of(
+        static CARAPI Of(
             /* [in] */ Int32 row,
             /* [in] */ Int32 column,
-            /* [in] */ Byte size);
+            /* [in] */ Byte size,
+            /* [out] */ ILockPatternViewCell** cell);
 
         static CARAPI UpdateSize(
             /* [in] */ Byte size);

@@ -228,6 +228,7 @@ ECode Services::GetServices(
     /* [out] */ IArrayList** services)
 {
     VALIDATE_NOT_NULL(services)
+    *services = NULL;
     AutoLock lock(LOCK);
     HashMap< String, AutoPtr<IArrayList> >::Iterator it = sServices.Find(key);
     if (it != sServices.End()) {

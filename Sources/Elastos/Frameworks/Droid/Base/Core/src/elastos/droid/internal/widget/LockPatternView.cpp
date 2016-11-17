@@ -131,15 +131,20 @@ ECode LockPatternView::Cell::GetColumn(
     return NOERROR;
 }
 
-AutoPtr<ILockPatternViewCell> LockPatternView::Cell::Of(
+ECode LockPatternView::Cell::Of(
     /* [in] */ Int32 row,
     /* [in] */ Int32 column,
-    /* [in] */ Byte size)
+    /* [in] */ Byte size,
+    /* [out] */ ILockPatternViewCell** cell)
 {
-    CheckRange(row, column, size);
+    VALIDATE_NOT_NULL(cell);
+    *cell = NULL;
+    FAIL_RETURN(CheckRange(row, column, size));
     AutoPtr<IInterface> obj;
     (*sCells)[row]->Get(column, (IInterface**)&obj);
-    return ILockPatternViewCell::Probe(obj);
+    *cell = ILockPatternViewCell::Probe(obj);
+    REFCOUNT_ADD(*cell);
+    return NOERROR;
 }
 
 ECode LockPatternView::Cell::UpdateSize(
@@ -998,7 +1003,9 @@ AutoPtr<LockPatternView::Cell> LockPatternView::DetectAndAddHit(
                     fillInRow += Elastos::Core::Math::Signum(dRow);
                     fillInColumn += Elastos::Core::Math::Signum(dColumn);
                     if (fillInRow == cell->mRow && fillInColumn == cell->mColumn) break;
-                    AutoPtr<ILockPatternViewCell> iCell = Cell::Of(fillInRow, fillInColumn, mPatternSize);
+                    AutoPtr<ILockPatternViewCell> iCell;
+                    ECode ec = Cell::Of(fillInRow, fillInColumn, mPatternSize, (ILockPatternViewCell**)&iCell);
+                    if (FAILED(ec)) return NULL;
                     AutoPtr<Cell> fillInGapCell = (Cell*)iCell.Get();
                     AutoPtr<IInterface> obj;
                     (*mPatternDrawLookup)[fillInGapCell->mRow]->Get(fillInGapCell->mColumn, (IInterface**)&obj);
@@ -1123,7 +1130,10 @@ AutoPtr<ILockPatternViewCell> LockPatternView::CheckForNewHit(
     if (b) {
         return NULL;
     }
-    return Cell::Of(rowHit, columnHit, mPatternSize);
+    AutoPtr<ILockPatternViewCell> cell;
+    ECode ec = Cell::Of(rowHit, columnHit, mPatternSize, (ILockPatternViewCell**)&cell);
+    if (FAILED(ec)) return NULL;
+    return cell;
 }
 
 Int32 LockPatternView::GetRowHit(

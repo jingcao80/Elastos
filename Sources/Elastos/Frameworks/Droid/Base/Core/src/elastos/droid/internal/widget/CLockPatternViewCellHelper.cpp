@@ -16,10 +16,7 @@ ECode CLockPatternViewCellHelper::Of(
     /* [out] */ ILockPatternViewCell** cell)
 {
     VALIDATE_NOT_NULL(cell);
-    AutoPtr<ILockPatternViewCell> c = LockPatternView::Cell::Of(row, column, size);
-    *cell = c;
-    REFCOUNT_ADD(*cell);
-    return NOERROR;
+    return LockPatternView::Cell::Of(row, column, size, cell);
 }
 
 ECode CLockPatternViewCellHelper::UpdateSize(
