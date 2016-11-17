@@ -6,6 +6,7 @@
 #include "CFileInputStream.h"
 #include "EmptyArray.h"
 #include "BlockGuard.h"
+#include "libcore/io/CStreams.h"
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::BlockGuard;
@@ -15,6 +16,8 @@ using Elastos::IO::CFileInputStream;
 using Elastos::IO::IDataInput;
 using Elastos::IO::IDataOutput;
 using Elastos::IO::IFile;
+using Libcore::IO::IStreams;
+using Libcore::IO::CStreams;
 using Libcore::Utility::EmptyArray;
 
 namespace Org {
@@ -24,16 +27,16 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
-static AutoPtr<IFileInputStream> InitDevURandom()
+static AutoPtr<IInputStream> InitDevURandom()
 {
     AutoPtr<IFile> f;
     ASSERT_SUCCEEDED(CFile::New(String("/dev/urandom"), (IFile**)&f));
-    AutoPtr<IFileInputStream> fs;
-    ASSERT_SUCCEEDED(CFileInputStream::New(f, (IFileInputStream**)&fs));
+    AutoPtr<IInputStream> fs;
+    ASSERT_SUCCEEDED(CFileInputStream::New(f, (IInputStream**)&fs));
     return fs;
 }
 
-AutoPtr<IFileInputStream> CSHA1PRNG_SecureRandomImpl::sDevURandom = InitDevURandom();
+AutoPtr<IInputStream> CSHA1PRNG_SecureRandomImpl::sDevURandom = InitDevURandom();
 Int32 CSHA1PRNG_SecureRandomImpl::END_FLAGS[] = { (Int32)0x80000000, (Int32)0x800000, (Int32)0x8000, (Int32)0x80 };
 const Int32 CSHA1PRNG_SecureRandomImpl::RIGHT1[] = { 0, 40, 48, 56 };
 const Int32 CSHA1PRNG_SecureRandomImpl::RIGHT2[] = { 0, 8, 16, 24 };
@@ -306,10 +309,11 @@ ECode CSHA1PRNG_SecureRandomImpl::WriteObject(
     const Int32 hashes_and_frame = EXTRAFRAME_OFFSET * 2 + FRAME_LENGTH;
     const Int32 hashes_and_frame_extra = EXTRAFRAME_OFFSET * 2 + FRAME_LENGTH * 2;
 
-    FAIL_RETURN(IDataOutput::Probe(oos)->WriteInt64(mSeedLength));
-    FAIL_RETURN(IDataOutput::Probe(oos)->WriteInt64(mCounter));
-    FAIL_RETURN(IDataOutput::Probe(oos)->WriteInt32(mState));
-    FAIL_RETURN(IDataOutput::Probe(oos)->WriteInt32((*mSeed)[ISHA1Constants::BYTES_OFFSET]));
+    IDataOutput* dout = IDataOutput::Probe(oos);
+    FAIL_RETURN(dout->WriteInt64(mSeedLength));
+    FAIL_RETURN(dout->WriteInt64(mCounter));
+    FAIL_RETURN(dout->WriteInt32(mState));
+    FAIL_RETURN(dout->WriteInt32((*mSeed)[ISHA1Constants::BYTES_OFFSET]));
 
     Int32 nRemaining = ((*mSeed)[ISHA1Constants::BYTES_OFFSET] + 3) >> 2; // converting bytes in words
     // result may be 0
@@ -360,11 +364,11 @@ ECode CSHA1PRNG_SecureRandomImpl::WriteObject(
         intData->Copy(offset, mSeed, ISHA1Constants::HASH_OFFSET, EXTRAFRAME_OFFSET);
     }
     for (Int32 i = 0; i < intData->GetLength(); i++) {
-        FAIL_RETURN(IDataOutput::Probe(oos)->WriteInt32((*intData)[i]));
+        FAIL_RETURN(dout->WriteInt32((*intData)[i]));
     }
 
-    FAIL_RETURN(IDataOutput::Probe(oos)->WriteInt32(mNextBIndex));
-    return IDataOutput::Probe(oos)->Write(mNextBytes, mNextBIndex, HASHBYTES_TO_USE - mNextBIndex);
+    FAIL_RETURN(dout->WriteInt32(mNextBIndex));
+    return dout->Write(mNextBytes, mNextBIndex, HASHBYTES_TO_USE - mNextBIndex);
 }
 
 ECode CSHA1PRNG_SecureRandomImpl::ReadObject(
@@ -374,53 +378,55 @@ ECode CSHA1PRNG_SecureRandomImpl::ReadObject(
     mCopies = ArrayOf<Int32>::Alloc(2 * FRAME_LENGTH + EXTRAFRAME_OFFSET);
     mNextBytes = ArrayOf<Byte>::Alloc(ISHA1Constants::DIGEST_LENGTH);
 
-    FAIL_RETURN(IDataInput::Probe(ois)->ReadInt64(&mSeedLength));
-    FAIL_RETURN(IDataInput::Probe(ois)->ReadInt64(&mCounter));
-    FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&mState));
+    IDataInput* di = IDataInput::Probe(ois);
+    FAIL_RETURN(di->ReadInt64(&mSeedLength));
+    FAIL_RETURN(di->ReadInt64(&mCounter));
+    FAIL_RETURN(di->ReadInt32(&mState));
     Int32 v = 0;
-    FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&v));
+    FAIL_RETURN(di->ReadInt32(&v));
     (*mSeed)[ISHA1Constants::BYTES_OFFSET] = v;
 
     Int32 nRemaining = ((*mSeed)[ISHA1Constants::BYTES_OFFSET] + 3) >> 2; // converting bytes in words
 
     if (mState != NEXT_BYTES) {
         for (Int32 i = 0; i < nRemaining; i++) {
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[i])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[i])));
         }
         for (Int32 i = 0; i < EXTRAFRAME_OFFSET; i++) {
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[ISHA1Constants::HASH_OFFSET + i])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[ISHA1Constants::HASH_OFFSET + i])));
         }
     }
     else {
         if ((*mSeed)[ISHA1Constants::BYTES_OFFSET] >= MAX_BYTES) {
             // reading next bytes in seed extra frame
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[FRAME_LENGTH])));
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[FRAME_LENGTH + 1])));
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[FRAME_LENGTH + 14])));
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[FRAME_LENGTH + 15])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[FRAME_LENGTH])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[FRAME_LENGTH + 1])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[FRAME_LENGTH + 14])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[FRAME_LENGTH + 15])));
         }
         // reading next bytes in seed frame
         for (Int32 i = 0; i < FRAME_LENGTH; i++) {
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[i])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[i])));
         }
         // reading remaining seed bytes
         for (Int32 i = 0; i < nRemaining; i++) {
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mCopies)[FRAME_LENGTH + EXTRAFRAME_OFFSET + i])));
+            FAIL_RETURN(di->ReadInt32(&((*mCopies)[FRAME_LENGTH + EXTRAFRAME_OFFSET + i])));
         }
         // reading copy of current hash
         for (Int32 i = 0; i < EXTRAFRAME_OFFSET; i++) {
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mCopies)[i])));
+            FAIL_RETURN(di->ReadInt32(&((*mCopies)[i])));
         }
         // reading current hash
         for (Int32 i = 0; i < EXTRAFRAME_OFFSET; i++) {
-            FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&((*mSeed)[ISHA1Constants::HASH_OFFSET + i])));
+            FAIL_RETURN(di->ReadInt32(&((*mSeed)[ISHA1Constants::HASH_OFFSET + i])));
         }
     }
 
-    FAIL_RETURN(IDataInput::Probe(ois)->ReadInt32(&mNextBIndex));
-    assert(0 && "TODO");
-    // Streams::ReadFully(ois, mNextBytes, mNextBIndex, HASHBYTES_TO_USE - mNextBIndex);
-    return NOERROR;
+    FAIL_RETURN(di->ReadInt32(&mNextBIndex));
+    AutoPtr<IStreams> streams;
+    CStreams::AcquireSingleton((IStreams**)&streams);
+    return streams->ReadFully(
+        IInputStream::Probe(ois), mNextBytes, mNextBIndex, HASHBYTES_TO_USE - mNextBIndex);
 }
 
 ECode CSHA1PRNG_SecureRandomImpl::GetRandomBytes(
@@ -430,7 +436,7 @@ ECode CSHA1PRNG_SecureRandomImpl::GetRandomBytes(
     VALIDATE_NOT_NULL(retValue);
     *retValue = NULL;
     if (byteCount <= 0) {
-        // throw new IllegalArgumentException("Too few bytes requested: " + byteCount);
+        ALOGE("CSHA1PRNG_SecureRandomImpl::Too few bytes requested: %d", byteCount);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -438,16 +444,17 @@ ECode CSHA1PRNG_SecureRandomImpl::GetRandomBytes(
     AutoPtr<ArrayOf<Byte> > result;
     ECode ec = NOERROR;
     do {
-        assert(0 && "TODO");
-        // BlockGuard::SetThreadPolicy(BlockGuard::LAX_POLICY);
+        AutoPtr<IStreams> streams;
+        CStreams::AcquireSingleton((IStreams**)&streams);
+        BlockGuard::SetThreadPolicy(BlockGuard::LAX_POLICY);
         result = ArrayOf<Byte>::Alloc(byteCount);
-        assert(0 && "TODO");
-        // ec = Streams::ReadFully(sDevURandom, result, 0, byteCount);
+        ec = streams->ReadFully(sDevURandom, result, 0, byteCount);
     } while (0);
 
     BlockGuard::SetThreadPolicy(originalPolicy);
     if (FAILED(ec)) {
-        // throw new ProviderException("Couldn't read " + byteCount + " random bytes", ex);
+        ALOGE("CSHA1PRNG_SecureRandomImpl::GetRandomBytes:Couldn't read %d random bytes, ec=%08x",
+            byteCount, ec);
         return E_PROVIDER_EXCEPTION;
     }
     *retValue = result;

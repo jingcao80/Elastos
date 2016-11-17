@@ -498,14 +498,12 @@ String CTorchService::GetCameraId()
         String id = (*ids)[i];
         AutoPtr<ICameraCharacteristics> c;
         mCameraManager->GetCameraCharacteristics(id, (ICameraCharacteristics**)&c);
-        Logger::I(TAG, " >> ================== Start CTorchService::GetCameraId %s =======================", id.string());
         AutoPtr<IInterface> p;
         c->Get(CameraCharacteristics::FLASH_INFO_AVAILABLE, (IInterface**)&p);
         Boolean flashAvailable = FALSE;
         if (IBoolean::Probe(p)) {
             IBoolean::Probe(p)->GetValue(&flashAvailable);
         }
-        Logger::I(TAG, " >> ================== End CTorchService::GetCameraId %s flashAvailable: %d", id.string(), flashAvailable);
         if (flashAvailable) {
             p = NULL;
             c->Get(CameraCharacteristics::LENS_FACING, (IInterface**)&p);

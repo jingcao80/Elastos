@@ -5,8 +5,8 @@
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
-#include "elastos/droid/os/CUserHandleHelper.h"
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/internal/telephony/CSmsApplication.h"
 #include "elastos/droid/provider/CSettingsSecure.h"
@@ -38,10 +38,9 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::CUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Provider::ISettingsSecure;
@@ -68,10 +67,8 @@ namespace Telephony {
 AutoPtr<IHashMap> gReceivers;
 
 CSmsApplication::SmsPackageMonitor::SmsPackageMonitor(
-    /* [in] */ IContext* context,
-    /* [in] */ CSmsApplication* host)
+    /* [in] */ IContext* context)
     : mContext(context)
-    , mHost(host)
 {
 }
 
@@ -124,8 +121,10 @@ void CSmsApplication::SmsPackageMonitor::OnPackageChanged(
         userContext = mContext;
     }
     // Ensure this component is still configured as the preferred activity
+    AutoPtr<ISmsApplication> smsApp;
+    CSmsApplication::AcquireSingleton((ISmsApplication**)&smsApp);
     AutoPtr<IComponentName> componentName;
-    mHost->GetDefaultSendToApplication(userContext, TRUE, (IComponentName**)&componentName);
+    smsApp->GetDefaultSendToApplication(userContext, TRUE, (IComponentName**)&componentName);
     if (componentName != NULL) {
         ConfigurePreferredActivity(packageManager, componentName, userId);
     }
@@ -180,15 +179,12 @@ Int32 CSmsApplication::GetIncomingUserId(
 //        Logger::I(LOGTAG, "getIncomingUserHandle caller=" + callingUid + ", myuid="
 //                + Process::MyUid() + "\n\t" + Debug->GetCallers(4));
 //    }
-    AutoPtr<IUserHandleHelper> hlp;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
-    Int32 appId = 0, userId = 0;
-    hlp->GetAppId(callingUid, &appId);
+    Int32 appId = UserHandle::GetAppId(callingUid);
     if (appId < IProcess::FIRST_APPLICATION_UID) {
         return contextUserId;
     }
     else {
-        hlp->GetUserId(callingUid, &userId);
+        Int32 userId = UserHandle::GetUserId(callingUid);
         return userId;
     }
 }
@@ -748,14 +744,10 @@ void CSmsApplication::SetDefaultApplicationInternal(
 ECode CSmsApplication::InitSmsPackageMonitor(
     /* [in] */ IContext* context)
 {
-    sSmsPackageMonitor = new SmsPackageMonitor(context, this);
+    sSmsPackageMonitor = new SmsPackageMonitor(context);
     AutoPtr<ILooper> looper;
     context->GetMainLooper((ILooper**)&looper);
-    AutoPtr<IUserHandleHelper> hlp;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
-    AutoPtr<IUserHandle> all;
-    hlp->GetALL((IUserHandle**)&all);
-    return sSmsPackageMonitor->Register(context, looper, all, FALSE);
+    return sSmsPackageMonitor->Register(context, looper, UserHandle::ALL, FALSE);
 }
 
 void CSmsApplication::ConfigurePreferredActivity(

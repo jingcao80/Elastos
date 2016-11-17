@@ -6,7 +6,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "SecureRandomSpi.h"
 
-using Elastos::IO::IFileInputStream;
+using Elastos::IO::IInputStream;
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
 using Elastos::Security::SecureRandomSpi;
@@ -133,7 +133,7 @@ private:
 
 private:
     // private static final Int64 serialVersionUID = 283736797212159675L;
-    static AutoPtr<IFileInputStream> sDevURandom;
+    static AutoPtr<IInputStream> sDevURandom;
 
     // constants to use in expressions operating on bytes in Int32 and Int64 variables:
     // END_FLAGS - final bytes in words to append to message;

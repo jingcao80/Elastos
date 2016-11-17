@@ -86,6 +86,7 @@ using Elastos::Droid::Widget::CRemoteViews;
 using Elastos::Droid::Widget::CRemoteViewsBitmapCache;
 using Elastos::Droid::Widget::IBitmapCache;
 using Elastos::Core::IByte;
+using Elastos::Core::IString;
 using Elastos::Core::IInteger16;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
@@ -1586,8 +1587,32 @@ Boolean Util::SetJavaBaseBundle(
                             }
                             Logger::D("ToJavaBundle", "ToJavaBundle() byte array set into bundle for key:%s", keyStr.string());
                         }
+                        else if (IString::Probe(firstItem) != NULL) {
+                            jclass stringKlass = env->FindClass("java/lang/String");
+                            jobjectArray jarr = env->NewObjectArray(size, stringKlass, NULL);
+                            CheckErrorAndLog(env, "ToJavaBundle", "NewStringArray failed  %d", __LINE__);
+
+                            IString* strObj;
+                            String str;
+                            for(Int32 i = 0; i < size; ++i) {
+                                AutoPtr<IInterface> elem;
+                                array->Get(i, (IInterface**)&elem);
+                                strObj = IString::Probe(elem);
+                                if (strObj != NULL) {
+                                    jstring jitem = Util::ToJavaString(env, Object::ToString(strObj));
+                                    env->SetObjectArrayElement(jarr, i, jitem);
+                                    CheckErrorAndLog(env, "Util", "ToJavaBundle, SetObjectArrayElement: String[] failed, %d", __LINE__);
+                                }
+                            }
+
+                            jmethodID m = env->GetMethodID(bundleKlass, "putStringArray", "(Ljava/lang/String;[Ljava/lang/String;)V");
+                            Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putStringArray %d", __LINE__);
+                            env->CallVoidMethod(jbundle, m, jKey, jarr);
+                            env->DeleteLocalRef(jarr);
+                            Logger::D("ToJavaBundle", "ToJavaBundle() string array set into bundle for key:%s", keyStr.string());
+                        }
                         else {
-                            LOGGERE("ToJavaBundle", "ArrayOf item is not implemented!!!");
+                            LOGGERE("ToJavaBundle", "ArrayOf item [%s] is not implemented!!!", TO_CSTR(firstItem));
                         }
                     }
                     else {

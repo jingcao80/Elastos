@@ -53,8 +53,9 @@ void MediaSessionService::UserRecord::StopLocked()
 
 void MediaSessionService::UserRecord::DestroyLocked()
 {
-    List<AutoPtr<MediaSessionRecord> >::ReverseIterator rit = mSessions.RBegin();
-    for (; rit != mSessions.REnd(); ++rit) {
+    List<AutoPtr<MediaSessionRecord> > temp(mSessions);
+    List<AutoPtr<MediaSessionRecord> >::ReverseIterator rit = temp.RBegin();
+    for (; rit != temp.REnd(); ++rit) {
         mHost->DestroySessionLocked(*rit);
     }
 }
@@ -390,14 +391,11 @@ void MediaSessionService::DestroyUserLocked(
 void MediaSessionService::DestroySessionLocked(
     /* [in] */ MediaSessionRecord* session)
 {
-    AutoPtr<MediaSessionRecord> record = session; // hold ref-count
+    AutoPtr<MediaSessionRecord> record = session; // hold ref
     Int32 userId = session->GetUserId();
     HashMap<Int32, AutoPtr<UserRecord> >::Iterator it = mUserRecords.Find(userId);
-    AutoPtr<UserRecord> user;
     if (it != mUserRecords.End()) {
-        user = it->mSecond;
-    }
-    if (user != NULL) {
+        AutoPtr<UserRecord> user = it->mSecond;
         user->RemoveSessionLocked(session);
     }
 

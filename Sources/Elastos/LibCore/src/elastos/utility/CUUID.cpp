@@ -5,6 +5,7 @@
 #include "StringBuilder.h"
 #include "Memory.h"
 #include "CMessageDigestHelper.h"
+#include "CSecureRandom.h"
 #include "AutoLock.h"
 
 using Elastos::Core::AutoLock;
@@ -16,6 +17,7 @@ using Libcore::IO::Memory;
 using Elastos::IO::ByteOrder_BIG_ENDIAN;
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Security::EIID_ISecureRandom;
+using Elastos::Security::CSecureRandom;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::CMessageDigestHelper;
@@ -104,8 +106,7 @@ ECode CUUID::RandomUUID(
     {
         AutoLock syncLock(sRngLock);
         if (sRng == NULL) {
-            assert(0);
-            //TODO CSecureRandom::New((ISecureRandom**)&sRng);
+            CSecureRandom::New((ISecureRandom**)&sRng);
         }
     }
 

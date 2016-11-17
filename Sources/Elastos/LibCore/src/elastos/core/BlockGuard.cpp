@@ -11,6 +11,8 @@ using Elastos::Core::Thread;
 namespace Elastos {
 namespace Core {
 
+AutoPtr<IBlockGuardPolicy> BlockGuard::LAX_POLICY = new BlockGuard::LAXPOLICY();
+
 AutoPtr<IBlockGuardPolicy> BlockGuard::sPolicy;
 Object BlockGuard::sLock;
 pthread_key_t BlockGuard::sTlsKey;
@@ -66,7 +68,7 @@ AutoPtr<IBlockGuardPolicy> BlockGuard::GetThreadPolicy()
     AutoPtr<IBlockGuardPolicy> policy = (IBlockGuardPolicy*)pthread_getspecific(sTlsKey);
     if (policy == NULL) {
         if (sPolicy == NULL) {
-            sPolicy = new BlockGuard::LAXPOLICY();
+            sPolicy = LAX_POLICY;
         }
 
         ASSERT_TRUE(pthread_setspecific(sTlsKey, sPolicy.Get()) == 0);

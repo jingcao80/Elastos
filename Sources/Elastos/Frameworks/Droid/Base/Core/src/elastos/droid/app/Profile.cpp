@@ -242,8 +242,7 @@ ECode Profile::constructor(
     AutoPtr<IUUIDHelper> helper;
     CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
     AutoPtr<IUUID> uuid;
-    Logger::E(TAG, " >> TODO Need UUID");
-    // helper->RandomUUID((IUUID**)&uuid);
+    helper->RandomUUID((IUUID**)&uuid);
     return constructor(name, -1, uuid);
 }
 
@@ -640,8 +639,7 @@ ECode Profile::GetUuid(
     if (mUuid == NULL) {
         AutoPtr<IUUIDHelper> helper;
         CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
-        Logger::E(TAG, " >> TODO Need UUID");
-        // helper->RandomUUID((IUUID**)&mUuid);
+        helper->RandomUUID((IUUID**)&mUuid);
     }
 
     *uuid = mUuid;
@@ -1102,8 +1100,7 @@ AutoPtr<IProfile> Profile::FromXml(
     AutoPtr<IUUIDHelper> helper;
     CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
     AutoPtr<IUUID> profileUuid, strUuid;
-    Logger::D(TAG, " >> TODO need UUID ");
-    // helper->RandomUUID((IUUID**)&profileUuid);
+    helper->RandomUUID((IUUID**)&profileUuid);
     // try {
     xpp->GetAttributeValue(String(NULL), String("uuid"), &value);
     ECode ec = helper->FromString(value, (IUUID**)&strUuid);

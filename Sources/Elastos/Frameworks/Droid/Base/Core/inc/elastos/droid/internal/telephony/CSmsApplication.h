@@ -93,8 +93,7 @@ private:
     {
     public:
         SmsPackageMonitor(
-            /* [in] */ IContext* context,
-            /* [in] */ CSmsApplication* host);
+            /* [in] */ IContext* context);
 
         //@Override
         CARAPI OnPackageDisappeared(
@@ -116,7 +115,6 @@ private:
 
     private:
         AutoPtr<IContext> mContext;
-        CSmsApplication* mHost;
     };
 
 public:
