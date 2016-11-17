@@ -1,5 +1,6 @@
 
 #include "AtomicReference.h"
+#include <cutils/atomic.h>
 
 using Elastos::IO::EIID_ISerializable;
 
@@ -7,6 +8,18 @@ namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 namespace Atomic {
+
+static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+{
+    // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+    int ret = android_atomic_release_cas((int32_t)expect,
+            (int32_t)update, address);
+    if (ret == 0) {
+        REFCOUNT_ADD(update)
+        REFCOUNT_RELEASE(expect)
+    }
+    return (ret == 0);
+}
 
 const Int64 AtomicReference::mSerialVersionUID = -1848883965231344442L;
 
@@ -56,8 +69,8 @@ ECode AtomicReference::CompareAndSet(
     /* [in] */ IInterface* update,
     /* [out] */ Boolean* value)
 {
-    assert(0 && "TODO");
-    // return unsafe.compareAndSwapObject(this, valueOffset, expect, update);
+    VALIDATE_NOT_NULL(value)
+    *value = CompareAndSwapObject((volatile int32_t*)&mValue, expect, update);
     return NOERROR;
 }
 
@@ -66,8 +79,8 @@ ECode AtomicReference::WeakCompareAndSet(
     /* [in] */ IInterface* update,
     /* [out] */ Boolean* value)
 {
-    assert(0 && "TODO");
-    // return unsafe.compareAndSwapObject(this, valueOffset, expect, update);
+    VALIDATE_NOT_NULL(value)
+    *value = CompareAndSwapObject((volatile int32_t*)&mValue, expect, update);
     return NOERROR;
 }
 

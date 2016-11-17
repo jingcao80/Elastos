@@ -321,7 +321,7 @@ AutoPtr< ArrayOf<IX509Certificate*> > CJarUtils::CreateChain(
     Boolean isEqual;
     if (subject->Equals(issuer, &isEqual), isEqual) {
         AutoPtr< ArrayOf<IX509Certificate*> > x509Certs = ArrayOf<IX509Certificate*>::Alloc(1);
-        x509Certs->Set(1, signer);
+        x509Certs->Set(0, signer);
         return x509Certs;
     }
 

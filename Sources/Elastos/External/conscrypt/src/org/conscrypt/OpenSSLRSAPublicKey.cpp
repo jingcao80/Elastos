@@ -131,13 +131,14 @@ void OpenSSLRSAPublicKey::EnsureReadParams()
 
     Int64 context = 0;
     mKey->GetPkeyContext(&context);
-    AutoPtr<ArrayOf<AutoPtr<ArrayOf<Byte> > > > params;
+    AutoPtr<ArrayOf<Byte> > param0;
+    AutoPtr<ArrayOf<Byte> > param1;
     NativeCrypto::Get_RSA_public_params(
             context,
-            (ArrayOf<Byte>**)&((*params)[0]),
-            (ArrayOf<Byte>**)&((*params)[1]));
-    CBigInteger::New(*((*params)[0]), (IBigInteger**)&mModulus);
-    CBigInteger::New(*((*params)[1]), (IBigInteger**)&mPublicExponent);
+            (ArrayOf<Byte>**)&param0,
+            (ArrayOf<Byte>**)&param1);
+    CBigInteger::New(*param0, (IBigInteger**)&mModulus);
+    CBigInteger::New(*param1, (IBigInteger**)&mPublicExponent);
 
     mFetchedParams = TRUE;
 }

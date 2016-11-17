@@ -355,6 +355,7 @@ AutoPtr<HashMap<String, AutoPtr<ArrayOf<Byte> > > > CStrictJarFile::GetMetaEntri
         ECode ec = streams->ReadFully(is, (ArrayOf<Byte>**)&bytes);
         if (FAILED(ec)) {
             ALOGE("CStrictJarFile::ReadMetaEntries failed!");
+            assert(0);
             break;
         }
         (*metaEntries)[name] = bytes;

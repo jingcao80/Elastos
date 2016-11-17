@@ -197,6 +197,7 @@ AutoPtr<IASN1Sequence> CExtension::initASN1()
     CASN1Boolean::GetInstance((IASN1Type**)&instance2);
 
     AutoPtr<ASN1OctetString> str = new MyASN1OctetString();
+    str->constructor();
 
     AutoPtr<ArrayOf<IASN1Type*> > array = ArrayOf<IASN1Type*>::Alloc(3);
     array->Set(0, IASN1Type::Probe(instance1));

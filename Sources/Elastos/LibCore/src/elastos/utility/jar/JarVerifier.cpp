@@ -249,8 +249,17 @@ ECode JarVerifier::VerifyCertificate(
 {
     // Found Digital Sig, .SF should already have been read
     String signatureFile = certFile.Substring(0, certFile.LastIndexOf('.')) + ".SF";
-    AutoPtr<ArrayOf<Byte> > manifestBytes;
+    AutoPtr<ArrayOf<Byte> > sfBytes;
     HashMap<String, AutoPtr<ArrayOf<Byte> > >::Iterator it = mMetaEntries->Find(signatureFile);
+    if (it != mMetaEntries->End()) {
+        sfBytes = it->mSecond;
+    }
+    if (sfBytes == NULL) {
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<Byte> > manifestBytes;
+    it = mMetaEntries->Find(IJarFile::MANIFEST_NAME);
     if (it != mMetaEntries->End()) {
         manifestBytes = it->mSecond;
     }
@@ -268,7 +277,7 @@ ECode JarVerifier::VerifyCertificate(
     AutoPtr<IJarUtils> jarUtils;
     CJarUtils::AcquireSingleton((IJarUtils**)&jarUtils);
     AutoPtr<IByteArrayInputStream> sfi, sbi;
-    CByteArrayInputStream::New(manifestBytes, (IByteArrayInputStream**)&sfi);
+    CByteArrayInputStream::New(sfBytes, (IByteArrayInputStream**)&sfi);
     CByteArrayInputStream::New(sBlockBytes, (IByteArrayInputStream**)&sbi);
     AutoPtr<ArrayOf<ICertificate*> > signerCertChain;
     FAIL_RETURN(jarUtils->VerifySignature(
@@ -282,7 +291,7 @@ ECode JarVerifier::VerifyCertificate(
     FAIL_RETURN(CAttributes::New((IAttributes**)&attributes))
 
     AutoPtr<HashMap<String, AutoPtr<IAttributes> > > entries = new HashMap<String, AutoPtr<IAttributes> >();
-    AutoPtr<ManifestReader> im = new ManifestReader(manifestBytes, attributes);
+    AutoPtr<ManifestReader> im = new ManifestReader(sfBytes, attributes);
     FAIL_RETURN(im->ReadEntries(entries, NULL))
 
     // Do we actually have any signatures to look at?

@@ -18,7 +18,9 @@ CAR_OBJECT_IMPL(CASN1Boolean)
 CAR_INTERFACE_IMPL(CASN1Boolean, ASN1Primitive, IASN1Boolean)
 AutoPtr<IASN1Type> CASN1Boolean::InitStatic()
 {
-    return new CASN1Boolean();
+    AutoPtr<IASN1Type> type;
+    CASN1Boolean::New((IASN1Type**)&type);
+    return type;
 }
 
 ECode CASN1Boolean::GetInstance(

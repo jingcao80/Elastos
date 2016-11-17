@@ -255,6 +255,7 @@ ECode OpenSSLMessageDigestJDK::EngineDigest(
     NativeCrypto::EVP_DigestFinal(mCtx, result, 0, &final);
     ResetContext();
     *ed = result;
+    REFCOUNT_ADD(*ed)
     return NOERROR;
 }
 

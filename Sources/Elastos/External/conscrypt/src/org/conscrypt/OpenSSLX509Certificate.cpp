@@ -6,6 +6,7 @@
 #include "NativeCrypto.h"
 #include "org/conscrypt/COpenSSLX509Certificate.h"
 #include "org/conscrypt/COpenSSLBIOInputStream.h"
+#include "org/conscrypt/COpenSSLKey.h"
 #include "org/conscrypt/CX509PublicKey.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/Arrays.h>
@@ -15,6 +16,8 @@ using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
 using Elastos::Math::CBigInteger;
 using Elastos::Security::IKeyFactory;
+using Elastos::Security::CKeyFactoryHelper;
+using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
 using Elastos::Security::CSignatureHelper;
@@ -623,8 +626,7 @@ ECode OpenSSLX509Certificate::GetPublicKey(
         Int64 pubkey = 0;
         NativeCrypto::X509_get_pubkey(mContext, &pubkey);
         AutoPtr<IOpenSSLKey> pkey;
-        assert(0 && "TODO");
-        // COpenSSLKey::New(pubkey, (IOpenSSLKey**)&pkey);
+        COpenSSLKey::New(pubkey, (IOpenSSLKey**)&pkey);
         return pkey->GetPublicKey(result);
     // } catch (NoSuchAlgorithmException ignored) {
     // }
@@ -635,8 +637,10 @@ ECode OpenSSLX509Certificate::GetPublicKey(
     AutoPtr<ArrayOf<Byte> > encoded;
     NativeCrypto::I2d_X509_PUBKEY(mContext, (ArrayOf<Byte>**)&encoded);
     // try {
-        assert(0 && "TODO");
-        AutoPtr<IKeyFactory> kf;// = KeyFactory::GetInstance(oid);
+        AutoPtr<IKeyFactoryHelper> kfHelper;
+        CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
+        AutoPtr<IKeyFactory> kf;
+        kfHelper->GetInstance(oid, (IKeyFactory**)&kf);
         AutoPtr<IX509EncodedKeySpec> spec;
         CX509EncodedKeySpec::New(encoded, (IX509EncodedKeySpec**)&spec);
         return kf->GeneratePublic(IKeySpec::Probe(spec), result);

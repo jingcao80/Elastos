@@ -136,6 +136,7 @@ ECode CManifest::GetAttributes(
     AutoPtr<IInterface> obj;
     map->Get(cs, (IInterface**)&obj);
     *attrib = IAttributes::Probe(obj);
+    REFCOUNT_ADD(*attrib)
     return NOERROR;
 }
 

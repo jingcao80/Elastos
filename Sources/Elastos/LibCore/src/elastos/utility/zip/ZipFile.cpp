@@ -101,7 +101,7 @@ ECode ZipFile::RAFStream::Read(
     *number = -1;
     VALIDATE_NOT_NULL(buffer);
 
-    AutoLock locK(this);
+    AutoLock lock(mSharedRaf);
 
     Int64 length = mEndOffset - mOffset;
     if (byteCount > length) {
@@ -109,7 +109,7 @@ ECode ZipFile::RAFStream::Read(
     }
 
     mSharedRaf->Seek(mOffset);
-    FAIL_RETURN(mSharedRaf->Read(buffer, mOffset, length, number));
+    FAIL_RETURN(mSharedRaf->Read(buffer, byteOffset, byteCount, number));
     if (*number > 0) {
         mOffset += *number;
     }
@@ -152,7 +152,8 @@ ECode ZipFile::RAFStream::Fill(
     CInflater* inf = (CInflater*)inflater;
     using Elastos::Core::Math;
 
-    {    AutoLock syncLock(inf);
+    {
+        AutoLock syncLock(mSharedRaf);
         AutoPtr<IFileDescriptor> fd;
         mSharedRaf->GetFD((IFileDescriptor**)&fd);
         Int32 len = Math::Min((Int32) (mEndOffset - mOffset), nativeEndBufSize);
@@ -342,7 +343,7 @@ ECode ZipFile::Close()
 
     if (raf != NULL) { // Only close initialized instances
         {
-            AutoLock locK(this);
+            AutoLock lock(raf);
             mRaf = NULL;
             ICloseable::Probe(raf)->Close();
         }
@@ -446,7 +447,7 @@ ECode ZipFile::GetInputStream(
     AutoPtr<IRandomAccessFile> raf = mRaf;
     CRandomAccessFile* craf = (CRandomAccessFile*)raf.Get();
 
-    AutoLock locK(craf);
+    AutoLock lock(craf);
     // We don't know the entry data's start position. All we have is the
     // position of the entry's local header.
     // http://www.pkware.com/documents/casestudies/APPNOTE.TXT

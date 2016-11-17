@@ -302,7 +302,6 @@ ECode CInflater::InflateImpl(
 
     mInRead += bytesRead;
     *result = bytesWritten;
-    ALOGD(" >> bytesWritten: %d", bytesWritten);
     return NOERROR;
 }
 

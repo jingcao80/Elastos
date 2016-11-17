@@ -61,23 +61,6 @@ public:
         /* [in] */ IInterface* object,
         /* [out, callee] */ ArrayOf<Byte>** encode);
 
-    CARAPI Decode(
-        /* [in] */ IBerInputStream* bis,
-        /* [out] */ IInterface** object);
-
-    CARAPI CheckTag(
-        /* [in] */ Int32 identifier,
-        /* [out] */ Boolean* checkTag);
-
-    CARAPI EncodeASN(
-        /* [in] */ IBerOutputStream* bos);
-
-    CARAPI EncodeContent(
-        /* [in] */ IBerOutputStream* bos);
-
-    CARAPI SetEncodingContent(
-        /* [in] */ IBerOutputStream* bos);
-
     CARAPI GetEncodedLength(
         /* [in] */ IBerOutputStream* bos,
         /* [out] */ Int32* length);
@@ -90,6 +73,8 @@ public:
 
     CARAPI GetConstrId(
         /* [out] */ Int32* constrId);
+
+    using IASN1Type::Decode;
 
 protected:
         /**

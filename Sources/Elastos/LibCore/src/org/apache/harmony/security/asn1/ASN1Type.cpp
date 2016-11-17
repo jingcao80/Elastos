@@ -131,43 +131,6 @@ ECode ASN1Type::GetDecodedObject(
     return bis->GetContent(object);
 }
 
-ECode ASN1Type::Decode(
-    /* [in] */ IBerInputStream* bis,
-    /* [out] */ IInterface** object)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode ASN1Type::CheckTag(
-    /* [in] */ Int32 identifier,
-    /* [out] */ Boolean* checkTag)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode ASN1Type::EncodeASN(
-    /* [in] */ IBerOutputStream* bos)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode ASN1Type::EncodeContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode ASN1Type::SetEncodingContent(
-    /* [in] */ IBerOutputStream* bos)
-{
-    // TODO: Add your code here
-    return E_NOT_IMPLEMENTED;
-}
-
 ECode ASN1Type::GetEncodedLength(
     /* [in] */ IBerOutputStream* bos,
     /* [out] */ Int32* length)
@@ -197,9 +160,12 @@ ECode ASN1Type::GetEncodedLength(
 ECode ASN1Type::ToString(
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
     // TODO decide whether this method is necessary
     //return getClass().getName() + "(tag: 0x" + Integer.toHexString(0xff & this.id) + ")";
-    return E_NOT_IMPLEMENTED;
+    Object::ToString(result);
+    result->AppendFormat(" tag: 0x%x", 0xff&mId);
+    return NOERROR;
 }
 
 ECode ASN1Type::GetId(

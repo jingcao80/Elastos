@@ -235,8 +235,8 @@ ECode CAttributeTypeAndValue::ASN1SequenceCls::GetValues(
     CAttributeTypeAndValue* atav = (CAttributeTypeAndValue*)IAttributeTypeAndValue::Probe(object);
     AutoPtr<ArrayOf<Int32> > vs;
     atav->mOid->GetOid((ArrayOf<Int32>**)&vs);
-    (*values)[0] = CoreUtils::Convert(vs);
-    (*values)[1] = atav->mValue;
+    values->Set(0, CoreUtils::Convert(vs));
+    values->Set(1, atav->mValue);
     return NOERROR;
 }
 

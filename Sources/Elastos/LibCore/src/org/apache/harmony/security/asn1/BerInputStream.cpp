@@ -496,7 +496,12 @@ ECode BerInputStream::ReadSequence(
     Int32 endOffset = begOffset + mLength;
 
     AutoPtr< ArrayOf<IASN1Type*> > type;
-    IASN1TypeCollection::Probe(sequence)->GetType((ArrayOf<IASN1Type*>**)&type);
+    AutoPtr< ArrayOf<Boolean> > option;
+    AutoPtr< ArrayOf<IInterface*> > def;
+    IASN1TypeCollection* temp = IASN1TypeCollection::Probe(sequence);
+    temp->GetType((ArrayOf<IASN1Type*>**)&type);
+    temp->GetOPTIONAL((ArrayOf<Boolean>**)&option);
+    temp->GetDEFAULT((ArrayOf<IInterface*>**)&def);
 
     Int32 i = 0;
 
@@ -509,8 +514,6 @@ ECode BerInputStream::ReadSequence(
             Boolean chk;
             while ((*type)[i]->CheckTag(mTag, &chk), !chk) {
                 // check whether it is optional component or not
-                AutoPtr< ArrayOf<Boolean> > option;
-                IASN1TypeCollection::Probe(sequence)->GetOPTIONAL((ArrayOf<Boolean>**)&option);
                 if (!(*option)[i] || (i == type->GetLength() - 1)) {
                     Logger::E("BerInputStream", "ASN.1 Sequence: mandatory value is missing at [%d]", mTagOffset);
                     return E_ASN1_EXCEPTION;
@@ -522,8 +525,6 @@ ECode BerInputStream::ReadSequence(
         }
 
         // check the rest of components
-        AutoPtr< ArrayOf<Boolean> > option;
-        IASN1TypeCollection::Probe(sequence)->GetOPTIONAL((ArrayOf<Boolean>**)&option);
         for (; i < type->GetLength(); i++) {
             if (!(*option)[i]) {
                 Logger::E("BerInputStream", "ASN.1 Sequence: mandatory value is missing at [%d]", mTagOffset);
@@ -543,16 +544,12 @@ ECode BerInputStream::ReadSequence(
             Boolean chk;
             while ((*type)[i]->CheckTag(mTag, &chk), !chk) {
                 // check whether it is optional component or not
-                AutoPtr< ArrayOf<Boolean> > option;
-                IASN1TypeCollection::Probe(sequence)->GetOPTIONAL((ArrayOf<Boolean>**)&option);
                 if (!(*option)[i] || (i == type->GetLength() - 1)) {
                     Logger::E("BerInputStream", "ASN.1 Sequence: mandatory value is missing at [%d]", mTagOffset);
                     return E_ASN1_EXCEPTION;
                 }
 
                 // sets default value
-                AutoPtr< ArrayOf<IInterface*> > def;
-                IASN1TypeCollection::Probe(sequence)->GetDEFAULT((ArrayOf<IInterface*>**)&def);
                 if ((*def)[i] != NULL) {
                     values->Set(i, (*def)[i]);
                 }
@@ -564,10 +561,6 @@ ECode BerInputStream::ReadSequence(
         }
 
         // check the rest of components
-        AutoPtr< ArrayOf<IInterface*> > def;
-        IASN1TypeCollection::Probe(sequence)->GetDEFAULT((ArrayOf<IInterface*>**)&def);
-        AutoPtr< ArrayOf<Boolean> > option;
-        IASN1TypeCollection::Probe(sequence)->GetOPTIONAL((ArrayOf<Boolean>**)&option);
         for (; i < type->GetLength(); i++) {
             if (!(*option)[i]) {
                 Logger::E("BerInputStream", "ASN.1 Sequence: mandatory value is missing at [%d]", mTagOffset);

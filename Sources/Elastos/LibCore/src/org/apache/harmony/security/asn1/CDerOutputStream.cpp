@@ -204,8 +204,7 @@ ECode CDerOutputStream::GetSequenceLength(
             }
         }
 
-        Boolean equal;
-        if (IObject::Probe((*def)[i])->Equals((*values)[i], &equal), equal) {
+        if (Object::Equals((*def)[i], (*values)[i])) {
             values->Set(i, NULL);
             continue;
         }
