@@ -675,8 +675,8 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_Replaced
         mGenerator->Initialize(IAlgorithmParameterSpec::Probe(spec));
 
         AutoPtr<IKeyPair> pair2;
-        mGenerator->GenerateKeyPair((IKeyPair**)&pair2);
-        assert(0 && "TODO: should failed");
+        ECode ec = mGenerator->GenerateKeyPair((IKeyPair**)&pair2);
+        assert(ec != NOERROR);
         //fail("Should not be able to generate encrypted key while not initialized");
 
         Boolean res;
@@ -811,7 +811,6 @@ ECode ElastosKeyPairGeneratorTest::AssertKeyPairCorrect(
         curve->GetField((IECField**)&field);
         Int32 size;
         field->GetFieldSize(&size);
-
         assert(keySize == size);
     }
     else if (String("RSA").EqualsIgnoreCase(keyType)) {

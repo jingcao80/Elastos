@@ -108,6 +108,7 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
 
     //try {
     ECode ec = engine->GetPrivateKeyById(privateKeyAlias, (IPrivateKey**)&privKey);
+    Logger::E("ElastosKeyPairGenerator", "=====[snow]===== privKey=%s", TO_CSTR(privKey));
     //} catch (InvalidKeyException e) {
     if (ec == (ECode)E_INVALID_KEY_EXCEPTION) {
         //throw new RuntimeException("Can't get key", e);
@@ -129,6 +130,7 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
         AutoPtr<IX509EncodedKeySpec> x509eks;
         FAIL_GOTO(ec = CX509EncodedKeySpec::New(pubKeyBytes, (IX509EncodedKeySpec**)&x509eks), ERROR)
         FAIL_GOTO(ec = keyFact->GeneratePublic(IKeySpec::Probe(x509eks), (IPublicKey**)&pubKey), ERROR)
+        Logger::E("ElastosKeyPairGenerator", "=====[snow]===== pubKey=%s", TO_CSTR(pubKey));
     }
     // catch (NoSuchAlgorithmException e) {
 ERROR:

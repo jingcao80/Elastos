@@ -78,13 +78,13 @@ ECode Platform::SetCurveName(
     /* [in] */ IECParameterSpec* spec,
     /* [in] */ const String& curveName)
 {
-    assert(0);
+    //assert(0);
     // try {
     //     Method setCurveName = spec.getClass().getDeclaredMethod("setCurveName", String.class);
     //     setCurveName.invoke(spec, curveName);
     // } catch (Exception ignored) {
     // }
-    return NOERROR;
+    return spec->SetCurveName(curveName);
 }
 
 ECode Platform::SetSocketTimeout(

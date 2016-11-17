@@ -246,7 +246,7 @@ ECode COpenSSLECGroupContext::GetECParameterSpec(
     Int32 type;
     NativeCrypto::Get_EC_GROUP_type(mGroupCtx, &type);
     if (type == INativeCrypto::EC_CURVE_GFP) {
-        CECFieldFp::New(p, (IECFieldFp**)&field);
+        CECFieldFp::New(p, (IECField**)&field);
     }
     else if (type == INativeCrypto::EC_CURVE_GF2M) {
         Int32 len;

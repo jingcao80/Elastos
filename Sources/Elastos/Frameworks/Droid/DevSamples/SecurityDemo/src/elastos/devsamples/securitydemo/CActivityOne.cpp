@@ -949,7 +949,23 @@ ECode CActivityOne::ButtonElastosKeyPairGenerator()
 
     //return text->TestKeyPairGenerator_GenerateKeyPair_Encrypted_Success();                                   //OK
 
-    return text->TestKeyPairGenerator_GenerateKeyPair_DSA_Unencrypted_Success();
+    //return text->TestKeyPairGenerator_GenerateKeyPair_DSA_Unencrypted_Success();                                      //error
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_DSA_2048_Unencrypted_Success();                                 //error
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_DSA_SpecifiedParams_Unencrypted_Success();                      //error
+
+    return text->TestKeyPairGenerator_GenerateKeyPair_EC_Unencrypted_Success();                                //OK
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_EC_P521_Unencrypted_Success();                                  //error
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_RSA_Unencrypted_Success();                             //OK
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_RSA_WithParams_Unencrypted_Success();                           //error  siji
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_Replaced_Success();                                    //OK
+
+    //return text->TestKeyPairGenerator_GenerateKeyPair_Replaced_UnencryptedToEncrypted_Success();             //OK
 }
 
 ECode CActivityOne::ButtonElastosKeyStore()

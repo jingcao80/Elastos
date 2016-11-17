@@ -276,7 +276,7 @@ ECode OpenSSLKey::GetPrivateKey(
         default: {
             // throw new NoSuchAlgorithmException("unknown PKEY type");
             Logger::E("OpenSSLKey", "unknown PKEY type, line:%d", __LINE__);
-            return NOERROR;
+            return E_NO_SUCH_ALGORITHM_EXCEPTION;
         }
     }
     return NOERROR;
