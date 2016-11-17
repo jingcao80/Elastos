@@ -2717,6 +2717,9 @@ ECode CActivityThread::HandleReceiver(
         String path("/system/lib/Elastos.Droid.Server.eco");
         CPathClassLoader::New(path, NULL, (IClassLoader**)&cl);
     }
+    else if (className.Equals("com.qualcomm.location.LocationServiceReceiver")) {
+        return NOERROR;
+    }
     else {
         packageInfo->GetClassLoader((IClassLoader**)&cl);
     }
