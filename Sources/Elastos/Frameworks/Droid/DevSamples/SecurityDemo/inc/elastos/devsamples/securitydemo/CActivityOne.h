@@ -75,10 +75,11 @@ private:
     CARAPI CipherTest();
 
 private:
-    AutoPtr<ArrayOf<Byte> > mPublicEncoded;
+    AutoPtr<ArrayOf<Byte> > mRSAPublicEncoded;
+    AutoPtr<ArrayOf<Byte> > mRSAPrivateEncoded;
 
-    AutoPtr<ArrayOf<Byte> > mPrivateEncoded;
-
+    AutoPtr<ArrayOf<Byte> > mDHPublicEncoded;
+    AutoPtr<ArrayOf<Byte> > mDHPrivateEncoded;
 };
 
 } // namespace SecurityDemo

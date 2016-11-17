@@ -14,6 +14,7 @@ using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
 using Elastos::Math::IBigInteger;
 using Elastos::Security::IPublicKey;
+using Elastos::Security::IKey;
 using Elastosx::Crypto::Interfaces::IDHKey;
 using Elastosx::Crypto::Interfaces::IDHPublicKey;
 using Elastosx::Crypto::Spec::IDHParameterSpec;
@@ -26,6 +27,7 @@ class OpenSSLDHPublicKey
     : public IOpenSSLDHPublicKey
     , public IDHPublicKey
     , public IDHKey
+    , public IKey
     , public IPublicKey
     , public IOpenSSLKeyHolder
     , public Object

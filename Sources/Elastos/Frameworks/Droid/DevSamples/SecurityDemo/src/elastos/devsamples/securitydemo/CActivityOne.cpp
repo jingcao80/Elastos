@@ -495,27 +495,37 @@ ECode CActivityOne::Button2Function()
 
 ECode CActivityOne::Button3Function()   //MessageDigest
 {
-    Logger::D(TAG, "begin Button3Function");
+    Logger::D(TAG, "begin MessageDigest");
     Services::Initialize();
 
     AutoPtr<IMessageDigestHelper> mdHelper;
     CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&mdHelper);
-    AutoPtr<IMessageDigest> md;
     Logger::D(TAG, "begin GetInstance");
-    mdHelper->GetInstance(String("SHA-1"), (IMessageDigest**)&md);
+    AutoPtr<ArrayOf<String> > allAlgorithms = ArrayOf<String>::Alloc(6);
+    allAlgorithms->Set(0, String("SHA-1"));
+    allAlgorithms->Set(1, String("SHA-224"));
+    allAlgorithms->Set(2, String("SHA-256"));
+    allAlgorithms->Set(3, String("SHA-384"));
+    allAlgorithms->Set(4, String("SHA-512"));
+    allAlgorithms->Set(5, String("MD5"));
+    for (Int32 i = 0; i < allAlgorithms->GetLength(); ++i) {
+        String algorithm = (*allAlgorithms)[i];
+        AutoPtr<IMessageDigest> md;
+        mdHelper->GetInstance(algorithm, (IMessageDigest**)&md);
 
-    String text("abc");
-    //SHA-1: A9:99:3E:36:47:06:81:6A:BA:3E:25:71:78:50:C2:6C:9C:D0:D8:9D
-    AutoPtr<ArrayOf<Byte> > data = text.GetBytes();
-    md->Update(data);
-    AutoPtr<ArrayOf<Byte> > resultData;
-    md->Digest((ArrayOf<Byte>**)&resultData);
-    for (Int32 i = 0; i < resultData->GetLength(); i++) {
-        Logger::D(TAG, "resultData %d is : %x", i, (*resultData)[i]);
+        String text("abc");
+        //SHA-1: A9:99:3E:36:47:06:81:6A:BA:3E:25:71:78:50:C2:6C:9C:D0:D8:9D
+        AutoPtr<ArrayOf<Byte> > data = text.GetBytes();
+        md->Update(data);
+        AutoPtr<ArrayOf<Byte> > resultData;
+        md->Digest((ArrayOf<Byte>**)&resultData);
+        //for (Int32 i = 0; i < resultData->GetLength(); i++) {
+        //    Logger::D(TAG, "resultData %d is : %x", i, (*resultData)[i]);
+        //}
+        String resultStr = StringUtils::ToHexString(*resultData);
+        Logger::D(TAG, "result string for al:%s, is : %s", algorithm.string(), resultStr.string());
     }
-    String resultStr = StringUtils::ToHexString(*resultData);
-
-    Logger::D(TAG, "=====end Button3Function===== \nresult string is : %s", resultStr.string());
+    Logger::D(TAG, "=====end MessageDigest===== ");
     return NOERROR;
 }
 
@@ -544,15 +554,49 @@ ECode CActivityOne::Button4Function()   //KeyPairGenerator
     AutoPtr<ArrayOf<Byte> > publicEncoded;
     IKey::Probe(publicKey)->GetEncoded((ArrayOf<Byte>**)&publicEncoded);
     String publicStr = StringUtils::ToHexString(*publicEncoded);
-    mPublicEncoded = publicEncoded;
+    mRSAPublicEncoded = publicEncoded;
 
     AutoPtr<ArrayOf<Byte> > privateEncoded;
     IKey::Probe(privateKey)->GetEncoded((ArrayOf<Byte>**)&privateEncoded);
     String privateStr = StringUtils::ToHexString(*privateEncoded);
-    mPrivateEncoded = privateEncoded;
+    mRSAPrivateEncoded = privateEncoded;
 
-    Logger::D(TAG, "=====end Button4Function===== \npublicKey string is : %s, \nprivateKey string is : %s",
-            publicStr.string(), privateStr.string());
+    Logger::D(TAG, "RSA publicKey string is : %s, \nprivateKey string is : %s", publicStr.string(), privateStr.string());
+    AutoPtr<ArrayOf<String> > allAlgorithms = ArrayOf<String>::Alloc(3);
+    allAlgorithms->Set(0, String("DH"));
+    allAlgorithms->Set(1, String("DSA"));
+    allAlgorithms->Set(2, String("EC"));
+    for (Int32 i = 0; i < allAlgorithms->GetLength(); ++i) {
+        String algorithm = (*allAlgorithms)[i];
+        AutoPtr<IKeyPairGenerator> keyPairGenerator;
+        kpgHelper->GetInstance(algorithm, String("ElastosOpenSSL"), (IKeyPairGenerator**)&keyPairGenerator);
+
+        AutoPtr<IKeyPair> keyPair;
+        keyPairGenerator->GenerateKeyPair((IKeyPair**)&keyPair);
+
+        AutoPtr<IPublicKey> publicKey;
+        keyPair->GetPublic((IPublicKey**)&publicKey);
+
+        AutoPtr<IPrivateKey> privateKey;
+        keyPair->GetPrivate((IPrivateKey**)&privateKey);
+
+        Logger::E("leliang", "publicKey:%p, privateKey:%p", publicKey.Get(), privateKey.Get());
+        AutoPtr<ArrayOf<Byte> > publicEncoded;
+        IKey::Probe(publicKey)->GetEncoded((ArrayOf<Byte>**)&publicEncoded);
+        String publicStr = StringUtils::ToHexString(*publicEncoded);
+
+        AutoPtr<ArrayOf<Byte> > privateEncoded;
+        IKey::Probe(privateKey)->GetEncoded((ArrayOf<Byte>**)&privateEncoded);
+        String privateStr = StringUtils::ToHexString(*privateEncoded);
+        if (algorithm.Equals("DH")) {
+            mDHPublicEncoded = publicEncoded;
+            mDHPrivateEncoded = privateEncoded;
+        }
+
+        Logger::D(TAG, "%s publicKey string is : %s, \nprivateKey string is : %s", algorithm.string(), publicStr.string(), privateStr.string());
+    }
+
+    Logger::D(TAG, "=====end Button4Function=====");
     return NOERROR;
 }
 
@@ -567,19 +611,41 @@ ECode CActivityOne::Button5Function()   //KeyFactory
     Logger::D(TAG, "begin GetInstance");
     kfHelper->GetInstance(String("RSA"), (IKeyFactory**)&keyFactory);
 
-    if (mPublicEncoded == NULL || mPrivateEncoded == NULL) {
-        Logger::D(TAG, "\n=====Please run button4 first=====\n");
+    if (mRSAPublicEncoded == NULL || mRSAPrivateEncoded == NULL) {
+        Logger::D(TAG, "\n=====Please run KeyPairGenerator first=====\n");
         return NOERROR;
     }
     AutoPtr<IX509EncodedKeySpec> x509Spec;
-    CX509EncodedKeySpec::New(mPublicEncoded, (IX509EncodedKeySpec**)&x509Spec);
+    CX509EncodedKeySpec::New(mRSAPublicEncoded, (IX509EncodedKeySpec**)&x509Spec);
     AutoPtr<IPublicKey> publicKey;
     keyFactory->GeneratePublic(IKeySpec::Probe(x509Spec), (IPublicKey**)&publicKey);
+    assert("RSA publicKey should not be NULL" && publicKey != NULL);
 
     AutoPtr<IPKCS8EncodedKeySpec> pkcs8Spec;
-    CPKCS8EncodedKeySpec::New(mPrivateEncoded, (IPKCS8EncodedKeySpec**)&pkcs8Spec);
+    CPKCS8EncodedKeySpec::New(mRSAPrivateEncoded, (IPKCS8EncodedKeySpec**)&pkcs8Spec);
     AutoPtr<IPrivateKey> privateKey;
     keyFactory->GeneratePrivate(IKeySpec::Probe(pkcs8Spec), (IPrivateKey**)&privateKey);
+    assert("RSA privateKey should not be NULL" && privateKey != NULL);
+    Logger::D(TAG, "\nafter test KeyFactory for RSA");
+
+    kfHelper->GetInstance(String("DH"), (IKeyFactory**)&keyFactory);
+
+    if (mDHPublicEncoded == NULL || mDHPrivateEncoded == NULL) {
+        Logger::D(TAG, "\n=====Please run KeyPairGenerator first=====\n");
+        return NOERROR;
+    }
+    AutoPtr<IX509EncodedKeySpec> x509SpecDH;
+    CX509EncodedKeySpec::New(mDHPublicEncoded, (IX509EncodedKeySpec**)&x509SpecDH);
+    AutoPtr<IPublicKey> publicKeyDH;
+    keyFactory->GeneratePublic(IKeySpec::Probe(x509SpecDH), (IPublicKey**)&publicKeyDH);
+    assert("DH publicKey should not be NULL" && publicKeyDH != NULL);
+
+    AutoPtr<IPKCS8EncodedKeySpec> pkcs8SpecDH;
+    CPKCS8EncodedKeySpec::New(mDHPrivateEncoded, (IPKCS8EncodedKeySpec**)&pkcs8SpecDH);
+    AutoPtr<IPrivateKey> privateKeyDH;
+    keyFactory->GeneratePrivate(IKeySpec::Probe(pkcs8SpecDH), (IPrivateKey**)&privateKeyDH);
+    assert("DH privateKey should not be NULL" && privateKeyDH != NULL);
+    Logger::D(TAG, "\nafter test KeyFactory for DH");
 
     Logger::D(TAG, "=====end Button5Function=====");
     return NOERROR;
@@ -787,6 +853,7 @@ ECode CActivityOne::Button7Function()// Certificate
     AutoPtr<ICertificate> certificate;
     cf->GenerateCertificate(IInputStream::Probe(fis), (ICertificate**)&certificate);
     Logger::E(TAG, "leliang after get ICertificate certificate:%p", certificate.Get());
+    assert("certificate should not be NULL" && certificate != NULL);
 
     String type;
     certificate->GetType(&type);

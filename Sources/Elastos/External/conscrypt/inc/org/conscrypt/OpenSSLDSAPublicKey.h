@@ -18,6 +18,7 @@ using Elastos::Security::Interfaces::IDSAKey;
 using Elastos::Security::Interfaces::IDSAParams;
 using Elastos::Security::Interfaces::IDSAPublicKey;
 using Elastos::Security::IPublicKey;
+using Elastos::Security::IKey;
 using Elastos::Security::Spec::IDSAPublicKeySpec;
 
 namespace Org {
@@ -27,6 +28,7 @@ class OpenSSLDSAPublicKey
     : public IOpenSSLDSAPublicKey
     , public IDSAPublicKey
     , public IDSAKey
+    , public IKey
     , public IPublicKey
     , public IOpenSSLKeyHolder
     , public Object

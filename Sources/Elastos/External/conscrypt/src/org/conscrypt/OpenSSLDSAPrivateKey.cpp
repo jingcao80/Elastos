@@ -8,6 +8,7 @@ using Elastos::IO::IObjectOutput;
 using Elastos::Core::StringBuilder;
 using Elastos::Math::CBigInteger;
 using Elastos::Security::EIID_IPrivateKey;
+using Elastos::Security::EIID_IKey;
 using Elastos::Security::IKey;
 using Elastos::Security::Interfaces::EIID_IDSAKey;
 using Elastos::Security::Interfaces::EIID_IDSAPrivateKey;
@@ -17,8 +18,8 @@ namespace Conscrypt {
 
 const Int64 OpenSSLDSAPrivateKey::serialVersionUID;
 
-CAR_INTERFACE_IMPL_5(OpenSSLDSAPrivateKey, Object, IOpenSSLDSAPrivateKey,
-        IDSAPrivateKey, IDSAKey, IPrivateKey, IOpenSSLKeyHolder)
+CAR_INTERFACE_IMPL_6(OpenSSLDSAPrivateKey, Object, IOpenSSLDSAPrivateKey,
+        IDSAPrivateKey, IDSAKey, IKey, IPrivateKey, IOpenSSLKeyHolder)
 
 OpenSSLDSAPrivateKey::OpenSSLDSAPrivateKey()
 {

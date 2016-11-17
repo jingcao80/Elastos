@@ -11,14 +11,15 @@ using Elastos::Math::CBigInteger;
 using Elastos::Security::Interfaces::EIID_IDSAKey;
 using Elastos::Security::Interfaces::EIID_IDSAPublicKey;
 using Elastos::Security::EIID_IPublicKey;
+using Elastos::Security::EIID_IKey;
 
 namespace Org {
 namespace Conscrypt {
 
 const Int64 OpenSSLDSAPublicKey::serialVersionUID;
 
-CAR_INTERFACE_IMPL_5(OpenSSLDSAPublicKey, Object, IOpenSSLDSAPublicKey,
-        IDSAPublicKey, IDSAKey, IPublicKey, IOpenSSLKeyHolder)
+CAR_INTERFACE_IMPL_6(OpenSSLDSAPublicKey, Object, IOpenSSLDSAPublicKey,
+        IDSAPublicKey, IDSAKey, IKey, IPublicKey, IOpenSSLKeyHolder)
 
 OpenSSLDSAPublicKey::OpenSSLDSAPublicKey()
 {

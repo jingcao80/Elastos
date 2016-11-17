@@ -20,17 +20,17 @@
     <Button android:id="@+id/Button3"
         android:layout_width="500px"
         android:layout_height="wrap_content"
-        android:text="Button3">
+        android:text="MessageDigest Test">
     </Button>
     <Button android:id="@+id/Button4"
         android:layout_width="500px"
         android:layout_height="wrap_content"
-        android:text="Button4">
+        android:text="KeyPairGenerator Test">
     </Button>
     <Button android:id="@+id/Button5"
         android:layout_width="500px"
         android:layout_height="wrap_content"
-        android:text="Button5">
+        android:text="KeyFactory Test">
     </Button>
     <Button android:id="@+id/Button6"
         android:layout_width="500px"

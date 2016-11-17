@@ -431,7 +431,7 @@ String IntegralToString::ToHexString(
     }
 
     const char* digits = upperCase ? UPPER_CASE_DIGITS : DIGITS;
-    char* buf = new char[len * 2];
+    char* buf = new char[len * 2 + 1];
     int c = 0;
     Byte b;
     for (Int32 i = 0; i < len; ++i) {
@@ -439,6 +439,7 @@ String IntegralToString::ToHexString(
         buf[c++] = digits[(b >> 4) & 0xf];
         buf[c++] = digits[b & 0xf];
     }
+    buf[c] = '\0';
     return String(buf);
 }
 
