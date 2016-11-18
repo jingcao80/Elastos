@@ -14,12 +14,14 @@ module
     merge("../../../../car/org/alljoyn/bus/Mutable.car");
     merge("../../../../car/org/alljoyn/bus/OnJoinSessionListener.car");
     merge("../../../../car/org/alljoyn/bus/OnPingListener.car");
+    merge("../../../../car/org/alljoyn/bus/ProxyBusObject.car");
     merge("../../../../car/org/alljoyn/bus/SecurityViolationListener.car");
     merge("../../../../car/org/alljoyn/bus/SessionListener.car");
     merge("../../../../car/org/alljoyn/bus/SessionOpts.car");
     merge("../../../../car/org/alljoyn/bus/SessionPortListener.car");
     merge("../../../../car/org/alljoyn/bus/Translator.car");
     merge("../../../../car/org/alljoyn/bus/alljoyn/DaemonInit.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/DBusProxyObj.car");
 
     namespace Org {
     namespace Alljoyn {
@@ -31,6 +33,44 @@ module
     }
 
     } // namespace Alljoyn
+
+    class CBusAttachment {
+        /**
+         * Constructs a BusAttachment.
+         *
+         * @param applicationName the name of the application
+         * @param policy if this attachment is allowed to receive messages from
+         *               remote devices
+         * @param concurrency The maximum number of concurrent method and signal
+         *                    handlers locally executing.
+         */
+        constructor(
+            [in] String applicationName,
+            [in] RemoteMessage policy,
+            [in] Int32 concurrency);
+
+        /**
+         * Constructs a BusAttachment.
+         *
+         * @param applicationName the name of the application
+         * @param policy if this attachment is allowed to receive messages
+         *               from remote devices
+         */
+        constructor(
+            [in] String applicationName,
+            [in] RemoteMessage policy);
+
+        /**
+         * Construct a BusAttachment that will only communicate on the local device.
+         *
+         * @param applicationName the name of the application
+         */
+        constructor(
+            [in] String applicationName);
+
+        interface IBusAttachment;
+    }
+
     } // namespace Bus
     } // namespace Alljoyn
     } // namespace Org

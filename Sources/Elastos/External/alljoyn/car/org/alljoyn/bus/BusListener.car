@@ -1,12 +1,110 @@
 
 module
 {
+    interface Org.Alljoyn.Bus.IBusAttachment;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
     interface IBusListener {
+        /**
+         * Called by the bus when the listener is registered. This give the listener implementation the
+         * opportunity to save a reference to the bus.
+         *
+         * @param bus  The bus the listener is registered with.
+         */
+        ListenerRegistered(
+            [in] IBusAttachment* bus);
 
+        /**
+         * Called by the bus when the listener is unregistered.
+         */
+        ListenerUnregistered();
+
+        /**
+         * Called by the bus when an external bus is discovered that is advertising
+         * a well-known name that this attachment has registered interest in via a
+         * call to findAdvertisedName
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param name         A well known name that the remote bus is advertising.
+         * @param transport    Transport that received the advertisment.
+         * @param namePrefix   The well-known name prefix used in call to
+         *                     FindAdvertisedName that triggered this callback.
+         */
+        FoundAdvertisedName(
+            [in] String name,
+            [in] Int16 transport,
+            [in] String namePrefix);
+
+        /**
+         * Called by the bus when an advertisement previously reported through
+         * foundAdvertisedName has become unavailable.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param name         A well known name that the remote bus is advertising
+         *                     that is of interest to this attachment.
+         * @param transport    Transport that stopped receiving the given advertised name.
+         * @param namePrefix   The well-known name prefix that was used in a call to
+         *                     FindAdvertisedName that triggered this callback.
+         */
+        LostAdvertisedName(
+            [in] String name,
+            [in] Int16 transport,
+            [in] String namePrefix);
+
+        /**
+         * Called by the bus when the ownership of any well-known name changes.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param busName        The well-known name that has changed.
+         * @param previousOwner  The unique name that previously owned the name or
+         *                       NULL if there was no previous owner.
+         * @param newOwner       The unique name that now owns the name or NULL if
+         *                       there is no new owner.
+         */
+        NameOwnerChanged(
+            [in] String busName,
+            [in] String previousOwner,
+            [in] String newOwner);
+
+        /**
+         * @deprecated This is deprecated.  It is no longer called when properties change.  Use the property change notification mechanism for proxy bus objects instead.
+         *
+         * Called by the bus when the value of a property changes if that property has annotation
+         * org.freedesktop.DBus.Properties.PropertiesChanged=true
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param propName       The well-known name that has changed.
+         * @param propValue      The new value of the property; NULL if not present
+         */
+        // public void propertyChanged(String propName, Variant propValue);
+
+        /**
+         * Called when a bus that this listener is registered with is stopping.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         */
+        BusStopping();
+
+        /**
+         * Called when a BusAttachment this listener is registered with is has become disconnected from
+         * the bus
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         */
+        BusDisconnected();
     }
 
     } // namespace Bus

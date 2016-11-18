@@ -1,0 +1,161 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    interface IProxyBusObject {
+        /** Enable property caching for this proxy bus object. */
+        EnablePropertyCaching();
+
+        /**
+         * Release resources immediately.
+         *
+         * Normally, when all references are removed to a given object, the Java
+         * garbage collector notices the fact that the object is no longer required
+         * and will destory it.  This can happen at the garbage collector's leisure
+         * an so any resources held by the object will not be released until "some
+         * time later" after the object is no longer needed.
+         *
+         * Often, in test programs, we cycle through many BusAttachments in a very
+         * short time, and if we rely on the garbage collector to clean up, we can
+         * fairly quickly run out of scarce underlying resources -- especially file
+         * descriptors.
+         *
+         * We provide an explicity release() method to allow test programs to release
+         * the underlying resources immediately.  The garbage collector will still
+         * call finalize, but the resrouces held by the underlying C++ objects will
+         * go away immediately.
+         *
+         * It is a programming error to call another method on the ProxyBusObject
+         * after the release() method has been called.
+         */
+        ReleaseResources();
+
+        /**
+         * Gets the bus name.
+         *
+         * @return the bus name
+         */
+        GetBusName(
+            [out] String* busName);
+
+        /**
+         * Gets the object path.
+         *
+         * @return the object path
+         */
+        GetObjPath(
+            [out] String* objPath);
+
+        /**
+         * Gets a proxy to an interface of this remote bus object.
+         *
+         * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+         * @param intf one of the interfaces supplied when the proxy bus object was
+         *             created
+         * @return the proxy implementing the interface
+         * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
+         */
+        GetInterface(
+            [in] InterfaceID intfId,
+            [out] IInterface** intf);
+
+        /**
+         * Sets the reply timeout for method invocations on this remote bus object.
+         * This affects all future method invocations of this bus object.  The
+         * default reply timeout is 25 seconds.
+         *
+         * @param timeoutMsecs the timeout to wait for a reply
+         */
+        SetReplyTimeout(
+            [in] Int32 timeoutMsecs);
+
+        /**
+         * Tells the bus to start an application to handle a method invocation of
+         * this bus object if needed.
+         * This affects all future method invocations of this bus object.  The
+         * default behavior is to not start an application.
+         *
+         * @param autoStart if {@code true} the bus should automatically start an
+         *                  application to handle the method
+         */
+        SetAutoStart(
+            [in] Boolean autoStart);
+
+        /**
+         * Indicates if the remote object for this proxy bus object is secure.
+         *
+         * @return  true if the object is secure
+         */
+        IsSecure(
+            [out] Boolean* isSecure);
+
+        /**
+         * Get a property from an interface on the remote object.
+         *
+         * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+         * @param iface the interface that the property exists on
+         * @param propertyName the name of the property
+         * @return Variant containing the value of the property
+         * @throws BusException if the named property doesn't exist
+         */
+        // public <T> Variant getProperty(Class<T> iface, String propertyName);
+
+        /**
+         * Set a property on an interface on the remote object.
+         *
+         * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+         * @param iface the interface that the property exists on
+         * @param propertyName the name of the property
+         * @param value the value for the property
+         * @throws BusException if the named property doesn't exist or cannot be set
+         */
+        // public <T> void setProperty(Class<T> iface, String propertyName, Variant value);
+
+        /**
+         * Get all properties from an interface on the remote object.
+         *
+         * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+         * @param iface the interface
+         * @return a Map of name/value associations
+         * @throws BusException if request cannot be honored
+         */
+        // public <T> Map<String, Variant> getAllProperties(Class<T> iface);
+
+        /**
+         * Function to register a handler for property change events.
+         * Note that registering the same handler callback for the same
+         * interface will overwrite the previous registration.  The same
+         * handler callback may be registered for several different
+         * interfaces simultaneously.
+         *
+         * @param iface             Remote object's interface on which the property is defined.
+         * @param properties        The name of the properties to monitor (NULL for all).
+         * @param listener          Reference to the object that will receive the callback.
+         * @return
+         *      - #ER_OK if the handler was registered successfully
+         *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
+         *      - #ER_BUS_NO_SUCH_PROPERTY if the property does not exist
+         */
+        // public native Status registerPropertiesChangedListener(String iface, String[] properties,
+        //                                                       PropertiesChangedListener listener);
+
+        /**
+         * Function to unregister a handler for property change events.
+         *
+         * @param iface     Remote object's interface on which the property is defined.
+         * @param listener  Reference to the object that used to receive the callback.
+         * @return
+         *      - #ER_OK if the handler was registered successfully
+         *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
+         */
+        // public native Status unregisterPropertiesChangedListener(String iface,
+        //                                                         PropertiesChangedListener listener);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}
