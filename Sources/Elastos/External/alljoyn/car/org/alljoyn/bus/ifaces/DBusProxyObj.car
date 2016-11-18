@@ -1,0 +1,16 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Ifaces {
+
+    interface IDBusProxyObj {
+    }
+
+    } // namespace Ifaces
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

@@ -3,9 +3,9 @@
 #define __ORG_ALLJOYN_BUS_ALLJOYN_CDAEMONINIT_H__
 
 #include "_Org_Alljoyn_Bus_Alljoyn_CDaemonInit.h"
-#include "org/alljoyn/bus/alljoyn/DaemonInit.h"
 #include <elastos/core/Singleton.h>
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Core::Singleton;
 
 namespace Org {
@@ -14,11 +14,20 @@ namespace Bus {
 namespace Alljoyn {
 
 CarClass(CDaemonInit)
-    , public DaemonInit
     , public Singleton
+    , public IDaemonInit
 {
 public:
     CAR_SINGLETON_DECL();
+
+    CAR_INTERFACE_DECL();
+
+    CARAPI GetContext(
+        /* [out] */ IContext** context);
+
+    CARAPI PrepareDaemon(
+        /* [in] */ IContext* context,
+        /* [out] */ Boolean* result);
 };
 
 } // namespace Alljoyn
