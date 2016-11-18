@@ -16,12 +16,6 @@ public:
     static CARAPI SignatureWithDSA();
 };
 
-class CipherTest
-{
-public:
-    static CARAPI AesECBNoPadding();
-};
-
 } // namespace SecurityDemo
 } // namespace DevSamples
 } // namespace Elastos

@@ -16,6 +16,7 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Org.Conscrypt.cpp
 SOURCES += CActivityOne.cpp
 SOURCES += Test.cpp
+SOURCES += CipherTest.cpp
 SOURCES += ElastosKeyPairGeneratorTest.cpp
 SOURCES += ElastosKeyStoreTest.cpp
 

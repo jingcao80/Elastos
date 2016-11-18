@@ -82,7 +82,7 @@ ECode Cipher::GetProvider(
 {
     VALIDATE_NOT_NULL(provider)
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     *provider = mProvider;
     REFCOUNT_ADD(*provider);
     return NOERROR;
@@ -101,7 +101,7 @@ ECode Cipher::GetBlockSize(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineGetBlockSize(value);
 }
 
@@ -117,7 +117,7 @@ ECode Cipher::GetOutputSize(
         return E_ILLEGAL_STATE_EXCEPTION;
     } else {
         AutoPtr<ICipherSpi> spi;
-        GetSpi((ICipherSpi**)&spi);
+        FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
         return spi->EngineGetOutputSize(inputLen, value);
     }
 }
@@ -127,7 +127,7 @@ ECode Cipher::GetIV(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineGetIV(value);
 }
 
@@ -136,7 +136,7 @@ ECode Cipher::GetParameters(
 {
     VALIDATE_NOT_NULL(parameters);
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineGetParameters(parameters);
 }
 
@@ -166,12 +166,12 @@ ECode Cipher::Init(
     /* [in] */ IKey * key,
     /* [in] */ ISecureRandom * random)
 {
-    CheckMode(opmode);
+    FAIL_RETURN(CheckMode(opmode));
     //        FIXME InvalidKeyException
     //        if keysize exceeds the maximum allowable keysize
     //        (jurisdiction policy files)
     AutoPtr<ICipherSpi> spi;
-    GetSpi(key, (ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi(key, (ICipherSpi**)&spi));
     FAIL_RETURN(spi->EngineInit(opmode, key, random));
     mMode = opmode;
     return NOERROR;
@@ -194,7 +194,7 @@ ECode Cipher::Init(
     /* [in] */ IAlgorithmParameterSpec * params,
     /* [in] */ ISecureRandom * random)
 {
-    CheckMode(opmode);
+    FAIL_RETURN(CheckMode(opmode));
     //        FIXME InvalidKeyException
     //        if keysize exceeds the maximum allowable keysize
     //        (jurisdiction policy files)
@@ -202,7 +202,7 @@ ECode Cipher::Init(
     //        cryptographic strength exceed the legal limits
     //        (jurisdiction policy files)
     AutoPtr<ICipherSpi> spi;
-    GetSpi(key, (ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi(key, (ICipherSpi**)&spi));
     FAIL_RETURN(spi->EngineInit(opmode, key, params, random));
     mMode = opmode;
     return NOERROR;
@@ -225,7 +225,7 @@ ECode Cipher::Init(
     /* [in] */ IAlgorithmParameters * params,
     /* [in] */ ISecureRandom * random)
 {
-    CheckMode(opmode);
+    FAIL_RETURN(CheckMode(opmode));
     //        FIXME InvalidKeyException
     //        if keysize exceeds the maximum allowable keysize
     //        (jurisdiction policy files)
@@ -233,7 +233,7 @@ ECode Cipher::Init(
     //        cryptographic strength exceed the legal limits
     //        (jurisdiction policy files)
     AutoPtr<ICipherSpi> spi;
-    GetSpi(key, (ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi(key, (ICipherSpi**)&spi));
     FAIL_RETURN(spi->EngineInit(opmode, key, params, random));
     mMode = opmode;
     return NOERROR;
@@ -254,7 +254,7 @@ ECode Cipher::Init(
     /* [in] */ ICertificate * certificate,
     /* [in] */ ISecureRandom * random)
 {
-    CheckMode(opmode);
+    FAIL_RETURN(CheckMode(opmode));
     AutoPtr<IX509Certificate> cert = IX509Certificate::Probe(certificate);
     if (cert != NULL) {
         AutoPtr<ISet> ce;
@@ -318,7 +318,7 @@ ECode Cipher::Init(
     certificate->GetPublicKey((IPublicKey**)&pkey);
     AutoPtr<IKey> key = IKey::Probe(pkey);
     AutoPtr<ICipherSpi> spi;
-    GetSpi(key, (ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi(key, (ICipherSpi**)&spi));
     spi->EngineInit(opmode, key, random);
     mMode = opmode;
     return NOERROR;
@@ -344,7 +344,7 @@ ECode Cipher::Update(
         return NOERROR;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdate(input, 0, input->GetLength(), output);
 }
 
@@ -371,7 +371,7 @@ ECode Cipher::Update(
         return NOERROR;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdate(input, inputOffset, inputLen, output);
 }
 
@@ -418,7 +418,7 @@ ECode Cipher::Update(
         return NOERROR;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdate(input, inputOffset, inputLen, output,
             outputOffset, value);
 }
@@ -440,7 +440,7 @@ ECode Cipher::Update(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdate(input, output, value);
 }
 
@@ -459,7 +459,7 @@ ECode Cipher::UpdateAAD(
         return NOERROR;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdateAAD(input, 0, input->GetLength());
 }
 
@@ -481,7 +481,7 @@ ECode Cipher::UpdateAAD(
         return NOERROR;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdateAAD(input, inputOffset, inputLen);
 }
 
@@ -497,7 +497,7 @@ ECode Cipher::UpdateAAD(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUpdateAAD(input);
 }
 
@@ -512,7 +512,7 @@ ECode Cipher::DoFinal(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineDoFinal(NULL, 0, 0, buf);
 }
 
@@ -533,7 +533,7 @@ ECode Cipher::DoFinal(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineDoFinal(NULL, 0, 0, output, outputOffset, number);
 }
 
@@ -549,7 +549,7 @@ ECode Cipher::DoFinal(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineDoFinal(input, 0, input->GetLength(), output);
 }
 
@@ -568,7 +568,7 @@ ECode Cipher::DoFinal(
     }
     CheckInputOffsetAndCount(input->GetLength(), inputOffset, inputLen);
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineDoFinal(input, inputOffset, inputLen, output);
 }
 
@@ -599,7 +599,7 @@ ECode Cipher::DoFinal(
     }
     CheckInputOffsetAndCount(input->GetLength(), inputOffset, inputLen);
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineDoFinal(input, inputOffset, inputLen, output,
             outputOffset, number);
 }
@@ -621,7 +621,7 @@ ECode Cipher::DoFinal(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineDoFinal(input, output, number);
 }
 
@@ -637,7 +637,7 @@ ECode Cipher::Wrap(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineWrap(key, array);
 }
 
@@ -655,7 +655,7 @@ ECode Cipher::Unwrap(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<ICipherSpi> spi;
-    GetSpi((ICipherSpi**)&spi);
+    FAIL_RETURN(GetSpi((ICipherSpi**)&spi));
     return spi->EngineUnwrap(wrappedKey, wrappedKeyAlgorithm,
             wrappedKeyType, key);
 }
@@ -717,7 +717,7 @@ ECode Cipher::GetMaxAllowedKeyLength(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ArrayOf<String> > transformParts;
-    CheckTransformation(transformation, (ArrayOf<String>**)&transformParts);
+    FAIL_RETURN(CheckTransformation(transformation, (ArrayOf<String>**)&transformParts));
     //FIXME jurisdiction policy files
     *value = 0x7FFFFFFF/*IInteger::MAX_VALUE*/;
     return NOERROR;
@@ -735,7 +735,7 @@ ECode Cipher::GetMaxAllowedParameterSpec(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ArrayOf<String> > transformParts;
-    CheckTransformation(transformation, (ArrayOf<String>**)&transformParts);
+    FAIL_RETURN(CheckTransformation(transformation, (ArrayOf<String>**)&transformParts));
     //FIXME jurisdiction policy files
     *value = NULL;
     return NOERROR;
@@ -755,7 +755,7 @@ ECode Cipher::GetCipher(
     }
 
     AutoPtr<ArrayOf<String> > transformParts;
-    CheckTransformation(transformation, (ArrayOf<String>**)&transformParts);
+    FAIL_RETURN(CheckTransformation(transformation, (ArrayOf<String>**)&transformParts));
     AutoPtr<ISpiAndProvider> sp;
     FAIL_RETURN(TryCombinations(NULL, provider, transformParts, (ISpiAndProvider**)&sp));
     if (sp.Get() == NULL) {

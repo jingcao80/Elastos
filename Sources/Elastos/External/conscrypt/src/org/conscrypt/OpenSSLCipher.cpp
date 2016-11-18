@@ -302,7 +302,9 @@ ECode OpenSSLCipher::EngineUpdate(
     /* [in] */ Int32 inputLen,
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     Int32 maximumLen = GetOutputSize(inputLen);
 
     /* See how large our output buffer would need to be. */
@@ -316,8 +318,11 @@ ECode OpenSSLCipher::EngineUpdate(
 
     Int32 bytesWritten;
     // try {
-    UpdateInternal(input, inputOffset,
+    ECode ec = UpdateInternal(input, inputOffset,
             inputLen, output, 0, maximumLen, &bytesWritten);
+    if (FAILED(ec)) {
+        return E_RUNTIME_EXCEPTION;
+    }
     // } catch (ShortBufferException e) {
     //     /* This shouldn't happen. */
     //     throw new RuntimeException("calculated buffer size was wrong: " + maximumLen);
@@ -347,9 +352,8 @@ ECode OpenSSLCipher::EngineUpdate(
 {
     VALIDATE_NOT_NULL(result)
     Int32 maximumLen = GetOutputSize(inputLen);
-    UpdateInternal(input, inputOffset,
+    return UpdateInternal(input, inputOffset,
             inputLen, output, outputOffset, maximumLen, result);
-    return NOERROR;
 }
 
 ECode OpenSSLCipher::EngineDoFinal(
@@ -359,13 +363,14 @@ ECode OpenSSLCipher::EngineDoFinal(
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     /*
      * Other implementations return NULL if we've never called update()
      * while decrypting.
      */
     if (!mEncrypting && !mCalledUpdate && inputLen == 0) {
         Reset();
-        *result = NULL;
         return NOERROR;
     }
 
@@ -374,8 +379,11 @@ ECode OpenSSLCipher::EngineDoFinal(
     AutoPtr<ArrayOf<Byte> > output = ArrayOf<Byte>::Alloc(maximumLen);
     Int32 bytesWritten;
     // try {
-    DoFinalInternal(input,
+    ECode ec = DoFinalInternal(input,
             inputOffset, inputLen, output, 0, maximumLen, &bytesWritten);
+    if (FAILED(ec)) {
+        return E_RUNTIME_EXCEPTION;
+    }
     // } catch (ShortBufferException e) {
     //     /* This should not happen since we sized our own buffer. */
     //     throw new RuntimeException("our calculated buffer was too small", e);
@@ -412,9 +420,8 @@ ECode OpenSSLCipher::EngineDoFinal(
     }
 
     Int32 maximumLen = GetOutputSize(inputLen);
-    DoFinalInternal(input, inputOffset,
+    return DoFinalInternal(input, inputOffset,
             inputLen, output, outputOffset, maximumLen, result);
-    return NOERROR;
 }
 
 ECode OpenSSLCipher::EngineWrap(
@@ -648,8 +655,8 @@ ECode OpenSSLCipher::DoFinalInternal(
 
     if (inputLen > 0) {
         Int32 updateBytesWritten;
-        UpdateInternal(input, inputOffset, inputLen, output,
-                outputOffset, maximumLen, &updateBytesWritten);
+        FAIL_RETURN(UpdateInternal(input, inputOffset, inputLen, output,
+                outputOffset, maximumLen, &updateBytesWritten));
         outputOffset += updateBytesWritten;
         maximumLen -= updateBytesWritten;
     }

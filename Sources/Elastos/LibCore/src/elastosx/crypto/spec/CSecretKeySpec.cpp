@@ -95,6 +95,8 @@ ECode CSecretKeySpec::GetEncoded(
     VALIDATE_NOT_NULL(value)
     *value = ArrayOf<Byte>::Alloc(mKey->GetLength());
     (*value)->Copy(0, mKey, 0, mKey->GetLength());
+
+    REFCOUNT_ADD(*value);
     return NOERROR;
 }
 

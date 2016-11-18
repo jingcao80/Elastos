@@ -1,6 +1,7 @@
 
 #include "elastos/devsamples/securitydemo/CActivityOne.h"
 #include "org/apache/harmony/security/fortress/Services.h"
+#include "elastos/devsamples/securitydemo/CipherTest.h"
 #include "elastos/devsamples/securitydemo/Test.h"
 #include "elastos/devsamples/securitydemo/ElastosKeyStoreTest.h"
 #include "elastos/devsamples/securitydemo/ElastosKeyPairGeneratorTest.h"
@@ -1011,7 +1012,7 @@ ECode CActivityOne::SignatureTest()
 
 ECode CActivityOne::CipherTest()
 {
-    return CipherTest::AesECBNoPadding();
+    return CipherTest::Test();
 }
 
 } // namespace SecurityDemo

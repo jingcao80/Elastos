@@ -10,14 +10,17 @@ using Elastos::Math::CBigInteger;
 using Elastos::Math::IBigInteger;
 using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::CSignatureHelper;
+using Elastos::Security::CSecureRandomHelper;
 using Elastos::Security::IKeyFactory;
 using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
+using Elastos::Security::ISecureRandomHelper;
 using Elastos::Security::Spec::CRSAPrivateKeySpec;
 using Elastos::Security::Spec::CRSAPublicKeySpec;
+using Elastos::Security::Spec::IAlgorithmParameterSpec;
 using Elastos::Security::Spec::IKeySpec;
 using Elastos::Security::Spec::IRSAPrivateKeySpec;
 using Elastos::Security::Spec::IRSAPublicKeySpec;
@@ -28,9 +31,20 @@ using Elastos::Security::Spec::CX509EncodedKeySpec;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
 using Elastosx::Crypto::Cipher;
+using Elastosx::Crypto::CKeyGeneratorHelper;
+using Elastosx::Crypto::CSecretKeyFactoryHelper;
 using Elastosx::Crypto::ICipher;
+using Elastosx::Crypto::IKeyGenerator;
+using Elastosx::Crypto::IKeyGeneratorHelper;
 using Elastosx::Crypto::ISecretKey;
+using Elastosx::Crypto::ISecretKeyFactory;
+using Elastosx::Crypto::ISecretKeyFactoryHelper;
+using Elastosx::Crypto::Spec::CIvParameterSpec;
 using Elastosx::Crypto::Spec::CSecretKeySpec;
+using Elastosx::Crypto::Spec::CDESedeKeySpec;
+using Elastosx::Crypto::Spec::IDESedeKeySpec;
+using Elastosx::Crypto::Spec::ISecretKeySpec;
+using Elastosx::Crypto::Spec::IIvParameterSpec;
 
 namespace Elastos {
 namespace DevSamples {
@@ -261,113 +275,6 @@ ECode SignatureTest::SignatureWithRSA()
     ec = sig->Verify(signature, &isVerified);
     ASSERT_SUCCEEDED(ec);
     assert("Signature must match expected signature" && isVerified);
-    return NOERROR;
-}
-
-ECode CipherTest::AesECBNoPadding() /*throws Exception*/
-{
-    /*
-     * Test vector generation:
-     * openssl rand -hex 16
-     * echo '3d4f8970b1f27537f40a39298a41555f' | sed 's/\(..\)/(Byte) 0x\1, /g'
-     */
-    Byte AES_128_KEY[] = {
-            (Byte) 0x3d, (Byte) 0x4f, (Byte) 0x89, (Byte) 0x70, (Byte) 0xb1, (Byte) 0xf2,
-            (Byte) 0x75, (Byte) 0x37, (Byte) 0xf4, (Byte) 0x0a, (Byte) 0x39, (Byte) 0x29,
-            (Byte) 0x8a, (Byte) 0x41, (Byte) 0x55, (Byte) 0x5f,
-    };
-
-    AutoPtr<ArrayOf<Byte> > bytes1 = ArrayOf<Byte>::AllocInplace(AES_128_KEY
-            , sizeof(AES_128_KEY)/sizeof(AES_128_KEY[0]));
-
-    String provider("ElastosOpenSSL");
-    AutoPtr<ISecretKey> key;
-    CSecretKeySpec::New(bytes1, String("AES"), (ISecretKey**)&key);
-    AutoPtr<ICipher> c;
-
-    //1. AES/ECB/NoPadding
-    String transformation("AES/ECB/NoPadding");
-    //2. AES/ECB/PKCS5Padding
-    // transformation = String("AES/ECB/PKCS5Padding");
-    // //3. AES/CBC/NoPadding
-    // transformation = String("AES/CBC/NoPadding");
-    // //4. AES/CBC/PKCS5Padding
-    // transformation = String("AES/CBC/PKCS5Padding");
-    // //5. AES/CFB/NoPadding
-    // transformation = String("AES/CFB/NoPadding");
-    // //6. AES/CTR/NoPadding
-    // transformation = String("AES/CTR/NoPadding");
-    // //7. AES/OFB/NoPadding
-    // transformation = String("AES/OFB/NoPadding");
-    // //8. DESEDE/ECB/NoPadding
-    // transformation = String("DESEDE/ECB/NoPadding");
-    // //9. DESEDE/ECB/PKCS5Padding
-    // transformation = String("DESEDE/ECB/PKCS5Padding");
-    // //10. DESEDE/CBC/NoPadding
-    // transformation = String("DESEDE/CBC/NoPadding");
-    // //11. DESEDE/CBC/PKCS5Padding
-    // transformation = String("DESEDE/CBC/PKCS5Padding");
-    // //12. DESEDE/CFB/NoPadding
-    // transformation = String("DESEDE/CFB/NoPadding");
-    // //13. DESEDE/OFB/NoPadding
-    // transformation = String("DESEDE/OFB/NoPadding");
-    // //14. ARC4
-    // transformation = String("ARC4");
-
-    ECode ec = Cipher::GetInstance(transformation, provider, (ICipher**)&c);
-    ASSERT_SUCCEEDED(ec);
-    AutoPtr<IProvider> p;
-    c->GetProvider((IProvider**)&p);
-    String n;
-    p->GetName(&n);
-    assert(provider == n);
-    c->Init(ICipher::ENCRYPT_MODE, IKey::Probe(key));
-
-    /*
-     * Test vector creation:
-     * openssl enc -aes-128-ecb -K 3d4f8970b1f27537f40a39298a41555f -in blah|openssl enc -aes-128-ecb -K 3d4f8970b1f27537f40a39298a41555f -nopad -d|recode ../x1 | sed 's/0x/(Byte) 0x/g'
-     */
-    Byte AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded[] = {
-            (Byte) 0x48, (Byte) 0x65, (Byte) 0x6C, (Byte) 0x6C, (Byte) 0x6F, (Byte) 0x2C,
-            (Byte) 0x20, (Byte) 0x77, (Byte) 0x6F, (Byte) 0x72, (Byte) 0x6C, (Byte) 0x64,
-            (Byte) 0x21, (Byte) 0x03, (Byte) 0x03, (Byte) 0x03
-    };
-    Int32 length = sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded) /
-        sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded[0]);
-
-    AutoPtr<ArrayOf<Byte> > bytes2 = ArrayOf<Byte>::AllocInplace(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded
-            , length);
-
-    for (Int32 i = 0; i < length - 1; i++) {
-        AutoPtr<ArrayOf<Byte> > outputFragment;
-        c->Update(bytes2, i, 1 , (ArrayOf<Byte>**)&outputFragment);
-        if (outputFragment != NULL) {
-            assert(0 == outputFragment->GetLength());
-        }
-    }
-
-    AutoPtr<ArrayOf<Byte> > output;
-    c->DoFinal(bytes2, length - 1, 1, (ArrayOf<Byte>**)&output);
-    assert(output);
-    assert(length == output->GetLength());
-
-    /*
-     * Test vector generation:
-     * openssl enc -aes-128-ecb -K 3d4f8970b1f27537f40a39298a41555f -in blah|recode ../x1 | sed 's/0x/(Byte) 0x/g'
-     */
-    Byte AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted[] = {
-            (Byte) 0x65, (Byte) 0x3E, (Byte) 0x86, (Byte) 0xFB, (Byte) 0x05, (Byte) 0x5A,
-            (Byte) 0x52, (Byte) 0xEA, (Byte) 0xDD, (Byte) 0x08, (Byte) 0xE7, (Byte) 0x48,
-            (Byte) 0x33, (Byte) 0x01, (Byte) 0xFC, (Byte) 0x5A,
-    };
-
-    length = sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted) /
-        sizeof(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted[0]);
-
-    AutoPtr<ArrayOf<Byte> > bytes3 = ArrayOf<Byte>::AllocInplace(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted
-            , length);
-
-    assert(Arrays::Equals(bytes3, output));
     return NOERROR;
 }
 
