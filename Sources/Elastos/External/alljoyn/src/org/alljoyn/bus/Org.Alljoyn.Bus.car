@@ -5,12 +5,16 @@ module
 
     merge("../../../../car/org/alljoyn/bus/Exception.car");
     merge("../../../../car/org/alljoyn/bus/AboutListener.car");
+    merge("../../../../car/org/alljoyn/bus/AuthListener.car");
     merge("../../../../car/org/alljoyn/bus/BusAttachment.car");
     merge("../../../../car/org/alljoyn/bus/BusListener.car");
     merge("../../../../car/org/alljoyn/bus/BusObject.car");
+    merge("../../../../car/org/alljoyn/bus/KeyStoreListener.car");
+    merge("../../../../car/org/alljoyn/bus/MessageContext.car");
     merge("../../../../car/org/alljoyn/bus/Mutable.car");
     merge("../../../../car/org/alljoyn/bus/OnJoinSessionListener.car");
     merge("../../../../car/org/alljoyn/bus/OnPingListener.car");
+    merge("../../../../car/org/alljoyn/bus/SecurityViolationListener.car");
     merge("../../../../car/org/alljoyn/bus/SessionListener.car");
     merge("../../../../car/org/alljoyn/bus/SessionOpts.car");
     merge("../../../../car/org/alljoyn/bus/SessionPortListener.car");

@@ -2,13 +2,17 @@
 module
 {
     interface Org.Alljoyn.Bus.IAboutListener;
+    interface Org.Alljoyn.Bus.IAuthListener;
     interface Org.Alljoyn.Bus.IBusListener;
     interface Org.Alljoyn.Bus.IBusObject;
+    interface Org.Alljoyn.Bus.IKeyStoreListener;
+    interface Org.Alljoyn.Bus.IMessageContext;
     interface Org.Alljoyn.Bus.IMutableInteger16Value;
     interface Org.Alljoyn.Bus.IMutableInteger32Value;
     interface Org.Alljoyn.Bus.IMutableStringValue;
     interface Org.Alljoyn.Bus.IOnJoinSessionListener;
     interface Org.Alljoyn.Bus.IOnPingListener;
+    interface Org.Alljoyn.Bus.ISecurityViolationListener;
     interface Org.Alljoyn.Bus.ISessionListener;
     interface Org.Alljoyn.Bus.ISessionOpts;
     interface Org.Alljoyn.Bus.ISessionPortListener;
@@ -28,7 +32,7 @@ module
         RemoteMessage_Receive,
     }
 
-    [deprecated]
+    [local, deprecated]
     interface IBusAttachment {
         /**
          * Value for requestName flags bit corresponding to allowing another bus
@@ -96,7 +100,6 @@ module
             [in] String propName,
             [in] IInterface* val,
             [in] Int32 sessionId);
-
 
         /**
          * Request a well-known name.
@@ -1127,16 +1130,15 @@ module
          *
          * @return the DBusProxyObj interface
          */
-        public DBusProxyObj getDBusProxyObj() {
-            return dbus;
-        }
+        // public DBusProxyObj getDBusProxyObj();
 
         /**
          * Get the unique name of this BusAttachment.
          *
          * @return the unique name of this BusAttachment
          */
-        public native String getUniqueName();
+        GetUniqueName(
+            [out] String* uniqueName);
 
         /**
          * Get the GUID of this BusAttachment.
@@ -1146,7 +1148,8 @@ module
          *
          * @return GUID of this BusAttachment as a string.
          */
-        public native String getGlobalGUIDString();
+        GetGlobalGUIDString(
+            [out] String* guid);
 
         /**
          * Registers a public method to receive a signal from all objects emitting
@@ -1160,12 +1163,11 @@ module
          * @param handlerMethod the signal handler method
          * @return OK if the register is succesful
          */
-        public Status registerSignalHandler(String ifaceName,
-                String signalName,
-                Object obj,
-                Method handlerMethod) {
-            return registerSignalHandler(ifaceName, signalName, obj, handlerMethod, "");
-        }
+        RegisterSignalHandler(
+            [in] String ifaceName,
+            [in] String signalName,
+            [in] IInterface* obj,
+            [in] IMethodInfo* handlerMethod);
 
         /**
          * Registers a public method to receive a signal from specific objects emitting it. Once registered, the method of
@@ -1178,11 +1180,12 @@ module
          * @param source the object path of the emitter of the signal
          * @return OK if the register is successful
          */
-        public Status registerSignalHandler(String ifaceName,
-                String signalName,
-                Object obj,
-                Method handlerMethod,
-                String source)
+        RegisterSignalHandler(
+            [in] String ifaceName,
+            [in] String signalName,
+            [in] IInterface* obj,
+            [in] IMethodInfo* handlerMethod,
+            [in] String source);
 
         /**
          * Register a signal handler.
@@ -1196,8 +1199,12 @@ module
          * @param matchRule a filter rule.
          * @return OK if the register is successful
          */
-        public Status registerSignalHandlerWithRule(String ifaceName, String signalName, Object obj, Method handlerMethod,
-            String matchRule)
+        RegisterSignalHandlerWithRule(
+            [in] String ifaceName,
+            [in] String signalName,
+            [in] IInterface* obj,
+            [in] IMethodInfo* handlerMethod,
+            [in] String matchRule);
 
         /**
          * Registers all public methods that are annotated as signal handlers.
@@ -1212,7 +1219,8 @@ module
          *         a discussion of how to annotate signal handlers.
          *         </ul>
          */
-        public Status registerSignalHandlers(Object obj);
+        RegisterSignalHandlers(
+            [in] IInterface* obj);
 
         /**
          * Unregisters a signal handler.
@@ -1220,7 +1228,9 @@ module
          * @param obj the object receiving the signal
          * @param handlerMethod the signal handler method
          */
-        public native void unregisterSignalHandler(Object obj, Method handlerMethod);
+        UnregisterSignalHandler(
+            [in] IInterface* obj,
+            [in] IMethodInfo* handlerMethod);
 
         /**
          * Unregisters all public methods annotated as signal handlers.
@@ -1229,14 +1239,8 @@ module
          *            been registered
          * @see org.alljoyn.bus.annotation.BusSignalHandler
          */
-        public void unregisterSignalHandlers(Object obj) {
-            for (Method m : obj.getClass().getMethods()) {
-                BusSignalHandler a = m.getAnnotation(BusSignalHandler.class);
-                if (a != null) {
-                    unregisterSignalHandler(obj, m);
-                }
-            }
-        }
+        UnregisterSignalHandlers(
+            [in] IInterface* obj);
 
         /**
          * Registers a user-defined key store listener to override the default key store.  This must be
@@ -1244,16 +1248,15 @@ module
          *
          * @param listener the key store listener
          */
-        public void registerKeyStoreListener(KeyStoreListener listener) {
-            keyStoreListener = listener;
-        }
+        RegisterKeyStoreListener(
+            [in] IKeyStoreListener* listener);
 
         /**
          * Clears all stored keys from the key store. All store keys and authentication information is
          * deleted and cannot be recovered. Any passwords or other credentials will need to be reentered
          * when establishing secure peer connections.
          */
-        public native void clearKeyStore();
+        ClearKeyStore();
 
         /**
          * Clear the keys associated with a specific peer identified by its GUID.
@@ -1267,7 +1270,8 @@ module
          * <li>other error status codes indicating a failure</li>
          * </ul>
          */
-        public native Status clearKeys(String guid);
+        ClearKeys(
+            [in] String guid);
 
         /**
          * Sets the expiration time on keys associated with a specific remote peer as identified by its
@@ -1284,7 +1288,9 @@ module
          * <li>UNKNOWN_GUID if there is no authenticated peer with the specified GUID</li>
          * </ul>
          */
-        public native Status setKeyExpiration(String guid, int timeout);
+        SetKeyExpiration(
+            [in] String guid,
+            [in] Int32 timeout);
 
         /**
          * Gets the expiration time on keys associated with a specific authenticated remote peer as
@@ -1300,7 +1306,9 @@ module
          * <li>UNKNOWN_GUID if there is no authenticated peer with the specified GUID</li>
          * </ul>
          */
-        public native Status getKeyExpiration(String guid, Mutable.IntegerValue timeout);
+        GetKeyExpiration(
+            [in] String guid,
+            [in] IMutableInteger32Value* timeout);
 
         /**
          * Reloads the key store for this bus attachment. This function would normally only be called in
@@ -1314,7 +1322,7 @@ module
          * <li>An error status indicating that the key store reload failed</li>
          * </ul>
          */
-        public native Status reloadKeyStore();
+        ReloadKeyStore();
 
         /**
          * Registers a user-defined authentication listener class with a specific
@@ -1343,8 +1351,11 @@ module
          *                         file.
          * @return OK if successful
          */
-        public Status registerAuthListener(String authMechanisms, AuthListener listener,
-                String keyStoreFileName, boolean isShared);
+        RegisterAuthListener(
+            [in] String authMechanisms,
+            [in] IAuthListener* listener,
+            [in] String keyStoreFileName,
+            [in] Boolean isShared);
 
         /**
          * Registers a user-defined authentication listener class with a specific default key store.
@@ -1367,10 +1378,10 @@ module
          *                         #registerKeyStoreListener(KeyStoreListener)}.
          * @return OK if successful
          */
-        public Status registerAuthListener(String authMechanisms, AuthListener listener,
-                String keyStoreFileName){
-            return registerAuthListener(authMechanisms, listener, keyStoreFileName, false);
-        }
+        RegisterAuthListener(
+            [in] String authMechanisms,
+            [in] IAuthListener* listener,
+            [in] String keyStoreFileName);
 
         /**
          * Registers a user-defined authentication listener class.  Under Android, it is recommended to
@@ -1387,18 +1398,17 @@ module
          * @param listener the authentication listener
          * @return OK if successful
          */
-        public Status registerAuthListener(String authMechanisms, AuthListener listener) {
-            return registerAuthListener(authMechanisms, listener, null, false);
-        }
+        RegisterAuthListener(
+            [in] String authMechanisms,
+            [in] IAuthListener* listener);
 
         /**
          * Registers a user-defined security violation listener class.
          *
          * @param listener the security violation listener
          */
-        public void registerSecurityViolationListener(SecurityViolationListener listener) {
-            busAuthListener.setSecurityViolationListener(listener);
-        }
+        RegisterSecurityViolationListener(
+            [in] ISecurityViolationListener* listener);
 
         /**
          * Gets the message context of the currently executing method, signal
@@ -1414,7 +1424,8 @@ module
          *         handler, security violation, or null if no message can be found
          *         for the calling thread
          */
-        public native MessageContext getMessageContext();
+        GetMessageContext(
+            [out] IMessageContext** context);
 
         /**
          * Enable callbacks within the context of the currently executing method
@@ -1432,7 +1443,7 @@ module
          * calls such as joinSession(), advertiseName(), cancelAdvertisedName(),
          * findAdvertisedName(), cancelFindAdvertisedName(), setLinkTimeout(), etc.
          */
-        public native void enableConcurrentCallbacks();
+        EnableConcurrentCallbacks();
     }
 
     } // namespace Bus
