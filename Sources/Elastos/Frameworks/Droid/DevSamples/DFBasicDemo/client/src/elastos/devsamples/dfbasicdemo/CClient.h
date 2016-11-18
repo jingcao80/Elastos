@@ -9,6 +9,8 @@
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/core/Object.h>
+#include <_Org.Alljoyn.Bus.h>
+#include <org/alljoyn/bus/BusListener.h>
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::Os::Handler;
@@ -21,6 +23,9 @@ using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IOnEditorActionListener;
 using Elastos::Core::Object;
+
+using Org::Alljoyn::Bus::BusListener;
+using Org::Alljoyn::Bus::IBusAttachment;
 
 namespace Elastos {
 namespace DevSamples {
@@ -71,6 +76,25 @@ private:
     class BusHandler
         : Handler
     {
+    private:
+        class InnerBusListener : public BusListener
+        {
+        public:
+            InnerBusListener(
+                /* [in] */ BusHandler* host)
+                : mHost(host)
+            {}
+
+            // @Override
+            CARAPI FoundAdvertisedName(
+                /* [in] */ const String& name,
+                /* [in] */ Int16 transport,
+                /* [in] */ const String& namePrefix);
+
+        private:
+            BusHandler* mHost;
+        };
+
     public:
         CARAPI constructor(
             /* [in] */ ILooper* looper,
@@ -98,7 +122,7 @@ private:
         static const String SERVICE_NAME;
         static const Int16 CONTACT_PORT;
 
-        // BusAttachment mBus;
+        AutoPtr<IBusAttachment> mBus;
         // ProxyBusObject mProxyObj;
         // BasicInterface mBasicInterface;
 

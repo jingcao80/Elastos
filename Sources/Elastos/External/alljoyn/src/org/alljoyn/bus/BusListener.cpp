@@ -1,58 +1,13 @@
 
 #include "org/alljoyn/bus/BusListener.h"
-#include "alljoyn/BusListener.h"
+#include "org/alljoyn/bus/NativeBusListener.h"
 
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
-//==============================================================
-// NativeBusListener
-//==============================================================
-class NativeBusListener : public ajn::BusListener
-{
-public:
-    NativeBusListener(
-        /* [in] */ Org::Alljoyn::Bus::BusListener* listener);
+CAR_INTERFACE_IMPL(BusListener, Object, IBusListener);
 
-    ~NativeBusListener();
-
-    // void Setup(jobject jbusAttachment);
-
-    // void ListenerRegistered(BusAttachment* bus);
-    // void ListenerUnregistered();
-    // void FoundAdvertisedName(const char* name, TransportMask transport, const char* namePrefix);
-    // void LostAdvertisedName(const char* name, TransportMask transport, const char* namePrefix);
-    // void NameOwnerChanged(const char* busName, const char* previousOwner, const char* newOwner);
-    // void BusStopping();
-    // void BusDisconnected();
-
-private:
-    NativeBusListener(const NativeBusListener& other);
-    NativeBusListener& operator =(const NativeBusListener& other);
-
-    AutoPtr<IWeakReference> mBusListener;
-    AutoPtr<IWeakReference> mBusAttachment;
-};
-
-NativeBusListener::NativeBusListener(
-    /* [in] */ Org::Alljoyn::Bus::BusListener* listener)
-{
-    /*
-     * Be careful when using a weak global reference.  They can only be
-     * passed to NewLocalRef, NewGlobalRef and DeleteWeakGlobalRef.
-     */
-    listener->GetWeakReference((IWeakReference**)&mBusListener);
-    assert(mBusListener != NULL);
-}
-
-NativeBusListener::~NativeBusListener()
-{}
-
-
-//==============================================================
-// BusListener
-//==============================================================
 BusListener::BusListener()
     : mHandle(0)
 {

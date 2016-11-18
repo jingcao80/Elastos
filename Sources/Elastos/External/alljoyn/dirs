@@ -1,2 +1,3 @@
 
+DIRS += inc
 DIRS += src/org/alljoyn/bus

@@ -1,7 +1,8 @@
 
 #include "CClient.h"
 #include "R.h"
-#include <Org.Alljoyn.Bus.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
@@ -9,9 +10,14 @@ using Elastos::Droid::Widget::CArrayAdapter;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
-using Org::Alljoyn::Bus::IDaemonInit;
-using Org::Alljoyn::Bus::CDaemonInit;
+using Org::Alljoyn::Bus::CBusAttachment;
+using Org::Alljoyn::Bus::IBusListener;
+using Org::Alljoyn::Bus::RemoteMessage_Receive;
+using Org::Alljoyn::Bus::Alljoyn::IDaemonInit;
+using Org::Alljoyn::Bus::Alljoyn::CDaemonInit;
 
 namespace Elastos {
 namespace DevSamples {
@@ -96,6 +102,36 @@ ECode CClient::EditorListener::OnEditorAction(
 
 
 //======================================================================
+//  CClient::BusHandler::InnerBusListener
+//======================================================================
+ECode CClient::BusHandler::InnerBusListener::FoundAdvertisedName(
+    /* [in] */ const String& name,
+    /* [in] */ Int16 transport,
+    /* [in] */ const String& namePrefix)
+{
+    Logger::I("CClient", "MyBusListener.foundAdvertisedName(%s, 0x%04x, %s)",
+            name.string(), transport, namePrefix.string());
+    /*
+     * This client will only join the first service that it sees advertising
+     * the indicated well-known name.  If the program is already a member of
+     * a session (i.e. connected to a service) we will not attempt to join
+     * another session.
+     * It is possible to join multiple session however joining multiple
+     * sessions is not shown in this sample.
+     */
+    if (!mHost->mIsConnected) {
+        AutoPtr<IMessage> msg;
+        mHost->ObtainMessage(JOIN_SESSION, (IMessage**)&msg);
+        msg->SetArg1(transport);
+        msg->SetObj(CoreUtils::Convert(name));
+        Boolean result;
+        mHost->SendMessage(msg, &result);
+    }
+    return NOERROR;
+}
+
+
+//======================================================================
 //  CClient::BusHandler
 //======================================================================
 const Int32 CClient::BusHandler::CONNECT = 1;
@@ -131,74 +167,60 @@ ECode CClient::BusHandler::HandleMessage(
         mHost->GetApplicationContext((IContext**)&context);
         AutoPtr<IDaemonInit> di;
         CDaemonInit::AcquireSingleton((IDaemonInit**)&di);
-        di->PrepareDaemon(context);
-//        /*
-//         * All communication through AllJoyn begins with a BusAttachment.
-//         *
-//         * A BusAttachment needs a name. The actual name is unimportant except for internal
-//         * security. As a default we use the class name as the name.
-//         *
-//         * By default AllJoyn does not allow communication between devices (i.e. bus to bus
-//         * communication). The second argument must be set to Receive to allow communication
-//         * between devices.
-//         */
-//        mBus = new BusAttachment(getPackageName(), BusAttachment.RemoteMessage.Receive);
-//
-//        /*
-//         * Create a bus listener class
-//         */
-//        mBus.registerBusListener(new BusListener() {
-//            @Override
-//            public void foundAdvertisedName(String name, short transport, String namePrefix) {
-//                logInfo(String.format("MyBusListener.foundAdvertisedName(%s, 0x%04x, %s)", name, transport, namePrefix));
-//                /*
-//                 * This client will only join the first service that it sees advertising
-//                 * the indicated well-known name.  If the program is already a member of
-//                 * a session (i.e. connected to a service) we will not attempt to join
-//                 * another session.
-//                 * It is possible to join multiple session however joining multiple
-//                 * sessions is not shown in this sample.
-//                 */
-//                if(!mIsConnected) {
-//                    Message msg = obtainMessage(JOIN_SESSION);
-//                    msg.arg1 = transport;
-//                    msg.obj = name;
-//                    sendMessage(msg);
-//                }
-//            }
-//        });
-//
-//        /* To communicate with AllJoyn objects, we must connect the BusAttachment to the bus. */
-//        Status status = mBus.connect();
-//        logStatus("BusAttachment.connect()", status);
-//        if (Status.OK != status) {
-//            finish();
-//            return;
-//        }
-//
-//        /*
-//         * Now find an instance of the AllJoyn object we want to call.  We start by looking for
-//         * a name, then connecting to the device that is advertising that name.
-//         *
-//         * In this case, we are looking for the well-known SERVICE_NAME.
-//         */
-//        status = mBus.findAdvertisedName(SERVICE_NAME);
-//        logStatus(String.format("BusAttachement.findAdvertisedName(%s)", SERVICE_NAME), status);
-//        if (Status.OK != status) {
-//            finish();
-//            return;
-//        }
+        Boolean result;
+        di->PrepareDaemon(context, &result);
+        /*
+         * All communication through AllJoyn begins with a BusAttachment.
+         *
+         * A BusAttachment needs a name. The actual name is unimportant except for internal
+         * security. As a default we use the class name as the name.
+         *
+         * By default AllJoyn does not allow communication between devices (i.e. bus to bus
+         * communication). The second argument must be set to Receive to allow communication
+         * between devices.
+         */
+        String pName;
+        mHost->GetPackageName(&pName);
+        mBus = NULL;
+        CBusAttachment::New(pName, RemoteMessage_Receive, (IBusAttachment**)&mBus);
+
+        /*
+         * Create a bus listener class
+         */
+        AutoPtr<IBusListener> bl = new InnerBusListener(this);
+        mBus->RegisterBusListener(bl);
+
+        /* To communicate with AllJoyn objects, we must connect the BusAttachment to the bus. */
+        ECode ec = mBus->Connect();
+        Logger::I("CClient", "BusAttachment.connect() 0x%08x", ec);
+        if ((ECode)E_STATUS_OK != ec) {
+            mHost->Finish();
+            return NOERROR;
+        }
+
+        /*
+         * Now find an instance of the AllJoyn object we want to call.  We start by looking for
+         * a name, then connecting to the device that is advertising that name.
+         *
+         * In this case, we are looking for the well-known SERVICE_NAME.
+         */
+        ec = mBus->FindAdvertisedName(SERVICE_NAME);
+        Logger::I("CClient", "BusAttachement.findAdvertisedName(%s) 0x%08x", SERVICE_NAME.string(), ec);
+        if ((ECode)E_STATUS_OK != ec) {
+            mHost->Finish();
+            return NOERROR;
+        }
 
         break;
     }
     case (JOIN_SESSION): {
-//        /*
-//         * If discovery is currently being stopped don't join to any other sessions.
-//         */
-//        if (mIsStoppingDiscovery) {
-//            break;
-//        }
-//
+        /*
+         * If discovery is currently being stopped don't join to any other sessions.
+         */
+        if (mIsStoppingDiscovery) {
+            break;
+        }
+
 //        /*
 //         * In order to join the session, we need to provide the well-known
 //         * contact port.  This is pre-arranged between both sides as part

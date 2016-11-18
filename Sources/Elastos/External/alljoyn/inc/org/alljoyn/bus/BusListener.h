@@ -54,6 +54,8 @@ class ECO_PUBLIC BusListener
     , public IBusListener
 {
 public:
+    CAR_INTERFACE_DECL();
+
     /**
      * Destroy native resources held by objects of this class.
      */

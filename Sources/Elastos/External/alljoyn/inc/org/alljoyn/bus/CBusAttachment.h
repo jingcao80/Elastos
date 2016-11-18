@@ -1448,6 +1448,8 @@ private:
         /* [in] */ Int32 concurrency);
 
 private:
+    friend class NativeBusListener;
+
     AutoPtr<ISet> mRegisteredAboutListeners;
 
     /** The native connection handle. */
