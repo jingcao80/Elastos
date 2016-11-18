@@ -37,7 +37,6 @@ ECode CMemInfoReader::ReadMemInfo()
     // Permit disk reads here, as /proc/meminfo isn't really "on
     // disk" and should be fast.  TODO: make BlockGuard ignore
     // /proc/ and /sys/ files perhaps?
-    Logger::W("CMemInfoReader::ReadMemInfo()", " === TODO CDebugis not implemented");
     AutoPtr<IStrictMode> strictMode;
     CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
     AutoPtr<IStrictModeThreadPolicy> savedPolicy;

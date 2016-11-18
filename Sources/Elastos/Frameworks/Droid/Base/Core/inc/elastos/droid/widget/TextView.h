@@ -520,6 +520,7 @@ private:
 
 public:
     TextView();
+    ~TextView();
 
     CAR_INTERFACE_DECL()
 

@@ -232,7 +232,6 @@ ECode TextView::PreDrawListener::OnPreDraw(
         TextView* tv = (TextView*)ITextView::Probe(obj);
         return tv->OnPreDraw(res);
     }
-    assert(0);
     return NOERROR;
 }
 
@@ -2185,6 +2184,14 @@ ECode TextView::constructor(
         SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
     return NOERROR;
+}
+
+
+TextView::~TextView()
+{
+    if (mPreDrawRegistered) {
+        UnregisterForPreDraw();
+    }
 }
 
 void TextView::SetTypefaceFromAttrs(
