@@ -488,10 +488,11 @@ void ContactEntryListFragment::StartLoadingDirectoryPartition(
         AutoPtr<IBundle> args;
         CBundle::New((IBundle**)&args);
         args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
-        AutoPtr<ILoaderManager> lm;
-        GetLoaderManager((ILoaderManager**)&lm);
-        AutoPtr<ILoader> l;
-        lm->InitLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+        // TODO:
+        // AutoPtr<ILoaderManager> lm;
+        // GetLoaderManager((ILoaderManager**)&lm);
+        // AutoPtr<ILoader> l;
+        // lm->InitLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
     }
 }
 

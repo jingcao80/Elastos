@@ -744,25 +744,25 @@ module
 //        interface ISwipeHelperHelper;
 //    }
 //
-//    [local]
-//    class CTileInteractionTeaserView {
-//        constructor(
-//            [in] IContext* ctx);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        interface IFrameLayout;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface ITileInteractionTeaserView;
-//    }
+    [local]
+    class CTileInteractionTeaserView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ITileInteractionTeaserView;
+    }
 
     } // List
     } // Dialer

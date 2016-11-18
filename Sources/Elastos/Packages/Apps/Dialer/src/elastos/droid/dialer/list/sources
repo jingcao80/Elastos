@@ -39,5 +39,5 @@ SOURCES += SpeedDialFragment.cpp
 #SOURCES += SwipeHelper.cpp
 #SOURCES += CSwipeHelper.cpp
 #SOURCES += CSwipeHelperHelper.cpp
-#SOURCES += TileInteractionTeaserView.cpp
-#SOURCES += CTileInteractionTeaserView.cpp
+SOURCES += TileInteractionTeaserView.cpp
+SOURCES += CTileInteractionTeaserView.cpp

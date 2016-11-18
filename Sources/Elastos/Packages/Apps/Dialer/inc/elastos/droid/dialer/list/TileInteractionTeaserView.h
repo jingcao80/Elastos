@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_TILEINTERACTIONTEASERVIEW_H__
 
 #include "_Elastos.Droid.Dialer.h"
+// #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
 #include <elastos/droid/widget/FrameLayout.h>
 #include <elastos/core/Runnable.h>
 #include "Elastos.Droid.View.h"
@@ -37,7 +38,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DismissClickListener(
             /* [in] */ TileInteractionTeaserView* host);
@@ -116,6 +117,8 @@ private:
     };
 
 public:
+    TileInteractionTeaserView();
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor(
@@ -125,11 +128,10 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    CARAPI GetShouldDisplayInList(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) GetShouldDisplayInList();
 
-    CARAPI SetAdapter(
-        /* [in] */ IShortcutCardsAdapter* adapter);
+    // CARAPI_(void) SetAdapter(
+    //     /* [in] */ ShortcutCardsAdapter* adapter);
 
 protected:
     // @Override
@@ -161,9 +163,11 @@ private:
 
     Boolean mNeedLayout;
     Int32 mTextTop;
-    Int32 mAnimatedHeight; // = -1;
+    Int32 mAnimatedHeight;
 
-    AutoPtr<IShortcutCardsAdapter> mAdapter;
+    // AutoPtr<ShortcutCardsAdapter> mAdapter;
+
+    friend class DismissClickListener;
 };
 
 } // List

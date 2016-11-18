@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_CTILEINTERACTIONTEASERVIEW_H__
 
 #include "_Elastos_Droid_Dialer_List_CTileInteractionTeaserView.h"
-#include "elastos/apps/dialer/list/TileInteractionTeaserView.h"
+#include "elastos/droid/dialer/list/TileInteractionTeaserView.h"
 
 namespace Elastos {
 namespace Droid {

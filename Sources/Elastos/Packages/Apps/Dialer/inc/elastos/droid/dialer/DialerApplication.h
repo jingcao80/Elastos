@@ -5,6 +5,7 @@
 #include <elastos/droid/app/Application.h>
 
 using Elastos::Droid::App::Application;
+using Elastos::Droid::Contacts::Common::IContactPhotoManager;
 
 namespace Elastos {
 namespace Droid {
@@ -24,7 +25,7 @@ public:
         /* [out] */ IInterface** object);
 
 private:
-    // AutoPtr<IContactPhotoManager> mContactPhotoManager;
+    AutoPtr<IContactPhotoManager> mContactPhotoManager;
 };
 
 } // Dialer

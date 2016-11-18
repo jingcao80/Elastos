@@ -115,7 +115,7 @@ ECode CPinnedHeaderListView::OnLayout(
     /* [in] */ Int32 r,
     /* [in] */ Int32 b)
 {
-    FAIL_RETURN(CPinnedHeaderListView::OnLayout(changed, l, t, r, b))
+    FAIL_RETURN(AutoScrollListView::OnLayout(changed, l, t, r, b))
     GetPaddingStart(&mHeaderPaddingStart);
     Int32 paddingEnd;
     GetPaddingEnd(&paddingEnd);

@@ -33,7 +33,7 @@ module
 
     }
 
-    [local]
+    [local, deprecated]
     interface IContactPhotoManager {
 
         /**
@@ -164,7 +164,7 @@ module
         CacheBitmap(
             [in] IUri* photoUri,
             [in] IBitmap* bitmap,
-            [in] ArrayOf<Byte> photoBytes);
+            [in] ArrayOf<Byte>* photoBytes);
 
         /**
          * Initiates a background process that over time will fill up cache with

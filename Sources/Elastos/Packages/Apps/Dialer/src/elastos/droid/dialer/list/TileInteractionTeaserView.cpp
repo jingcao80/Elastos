@@ -1,15 +1,23 @@
 
 #include "elastos/droid/dialer/list/TileInteractionTeaserView.h"
-#include "R.h"
 #include <elastos/droid/view/View.h>
 #include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Animation::EIID_IAnimatorListener;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::View;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
-using Elastos::Core::IRunnable;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Core::IInteger32;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -37,7 +45,6 @@ ECode TileInteractionTeaserView::DismissClickListener::OnClick(
 //=================================================================
 // TileInteractionTeaserView::ArrowRunnable
 //=================================================================
-
 TileInteractionTeaserView::ArrowRunnable::ArrowRunnable(
     /* [in] */ TileInteractionTeaserView* host,
     /* [in] */ ITextView* text,
@@ -52,7 +59,8 @@ ECode TileInteractionTeaserView::ArrowRunnable::Run()
     // The text top is changed when we move the arrow, so we need to
     // do multiple passes
     Int32 textTop;
-    mText->GetTop(&textTop);
+    IView::Probe(mText)->GetTop(&textTop);
+    AutoPtr<IView> arraw = IView::Probe(mArrow);
     if (mHost->mNeedLayout || textTop != mHost->mTextTop) {
         mHost->mNeedLayout = FALSE;
         mHost->mTextTop = textTop;
@@ -60,12 +68,12 @@ ECode TileInteractionTeaserView::ArrowRunnable::Run()
         Int32 lineHeight;
         mText->GetLineHeight(&lineHeight);
         AutoPtr<IViewGroupLayoutParams> arrowParams;
-        IView::Probe(mArrow)->GetLayoutParams((IViewGroupLayoutParams**)&arrowParams);
+        arraw->GetLayoutParams((IViewGroupLayoutParams**)&arrowParams);
         IViewGroupMarginLayoutParams::Probe(arrowParams)->SetTopMargin(
                 mHost->mTextTop + lineHeight / 2);
-        mArrow->SetLayoutParams(arrowParams);
+        arraw->SetLayoutParams(arrowParams);
     }
-    arrow->SetVisibility(IView::VISIBLE);
+    arraw->SetVisibility(IView::VISIBLE);
     return NOERROR;
 }
 
@@ -82,7 +90,9 @@ TileInteractionTeaserView::HeightAnimatorUpdateListener::HeightAnimatorUpdateLis
 ECode TileInteractionTeaserView::HeightAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
-    animation->GetAnimatedValue(&mHost->mAnimatedHeight);
+    AutoPtr<IInterface> value;
+    animation->GetAnimatedValue((IInterface**)&value);
+    IInteger32::Probe(value)->GetValue(&mHost->mAnimatedHeight);
     mHost->RequestLayout();
     return NOERROR;
 }
@@ -108,9 +118,10 @@ ECode TileInteractionTeaserView::HeightAnimatorListener::OnAnimationEnd(
 {
     mHost->SetVisibility(IView::GONE);
     mHost->SetDismissed();
-    if (mHost->mAdapter != NULL) {
-        mHost->mAdapter->NotifyDataSetChanged();
-    }
+    assert(0);
+    // if (mHost->mAdapter != NULL) {
+    //     mHost->mAdapter->NotifyDataSetChanged();
+    // }
     return NOERROR;
 }
 
@@ -135,6 +146,12 @@ const String TileInteractionTeaserView::KEY_TILE_INTERACTION_TEASER_SHOWN("key_t
 
 CAR_INTERFACE_IMPL(TileInteractionTeaserView, FrameLayout, ITileInteractionTeaserView)
 
+TileInteractionTeaserView::TileInteractionTeaserView()
+    : mNeedLayout(FALSE)
+    , mTextTop(0)
+    , mAnimatedHeight(-1)
+{}
+
 ECode TileInteractionTeaserView::constructor(
     /* [in] */ IContext* context)
 {
@@ -150,7 +167,7 @@ ECode TileInteractionTeaserView::constructor(
     context->GetResources((IResources**)&resources);
 
     mNeedLayout = TRUE;
-    resources->GetInteger(R::integer::escape_animation_duration,
+    resources->GetInteger(Elastos::Droid::Dialer::R::integer::escape_animation_duration,
             &sShrinkAnimationDuration);
     return NOERROR;
 }
@@ -158,9 +175,9 @@ ECode TileInteractionTeaserView::constructor(
 ECode TileInteractionTeaserView::OnFinishInflate()
 {
     AutoPtr<IView> view;
-    FindViewById(R::id::dismiss_button, (IView**)&view);
-    view->SetOnClickListener((IViewOnClickListener*)new DismissClickListener(this));
-
+    FindViewById(Elastos::Droid::Dialer::R::id::dismiss_button, (IView**)&view);
+    AutoPtr<IViewOnClickListener> listener = (IViewOnClickListener*)new DismissClickListener(this);
+    view->SetOnClickListener(listener);
     return NOERROR;
 }
 
@@ -174,35 +191,36 @@ ECode TileInteractionTeaserView::OnLayout(
     FrameLayout::OnLayout(changed, left, top, right, bottom);
 
     AutoPtr<IView> text;
-    FindViewById(R::id::text, (IView**)&text);
+    FindViewById(Elastos::Droid::Dialer::R::id::text, (IView**)&text);
     AutoPtr<IView> arrow;
-    FindViewById(R::id::arrow, (IView**)&arrow);
+    FindViewById(Elastos::Droid::Dialer::R::id::arrow, (IView**)&arrow);
 
     // We post to avoid calling layout within layout
     Boolean result;
-    arrow->Post((IRunnable*)new ArrowRunnable(this,
-            ITextView::Probe(text), IImageView::Probe(arrow)), &result);
+    AutoPtr<IRunnable> runnable = (IRunnable*)new ArrowRunnable(this,
+            ITextView::Probe(text), IImageView::Probe(arrow));
+    arrow->Post(runnable, &result);
     return NOERROR;
 }
 
-ECode TileInteractionTeaserView::GetShouldDisplayInList(
-    /* [out] */ Boolean* result)
+Boolean TileInteractionTeaserView::GetShouldDisplayInList()
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<ISharedPreferences> prefs;
     context->GetSharedPreferences(IDialtactsActivity::SHARED_PREFS_NAME,
             IContext::MODE_PRIVATE, (ISharedPreferences**)&prefs);
-    return prefs->GetBoolean(KEY_TILE_INTERACTION_TEASER_SHOWN, TRUE, result);
+    Boolean result;
+    prefs->GetBoolean(KEY_TILE_INTERACTION_TEASER_SHOWN, TRUE, &result);
+    return result;
 }
 
-ECode TileInteractionTeaserView::SetAdapter(
-    /* [in] */ IShortcutCardsAdapter* adapter)
-{
-    mAdapter = adapter;
-    return NOERROR;
-}
+// void TileInteractionTeaserView::SetAdapter(
+//     /* [in] */ ShortcutCardsAdapter* adapter)
+// {
+//     mAdapter = adapter;
+//     return NOERROR;
+// }
 
 void TileInteractionTeaserView::StartDestroyAnimation()
 {
@@ -213,19 +231,24 @@ void TileInteractionTeaserView::StartDestroyAnimation()
     Logger::V(String("Interaction"), "Start from %d", start);
 
     AutoPtr<IValueAnimatorHelper> helper;
-    CValueAnimatorHelper::AcquireSingleton(&helper);
+    CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
     AutoPtr<IValueAnimator> heightAnimator;
-    helper->OfInt32(start, end, (IValueAnimator**)&heightAnimator);
+    AutoPtr<ArrayOf<Int32> > attrs = ArrayOf<Int32>::Alloc(2);
+    (*attrs)[0] = start;
+    (*attrs)[1] = end;
+    helper->OfInt32(attrs, (IValueAnimator**)&heightAnimator);
     heightAnimator->SetDuration(sShrinkAnimationDuration);
 
-    AutoPtr<IDecelerateInterpolator> interpolator;
-    CDecelerateInterpolator::New(2.0f, (IDecelerateInterpolator**)&interpolator);
-    heightAnimator->SetInterpolator(interpolator);
-    heightAnimator->AddUpdateListener(
-            (IAnimatorUpdateListener*)new HeightAnimatorUpdateListener(this));
-    heightAnimator->AddListener((IAnimatorListener*)new HeightAnimatorListener(this));
+    AutoPtr<ITimeInterpolator> interpolator;
+    CDecelerateInterpolator::New(2.0f, (ITimeInterpolator**)&interpolator);
+    AutoPtr<IAnimator> animator = IAnimator::Probe(heightAnimator);
+    animator->SetInterpolator(interpolator);
+    AutoPtr<IAnimatorUpdateListener> listener = (IAnimatorUpdateListener*)new HeightAnimatorUpdateListener(this);
+    heightAnimator->AddUpdateListener(listener);
+    AutoPtr<IAnimatorListener> animatorListener = (IAnimatorListener*)new HeightAnimatorListener(this);
+    animator->AddListener(animatorListener);
 
-    heightAnimator->Start();
+    animator->Start();
 }
 
 void TileInteractionTeaserView::SetDismissed()
@@ -237,7 +260,7 @@ void TileInteractionTeaserView::SetDismissed()
             IContext::MODE_PRIVATE, (ISharedPreferences**)&prefs);
     AutoPtr<ISharedPreferencesEditor> editor;
     prefs->Edit((ISharedPreferencesEditor**)&editor);
-    editor->PutBoolean(KEY_TILE_INTERACTION_TEASER_SHOWN, FALSE)
+    editor->PutBoolean(KEY_TILE_INTERACTION_TEASER_SHOWN, FALSE);
     editor->Apply();
 }
 

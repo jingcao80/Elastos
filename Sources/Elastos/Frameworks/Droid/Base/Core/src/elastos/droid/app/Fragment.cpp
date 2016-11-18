@@ -1327,6 +1327,7 @@ ECode Fragment::GetLoaderManager(
     if (mLoaderManager != NULL) {
         *manager = ILoaderManager::Probe(mLoaderManager);
         REFCOUNT_ADD(*manager);
+        return NOERROR;
     }
     if (mActivity == NULL) {
         Slogger::E(TAG, "Fragment  not attached to Activity");
