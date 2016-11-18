@@ -21,6 +21,8 @@ using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFileInputStream;
+using Elastos::IO::IStringBufferInputStream;
+using Elastos::IO::CStringBufferInputStream;
 using Elastos::IO::IInputStream;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::CKeyFactoryHelper;
@@ -843,15 +845,39 @@ ECode CActivityOne::Button7Function()// Certificate
     AutoPtr<ICertificateFactory> cf;
     cfHelper->GetInstance(String("X509"), (ICertificateFactory**)&cf);
     Logger::E(TAG, "leliang after get ICertificateFactory cf:%p", cf.Get());
-    AutoPtr<IFileInputStream> fis;
-    CFileInputStream::New(String("/data/security/test.crt"), (IFileInputStream**)&fis);
-    Logger::E(TAG, "leliang after create CFileInputStream, fis:%p", fis.Get());
-    if (fis == NULL) {
-        Logger::E(TAG, "leliang /data/security/test.crt is not found");
-        return NOERROR;
-    }
+    //AutoPtr<IFileInputStream> fis;
+    //CFileInputStream::New(String("/data/security/test.crt"), (IFileInputStream**)&fis);
+    //Logger::E(TAG, "leliang after create CFileInputStream, fis:%p", fis.Get());
+    //if (fis == NULL) {
+    //    Logger::E(TAG, "leliang /data/security/test.crt is not found");
+    //    return NOERROR;
+    //}
+    String certStr("-----BEGIN CERTIFICATE-----\n\
+MIIDTjCCAjagAwIBAgIBATANBgkqhkiG9w0BAQsFADB5MQswCQYDVQQGEwJDTjEL\n\
+MAkGA1UECAwCU0gxCzAJBgNVBAcMAlNIMQswCQYDVQQKDAJPUzELMAkGA1UECwwC\n\
+T1MxEDAOBgNVBAMMB2VsYXN0b3MxJDAiBgkqhkiG9w0BCQEWFXpoYW5nLmxlbGlh\n\
+bmdAMTYzLmNvbTAeFw0xNjEwMjUwMzE0MDBaFw0xNzEwMjUwMzE0MDBaMGMxCzAJ\n\
+BgNVBAYTAkNOMQswCQYDVQQIDAJTSDELMAkGA1UECwwCT1MxEDAOBgNVBAMMB2Vs\n\
+YXN0b3MxKDAmBgkqhkiG9w0BCQEWGXpoYW5nLmxlbGlhbmdAa29ydGlkZS5jb20w\n\
+gZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAJ/YepjuVlTa2lvvLqUguq/StGH5\n\
+hJoqE9JvLVLfWCd5VsDweQH/1iUJejsQr1ZHD9rSrX0oVbRTXV/2fx+iow/8n/xO\n\
+RUCxdhxoxz1oXEWLWugEWRXqt2t//vTiy16h1wtwWwKpKb9d01yZ+3d0QHaWYPpJ\n\
+CH+gD3AUvpPjskwFAgMBAAGjezB5MAkGA1UdEwQCMAAwLAYJYIZIAYb4QgENBB8W\n\
+HU9wZW5TU0wgR2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBTw6tsyRxFp\n\
+3Yev2r+GEqDiCz1hazAfBgNVHSMEGDAWgBTlQcWf03XjZNX7oN74cHMffC15xjAN\n\
+BgkqhkiG9w0BAQsFAAOCAQEAHA8t28IV79t+Pl/vs8/Gozmz+bRw4Af7PsTU8mHJ\n\
+SXTpKX7pGTaLmkCrGIvzUnIxbFdhi0cYWIIIxsWgBQmxIwOVP1/941K5/y7WdijN\n\
+t1mU9NhXrxa77BwJNUH6+JrILUkpWFmrN2n4tWm7sQe4F5Tno68XqL6CvgNrkHft\n\
+dcHFRXtSMQSUvrItZcZlT5KHRHqD42Rahq15pcuY1uQTOmJK0sqAG5VEGVgLCs6w\n\
++5UY4DnYz5YBpqodYy8O/kMksl96q75zOaqWo2mfDhn5nt3/AbDrwvCYZ4Q1XGTm\n\
+Oij8xXDCkImcYXmmKDUOt5VNwLZL3vvqyz3AJm70sPo1bA==\n\
+-----END CERTIFICATE-----");
+    AutoPtr<IStringBufferInputStream> sbis;
+    CStringBufferInputStream::New(certStr, (IStringBufferInputStream**)&sbis);
+    Logger::E(TAG, "leliang after create CFileInputStream, sbis:%p", sbis.Get());
+
     AutoPtr<ICertificate> certificate;
-    cf->GenerateCertificate(IInputStream::Probe(fis), (ICertificate**)&certificate);
+    cf->GenerateCertificate(IInputStream::Probe(sbis), (ICertificate**)&certificate);
     Logger::E(TAG, "leliang after get ICertificate certificate:%p", certificate.Get());
     assert("certificate should not be NULL" && certificate != NULL);
 
