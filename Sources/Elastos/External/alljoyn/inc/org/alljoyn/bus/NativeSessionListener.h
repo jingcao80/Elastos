@@ -3,7 +3,7 @@
 #define __ORG_ALLJOYN_BUS_NATIVESESSIONLISTENER_H__
 
 #include "_Org.Alljoyn.Bus.h"
-#include <alljoyn/SessionListener>
+#include <alljoyn/SessionListener.h>
 
 namespace Org {
 namespace Alljoyn {

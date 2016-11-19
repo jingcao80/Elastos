@@ -4,11 +4,19 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::IProgressDialogHelper;
+using Elastos::Droid::App::CProgressDialogHelper;
+using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::Widget::CArrayAdapter;
+using Elastos::Droid::Widget::CToast;
+using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
@@ -18,6 +26,7 @@ using Org::Alljoyn::Bus::CMutableInteger32Value;
 using Org::Alljoyn::Bus::CSessionOpts;
 using Org::Alljoyn::Bus::IBusListener;
 using Org::Alljoyn::Bus::IMutableInteger32Value;
+using Org::Alljoyn::Bus::ISessionListener;
 using Org::Alljoyn::Bus::ISessionOpts;
 using Org::Alljoyn::Bus::RemoteMessage_Receive;
 using Org::Alljoyn::Bus::Alljoyn::IDaemonInit;
@@ -38,32 +47,51 @@ CClient::MyHandler::MyHandler(
 ECode CClient::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // switch (msg.what) {
-    // case MESSAGE_PING:
-    //     String cat = (String) msg.obj;
-    //     mListViewArrayAdapter.add("Cat args:  " + cat);
-    //     break;
-    // case MESSAGE_PING_REPLY:
-    //     String ret = (String) msg.obj;
-    //     mListViewArrayAdapter.add("Reply:  " + ret);
-    //     mEditText.setText("");
-    //     break;
-    // case MESSAGE_POST_TOAST:
-    //     Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_LONG).show();
-    //     break;
-    // case MESSAGE_START_PROGRESS_DIALOG:
-    //     mDialog = ProgressDialog.show(Client.this,
-    //                                   "",
-    //                                   "Finding Basic Service.\nPlease wait...",
-    //                                   true,
-    //                                   true);
-    //     break;
-    // case MESSAGE_STOP_PROGRESS_DIALOG:
-    //     mDialog.dismiss();
-    //     break;
-    // default:
-    //     break;
-    // }
+    Int32 what;
+    msg->GetWhat(&what);
+
+    switch (what) {
+    case MESSAGE_PING: {
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        String cat = CoreUtils::Unbox(ICharSequence::Probe(obj));
+        mHost->mListViewArrayAdapter->Add(CoreUtils::Convert(String("Cat args:  ") + cat));
+        break;
+    }
+    case MESSAGE_PING_REPLY: {
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        String ret = CoreUtils::Unbox(ICharSequence::Probe(obj));
+        mHost->mListViewArrayAdapter->Add(CoreUtils::Convert(String("Reply:  ") + ret));
+        ITextView::Probe(mHost->mEditText)->SetText(CoreUtils::Convert(String("")));
+        break;
+    }
+    case MESSAGE_POST_TOAST: {
+        AutoPtr<IContext> context;
+        mHost->GetApplicationContext((IContext**)&context);
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        AutoPtr<IToastHelper> helper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+        AutoPtr<IToast> toast;
+        helper->MakeText(context, ICharSequence::Probe(obj), IToast::LENGTH_LONG, (IToast**)&toast);
+        toast->Show();
+        break;
+    }
+    case MESSAGE_START_PROGRESS_DIALOG: {
+        AutoPtr<IProgressDialogHelper> helper;
+        CProgressDialogHelper::AcquireSingleton((IProgressDialogHelper**)&helper);
+        helper->Show(mHost, CoreUtils::Convert(String("")),
+                CoreUtils::Convert(String("Finding Basic Service.\nPlease wait...")),
+                TRUE, TRUE, (IProgressDialog**)&mHost->mDialog);
+        break;
+    }
+    case MESSAGE_STOP_PROGRESS_DIALOG:
+        IDialogInterface::Probe(mHost->mDialog)->Dismiss();
+        break;
+    default:
+        break;
+    }
     return NOERROR;
 }
 
@@ -93,13 +121,16 @@ ECode CClient::EditorListener::OnEditorAction(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // if (actionId == EditorInfo.IME_NULL
-    //     && event.getAction() == KeyEvent.ACTION_UP) {
-    //     /* Call the remote object's cat method. */
-    //     Message msg = mBusHandler.obtainMessage(BusHandler.CAT,
-    //                                             view.getText().toString());
-    //     mBusHandler.sendMessage(msg);
-    // }
+    Int32 action;
+    if (actionId == IEditorInfo::IME_NULL
+        && (event->GetAction(&action), action == IKeyEvent::ACTION_UP)) {
+        /* Call the remote object's cat method. */
+        AutoPtr<ICharSequence> text;
+        v->GetText((ICharSequence**)&text);
+        AutoPtr<IMessage> msg;
+        mHost->mBusHandler->ObtainMessage(BusHandler::CAT, text, (IMessage**)&msg);
+        mHost->mBusHandler->SendMessage(msg, result);
+    }
     *result = TRUE;
     return NOERROR;
 }
@@ -131,6 +162,21 @@ ECode CClient::BusHandler::InnerBusListener::FoundAdvertisedName(
         Boolean result;
         mHost->SendMessage(msg, &result);
     }
+    return NOERROR;
+}
+
+
+//======================================================================
+//  CClient::BusHandler::InnerSessionListener
+//======================================================================
+ECode CClient::BusHandler::InnerSessionListener::SessionLost(
+    /* [in] */ Int32 sessionId,
+    /* [in] */ Int32 reason)
+{
+    mHost->mIsConnected = FALSE;
+    Logger::I("CClient", "MyBusListener.sessionLost(sessionId = %d, reason = %d)", sessionId,reason);
+    Boolean result;
+    mHost->mHost->mHandler->SendEmptyMessage(MESSAGE_START_PROGRESS_DIALOG, &result);
     return NOERROR;
 }
 
@@ -242,48 +288,52 @@ ECode CClient::BusHandler::HandleMessage(
         AutoPtr<IMutableInteger32Value> sessionId;
         CMutableInteger32Value::New((IMutableInteger32Value**)&sessionId);
 
-//        Status status = mBus.joinSession((String) msg.obj, contactPort, sessionId, sessionOpts, new SessionListener() {
-//            @Override
-//            public void sessionLost(int sessionId, int reason) {
-//                mIsConnected = false;
-//                logInfo(String.format("MyBusListener.sessionLost(sessionId = %d, reason = %d)", sessionId,reason));
-//                mHandler.sendEmptyMessage(MESSAGE_START_PROGRESS_DIALOG);
-//            }
-//        });
-//        logStatus("BusAttachment.joinSession() - sessionId: " + sessionId.value, status);
-//
-//        if (status == Status.OK) {
-//            /*
-//             * To communicate with an AllJoyn object, we create a ProxyBusObject.
-//             * A ProxyBusObject is composed of a name, path, sessionID and interfaces.
-//             *
-//             * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
-//             * "/sample", uses sessionID of CONTACT_PORT, and implements the BasicInterface.
-//             */
-//            mProxyObj =  mBus.getProxyBusObject(SERVICE_NAME,
-//                                                "/sample",
-//                                                sessionId.value,
-//                                                new Class<?>[] { BasicInterface.class });
-//
-//            /* We make calls to the methods of the AllJoyn object through one of its interfaces. */
-//            mBasicInterface =  mProxyObj.getInterface(BasicInterface.class);
-//
-//            mSessionId = sessionId.value;
-//            mIsConnected = true;
-//            mHandler.sendEmptyMessage(MESSAGE_STOP_PROGRESS_DIALOG);
-//        }
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        AutoPtr<ISessionListener> sl = new InnerSessionListener(this);
+        ECode ec = mBus->JoinSession(CoreUtils::Unbox(ICharSequence::Probe(obj)),
+                contactPort, sessionId, sessionOpts, sl);
+        Int32 value;
+        sessionId->GetValue(&value);
+        Logger::I("CClient", "BusAttachment.joinSession() - sessionId: %d, 0x%08x", value, ec);
+
+        if (ec == (ECode)E_STATUS_OK) {
+            /*
+             * To communicate with an AllJoyn object, we create a ProxyBusObject.
+             * A ProxyBusObject is composed of a name, path, sessionID and interfaces.
+             *
+             * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
+             * "/sample", uses sessionID of CONTACT_PORT, and implements the BasicInterface.
+             */
+            AutoPtr< ArrayOf<InterfaceID> > busInterfaces = ArrayOf<InterfaceID>::Alloc(1);
+            (*busInterfaces)[0] = EIID_IBasicInterface;
+            mProxyObj = NULL;
+            mBus->GetProxyBusObject(SERVICE_NAME, String("/sample"),
+                    value, busInterfaces, (IProxyBusObject**)&mProxyObj);
+
+            /* We make calls to the methods of the AllJoyn object through one of its interfaces. */
+            mBasicInterface = NULL;
+            mProxyObj->GetInterface(EIID_IBasicInterface, (IInterface**)&mBasicInterface);
+
+            mSessionId = value;
+            mIsConnected = TRUE;
+            Boolean result;
+            mHost->mHandler->SendEmptyMessage(MESSAGE_STOP_PROGRESS_DIALOG, &result);
+        }
         break;
     }
 
     /* Release all resources acquired in the connect. */
     case DISCONNECT: {
-//        mIsStoppingDiscovery = true;
-//        if (mIsConnected) {
-//            Status status = mBus.leaveSession(mSessionId);
-//            logStatus("BusAttachment.leaveSession()", status);
-//        }
-//        mBus.disconnect();
-//        getLooper().quit();
+        mIsStoppingDiscovery = TRUE;
+        if (mIsConnected) {
+            ECode ec = mBus->LeaveSession(mSessionId);
+            Logger::I("CClient", "BusAttachment.leaveSession() 0x%08x", ec);
+        }
+        mBus->Disconnect();
+        AutoPtr<ILooper> looper;
+        GetLooper((ILooper**)&looper);
+        looper->Quit();
         break;
     }
 
@@ -295,11 +345,15 @@ ECode CClient::BusHandler::HandleMessage(
      */
     case CAT: {
 //        try {
-//            if (mBasicInterface != null) {
-//                sendUiMessage(MESSAGE_PING, msg.obj + " and " + msg.obj);
-//                String reply = mBasicInterface.cat((String) msg.obj, (String) msg.obj);
-//                sendUiMessage(MESSAGE_PING_REPLY, reply);
-//            }
+        if (mBasicInterface != NULL) {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            String str = CoreUtils::Unbox(ICharSequence::Probe(obj));
+            SendUiMessage(MESSAGE_PING, str + String(" and ") + str);
+            String reply;
+            mBasicInterface->Cat(str, str, &reply);
+            SendUiMessage(MESSAGE_PING_REPLY, reply);
+        }
 //        } catch (BusException ex) {
 //            logException("BasicInterface.cat()", ex);
 //        }
@@ -311,15 +365,33 @@ ECode CClient::BusHandler::HandleMessage(
     return NOERROR;
 }
 
+void CClient::BusHandler::SendUiMessage(
+    /* [in] */ Int32 what,
+    /* [in] */ const String& str)
+{
+    AutoPtr<IMessage> msg;
+    mHost->mHandler->ObtainMessage(what, CoreUtils::Convert(str), (IMessage**)&msg);
+    Boolean result;
+    mHost->mHandler->SendMessage(msg, &result);
+}
+
+ECode CClient::BusHandler::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CClient::BusHandler";
+    return NOERROR;
+}
+
 
 //======================================================================
 //  CClient
 //======================================================================
-const Int32 CClient::MESSAGE_PING = 1;
-const Int32 CClient::MESSAGE_PING_REPLY = 2;
-const Int32 CClient::MESSAGE_POST_TOAST = 3;
-const Int32 CClient::MESSAGE_START_PROGRESS_DIALOG = 4;
-const Int32 CClient::MESSAGE_STOP_PROGRESS_DIALOG = 5;
+const Int32 CClient::MESSAGE_PING;
+const Int32 CClient::MESSAGE_PING_REPLY;
+const Int32 CClient::MESSAGE_POST_TOAST;
+const Int32 CClient::MESSAGE_START_PROGRESS_DIALOG;
+const Int32 CClient::MESSAGE_STOP_PROGRESS_DIALOG;
 const String CClient::TAG("BasicClient");
 
 ECode CClient::constructor()
@@ -352,11 +424,12 @@ ECode CClient::OnCreate(
     IThread::Probe(busThread)->Start();
     AutoPtr<ILooper> looper;
     busThread->GetLooper((ILooper**)&looper);
-    // mBusHandler = new BusHandler(busThread.getLooper());
+    mBusHandler = new BusHandler();
+    mBusHandler->constructor(looper, this);
 
     /* Connect to an AllJoyn object. */
     Boolean result;
-    // mBusHandler.sendEmptyMessage(BusHandler.CONNECT);
+    mBusHandler->SendEmptyMessage(BusHandler::CONNECT, &result);
     mHandler->SendEmptyMessage(MESSAGE_START_PROGRESS_DIALOG, &result);
     return NOERROR;
 }

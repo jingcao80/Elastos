@@ -457,12 +457,15 @@ ECode CBusAttachment::UnregisterBusObject(
     return NOERROR;
 }
 
-// GetProxyBusObject(
-//     [in] String busName,
-//     [in] String objPath,
-//     [in] Int32 sessionId,
-//         Class<?>[] busInterfaces,
-//     [out] IProxyBusObject** proxy);
+ECode CBusAttachment::GetProxyBusObject(
+    /* [in] */ const String& busName,
+    /* [in] */ const String& objPath,
+    /* [in] */ Int32 sessionId,
+    /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+    /* [out] */ IProxyBusObject** proxy)
+{
+    return NOERROR;
+}
 
 // public ProxyBusObject getProxyBusObject(String busName,
 //         String objPath,

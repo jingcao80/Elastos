@@ -11,8 +11,10 @@
 #include <elastos/core/Object.h>
 #include <_Org.Alljoyn.Bus.h>
 #include <org/alljoyn/bus/BusListener.h>
+#include <org/alljoyn/bus/SessionListener.h>
 
 using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::IProgressDialog;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
@@ -26,6 +28,8 @@ using Elastos::Core::Object;
 
 using Org::Alljoyn::Bus::BusListener;
 using Org::Alljoyn::Bus::IBusAttachment;
+using Org::Alljoyn::Bus::IProxyBusObject;
+using Org::Alljoyn::Bus::SessionListener;
 
 namespace Elastos {
 namespace DevSamples {
@@ -74,7 +78,7 @@ private:
 
     /* This class will handle all AllJoyn calls. See onCreate(). */
     class BusHandler
-        : Handler
+        : public Handler
     {
     private:
         class InnerBusListener : public BusListener
@@ -95,6 +99,23 @@ private:
             BusHandler* mHost;
         };
 
+        class InnerSessionListener : public SessionListener
+        {
+        public:
+            InnerSessionListener(
+                /* [in] */ BusHandler* host)
+                : mHost(host)
+            {}
+
+            // @Override
+            CARAPI SessionLost(
+                /* [in] */ Int32 sessionId,
+                /* [in] */ Int32 reason);
+
+        private:
+            BusHandler* mHost;
+        };
+
     public:
         CARAPI constructor(
             /* [in] */ ILooper* looper,
@@ -103,6 +124,15 @@ private:
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        /* Helper function to send a message to the UI thread. */
+        CARAPI_(void) SendUiMessage(
+            /* [in] */ Int32 what,
+            /* [in] */ const String& str);
 
     public:
         /* These are the messages sent to the BusHandler from the UI. */
@@ -123,8 +153,8 @@ private:
         static const Int16 CONTACT_PORT;
 
         AutoPtr<IBusAttachment> mBus;
-        // ProxyBusObject mProxyObj;
-        // BasicInterface mBasicInterface;
+        AutoPtr<IProxyBusObject> mProxyObj;
+        AutoPtr<IBasicInterface> mBasicInterface;
 
         Int32 mSessionId;
         Boolean mIsInASession;
@@ -141,11 +171,11 @@ protected:
         /* [in] */ IBundle* savedInstanceState);
 
 private:
-    static const Int32 MESSAGE_PING;
-    static const Int32 MESSAGE_PING_REPLY;
-    static const Int32 MESSAGE_POST_TOAST;
-    static const Int32 MESSAGE_START_PROGRESS_DIALOG;
-    static const Int32 MESSAGE_STOP_PROGRESS_DIALOG;
+    static const Int32 MESSAGE_PING = 1;
+    static const Int32 MESSAGE_PING_REPLY = 2;
+    static const Int32 MESSAGE_POST_TOAST = 3;
+    static const Int32 MESSAGE_START_PROGRESS_DIALOG = 4;
+    static const Int32 MESSAGE_STOP_PROGRESS_DIALOG = 5;
 
     static const String TAG;
 
@@ -155,9 +185,9 @@ private:
     // private Menu menu;
 
     /* Handler used to make calls to AllJoyn methods. See onCreate(). */
-    // private BusHandler mBusHandler;
+    AutoPtr<BusHandler> mBusHandler;
 
-    // private ProgressDialog mDialog;
+    AutoPtr<IProgressDialog> mDialog;
 
     AutoPtr<IHandler> mHandler;
 };

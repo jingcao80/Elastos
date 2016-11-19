@@ -1080,12 +1080,12 @@ public:
      * @return a ProxyBusObject for an object that implements all interfaces listed in busInterfaces
      * @see org.alljoyn.bus.annotation.BusMethod
      */
-    // GetProxyBusObject(
-    //     [in] String busName,
-    //     [in] String objPath,
-    //     [in] Int32 sessionId,
-    //         Class<?>[] busInterfaces,
-    //     [out] IProxyBusObject** proxy);
+    CARAPI GetProxyBusObject(
+        /* [in] */ const String& busName,
+        /* [in] */ const String& objPath,
+        /* [in] */ Int32 sessionId,
+        /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+        /* [out] */ IProxyBusObject** proxy);
 
     /**
      * Creates a proxy bus object for a remote bus object.
