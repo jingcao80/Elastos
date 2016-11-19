@@ -465,12 +465,12 @@ int LubeContext::InterfaceConstMember(MemberType member, char *pszBuffer)
                     }
                 }
                 else if (pDesc->mType == TYPE_BYTE) {
-                    sprintf(pszBuffer, pDesc->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%08x":"%d",
-                            (unsigned char)pDesc->mV.mInt32Value.mValue);
+                    sprintf(pszBuffer, pDesc->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%02x":"%d",
+                            (unsigned char)pDesc->mV.mInt32Value.mValue & 0xff);
                 }
                 else if (pDesc->mType == TYPE_INTEGER16) {
-                    sprintf(pszBuffer, pDesc->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%08x":"%d",
-                            (short)pDesc->mV.mInt32Value.mValue);
+                    sprintf(pszBuffer, pDesc->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%04x":"%d",
+                            (short)pDesc->mV.mInt32Value.mValue & 0xffff);
                 }
                 else if (pDesc->mType == TYPE_INTEGER32) {
                     sprintf(pszBuffer, pDesc->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%08x":"%d",

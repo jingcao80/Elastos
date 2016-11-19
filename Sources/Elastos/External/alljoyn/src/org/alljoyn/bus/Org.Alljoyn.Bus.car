@@ -71,6 +71,27 @@ module
         interface IBusAttachment;
     }
 
+    class CSessionOpts {
+        constructor();
+
+        constructor(
+            [in] Byte traffic,
+            [in] Boolean isMultipoint,
+            [in] Byte proximity,
+            [in] Int16 transports);
+
+        interface ISessionOpts;
+    }
+
+    class CMutableInteger32Value {
+        constructor();
+
+        constructor(
+            [in] Int32 v);
+
+        interface IMutableInteger32Value;
+    }
+
     } // namespace Bus
     } // namespace Alljoyn
     } // namespace Org

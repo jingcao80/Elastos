@@ -1,2 +1,3 @@
 
 EXPORT_HEADERS += org/alljoyn/bus/BusListener.h
+EXPORT_HEADERS += org/alljoyn/bus/SessionListener.h

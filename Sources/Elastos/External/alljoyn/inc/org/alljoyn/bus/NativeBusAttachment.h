@@ -4,9 +4,17 @@
 
 #include <alljoyn/BusAttachment.h>
 
+namespace Org {
+namespace Alljoyn {
+namespace Bus {
+
 class NativeBusAttachment : public ajn::BusAttachment
 {
 
 };
+
+} // namespace Bus
+} // namespace Alljoyn
+} // namespace Org
 
 #endif // __ORG_ALLJOYN_BUS_NATIVEBUSATTACHMENT_H__

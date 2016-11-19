@@ -2672,6 +2672,7 @@ int P_Integer16(InterfaceDescriptor* pInterface, InterfaceConstDescriptor *pDesc
                 unsigned char format = FORMAT_DECIMAL;
                 InterfaceConstDescriptor *pSrcDesc = pInterface->mConsts[n];
                 switch (pSrcDesc->mType) {
+                    case TYPE_INTEGER16:
                     case TYPE_INTEGER32:
                         v = pSrcDesc->mV.mInt32Value.mValue;
                         format = pSrcDesc->mV.mInt32Value.mFormat;

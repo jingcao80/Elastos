@@ -2752,13 +2752,13 @@ void OutputInterface(InterfaceDirEntry* pItfDir, CLSModule* pModule)
                 break;
             case TYPE_BYTE:
                 fprintf(pFile, "    static const _ELASTOS Byte %s = ", pItfConst->mName);
-                fprintf(pFile, pItfConst->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%08x;\n":"%d;\n",
-                        (unsigned char)pItfConst->mV.mInt32Value.mValue);
+                fprintf(pFile, pItfConst->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%02x;\n":"%d;\n",
+                        (unsigned char)pItfConst->mV.mInt32Value.mValue & 0xff);
                 break;
             case TYPE_INTEGER16:
                 fprintf(pFile, "    static const _ELASTOS Int16 %s = ", pItfConst->mName);
-                fprintf(pFile, pItfConst->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%08x;\n":"%d;\n",
-                        (short)pItfConst->mV.mInt32Value.mValue);
+                fprintf(pFile, pItfConst->mV.mInt32Value.mFormat == FORMAT_HEX ? "0x%04x;\n":"%d;\n",
+                        (short)pItfConst->mV.mInt32Value.mValue & 0xffff);
                 break;
             case TYPE_INTEGER32:
                 fprintf(pFile, "    static const _ELASTOS Int32 %s = ", pItfConst->mName);

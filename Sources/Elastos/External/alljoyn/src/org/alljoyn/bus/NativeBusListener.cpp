@@ -11,13 +11,13 @@ namespace Alljoyn {
 namespace Bus {
 
 NativeBusListener::NativeBusListener(
-    /* [in] */ Org::Alljoyn::Bus::BusListener* listener)
+    /* [in] */ IBusListener* listener)
 {
     /*
      * Be careful when using a weak global reference.  They can only be
      * passed to NewLocalRef, NewGlobalRef and DeleteWeakGlobalRef.
      */
-    listener->GetWeakReference((IWeakReference**)&mBusListener);
+    IWeakReferenceSource::Probe(listener)->GetWeakReference((IWeakReference**)&mBusListener);
     assert(mBusListener != NULL);
 }
 

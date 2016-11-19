@@ -10,7 +10,11 @@ module
     }
 
     interface IMutableInteger32Value {
+        GetValue(
+            [out] Int32* value);
 
+        SetValue(
+            [in] Int32 value);
     }
 
     interface IMutableStringValue {

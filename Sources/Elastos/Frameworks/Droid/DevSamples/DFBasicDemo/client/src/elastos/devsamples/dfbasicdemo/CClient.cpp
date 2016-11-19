@@ -14,7 +14,11 @@ using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 
 using Org::Alljoyn::Bus::CBusAttachment;
+using Org::Alljoyn::Bus::CMutableInteger32Value;
+using Org::Alljoyn::Bus::CSessionOpts;
 using Org::Alljoyn::Bus::IBusListener;
+using Org::Alljoyn::Bus::IMutableInteger32Value;
+using Org::Alljoyn::Bus::ISessionOpts;
 using Org::Alljoyn::Bus::RemoteMessage_Receive;
 using Org::Alljoyn::Bus::Alljoyn::IDaemonInit;
 using Org::Alljoyn::Bus::Alljoyn::CDaemonInit;
@@ -221,19 +225,23 @@ ECode CClient::BusHandler::HandleMessage(
             break;
         }
 
-//        /*
-//         * In order to join the session, we need to provide the well-known
-//         * contact port.  This is pre-arranged between both sides as part
-//         * of the definition of the chat service.  As a result of joining
-//         * the session, we get a session identifier which we must use to
-//         * identify the created session communication channel whenever we
-//         * talk to the remote side.
-//         */
-//        short contactPort = CONTACT_PORT;
-//        SessionOpts sessionOpts = new SessionOpts();
-//        sessionOpts.transports = (short)msg.arg1;
-//        Mutable.IntegerValue sessionId = new Mutable.IntegerValue();
-//
+        /*
+         * In order to join the session, we need to provide the well-known
+         * contact port.  This is pre-arranged between both sides as part
+         * of the definition of the chat service.  As a result of joining
+         * the session, we get a session identifier which we must use to
+         * identify the created session communication channel whenever we
+         * talk to the remote side.
+         */
+        Int16 contactPort = CONTACT_PORT;
+        AutoPtr<ISessionOpts> sessionOpts;
+        CSessionOpts::New((ISessionOpts**)&sessionOpts);
+        Int32 arg1;
+        msg->GetArg1(&arg1);
+        sessionOpts->SetTransports(arg1);
+        AutoPtr<IMutableInteger32Value> sessionId;
+        CMutableInteger32Value::New((IMutableInteger32Value**)&sessionId);
+
 //        Status status = mBus.joinSession((String) msg.obj, contactPort, sessionId, sessionOpts, new SessionListener() {
 //            @Override
 //            public void sessionLost(int sessionId, int reason) {

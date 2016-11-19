@@ -333,7 +333,7 @@ ECode AsyncQueryHandler::HandleMessage(
     // pass token back to caller on each callback.
     switch (event) {
         case EVENT_ARG_QUERY:
-            return OnQueryComplete(token, args->mCookie, ICursor::Probe(args->mResult.Get()));
+            return OnQueryComplete(token, args->mCookie, ICursor::Probe(args->mResult));
 
         case EVENT_ARG_INSERT:
             return OnInsertComplete(token, args->mCookie, IUri::Probe(args->mResult));

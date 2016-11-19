@@ -3,7 +3,6 @@
 #define __ORG_ALLJOYN_BUS_NATIVEBUSLISTENER_H__
 
 #include "_Org.Alljoyn.Bus.h"
-#include "org/alljoyn/bus/BusListener.h"
 #include <alljoyn/BusListener.h>
 #include <alljoyn/TransportMask.h>
 
@@ -15,7 +14,7 @@ class NativeBusListener : public ajn::BusListener
 {
 public:
     NativeBusListener(
-        /* [in] */ Org::Alljoyn::Bus::BusListener* listener);
+        /* [in] */ IBusListener* listener);
 
     ~NativeBusListener();
 
