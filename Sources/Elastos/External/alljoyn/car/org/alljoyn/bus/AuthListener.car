@@ -5,8 +5,69 @@ module
     namespace Alljoyn {
     namespace Bus {
 
-    interface IAuthListener {
+    interface ICredentials {
 
+    }
+
+    interface IAuthRequest {
+
+    }
+
+    [deprecated]
+    interface IAuthListener {
+        /**
+         * Called by an authentication mechanism making authentication requests.
+         * A count allows the listener to decide whether to allow or reject mutiple
+         * authentication attempts to the same peer.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param mechanism the name of the authentication mechanism issuing the
+         *                  request
+         * @param peerName  the name of the remote peer being authenticated.  On the
+         *                  initiating side this will be a well-known-name for the
+         *                  remote peer. On the accepting side this will be the
+         *                  unique bus name for the remote peer.
+         * @param count the count (starting at 1) of the number of authentication
+         *              request attempts made
+         * @param userName the user name for the credentials being requested.  If
+         *               this is not the empty string the request is specific to the
+         *               named user.
+         * @param requests the requests.  The application may handle none, some, or
+         *                 all of the requests.
+         *
+         * @return {@code true} if the request is accepted or {@code false} if the request is
+         *         rejected.  If the request is rejected the authentication is
+         *         complete.
+         */
+        Requested(
+            [in] String mechanism,
+            [in] String peerName,
+            [in] Int32 count,
+            [in] String userName,
+            [in] ArrayOf<IAuthRequest*>* requests,
+            [out] Boolean* result);
+
+        /**
+         * Called by the authentication engine when all authentication attempts are
+         * completed.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param mechanism the name of the authentication mechanism that was used
+         *                  or an empty string if the authentication failed
+         * @param peerName  the name of the remote peer being authenticated.  On the
+         *                  initiating side this will be a well-known-name for the
+         *                  remote peer. On the accepting side this will be the
+         *                  unique bus name for the remote peer.
+         * @param authenticated {@code true} if the authentication succeeded
+         */
+        Completed(
+            [in] String mechanism,
+            [in] String peerName,
+            [in] Boolean authenticated);
     }
 
     } // namespace Bus

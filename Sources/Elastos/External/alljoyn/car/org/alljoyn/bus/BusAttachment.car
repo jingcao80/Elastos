@@ -5,6 +5,7 @@ module
     interface Org.Alljoyn.Bus.IAuthListener;
     interface Org.Alljoyn.Bus.IBusListener;
     interface Org.Alljoyn.Bus.IBusObject;
+    interface Org.Alljoyn.Bus.ICredentials;
     interface Org.Alljoyn.Bus.IKeyStoreListener;
     interface Org.Alljoyn.Bus.IMessageContext;
     interface Org.Alljoyn.Bus.IMutableInteger16Value;
@@ -31,6 +32,40 @@ module
 
         /** This attachment will receive messages from remote devices. */
         RemoteMessage_Receive,
+    }
+
+    interface IAuthListenerInternal {
+        SetAuthListener(
+            [in] IAuthListener* authListener);
+
+        AuthListenerSet(
+            [out] Boolean* result);
+
+        SetSecurityViolationListener(
+            [in] ISecurityViolationListener* violationListener);
+
+        RequestCredentials(
+            [in] String authMechanism,
+            [in] String authPeer,
+            [in] Int32 authCount,
+            [in] String userName,
+            [in] Int32 credMask,
+            [out] ICredentials** credentials);
+
+        VerifyCredentials(
+            [in] String authMechanism,
+            [in] String peerName,
+            [in] String userName,
+            [in] String cert,
+            [out] Boolean* result);
+
+        SecurityViolation(
+            [in] ECode status);
+
+        AuthenticationComplete(
+            [in] String authMechanism,
+            [in] String peerName,
+            [in] Boolean success);
     }
 
     [local, deprecated]
