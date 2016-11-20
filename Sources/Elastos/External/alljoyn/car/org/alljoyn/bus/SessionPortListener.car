@@ -1,12 +1,47 @@
 
 module
 {
+    interface Org.Alljoyn.Bus.ISessionOpts;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
     interface ISessionPortListener {
+        /**
+         * Accept or reject an incoming JoinSession request. The session does not
+         * exist until this after this function returns.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param sessionPort    Session port that was joined.
+         * @param joiner         Unique name of potential joiner.
+         * @param opts           Session options requested by the joiner.
+         *
+         * @return Return true if JoinSession request is accepted. false if rejected.
+         */
+        AcceptSessionJoiner(
+            [in] Int16 sessionPort,
+            [in] String joiner,
+            [in] ISessionOpts* opts,
+            [out] Boolean* accepted);
 
+        /**
+         * Called by the bus when a session has been successfully joined. The
+         * session is fully up when this method is called.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param sessionPort    Session port that was joined.
+         * @param id             Id of session.
+         * @param joiner         Unique name of the joiner.
+         */
+        SessionJoined(
+            [in] Int16 sessionPort,
+            [in] Int32 id,
+            [in] String joiner);
     }
 
     } // namespace Bus

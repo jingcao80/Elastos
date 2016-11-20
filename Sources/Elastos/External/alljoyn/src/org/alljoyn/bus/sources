@@ -18,13 +18,17 @@ INCLUDES += $(PREBUILD_INC)/stlport
 SOURCES = Org.Alljoyn.Bus.car
 SOURCES += BusListener.cpp
 SOURCES += CBusAttachment.cpp
+SOURCES += CMutableInteger16Value.cpp
 SOURCES += CMutableInteger32Value.cpp
 SOURCES += CSessionOpts.cpp
 SOURCES += NativeBusAttachment.cpp
 SOURCES += NativeBusListener.cpp
 SOURCES += NativeSessionListener.cpp
+SOURCES += NativeSessionPortListener.cpp
 SOURCES += ProxyBusObject.cpp
 SOURCES += SessionListener.cpp
+SOURCES += SessionPortListener.cpp
+SOURCES += Org.Alljoyn.Bus.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 

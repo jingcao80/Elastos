@@ -172,6 +172,8 @@ public:
     ECode AppendFormat(const char* fmt, ...);
 #endif
 
+    ECode VAppendFormat(const char* fmt, va_list ap);
+
     //---- Trim ----
     String Trim() const;
     String TrimStart() const;
@@ -298,6 +300,13 @@ public:
     static AutoPtr<ArrayOf<Byte> > ToByteArray(Char32 c);
     static Char32 ToLowerCase(Char32 codePoint);
     static Char32 ToUpperCase(Char32 codePoint);
+
+#ifdef _GNUC_
+    static String Format(const char* fmt, ...)
+            __attribute__((format (printf, 2, 3)));
+#else
+    static String Format(const char* fmt, ...);
+#endif
 
 private:
     void SetCounted(Int32 charCount) const;

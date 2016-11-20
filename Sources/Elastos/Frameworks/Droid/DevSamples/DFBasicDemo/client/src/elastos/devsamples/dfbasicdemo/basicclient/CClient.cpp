@@ -9,9 +9,9 @@ using Elastos::Droid::App::CProgressDialogHelper;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::View::IMenuInflater;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::Widget::CArrayAdapter;
-using Elastos::Droid::Widget::CToast;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IAdapterView;
@@ -35,13 +35,15 @@ using Org::Alljoyn::Bus::Alljoyn::CDaemonInit;
 namespace Elastos {
 namespace DevSamples {
 namespace DFBasicDemo {
+namespace BasicClient {
 
 //======================================================================
 //  CClient::MyHander
 //======================================================================
 CClient::MyHandler::MyHandler(
     /* [in] */ CClient* host)
-    : mHost(host)
+    : Handler(FALSE)
+    , mHost(host)
 {}
 
 ECode CClient::MyHandler::HandleMessage(
@@ -242,7 +244,7 @@ ECode CClient::BusHandler::HandleMessage(
 
         /* To communicate with AllJoyn objects, we must connect the BusAttachment to the bus. */
         ECode ec = mBus->Connect();
-        Logger::I("CClient", "BusAttachment.connect() 0x%08x", ec);
+        mHost->LogStatus(String("BusAttachment.connect()"), ec);
         if ((ECode)E_STATUS_OK != ec) {
             mHost->Finish();
             return NOERROR;
@@ -255,7 +257,9 @@ ECode CClient::BusHandler::HandleMessage(
          * In this case, we are looking for the well-known SERVICE_NAME.
          */
         ec = mBus->FindAdvertisedName(SERVICE_NAME);
-        Logger::I("CClient", "BusAttachement.findAdvertisedName(%s) 0x%08x", SERVICE_NAME.string(), ec);
+        String strMsg("");
+        strMsg.AppendFormat("BusAttachement.findAdvertisedName(%s)", SERVICE_NAME.string());
+        mHost->LogStatus(strMsg, ec);
         if ((ECode)E_STATUS_OK != ec) {
             mHost->Finish();
             return NOERROR;
@@ -295,7 +299,9 @@ ECode CClient::BusHandler::HandleMessage(
                 contactPort, sessionId, sessionOpts, sl);
         Int32 value;
         sessionId->GetValue(&value);
-        Logger::I("CClient", "BusAttachment.joinSession() - sessionId: %d, 0x%08x", value, ec);
+        String strMsg("");
+        strMsg.AppendFormat("BusAttachment.joinSession() - sessionId: %d", value);
+        mHost->LogStatus(strMsg, ec);
 
         if (ec == (ECode)E_STATUS_OK) {
             /*
@@ -328,7 +334,7 @@ ECode CClient::BusHandler::HandleMessage(
         mIsStoppingDiscovery = TRUE;
         if (mIsConnected) {
             ECode ec = mBus->LeaveSession(mSessionId);
-            Logger::I("CClient", "BusAttachment.leaveSession() 0x%08x", ec);
+            mHost->LogStatus(String("BusAttachment.leaveSession()"), ec);
         }
         mBus->Disconnect();
         AutoPtr<ILooper> looper;
@@ -434,6 +440,80 @@ ECode CClient::OnCreate(
     return NOERROR;
 }
 
+ECode CClient::OnCreateOptionsMenu(
+    /* [in] */ IMenu* menu,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    AutoPtr<IMenuInflater> inflater;
+    GetMenuInflater((IMenuInflater**)&inflater);
+    inflater->Inflate(R::menu::mainmenu, menu);
+    mMenu = menu;
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode CClient::OnOptionsItemSelected(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // Handle item selection
+    Int32 id;
+    item->GetItemId(&id);
+    switch (id) {
+    case R::id::quit:
+        Finish();
+        *result = TRUE;
+        return NOERROR;
+    default:
+        return Activity::OnOptionsItemSelected(item, result);
+    }
+}
+
+ECode CClient::OnDestroy()
+{
+    Activity::OnDestroy();
+
+    /* Disconnect to prevent resource leaks. */
+    Boolean result;
+    mBusHandler->SendEmptyMessage(BusHandler::DISCONNECT, &result);
+    return NOERROR;
+}
+
+void CClient::LogStatus(
+    /* [in] */ const String& msg,
+    /* [in] */ ECode status)
+{
+    String log("");
+    log.AppendFormat("%s: 0x%08x", msg.string(), status);
+    if (status == (ECode)E_STATUS_OK) {
+        Logger::I(TAG, log.string());
+    }
+    else {
+        AutoPtr<IMessage> toastMsg;
+        mHandler->ObtainMessage(MESSAGE_POST_TOAST, CoreUtils::Convert(log), (IMessage**)&toastMsg);
+        Boolean result;
+        mHandler->SendMessage(toastMsg, &result);
+        Logger::E(TAG, log.string());
+    }
+}
+
+void CClient::LogException(
+    /* [in] */ const String& msg,
+    /* [in] */ ECode ex)
+{
+    String log("");
+    log.AppendFormat("%s: 0x%08x", msg.string(), ex);
+    AutoPtr<IMessage> toastMsg;
+    mHandler->ObtainMessage(MESSAGE_POST_TOAST, CoreUtils::Convert(log), (IMessage**)&toastMsg);
+    Boolean result;
+    mHandler->SendMessage(toastMsg, &result);
+    Logger::E(TAG, log.string());
+}
+
+} // namespace BasicClient
 } // namespace DFBasicDemo
 } // namespace DevSamples
 } // namespace Elastos

@@ -1,5 +1,8 @@
 
 #include "org/alljoyn/bus/CSessionOpts.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
 
 namespace Org {
 namespace Alljoyn {
@@ -88,6 +91,42 @@ ECode CSessionOpts::SetTransports(
     /* [in] */ Int16 transports)
 {
     mTransports = transports;
+    return NOERROR;
+}
+
+ECode CSessionOpts::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    StringBuilder result;
+    result.Append("CSessionOpts {");
+
+    result.Append("traffic = ");
+    String value = String::Format("(0x%02x)", mTraffic);
+    result.Append(value);
+    if ((mTraffic & TRAFFIC_MESSAGES) != 0) result.Append(" TRAFFIC_MESSAGES");
+    if ((mTraffic & TRAFFIC_RAW_UNRELIABLE) != 0) result.Append(" TRAFFIC_RAW_UNRELIABLE");
+    if ((mTraffic & TRAFFIC_RAW_RELIABLE) != 0) result.Append(" TRAFFIC_RAW_RELIABLE");
+
+    result.Append(", isMultipoint = ");
+    value = String::Format("%d", mIsMultipoint);
+    result.Append(value);
+
+    result.Append(", proximity =");
+    value = String::Format("(0x%02x)", mProximity);
+    result.Append(value);
+    if ((mProximity & PROXIMITY_PHYSICAL) != 0) result.Append(" PROXIMITY_PHYSICAL");
+    if ((mProximity & PROXIMITY_NETWORK) != 0) result.Append(" PROXIMITY_NETWORK");
+
+    result.Append(", transports =");
+    value = String::Format("(0x%04x)", mTransports);
+    result.Append(value);
+    if ((mTransports & TRANSPORT_LOCAL) != 0) result.Append(" TRANSPORT_LOCAL");
+    if ((mTransports & TRANSPORT_TCP) != 0) result.Append(" TRANSPORT_TCP");
+    if ((mTransports & TRANSPORT_UDP) != 0) result.Append(" TRANSPORT_UDP");
+
+    result.Append("}");
+    *str = result.ToString();
     return NOERROR;
 }
 

@@ -52,6 +52,9 @@ public:
     CARAPI SetTransports(
         /* [in] */ Int16 transports);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     /**
      * Holds the traffic type for this SessionOpt

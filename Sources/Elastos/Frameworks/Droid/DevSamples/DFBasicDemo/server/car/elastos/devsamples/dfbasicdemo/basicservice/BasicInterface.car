@@ -4,6 +4,7 @@ module
     namespace Elastos {
     namespace DevSamples {
     namespace DFBasicDemo {
+    namespace BasicService {
 
     interface IBasicInterface {
         Cat(
@@ -12,6 +13,7 @@ module
             [out] String* result);
     }
 
+    } // namespace BasicService
     } // namespace DFBasicDemo
     } // namespace DevSamples
     } // namespace Elastos

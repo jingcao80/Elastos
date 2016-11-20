@@ -654,12 +654,20 @@ ECode String::Append(const char* other, Int32 numOfBytes)
 
 ECode String::AppendFormat(const char* fmt, ...)
 {
-    ClearCounted();
-
     va_list ap;
     va_start(ap, fmt);
 
-    Int32 result = NOERROR;
+    ECode ec = VAppendFormat(fmt, ap);
+
+    va_end(ap);
+    return ec;
+}
+
+ECode String::VAppendFormat(const char* fmt, va_list ap)
+{
+    ClearCounted();
+
+    ECode ec = NOERROR;
     Int32 n = vsnprintf(NULL, 0, fmt, ap);
     if (n != 0) {
         Int32 oldLength = GetByteLength();
@@ -669,12 +677,11 @@ ECode String::AppendFormat(const char* fmt, ...)
             UnlockBuffer(oldLength + n);
         }
         else {
-            result = E_OUT_OF_MEMORY;
+            ec = E_OUT_OF_MEMORY;
         }
     }
 
-    va_end(ap);
-    return result;
+    return ec;
 }
 
 ECode String::RealAppend(const char* other, Int32 numOfBytes)
@@ -927,6 +934,20 @@ String String::ToUpperCase(Int32 offset, Int32 numOfChars) const
     }
 
     return String(*newChars);
+}
+
+//---- Format ----
+String String::Format(const char* fmt, ...)
+{
+    String retStr("");
+
+    va_list ap;
+    va_start(ap, fmt);
+
+    retStr.VAppendFormat(fmt, ap);
+
+    va_end(ap);
+    return retStr;
 }
 
 //---- Compare ----

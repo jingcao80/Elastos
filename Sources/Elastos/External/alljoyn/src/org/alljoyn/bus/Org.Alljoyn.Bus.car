@@ -71,6 +71,12 @@ module
         interface IBusAttachment;
     }
 
+    class CBusListener {
+        constructor();
+
+        interface IBusListener;
+    }
+
     class CSessionOpts {
         constructor();
 
@@ -81,6 +87,15 @@ module
             [in] Int16 transports);
 
         interface ISessionOpts;
+    }
+
+    class CMutableInteger16Value {
+        constructor();
+
+        constructor(
+            [in] Int16 v);
+
+        interface IMutableInteger16Value;
     }
 
     class CMutableInteger32Value {

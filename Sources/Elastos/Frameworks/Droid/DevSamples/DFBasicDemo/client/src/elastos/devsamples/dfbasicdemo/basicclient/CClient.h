@@ -1,11 +1,11 @@
 
-#ifndef __ELASTOS_DEVSAMPLES_DFBASICDEMO_CCLIENT_H__
-#define __ELASTOS_DEVSAMPLES_DFBASICDEMO_CCLIENT_H__
+#ifndef __ELASTOS_DEVSAMPLES_DFBASICDEMO_BASICCLIENT_CCLIENT_H__
+#define __ELASTOS_DEVSAMPLES_DFBASICDEMO_BASICCLIENT_CCLIENT_H__
 
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "_Elastos_DevSamples_DFBasicDemo_CClient.h"
+#include "_Elastos_DevSamples_DFBasicDemo_BasicClient_CClient.h"
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/core/Object.h>
@@ -19,6 +19,8 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::Widget::IArrayAdapter;
 using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::IListView;
@@ -34,6 +36,7 @@ using Org::Alljoyn::Bus::SessionListener;
 namespace Elastos {
 namespace DevSamples {
 namespace DFBasicDemo {
+namespace BasicClient {
 
 CarClass(CClient)
     , public Activity
@@ -166,9 +169,30 @@ private:
 public:
     CARAPI constructor();
 
+    // @Override
+    CARAPI OnCreateOptionsMenu(
+        /* [in] */ IMenu* menu,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI OnOptionsItemSelected(
+        /* [in] */ IMenuItem* item,
+        /* [out] */ Boolean* result);
+
 protected:
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
+
+    CARAPI OnDestroy();
+
+private:
+    CARAPI_(void) LogStatus(
+        /* [in] */ const String& msg,
+        /* [in] */ ECode status);
+
+    CARAPI_(void) LogException(
+        /* [in] */ const String& msg,
+        /* [in] */ ECode ex);
 
 private:
     static const Int32 MESSAGE_PING = 1;
@@ -182,7 +206,7 @@ private:
     AutoPtr<IEditText> mEditText;
     AutoPtr<IArrayAdapter> mListViewArrayAdapter;
     AutoPtr<IListView> mListView;
-    // private Menu menu;
+    AutoPtr<IMenu> mMenu;
 
     /* Handler used to make calls to AllJoyn methods. See onCreate(). */
     AutoPtr<BusHandler> mBusHandler;
@@ -192,6 +216,7 @@ private:
     AutoPtr<IHandler> mHandler;
 };
 
+} // namespace BasicClient
 } // namespace DFBasicDemo
 } // namespace DevSamples
 } // namespace Elastos

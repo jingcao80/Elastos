@@ -6,7 +6,11 @@ module
     namespace Bus {
 
     interface IMutableInteger16Value {
+        GetValue(
+            [out] Int16* value);
 
+        SetValue(
+            [in] Int16 value);
     }
 
     interface IMutableInteger32Value {
