@@ -27,6 +27,7 @@ SOURCES += NativeApi.cpp
 SOURCES += NativeAuthListenerInternal.cpp
 SOURCES += NativeBusAttachment.cpp
 SOURCES += NativeBusListener.cpp
+SOURCES += NativeBusObject.cpp
 SOURCES += NativeKeyStoreListener.cpp
 SOURCES += NativeMessageContext.cpp
 SOURCES += NativePendingAsyncJoin.cpp

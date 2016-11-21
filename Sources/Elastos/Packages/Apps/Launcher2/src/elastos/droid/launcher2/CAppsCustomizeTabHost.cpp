@@ -314,7 +314,7 @@ ECode CAppsCustomizeTabHost::OnFinishInflate()
 
     if (tabs == NULL || mAppsCustomizePane == NULL) {
         //throw new Resources.NotFoundException();
-        Slogger::E(LOG_TAG, "Resources.NotFoundException");
+        Slogger::E(TAG, "Resources.NotFoundException");
         return E_RESOURCES_NOT_FOUND_EXCEPTION;
     }
 

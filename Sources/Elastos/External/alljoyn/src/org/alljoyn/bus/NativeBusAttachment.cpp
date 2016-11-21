@@ -3,6 +3,7 @@
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
+#include "org/alljoyn/bus/NativeBusObject.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -261,7 +262,187 @@ QStatus NativeBusAttachment::RegisterBusObject(
     /* [in] */ const String& desc,
     /* [in] */ ITranslator* translator)
 {
+    AutoLock lock1(gBusObjectMapLock);
 
+    AutoLock lock2(mBaCommonLock);
+
+    /*
+     * It is a programming error to register any bus object with a given bus
+     * attachment multiple times.
+     */
+    if (IsLocalBusObject(busObject)) {
+        return ER_BUS_OBJ_ALREADY_EXISTS;
+    }
+
+    if (busObject == NULL) return ER_FAIL;
+
+    /*
+     * It is a programming error to register the same Java Bus Object with
+     * multiple bus attachments.  It looks like it should be possible from
+     * the top, but that is not the case.
+     */
+    NativeBusObject* ntBusObject = GetBackingObject(busObject);
+    if (ntBusObject) {
+        return ER_BUS_OBJ_ALREADY_EXISTS;
+    }
+    else {
+        ntBusObject = new NativeBusObject(this, objPath, busObject);
+        QStatus status = ntBusObject->AddInterfaces(busInterfaces);
+        if (status != ER_OK) {
+            delete ntBusObject;
+            return ER_FAIL;
+        }
+        ntBusObject->SetDescriptions(langTag, desc, translator);
+
+        NewRefBackingObject(busObject, ntBusObject);
+    }
+
+    /*
+     * After we enter this call, AllJoyn has its hands on the bus object and
+     * calls in can start flowing.
+     */
+    QStatus status = BusAttachment::RegisterBusObject(*ntBusObject, secure);
+    if (status != ER_OK) {
+        /*
+         * AllJoyn balked at us for some reason.  As a result we really don't
+         * need to have a hold on any of the objects we've acquired references
+         * to or created.  If we created the C++ backing object, we'll get
+         * responsibility for its disposition from DecRefBackingObject.
+         * release our global reference to that as well.
+         */
+        NativeBusObject* cppObject = DecRefBackingObject(busObject);
+        if (cppObject) {
+            delete cppObject;
+            cppObject = NULL;
+        }
+    }
+    else {
+        /*
+         * The registration is successful. Put the global ref in the internal
+         * list of busobjects registered to this the busattachment.
+         */
+        mBusObjects.PushBack(busObject);
+    }
+
+    return status;
+}
+
+void NativeBusAttachment::UnregisterBusObject(
+    /* [in] */ IBusObject* busObject)
+{
+    AutoLock lock1(gBusObjectMapLock);
+
+    AutoLock lock2(mBaCommonLock);
+
+    /*
+     * It is a programming error to 1) register a Bus Object on one Bus
+     * Attachment and unregister it on another; 2) unregister a Bus Object that
+     * has never been regsitered with the given Bus Attachment; and 3)
+     * unregister a Bus Object multiple times on a given Bus Attachment.  All of
+     * these cases are caught by making sure the provided Java Bus Object is
+     * currently in the list of Java Objects associated with this bus
+     * Attachment.
+     */
+    if (!IsLocalBusObject(busObject)) {
+        Logger::E("NativeBusAttachment", "UnregisterBusObject(): No existing Bus Object");
+        return;
+    }
+
+    NativeBusObject* cppObject = GetBackingObject(busObject);
+    if (cppObject == NULL) {
+        Logger::E("NativeBusAttachment", "UnregisterBusObject(): No existing Backing Object");
+        return;
+    }
+
+    /*
+     * As soon as this call completes, AllJoyn will not make any further
+     * calls into the object, so we can safely get rid of it, and we can
+     * release our hold on the corresponding Java object and allow it to
+     * be garbage collected.
+     */
+    BusAttachment::UnregisterBusObject(*cppObject);
+
+    /*
+     * AllJoyn doesn't have its grubby little hands on the C++ Object any
+     * more.  As a result we shouldn't have a hold on any of the objects
+     * we've acquired to support the plumbing.
+     *
+     * Just because we don't need the C++ object doesn't mean that other
+     * bus attachments don't need it, so we need to pay attention to the
+     * reference counting mechanism.  If DecRefBackingObject returns a
+     * pointer to the object, we
+     */
+    AutoPtr<IBusObject> jo = GetGlobalRefForObject(busObject);
+
+    NativeBusObject* cppObjectToDelete = DecRefBackingObject(jo);
+    if (cppObjectToDelete) {
+        /*
+         * The object we delete had better be the object we just told AllJoyn
+         * about.
+         */
+        assert(cppObjectToDelete == cppObject);
+        delete cppObject;
+        cppObject = NULL;
+    }
+
+    /*
+     * AllJoyn shouldn't be remembering the Java Bus Object as a bus
+     * object associated with this bus attachment.  We've now changed
+     * the structure of the busObjects list so the iterator is
+     * invalid, so mark it as such.
+     */
+    ForgetLocalBusObject(jo);
+}
+
+template <typename T>
+QStatus NativeBusAttachment::RegisterSignalHandler(
+    /* [in] */ const char* ifaceName,
+    /* [in] */ const char* signalName,
+    /* [in] */ IInterface* signalHandler,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ const char* ancillary)
+{
+    AutoLock lock(mBaCommonLock);
+
+    if (signalHandler == NULL) return ER_FAIL;
+
+    /*
+     * Create the C++ object that backs the Java signal handler object.
+     */
+    NativeSignalHandler* ntSignalHandler = new T(signalHandler, method);
+    if (ntSignalHandler == NULL) return ER_FAIL;
+
+    /*
+     * Wire the C++ signal handler to the Java signal handler and if the
+     * operation was successful, remember both the Java object and the C++
+     * object.  If it didn't work then we might as well forget them both.
+     */
+    QStatus status = ntSignalHandler->Register(*this, ifaceName, signalName, ancillary);
+    if (ER_OK == status) {
+        mSignalHandlers.PushBack(Pair<AutoPtr<IInterface>, NativeSignalHandler*>(signalHandler, ntSignalHandler));
+    }
+    else {
+        delete ntSignalHandler;
+    }
+
+    return status;
+}
+
+void NativeBusAttachment::UnregisterSignalHandler(
+    /* [in] */ IInterface* signalHandler,
+    /* [in] */ IMethodInfo* method)
+{
+    AutoLock lock(mBaCommonLock);
+
+    for (Vector<Pair<AutoPtr<IInterface>, NativeSignalHandler*> >::Iterator i = mSignalHandlers.Begin();
+            i != mSignalHandlers.End(); ++i) {
+        if ((*i).mSecond->IsSameObject(signalHandler, method)) {
+            (*i).mSecond->Unregister(*this);
+            delete ((*i).mSecond);
+            mSignalHandlers.Erase(i);
+            break;
+        }
+    }
 }
 
 } // namespace Bus
