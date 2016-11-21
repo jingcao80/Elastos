@@ -1,8 +1,8 @@
 
 #include "BufferedInputStream.h"
-#include "AutoLock.h"
-
 #include <elastos/core/AutoLock.h>
+#include <cutils/log.h>
+
 using Elastos::Core::AutoLock;
 
 namespace Elastos {

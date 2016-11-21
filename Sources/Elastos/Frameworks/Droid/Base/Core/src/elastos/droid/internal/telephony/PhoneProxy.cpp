@@ -210,14 +210,14 @@ void PhoneProxy::Logd(
     /* [in] */ String msg)
 {
     // Rlog::D(LOG_TAG, "[PhoneProxy] %s", msg);
-    Logger::D(LOG_TAG, "TODO [PhoneProxy] %s", msg.string());
+    Logger::D("PhoneProxy", "TODO [PhoneProxy] %s", msg.string());
 }
 
 void PhoneProxy::Loge(
     /* [in] */ String msg)
 {
     // Rlog::E(LOG_TAG, "[PhoneProxy] %s", msg);
-    Logger::E(LOG_TAG, "TODO [PhoneProxy] %s", msg.string());
+    Logger::E("PhoneProxy", "TODO [PhoneProxy] %s", msg.string());
 }
 
 void PhoneProxy::PhoneObjectUpdater(

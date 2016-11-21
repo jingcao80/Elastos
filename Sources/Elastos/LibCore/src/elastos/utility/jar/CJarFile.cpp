@@ -5,6 +5,7 @@
 #include "CStreams.h"
 #include "CFile.h"
 #include <elastos/utility/etl//List.h>
+#include <cutils/log.h>
 
 using Elastos::Utility::Etl::List;
 using Elastos::IO::FilterInputStream;

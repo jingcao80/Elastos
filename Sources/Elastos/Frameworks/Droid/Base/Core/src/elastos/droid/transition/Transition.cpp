@@ -494,7 +494,7 @@ ECode Transition::CreateAnimators(
     /* [in] */ IArrayList* endValuesList)
 {
     if (DBG) {
-        Logger::D(LOG_TAG, "createAnimators() for %p", this);
+        Logger::D(TAG, "createAnimators() for %p", this);
     }
     AutoPtr<IArrayMap> runningAnimators = GetRunningAnimators();
     Int64 minStartDelay = Elastos::Core::Math::INT64_MAX_VALUE;
@@ -740,7 +740,7 @@ AutoPtr<IArrayMap> Transition::GetRunningAnimators()
 ECode Transition::RunAnimators()
 {
     if (DBG) {
-        Logger::D(LOG_TAG, "runAnimators() on %p", this);
+        Logger::D(TAG, "runAnimators() on %p", this);
     }
     Start();
     AutoPtr<IArrayMap> runningAnimators = GetRunningAnimators();
@@ -753,7 +753,7 @@ ECode Transition::RunAnimators()
         it->GetNext((IInterface**)&p);
         AutoPtr<IAnimator> anim = IAnimator::Probe(p);
         if (DBG) {
-            Logger::D(LOG_TAG, "  anim: %p", anim.Get());
+            Logger::D(TAG, "  anim: %p", anim.Get());
         }
         Boolean bContainsKey = FALSE;
         if ((IMap::Probe(runningAnimators)->ContainsKey(anim, &bContainsKey), bContainsKey)) {
@@ -1433,13 +1433,13 @@ ECode Transition::PlayTransition(
                     Boolean bRun = FALSE, bStart = FALSE;
                     if ((anim->IsRunning(&bRun), bRun) || (anim->IsStarted(&bStart), bStart)) {
                         if (DBG) {
-                            Logger::D(LOG_TAG, "Canceling anim %p", anim.Get());
+                            Logger::D(TAG, "Canceling anim %p", anim.Get());
                         }
                         anim->Cancel();
                     }
                     else {
                         if (DBG) {
-                            Logger::D(LOG_TAG, "removing anim from info list: %p", anim.Get());
+                            Logger::D(TAG, "removing anim from info list: %p", anim.Get());
                         }
                         IMap::Probe(runningAnimators)->Remove(anim);
                     }
@@ -1526,7 +1526,7 @@ Boolean Transition::IsValueChanged(
         changed = !Object::Equals(oldValue, newValue);
     }
     if (DBG && changed) {
-        Logger::D(LOG_TAG, "Transition.playTransition: "
+        Logger::D(TAG, "Transition.playTransition: "
                 "oldValue != newValue for %s"
                 ": old, new = %p, %p", (const char*)key, oldValue.Get(), newValue.Get());
     }

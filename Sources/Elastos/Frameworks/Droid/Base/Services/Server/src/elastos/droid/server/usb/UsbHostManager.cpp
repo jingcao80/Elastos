@@ -489,7 +489,7 @@ Int32 UsbHostManager::usb_device_added(const char* devname, void* client_data)
 
     struct usb_device *device = usb_device_open(devname);
     if (!device) {
-        ALOGE("usb_device_open failed\n");
+        Slogger::E(TAG, "usb_device_open failed\n");
         return 0;
     }
 

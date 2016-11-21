@@ -193,7 +193,7 @@ ECode IAccessibilityServiceClientWrapper::ExecuteMessage(
         }
 
         default :
-            Logger::W(LOG_TAG, "Unknown message type %d", what);
+            Logger::W("IAccessibilityServiceClientWrapper", "Unknown message type %d", what);
             return NOERROR;
     }
     return NOERROR;

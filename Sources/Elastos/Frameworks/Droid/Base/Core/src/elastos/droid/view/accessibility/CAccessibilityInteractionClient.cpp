@@ -169,14 +169,14 @@ ECode CAccessibilityInteractionClient::GetWindow(
         sAccessibilityCache->GetWindow(accessibilityWindowId, (IAccessibilityWindowInfo**)&window);
         if (window != NULL) {
             if (DEBUG) {
-                Slogger::I(LOG_TAG, "Window cache hit");
+                Slogger::I("CAccessibilityInteractionClient", "Window cache hit");
             }
             *info = window;
             REFCOUNT_ADD(*info);
             return NOERROR;
         }
         if (DEBUG) {
-            Slogger::I(LOG_TAG, "Window cache miss");
+            Slogger::I("CAccessibilityInteractionClient", "Window cache miss");
         }
         connection->GetWindow(accessibilityWindowId, (IAccessibilityWindowInfo**)&window);
         if (window != NULL) {
@@ -188,11 +188,11 @@ ECode CAccessibilityInteractionClient::GetWindow(
     }
     else {
         if (DEBUG) {
-            Slogger::W(LOG_TAG, "No connection for connection id: %d", connectionId);
+            Slogger::W("CAccessibilityInteractionClient", "No connection for connection id: %d", connectionId);
         }
     }
     // } catch (RemoteException re) {
-    //     Log.e(LOG_TAG, "Error while calling remote getWindow", re);
+    //     Log.e("CAccessibilityInteractionClient", "Error while calling remote getWindow", re);
     // }
     return NOERROR;
 }
@@ -211,14 +211,14 @@ ECode CAccessibilityInteractionClient::GetWindows(
         sAccessibilityCache->GetWindows((IList**)&windows);
         if (windows != NULL) {
             if (DEBUG) {
-                Slogger::I(LOG_TAG, "Windows cache hit");
+                Slogger::I("CAccessibilityInteractionClient", "Windows cache hit");
             }
             *list = windows;
             REFCOUNT_ADD(*list);
             return NOERROR;
         }
         if (DEBUG) {
-            Slogger::I(LOG_TAG, "Windows cache miss");
+            Slogger::I("CAccessibilityInteractionClient", "Windows cache miss");
         }
         connection->GetWindows((IList**)&windows);
         if (windows != NULL) {
@@ -237,11 +237,11 @@ ECode CAccessibilityInteractionClient::GetWindows(
     }
     else {
         if (DEBUG) {
-            Slogger::W(LOG_TAG, "No connection for connection id: %d", connectionId);
+            Slogger::W("CAccessibilityInteractionClient", "No connection for connection id: %d", connectionId);
         }
     }
     // } catch (RemoteException re) {
-    //     Log.e(LOG_TAG, "Error while calling remote getWindows", re);
+    //     Log.e("CAccessibilityInteractionClient", "Error while calling remote getWindows", re);
     // }
     AutoPtr<ICollections> collections;
     CCollections::AcquireSingleton((ICollections**)&collections);
@@ -261,7 +261,7 @@ ECode CAccessibilityInteractionClient::FindAccessibilityNodeInfoByAccessibilityI
 
     if ((prefetchFlags & IAccessibilityNodeInfo::FLAG_PREFETCH_SIBLINGS) != 0
             && (prefetchFlags & IAccessibilityNodeInfo::FLAG_PREFETCH_PREDECESSORS) == 0) {
-        Slogger::I(LOG_TAG, "FLAG_PREFETCH_SIBLINGS requires FLAG_PREFETCH_PREDECESSORS");
+        Slogger::I("CAccessibilityInteractionClient", "FLAG_PREFETCH_SIBLINGS requires FLAG_PREFETCH_PREDECESSORS");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("FLAG_PREFETCH_SIBLINGS"
         //     + " requires FLAG_PREFETCH_PREDECESSORS");
@@ -276,14 +276,14 @@ ECode CAccessibilityInteractionClient::FindAccessibilityNodeInfoByAccessibilityI
             sAccessibilityCache->GetNode(accessibilityWindowId, accessibilityNodeId, (IAccessibilityNodeInfo**)&cachedInfo);
             if (cachedInfo != NULL) {
                 if (DEBUG) {
-                    Slogger::I(LOG_TAG, "Node cache hit");
+                    Slogger::I("CAccessibilityInteractionClient", "Node cache hit");
                 }
                 *info = cachedInfo;
                 REFCOUNT_ADD(*info);
                 return NOERROR;
             }
             if (DEBUG) {
-                Slogger::I(LOG_TAG, "Node cache miss");
+                Slogger::I("CAccessibilityInteractionClient", "Node cache miss");
             }
         }
 
@@ -612,11 +612,11 @@ ECode CAccessibilityInteractionClient::ComputeClickPointInScreen(
     }
     else {
         if (DEBUG) {
-            Slogger::W(LOG_TAG, "No connection for connection id: %d", connectionId);
+            Slogger::W("CAccessibilityInteractionClient", "No connection for connection id: %d", connectionId);
         }
     }
     // } catch (RemoteException re) {
-    //     Log.w(LOG_TAG, "Error while calling remote computeClickPointInScreen", re);
+    //     Log.w("CAccessibilityInteractionClient", "Error while calling remote computeClickPointInScreen", re);
     // }
     return NOERROR;
 }

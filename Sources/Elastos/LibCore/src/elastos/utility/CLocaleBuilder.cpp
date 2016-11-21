@@ -6,6 +6,7 @@
 #include "CString.h"
 #include "CChar32.h"
 #include "CoreUtils.h"
+#include <cutils/log.h>
 
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;

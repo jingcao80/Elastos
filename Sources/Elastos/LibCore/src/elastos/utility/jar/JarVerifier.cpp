@@ -8,6 +8,7 @@
 #include "security/CMessageDigestHelper.h"
 #include "utility/etl/List.h"
 #include "org/apache/harmony/security/utils/CJarUtils.h"
+#include <cutils/log.h>
 
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;

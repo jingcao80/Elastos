@@ -179,6 +179,8 @@ private:
     CARAPI_(void) Destroy();
 
 private:
+    friend class NativeBusAttachment;
+
     /**
      * The opaque pointer to the underlying C++ object which is actually tied
      * to the AllJoyn code.

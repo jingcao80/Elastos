@@ -124,7 +124,7 @@ TzData::TzData(
     // We didn't find any usable tzdata on disk, so let's just hard-code knowledge of "GMT".
     // This is actually implemented in TimeZone itself, so if this is the only time zone
     // we report, we won't be asked any more questions.
-    ALOGE("Couldn't find any tzdata!");
+    Logger::E("TzData", "Couldn't find any tzdata!");
     mVersion = String("missing");
     mZoneTab = String("# Emergency fallback data.\n");
     mIds = ArrayOf<String>::Alloc(1);

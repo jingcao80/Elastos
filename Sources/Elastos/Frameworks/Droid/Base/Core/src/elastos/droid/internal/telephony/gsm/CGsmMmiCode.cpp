@@ -217,16 +217,16 @@ ECode CGsmMmiCode::NewFromUssdUserInput(
 ECode CGsmMmiCode::ProcessSsData(
     /* [in] */ AsyncResult* data)
 {
-    Logger::D(LOG_TAG, "In processSsData");
+    Logger::D("CGsmMmiCode", "In processSsData");
 
     mIsSsInfo = TRUE;
     // try {
     AutoPtr<ISsData> ssData = ISsData::Probe(data->mResult);
     ParseSsData(ssData);
     // } catch (ClassCastException ex) {
-    //     Logger::E(LOG_TAG, "Class Cast Exception in parsing SS Data : " + ex);
+    //     Logger::E("CGsmMmiCode", "Class Cast Exception in parsing SS Data : " + ex);
     // } catch (NullPointerException ex) {
-    //     Logger::E(LOG_TAG, "Null Pointer Exception in parsing SS Data : " + ex);
+    //     Logger::E("CGsmMmiCode", "Null Pointer Exception in parsing SS Data : " + ex);
     // }
     return NOERROR;
 }
@@ -241,7 +241,7 @@ ECode CGsmMmiCode::ParseSsData(
     // CommandException::FromRilErrno(ssData->mResult, (ICommandException**)&ex);
     mSc = GetScStringFromScType(ssData->mServiceType);
     mAction = GetActionStringFromReqType(ssData->mRequestType);
-    // Logger::D(LOG_TAG, "parseSsData msc = " + mSc + ", action = " + mAction + ", ex = " + ex);
+    // Logger::D("CGsmMmiCode", "parseSsData msc = " + mSc + ", action = " + mAction + ", ex = " + ex);
 
     Boolean b1, b2, b3;
 // TODO: Need ServiceType::isTypeUnConditional
@@ -263,13 +263,13 @@ ECode CGsmMmiCode::ParseSsData(
                         ssData->mRequestType == SS_REGISTRATION) &&
                         IsServiceClassVoiceorNone(ssData->mServiceClass));
 
-                Logger::D(LOG_TAG, "setVoiceCallForwardingFlag cffEnabled: %d", cffEnabled);
+                Logger::D("CGsmMmiCode", "setVoiceCallForwardingFlag cffEnabled: %d", cffEnabled);
                 if (((CGSMPhone*)mPhone.Get())->mIccRecords != NULL) {
                     mIccRecords->SetVoiceCallForwardingFlag(1, cffEnabled, String(NULL));
-                    Logger::D(LOG_TAG, "setVoiceCallForwardingFlag done from SS Info.");
+                    Logger::D("CGsmMmiCode", "setVoiceCallForwardingFlag done from SS Info.");
                 }
                 else {
-                    Logger::E(LOG_TAG, "setVoiceCallForwardingFlag aborted. sim records is null.");
+                    Logger::E("CGsmMmiCode", "setVoiceCallForwardingFlag aborted. sim records is null.");
                 }
             }
             AutoPtr<IArrayOf> iArray;
@@ -282,7 +282,7 @@ ECode CGsmMmiCode::ParseSsData(
         }
         case SS_INTERROGATION: {
             if (b2) {
-                Logger::D(LOG_TAG, "CLIR INTERROGATION");
+                Logger::D("CGsmMmiCode", "CLIR INTERROGATION");
                 AutoPtr<IArrayOf> iArray;
                 CArrayOf::New(EIID_IInteger32, ssData->mSsInfo->GetLength(), (IArrayOf**)&iArray);
                 for (Int32 i = 0; i < ssData->mSsInfo->GetLength(); i++) {
@@ -291,7 +291,7 @@ ECode CGsmMmiCode::ParseSsData(
                 OnGetClirComplete(new AsyncResult(NULL, iArray, IThrowable::Probe(ex)));
             }
             else if (b3) {
-                Logger::D(LOG_TAG, "CALL FORWARD INTERROGATION");
+                Logger::D("CGsmMmiCode", "CALL FORWARD INTERROGATION");
                 AutoPtr<IArrayOf> iArray;
                 CArrayOf::New(EIID_ICallForwardInfo, ssData->mCfInfo->GetLength(), (IArrayOf**)&iArray);
                 for (Int32 i = 0; i < ssData->mCfInfo->GetLength(); i++) {
@@ -310,7 +310,7 @@ ECode CGsmMmiCode::ParseSsData(
             break;
         }
         default:
-            Logger::E(LOG_TAG, "Invaid requestType in SSData : " + ssData->mRequestType);
+            Logger::E("CGsmMmiCode", "Invaid requestType in SSData : " + ssData->mRequestType);
             break;
     }
     return NOERROR;
@@ -583,7 +583,7 @@ ECode CGsmMmiCode::ProcessCode()
     // try {
     Boolean b;
     if (IsShortCode(&b), b) {
-        Logger::D(LOG_TAG, "IsShortCode");
+        Logger::D("CGsmMmiCode", "IsShortCode");
         // These just get treated as USSD.
         SendUssd(mDialingNumber);
     }
@@ -593,7 +593,7 @@ ECode CGsmMmiCode::ProcessCode()
         return E_RUNTIME_EXCEPTION;
     }
     else if (mSc != NULL && mSc.Equals(SC_CLIP)) {
-        Logger::D(LOG_TAG, "is CLIP");
+        Logger::D("CGsmMmiCode", "is CLIP");
         if (IsInterrogate(&b), b) {
             AutoPtr<IMessage> msg;
             ObtainMessage(EVENT_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
@@ -605,7 +605,7 @@ ECode CGsmMmiCode::ProcessCode()
         }
     }
     else if (mSc != NULL && mSc.Equals(SC_CLIR)) {
-        Logger::D(LOG_TAG, "is CLIR");
+        Logger::D("CGsmMmiCode", "is CLIR");
         if (IsActivate(&b), b) {
             AutoPtr<IMessage> msg;
             ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
@@ -627,7 +627,7 @@ ECode CGsmMmiCode::ProcessCode()
         }
     }
     else if (IsServiceCodeCallForwarding(mSc, &b), b) {
-        Logger::D(LOG_TAG, "is CF");
+        Logger::D("CGsmMmiCode", "is CF");
 
         String dialingNumber = mSia;
         Int32 serviceClass;
@@ -683,7 +683,7 @@ ECode CGsmMmiCode::ProcessCode()
                 ((cfAction == ICommandsInterface::CF_ACTION_ENABLE) ||
                         (cfAction == ICommandsInterface::CF_ACTION_REGISTRATION)) ? 1 : 0;
 
-            Logger::D(LOG_TAG, "is CF setCallForward");
+            Logger::D("CGsmMmiCode", "is CF setCallForward");
             AutoPtr<IMessage> msg;
             ObtainMessage(EVENT_SET_CFF_COMPLETE, isSettingUnconditionalVoice,
                 isEnableDesired, TO_IINTERFACE(this), (IMessage**)&msg);
@@ -806,7 +806,7 @@ ECode CGsmMmiCode::ProcessCode()
                 HandlePasswordError(Elastos::Droid::R::string::needPuk);
             }
             else if (mUiccApplication != NULL) {
-                Logger::D(LOG_TAG, "process mmi service code using UiccApp sc=%s", mSc.string());
+                Logger::D("CGsmMmiCode", "process mmi service code using UiccApp sc=%s", mSc.string());
 
                 // We have an app and the pre-checks are OK
                 if (mSc.Equals(SC_PIN)) {
@@ -1219,7 +1219,7 @@ Boolean CGsmMmiCode::IsTwoDigitShortCode(
     /* [in] */ IContext* context,
     /* [in] */ const String& dialString)
 {
-    Logger::D(LOG_TAG, "isTwoDigitShortCode");
+    Logger::D("CGsmMmiCode", "isTwoDigitShortCode");
 
     if (dialString.IsNull() || dialString.GetLength() > 2) return FALSE;
 
@@ -1232,13 +1232,13 @@ Boolean CGsmMmiCode::IsTwoDigitShortCode(
 
     for (Int32 i = 0; i < sTwoDigitNumberPattern->GetLength(); i++) {
         String dialnumber = (*sTwoDigitNumberPattern)[i];
-        Logger::D(LOG_TAG, "Two Digit Number Pattern %s", dialnumber.string());
+        Logger::D("CGsmMmiCode", "Two Digit Number Pattern %s", dialnumber.string());
         if (dialString.Equals(dialnumber)) {
-            Logger::D(LOG_TAG, "Two Digit Number Pattern -TRUE");
+            Logger::D("CGsmMmiCode", "Two Digit Number Pattern -TRUE");
             return TRUE;
         }
     }
-    Logger::D(LOG_TAG, "Two Digit Number Pattern -FALSE");
+    Logger::D("CGsmMmiCode", "Two Digit Number Pattern -FALSE");
     return FALSE;
 }
 
@@ -1317,37 +1317,37 @@ AutoPtr<ICharSequence> CGsmMmiCode::GetErrorMessage(
         // ce->GetCommandError(&err);
 
         // if (err == CommandExceptionError_FDN_CHECK_FAILURE) {
-        //     Logger::I(LOG_TAG, "FDN_CHECK_FAILURE");
+        //     Logger::I("CGsmMmiCode", "FDN_CHECK_FAILURE");
         //     mContext->GetText(Elastos::Droid::R::string::mmiFdnError, (ICharSequence**)&cs);
         //     return cs;
         // }
         // else if (err == CommandExceptionError_USSD_MODIFIED_TO_DIAL) {
-        //     Logger::I(LOG_TAG, "USSD_MODIFIED_TO_DIAL");
+        //     Logger::I("CGsmMmiCode", "USSD_MODIFIED_TO_DIAL");
         //     mContext->GetText(Elastos::Droid::R::string::stk_cc_ussd_to_dial, (ICharSequence**)&cs);
         //     return cs;
         // }
         // else if (err == CommandExceptionError_USSD_MODIFIED_TO_SS) {
-        //     Logger::I(LOG_TAG, "USSD_MODIFIED_TO_SS");
+        //     Logger::I("CGsmMmiCode", "USSD_MODIFIED_TO_SS");
         //     mContext->GetText(Elastos::Droid::R::string::stk_cc_ussd_to_ss, (ICharSequence**)&cs);
         //     return cs;
         // }
         // else if (err == CommandExceptionError_USSD_MODIFIED_TO_USSD) {
-        //     Logger::I(LOG_TAG, "USSD_MODIFIED_TO_USSD");
+        //     Logger::I("CGsmMmiCode", "USSD_MODIFIED_TO_USSD");
         //     mContext->GetText(Elastos::Droid::R::string::stk_cc_ussd_to_ussd, (ICharSequence**)&cs);
         //     return cs;
         // }
         // else if (err == CommandExceptionError_SS_MODIFIED_TO_DIAL) {
-        //     Logger::I(LOG_TAG, "SS_MODIFIED_TO_DIAL");
+        //     Logger::I("CGsmMmiCode", "SS_MODIFIED_TO_DIAL");
         //     mContext->GetText(Elastos::Droid::R::string::stk_cc_ss_to_dial, (ICharSequence**)&cs);
         //     return cs;
         // }
         // else if (err == CommandExceptionError_SS_MODIFIED_TO_USSD) {
-        //     Logger::I(LOG_TAG, "SS_MODIFIED_TO_USSD");
+        //     Logger::I("CGsmMmiCode", "SS_MODIFIED_TO_USSD");
         //     mContext->GetText(Elastos::Droid::R::string::stk_cc_ss_to_ussd, (ICharSequence**)&cs);
         //     return cs;
         // }
         // else if (err == CommandExceptionError_SS_MODIFIED_TO_SS) {
-        //     Logger::I(LOG_TAG, "SS_MODIFIED_TO_SS");
+        //     Logger::I("CGsmMmiCode", "SS_MODIFIED_TO_SS");
         //     mContext->GetText(Elastos::Droid::R::string::stk_cc_ss_to_ss, (ICharSequence**)&cs);
         //     return cs;
         // }
@@ -1432,11 +1432,11 @@ void CGsmMmiCode::OnSetComplete(
             //         Int32 attemptsRemaining;
             //         msg->GetArg1(&attemptsRemaining);
             //         if (attemptsRemaining <= 0) {
-            //             Logger::D(LOG_TAG, "onSetComplete: PUK locked, cancel as lock screen will handle this");
+            //             Logger::D("CGsmMmiCode", "onSetComplete: PUK locked, cancel as lock screen will handle this");
             //             mState = IMmiCodeState_CANCELLED;
             //         }
             //         else if (attemptsRemaining > 0) {
-            //             Logger::D(LOG_TAG, "onSetComplete: attemptsRemaining=%d", attemptsRemaining);
+            //             Logger::D("CGsmMmiCode", "onSetComplete: attemptsRemaining=%d", attemptsRemaining);
             //             AutoPtr<IResources> res;
             //             mContext->GetResources((IResources**)&res);
             //             String str;
@@ -1469,7 +1469,7 @@ void CGsmMmiCode::OnSetComplete(
             //     }
             // }
             // else if (err == CommandExceptionError_FDN_CHECK_FAILURE) {
-            //     Logger::I(LOG_TAG, "FDN_CHECK_FAILURE");
+            //     Logger::I("CGsmMmiCode", "FDN_CHECK_FAILURE");
             //     mContext->GetText(
             //         Elastos::Droid::R::string::mmiFdnError, (ICharSequence**)&cs);
             //     sb.Append(cs);

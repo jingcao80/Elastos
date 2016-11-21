@@ -10,6 +10,7 @@
 #include "CInflater.h"
 #include "charset/CModifiedUtf8.h"
 #include "Arrays.h"
+#include <cutils/log.h>
 
 using Elastos::Core::Math;
 using Elastos::IO::EIID_IInputStream;

@@ -4,7 +4,9 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     merge("../../../../car/org/alljoyn/bus/Exception.car");
+    merge("../../../../car/org/alljoyn/bus/AboutDataListener.car");
     merge("../../../../car/org/alljoyn/bus/AboutListener.car");
+    merge("../../../../car/org/alljoyn/bus/AboutObj.car");
     merge("../../../../car/org/alljoyn/bus/AuthListener.car");
     merge("../../../../car/org/alljoyn/bus/BusAttachment.car");
     merge("../../../../car/org/alljoyn/bus/BusListener.car");

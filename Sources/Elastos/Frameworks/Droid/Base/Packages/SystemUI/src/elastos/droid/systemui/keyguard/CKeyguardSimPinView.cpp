@@ -95,7 +95,7 @@ ECode CKeyguardSimPinView::MyCheckSimPin::MyRunnable2::Run()
             AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
             mHost->mSecurityMessageDisplay->SetMessage(cchar, TRUE);
         }
-        if (DEBUG) Logger::D(LOG_TAG, "verifyPasswordAndUnlock "
+        if (DEBUG) Logger::D(TAG, "verifyPasswordAndUnlock "
                 " CheckSimPin.onSimCheckResponse: %d attemptsRemaining=%d",
                 mResult, mAttemptsRemaining);
         mHost->ResetPasswordText(TRUE /* animate */);
@@ -166,7 +166,7 @@ String CKeyguardSimPinView::GetPinPasswordErrorMessage(
         GetContext((IContext**)&context);
         context->GetString(R::string::kg_password_pin_failed, &displayMessage);
     }
-    if (DEBUG) Logger::D(LOG_TAG, "getPinPasswordErrorMessage: attemptsRemaining=%d displayMessage=%d",
+    if (DEBUG) Logger::D(TAG, "getPinPasswordErrorMessage: attemptsRemaining=%d displayMessage=%d",
             attemptsRemaining + displayMessage);
     return displayMessage;
 }

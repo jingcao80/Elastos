@@ -5,6 +5,7 @@
 #include "CLocale.h"
 #include "CSimpleDateFormat.h"
 #include "CParsePosition.h"
+#include <cutils/log.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IDate;

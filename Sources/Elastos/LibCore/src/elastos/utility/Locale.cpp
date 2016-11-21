@@ -14,6 +14,7 @@
 #include "CChar32.h"
 #include "CArrayList.h"
 #include "CoreUtils.h"
+#include <cutils/log.h>
 
 using Elastos::Core::IChar32;
 using Elastos::Core::CChar32;

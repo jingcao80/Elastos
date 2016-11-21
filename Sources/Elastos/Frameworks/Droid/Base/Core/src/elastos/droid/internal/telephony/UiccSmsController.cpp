@@ -953,7 +953,7 @@ ECode UiccSmsController::GetSmsCapacityOnIccForSubscriber(
 ECode UiccSmsController::Log(
     /* [in] */ String msg)
 {
-    Logger::D(LOG_TAG, "[UiccSmsController] %s", (const char*)msg);
+    Logger::D("UiccSmsController", "[UiccSmsController] %s", (const char*)msg);
     return NOERROR;
 }
 

@@ -4,6 +4,7 @@
 #include "JarURLConnection.h"
 #include "UriCodec.h"
 #include "CURL.h"
+#include <cutils/log.h>
 
 using Elastos::Core::ICloneable;
 using Libcore::Net::UriCodec;

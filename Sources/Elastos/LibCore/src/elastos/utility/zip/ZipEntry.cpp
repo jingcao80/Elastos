@@ -7,6 +7,7 @@
 #include "CZipEntry.h"
 #include "ZipFile.h"
 #include "Arrays.h"
+#include <cutils/log.h>
 
 using Libcore::IO::IStreams;
 using Libcore::IO::CStreams;

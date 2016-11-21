@@ -301,7 +301,7 @@ static void activity_callback(
     int count)
 {
     if (events == NULL || count <= 0) {
-        ALOGE("Invalid activity_callback. Count: %d, Events: %p", count, events);
+        Logger::E("ActivityRecognitionHardware", "Invalid activity_callback. Count: %d, Events: %p", count, events);
         return;
     }
 

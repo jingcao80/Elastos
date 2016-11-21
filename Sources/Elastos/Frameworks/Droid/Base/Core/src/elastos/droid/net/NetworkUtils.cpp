@@ -517,7 +517,7 @@ Boolean NetworkUtils::NativeRunDhcpCommon(
                 dns, server, &lease, vendorInfo, domains, mtu);
     }
     if (num != 0) {
-        ALOGD("dhcp_do_request failed : %s (%s)", nameStr, renew ? "renew" : "new");
+        Logger::D(TAG, "dhcp_do_request failed : %s (%s)", nameStr, renew ? "renew" : "new");
     }
 
     Boolean b;

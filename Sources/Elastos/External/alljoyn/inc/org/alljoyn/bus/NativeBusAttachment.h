@@ -38,7 +38,7 @@ public:
         /* [in] */ const char* connectArgs,
         /* [in] */ IKeyStoreListener* keyStoreListener,
         /* [in] */ const char* authMechanisms,
-        /* [in] */ IAuthListener* authListener,
+        /* [in] */ IAuthListenerInternal* authListener,
         /* [in] */ const char* keyStoreFileName,
         /* [in] */ Boolean isShared);
 
@@ -46,7 +46,7 @@ public:
 
     QStatus EnablePeerSecurity(
         /* [in] */ const char* authMechanisms,
-        /* [in] */ IAuthListener* authListener,
+        /* [in] */ IAuthListenerInternal* authListener,
         /* [in] */ const char* keyStoreFileName,
         /* [in] */ Boolean isShared);
 
@@ -160,7 +160,7 @@ public:
      * set, there must be a corresponding strong reference to the associated
      * Java Object set in jauthListenerRef.
      */
-    NativeAuthListener* mAuthListener;
+    NativeAuthListenerInternal* mAuthListener;
 
     /**
      * The single (optional) C++ backing class for JAboutObject. The aboutObj
@@ -175,7 +175,7 @@ public:
      * set, there must be a corresponding object pointer to an associated
      * C++ backing object set in authListener.
      */
-    AutoPtr<IAuthListener> mAuthListenerRef;
+    AutoPtr<IAuthListenerInternal> mAuthListenerRef;
 
     /**
      * A dedicated mutex to serialize access to the authListener,

@@ -14,6 +14,7 @@
 #include "CStreams.h"
 #include "elastos/core/UniquePtr.h"
 #include <ziparchive/zip_archive.h>
+#include <cutils/log.h>
 
 using Elastos::Core::UniquePtr;
 using Elastos::Core::CArrayOf;

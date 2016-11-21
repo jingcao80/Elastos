@@ -1,5 +1,6 @@
 
 #include "CSemaphore.h"
+#include <cutils/log.h>
 
 using Elastos::IO::EIID_ISerializable;
 using namespace Elastos::Utility::Concurrent::Locks;

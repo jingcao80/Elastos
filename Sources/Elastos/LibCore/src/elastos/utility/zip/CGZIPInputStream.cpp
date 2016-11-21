@@ -6,6 +6,7 @@
 #include "CCRC32.h"
 #include "CStreams.h"
 #include "CPushbackInputStream.h"
+#include <cutils/log.h>
 
 using Libcore::IO::Memory;
 using Libcore::IO::IStreams;

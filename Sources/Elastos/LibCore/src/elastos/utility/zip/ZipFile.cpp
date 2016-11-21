@@ -14,8 +14,9 @@
 #include "CString.h"
 #include "HeapBufferIterator.h"
 #include "CCloseGuardHelper.h"
-
 #include <elastos/core/AutoLock.h>
+#include <cutils/log.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Core::ICharSequence;

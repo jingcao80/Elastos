@@ -11,7 +11,24 @@ namespace Bus {
 
 class NativeKeyStoreListener : public ajn::KeyStoreListener
 {
+public:
+    NativeKeyStoreListener(
+        /* [in] */ IKeyStoreListener* listener);
 
+    ~NativeKeyStoreListener();
+
+    QStatus LoadRequest(
+        /* [in] */ ajn::KeyStore& keyStore);
+
+    QStatus StoreRequest(
+        /* [in] */ ajn::KeyStore& keyStore);
+
+private:
+    NativeKeyStoreListener(const NativeKeyStoreListener& other);
+    NativeKeyStoreListener& operator =(const NativeKeyStoreListener& other);
+
+private:
+    AutoPtr<IWeakReference> mKeyStoreListener;
 };
 
 } // namespace Bus

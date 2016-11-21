@@ -6,6 +6,7 @@
 #include "UrlUtils.h"
 #include "StringBuilder.h"
 #include "StringUtils.h"
+#include <cutils/log.h>
 
 namespace Elastos {
 namespace Net {

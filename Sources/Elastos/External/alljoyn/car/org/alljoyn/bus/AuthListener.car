@@ -1,12 +1,30 @@
 
 module
 {
+    using interface Elastos.Core.IInteger32;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
     interface ICredentials {
+        GetPassword(
+            [out, callee] ArrayOf<Byte>* password);
 
+        GetUserName(
+            [out] String* userName);
+
+        GetCertificateChain(
+            [out] String* certificateChain);
+
+        GetPrivateKey(
+            [out] String* privateKey);
+
+        GetLogonEntry(
+            [out, callee] ArrayOf<Byte>* logonEntry);
+
+        GetExpiration(
+            [out] IInteger32** expiration);
     }
 
     interface IAuthRequest {

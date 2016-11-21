@@ -18,6 +18,7 @@
 #include "unicode/tznames.h"
 #include "unicode/locid.h"
 #include "CLocale.h"
+#include <cutils/log.h>
 
 using Elastos::Core::CSystem;
 using Elastos::Core::CArrayOf;

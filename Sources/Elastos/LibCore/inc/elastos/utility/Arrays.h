@@ -9,12 +9,14 @@
 #include <elastos/utility/DualPivotQuicksort.h>
 #include <elastos/utility/ComparableTimSort.h>
 #include <elastos/utility/TimSort.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::IComparator;
 using Elastos::Core::IComparable;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IArrayOf;
 // using Elastos::IO::ISerializable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Utility {
@@ -801,7 +803,7 @@ ECode Arrays::BinarySearch(
 
     ECode ec = CheckBinarySearchBounds(startIndex, endIndex, array->GetLength());
     if (FAILED(ec)) {
-        ALOGE("Arrays::BinarySearch: error %08x, startIndex: %d, endIndex: %d, array length: %d",
+        Logger::E("Arrays", "BinarySearch: error %08x, startIndex: %d, endIndex: %d, array length: %d",
             ec, startIndex, endIndex, array->GetLength());
         return ec;
     }
@@ -879,7 +881,7 @@ ECode Arrays::BinarySearch(
 
     ECode ec = CheckBinarySearchBounds(startIndex, endIndex, array->GetLength());
     if (FAILED(ec)) {
-        ALOGE("Arrays::BinarySearch: error %08x, startIndex: %d, endIndex: %d, array length: %d",
+        Logger::E("Arrays", "BinarySearch: error %08x, startIndex: %d, endIndex: %d, array length: %d",
             ec, startIndex, endIndex, array->GetLength());
         return ec;
     }
@@ -892,7 +894,7 @@ ECode Arrays::BinarySearch(
         mid = (UInt32(lo + hi)) >> 1;
         comp = IComparable::Probe((*array)[mid]);
         if (comp == NULL) {
-            ALOGE("Arrays::BinarySearch: object at %d does not implement IComparable.", mid);
+            Logger::E("Arrays", "BinarySearch: object at %d does not implement IComparable.", mid);
         }
         assert(comp != NULL);
         comp->CompareTo(TO_IINTERFACE(value), &midValCmp);
@@ -1629,13 +1631,13 @@ ECode Arrays::CopyOfRange(
     VALIDATE_NOT_NULL(original)
 
     if (start > end) {
-        ALOGE("Arrays::CopyOfRange: error, E_ILLEGAL_ARGUMENT_EXCEPTION, start %d, end %d", start, end);
+        Logger::E("Arrays", "CopyOfRange: error, E_ILLEGAL_ARGUMENT_EXCEPTION, start %d, end %d", start, end);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Int32 originalLength = original->GetLength();
     if (start < 0 || start > originalLength) {
-        ALOGE("Arrays::CopyOfRange: error, E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, start %d, originalLength %d",
+        Logger::E("Arrays", "CopyOfRange: error, E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, start %d, originalLength %d",
             start, originalLength);
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -1656,7 +1658,7 @@ ECode Arrays::CopyOf(
     /* [out, callee] */ ArrayOf<T> ** result)
 {
     if (newLength < 0) {
-        ALOGE("Arrays::CopyOf: error, E_NAGATIVE_ARRAY_SIZE_EXCEPTION, newLength %d", newLength);
+        Logger::E("Arrays", "CopyOf: error, E_NAGATIVE_ARRAY_SIZE_EXCEPTION, newLength %d", newLength);
         return E_NAGATIVE_ARRAY_SIZE_EXCEPTION;
     }
 
@@ -1695,13 +1697,13 @@ ECode Arrays::CopyOfRange(
     VALIDATE_NOT_NULL(original)
 
     if (start > end) {
-        ALOGE("Arrays::CopyOfRange: error, E_ILLEGAL_ARGUMENT_EXCEPTION, start %d, end %d", start, end);
+        Logger::E("Arrays", "CopyOfRange: error, E_ILLEGAL_ARGUMENT_EXCEPTION, start %d, end %d", start, end);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Int32 originalLength = original->GetLength();
     if (start < 0 || start > originalLength) {
-        ALOGE("Arrays::CopyOfRange: error, E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, start %d, originalLength %d",
+        Logger::E("Arrays", "CopyOfRange: error, E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, start %d, originalLength %d",
             start, originalLength);
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -1725,7 +1727,7 @@ ECode Arrays::CopyOf(
     /* [out, callee] */ ArrayOf<U> ** result)
 {
     if (newLength < 0) {
-        ALOGE("Arrays::CopyOf: error, E_NAGATIVE_ARRAY_SIZE_EXCEPTION, newLength %d", newLength);
+        Logger::E("Arrays", "CopyOf: error, E_NAGATIVE_ARRAY_SIZE_EXCEPTION, newLength %d", newLength);
         return E_NAGATIVE_ARRAY_SIZE_EXCEPTION;
     }
 

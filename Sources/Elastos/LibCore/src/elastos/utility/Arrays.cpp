@@ -9,6 +9,7 @@
 #include "CDouble.h"
 #include "CString.h"
 #include "CArrayList.h"
+#include <cutils/log.h>
 
 using Elastos::Core::IByte;
 using Elastos::Core::CByte;

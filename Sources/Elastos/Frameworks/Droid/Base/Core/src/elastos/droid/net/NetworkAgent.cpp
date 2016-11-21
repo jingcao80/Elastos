@@ -264,7 +264,7 @@ ECode NetworkAgent::Log(
 {
     va_list ap;
     va_start(ap, fmt);
-    Logger::D(LOG_TAG, (String("NetworkAgent: ") + fmt).string(), ap);
+    Logger::D(mLOG_TAG, (String("NetworkAgent: ") + fmt).string(), ap);
     va_end(ap);
     return NOERROR;
 }

@@ -7,6 +7,7 @@
 #include "EmptyArray.h"
 #include "BlockGuard.h"
 #include "libcore/io/CStreams.h"
+#include <cutils/log.h>
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::BlockGuard;

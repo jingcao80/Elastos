@@ -404,7 +404,7 @@ ECode ScreenMagnifier::MagnificationController::SetMagnificationSpec(
     /* [in] */ IMagnificationSpec* spec)
 {
     if (DEBUG_SET_MAGNIFICATION_SPEC) {
-        Slogger::I(LOG_TAG, "Sending: %p", spec);
+        Slogger::I(TAG, "Sending: %p", spec);
     }
 
     Float scale, sx, sy;

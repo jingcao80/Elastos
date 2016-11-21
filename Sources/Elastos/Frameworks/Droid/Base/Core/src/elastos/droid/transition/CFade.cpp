@@ -94,7 +94,7 @@ ECode CFade::OnAppear(
     VALIDATE_NOT_NULL(result)
     if (DBG) {
         AutoPtr<IView> startView = (startValues != NULL) ? ((CTransitionValues*)startValues)->mView : NULL;
-        Logger::D(LOG_TAG, "Fade.onAppear: startView, startVis, endView, endVis = %p, %p",
+        Logger::D(TAG, "Fade.onAppear: startView, startVis, endView, endVis = %p, %p",
                 startView.Get(), view);
     }
     AutoPtr<IAnimator> p = CreateAnimation(view, 0, 1);

@@ -3,6 +3,7 @@
 
 #include <elastos/core/Object.h>
 #include <elastos/core/Math.h>
+#include <cutils/log.h>
 
 using Elastos::Core::Object;
 using Elastos::Core::IComparable;

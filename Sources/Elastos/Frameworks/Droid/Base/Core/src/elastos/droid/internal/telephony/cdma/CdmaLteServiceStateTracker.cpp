@@ -916,7 +916,7 @@ ECode CdmaLteServiceStateTracker::UpdatePhoneObject()
         ctx->GetResources((IResources**)&res);
         Int32 volteReplacementRat;
         res->GetInteger(R::integer::config_volte_replacement_rat, &volteReplacementRat);
-        Logger::D(LOG_TAG, "updatePhoneObject: volteReplacementRat=%d", volteReplacementRat);
+        Logger::D("CdmaLteServiceStateTracker", "updatePhoneObject: volteReplacementRat=%d", volteReplacementRat);
 
         if (voiceRat == IServiceState::RIL_RADIO_TECHNOLOGY_LTE &&
                 volteReplacementRat == IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) {
@@ -930,14 +930,14 @@ ECode CdmaLteServiceStateTracker::UpdatePhoneObject()
 ECode CdmaLteServiceStateTracker::Log(
     /* [in] */ const String& s)
 {
-    Logger::D(LOG_TAG, "[CdmaLteSST] %s", s.string());
+    Logger::D("CdmaLteServiceStateTracker", "[CdmaLteSST] %s", s.string());
     return NOERROR;
 }
 
 ECode CdmaLteServiceStateTracker::Loge(
     /* [in] */ const String& s)
 {
-    Logger::E(LOG_TAG, "[CdmaLteSST] %s", s.string());
+    Logger::E("CdmaLteServiceStateTracker", "[CdmaLteSST] %s", s.string());
     return NOERROR;
 }
 

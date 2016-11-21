@@ -4,6 +4,7 @@
 #include "CName.h"
 #include "CByteArrayOutputStream.h"
 #include "CAttributes.h"
+#include <cutils/log.h>
 
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;

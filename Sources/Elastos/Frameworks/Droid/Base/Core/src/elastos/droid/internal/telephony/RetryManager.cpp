@@ -196,8 +196,8 @@ ECode RetryManager::Configure(
                     }
                 }
                 else {
-                    Logger::E(LOG_TAG, String("Unrecognized configuration name value pair: ")
-                                    + (*strArray)[i]);
+                    Logger::E(LOGTAG, "Unrecognized configuration name value pair: %s",
+                            (*strArray)[i].string());
                     *result = FALSE;
                     return NOERROR;
                 }
@@ -410,7 +410,7 @@ AutoPtr<IPair> RetryManager::ParseNonNegativeInt(
         Boolean res = ValidateNonNegativeInt(name, value);
         CPair::New(CoreUtils::Convert(res), CoreUtils::Convert(value), (IPair**)&retVal);
     // } Catch (NumberFormatException e) {
-    //     Rlog->E(LOG_TAG, name + " bad value: " + stringValue, e);
+    //     Rlog->E(LOGTAG, name + " bad value: " + stringValue, e);
     //     retVal = new Pair<Boolean, Integer>(FALSE, 0);
     // }
     if (VDBG) {
@@ -432,14 +432,14 @@ Boolean RetryManager::ValidateNonNegativeInt(
 {
     Boolean retVal;
     if (value < 0) {
-        Logger::E(LOG_TAG, name + String(" bad value: is < 0"));
+        Logger::E(LOGTAG, name + String(" bad value: is < 0"));
         retVal = FALSE;
     }
     else {
         retVal = TRUE;
     }
     if (VDBG) {
-        Logger::D(LOG_TAG, String("validateNonNegative: ") + name
+        Logger::D(LOGTAG, String("validateNonNegative: ") + name
             + String(", ") + StringUtils::ToString(value)
             + String(", ") + StringUtils::ToString(retVal));
     }
@@ -466,7 +466,7 @@ Int32 RetryManager::NextRandomizationTime(
 void RetryManager::Log(
     /* [in] */ String s)
 {
-    Logger::D(LOG_TAG, String("[RM] ") + s);
+    Logger::D(LOGTAG, String("[RM] ") + s);
 }
 
 } // namespace Telephony

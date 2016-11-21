@@ -10,6 +10,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include "hardware/fused_location.h"
 #include "hardware_legacy/power.h"
+#include <cutils/log.h>
 
 using Elastos::Droid::Hardware::Location::EIID_IIFusedLocationHardware;
 using Elastos::Droid::Hardware::Location::IGeofenceHardware;

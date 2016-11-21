@@ -573,7 +573,7 @@ void CAccessibilityManager::TryConnectToServiceLocked()
     Int32 stateFlags;
     ECode ec = service->AddClient(mClient, mUserId, &stateFlags);
     if (FAILED(ec)) {
-        Logger::E(LOG_TAG, "AccessibilityManagerService is dead, 0x%08x", ec);
+        Logger::E(localLOG_TAG, "AccessibilityManagerService is dead, 0x%08x", ec);
     }
     SetStateLocked(stateFlags);
     mService = service;

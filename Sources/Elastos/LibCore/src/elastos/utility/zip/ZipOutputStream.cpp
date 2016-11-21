@@ -9,6 +9,7 @@
 #include "Arrays.h"
 #include "EmptyArray.h"
 #include <elastos/utility/etl/Algorithm.h>
+#include <cutils/log.h>
 
 using Elastos::Core::ISystem;
 using Elastos::IO::CByteArrayOutputStream;

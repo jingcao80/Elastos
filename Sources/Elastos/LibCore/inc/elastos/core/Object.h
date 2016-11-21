@@ -6,7 +6,6 @@
 #include <elastos/coredef.h>
 #include <elastos/core/NativeThread.h>
 #include <elastos/core/StringUtils.h>
-#include <utils/Log.h>
 
 using Elastos::Core::ISynchronize;
 using Elastos::Core::NativeObject;
@@ -368,7 +367,6 @@ Boolean Object::Equals(
 
     IObject* obj = (IObject*)lhs->Probe(EIID_IObject);
     if (obj == NULL) {
-        ALOGD("Waring: Object::Equals lhs object %p is not a IObject!", lhs);
         return FALSE;
     }
     Boolean isflag = FALSE;
@@ -390,7 +388,6 @@ Boolean Object::Equals(
 
     IObject* obj = (IObject*)lhs->Probe(EIID_IObject);
     if (obj == NULL) {
-        ALOGD("Waring: Object::Equals lhs object %p is not a IObject!", lhs);
         return FALSE;
     }
     Boolean isflag = FALSE;

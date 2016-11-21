@@ -29,6 +29,7 @@
 #include <pthread.h>
 #include <linux/in.h>
 #include <linux/in6.h>
+#include <cutils/log.h>
 
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::CAppOpsManagerHelper;

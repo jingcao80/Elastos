@@ -144,7 +144,7 @@ ECode CCrossfade::CreateAnimator(
     AutoPtr<IBitmapDrawable> endDrawable = IBitmapDrawable::Probe(eD);
     if (Transition::DBG) {
         Boolean b = FALSE;
-        Logger::D(LOG_TAG, "StartBitmap.sameAs(endBitmap) = %d for start, end: %p, %p",
+        Logger::D(TAG, "StartBitmap.sameAs(endBitmap) = %d for start, end: %p, %p",
                     (startBitmap->SameAs(endBitmap, &b), b), startBitmap.Get(), endBitmap.Get());
     }
     Boolean bSame = FALSE;
@@ -197,7 +197,7 @@ ECode CCrossfade::CreateAnimator(
             anim1 = ObjectAnimator::OfFloat(view, Elastos::Droid::View::View::ALPHA, arr);
         }
         if (Transition::DBG) {
-            Logger::D(LOG_TAG, "Crossfade: created anim %p for start, end values %p, %p",
+            Logger::D(TAG, "Crossfade: created anim %p for start, end values %p, %p",
                                 anim.Get(), startValues, endValues);
         }
         AutoPtr<AnimatorListenerAdapter_1> p = new AnimatorListenerAdapter_1(useParentOverlay,
@@ -220,7 +220,7 @@ ECode CCrossfade::CreateAnimator(
         if (mResizeBehavior == RESIZE_BEHAVIOR_SCALE &&
              !(startBounds->Equals(endBounds, &bEqual), bEqual)) {
             if (Transition::DBG) {
-                Logger::D(LOG_TAG, "animating from startBounds to endBounds: %p, %p",
+                Logger::D(TAG, "animating from startBounds to endBounds: %p, %p",
                         startBounds.Get(), endBounds.Get());
             }
             AutoPtr<ArrayOf<IInterface*> > vls = ArrayOf<IInterface*>::Alloc(2);
@@ -276,7 +276,7 @@ ECode CCrossfade::CaptureValues(
     if (Transition::DBG) {
         AutoPtr<IInterface> p;
         ctv->mValues->Get(pro_bounds, (IInterface**)&p);
-        Logger::D(LOG_TAG, "Captured bounds %p", p.Get());
+        Logger::D(TAG, "Captured bounds %p", p.Get());
     }
     Int32 w1 = 0, h1 = 0;
     view->GetWidth(&w1);

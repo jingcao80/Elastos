@@ -6,6 +6,7 @@
 #include "StringBuilder.h"
 #include "io/CFile.h"
 #include <cutils/properties.h>
+#include <cutils/log.h>
 
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;

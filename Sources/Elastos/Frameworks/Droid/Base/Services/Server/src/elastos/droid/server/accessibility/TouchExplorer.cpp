@@ -1906,7 +1906,7 @@ void TouchExplorer::SendMotionEvent(
     }
 
     if (DEBUG) {
-        Slogger::D(LOG_TAG, "Injecting event: %p, policyFlags=0x",
+        Slogger::D(LOCAL_LOG_TAG, "Injecting event: %p, policyFlags=0x",
                 event.Get()/*, StringUtils::ToHexString(policyFlags)*/);
     }
 
