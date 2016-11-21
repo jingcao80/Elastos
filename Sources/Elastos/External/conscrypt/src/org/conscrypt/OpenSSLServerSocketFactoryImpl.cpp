@@ -18,8 +18,7 @@ CAR_INTERFACE_IMPL_2(OpenSSLServerSocketFactoryImpl, Object, ISSLServerSocketFac
 ECode OpenSSLServerSocketFactoryImpl::constructor()
 {
     SSLParametersImpl::GetDefault((ISSLParametersImpl**)&mSslParameters);
-    assert(0 && "TODO");
-    // mSslParameters->SetUseClientMode(FALSE);
+    mSslParameters->SetUseClientMode(FALSE);
     return NOERROR;
 }
 
@@ -29,8 +28,7 @@ ECode OpenSSLServerSocketFactoryImpl::constructor(
     AutoPtr<IInterface> p;
     ICloneable::Probe(sslParameters)->Clone((IInterface**)&p);
     mSslParameters = ISSLParametersImpl::Probe(p);
-    assert(0 && "TODO");
-    // mSslParameters->SetUseClientMode(FALSE);
+    mSslParameters->SetUseClientMode(FALSE);
     return NOERROR;
 }
 
@@ -38,9 +36,7 @@ ECode OpenSSLServerSocketFactoryImpl::GetDefaultCipherSuites(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0 && "TODO");
-    // return mSslParameters->GetEnabledCipherSuites(result);
-    return NOERROR;
+    return mSslParameters->GetEnabledCipherSuites(result);
 }
 
 ECode OpenSSLServerSocketFactoryImpl::GetSupportedCipherSuites(

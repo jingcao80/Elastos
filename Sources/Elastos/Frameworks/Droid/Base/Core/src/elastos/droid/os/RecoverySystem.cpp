@@ -56,6 +56,7 @@ using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
 using Elastos::Security::Cert::CCertificateFactoryHelper;
+using Elastos::Security::CSignatureHelper;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::ISignature;
 using Elastos::Security::ISignatureHelper;
@@ -330,10 +331,9 @@ ECode RecoverySystem::VerifyPackage(
         alg = da + "with" + dea;
     }
 
-    AutoPtr<ISignature> sig;
     AutoPtr<ISignatureHelper> signHelper;
-    assert(0 && "TODO");
-    // CSignatureHelper::AcquireSingleton(alg, (ISignatureHelper**)&signHelper);
+    CSignatureHelper::AcquireSingleton((ISignatureHelper**)&signHelper);
+    AutoPtr<ISignature> sig;
     signHelper->GetInstance(alg, (ISignature**)&sig);
     sig->InitVerify(cert);
 

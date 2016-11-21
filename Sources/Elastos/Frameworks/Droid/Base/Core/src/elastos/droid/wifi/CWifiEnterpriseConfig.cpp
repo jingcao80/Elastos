@@ -1,5 +1,6 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.Droid.KeyStore.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/wifi/CWifiEnterpriseConfig.h"
 #include "elastos/droid/wifi/CWifiEnterpriseConfigEap.h"
@@ -7,12 +8,14 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuffer.h>
 
+using Elastos::Droid::KeyStore::Security::ICredentials;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::CoreUtils;
+using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::IKey;
 using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::IKeyFactory;
@@ -21,8 +24,8 @@ using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::IKeySpec;
-//TODO using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
-//TODO using Elastos::Security::Cert::CCertificateFactoryHelper
+using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
+using Elastos::Security::Cert::CCertificateFactoryHelper;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayInputStream;
@@ -389,9 +392,7 @@ ECode CWifiEnterpriseConfig::SetClientCertificateAlias(
     /* [in] */ const String& alias)
 {
     SetFieldValue(CLIENT_CERT_KEY, alias, CLIENT_CERT_PREFIX);
-    assert(0);
-    // TODO
-    // SetFieldValue(PRIVATE_KEY_ID_KEY, alias, ICredentials::USER_PRIVATE_KEY);
+    SetFieldValue(IWifiEnterpriseConfig::PRIVATE_KEY_ID_KEY, alias, ICredentials::USER_PRIVATE_KEY);
 
     // Also, set engine parameters
     if (TextUtils::IsEmpty(alias)) {
@@ -662,13 +663,9 @@ ECode CWifiEnterpriseConfig::WriteToParcel(
 
     if (mClientPrivateKey != NULL) {
         String algorithm;
-        assert(0);
-        // TODO
-        // mClientPrivateKey->GetAlgorithm(&algorithm);
+        IKey::Probe(mClientPrivateKey)->GetAlgorithm(&algorithm);
         AutoPtr< ArrayOf<Byte> > userKeyBytes;
-        assert(0);
-        // TODO
-        // mClientPrivateKey->GetEncoded((ArrayOf<Byte>**)&userKeyBytes);
+        IKey::Probe(mClientPrivateKey)->GetEncoded((ArrayOf<Byte>**)&userKeyBytes);
         dest->WriteInt32(userKeyBytes->GetLength());
         dest->WriteArrayOf((Handle32)userKeyBytes.Get());
         dest->WriteString(algorithm);
@@ -767,9 +764,7 @@ void CWifiEnterpriseConfig::WriteCertificate(
     if (cert != NULL) {
         // try {
             AutoPtr< ArrayOf<Byte> > certBytes;
-            assert(0);
-            // TODO
-            // cert->GetEncoded((ArrayOf<Byte>**)&certBytes);
+            ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&certBytes);
             dest->WriteInt32(certBytes->GetLength());
             dest->WriteArrayOf((Handle32)certBytes.Get());
         // } catch (CertificateEncodingException e) {
@@ -841,7 +836,7 @@ ECode CWifiEnterpriseConfig::ReadCertificate(
             AutoPtr<ArrayOf<Byte> > bytes;// = ArrayOf<Byte>::Alloc(len);
             in->ReadArrayOf((Handle32*)&bytes);
             AutoPtr<ICertificateFactoryHelper> cfHelper;
-            //TODO CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfHelper);
+            CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfHelper);
             AutoPtr<ICertificateFactory> cFactory;
             cfHelper->GetInstance(String("X.509"), (ICertificateFactory**)&cFactory);
             AutoPtr<ICertificate> c;
@@ -887,13 +882,12 @@ ECode CWifiEnterpriseConfig::ReadFromParcel(
         String algorithm;
         source->ReadString(&algorithm);
 
-        assert(0);
         AutoPtr<IKeyFactoryHelper> kfHelper;
-        //TODO CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&cfHelper);
+        CKeyFactoryHelper::AcquireSingleton((IKeyFactoryHelper**)&kfHelper);
         AutoPtr<IKeyFactory> keyFactory;
         kfHelper->GetInstance(algorithm, (IKeyFactory**)&keyFactory);
         AutoPtr<IPKCS8EncodedKeySpec> keySpec;
-        //TODO CPKCS8EncodedKeySpec::New(bytes, (IPKCS8EncodedKeySpec**)&keySpec);
+        CPKCS8EncodedKeySpec::New(bytes, (IPKCS8EncodedKeySpec**)&keySpec);
         keyFactory->GeneratePrivate(IKeySpec::Probe(keySpec), (IPrivateKey**)&userKey);
         //} catch (NoSuchAlgorithmException e) {
         //    userKey = null;

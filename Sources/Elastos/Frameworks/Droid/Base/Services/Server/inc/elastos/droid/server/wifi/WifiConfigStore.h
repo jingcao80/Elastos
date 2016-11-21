@@ -29,7 +29,7 @@ using Elastos::Core::IInteger32;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IDataOutputStream;
-using Elastos::Security::IKeyStore;
+using Elastos::Droid::KeyStore::Security::IKeyStore;
 using Elastos::Security::IPrivateKey;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Utility::IBitSet;

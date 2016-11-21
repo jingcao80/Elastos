@@ -11,33 +11,20 @@
 
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::Environment;
-//import android.os.Environment;
-//import android.os.FileUtils;
-//
-//import java.io.File;
-//import java.io.FileOutputStream;
 using Elastos::IO::CFile;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IFileOutputStream;
 using Elastos::IO::CFileOutputStream;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFlushable;
-//import java.io.IOException;
-//import java.security.NoSuchAlgorithmException;
-//import java.security.SecureRandom;
 using Elastos::Security::IKey;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::ISecureRandomHelper;
 using Elastos::Security::CSecureRandomHelper;
-//
-//import javax.crypto.KeyGenerator;
 using Elastosx::Crypto::ISecretKey;
 using Elastosx::Crypto::IKeyGenerator;
 using Elastosx::Crypto::IKeyGeneratorHelper;
-//TODO using Elastosx::Crypto::CKeyGeneratorHelper;
-//import javax.crypto.SecretKey;
-//
-//import libcore.io.IoUtils;
+using Elastosx::Crypto::CKeyGeneratorHelper;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Libcore::IO::IIoUtils;
@@ -114,12 +101,11 @@ ECode SystemKeyStore::GenerateNewKey(
     if (keyFile->Exists(&exists), exists) {
         //throw new IllegalArgumentException();
         Logger::E("SystemKeyStore", "GenerateNewKey, keyfile exists");
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     AutoPtr<IKeyGeneratorHelper> kgHelper;
-    //TODO CKeyGeneratorHelper::AcquireSingleton((IKeyGeneratorHelper**)&kgHelper);
+    CKeyGeneratorHelper::AcquireSingleton((IKeyGeneratorHelper**)&kgHelper);
     AutoPtr<IKeyGenerator> skg;
     kgHelper->GetInstance(algName, (IKeyGenerator**)&skg);
 

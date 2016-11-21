@@ -402,8 +402,6 @@ ECode FileClientSessionCache::CacheFile::CompareTo(
 //  FileClientSessionCache
 //==============================================================================
 
-CAR_INTERFACE_IMPL(FileClientSessionCache, Object, IFileClientSessionCache)
-
 ECode FileClientSessionCache::UsingDirectory(
     /* [in] */ IFile* directory,
     /* [out] */ ISSLClientSessionCache** result)

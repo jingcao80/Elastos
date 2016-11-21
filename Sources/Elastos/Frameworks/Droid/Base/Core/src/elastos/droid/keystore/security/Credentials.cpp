@@ -6,19 +6,11 @@
 #include "elastos/droid/keystore/security/KeyChain.h"
 #include <elastos/utility/logging/Logger.h>
 
-
-//import android.content.ActivityNotFoundException;
-//import android.content.Context;
 using Elastos::Droid::Content::CIntent;
-//import android.util.Log;
-//import com.android.org.bouncycastle.util.io.pem.PemObject;
-//import com.android.org.bouncycastle.util.io.pem.PemReader;
-//import com.android.org.bouncycastle.util.io.pem.PemWriter;
 using Elastos::IO::IByteArrayOutputStream;
 using Elastos::IO::IByteArrayInputStream;
 using Elastos::IO::CByteArrayOutputStream;
 using Elastos::IO::CByteArrayInputStream;
-//import java.io.IOException;
 using Elastos::IO::CInputStreamReader;
 using Elastos::IO::COutputStreamWriter;
 using Elastos::IO::IOutputStream;
@@ -29,18 +21,11 @@ using Elastos::IO::IWriter;
 using Elastos::IO::Charset::IStandardCharsets;
 using Elastos::IO::Charset::CStandardCharsets;
 using Elastos::IO::Charset::ICharset;
-//import java.nio.charset.StandardCharsets;
-//import java.security.KeyPair;
-//import java.security.cert.Certificate;
 using Elastos::Security::IKey;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
 using Elastos::Security::Cert::CCertificateFactoryHelper;
-//import java.security.cert.CertificateEncodingException;
-//import java.security.cert.CertificateException;
-//import java.security.cert.CertificateFactory;
-//import java.security.cert.X509Certificate;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
@@ -195,9 +180,8 @@ ECode Credentials::Install(
     AutoPtr<ArrayOf<Byte> > publicEncoded;
     IKey::Probe(publicKey)->GetEncoded((ArrayOf<Byte>**)&publicEncoded);
 
-    assert(0);//in java Serializable
-    //TODO intent->PutExtra(EXTRA_PRIVATE_KEY, privateKey);
-    //TODO intent->PutExtra(EXTRA_PUBLIC_KEY, publicKey);
+    intent->PutByteArrayExtra(EXTRA_PRIVATE_KEY, privateEncoded);
+    intent->PutByteArrayExtra(EXTRA_PUBLIC_KEY, publicEncoded);
     context->StartActivity(intent);
     //} catch (ActivityNotFoundException e) {
     //    Log.w(LOGTAG, e.toString());
@@ -213,7 +197,7 @@ ECode Credentials::Install(
     //try {
     AutoPtr<IIntent> intent;
     KeyChain::CreateInstallIntent((IIntent**)&intent);
-    //TODO intent->PutExtra(type, value);
+    intent->PutByteArrayExtra(type, value);
     context->StartActivity(intent);
     //} catch (ActivityNotFoundException e) {
     //    Log.w(LOGTAG, e.toString());

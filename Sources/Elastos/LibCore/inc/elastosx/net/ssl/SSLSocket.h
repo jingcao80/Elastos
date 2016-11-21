@@ -3,7 +3,7 @@
 #define __ELASTOSX_NET_SSL_SSLSOCKET_H__
 
 #include "Elastos.CoreLibrary.Extensions.h"
-#include "Socket.h"
+#include "elastos/net/Socket.h"
 
 using Elastos::Net::Socket;
 using Elastos::Net::IInetAddress;
@@ -728,7 +728,7 @@ namespace Ssl {
  *     </tbody>
  * </table>
  */
-class SSLSocket
+class ECO_PUBLIC SSLSocket
     : public Socket
     , public ISSLSocket
 {

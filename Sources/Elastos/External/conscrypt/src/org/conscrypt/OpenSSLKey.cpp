@@ -1,15 +1,18 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "OpenSSLKey.h"
-// #include "OpenSSLRSAPrivateKey.h"
-// #include "OpenSSLDSAPrivateKey.h"
-// #include "OpenSSLECPrivateKey.h"
+#include "OpenSSLRSAPrivateKey.h"
+#include "OpenSSLDSAPrivateKey.h"
 #include "NativeCrypto.h"
+#include "COpenSSLDHPrivateKey.h"
+#include "COpenSSLDSAPrivateKey.h"
 #include "COpenSSLKey.h"
 #include "COpenSSLRSAPublicKey.h"
+#include "COpenSSLSecretKey.h"
 #include "COpenSSLECPublicKey.h"
 #include "COpenSSLRSAPrivateKey.h"
 #include "COpenSSLECPrivateKey.h"
+#include "OpenSSLEngine.h"
 #include "org/conscrypt/COpenSSLDHPublicKey.h"
 #include "org/conscrypt/COpenSSLDSAPublicKey.h"
 #include "org/conscrypt/COpenSSLDHPrivateKey.h"
@@ -119,20 +122,23 @@ AutoPtr<IOpenSSLKey> OpenSSLKey::FromPrivateKey(
 AutoPtr<IOpenSSLKey> OpenSSLKey::WrapPrivateKey(
     /* [in] */ IPrivateKey* key)
 {
-    // if (IRSAPrivateKey::Probe(key) != NULL) {
-    //     return OpenSSLRSAPrivateKey::WrapPlatformKey(IRSAPrivateKey::Probe(key));
-    // }
-    // else if (IDSAPrivateKey::Probe(key) != NULL) {
-    //     return OpenSSLDSAPrivateKey::WrapPlatformKey(IDSAPrivateKey::Probe(key));
-    // }
-    // else if (IECPrivateKey::Probe(key) != NULL) {
-    //     return OpenSSLECPrivateKey::WrapPlatformKey(IECPrivateKey::Probe(key));
-    // }
-    // else {
-    //     // throw new InvalidKeyException("Unknown key type: " + key.toString());
-    //     return NULL;
-    // }
-    assert(0 && "TODO");
+    if (IRSAPrivateKey::Probe(key) != NULL) {
+        return OpenSSLRSAPrivateKey::WrapPlatformKey(IRSAPrivateKey::Probe(key));
+    }
+    else if (IDSAPrivateKey::Probe(key) != NULL) {
+        AutoPtr<IOpenSSLKey> ret;
+        OpenSSLDSAPrivateKey::WrapPlatformKey(IDSAPrivateKey::Probe(key), (IOpenSSLKey**)&ret);
+        return ret;
+    }
+    else if (IECPrivateKey::Probe(key) != NULL) {
+        AutoPtr<IOpenSSLKey> ret;
+        COpenSSLECPrivateKey::WrapPlatformKey(IECPrivateKey::Probe(key), (IOpenSSLKey**)&ret);
+        return ret;
+    }
+    else {
+        // throw new InvalidKeyException("Unknown key type: " + key.toString());
+        return NULL;
+    }
     return NULL;
 }
 
@@ -319,11 +325,10 @@ ECode OpenSSLKey::GetSecretKey(
     switch (keyType) {
         case INativeCrypto::EVP_PKEY_HMAC:
         case INativeCrypto::EVP_PKEY_CMAC: {
-            assert(0 && "TODO");
-            // AutoPtr<IOpenSSLSecretKey> p;
-            // = new OpenSSLSecretKey(algorithm, this);
-            // *result = ISecretKey::Probe(p);
-            // REFCOUNT_ADD(*result)
+            AutoPtr<IOpenSSLSecretKey> p;
+            COpenSSLSecretKey::New(algorithm, this, (IOpenSSLSecretKey**)&p);
+            *result = ISecretKey::Probe(p);
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
         default: {
@@ -372,17 +377,17 @@ ECode OpenSSLKey::Equals(
     AutoPtr<IOpenSSLEngine> otherEngine;
     other->GetEngine((IOpenSSLEngine**)&otherEngine);
     Boolean bEquals = FALSE;
-    assert(0 && "TODO");
+
     if (mEngine == NULL) {
         if (otherEngine != NULL) {
             *result = FALSE;
             return NOERROR;
         }
     }
-    // else if (!(mEngine->Equals(otherEngine, &bEquals), bEquals)) {
-    //     *result = FALSE;
-    //     return NOERROR;
-    // }
+    else if (!(IObject::Probe(mEngine)->Equals(otherEngine, &bEquals), bEquals)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     else {
         String otherAlias;
         other->GetAlias(&otherAlias);
@@ -408,8 +413,9 @@ ECode OpenSSLKey::GetHashCode(
     VALIDATE_NOT_NULL(result)
     Int32 hash = 1;
     hash = hash * 17 + (Int32) mCtx;
-    assert(0 && "TODO");
-    // hash = hash * 31 + (Int32) (mEngine == NULL ? 0 : mEngine->GetEngineContext());
+    Int64 val;
+    hash = hash * 31 + (Int32) (mEngine == NULL ?
+            0 : (((OpenSSLEngine*)mEngine.Get())->GetEngineContext(&val), val));
     *result = hash;
     return NOERROR;
 }

@@ -19,7 +19,7 @@ using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Os::IHandler;
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IFileDescriptor;
-using Elastos::Utility::IRandom;
+using Elastos::Security::ISecureRandom;
 
 namespace Elastos {
 namespace Droid {
@@ -215,7 +215,7 @@ public:
      */
     const static Double MAX_LATITUDE;
 
-    AutoPtr<IRandom> mRandom; // ISecureRandom
+    AutoPtr<ISecureRandom> mRandom; // ISecureRandom
 
     /**
      * Used to monitor coarse accuracy secure setting for changes.

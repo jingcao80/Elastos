@@ -2,6 +2,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Security.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.KeyStore.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Utility.h"
@@ -21,6 +22,14 @@
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::KeyStore::Security::CCredentialsHelper;
+using Elastos::Droid::KeyStore::Security::CKeyChain;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::ICredentials;
+using Elastos::Droid::KeyStore::Security::ICredentialsHelper;
+using Elastos::Droid::KeyStore::Security::IKeyChain;
+using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::KeyStoreState;
 using Elastos::Droid::Net::IpConfigurationIpAssignment;
 using Elastos::Droid::Net::CIpConfiguration;
 using Elastos::Droid::Os::IProcess;
@@ -90,13 +99,8 @@ using Elastos::IO::IFileInputStream;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IDataInput;
 using Elastos::Security::IKey;
-//TODO using Elastos::Security::ICredentials;
-//TODO using Elastos::Security::IKeyChain;
 using Elastos::Security::IPublicKey;
-using Elastos::Security::IKeyStoreHelper;
-//TODO using Elastos::Security::KeyStoreState;
 using Elastos::Security::Cert::IX509Certificate;
-//TODO using Elastos::Security::CKeyStoreHelper;
 using Elastos::Utility::IBitSet;
 using Elastos::Utility::Regex::IMatcher;
 using Elastos::Utility::Regex::IMatchResult;
@@ -567,10 +571,8 @@ WifiConfigStore::WifiConfigStore(
     CHashMap::New((IHashMap**)&mConfiguredNetworks);
     CHashMap::New((IHashMap**)&mNetworkIds);
     AutoPtr<IKeyStoreHelper> keyStoreHelper;
-    //TODO CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&keyStoreHelper);
-    //TODO String type;
-    //TODO keyStoreHelper->GetDefaultType(&type);
-    //TODO keyStoreHelper->GetInstance(type, (IKeyStore**)&mKeyStore);
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&keyStoreHelper);
+    keyStoreHelper->GetInstance((IKeyStore**)&mKeyStore);
 
     mContext = c;
     mWifiNative = wn;
@@ -2642,28 +2644,26 @@ Boolean WifiConfigStore::NeedsKeyStore(
 Boolean WifiConfigStore::IsHardwareBackedKey(
     /* [in] */ IPrivateKey* key)
 {
-    //TODO AutoPtr<IKeyChain> keyChain;
-    assert(0);
-    //TODO CKeyChain::AcquireSingleton((IKeyChain**)&keyChain);
+    AutoPtr<IKeyChain> keyChain;
+    CKeyChain::AcquireSingleton((IKeyChain**)&keyChain);
     String algorithm;
     IKey::Probe(key)->GetAlgorithm(&algorithm);
     Boolean bTemp = FALSE;
-    //TODO KeyChain->IsBoundKeyAlgorithm(algorithm, &bTemp);
+    keyChain->IsBoundKeyAlgorithm(algorithm, &bTemp);
     return bTemp;
 }
 
 Boolean WifiConfigStore::HasHardwareBackedKey(
     /* [in] */ ICertificate* certificate)
 {
-    //TODO AutoPtr<IKeyChain> keyChain;
-    assert(0);
-    //TODO CKeyChain::AcquireSingleton((IKeyChain**)&keyChain);
+    AutoPtr<IKeyChain> keyChain;
+    CKeyChain::AcquireSingleton((IKeyChain**)&keyChain);
     AutoPtr<IPublicKey> publickKey;
     certificate->GetPublicKey((IPublicKey**)&publickKey);
     String algorithm;
     IKey::Probe(publickKey)->GetAlgorithm(&algorithm);
     Boolean bTemp = FALSE;
-    //TODO KeyChain->IsBoundKeyAlgorithm(algorithm, &bTemp);
+    keyChain->IsBoundKeyAlgorithm(algorithm, &bTemp);
     return bTemp;
 }
 
@@ -3046,14 +3046,13 @@ ECode WifiConfigStore::InstallKeys(
     VALIDATE_NOT_NULL(result);
     Boolean ret = TRUE;
 
-    String privKeyName = /*TODO ICredentials::USER_PRIVATE_KEY*/ String("USRPKEY_") + name;
-    String userCertName = /*TODO ICredentials::USER_CERTIFICATE*/ String("USRCERT_") + name;
-    String caCertName = /*TODO ICredentials::CA_CERTIFICATE*/ String("CACERT_") + name;
+    String privKeyName = ICredentials::USER_PRIVATE_KEY + name;
+    String userCertName = ICredentials::USER_CERTIFICATE + name;
+    String caCertName = ICredentials::CA_CERTIFICATE + name;
 
     AutoPtr<IX509Certificate> clientCert;
     config->GetClientCertificate((IX509Certificate**)&clientCert);
     if (clientCert != NULL) {
-        assert(0);//TODO
         AutoPtr<IPrivateKey> clientPriavateKey;
         config->GetClientPrivateKey((IPrivateKey**)&clientPriavateKey);
         AutoPtr<ArrayOf<Byte> > privKeyData;
@@ -3062,14 +3061,14 @@ ECode WifiConfigStore::InstallKeys(
             // Hardware backed key store is secure enough to store keys un-encrypted, this
             // removes the need for user to punch a PIN to get access to these keys
             if (DBG) Logger::D(TAG, "importing keys %s in hardware backed store", name.string());
-            //TODO ret = mKeyStore->ImportKey(privKeyName, privKeyData, IProcess::WIFI_UID, IKeyStore::FLAG_NONE);
+            mKeyStore->ImportKey(privKeyName, privKeyData, IProcess::WIFI_UID, IKeyStore::FLAG_NONE, &ret);
         } else {
             // Software backed key store is NOT secure enough to store keys un-encrypted.
             // Save keys encrypted so they are protected with user's PIN. User will
             // have to unlock phone before being able to use these keys and connect to
             // networks.
             if (DBG) Logger::D(TAG, "importing keys %s in software backed store", name.string());
-            //TODO ret = mKeyStore->ImportKey(privKeyName, privKeyData, IProcess::WIFI_UID, IKeyStore::FLAG_ENCRYPTED);
+            mKeyStore->ImportKey(privKeyName, privKeyData, IProcess::WIFI_UID, IKeyStore::FLAG_ENCRYPTED, &ret);
         }
         if (ret == FALSE) {
             *result = ret;
@@ -3079,7 +3078,8 @@ ECode WifiConfigStore::InstallKeys(
         ret = PutCertInKeyStore(userCertName, ICertificate::Probe(clientCert));
         if (ret == FALSE) {
             // Remove private key installed
-            //TODO mKeyStore->DelKey(privKeyName, IProcess::WIFI_UID);
+            Boolean b;
+            mKeyStore->DelKey(privKeyName, IProcess::WIFI_UID, &b);
             *result = ret;
             return NOERROR;
         }
@@ -3092,8 +3092,9 @@ ECode WifiConfigStore::InstallKeys(
         if (ret == FALSE) {
             if (clientCert != NULL) {
                 // Remove client key+cert
-                //TODO mKeyStore->DelKey(privKeyName, IProcess::WIFI_UID);
-                //TODO mKeyStore->Delete(userCertName, IProcess::WIFI_UID);
+                Boolean b;
+                mKeyStore->DelKey(privKeyName, IProcess::WIFI_UID, &b);
+                mKeyStore->Delete(userCertName, IProcess::WIFI_UID, &b);
             }
             *result = ret;
             return NOERROR;
@@ -3124,9 +3125,9 @@ ECode WifiConfigStore::RemoveKeys(
     // a valid client certificate is configured
     if (!TextUtils::IsEmpty(client)) {
         if (DBG) Logger::D(TAG, "removing client private key and user cert");
-        assert(0);
-        //TODO mKeyStore->DelKey(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID);
-        //TODO mKeyStore->Delete(ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID);
+        Boolean b;
+        mKeyStore->DelKey(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID, &b);
+        mKeyStore->Delete(ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID, &b);
     }
 
     String ca;
@@ -3134,8 +3135,8 @@ ECode WifiConfigStore::RemoveKeys(
     // a valid ca certificate is configured
     if (!TextUtils::IsEmpty(ca)) {
         if (DBG) Logger::D(TAG, "removing CA cert");
-        assert(0);
-        //TODO mKeyStore->Delete(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID);
+        Boolean b;
+        mKeyStore->Delete(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID, &b);
     }
     return NOERROR;
 }
@@ -3206,11 +3207,11 @@ ECode WifiConfigStore::MigrateCerts(
     // a valid client certificate is configured
     if (!TextUtils::IsEmpty(client)) {
         Boolean contains = TRUE;
-        assert(0);//TODO
-        //TODO mKeyStore->Contains(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID, &contains);
+        mKeyStore->Contains(ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID, &contains);
         if (!contains) {
-            //TODO mKeyStore->Duplicate(ICredentials::USER_PRIVATE_KEY + client, -1, ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID);
-            //TODO mKeyStore->Duplicate(ICredentials::USER_CERTIFICATE + client, -1, ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID);
+            Boolean b;
+            mKeyStore->Duplicate(ICredentials::USER_PRIVATE_KEY + client, -1, ICredentials::USER_PRIVATE_KEY + client, IProcess::WIFI_UID, &b);
+            mKeyStore->Duplicate(ICredentials::USER_CERTIFICATE + client, -1, ICredentials::USER_CERTIFICATE + client, IProcess::WIFI_UID, &b);
         }
     }
 
@@ -3219,9 +3220,10 @@ ECode WifiConfigStore::MigrateCerts(
     // a valid ca certificate is configured
     if (!TextUtils::IsEmpty(ca)) {
         Boolean contains = TRUE;
-        //TODO mKeyStore->Contains(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID))
+        mKeyStore->Contains(ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID, &contains);
         if (!contains) {
-            //TODO mKeyStore->Duplicate(ICredentials::CA_CERTIFICATE + ca, -1, ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID);
+            Boolean b;
+            mKeyStore->Duplicate(ICredentials::CA_CERTIFICATE + ca, -1, ICredentials::CA_CERTIFICATE + ca, IProcess::WIFI_UID, &b);
         }
     }
     return NOERROR;
@@ -4922,15 +4924,14 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                  * credentials.
                  * TODO: Do we need a dialog here ?
                  */
-                assert(0);//TODO
-                //TODO KeyStoreState st;
-                //TODO mKeyStore->State(&st);
-                //TODO if (st != Elastos::Security::KeyStoreState_UNLOCKED) {
-                //TODO     String str(ssid);
-                //TODO    str += ": key store is locked";
-                //TODO    Loge(str);
-                //TODO    goto setVariables;
-                //TODO }
+                KeyStoreState st;
+                mKeyStore->State(&st);
+                if (st != Elastos::Droid::KeyStore::Security::KeyStoreState_UNLOCKED) {
+                    String str(ssid);
+                    str += ": key store is locked";
+                    Loge(str);
+                    goto setVariables;
+                }
 
                 // try {
                     /* config passed may include only fields being updated.
@@ -5616,25 +5617,28 @@ Boolean WifiConfigStore::PutCertInKeyStore(
     /* [in] */ ICertificate* cert)
 {
     // try {
-    assert(0);//TODO
-    //TODO AutoPtr<ICredentialsHelper> hlp;
-    //TODO CCredentialsHelper::AcquireSingleton((ICredentialsHelper**)&hlp);
-    //TODO AutoPtr<ArrayOf<Byte> > certData;
-    //TODO hlp->ConvertToPem(cert, (ArrayOf<Byte>**)&certData);
-    //TODO if (DBG) {
-    //TODO     String str("putting certificate ");
-    //TODO     str += name;
-    //TODO     str += " in keystore";
-    //TODO     Logger::D(TAG, str);
-    //TODO }
-    //TODO return mKeyStore->Put(name, certData, IProcess::WIFI_UID, IKeyStore::FLAG_NONE);
+    AutoPtr<ICredentialsHelper> hlp;
+    CCredentialsHelper::AcquireSingleton((ICredentialsHelper**)&hlp);
+    AutoPtr<ArrayOf<ICertificate*> > certs = ArrayOf<ICertificate*>::Alloc(1);
+    certs->Set(0, cert);
+    AutoPtr<ArrayOf<Byte> > certData;
+    hlp->ConvertToPem(certs, (ArrayOf<Byte>**)&certData);
+    if (DBG) {
+        String str("putting certificate ");
+        str += name;
+        str += " in keystore";
+        Logger::D(TAG, str);
+    }
+
+    Boolean b;
+    mKeyStore->Put(name, certData, IProcess::WIFI_UID, IKeyStore::FLAG_NONE, &b);
 
     // } catch (IOException e1) {
     //     return false;
     // } catch (CertificateException e2) {
     //     return false;
     // }
-    return FALSE;
+    return b;
 }
 
 } // namespace Wifi

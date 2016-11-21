@@ -94,7 +94,7 @@ ECode CConfigUpdateInstallReceiver::OnReceive(
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     // get the certificate from Settings.Secure
-    cert = GetCert(context->GetContentResolver(resolver);
+    cert = GetCert(context->GetContentResolver(resolver));
     // get the content path from the extras
     altContent = GetAltContent(intent);
     // get the version from the extras

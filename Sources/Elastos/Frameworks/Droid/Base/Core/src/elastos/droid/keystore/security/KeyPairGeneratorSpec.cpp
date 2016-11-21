@@ -5,27 +5,11 @@
 #include "_Org.Conscrypt.h"
 
 using Elastos::Droid::Text::TextUtils;
-
-//import com.android.org.conscrypt.NativeCrypto;
-using Org::Conscrypt::INativeCrypto;
-//
-//import android.content.Context;
-//import android.text.TextUtils;
-//
-//import java.math.BigInteger;
-//import java.security.NoSuchAlgorithmException;
-//import java.security.PrivateKey;
-//import java.security.cert.Certificate;
-//import java.security.spec.AlgorithmParameterSpec;
-//import java.security.spec.DSAParameterSpec;
 using Elastos::Security::Spec::IDSAParameterSpec;
 using Elastos::Security::Spec::IRSAKeyGenParameterSpec;
 using Elastos::Security::Spec::EIID_IAlgorithmParameterSpec;
-//import java.security.spec.RSAKeyGenParameterSpec;
-//import java.util.Date;
-//
-//import javax.security.auth.x500.X500Principal;
 using Elastos::Utility::Logging::Logger;
+using Org::Conscrypt::INativeCrypto;
 
 namespace Elastos {
 namespace Droid {
@@ -48,7 +32,7 @@ ECode KeyPairGeneratorSpec::Builder::constructor(
     if (context == NULL) {
         //throw new NullPointerException("context == null");
         Logger::E("KeyPairGeneratorSpec", "Builder(), context == null");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mContext = context;
     return NOERROR;
@@ -60,7 +44,7 @@ ECode KeyPairGeneratorSpec::Builder::SetAlias(
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetAlias(), alias == null");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mKeystoreAlias = alias;
     return NOERROR;
@@ -72,11 +56,11 @@ ECode KeyPairGeneratorSpec::Builder::SetKeyType(
     if (keyType.IsNull()) {
         //throw new NullPointerException("keyType == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetKeyType(), keyType == null");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     else {
         //try {
-        KeyStore::GetKeyTypeForAlgorithm(keyType);
+        FAIL_RETURN(KeyStore::GetKeyTypeForAlgorithm(keyType));
         //} catch (IllegalArgumentException e) {
         //    throw new NoSuchAlgorithmException("Unsupported key type: " + keyType);
         //}
@@ -91,7 +75,7 @@ ECode KeyPairGeneratorSpec::Builder::SetKeySize(
     if (keySize < 0) {
         //throw new IllegalArgumentException("keySize < 0");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetKeySize(), keySize < 0");
-        assert(0);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mKeySize = keySize;
     return NOERROR;
@@ -103,7 +87,7 @@ ECode KeyPairGeneratorSpec::Builder::SetAlgorithmParameterSpec(
     if (spec == NULL) {
         //throw new NullPointerException("spec == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetAlgorithmParameterSpec(), spec == NULL");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mSpec = spec;
     return NOERROR;
@@ -115,7 +99,7 @@ ECode KeyPairGeneratorSpec::Builder::SetSubject(
     if (subject == NULL) {
         //throw new NullPointerException("subject == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetSubject(), subject == NULL");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mSubjectDN = subject;
     return NOERROR;
@@ -127,7 +111,7 @@ ECode KeyPairGeneratorSpec::Builder::SetSerialNumber(
     if (serialNumber == NULL) {
         //throw new NullPointerException("serialNumber == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetSerialNumber(), serialNumber == NULL");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mSerialNumber = serialNumber;
     return NOERROR;
@@ -139,7 +123,7 @@ ECode KeyPairGeneratorSpec::Builder::SetStartDate(
     if (startDate == NULL) {
         //throw new NullPointerException("startDate == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetStartDate(), startDate == NULL");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mStartDate = startDate;
     return NOERROR;
@@ -151,7 +135,7 @@ ECode KeyPairGeneratorSpec::Builder::SetEndDate(
     if (endDate == NULL) {
         //throw new NullPointerException("endDate == null");
         Logger::E("KeyPairGeneratorSpec", "Builder::SetStartDate(), endDate == NULL");
-        assert(0);
+        return E_NULL_POINTER_EXCEPTION;
     }
     mEndDate = endDate;
     return NOERROR;
@@ -288,7 +272,6 @@ ECode KeyPairGeneratorSpec::GetDefaultKeySizeForType(
     }
     //throw new IllegalArgumentException("Invalid key type " + keyType);
     Logger::E("KeyPairGeneratorSpec", "GetDefaultKeySizeForType, Invalid key type: %d", keyType);
-    assert(0);
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
@@ -321,7 +304,6 @@ ECode KeyPairGeneratorSpec::CheckValidKeySize(
     else {
         //throw new IllegalArgumentException("Invalid key type " + keyType);
         Logger::E("KeyPairGeneratorSpec", "CheckValidKeySize, Invalid key type %d", keyType);
-        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -336,7 +318,6 @@ ECode KeyPairGeneratorSpec::CheckCorrectParametersSpec(
         if (IDSAParameterSpec::Probe(spec) == NULL) {
             //throw new IllegalArgumentException("DSA keys must have DSAParameterSpec specified");
             Logger::E("KeyPairGeneratorSpec", "CheckCorrectParametersSpec, DSA keys must have DSAParameterSpec specified");
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -350,14 +331,12 @@ ECode KeyPairGeneratorSpec::CheckCorrectParametersSpec(
                 //        + " vs " + rsaSpec.getKeysize());
                 Logger::E("KeyPairGeneratorSpec", "CheckCorrectParametersSpec, RSA key size must match: %d vs %d",
                         keySize, keysize);
-                assert(0);
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
         }
         else {
             //throw new IllegalArgumentException("RSA may only use RSAKeyGenParameterSpec");
             Logger::E("KeyPairGeneratorSpec", "CheckCorrectParametersSpec, RSA may only use RSAKeyGenParameterSpec");
-            assert(0);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }

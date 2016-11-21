@@ -42,7 +42,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-// using Elastos::Droid::KeyStore::Security::CKeyChain;
+using Elastos::Droid::KeyStore::Security::CKeyChain;
 using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
 // using Elastos::Droid::Os::CEnvironment;
 // using Elastos::Droid::Os::CServiceManager;
@@ -1236,9 +1236,7 @@ ECode CDevicePolicyManagerService::MonitoringCertNotificationTask::ManageNotific
     ECode ec = NOERROR;
     do {
         AutoPtr<IKeyChain> helper;
-        // TODO: Waiting for CKeyChain
-        assert(0);
-        // CKeyChain::AcquireSingleton((IKeyChain**)&helper);
+        CKeyChain::AcquireSingleton((IKeyChain**)&helper);
         AutoPtr<IKeyChainConnection> kcs;
         ec = helper->BindAsUser(mHost->mContext, userHandle, (IKeyChainConnection**)&kcs);
         if (FAILED(ec)) break;
@@ -6134,9 +6132,9 @@ ECode CDevicePolicyManagerService::InstallCaCert(
     // try {
     do {
         AutoPtr<IKeyChainConnection> keyChainConnection;
-        // TODO: Waiting for KeyChain
-        assert(0);
-        // ec = KeyChain::BindAsUser(mContext, userHandle, (IKeyChainConnection**)&keyChainConnection);
+        AutoPtr<IKeyChain> helper;
+        CKeyChain::AcquireSingleton((IKeyChain**)&helper);
+        ec = helper->BindAsUser(mContext, userHandle, (IKeyChainConnection**)&keyChainConnection);
         if (FAILED(ec)) break;
         // try {
         do {
@@ -6207,9 +6205,9 @@ ECode CDevicePolicyManagerService::UninstallCaCert(
     ECode ec;
     do {
         AutoPtr<IKeyChainConnection> keyChainConnection;
-        // TODO: Waiting for KeyChain
-        assert(0);
-        // ec = KeyChain::BindAsUser(mContext, userHandle, (IKeyChainConnection**)&keyChainConnection);
+        AutoPtr<IKeyChain> helper;
+        CKeyChain::AcquireSingleton((IKeyChain**)&helper);
+        ec = helper->BindAsUser(mContext, userHandle, (IKeyChainConnection**)&keyChainConnection);
         if (FAILED(ec)) break;
         // try {
         do {
@@ -6267,9 +6265,9 @@ ECode CDevicePolicyManagerService::InstallKeyPair(
     ECode ec;
     do {
         AutoPtr<IKeyChainConnection> keyChainConnection;
-        // TODO: Waiting for KeyChain
-        assert(0);
-        // ec = KeyChain::BindAsUser(mContext, userHandle, (IKeyChainConnection**)&keyChainConnection);
+        AutoPtr<IKeyChain> helper;
+        CKeyChain::AcquireSingleton((IKeyChain**)&helper);
+        ec = helper->BindAsUser(mContext, userHandle, (IKeyChainConnection**)&keyChainConnection);
         if (FAILED(ec)) break;
         // try {
         do {

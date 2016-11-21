@@ -41,9 +41,7 @@ ECode OpenSSLSocketFactoryImpl::GetDefaultCipherSuites(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0 && "TODO");
-    // return mSslParameters->GetEnabledCipherSuites(result);
-    return NOERROR;
+    return mSslParameters->GetEnabledCipherSuites(result);
 }
 
 ECode OpenSSLSocketFactoryImpl::GetSupportedCipherSuites(

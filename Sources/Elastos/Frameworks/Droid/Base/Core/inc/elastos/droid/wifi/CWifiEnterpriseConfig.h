@@ -288,63 +288,6 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
-public:
-    // public static final Creator<WifiEnterpriseConfig> CREATOR =
-    //         new Creator<WifiEnterpriseConfig>() {
-    //             public WifiEnterpriseConfig createFromParcel(Parcel in) {
-    //                 WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-    //                 int count = in.readInt();
-    //                 for (int i = 0; i < count; i++) {
-    //                     String key = in.readString();
-    //                     String value = in.readString();
-    //                     enterpriseConfig.mFields.put(key, value);
-    //                 }
-
-    //                 enterpriseConfig.mCaCert = readCertificate(in);
-
-    //                 PrivateKey userKey = null;
-    //                 int len = in.readInt();
-    //                 if (len > 0) {
-    //                     try {
-    //                         byte[] bytes = new byte[len];
-    //                         in.readByteArray(bytes);
-    //                         String algorithm = in.readString();
-    //                         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
-    //                         userKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-    //                     } catch (NoSuchAlgorithmException e) {
-    //                         userKey = null;
-    //                     } catch (InvalidKeySpecException e) {
-    //                         userKey = null;
-    //                     }
-    //                 }
-
-    //                 enterpriseConfig.mClientPrivateKey = userKey;
-    //                 enterpriseConfig.mClientCertificate = readCertificate(in);
-    //                 return enterpriseConfig;
-    //             }
-
-    //             private X509Certificate readCertificate(Parcel in) {
-    //                 X509Certificate cert = null;
-    //                 int len = in.readInt();
-    //                 if (len > 0) {
-    //                     try {
-    //                         byte[] bytes = new byte[len];
-    //                         in.readByteArray(bytes);
-    //                         CertificateFactory cFactory = CertificateFactory.getInstance("X.509");
-    //                         cert = (X509Certificate) cFactory
-    //                                 .generateCertificate(new ByteArrayInputStream(bytes));
-    //                     } catch (CertificateException e) {
-    //                         cert = null;
-    //                     }
-    //                 }
-    //                 return cert;
-    //             }
-
-    //             public WifiEnterpriseConfig[] newArray(int size) {
-    //                 return new WifiEnterpriseConfig[size];
-    //             }
-    //         };
-
 private:
     CARAPI_(void) WriteCertificate(
         /* [in] */ IParcel* dest,

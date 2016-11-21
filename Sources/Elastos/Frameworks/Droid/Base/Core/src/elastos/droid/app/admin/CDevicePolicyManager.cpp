@@ -5,6 +5,7 @@
 #include "elastos/droid/app/admin/CDevicePolicyManager.h"
 // #include "elastos/droid/app/admin/CDeviceAdminInfo.h"
 #include "elastos/droid/content/CComponentName.h"
+#include "elastos/droid/keystore/security/CCredentialsHelper.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Process.h"
@@ -21,6 +22,8 @@ using Elastos::Droid::Content::Pm::CResolveInfo;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::KeyStore::Security::CCredentialsHelper;
+using Elastos::Droid::KeyStore::Security::ICredentialsHelper;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IServiceManager;
@@ -42,6 +45,7 @@ using Elastos::Security::Cert::CCertificateFactoryHelper;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Security::IKey;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CArrayList;
@@ -1084,11 +1088,17 @@ ECode CDevicePolicyManager::InstallKeyPair(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    assert(0 && "TODO");
-
     // try {
-    //     final byte[] pemCert = Credentials.ConvertToPem(cert);
-    //     return mService.installKeyPair(who, privKey.getEncoded(), pemCert, alias);
+    AutoPtr<ICredentialsHelper> hlp;
+    CCredentialsHelper::AcquireSingleton((ICredentialsHelper**)&hlp);
+    AutoPtr<ArrayOf<ICertificate*> > certs = ArrayOf<ICertificate*>::Alloc(1);
+    certs->Set(0, cert);
+    AutoPtr<ArrayOf<Byte> > pemCert;
+    hlp->ConvertToPem(certs, (ArrayOf<Byte>**)&pemCert);
+
+    AutoPtr<ArrayOf<Byte> > encoded;
+    IKey::Probe(privKey)->GetEncoded((ArrayOf<Byte>**)&encoded);
+    return mService->InstallKeyPair(who, encoded, pemCert, alias, result);
     // } catch (CertificateException e) {
     //     Log.w(TAG, "Error encoding certificate", e);
     // } catch (IOException e) {
@@ -1096,7 +1106,6 @@ ECode CDevicePolicyManager::InstallKeyPair(
     // } catch (RemoteException e) {
     //     Log.w(TAG, "Failed talking with device policy service", e);
     // }
-    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetCaCertAlias(

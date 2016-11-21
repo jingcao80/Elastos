@@ -222,8 +222,7 @@ ECode OpenSSLSocketImpl::constructor(
     /* [in] */ Int32 port,
     /* [in] */ ISSLParametersImpl* sslParameters)
 {
-    assert(0 && "TODO");
-    // SSLSocket::constructor(host, port);
+    SSLSocket::constructor(host, port);
     mSocket = ISocket::Probe(this);
     mWrappedHost = NULL;
     mWrappedPort = -1;
@@ -237,8 +236,7 @@ ECode OpenSSLSocketImpl::constructor(
     /* [in] */ Int32 port,
     /* [in] */ ISSLParametersImpl* sslParameters)
 {
-    assert(0 && "TODO");
-    // SSLSocket::constructor(address, port);
+    SSLSocket::constructor(address, port);
     mSocket = ISocket::Probe(this);
     mWrappedHost = NULL;
     mWrappedPort = -1;
@@ -254,8 +252,7 @@ ECode OpenSSLSocketImpl::constructor(
     /* [in] */ Int32 clientPort,
     /* [in] */ ISSLParametersImpl* sslParameters)
 {
-    assert(0 && "TODO");
-    // SSLSocket::constructor(host, port, clientAddress, clientPort);
+    SSLSocket::constructor(host, port, clientAddress, clientPort);
     mSocket = ISocket::Probe(this);
     mWrappedHost = NULL;
     mWrappedPort = -1;
@@ -271,8 +268,7 @@ ECode OpenSSLSocketImpl::constructor(
     /* [in] */ Int32 clientPort,
     /* [in] */ ISSLParametersImpl* sslParameters)
 {
-    assert(0 && "TODO");
-    // SSLSocket::constructor(address, port, clientAddress, clientPort);
+    SSLSocket::constructor(address, port, clientAddress, clientPort);
     mSocket = ISocket::Probe(this);
     mWrappedHost = NULL;
     mWrappedPort = -1;

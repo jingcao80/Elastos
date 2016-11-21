@@ -498,7 +498,7 @@ Int32 KeyStore::GetKeyTypeForAlgorithm(
     else {
         //throw new IllegalArgumentException("Unsupported key type: " + keyType);
         Logger::E("KeyStore", "GetKeyTypeForAlgorithm, Unsupported key type: %s", keyType.string());
-        return -1;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 }
 
