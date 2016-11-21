@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Security.IPrivateKey;
+
     namespace Org {
     namespace Conscrypt {
 
@@ -58,8 +60,8 @@ module
          * @throws IllegalStateException if this is a server socket or if the handshake has already
          *         started.
          */
-        // SetChannelIdPrivateKey(
-        //     [in] IPrivateKey* privateKey);
+        SetChannelIdPrivateKey(
+            [in] IPrivateKey* privateKey);
 
         /**
          * Note write timeouts are not part of the javax.net.ssl.SSLSocket API

@@ -1,8 +1,13 @@
 
 #include "Elastos.CoreLibrary.Security.h"
 #include "CSecretKeyFactory.h"
+#include "security/CSecurity.h"
+#include "org/apache/harmony/security/fortress/CEngine.h"
 
+using Elastos::Security::CSecurity;
 using Elastos::Security::ISecurity;
+using Org::Apache::Harmony::Security::Fortress::CEngine;
+using Org::Apache::Harmony::Security::Fortress::ISpiAndProvider;
 
 namespace Elastosx {
 namespace Crypto {
@@ -10,14 +15,18 @@ namespace Crypto {
 CAR_OBJECT_IMPL(CSecretKeyFactory)
 CAR_INTERFACE_IMPL(CSecretKeyFactory, Object, ISecretKeyFactory)
 
-//TODO: Need IEngine
-//AutoPtr<IEngine> CSecretKeyFactory::mENGINE;
+static AutoPtr<IEngine> InitEngine()
+{
+    AutoPtr<IEngine> e;
+    CEngine::New(String("SecretKeyFactory"), (IEngine**)&e);
+    return e;
+}
+
+AutoPtr<IEngine> CSecretKeyFactory::ENGINE = InitEngine();
 
 CSecretKeyFactory::CSecretKeyFactory()
     : mAlgorithm(String(NULL))
 {
-//TODO: Need IEngine
-    // CEngine::New("SecretKeyFactory", (IEngine**)&mEngine);
 }
 
 ECode CSecretKeyFactory::constructor(
@@ -80,11 +89,15 @@ ECode CSecretKeyFactory::GetInstance(
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
-    assert(0 && "TODO");
-//TODO: Need IEngine
-    // AutoPtr<IEngine.SpiAndProvider> sap = ENGINE.getInstance(algorithm, NULL);
-    // return new SecretKeyFactory((SecretKeyFactorySpi) sap.spi, sap.provider, algorithm);
-    return NOERROR;
+
+    AutoPtr<ISpiAndProvider> sap;
+    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    AutoPtr<IInterface> spi;
+    sap->GetSpi((IInterface**)&spi);
+    AutoPtr<IProvider> provider;
+    sap->GetProvider((IProvider**)&provider);
+
+    return CSecretKeyFactory::New(ISecretKeyFactorySpi::Probe(spi), provider, algorithm, secretKeyFactory);
 }
 
 ECode CSecretKeyFactory::GetInstance(
@@ -98,10 +111,10 @@ ECode CSecretKeyFactory::GetInstance(
         // throw new IllegalArgumentException("Provider is null or empty");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+
     AutoPtr<IProvider> impProvider;
     AutoPtr<ISecurity> security;
-//TODO: Need CSecurity
-    // CSecurity::AcquireSingleton((ISecurity**)&security);
+    CSecurity::AcquireSingleton((ISecurity**)&security);
     security->GetProvider(provider, (IProvider**)&impProvider);
     if (impProvider == NULL) {
         // throw new NoSuchProviderException(provider);
@@ -125,10 +138,11 @@ ECode CSecretKeyFactory::GetInstance(
         // throw new NullPointerException("algorithm == NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
-//TODO: Need IEngine
-    // Object spi = ENGINE.getInstance(algorithm, provider, NULL);
-    // return new SecretKeyFactory((SecretKeyFactorySpi) spi, provider, algorithm);
-    return NOERROR;
+
+    AutoPtr<IInterface> spi;
+    ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi);
+    return CSecretKeyFactory::New(ISecretKeyFactorySpi::Probe(spi),
+            provider, algorithm, secretKeyFactory);
 }
 
 } // Crypto

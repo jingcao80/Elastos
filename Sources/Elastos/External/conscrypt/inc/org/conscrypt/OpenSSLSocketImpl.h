@@ -11,6 +11,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/io/InputStream.h>
 #include <elastos/io/OutputStream.h>
+#include "elastosx/net/ssl/SSLSocket.h"
 
 using Elastos::Core::ICloseGuard;
 using Elastos::IO::InputStream;
@@ -27,6 +28,7 @@ using Elastosx::Security::Auth::X500::IX500Principal;
 using Elastosx::Net::Ssl::ISSLSession;
 using Elastosx::Net::Ssl::IHandshakeCompletedListener;
 using Elastosx::Net::Ssl::IX509KeyManager;
+using Elastosx::Net::Ssl::SSLSocket;
 
 namespace Org {
 namespace Conscrypt {
@@ -42,7 +44,7 @@ namespace Conscrypt {
  * </ul>
  */
 class OpenSSLSocketImpl
-    : public Object // public SSLSocket
+    : public SSLSocket
     , public ISSLHandshakeCallbacks
     , public ISSLParametersImplAliasChooser
     , public ISSLParametersImplPSKCallbacks

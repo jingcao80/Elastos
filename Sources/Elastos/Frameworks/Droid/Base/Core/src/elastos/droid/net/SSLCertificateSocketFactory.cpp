@@ -35,14 +35,16 @@ using Elastosx::Net::Ssl::IHostnameVerifier;
 using Elastosx::Net::Ssl::IHttpsURLConnection;
 using Elastosx::Net::Ssl::IHttpsURLConnectionHelper;
 using Elastosx::Net::Ssl::IKeyManager;
+using Elastosx::Net::Ssl::ISSLContextSpi;
 using Elastosx::Net::Ssl::ISSLSession;
+using Elastosx::Net::Ssl::ISSLSessionContext;
 using Elastosx::Net::Ssl::ISSLSocket;
 using Elastosx::Net::Ssl::ISSLSocketFactory;
 using Elastosx::Net::Ssl::ISSLSocketFactoryHelper;
 using Elastosx::Net::Ssl::ITrustManager;
 using Elastosx::Net::Ssl::IX509TrustManager;
 
-// using Org::Conscrypt::COpenSSLContextImpl;
+using Org::Conscrypt::COpenSSLContextImpl;
 using Org::Conscrypt::IClientSessionContext;
 using Org::Conscrypt::IOpenSSLContextImpl;
 using Org::Conscrypt::IOpenSSLSocketImpl;
@@ -159,9 +161,9 @@ ECode SSLCertificateSocketFactory::GetHttpSocketFactory(
 
     AutoPtr<ISSLCertificateSocketFactory> certSocketFactory;
     CSSLCertificateSocketFactory::New(handshakeTimeoutMillis, (ISSLCertificateSocketFactory**)&certSocketFactory);
-    // TODO: Waiting for Org::Apache::Http::Conn::Ssl::CSSLSocketFactory
-    assert(0);
-    // Org::Apache::Http::Conn::Ssl::CSSLSocketFactory::New(certSocketFactory, result);
+
+    Org::Apache::Http::Conn::SSL::CSSLSocketFactory::New(
+            ISSLSocketFactory::Probe(certSocketFactory), result);
     return NOERROR;
 }
 
@@ -211,10 +213,8 @@ ECode SSLCertificateSocketFactory::MakeSocketFactory(
     AutoPtr<ISocketFactory> rev;
     AutoPtr<IOpenSSLContextImpl> sslContext;
     ECode ec;
-    // TODO: Waiting for COpenSSLContextImpl, IOpenSSLContextImpl
-    assert(0);
-    // COpenSSLContextImpl::New((IOpenSSLContextImpl**)&sslContext);
-    // ec = sslContext->EngineInit(keyManagers, trustManagers, NULL);
+    COpenSSLContextImpl::New((IOpenSSLContextImpl**)&sslContext);
+    ec = ISSLContextSpi::Probe(sslContext)->EngineInit(keyManagers, trustManagers, NULL);
     if (FAILED(ec)) {
         if (ec == (ECode)E_KEY_MANAGEMENT_EXCEPTION) {
             Logger::W(TAG, "%d", ec);
@@ -227,14 +227,14 @@ ECode SSLCertificateSocketFactory::MakeSocketFactory(
     }
 
     AutoPtr<IClientSessionContext> sessionContext;
-    // TODO: Waiting for IClientSessionContext
-    assert(0);
-    // sslContext->EngineGetClientSessionContext((IClientSessionContext**)&sessionContext);
-    // sessionContext->SetPersistentCache(mSessionCache);
+    AutoPtr<ISSLSessionContext> ctx;
+    ISSLContextSpi::Probe(sslContext)->EngineGetClientSessionContext((ISSLSessionContext**)&ctx);
+    sessionContext = IClientSessionContext::Probe(ctx);
+    sessionContext->SetPersistentCache(mSessionCache);
 
-    // TODO: Waiting for IOpenSSLContextImpl
-    assert(0);
-    // sslContext->EngineGetSocketFactory((ISocketFactory**)&rev);
+    AutoPtr<ISSLSocketFactory> factory;
+    ISSLContextSpi::Probe(sslContext)->EngineGetSocketFactory((ISSLSocketFactory**)&factory);
+    rev = ISocketFactory::Probe(factory);
 
     FUNC_RETURN(ISSLSocketFactory::Probe(rev))
     //} catch (KeyManagementException e) {
@@ -362,10 +362,7 @@ ECode SSLCertificateSocketFactory::GetNpnSelectedProtocol(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    return NOERROR;
-    // return openSslSocketImpl->GetNpnSelectedProtocol(result);
+    return openSslSocketImpl->GetNpnSelectedProtocol(result);
 }
 
 ECode SSLCertificateSocketFactory::GetAlpnSelectedProtocol(
@@ -376,10 +373,7 @@ ECode SSLCertificateSocketFactory::GetAlpnSelectedProtocol(
 
     AutoPtr<IOpenSSLSocketImpl> openSslSocketImpl;
     CastToOpenSSLSocket(socket, (IOpenSSLSocketImpl**)&openSslSocketImpl);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    return NOERROR;
-    // return openSslSocketImpl->GetAlpnSelectedProtocol(result);
+    return openSslSocketImpl->GetAlpnSelectedProtocol(result);
 }
 
 ECode SSLCertificateSocketFactory::SetKeyManagers(
@@ -411,10 +405,7 @@ ECode SSLCertificateSocketFactory::SetUseSessionTickets(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    return NOERROR;
-    // return openSslSocketImpl->SetUseSessionTickets(useSessionTickets);
+    return openSslSocketImpl->SetUseSessionTickets(useSessionTickets);
 }
 
 ECode SSLCertificateSocketFactory::SetHostname(
@@ -428,10 +419,7 @@ ECode SSLCertificateSocketFactory::SetHostname(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    return NOERROR;
-    // return openSslSocketImpl->SetHostname(hostName);
+    return openSslSocketImpl->SetHostname(hostName);
 }
 
 ECode SSLCertificateSocketFactory::SetSoWriteTimeout(
@@ -445,10 +433,7 @@ ECode SSLCertificateSocketFactory::SetSoWriteTimeout(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    return NOERROR;
-    // return openSslSocketImpl->SetSoWriteTimeout(writeTimeoutMilliseconds);
+    return openSslSocketImpl->SetSoWriteTimeout(writeTimeoutMilliseconds);
 }
 
 ECode SSLCertificateSocketFactory::CastToOpenSSLSocket(
@@ -480,12 +465,12 @@ ECode SSLCertificateSocketFactory::CreateSocket(
     VALIDATE_NOT_NULL(result);
 
     GetDelegate()->CreateSocket(k, host, port, close, result);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    // IOpenSSLSocketImpl::Probe(*result)->SetNpnProtocols(mNpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetAlpnProtocols(mAlpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetHandshakeTimeout(mHandshakeTimeoutMillis);
-    // IOpenSSLSocketImpl::Probe(*result)->SetChannelIdPrivateKey(mChannelIdPrivateKey);
+
+    AutoPtr<IOpenSSLSocketImpl> impl = IOpenSSLSocketImpl::Probe(*result);
+    impl->SetNpnProtocols(mNpnProtocols);
+    impl->SetAlpnProtocols(mAlpnProtocols);
+    impl->SetHandshakeTimeout(mHandshakeTimeoutMillis);
+    impl->SetChannelIdPrivateKey(mChannelIdPrivateKey);
     if (mSecure) {
         return VerifyHostname(*result, host);
     }
@@ -498,12 +483,12 @@ ECode SSLCertificateSocketFactory::CreateSocket(
     VALIDATE_NOT_NULL(result);
 
     ISocketFactory::Probe(GetDelegate())->CreateSocket(result);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    // IOpenSSLSocketImpl::Probe(*result)->SetNpnProtocols(mNpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetAlpnProtocols(mAlpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetHandshakeTimeout(mHandshakeTimeoutMillis);
-    // IOpenSSLSocketImpl::Probe(*result)->SetChannelIdPrivateKey(mChannelIdPrivateKey);
+
+    AutoPtr<IOpenSSLSocketImpl> impl = IOpenSSLSocketImpl::Probe(*result);
+    impl->SetNpnProtocols(mNpnProtocols);
+    impl->SetAlpnProtocols(mAlpnProtocols);
+    impl->SetHandshakeTimeout(mHandshakeTimeoutMillis);
+    impl->SetChannelIdPrivateKey(mChannelIdPrivateKey);
     return NOERROR;
 }
 
@@ -517,12 +502,12 @@ ECode SSLCertificateSocketFactory::CreateSocket(
     VALIDATE_NOT_NULL(result);
 
     ISocketFactory::Probe(GetDelegate())->CreateSocket(addr, port, localAddr, localPort, result);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    // IOpenSSLSocketImpl::Probe(*result)->SetNpnProtocols(mNpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetAlpnProtocols(mAlpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetHandshakeTimeout(mHandshakeTimeoutMillis);
-    // IOpenSSLSocketImpl::Probe(*result)->SetChannelIdPrivateKey(mChannelIdPrivateKey);
+
+    AutoPtr<IOpenSSLSocketImpl> impl = IOpenSSLSocketImpl::Probe(*result);
+    impl->SetNpnProtocols(mNpnProtocols);
+    impl->SetAlpnProtocols(mAlpnProtocols);
+    impl->SetHandshakeTimeout(mHandshakeTimeoutMillis);
+    impl->SetChannelIdPrivateKey(mChannelIdPrivateKey);
     return NOERROR;
 }
 
@@ -534,12 +519,12 @@ ECode SSLCertificateSocketFactory::CreateSocket(
     VALIDATE_NOT_NULL(result);
 
     ISocketFactory::Probe(GetDelegate())->CreateSocket(addr, port, result);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    // IOpenSSLSocketImpl::Probe(*result)->SetNpnProtocols(mNpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetAlpnProtocols(mAlpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetHandshakeTimeout(mHandshakeTimeoutMillis);
-    // IOpenSSLSocketImpl::Probe(*result)->SetChannelIdPrivateKey(mChannelIdPrivateKey);
+
+    AutoPtr<IOpenSSLSocketImpl> impl = IOpenSSLSocketImpl::Probe(*result);
+    impl->SetNpnProtocols(mNpnProtocols);
+    impl->SetAlpnProtocols(mAlpnProtocols);
+    impl->SetHandshakeTimeout(mHandshakeTimeoutMillis);
+    impl->SetChannelIdPrivateKey(mChannelIdPrivateKey);
     return NOERROR;
 }
 
@@ -553,14 +538,14 @@ ECode SSLCertificateSocketFactory::CreateSocket(
     VALIDATE_NOT_NULL(result);
 
     ISocketFactory::Probe(GetDelegate())->CreateSocket(host, port, localAddr, localPort, result);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    // IOpenSSLSocketImpl::Probe(*result)->SetNpnProtocols(mNpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetAlpnProtocols(mAlpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetHandshakeTimeout(mHandshakeTimeoutMillis);
-    // IOpenSSLSocketImpl::Probe(*result)->SetChannelIdPrivateKey(mChannelIdPrivateKey);
+
+    AutoPtr<IOpenSSLSocketImpl> impl = IOpenSSLSocketImpl::Probe(*result);
+    impl->SetNpnProtocols(mNpnProtocols);
+    impl->SetAlpnProtocols(mAlpnProtocols);
+    impl->SetHandshakeTimeout(mHandshakeTimeoutMillis);
+    impl->SetChannelIdPrivateKey(mChannelIdPrivateKey);
     if (mSecure) {
-        VerifyHostname(*result, host);
+        return VerifyHostname(*result, host);
     }
     return NOERROR;
 }
@@ -573,12 +558,12 @@ ECode SSLCertificateSocketFactory::CreateSocket(
     VALIDATE_NOT_NULL(result);
 
     ISocketFactory::Probe(GetDelegate())->CreateSocket(host, port, result);
-    // TODO: Waiting for IOpenSSLSocketImpl
-    assert(0);
-    // IOpenSSLSocketImpl::Probe(*result)->SetNpnProtocols(mNpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetAlpnProtocols(mAlpnProtocols);
-    // IOpenSSLSocketImpl::Probe(*result)->SetHandshakeTimeout(mHandshakeTimeoutMillis);
-    // IOpenSSLSocketImpl::Probe(*result)->SetChannelIdPrivateKey(mChannelIdPrivateKey);
+
+    AutoPtr<IOpenSSLSocketImpl> impl = IOpenSSLSocketImpl::Probe(*result);
+    impl->SetNpnProtocols(mNpnProtocols);
+    impl->SetAlpnProtocols(mAlpnProtocols);
+    impl->SetHandshakeTimeout(mHandshakeTimeoutMillis);
+    impl->SetChannelIdPrivateKey(mChannelIdPrivateKey);
     return NOERROR;
 }
 

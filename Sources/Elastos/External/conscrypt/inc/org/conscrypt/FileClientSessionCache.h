@@ -21,8 +21,6 @@ namespace Org {
 namespace Conscrypt {
 
 class FileClientSessionCache
-    : public Object
-    , public IFileClientSessionCache
 {
 public:
     /**
@@ -146,8 +144,6 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     /**
      * Returns a cache backed by the given directory. Creates the directory
      * (including parent directories) if necessary. This cache should have

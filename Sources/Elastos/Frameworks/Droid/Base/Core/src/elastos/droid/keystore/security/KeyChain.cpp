@@ -8,6 +8,7 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Looper.h"
 #include <elastos/utility/logging/Logger.h>
+#include "_Org.Conscrypt.h"
 
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ILooper;
@@ -33,6 +34,9 @@ using Elastos::Security::Cert::ICertificate;
 using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::CLinkedBlockingQueue;
 using Elastos::Utility::Logging::Logger;
+using Org::Conscrypt::COpenSSLEngineHelper;
+using Org::Conscrypt::IOpenSSLEngine;
+using Org::Conscrypt::IOpenSSLEngineHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -214,11 +218,11 @@ ECode KeyChain::GetPrivateKey(
         return E_KEY_CHAIN_EXCEPTION;
     }
 
-    //TODO AutoPtr<IOpenSSLEngineHelper> oeHelper;
-    //TODO COpenSSLEngineHelper::AcquireSingleton((IOpenSSLEngineHelper**)&oeHelper);
-    //TODO AutoPtr<IOpenSSLEngine> engine;
-    //TODO OpenSSLEngine->GetInstance(String("keystore"), (IOpenSSLEngineHelper**)&oeHelper);
-    //TODO engine->GetPrivateKeyById(keyId, result);
+    AutoPtr<IOpenSSLEngineHelper> oeHelper;
+    COpenSSLEngineHelper::AcquireSingleton((IOpenSSLEngineHelper**)&oeHelper);
+    AutoPtr<IOpenSSLEngine> engine;
+    oeHelper->GetInstance(String("keystore"), (IOpenSSLEngine**)&engine);
+    engine->GetPrivateKeyById(keyId, result);
     //} catch (RemoteException e) {
     //    throw new KeyChainException(e);
     //} catch (RuntimeException e) {

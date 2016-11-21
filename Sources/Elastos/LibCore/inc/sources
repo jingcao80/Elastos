@@ -99,6 +99,7 @@ EXPORT_HEADERS += elastos/utility/regex/Pattern.h
 
 EXPORT_HEADERS += elastos/net/ProxySelector.h
 EXPORT_HEADERS += elastos/net/ResponseCache.h
+EXPORT_HEADERS += elastos/net/Socket.h
 
 EXPORT_HEADERS += elastos/io/InputStream.h
 EXPORT_HEADERS += elastos/io/OutputStream.h
@@ -135,6 +136,7 @@ EXPORT_HEADERS += elastosx/crypto/KeyAgreementSpi.h
 EXPORT_HEADERS += elastosx/net/SocketFactory.h
 EXPORT_HEADERS += elastosx/net/ssl/SSLContextSpi.h
 EXPORT_HEADERS += elastosx/net/ssl/SSLEngine.h
+EXPORT_HEADERS += elastosx/net/ssl/SSLSocket.h
 EXPORT_HEADERS += elastosx/net/ssl/SSLSocketFactory.h
 EXPORT_HEADERS += elastosx/net/ssl/X509ExtendedKeyManager.h
 

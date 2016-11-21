@@ -42,8 +42,9 @@ using Elastosx::Net::Ssl::ITrustManagerFactory;
 using Elastosx::Net::Ssl::ITrustManagerFactoryHelper;
 using Elastosx::Net::Ssl::IX509TrustManager;
 
-// using Org::Conscrypt::CSSLParametersImpl;
+using Org::Conscrypt::CSSLParametersImplHelper;
 using Org::Conscrypt::ISSLParametersImpl;
+using Org::Conscrypt::ISSLParametersImplHelper;
 using Org::Conscrypt::ITrustManagerImpl;
 
 namespace Elastos {
@@ -312,16 +313,11 @@ ECode CertificateChainValidator::VerifyServerDomainAndCertificates(
         return NOERROR;
     }
 
-
-    AutoPtr<ISSLParametersImpl> impl;
-    // TODO: Waiting for CSSLParametersImpl
-    assert(0);
-    // CSSLParametersImpl::AcquireSingleton((ISSLParametersImpl**)&impl);
+    AutoPtr<ISSLParametersImplHelper> helper;
+    CSSLParametersImplHelper::AcquireSingleton((ISSLParametersImplHelper**)&helper);
     AutoPtr<IX509TrustManager> x509TrustManager;
     ECode ec;
-    // TODO: Waiting for ISSLParametersImpl
-    assert(0);
-    // ec = impl->GetDefaultTrustManager((IX509TrustManager**)&x509TrustManager);
+    ec = helper->GetDefaultX509TrustManager((IX509TrustManager**)&x509TrustManager);
     if(FAILED(ec)) {
         if (ec == (ECode)E_GENERAL_SECURITY_EXCEPTION) {
             if (HttpLog::LOGV) {

@@ -193,6 +193,10 @@ module
         interface ISSLContextSpi;
     }
 
+    singleton class CFileClientSessionCache {
+        interface IFileClientSessionCache;
+    }
+
     class CKeyManagerFactoryImpl {
         constructor();
 
@@ -940,6 +944,10 @@ module
 
         interface ISSLParametersImpl;
         interface ICloneable;
+    }
+
+    singleton class CSSLParametersImplHelper {
+        interface ISSLParametersImplHelper;
     }
 
     class CServerSessionContext {

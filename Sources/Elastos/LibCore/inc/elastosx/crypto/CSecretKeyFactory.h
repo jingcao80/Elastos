@@ -8,8 +8,7 @@
 
 using Elastos::Security::IProvider;
 using Elastos::Security::Spec::IKeySpec;
-//TODO: Need IEngine
-//using Org::Apache::Harmony::Security::Fortress::IEngine;
+using Org::Apache::Harmony::Security::Fortress::IEngine;
 
 namespace Elastosx {
 namespace Crypto {
@@ -169,8 +168,7 @@ public:
 
 private:
     // Used to access common engine functionality
-//TODO: Need IEngine
-    // static AutoPtr<IEngine> mENGINE; // = new Engine("SecretKeyFactory");
+    static AutoPtr<IEngine> ENGINE; // = new Engine("SecretKeyFactory");
 
     // Store used provider
     AutoPtr<IProvider> mProvider;

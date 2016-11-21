@@ -43,7 +43,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IInputStream;
-// using Elastos::Security::CMessageDigest;
+using Elastos::Security::CMessageDigestHelper;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Utility::CHashMap;
@@ -466,9 +466,7 @@ ECode RequestHandle::H(
     ECode ec;
     if (param != NULL) {
         AutoPtr<IMessageDigestHelper> helper;
-        // TODO: Waiting for CMessageDigest
-        assert(0);
-        // CMessageDigest::AcquireSingleton((IMessageDigestHelper**)&helper);
+        CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
         AutoPtr<IMessageDigest> md5;
         ec = helper->GetInstance(String("MD5"), (IMessageDigest**)&md5);
         if (FAILED(ec)) {

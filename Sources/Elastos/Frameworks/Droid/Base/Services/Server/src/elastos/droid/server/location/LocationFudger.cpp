@@ -19,7 +19,8 @@ using Elastos::Core::AutoLock;
 using Elastos::Core::Math;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
-using Elastos::Utility::CRandom;
+using Elastos::Security::CSecureRandom;
+using Elastos::Utility::IRandom;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -78,7 +79,7 @@ LocationFudger::LocationFudger(
     /* [in] */ IHandler* handler)
 {
     Logger::E(TAG, "TODO: CSecureRandom is not implemented!");
-    CRandom::New((IRandom**)&mRandom);
+    CSecureRandom::New((ISecureRandom**)&mRandom);
     mContext = context;
     mSettingsObserver = new SettingsObserver();
     mSettingsObserver->constructor(handler, this);
@@ -242,7 +243,7 @@ void LocationFudger::UpdateRandomOffsetLocked()
 Double LocationFudger::NextOffsetLocked()
 {
     Double value;
-    mRandom->NextGaussian(&value);
+    IRandom::Probe(mRandom)->NextGaussian(&value);
     return value * mStandardDeviationInMeters;
 }
 

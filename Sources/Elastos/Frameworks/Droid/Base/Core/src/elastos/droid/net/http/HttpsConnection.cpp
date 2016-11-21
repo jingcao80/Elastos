@@ -40,6 +40,8 @@ using Elastos::Utility::Logging::Logger;
 using Elastosx::Net::ISocketFactory;
 using Elastosx::Net::Ssl::EIID_ITrustManager;
 using Elastosx::Net::Ssl::EIID_IX509TrustManager;
+using Elastosx::Net::Ssl::ISSLContextSpi;
+using Elastosx::Net::Ssl::ISSLSessionContext;
 using Elastosx::Net::Ssl::ISSLSocket;
 using Elastosx::Net::Ssl::ISSLSocketFactory;
 using Elastosx::Net::Ssl::ITrustManager;
@@ -60,11 +62,10 @@ using Org::Apache::Http::Params::IBasicHttpParams;
 using Org::Apache::Http::Params::ICoreConnectionPNames;
 using Org::Apache::Http::Params::IHttpConnectionParams;
 using Org::Apache::Http::Params::IHttpParams;
-// using Org::Conscrypt::CFileClientSessionCacheHelper;
-// using Org::Conscrypt::COpenSSLContextImpl;
+using Org::Conscrypt::CFileClientSessionCache;
+using Org::Conscrypt::COpenSSLContextImpl;
 using Org::Conscrypt::IClientSessionContext;
 using Org::Conscrypt::IFileClientSessionCache;
-using Org::Conscrypt::IFileClientSessionCacheHelper;
 using Org::Conscrypt::IOpenSSLContextImpl;
 using Org::Conscrypt::ISSLClientSessionCache;
 
@@ -137,18 +138,14 @@ ECode HttpsConnection::InitializeEngine(
         IObject::Probe(sessionDir)->ToString(&sSessionDir);
         Logger::D(String("HttpsConnection"), String("Caching SSL sessions in ")
                 + sSessionDir + String("."));
-        AutoPtr<IFileClientSessionCacheHelper> helper;
+        AutoPtr<IFileClientSessionCache> helper;
 
-        // TODO: Waiting for FileClientSessionCacheHelper
-        assert(0);
-        // CFileClientSessionCacheHelper::AcquireSingleton((IFileClientSessionCacheHelper**)&helper);
-        // FAIL_RETURN(helper->UsingDirectory(sessionDir, &cache));
+        CFileClientSessionCache::AcquireSingleton((IFileClientSessionCache**)&helper);
+        FAIL_RETURN(helper->UsingDirectory(sessionDir, (ISSLClientSessionCache**)&cache));
     }
 
     AutoPtr<IOpenSSLContextImpl> sslContext;
-    // TODO: Waiting for COpenSSLContextImpl
-    assert(0);
-    // COpenSSLContextImpl::New((IOpenSSLContextImpl**)&sslContext);
+    COpenSSLContextImpl::New((IOpenSSLContextImpl**)&sslContext);
 
     // here, trust managers is a single trust-all manager
     AutoPtr<ArrayOf<ITrustManager*> > trustManagers = ArrayOf<ITrustManager*>::Alloc(1);
@@ -157,23 +154,16 @@ ECode HttpsConnection::InitializeEngine(
     manager = ITrustManager::Probe(cmanager);
     (*trustManagers)[0] = manager;
 
-    // TODO: Waiting for OpenSSLContextImpl
-    assert(0);
-    // FAIL_RETURN(sslContext->EngineInit(NULL, trustManagers, NULL));
+    FAIL_RETURN(ISSLContextSpi::Probe(sslContext)->EngineInit(NULL, trustManagers, NULL));
 
-    AutoPtr<IClientSessionContext> context;
-    // TODO: Waiting for OpenSSLContextImpl, ClientSessionContext
-    assert(0);
-    // FAIL_RETURN(sslContext->EngineGetClientSessionContext((IClientSessionContext**)&context));
-    // FAIL_RETURN(context->SetPersistentCache(cache));
+    AutoPtr<ISSLSessionContext> context;
+    FAIL_RETURN(ISSLContextSpi::Probe(sslContext)->EngineGetClientSessionContext((ISSLSessionContext**)&context));
+    FAIL_RETURN(IClientSessionContext::Probe(context)->SetPersistentCache(cache));
 
-    {    AutoLock syncLock(sLock);
-        // TODO: Waiting for OpenSSLContextImpl
-        assert(0);
-        // FAIL_RETURN(sslContext->EngineGetSocketFactory((ISSLSocketFactory**)&sSslSocketFactory));
+    {
+        AutoLock syncLock(sLock);
+        return ISSLContextSpi::Probe(sslContext)->EngineGetSocketFactory((ISSLSocketFactory**)&sSslSocketFactory);
     }
-
-    return NOERROR;
 }
 
 AutoPtr<ISSLSocketFactory> HttpsConnection::GetSocketFactory()

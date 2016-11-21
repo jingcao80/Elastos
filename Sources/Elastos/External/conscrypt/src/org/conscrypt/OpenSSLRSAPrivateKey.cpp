@@ -156,8 +156,8 @@ AutoPtr<IOpenSSLRSAPrivateKey> OpenSSLRSAPrivateKey::GetInstance(
 AutoPtr<IOpenSSLKey> OpenSSLRSAPrivateKey::WrapPlatformKey(
     /* [in] */ IRSAPrivateKey* rsaPrivateKey)
 {
-    assert(0 && "TODO");
-    AutoPtr<IOpenSSLKey> wrapper;// = Platform::WrapRsaKey(rsaPrivateKey);
+    AutoPtr<IOpenSSLKey> wrapper;
+    Platform::WrapRsaKey(IPrivateKey::Probe(rsaPrivateKey), (IOpenSSLKey**)&wrapper);
     if (wrapper != NULL) {
         return wrapper;
     }

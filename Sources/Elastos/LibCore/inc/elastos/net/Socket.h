@@ -16,7 +16,7 @@ using Elastos::IO::Channels::ISocketChannel;
 namespace Elastos {
 namespace Net {
 
-class Socket
+class ECO_PUBLIC Socket
     : public Object
     , public ISocket
     , public ICloseable

@@ -21,6 +21,7 @@
 #include <elastos/core/AutoLock.h>
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/StringUtils.h"
+#include <Elastos.CoreLibrary.Extensions.h>
 #include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.Droid.Hardware.h>
 #include <Elastos.Droid.Os.h>
@@ -97,6 +98,7 @@ using Elastos::IO::CFileOutputStream;
 using Elastos::IO::IWriter;
 using Elastos::Math::IBigInteger;
 using Elastos::Math::CBigInteger;
+using Elastos::Security::IKey;
 using Elastos::Security::Spec::IKeySpec;
 using Elastos::Text::IDateFormat;
 using Elastos::Text::ISimpleDateFormat;
@@ -121,10 +123,11 @@ using Elastos::Utility::CLinkedList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IMapEntry;
 using Elastos::Utility::Logging::Slogger;
-// using Elastosx::Crypto::CPBEKeySpec;
-// using Elastosx::Crypto::ISecretKey;
-// using Elastosx::Crypto::ISecretKeyFactory;
-// using Elastosx::Crypto::CSecretKeyFactory;
+using Elastosx::Crypto::Spec::CPBEKeySpec;
+using Elastosx::Crypto::ISecretKey;
+using Elastosx::Crypto::CSecretKeyFactoryHelper;
+using Elastosx::Crypto::ISecretKeyFactory;
+using Elastosx::Crypto::ISecretKeyFactoryHelper;
 using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
@@ -1002,35 +1005,25 @@ ECode CMountService::MountObbAction::HandleExecute()
         hashedKey = String("none");
     }
     else {
-        assert(0);
         // try {
-//         AutoPtr<ISecretKeyFactory> factory;
-//         FAILE_GOTO(CSecretKeyFactory::GetInstance(
-//                 String("PBKDF2WithHmacSHA1"), (ISecretKeyFactory**)&factory), next);
-//         AutoPtr<ArrayOf<Byte> > salt;
-//         FAILE_GOTO(obbInfo->GetSalt((ArrayOf<Byte>**)&salt)), next);
-//         AutoPtr<IKeySpec> ks;
-//         FAILE_GOTO(CPBEKeySpec::New(mKey.GetChars(), salt,
-//                 PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE, (IKeySpec**)&ks), next);
+        AutoPtr<ISecretKeyFactoryHelper> skfHelper;
+        CSecretKeyFactoryHelper::AcquireSingleton((ISecretKeyFactoryHelper**)&skfHelper);
+        AutoPtr<ISecretKeyFactory> factory;
+        skfHelper->GetInstance(
+                String("PBKDF2WithHmacSHA1"), (ISecretKeyFactory**)&factory);
+        AutoPtr<ArrayOf<Byte> > salt;
+        obbInfo->GetSalt((ArrayOf<Byte>**)&salt);
+        AutoPtr<IKeySpec> ks;
+        CPBEKeySpec::New(mKey.GetChars(), salt,
+                PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE, (IKeySpec**)&ks);
 
-//         AutoPtr<ISecretKey> key;
-//         FAILE_GOTO(factory->GenerateSecret(ks, (ISecretKey**)&key), next);
-//         AutoPtr<ArrayOf<Byte> > encoded;
-//         FAILE_GOTO(IKey::Probe(key)->GetEncoded((ArrayOf<Byte>**)&encoded), next);
-//         AutoPtr<IBigInteger> bi;
-//         FAILE_GOTO(CBigInteger::New(encoded, (IBigInteger**)&bi), next);
-//         bi->ToString(16, &hashedKey);
-// next:
-//         if (ec == (ECode)E_NO_SUCH_ALGORITHM_EXCEPTION) {
-//             Slogger::E(TAG, "Could not load PBKDF2 algorithm");
-//             SendNewStatusOrIgnore(OnObbStateChangeListener::ERROR_INTERNAL);
-//             return ec;
-//         }
-//         else if (ec == (ECode)E_INVALID_KEY_SPEC_EXCEPTION) {
-//             Slogger::E(TAG, "Invalid key spec when loading PBKDF2 algorithm");
-//             SendNewStatusOrIgnore(OnObbStateChangeListener::ERROR_INTERNAL);
-//             return ec;
-//         }
+        AutoPtr<ISecretKey> key;
+        factory->GenerateSecret(ks, (ISecretKey**)&key);
+        AutoPtr<ArrayOf<Byte> > encoded;
+        IKey::Probe(key)->GetEncoded((ArrayOf<Byte>**)&encoded);
+        AutoPtr<IBigInteger> bi;
+        CBigInteger::New(*encoded, (IBigInteger**)&bi);
+        bi->ToString(16, &hashedKey);
         // } catch (NoSuchAlgorithmException e) {
         //     Slog.e(TAG, "Could not load PBKDF2 algorithm", e);
         //     sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
