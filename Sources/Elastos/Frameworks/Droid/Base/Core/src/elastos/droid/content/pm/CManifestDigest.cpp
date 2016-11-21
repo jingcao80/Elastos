@@ -167,7 +167,6 @@ ECode CManifestDigest::WriteToParcel(
     return dest->WriteArrayOf((Handle32)mDigest.Get());
 }
 
-
 }
 }
 }

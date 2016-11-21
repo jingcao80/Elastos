@@ -1987,9 +1987,6 @@ fail:
 ECode PackageParser::CollectManifestDigest(
     /* [in] */ Package* pkg)
 {
-    // Logger::I(TAG, " >>> CollectManifestDigest: TODO wait for signature can be parsered");
-    return TRUE;
-
     pkg->mManifestDigest = NULL;
 
     // TODO: extend to gather digest for split APKs
@@ -2065,9 +2062,6 @@ ECode PackageParser::CollectCertificates(
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<Byte>* readBuffer)
 {
-    // Logger::I(TAG, " >>> CollectCertificates: TODO wait for signature can be parsered");
-    return TRUE;
-
     String apkPath;
     apkFile->GetAbsolutePath(&apkPath);
 
@@ -2183,6 +2177,7 @@ _EXIT_:
         Logger::E(TAG, "INSTALL_PARSE_FAILED_NO_CERTIFICATES : Failed to collect certificates from %s", apkPath.string());
         ec = E_PACKAGE_PARSER_EXCEPTION;
     }
+
     // catch (GeneralSecurityException e) {
     //     throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
     //             "Failed to collect certificates from " + apkPath, e);

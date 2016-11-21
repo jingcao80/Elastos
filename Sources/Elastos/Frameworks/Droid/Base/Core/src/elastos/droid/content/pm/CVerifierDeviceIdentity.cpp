@@ -186,7 +186,6 @@ ECode CVerifierDeviceIdentity::DecodeBase32(
     }
 
     *value = output;
-    Slogger::E("CVerifierDeviceIdentity", "CVerifierDeviceIdentity::DecodeBase32() E_NOT_IMPLEMENTED");
     return NOERROR;
 }
 

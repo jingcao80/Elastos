@@ -27,7 +27,9 @@ CAR_OBJECT_IMPL(CASN1GeneralizedTime)
 CAR_INTERFACE_IMPL(CASN1GeneralizedTime, ASN1Time, IASN1GeneralizedTime)
 AutoPtr<IASN1Type> CASN1GeneralizedTime::Init()
 {
-    return new CASN1GeneralizedTime();
+    AutoPtr<IASN1Type> instance;
+    ASSERT_SUCCEEDED(CASN1GeneralizedTime::New((IASN1Type**)&instance))
+    return instance;
 }
 
 ECode CASN1GeneralizedTime::GetInstance(

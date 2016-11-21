@@ -116,6 +116,7 @@ static String InitStaticAttr(
     switch (mode) {
         case 1:
             file = Environment::GetDataDirectory();
+            break;
         case 2:
             file = Environment::GetRootDirectory();
     }
@@ -456,7 +457,7 @@ Boolean SELinuxMMAC::ShouldRestorecon()
     // try {
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-    ec = ioUtils->ReadFileAsByteArray(SEAPP_HASH_FILE, (ArrayOf<Byte>**)&ioUtils);
+    ec = ioUtils->ReadFileAsByteArray(SEAPP_HASH_FILE, (ArrayOf<Byte>**)&storedHash);
     if (ec == (ECode)E_IO_EXCEPTION) {
         Slogger::E(TAG, "Error opening %s. Assuming first boot.", SEAPP_HASH_FILE.string());
     }
@@ -466,9 +467,8 @@ Boolean SELinuxMMAC::ShouldRestorecon()
 
     AutoPtr<IMessageDigestHelper> helper;
     CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
-    Boolean isEqual;
-    helper->IsEqual(storedHash, currentHash, &isEqual);
-    return (storedHash == NULL || !isEqual);
+    Boolean isEqual = FALSE;
+    return (storedHash == NULL || (helper->IsEqual(storedHash, currentHash, &isEqual), !isEqual));
 }
 
 void SELinuxMMAC::SetRestoreconDone()
@@ -496,35 +496,37 @@ ECode SELinuxMMAC::DumpHash(
 {
     AutoPtr<IFileOutputStream> fos;
     AutoPtr<IFile> tmp;
-    // try {
-    AutoPtr<IFile> parentFile;
-    file->GetParentFile((IFile**)&parentFile);
-    AutoPtr<IFileHelper> helper;
-    CFileHelper::AcquireSingleton((IFileHelper**)&helper);
-    helper->CreateTempFile(String("seapp_hash"), String(".journal"), parentFile, (IFile**)&tmp);
-    Boolean result;
-    tmp->SetReadable(TRUE, &result);
-    CFileOutputStream::New(tmp, (IFileOutputStream**)&fos);
-    IOutputStream::Probe(fos)->Write(content);
-    AutoPtr<IFileDescriptor> fd;
-    fos->GetFD((IFileDescriptor**)&fd);
-    fd->Sync();
     ECode ec = NOERROR;
-    if (tmp->RenameTo(file, &result), !result) {
-        String path;
-        file->GetCanonicalPath(&path);
-        Slogger::E(TAG, "Failure renaming %s", path.string());
-        if (tmp != NULL) {
-            tmp->Delete();
+    do {
+        AutoPtr<IFile> parentFile;
+        file->GetParentFile((IFile**)&parentFile);
+        AutoPtr<IFileHelper> helper;
+        CFileHelper::AcquireSingleton((IFileHelper**)&helper);
+        ec = helper->CreateTempFile(String("seapp_hash"), String(".journal"), parentFile, (IFile**)&tmp);
+        if (FAILED(ec))
+            break;
+        Boolean result;
+        tmp->SetReadable(TRUE, &result);
+        ec = CFileOutputStream::New(tmp, (IFileOutputStream**)&fos);
+        if (FAILED(ec))
+            break;
+        ec = IOutputStream::Probe(fos)->Write(content);
+        if (FAILED(ec))
+            break;
+        AutoPtr<IFileDescriptor> fd;
+        fos->GetFD((IFileDescriptor**)&fd);
+        fd->Sync();
+        if (tmp->RenameTo(file, &result), !result) {
+            String path;
+            file->GetCanonicalPath(&path);
+            Slogger::E(TAG, "Failure renaming %s", path.string());
+            ec = E_IO_EXCEPTION;
         }
-        ec = E_IO_EXCEPTION;
+    } while (0);
+
+    if (tmp != NULL) {
+        tmp->Delete();
     }
-    // } finally {
-    //     if (tmp != null) {
-    //         tmp.delete();
-    //     }
-    //     IoUtils.closeQuietly(fos);
-    // }
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
     ioUtils->CloseQuietly(ICloseable::Probe(fos));

@@ -40,7 +40,7 @@ using Elastos::IO::ICloseable;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::ISecureRandomHelper;
 using Elastos::Security::IMessageDigest;
-// using Elastos::Security::CSecureRandomHelper;
+using Elastos::Security::CSecureRandomHelper;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::CMessageDigestHelper;
 using Elastos::Utility::IArrayList;
@@ -2026,8 +2026,7 @@ ECode CUserManagerService::SetRestrictionsChallenge(
         else {
             // try {
             AutoPtr<ISecureRandomHelper> helper;
-            assert(0);
-            // CSecureRandomHelper::AcquireSingleton((ISecureRandomHelper**)&helper);
+            CSecureRandomHelper::AcquireSingleton((ISecureRandomHelper**)&helper);
             AutoPtr<ISecureRandom> random;
             helper->GetInstance(String("SHA1PRNG"), (ISecureRandom**)&random);
             if (FAILED(IRandom::Probe(random)->NextInt64(&pinState->mSalt))) {

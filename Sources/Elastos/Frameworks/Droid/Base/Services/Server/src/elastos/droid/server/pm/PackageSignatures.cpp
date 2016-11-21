@@ -50,8 +50,8 @@ void PackageSignatures::WriteXml(
         Int32 sigHash;
         IObject::Probe(sig)->GetHashCode(&sigHash);
         Int32 j;
-        List< AutoPtr<ISignature> >::Iterator it;
-        for (it = pastSignatures.Begin(), j = 0; it != pastSignatures.End(); ++it, ++j) {
+        List< AutoPtr<ISignature> >::Iterator it = pastSignatures.Begin();
+        for (j = 0; it != pastSignatures.End(); ++it, ++j) {
             AutoPtr<ISignature> pastSig = *it;
             Int32 hash;
             Boolean isEqual;
@@ -62,8 +62,9 @@ void PackageSignatures::WriteXml(
             }
         }
         if (it == pastSignatures.End()) {
+            Int32 size = pastSignatures.GetSize();
             pastSignatures.PushBack(sig);
-            serializer->WriteAttribute(String(NULL), String("index"), StringUtils::ToString((Int32)pastSignatures.GetSize()));
+            serializer->WriteAttribute(String(NULL), String("index"), StringUtils::ToString(size));
             String str;
             sig->ToCharsString(&str);
             serializer->WriteAttribute(String(NULL), String("key"), str);

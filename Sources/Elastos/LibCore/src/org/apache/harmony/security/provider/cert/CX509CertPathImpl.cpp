@@ -152,14 +152,14 @@ ECode CX509CertPathImpl::ASN1SequenceOfDerived::GetDecodedObject(
         }
         AutoPtr<IInterface> decObj;
         CCertificate::ASN1->Decode(bytes, (IInterface**)&decObj);
-        certificates->Add(new CX509CertImpl(ICertificate::Probe(decObj)));
+        AutoPtr<IX509CertImpl> impl;
+        CX509CertImpl::New(ICertificate::Probe(decObj), (IX509CertImpl**)&impl);
+        certificates->Add(impl);
     }
     // create and return the resulting object
     AutoPtr<ArrayOf<Byte> > encoded;
     bis->GetEncoded((ArrayOf<Byte>**)&encoded);
-    *object = new CX509CertPathImpl(certificates.Get(), PKI_PATH, encoded);
-    REFCOUNT_ADD(*object)
-    return NOERROR;
+    return CX509CertPathImpl::New(certificates.Get(), PKI_PATH, encoded, object);
 }
 
 ECode CX509CertPathImpl::ASN1SequenceOfDerived::SetEncodingContent(
@@ -268,13 +268,17 @@ AutoPtr<ArrayOf<String> > CX509CertPathImpl::InitStatic()
 
     AutoPtr<ArrayOf<IASN1Type*> > argForISN = ArrayOf<IASN1Type*>::Alloc(3);
     argForISN->Set(0, ty);
-    argForISN->Set(1, new CASN1Implicit(0, ASN1));
+    AutoPtr<IASN1Type> temp;
+    CASN1Implicit::New(0, ASN1, (IASN1Type**)&temp);
+    argForISN->Set(1, temp);
     argForISN->Set(2, ty);
     ASN1_SIGNED_DATA = new ASN1SequenceDerived1(argForISN);
 
     argForISN = ArrayOf<IASN1Type*>::Alloc(2);
     argForISN->Set(0, ty);
-    argForISN->Set(1, new CASN1Explicit(0, ASN1_SIGNED_DATA.Get()));
+    temp = NULL;
+    CASN1Explicit::New(0, ASN1_SIGNED_DATA, (IASN1Type**)&temp);
+    argForISN->Set(1, temp);
     PKCS7_SIGNED_DATA_OBJECT = new ASN1SequenceDerived2(argForISN);
 
     return ret;

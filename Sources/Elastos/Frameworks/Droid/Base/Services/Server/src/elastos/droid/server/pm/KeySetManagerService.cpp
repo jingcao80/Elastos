@@ -447,22 +447,21 @@ Int64 KeySetManagerService::GetIdFromKeyIdsLPr(
 Int64 KeySetManagerService::GetIdForPublicKeyLPr(
     /* [in] */ IPublicKey* k)
 {
-    Slogger::D(TAG, "[TODO] GetIdForPublicKeyLPr k ====== NULL");
-    if (k != NULL) {
-        AutoPtr<ArrayOf<Byte> > encoded;
+    assert (k != NULL);
+    AutoPtr<ArrayOf<Byte> > encoded;
+    IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
+    String encodedPublicKey(*encoded);
+    HashMap<Int64, AutoPtr<IPublicKey> >::Iterator it = mPublicKeys.Begin();
+    for (; it != mPublicKeys.End(); ++it) {
+        AutoPtr<IPublicKey> value = it->mSecond;
+        encoded = NULL;
         IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
-        String encodedPublicKey(*encoded);
-        HashMap<Int64, AutoPtr<IPublicKey> >::Iterator it = mPublicKeys.Begin();
-        for (; it != mPublicKeys.End(); ++it) {
-            AutoPtr<IPublicKey> value = it->mSecond;
-            encoded = NULL;
-            IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
-            String encodedExistingKey(*encoded);
-            if (encodedPublicKey.Equals(encodedExistingKey)) {
-                return it->mFirst;
-            }
+        String encodedExistingKey(*encoded);
+        if (encodedPublicKey.Equals(encodedExistingKey)) {
+            return it->mFirst;
         }
     }
+
     return PUBLIC_KEY_NOT_FOUND;
 }
 
@@ -632,16 +631,14 @@ ECode KeySetManagerService::EncodePublicKey(
     /* [out] */ String* key)
 {
     VALIDATE_NOT_NULL(key)
-    Slogger::D(TAG, "[TODO] EncodePublicKey k ====== NULL");
-    if (k != NULL) {
-        AutoPtr<ArrayOf<Byte> > encoded;
-        IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
-        AutoPtr<IBase64> base64;
-        CBase64::AcquireSingleton((IBase64**)&base64);
-        AutoPtr<ArrayOf<Byte> > encoded1;
-        base64->Encode(encoded, 0, (ArrayOf<Byte>**)&encoded1);
-        *key = String(*encoded1);
-    }
+    assert(k != NULL);
+    AutoPtr<ArrayOf<Byte> > encoded;
+    IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
+    AutoPtr<IBase64> base64;
+    CBase64::AcquireSingleton((IBase64**)&base64);
+    AutoPtr<ArrayOf<Byte> > encoded1;
+    base64->Encode(encoded, 0, (ArrayOf<Byte>**)&encoded1);
+    *key = String(*encoded1);
     return NOERROR;
 }
 

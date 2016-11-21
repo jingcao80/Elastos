@@ -18,7 +18,9 @@ CAR_INTERFACE_IMPL(CASN1Any, ASN1Type, IASN1Any)
 
 AutoPtr<IASN1Any> CASN1Any::Init()
 {
-    return new CASN1Any();
+    AutoPtr<IASN1Any> instance;
+    ASSERT_SUCCEEDED(CASN1Any::New((IASN1Any**)&instance))
+    return instance;
 }
 
 ECode CASN1Any::GetInstance(

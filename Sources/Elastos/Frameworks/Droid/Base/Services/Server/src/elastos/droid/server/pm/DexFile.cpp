@@ -234,7 +234,6 @@ static Byte IsDexOptNeededForFile(
     /* [in] */ const char* filename,
     /* [in] */ InstructionSet target_instruction_set)
 {
-    Slogger::D("chenxihao", "IsDexOptNeededForFile oat_filename = %s, filename = %s", oat_filename.string(), filename);
     AutoPtr<IFile> file;
     CFile::New(oat_filename, (IFile**)&file);
     Boolean isExists;

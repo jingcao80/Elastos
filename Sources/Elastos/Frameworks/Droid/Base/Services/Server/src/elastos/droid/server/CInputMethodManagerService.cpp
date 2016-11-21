@@ -792,6 +792,7 @@ CInputMethodManagerService::InputMethodFileManager::InputMethodFileManager(
         // throw new NullPointerException("methodMap is NULL");
     }
     mMethodMap = methodMap;
+    CHashMap::New((IHashMap**)&mAdditionalSubtypesMap);
     AutoPtr<IFile> systemDir;
     if (userId == IUserHandle::USER_OWNER) {
         AutoPtr<IEnvironment> env;
@@ -982,6 +983,9 @@ ECode CInputMethodManagerService::InputMethodFileManager::ReadAdditionalInputMet
     parser->GetName(&firstNodeName);
     if (!NODE_SUBTYPES.Equals(firstNodeName)) {
         Slogger::E(TAG, "Xml doesn't start with subtypes");
+        if (fis != NULL) {
+            ICloseable::Probe(fis)->Close();
+        }
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 

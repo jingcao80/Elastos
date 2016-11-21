@@ -23,7 +23,9 @@ CAR_INTERFACE_IMPL(CASN1Enumerated, ASN1Primitive, IASN1Enumerated)
 
 AutoPtr<IASN1Enumerated> CASN1Enumerated::Init()
 {
-    return new CASN1Enumerated();
+    AutoPtr<IASN1Enumerated> instance;
+    ASSERT_SUCCEEDED(CASN1Enumerated::New((IASN1Enumerated**)&instance))
+    return instance;
 }
 
 ECode CASN1Enumerated::GetInstance(

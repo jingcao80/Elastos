@@ -123,6 +123,7 @@ ECode CSignature::ToChars(
     }
     if (outLen != NULL) (*outLen)[0] = N;
     *text = textArray;
+    REFCOUNT_ADD(*text)
     return NOERROR;
 }
 
@@ -260,9 +261,11 @@ ECode CSignature::WriteToParcel(
 }
 
 Boolean CSignature::AreExactMatch(
-    /* [in] */ ArrayOf<ISignature*>* a,
-    /* [in] */ ArrayOf<ISignature*>* b)
+    /* [in] */ ArrayOf<ISignature*>* _a,
+    /* [in] */ ArrayOf<ISignature*>* _b)
 {
+    ArrayOf<IInterface*>* a = (ArrayOf<IInterface*>*)_a;
+    ArrayOf<IInterface*>* b = (ArrayOf<IInterface*>*)_b;
     return (a->GetLength() == b->GetLength()) && ArrayUtils::ContainsAll(a, b)
             && ArrayUtils::ContainsAll(b, a);
 }

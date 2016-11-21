@@ -105,7 +105,10 @@ using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::Utility::CFastPrintWriter;
 using Elastos::Droid::KeyStore::Security::IKeyStore;
 using Elastos::Droid::KeyStore::Security::IKeyStoreHelper;
-// using Elastos::Droid::Keystore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::CKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::CSystemKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::ISystemKeyStoreHelper;
+using Elastos::Droid::KeyStore::Security::ISystemKeyStore;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
@@ -150,6 +153,7 @@ using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::Server::SystemConfig;
 using Elastos::Droid::Server::ServiceThread;
+using Elastos::Droid::Services::SecurityBridge::Api::CPackageManagerMonitor;
 using Elastos::Droid::System::IStructStat;
 using Elastos::Droid::System::OsConstants;
 using Elastos::Droid::System::Os;
@@ -4314,17 +4318,16 @@ ECode CPackageManagerService::constructor(
     /*
      * load and create the security bridge
      */
-    // TODO: SecurityBridge has not implimented!
     // bridgeObject = getClass().getClassLoader().loadClass(SECURITY_BRIDGE_NAME).newInstance();
     // mSecurityBridge = (PackageManagerMonitor)bridgeObject;
     Slogger::E(TAG, "No security bridge jar found, using default");
+    CPackageManagerMonitor::New((IPackageManagerMonitor**)&mSecurityBridge);
     // } catch (Exception e){
     //     Slog.w(TAG, "No security bridge jar found, using default");
     //     mSecurityBridge = new PackageManagerMonitor();
     // }
 
-    //TODO: SELinux
-    // mShouldRestoreconData = SELinuxMMAC::ShouldRestorecon();
+    mShouldRestoreconData = SELinuxMMAC::ShouldRestorecon();
     mActivities = new ActivityIntentResolver(this);
     mReceivers = new ActivityIntentResolver(this);
     mServices = new ServiceIntentResolver(this);
@@ -6529,6 +6532,10 @@ Boolean CPackageManagerService::IsAllowedSignature(
     /* [in] */ PackageParser::Package* pkg,
     /* [in] */ const String& permissionName)
 {
+    // TODO: delete, add by xihao
+    if (pkg->mIsEpk)
+        return TRUE;
+
     for (Int32 i = 0; i < pkg->mSignatures->GetLength(); ++i) {
         AutoPtr<ISignature> pkgSig = (*pkg->mSignatures)[i];
         AutoPtr<HashSet<String> > perms;
@@ -6760,10 +6767,6 @@ Int32 CPackageManagerService::CompareSignatures(
     /* [in] */ ArrayOf<ISignature*>* s1,
     /* [in] */ ArrayOf<ISignature*>* s2)
 {
-    // Slogger::W(TAG, "TODO: CompareSignatures: delete");
-    // TODO
-    return IPackageManager::SIGNATURE_MATCH;
-
     if (s1 == NULL) {
         return s2 == NULL
                 ? IPackageManager::SIGNATURE_NEITHER_SIGNED
@@ -9418,6 +9421,10 @@ ECode CPackageManagerService::VerifySignaturesLP(
     /* [in] */ PackageSetting* pkgSetting,
     /* [in] */ PackageParser::Package* pkg)
 {
+    // TODO: delete, add by xihao
+    if (pkg->mIsEpk)
+        return NOERROR;
+
     if (pkgSetting->mSignatures->mSignatures != NULL) {
         // Already existing package. Make sure signatures match
         Boolean match = CompareSignatures(pkgSetting->mSignatures->mSignatures, pkg->mSignatures)
@@ -10687,12 +10694,12 @@ Slogger::I(TAG, " >>>>>>>>> ScanPackageDirtyLI %s", TO_CSTR(pkg));
             if (sharedSetting != NULL) {
                 s1 = sharedSetting->mSignatures->mSignatures;
             }
-            Slogger::D("TAG", "TODO: CompareSignatures should be called here");
-            // if ((CompareSignatures(pkg->mSignatures, s1) == IPackageManager::SIGNATURE_MATCH)) {
-            //     Slogger::E(TAG, "%d Cannot install platform packages to user storage!",
-            //             IPackageManager::INSTALL_FAILED_INVALID_INSTALL_LOCATION);
-            //     return E_PACKAGE_MANAGER_EXCEPTION;
-            // }
+
+            if ((CompareSignatures(pkg->mSignatures, s1) == IPackageManager::SIGNATURE_MATCH)) {
+                Slogger::E(TAG, "%d Cannot install platform packages to user storage!",
+                        IPackageManager::INSTALL_FAILED_INVALID_INSTALL_LOCATION);
+                return E_PACKAGE_MANAGER_EXCEPTION;
+            }
         }
     }
 
@@ -13761,6 +13768,10 @@ Boolean CPackageManagerService::GrantSignaturePermission(
     /* [in] */ BasePermission* bp,
     /* [in] */ HashSet<String>* origPermissions)
 {
+    // TODO: delete, add by xihao
+    if (pkg->mIsEpk)
+        return TRUE;
+
     Boolean allowed;
     allowed = (CompareSignatures(bp->mPackageSetting->mSignatures->mSignatures, pkg->mSignatures)
                     == IPackageManager::SIGNATURE_MATCH)
@@ -15476,13 +15487,20 @@ void CPackageManagerService::InstallPackageLI(
     res->mReturnCode = IPackageManager::INSTALL_SUCCEEDED;
 
     if (DEBUG_INSTALL) Slogger::D(TAG, "installPackageLI: path=%s", TO_CSTR(tmpPackageFile));
-    // TODO
-    // if (true != mSecurityBridge.approveAppInstallRequest(
-    //                 args.getResourcePath(),
-    //                 Uri.fromFile(args.origin.file).toSafeString())) {
-    //     res.returnCode = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
-    //     return;
-    // }
+
+
+    AutoPtr<IUriHelper> uriHelper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+    AutoPtr<IUri> originUri;
+    uriHelper->FromFile(args->mOrigin->mFile, (IUri**)&originUri);
+    String str;
+    originUri->ToSafeString(&str);
+    Boolean result = FALSE;
+    mSecurityBridge->ApproveAppInstallRequest(args->GetResourcePath(), str, &result);
+    if (!result) {
+        res->mReturnCode = IPackageManager::INSTALL_FAILED_VERIFICATION_FAILURE;
+        return;
+    }
 
     // Retrieve PackageSettings and parse package
     Int32 parseFlags = mDefParseFlags | PackageParser::PARSE_CHATTY |
@@ -15535,14 +15553,17 @@ void CPackageManagerService::InstallPackageLI(
     }
 
     // try {
-    if (FAILED(pp->CollectCertificates(pkg, parseFlags, readBuffer))) {
-        res->SetError(String("Failed collect during installPackageLI"), pp->GetParseError(), ec);
-        return;
-    }
+    // TODO: delete, add by xihao
+    if (!pkg->mIsEpk) {
+        if (FAILED(pp->CollectCertificates(pkg, parseFlags, readBuffer))) {
+            res->SetError(String("Failed collect during installPackageLI"), pp->GetParseError(), ec);
+            return;
+        }
 
-    if (FAILED(pp->CollectManifestDigest(pkg))) {
-        res->SetError(String("Failed collect during installPackageLI"), pp->GetParseError(), ec);
-        return;
+        if (FAILED(pp->CollectManifestDigest(pkg))) {
+            res->SetError(String("Failed collect during installPackageLI"), pp->GetParseError(), ec);
+            return;
+        }
     }
     // } catch (PackageParserException e) {
     //     res.setError("Failed collect during installPackageLI", e);
@@ -15551,31 +15572,27 @@ void CPackageManagerService::InstallPackageLI(
 
     /* If the installer passed in a manifest digest, compare it now. */
     if (args->mManifestDigest != NULL) {
-//         if (DEBUG_INSTALL) {
-//             final String parsedManifest = pkg.manifestDigest == null ? "null"
-//                     : pkg.manifestDigest.toString();
-//             Slog.d(TAG, "Comparing manifests: " + args.manifestDigest.toString() + " vs. "
-//                     + parsedManifest);
-//         }
+        if (DEBUG_INSTALL) {
+            Slogger::D(TAG, "Comparing manifests: %s vs. %s", TO_CSTR(args->mManifestDigest),
+                TO_CSTR(pkg->mManifestDigest));
+        }
 
-        Logger::D(TAG, "TODO: pkg->mManifestDigest is null");
-        // Boolean isEqual;
-        // if (args->mManifestDigest->Equals(pkg->mManifestDigest, &isEqual), !isEqual) {
-        //     res->SetError(IPackageManager::INSTALL_FAILED_PACKAGE_CHANGED, String("Manifest digest changed"));
-        //     return;
-        // }
+        Boolean isEqual;
+        if (args->mManifestDigest->Equals(pkg->mManifestDigest, &isEqual), !isEqual) {
+            res->SetError(IPackageManager::INSTALL_FAILED_PACKAGE_CHANGED, String("Manifest digest changed"));
+            return;
+        }
     }
-//        else if (DEBUG_INSTALL) {
-//         final String parsedManifest = pkg.manifestDigest == null
-//                 ? "null" : pkg.manifestDigest.toString();
-//         Slog.d(TAG, "manifestDigest was not present, but parser got: " + parsedManifest);
-//     }
+    else if (DEBUG_INSTALL) {
+        Slogger::D(TAG, "manifestDigest was not present, but parser got: %s", TO_CSTR(pkg->mManifestDigest));
+    }
 
     // Get rid of all references to package scan path via parser.
     pp = NULL;
     String oldCodePath;
     Boolean systemApp = FALSE;
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         // Check whether the newly-scanned package wants to define an already-defined perm
         List<AutoPtr<PackageParser::Permission> >::ReverseIterator permRIt = pkg->mPermissions.RBegin();
         while (permRIt != pkg->mPermissions.REnd()) {
@@ -16633,10 +16650,9 @@ void CPackageManagerService::RemoveKeystoreDataIfNeeded(
     }
 
     AutoPtr<IKeyStoreHelper> helper;
-    Slogger::E(TAG, "TODO:CPackageManagerService::RemoveKeystoreDataIfNeeded need CKeyStoreHelper");
-    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
     AutoPtr<IKeyStore> keyStore;
-    // helper->GetInstance((IKeyStore**)&keyStore);
+    helper->GetInstance((IKeyStore**)&keyStore);
     if (keyStore != NULL) {
         if (userId == IUserHandle::USER_ALL) {
             AutoPtr<ArrayOf<Int32> > userIds = sUserManager->GetUserIds();
@@ -17796,24 +17812,24 @@ String CPackageManagerService::ArrayToString(
 String CPackageManagerService::GetEncryptKey()
 {
     // try {
-    // AutoPtr<ISystemKeyStoreHelper> helper;
-    // CSystemKeyStoreHelper::AcquireSingleton((ISystemKeyStoreHelper**)&helper);
-    // AutoPtr<ISystemKeyStore> keyStore;
-    // helper->GetInstance((ISystemKeyStore**)&keyStore);
-    // String sdEncKey;
-    // keyStore->RetrieveKeyHexString(SD_ENCRYPTION_KEYSTORE_NAME, &sdEncKey);
-    // if (sdEncKey.IsNull()) {
-    //     if (FAILED(keyStore->generateNewKeyHexString(128,
-    //             SD_ENCRYPTION_ALGORITHM, SD_ENCRYPTION_KEYSTORE_NAME, &sdEncKey))) {
-    //         Slogger::E(TAG, "Failed to create encryption keys with exception: ");
-    //         return String(NULL);
-    //     }
-    //     if (sdEncKey.IsNull()) {
-    //         Slogger::E(TAG, "Failed to create encryption keys");
-    //         return String(NULL);
-    //     }
-    // }
-    // return sdEncKey;
+    AutoPtr<ISystemKeyStoreHelper> helper;
+    CSystemKeyStoreHelper::AcquireSingleton((ISystemKeyStoreHelper**)&helper);
+    AutoPtr<ISystemKeyStore> keyStore;
+    helper->GetInstance((ISystemKeyStore**)&keyStore);
+    String sdEncKey;
+    keyStore->RetrieveKeyHexString(SD_ENCRYPTION_KEYSTORE_NAME, &sdEncKey);
+    if (sdEncKey.IsNull()) {
+        if (FAILED(keyStore->GenerateNewKeyHexString(128,
+                SD_ENCRYPTION_ALGORITHM, SD_ENCRYPTION_KEYSTORE_NAME, &sdEncKey))) {
+            Slogger::E(TAG, "Failed to create encryption keys with exception: ");
+            return String(NULL);
+        }
+        if (sdEncKey.IsNull()) {
+            Slogger::E(TAG, "Failed to create encryption keys");
+            return String(NULL);
+        }
+    }
+    return sdEncKey;
     // } catch (NoSuchAlgorithmException nsae) {
     //     Slog.e(TAG, "Failed to create encryption keys with exception: " + nsae);
     //     return null;
@@ -17821,8 +17837,6 @@ String CPackageManagerService::GetEncryptKey()
     //     Slog.e(TAG, "Failed to retrieve encryption keys with exception: " + ioe);
     //     return null;
     // }
-    Slogger::E(TAG, "TODO:CPackageManagerService::GetEncryptKey is not implemented!");
-    return String("4eb26b94a3996346c363db11b14f5f2b");
 }
 
 ECode CPackageManagerService::UpdateExternalMediaStatus(
@@ -19019,21 +19033,21 @@ ECode CPackageManagerService::ToString(
 ECode CPackageManagerService::ParseSignatureByJava(
     /* [in] */ IElSignatureParser* parser)
 {
-    AutoLock lock(mPackagesLock);
-    if (mElSignatureParser != NULL)
-        return NOERROR;
+    // AutoLock lock(mPackagesLock);
+    // if (mElSignatureParser != NULL)
+    //     return NOERROR;
 
-    HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it;
-    for (it = mPackages.Begin(); it != mPackages.End(); ++it) {
-        AutoPtr<ISignature> signature;
-        parser->GetSignature(it->mFirst, (ISignature**)&signature);
-        if (signature != NULL) {
-            AutoPtr<PackageParser::Package> p = it->mSecond;
-            p->mSignatures = ArrayOf<ISignature*>::Alloc(1);
-            p->mSignatures->Set(0, signature);
-        }
-    }
-    mElSignatureParser = parser;
+    // HashMap<String, AutoPtr<PackageParser::Package> >::Iterator it;
+    // for (it = mPackages.Begin(); it != mPackages.End(); ++it) {
+    //     AutoPtr<ISignature> signature;
+    //     parser->GetSignature(it->mFirst, (ISignature**)&signature);
+    //     if (signature != NULL) {
+    //         AutoPtr<PackageParser::Package> p = it->mSecond;
+    //         p->mSignatures = ArrayOf<ISignature*>::Alloc(1);
+    //         p->mSignatures->Set(0, signature);
+    //     }
+    // }
+    // mElSignatureParser = parser;
     return NOERROR;
 }
 

@@ -1166,8 +1166,7 @@ ECode MediaProvider::ScannerClient::constructor(
 {
     mDb = db;
     mPath = path;
-    AutoPtr<IMediaScannerConnection> connect;
-    CMediaScannerConnection::New(context, this, (IMediaScannerConnection**)&connect);
+    CMediaScannerConnection::New(context, this, (IMediaScannerConnection**)&mScannerConnection);
     return mScannerConnection->Connect();
 }
 
@@ -1178,9 +1177,8 @@ ECode MediaProvider::ScannerClient::OnMediaScannerConnected()
     (*arr)[0] = mPath + String("/");
     (*arr)[1] = mPath + String("0");
     mDb->Query(String("files"), openFileColumns,
-          String("_data >= ? AND _data < ?"),
-          arr, mPath + String("0"),
-          String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+        String("_data >= ? AND _data < ?"), arr,
+        String(NULL), String(NULL), String(NULL), (ICursor**)&c);
    // try  {
       Boolean flag = FALSE;
       AutoPtr<IFile> f;

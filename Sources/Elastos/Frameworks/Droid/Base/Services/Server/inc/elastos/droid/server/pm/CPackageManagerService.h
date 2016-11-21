@@ -15,6 +15,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.SecurityBridge.h>
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
@@ -95,6 +96,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandlerThread;
+using Elastos::Droid::Services::SecurityBridge::Api::IPackageManagerMonitor;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::IAtomicFile;
@@ -3367,7 +3369,7 @@ private:
 
     static const String SD_ENCRYPTION_ALGORITHM;
 
-    // PackageManagerMonitor mSecurityBridge;
+    AutoPtr<IPackageManagerMonitor> mSecurityBridge;
 
     /**
      * Messages for {@link #mHandler} that need to wait for system ready before
