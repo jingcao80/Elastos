@@ -997,6 +997,9 @@ ECode CActivityOne::ButtonElastosKeyPairGenerator()
 
 ECode CActivityOne::ButtonElastosKeyStore()
 {
+    //setprop elastos.class.path /system/lib/Elastos.Droid.Core.eco:/system/lib/Org.Conscrypt.eco
+    Services::Initialize();
+
     AutoPtr<ElastosKeyStoreTest> test = new ElastosKeyStoreTest();
 
     //return test->TestKeyStore_Aliases_Encrypted_Success();                                        //OK
@@ -1015,7 +1018,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_DeleteEntry_NonExistent_Encrypted_Success();                        //OK
 
-    //return test->TestKeyStore_GetCertificate_Single_Encrypted_Success();                                    //error
+    return test->TestKeyStore_GetCertificate_Single_Encrypted_Success();                            //OK
 
     //return test->TestKeyStore_GetCertificate_NonExist_Encrypted_Failure();                        //OK
 
@@ -1077,7 +1080,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_IsKeyEntry_NonExist_Encrypted_Failure();                            //OK
 
-    //return test->TestKeyStore_SetCertificate_CA_Encrypted_Success();                                         //error
+    //return test->TestKeyStore_SetCertificate_CA_Encrypted_Success();                              //OK
 
     //return test->TestKeyStore_SetCertificate_CAExists_Overwrite_Encrypted_Success();              //OK
 
@@ -1125,7 +1128,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_Store_OutputStream_Encrypted_Failure();                            //OK
 
-    return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                          //error
+    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                          //error
 }
 
 ECode CActivityOne::SignatureTest()

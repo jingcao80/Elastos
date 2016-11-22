@@ -130,7 +130,7 @@ ECode ElastosKeyStore::EngineGetCertificate(
     /* [out] */ ICertificate** cert)
 {
     VALIDATE_NOT_NULL(cert);
-    cert = NULL;
+    *cert = NULL;
 
     if (alias.IsNull()) {
         //throw new NullPointerException("alias == null");
