@@ -1447,6 +1447,15 @@ private:
         /* [in] */ Boolean allowRemoteMessages,
         /* [in] */ Int32 concurrency);
 
+    CARAPI RegisterBusObject(
+        /* [in] */ const String& objPath,
+        /* [in] */ IBusObject* busObj,
+        /* [in] */ ArrayOf<IInterfaceDescription*>* busInterfaces,
+        /* [in] */ Boolean secure,
+        /* [in] */ const String& languageTag,
+        /* [in] */ const String& description,
+        /* [in] */ ITranslator* dt);
+
 private:
     friend class NativeBusListener;
 

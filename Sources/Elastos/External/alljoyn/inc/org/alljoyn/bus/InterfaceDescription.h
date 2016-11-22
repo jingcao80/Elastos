@@ -3,9 +3,12 @@
 #define __ORG_ALLJOYN_BUS_INTERFACEDESCRIPTION_H__
 
 #include "_Org.Alljoyn.Bus.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "org/alljoyn/bus/CBusAttachment.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::IList;
 
 namespace Org {
 namespace Alljoyn {
@@ -21,6 +24,19 @@ class InterfaceDescription
 {
 public:
     CAR_INTERFACE_DECL();
+
+    /**
+     * Create the native interface descriptions needed by
+     * busInterfaces.  The Java interface descriptions are returned
+     * in the descs list.
+     * @param busAttachment The connection the interfaces are on.
+     * @param busInterfaces The interfaces.
+     * @param descs The returned interface descriptions.
+     */
+    static CARAPI Create(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+        /* [in] */ IList* descs);
 
     CARAPI IsAnnounced(
         /* [out] */ Boolean* res);

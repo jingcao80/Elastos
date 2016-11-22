@@ -1,6 +1,7 @@
 
 #include "org/alljoyn/bus/BusListener.h"
 #include "org/alljoyn/bus/CBusAttachment.h"
+#include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
 #include <elastos/core/AutoLock.h>
@@ -8,7 +9,9 @@
 
 using Org::Alljoyn::Bus::Ifaces::EIID_IDBusProxyObj;
 using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
+using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::CExecutors;
 using Elastos::Utility::Concurrent::IExecutors;
 using Elastos::Utility::Logging::Logger;
@@ -475,17 +478,28 @@ ECode CBusAttachment::RegisterBusObject(
     /* [in] */ ITranslator* dt)
 {
     // try {
-    // AutoPtr<IList> descs;
-    // CArrayList::New((IList**)&descs);
-
-
-    // Status status = InterfaceDescription.create(this, busObj.getClass().getInterfaces(),
-    //                                             descs);
-    // if (status != Status.OK) {
-    //     return status;
-    // }
-    // return registerBusObject(objPath, busObj, descs.toArray(new InterfaceDescription[0]), secure,
-    //                          languageTag, description, dt);
+    AutoPtr<IList> descs;
+    CArrayList::New((IList**)&descs);
+    AutoPtr<IClassInfo> clsInfo;
+    CObject::ReflectClassInfo(busObj, (IClassInfo**)&clsInfo);
+    Int32 count;
+    clsInfo->GetInterfaceCount(&count);
+    AutoPtr< ArrayOf<IInterfaceInfo*> > itfInfos = ArrayOf<IInterfaceInfo*>::Alloc(count);
+    clsInfo->GetAllInterfaceInfos(itfInfos);
+    AutoPtr< ArrayOf<InterfaceID> > busInterfaces = ArrayOf<InterfaceID>::Alloc(count);
+    for (Int32 i = 0; i < count; i++) {
+        InterfaceID itfID;
+        (*itfInfos)[i]->GetId(&itfID);
+        (*busInterfaces)[i] = itfID;
+    }
+    ECode ec = InterfaceDescription::Create(this, busInterfaces, descs);
+    if (ec != E_STATUS_OK) {
+        return ec;
+    }
+    AutoPtr< ArrayOf<IInterfaceDescription*> > busInterfaceArray;
+    descs->ToArray((ArrayOf<IInterface*>**)&busInterfaceArray);
+    return RegisterBusObject(objPath, busObj, busInterfaceArray, secure,
+            languageTag, description, dt);
     // } catch (AnnotationBusException ex) {
     //     BusException.log(ex);
     //     return Status.BAD_ANNOTATION;
