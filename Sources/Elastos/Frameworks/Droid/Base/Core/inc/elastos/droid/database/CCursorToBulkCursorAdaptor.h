@@ -23,8 +23,9 @@ namespace Database {
  */
 CarClass(CCursorToBulkCursorAdaptor)
     , public Object
-    , public IBinder
+    , public ICursorToBulkCursorAdaptor
     , public IBulkCursor
+    , public IBinder
     , public IProxyDeathRecipient
 {
 private:
@@ -65,7 +66,7 @@ public:
      * and obtaining the row count.
      */
     CARAPI GetBulkCursorDescriptor(
-        /* [out] */ CBulkCursorDescriptor** result);
+        /* [out] */ IBulkCursorDescriptor** result);
 
     CARAPI GetWindow(
         /* [in] */ Int32 position,

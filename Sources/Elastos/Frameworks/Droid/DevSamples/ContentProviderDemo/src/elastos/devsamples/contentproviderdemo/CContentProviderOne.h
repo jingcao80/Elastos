@@ -24,6 +24,8 @@ public:
 
     ~CContentProviderOne();
 
+    TO_STRING_IMPL("CContentProviderOne")
+
     CARAPI constructor();
 
     CARAPI OnCreate(

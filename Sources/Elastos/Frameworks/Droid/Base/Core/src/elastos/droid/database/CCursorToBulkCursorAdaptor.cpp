@@ -70,7 +70,9 @@ ECode CCursorToBulkCursorAdaptor::ContentObserverProxy::OnChange(
 
 const String CCursorToBulkCursorAdaptor::TAG("Cursor");
 
-CAR_INTERFACE_IMPL_3(CCursorToBulkCursorAdaptor, Object, IBinder, IBulkCursor, IProxyDeathRecipient);
+CAR_INTERFACE_IMPL_4(CCursorToBulkCursorAdaptor, Object, \
+    ICursorToBulkCursorAdaptor, IBulkCursor, \
+    IBinder, IProxyDeathRecipient)
 
 CAR_OBJECT_IMPL(CCursorToBulkCursorAdaptor)
 
@@ -112,29 +114,30 @@ ECode CCursorToBulkCursorAdaptor::ProxyDied()
 }
 
 ECode CCursorToBulkCursorAdaptor::GetBulkCursorDescriptor(
-    /* [out] */ CBulkCursorDescriptor** result)
+    /* [out] */ IBulkCursorDescriptor** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
 
-    {    AutoLock syncLock(mLock);
-        FAIL_RETURN(ThrowIfCursorIsClosed())
+    AutoLock syncLock(mLock);
+    FAIL_RETURN(ThrowIfCursorIsClosed())
 
-        AutoPtr<CBulkCursorDescriptor> d;
-        CBulkCursorDescriptor::NewByFriend((CBulkCursorDescriptor**)&d);
-        d->mCursor = this;
-        ICursor* cursor = ICursor::Probe(mCursor);
-        cursor->GetColumnNames((ArrayOf<String>**)&d->mColumnNames);
-        cursor->GetWantsAllOnMoveCalls(&d->mWantsAllOnMoveCalls);
-        cursor->GetCount(&d->mCount);
-        mCursor->GetWindow((ICursorWindow**)&d->mWindow);
-        if (d->mWindow != NULL) {
-            // Acquire a reference to the window because its reference count will be
-            // decremented when it is returned as part of the binder call reply parcel.
-            ISQLiteClosable::Probe(d->mWindow)->AcquireReference();
-        }
-        *result = d;
-        REFCOUNT_ADD(*result)
+    AutoPtr<CBulkCursorDescriptor> d;
+    CBulkCursorDescriptor::NewByFriend((CBulkCursorDescriptor**)&d);
+    d->mCursor = this;
+    ICursor* cursor = ICursor::Probe(mCursor);
+    cursor->GetColumnNames((ArrayOf<String>**)&d->mColumnNames);
+    cursor->GetWantsAllOnMoveCalls(&d->mWantsAllOnMoveCalls);
+    cursor->GetCount(&d->mCount);
+    mCursor->GetWindow((ICursorWindow**)&d->mWindow);
+    if (d->mWindow != NULL) {
+        // Acquire a reference to the window because its reference count will be
+        // decremented when it is returned as part of the binder call reply parcel.
+        ISQLiteClosable::Probe(d->mWindow)->AcquireReference();
     }
+    *result = (IBulkCursorDescriptor*)d.Get();
+    REFCOUNT_ADD(*result)
+
     return NOERROR;
 }
 
@@ -145,45 +148,45 @@ ECode CCursorToBulkCursorAdaptor::GetWindow(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    {    AutoLock syncLock(mLock);
-        FAIL_RETURN(ThrowIfCursorIsClosed())
+    AutoLock syncLock(mLock);
+    FAIL_RETURN(ThrowIfCursorIsClosed())
 
-        Boolean isSuccess;
-        if (ICursor::Probe(mCursor)->MoveToPosition(position, &isSuccess), !isSuccess) {
-            CloseFilledWindowLocked();
-            return NOERROR;
-        }
+    Boolean isSuccess;
+    if (ICursor::Probe(mCursor)->MoveToPosition(position, &isSuccess), !isSuccess) {
+        CloseFilledWindowLocked();
+        return NOERROR;
+    }
 
-        AutoPtr<ICursorWindow> window;
-        mCursor->GetWindow((ICursorWindow**)&window);
-        if (window != NULL) {
-            CloseFilledWindowLocked();
+    AutoPtr<ICursorWindow> window;
+    mCursor->GetWindow((ICursorWindow**)&window);
+    if (window != NULL) {
+        CloseFilledWindowLocked();
+    }
+    else {
+        window = mFilledWindow;
+        if (window == NULL) {
+            CCursorWindow::New(mProviderName, (ICursorWindow**)&mFilledWindow);
+            window = mFilledWindow;
         }
         else {
-            window = mFilledWindow;
-            if (window == NULL) {
-                CCursorWindow::New(mProviderName, (ICursorWindow**)&mFilledWindow);
-                window = mFilledWindow;
+            Int32 pos, rows;
+            window->GetStartPosition(&pos);
+            window->GetNumRows(&rows);
+            if (position < pos || position >= pos + rows) {
+                window->Clear();
             }
-            else {
-                Int32 pos, rows;
-                window->GetStartPosition(&pos);
-                window->GetNumRows(&rows);
-                if (position < pos || position >= pos + rows) {
-                    window->Clear();
-                }
-            }
-            mCursor->FillWindow(position, window);
         }
-
-        if (window != NULL) {
-            // Acquire a reference to the window because its reference count will be
-            // decremented when it is returned as part of the binder call reply parcel.
-            ISQLiteClosable::Probe(window)->AcquireReference();
-        }
-        *result = window;
-        REFCOUNT_ADD(*result)
+        mCursor->FillWindow(position, window);
     }
+
+    if (window != NULL) {
+        // Acquire a reference to the window because its reference count will be
+        // decremented when it is returned as part of the binder call reply parcel.
+        ISQLiteClosable::Probe(window)->AcquireReference();
+    }
+    *result = window;
+    REFCOUNT_ADD(*result)
+
     return NOERROR;
 }
 
@@ -191,34 +194,30 @@ ECode CCursorToBulkCursorAdaptor::OnMove(
     /* [in] */ Int32 position)
 {
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mLock);
-        FAIL_RETURN(ThrowIfCursorIsClosed())
-        Int32 mPosition;
-        ICursor::Probe(mCursor)->GetPosition(&mPosition);
-        Boolean isSuccess;
-        ec = mCursor->OnMove(mPosition, position, &isSuccess);
-    }
-    return ec;
+    AutoLock syncLock(mLock);
+    FAIL_RETURN(ThrowIfCursorIsClosed())
+    Int32 mPosition;
+    ICursor::Probe(mCursor)->GetPosition(&mPosition);
+    Boolean isSuccess;
+    return mCursor->OnMove(mPosition, position, &isSuccess);
 }
 
 ECode CCursorToBulkCursorAdaptor::Deactivate()
 {
-    {    AutoLock syncLock(mLock);
-        if (mCursor != NULL) {
-            UnregisterObserverProxyLocked();
-            ICursor::Probe(mCursor)->Deactivate();
-        }
-
-        CloseFilledWindowLocked();
+    AutoLock syncLock(mLock);
+    if (mCursor != NULL) {
+        UnregisterObserverProxyLocked();
+        ICursor::Probe(mCursor)->Deactivate();
     }
+
+    CloseFilledWindowLocked();
     return NOERROR;
 }
 
 ECode CCursorToBulkCursorAdaptor::Close()
 {
-    {    AutoLock syncLock(mLock);
-        DisposeLocked();
-    }
+    AutoLock syncLock(mLock);
+    DisposeLocked();
     return NOERROR;
 }
 
@@ -227,6 +226,7 @@ ECode CCursorToBulkCursorAdaptor::Requery(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
     ECode ec = NOERROR;
     {    AutoLock syncLock(mLock);
@@ -299,12 +299,12 @@ ECode CCursorToBulkCursorAdaptor::Respond(
     /* [in] */ IBundle* extras,
     /* [out] */ IBundle** result)
 {
-    ECode ec = NOERROR;
-    {    AutoLock syncLock(mLock);
-        FAIL_RETURN(ThrowIfCursorIsClosed())
-        ec = ICursor::Probe(mCursor)->Respond(extras, result);
-    }
-    return ec;
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    AutoLock syncLock(mLock);
+    FAIL_RETURN(ThrowIfCursorIsClosed())
+    return ICursor::Probe(mCursor)->Respond(extras, result);
 }
 
 ECode CCursorToBulkCursorAdaptor::ToString(
@@ -320,10 +320,8 @@ ECode CCursorToBulkCursorAdaptor::constructor(
     /* [in] */ IIContentObserver* observer,
     /* [in] */ const String& providerName)
 {
-    if (ICrossProcessCursor::Probe(cursor) != NULL) {
-        mCursor = ICrossProcessCursor::Probe(cursor);
-    }
-    else {
+    mCursor = ICrossProcessCursor::Probe(cursor);
+    if (mCursor == NULL) {
         CCrossProcessCursorWrapper::New(cursor, (ICrossProcessCursor**)&mCursor);
     }
     mProviderName = providerName;

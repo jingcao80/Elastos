@@ -1,36 +1,45 @@
 
-#ifndef __ELASTOS_DROID_CONTENT_CCONTENTPROVIDERTRANSPORT_H__
-#define __ELASTOS_DROID_CONTENT_CCONTENTPROVIDERTRANSPORT_H__
+#ifndef __ELASTOS_DROID_CONTENT_CONTENT_PROVIDER_NATIVE_H__
+#define __ELASTOS_DROID_CONTENT_CONTENT_PROVIDER_NATIVE_H__
 
-#include "_Elastos_Droid_Content_CContentProviderTransport.h"
-#include "elastos/droid/content/ContentProviderNative.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/ext/frameworkext.h>
+
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IICancellationSignal;
+using Elastos::Droid::Os::IParcelFileDescriptor;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Database::IIContentObserver;
+using Elastos::Droid::Database::IBulkCursorDescriptor;
+using Elastos::Droid::Content::Res::IAssetFileDescriptor;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Content {
 
-CarClass(CContentProviderTransport)
-    , public ContentProviderNative
-    , public IContentProviderTransport
+class ContentProviderProxy
+    : public Object
+    , public IIContentProvider
+    , public IContentProviderProxy
 {
 public:
     CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL()
-
-    CContentProviderTransport();
+    ContentProviderProxy(
+        /* [in] */ IBinder* binder);
 
     CARAPI ToString(
         /* [out] */ String* str);
 
-    CARAPI constructor(
-        /* [in] */ IContentProvider* owner);
-
-    CARAPI GetContentProvider(
-        /* [out] */ IContentProvider** provider);
-
-    CARAPI GetProviderName(
-        /* [out] */ String* name);
+    CARAPI AsBinder(
+        /* [out] */ IBinder** binder);
 
     CARAPI Query(
         /* [in] */ const String& callingPkg,
@@ -41,6 +50,17 @@ public:
         /* [in] */ const String& sortOrder,
         /* [in] */ IICancellationSignal* cancellationSignal,
         /* [out] */ ICursor** cursor);
+
+    CARAPI Query(
+        /* [in] */ const String& callingPkg,
+        /* [in] */ IUri* uri,
+        /* [in] */ ArrayOf<String>* projection,
+        /* [in] */ const String& selection,
+        /* [in] */ ArrayOf<String>* selectionArgs,
+        /* [in] */ const String& sortOrder,
+        /* [in] */ IIContentObserver* observer,
+        /* [in] */ IICancellationSignal* cancellationSignal,
+        /* [out] */ IBulkCursorDescriptor** descriptor);
 
     CARAPI GetType(
         /* [in] */ IUri* uri,
@@ -126,35 +146,58 @@ public:
         /* [out] */ IUri** result);
 
 private:
-    CARAPI EnforceFilePermission(
+    AutoPtr<IIContentProvider> mRemote;
+};
+
+class ContentProviderNative
+    : public Object
+    , public IIContentProvider
+    , public IBinder
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    TO_STRING_IMPL("ContentProviderNative")
+
+    /**
+     * Gets the name of the content provider.
+     * Should probably be part of the {@link IContentProvider} interface.
+     * @return The content provider name.
+     */
+    virtual CARAPI GetProviderName(
+        /* [out] */ String* name) = 0;
+
+    /**
+     * Cast a Binder object into a content resolver interface, generating
+     * a proxy if needed.
+     */
+    static AutoPtr<IIContentProvider> AsInterface(
+        /* [in] */ IBinder* binder);
+
+    virtual CARAPI Query(
         /* [in] */ const String& callingPkg,
         /* [in] */ IUri* uri,
-        /* [in] */ const String& mode);
+        /* [in] */ ArrayOf<String>* projection,
+        /* [in] */ const String& selection,
+        /* [in] */ ArrayOf<String>* selectionArgs,
+        /* [in] */ const String& sortOrder,
+        /* [in] */ IICancellationSignal* cancellationSignal,
+        /* [out] */ ICursor** cursor) = 0;
 
-    CARAPI EnforceReadPermission(
+    CARAPI Query(
         /* [in] */ const String& callingPkg,
         /* [in] */ IUri* uri,
-        /* [out] */ Int32* result);
-
-    CARAPI EnforceWritePermission(
-        /* [in] */ const String& callingPkg,
-        /* [in] */ IUri* uri,
-        /* [out] */ Int32* result);
-
-private:
-    friend class  ContentProvider;
-
-    AutoPtr<IWeakReference> mWeakContentProvider;
-    //ContentProvider* mContentProvider;
-
-    AutoPtr<IAppOpsManager> mAppOpsManager;
-    Int32 mReadOp;// = AppOpsManager.OP_NONE;
-    Int32 mWriteOp;// = AppOpsManager.OP_NONE;
-
+        /* [in] */ ArrayOf<String>* projection,
+        /* [in] */ const String& selection,
+        /* [in] */ ArrayOf<String>* selectionArgs,
+        /* [in] */ const String& sortOrder,
+        /* [in] */ IIContentObserver* observer,
+        /* [in] */ IICancellationSignal* cancellationSignal,
+        /* [out] */ IBulkCursorDescriptor** descriptor);
 };
 
 } // namespace Content
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_CONTENT_CCONTENTPROVIDERTRANSPORT_H__
+#endif //__ELASTOS_DROID_CONTENT_CONTENT_PROVIDER_NATIVE_H__

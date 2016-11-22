@@ -269,9 +269,6 @@ ECode Settings::NameValueCache::GetStringForUser(
         AutoPtr<IBundle> b;
         ec = cp->Call(package, mCallGetCommand, name, args, (IBundle**)&b);
         if (SUCCEEDED(ec) && b != NULL) {
-            Int32 size;
-            IBaseBundle::Probe(b)->GetSize(&size);
-
             String _value;
             IBaseBundle::Probe(b)->GetPairValue(&_value);
             // Don't update our cache for reads of other users' data

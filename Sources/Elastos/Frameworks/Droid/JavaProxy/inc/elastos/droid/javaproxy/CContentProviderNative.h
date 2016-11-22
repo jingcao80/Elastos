@@ -11,6 +11,8 @@ using Elastos::Droid::Content::IContentProviderResult;
 using Elastos::Droid::Content::IIContentProvider;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Database::IIContentObserver;
+using Elastos::Droid::Database::IBulkCursorDescriptor;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
@@ -50,6 +52,17 @@ public:
         /* [in] */ const String& sortOrder,
         /* [in] */ IICancellationSignal* cancellationSignal,
         /* [out] */ ICursor** cursor);
+
+    CARAPI Query(
+        /* [in] */ const String& callingPkg,
+        /* [in] */ IUri* uri,
+        /* [in] */ ArrayOf<String>* projection,
+        /* [in] */ const String& selection,
+        /* [in] */ ArrayOf<String>* selectionArgs,
+        /* [in] */ const String& sortOrder,
+        /* [in] */ IIContentObserver* observer,
+        /* [in] */ IICancellationSignal* cancellationSignal,
+        /* [out] */ IBulkCursorDescriptor** descriptor);
 
     CARAPI GetType(
         /* [in] */ IUri* uri,

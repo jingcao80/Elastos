@@ -5,13 +5,13 @@
 #include "_Elastos_Droid_Database_CBulkCursorDescriptor.h"
 #include <elastos/core/Object.h>
 
-
 namespace Elastos {
 namespace Droid {
 namespace Database {
 
 CarClass(CBulkCursorDescriptor)
     , public Object
+    , public IBulkCursorDescriptor
     , public IParcelable
 {
 public:

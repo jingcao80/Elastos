@@ -947,10 +947,13 @@ ECode ContentProvider::ValidateIncomingUri(
         return E_SECURITY_EXCEPTION;
     }
 
-    if (!MatchesOurAuthorities(GetAuthorityWithoutUserId(auth))) {
+    String au = GetAuthorityWithoutUserId(auth);
+    if (!MatchesOurAuthorities(au)) {
         StringBuilder sb("The authority of the uri ");
         sb.Append(Object::ToString(uri));
-        sb.Append(" does not match the one of the contentProvider: ");
+        sb.Append(", authority[");
+        sb += au;
+        sb.Append("] does not match the one of the contentProvider: ");
         if (!mAuthority.IsNull()) {
             sb.Append(mAuthority);
         }
@@ -963,6 +966,8 @@ ECode ContentProvider::ValidateIncomingUri(
             }
         }
 
+        sb.Append(". provider:");
+        sb += TO_CSTR(this);
         Logger::E(TAG, sb.ToString().string());
         return E_SECURITY_EXCEPTION;
     }

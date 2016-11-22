@@ -32,6 +32,7 @@ SOURCES += CDefaultDatabaseErrorHandler.cpp
 SOURCES += BulkCursorToCursorAdaptor.cpp
 SOURCES += CrossProcessCursorWrapper.cpp
 SOURCES += CBulkCursorDescriptor.cpp
+SOURCES += BulkCursorProxy.cpp
 SOURCES += database.cpp
 
 ELASTOS_LIBS = sqlite/sqlite.lib

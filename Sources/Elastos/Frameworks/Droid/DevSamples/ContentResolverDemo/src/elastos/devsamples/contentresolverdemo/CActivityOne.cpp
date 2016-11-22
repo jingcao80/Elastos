@@ -290,6 +290,7 @@ ECode CActivityOne::Query()
     }
     else {
         Logger::E(TAG, " failed to query.");
+        assert(0);
     }
     return ec;
 }

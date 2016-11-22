@@ -74,7 +74,11 @@ using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::Typeface;
 using Elastos::Droid::Content::IContextWrapper;
 using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::IContentProviderProxy;
+using Elastos::Droid::Content::IPendingResult;
 using Elastos::Droid::Content::EIID_IPendingResult;
+using Elastos::Droid::Content::EIID_IComponentCallbacks;
+using Elastos::Droid::Content::EIID_IComponentCallbacks2;
 using Elastos::Droid::Content::Pm::IPackageInfo;
 using Elastos::Droid::Content::Pm::IInstrumentationInfo;
 using Elastos::Droid::Content::Pm::CInstrumentationInfo;
@@ -86,9 +90,6 @@ using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Content::Res::IConfigurationHelper;
 using Elastos::Droid::Content::Res::CConfigurationHelper;
 using Elastos::Droid::Content::Res::EIID_IResources;
-using Elastos::Droid::Content::EIID_IComponentCallbacks;
-using Elastos::Droid::Content::EIID_IComponentCallbacks2;
-using Elastos::Droid::Content::IPendingResult;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Hardware::Display::DisplayManagerGlobal;
@@ -160,7 +161,7 @@ const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
 const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
 const Boolean CActivityThread::DEBUG_SERVICE = FALSE;
 const Boolean CActivityThread::DEBUG_MEMORY_TRIM = FALSE;
-const Boolean CActivityThread::DEBUG_PROVIDER = FALSE;
+const Boolean CActivityThread::DEBUG_PROVIDER = TRUE;
 
 const Int64 CActivityThread::MIN_TIME_BETWEEN_GCS;
 const Int32 CActivityThread::SQLITE_MEM_RELEASED_EVENT_LOG_TAG;
@@ -5593,7 +5594,8 @@ ECode CActivityThread::AcquireExistingProvider(
     }
 
     AutoPtr<IIContentProvider> provider = pr->mProvider;
-    IBinder* jBinder = IBinder::Probe(provider);
+    AutoPtr<IBinder> jBinder = ToJBinder(provider);
+
     IProxy* proxy = (IProxy*)provider->Probe(EIID_IProxy);
     Boolean alive;
     if (proxy != NULL && (proxy->IsStubAlive(&alive), !alive)) {
@@ -5634,7 +5636,7 @@ ECode CActivityThread::ReleaseProvider(
         return NOERROR;
     }
 
-    IBinder* jBinder = IBinder::Probe(provider);
+    AutoPtr<IBinder> jBinder = ToJBinder(provider);
     {
         AutoLock lock(mProviderMapLock);
         AutoPtr<ProviderRefCount> prc;
@@ -5772,7 +5774,7 @@ ECode CActivityThread::CompleteRemoveProvider(
 
         AutoPtr<IIContentProvider> provider;
         prc->mHolder->GetContentProvider((IIContentProvider**)&provider);
-        IBinder* jBinder = IBinder::Probe(provider);
+        AutoPtr<IBinder> jBinder = ToJBinder(provider);
         AutoPtr<ProviderRefCount> existingPrc;
         HashMap< AutoPtr<IBinder>, AutoPtr<ProviderRefCount> >::Iterator it =
                 mProviderRefCountMap.Find(jBinder);
@@ -5948,6 +5950,20 @@ AutoPtr<CActivityThread::ProviderClientRecord> CActivityThread::InstallProviderA
     return pcr;
 }
 
+AutoPtr<IBinder> CActivityThread::ToJBinder(
+    /* [in] */ IIContentProvider* provider)
+{
+    AutoPtr<IBinder> jBinder;
+    IContentProviderProxy* proxy = IContentProviderProxy::Probe(provider);
+    if (proxy != NULL) {
+        proxy->AsBinder((IBinder**)&jBinder);
+    }
+    else {
+        jBinder = IBinder::Probe(provider);
+    }
+    return jBinder;
+}
+
 /**
  * Installs the provider.
  *
@@ -6047,7 +6063,8 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
         }
 
         if (DEBUG_PROVIDER) {
-            Slogger::V(TAG, "Instantiating local provider %s", name.string());
+            Slogger::V(TAG, "Instantiating local provider %s, localProvider: %s, provider: %s",
+                name.string(), TO_CSTR(localProvider), TO_CSTR(provider));
         }
 
         // XXX Need to create the correct context for this provider.
@@ -6060,8 +6077,8 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
     else {
         provider = holderProvider;
         if (DEBUG_PROVIDER) {
-            Slogger::V(TAG, "Installing external provider %s: %s",
-                authority.string(), name.string());
+            Slogger::V(TAG, "Installing external provider authority[%s] : %s, object: %s",
+                authority.string(), name.string(), TO_CSTR(provider));
         }
     }
 
@@ -6070,10 +6087,13 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
     {
         AutoLock lock(mProviderMapLock);
 
+        AutoPtr<IBinder> jBinder = ToJBinder(provider);
+
         if (DEBUG_PROVIDER) {
-            Slogger::V(TAG, "Checking to add %s / %s", TO_CSTR(provider), name.string());
+            Slogger::V(TAG, "Checking to add %s / %s, jBinder: %s",
+                TO_CSTR(provider), name.string(), TO_CSTR(jBinder));
         }
-        AutoPtr<IBinder> jBinder = IBinder::Probe(provider);
+
         if (localProvider != NULL) {
             String pkgName;
             IPackageItemInfo::Probe(info)->GetPackageName(&pkgName);
@@ -6119,16 +6139,15 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
                 // system process).
                 if (!noReleaseNeeded) {
                     IncProviderRefLocked(prc, stable);
-//                     try {
                     AutoPtr<IBinder> connection;
                     holder->GetConnection((IBinder**)&connection);
                     ActivityManagerNative::GetDefault()->RemoveContentProvider(connection, stable);
-//                     } catch (RemoteException e) {
-//                         //do nothing content provider object is dead any way
-//                     }
                 }
             }
             else {
+                if (DEBUG_PROVIDER) {
+                    Slogger::V(TAG, "install new external provider.");
+                }
                 AutoPtr<ProviderClientRecord> client = InstallProviderAuthoritiesLocked(
                         provider, localProvider, holder);
                 if (noReleaseNeeded) {

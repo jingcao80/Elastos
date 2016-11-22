@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Droid.Os.IBinder;
+    
+    namespace Elastos {
+    namespace Droid {
+    namespace Database {
+
+    /**
+     * Describes the properties of a {@link CursorToBulkCursorAdaptor} that are
+     * needed to initialize its {@link BulkCursorToCursorAdaptor} counterpart on the client's end.
+     *
+     * {@hide}
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    [deprecated]
+    interface IBulkCursorProxy {
+        AsBinder(
+            [out] IBinder** binder);
+    }
+
+
+    } // namespace Database
+    } // namespace Droid
+    } // namespace Elastos
+}

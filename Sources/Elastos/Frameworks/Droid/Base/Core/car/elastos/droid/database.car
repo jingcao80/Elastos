@@ -32,6 +32,8 @@ module
     merge("database/MatrixCursor.car");
     merge("database/MergeCursor.car");
     merge("database/ContentObserverTransport.car");
+    merge("database/BulkCursorDescriptor.car");
+    merge("database/BulkCursorNative.car");
     merge("database/sqlite/SQLiteCursor.car");
 
     using interface Elastos.IO.ICloseable;
@@ -224,8 +226,9 @@ module
             [in] IIContentObserver* observer,
             [in] String providerName);
 
-        interface IBinder;
+        interface ICursorToBulkCursorAdaptor;
         interface IBulkCursor;
+        interface IBinder;
         interface IProxyDeathRecipient;
     }
 
@@ -244,6 +247,7 @@ module
     class CBulkCursorDescriptor {
         constructor();
 
+        interface IBulkCursorDescriptor;
         interface IParcelable;
     }
 

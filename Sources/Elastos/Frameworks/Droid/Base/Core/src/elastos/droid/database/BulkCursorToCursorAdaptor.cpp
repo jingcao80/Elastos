@@ -1,13 +1,14 @@
 
 #include "elastos/droid/database/BulkCursorToCursorAdaptor.h"
+#include "elastos/droid/database/CBulkCursorDescriptor.h"
 #include "elastos/droid/database/DatabaseUtils.h"
 #include "elastos/droid/os/CBundle.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::CBundle;
 using Elastos::IO::ICloseable;
 using Elastos::IO::EIID_ICloseable;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,20 +18,26 @@ const String BulkCursorToCursorAdaptor::TAG("BulkCursor");
 
 BulkCursorToCursorAdaptor::BulkCursorToCursorAdaptor()
 {
+}
+
+ECode BulkCursorToCursorAdaptor::constructor()
+{
     mObserverBridge = new SelfContentObserver();
     mObserverBridge->constructor(this);
+    return NOERROR;
 }
 
 ECode BulkCursorToCursorAdaptor::Initialize(
-    /* [in] */ CBulkCursorDescriptor* d)
+    /* [in] */ IBulkCursorDescriptor* d)
 {
-    mBulkCursor = d->mCursor;
-    mColumns = d->mColumnNames;
+    CBulkCursorDescriptor* desc = (CBulkCursorDescriptor*)d;
+    mBulkCursor = desc->mCursor;
+    mColumns = desc->mColumnNames;
     mRowIdColumnIndex = DatabaseUtils::FindRowIdColumnIndex(mColumns);
-    mWantsAllOnMoveCalls = d->mWantsAllOnMoveCalls;
-    mCount = d->mCount;
-    if (d->mWindow != NULL) {
-        SetWindow(d->mWindow);
+    mWantsAllOnMoveCalls = desc->mWantsAllOnMoveCalls;
+    mCount = desc->mCount;
+    if (desc->mWindow != NULL) {
+        SetWindow(desc->mWindow);
     }
     return NOERROR;
 }
@@ -46,7 +53,7 @@ ECode BulkCursorToCursorAdaptor::ThrowIfCursorIsClosed()
 {
     if (mBulkCursor == NULL) {
         //throw new StaleDataException("Attempted to access a cursor after it has been closed.");
-        Slogger::E(TAG, "Attempted to access a cursor after it has been closed.");
+        Logger::E(TAG, "Attempted to access a cursor after it has been closed.");
         return E_STALE_DATA_EXCEPTION;
     }
     return NOERROR;
@@ -67,6 +74,8 @@ ECode BulkCursorToCursorAdaptor::OnMove(
     /* [out] */ Boolean* succeeded)
 {
     VALIDATE_NOT_NULL(succeeded)
+    *succeeded = FALSE;
+
     FAIL_RETURN(ThrowIfCursorIsClosed())
     //try {
     // Make sure we have the proper window
@@ -77,8 +86,7 @@ ECode BulkCursorToCursorAdaptor::OnMove(
         ECode ec = mBulkCursor->GetWindow(newPosition, (ICursorWindow**)&win);
         if (FAILED(ec)) {
             // We tried to get a window and failed
-            Slogger::E(TAG, "Unable to get window because the remote process is dead");
-            *succeeded = FALSE;
+            Logger::E(TAG, "Unable to get window because the remote process is dead");
             return ec;
         }
         SetWindow(win);
@@ -87,21 +95,15 @@ ECode BulkCursorToCursorAdaptor::OnMove(
         ECode ec = mBulkCursor->OnMove(newPosition);
         if (FAILED(ec)) {
             // We tried to get a window and failed
-            Slogger::E(TAG, "Unable to get window because the remote process is dead");
-            *succeeded = FALSE;
+            Logger::E(TAG, "Unable to get window because the remote process is dead");
             return NOERROR;
         }
     }
-    //} catch (RemoteException ex) {
-        // We tried to get a window and failed
-        // Log.e(TAG, "Unable to get window because the remote process is dead");
-        // return false;
-    //}
 
     if (mWindow == NULL) {
-        *succeeded = FALSE;
         return NOERROR;
     }
+
     *succeeded = TRUE;
     return NOERROR;
 }
@@ -117,7 +119,7 @@ ECode BulkCursorToCursorAdaptor::Deactivate()
         ec = mBulkCursor->Deactivate();
         //} catch (RemoteException ex) {
         if(FAILED(ec)) {
-            Slogger::W(TAG, "Remote process exception when deactivating");
+            Logger::W(TAG, "Remote process exception when deactivating");
         }
         //}
     }
@@ -133,7 +135,7 @@ ECode BulkCursorToCursorAdaptor::Close()
         ec = mBulkCursor->Close();
         //} catch (RemoteException ex) {
         if(FAILED(ec)) {
-            Slogger::W(TAG, String("Remote process exception when closing"));
+            Logger::W(TAG, String("Remote process exception when closing"));
         }
         //} finally {
         mBulkCursor = NULL;
@@ -146,6 +148,8 @@ ECode BulkCursorToCursorAdaptor::Requery(
     /* [out] */ Boolean* succeeded)
 {
     VALIDATE_NOT_NULL(succeeded)
+    *succeeded = FALSE;
+
     FAIL_RETURN(ThrowIfCursorIsClosed())
     Boolean issuccess;
 
@@ -154,9 +158,8 @@ ECode BulkCursorToCursorAdaptor::Requery(
     GetObserver((IIContentObserver**)&observer);
     ECode ec = mBulkCursor->Requery(observer, &mCount);
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Unable to requery because the remote process exception , 0x%08x", ec);
+        Logger::E(TAG, "Unable to requery because the remote process exception , 0x%08x", ec);
         Deactivate();
-        *succeeded = FALSE;
         return ec;
     }
     if (mCount != -1) {
@@ -184,6 +187,9 @@ ECode BulkCursorToCursorAdaptor::Requery(
 ECode BulkCursorToCursorAdaptor::GetColumnNames(
     /* [out] */ ArrayOf<String>** names)
 {
+    VALIDATE_NOT_NULL(names)
+    *names = NULL;
+
     FAIL_RETURN(ThrowIfCursorIsClosed())
     *names = mColumns;
     REFCOUNT_ADD(*names)
@@ -209,6 +215,8 @@ ECode BulkCursorToCursorAdaptor::Respond(
     /* [out] */ IBundle** v)
 {
     VALIDATE_NOT_NULL(v)
+    *v = NULL;
+
     //try {
     ECode ec = mBulkCursor->Respond(extras, v);
     //} catch (RemoteException e) {
@@ -216,319 +224,12 @@ ECode BulkCursorToCursorAdaptor::Respond(
         // is killed, but this can still happen if this is being called from the system process,
         // so, better to log and return an empty bundle.
      if(FAILED(ec)) {
-        Slogger::W(TAG, "respond() threw RemoteException, returning an empty bundle. 0x%08x");
+        Logger::W(TAG, "respond() threw RemoteException, returning an empty bundle. 0x%08x");
         *v =  CBundle::EMPTY;
         REFCOUNT_ADD(*v)
      }
     //}
     return ec;
-}
-
-ECode BulkCursorToCursorAdaptor::IsBlob(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    return AbstractWindowedCursor::IsBlob(columnIndex, result);
-}
-
-ECode BulkCursorToCursorAdaptor::IsString(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    return AbstractWindowedCursor::IsString(columnIndex, result);
-}
-
-ECode BulkCursorToCursorAdaptor::IsInt64(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    return AbstractWindowedCursor::IsInt64(columnIndex, result);
-}
-
-ECode BulkCursorToCursorAdaptor::IsFloat(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    return AbstractWindowedCursor::IsFloat(columnIndex, result);
-}
-
-ECode BulkCursorToCursorAdaptor::SetWindow(
-    /* [in] */ ICursorWindow* window)
-{
-    return AbstractWindowedCursor::SetWindow(window);
-}
-
-ECode BulkCursorToCursorAdaptor::HasWindow(
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    return AbstractWindowedCursor::HasWindow(result);
-}
-
-ECode BulkCursorToCursorAdaptor::GetNotificationUri(
-    /* [out] */ IUri** uri)
-{
-    VALIDATE_NOT_NULL(uri)
-    return AbstractWindowedCursor::GetNotificationUri(uri);
-}
-
-ECode BulkCursorToCursorAdaptor::OnChange(
-    /* [in] */ Boolean selfChange)
-{
-    return AbstractWindowedCursor::OnChange(selfChange);
-}
-
-ECode BulkCursorToCursorAdaptor::GetWindow(
-    /* [out] */ ICursorWindow** window)
-{
-     VALIDATE_NOT_NULL(window)
-    return AbstractWindowedCursor::GetWindow(window);
-}
-
-ECode BulkCursorToCursorAdaptor::FillWindow(
-    /* [in] */ Int32 pos,
-    /* [in] */ ICursorWindow* window)
-{
-    return AbstractWindowedCursor::FillWindow(pos, window);
-}
-
-ECode BulkCursorToCursorAdaptor::GetPosition(
-    /* [out] */ Int32* position)
-{
-    VALIDATE_NOT_NULL(position)
-    return AbstractWindowedCursor::GetPosition(position);
-}
-
-ECode BulkCursorToCursorAdaptor::Move(
-    /* [in] */ Int32 offset,
-    /* [out] */ Boolean* succeeded)
-{
-    VALIDATE_NOT_NULL(succeeded)
-    return AbstractWindowedCursor::Move(offset, succeeded);
-}
-
-ECode BulkCursorToCursorAdaptor::MoveToPosition(
-    /* [in] */ Int32 position,
-    /* [out] */ Boolean* succeeded)
-{
-    VALIDATE_NOT_NULL(succeeded)
-    return AbstractWindowedCursor::MoveToPosition(position, succeeded);
-}
-
-ECode BulkCursorToCursorAdaptor::MoveToFirst(
-    /* [out] */ Boolean* succeeded)
-{
-    VALIDATE_NOT_NULL(succeeded)
-    return AbstractWindowedCursor::MoveToFirst(succeeded);
-}
-
-ECode BulkCursorToCursorAdaptor::MoveToLast(
-    /* [out] */ Boolean* succeeded)
-{
-    VALIDATE_NOT_NULL(succeeded)
-    return AbstractWindowedCursor::MoveToLast(succeeded);
-}
-
-ECode BulkCursorToCursorAdaptor::MoveToNext(
-    /* [out] */ Boolean* succeeded)
-{
-    VALIDATE_NOT_NULL(succeeded)
-    return AbstractWindowedCursor::MoveToNext(succeeded);
-}
-
-ECode BulkCursorToCursorAdaptor::MoveToPrevious(
-    /* [out] */ Boolean* succeeded)
-{
-    VALIDATE_NOT_NULL(succeeded)
-    return AbstractWindowedCursor::MoveToPrevious(succeeded);
-}
-
-ECode BulkCursorToCursorAdaptor::IsFirst(
-    /* [out] */ Boolean* isFirst)
-{
-    VALIDATE_NOT_NULL(isFirst)
-    return AbstractWindowedCursor::IsFirst(isFirst);
-}
-
-ECode BulkCursorToCursorAdaptor::IsLast(
-    /* [out] */ Boolean* isLast)
-{
-    VALIDATE_NOT_NULL(isLast)
-    return AbstractWindowedCursor::IsLast(isLast);
-}
-
-ECode BulkCursorToCursorAdaptor::IsBeforeFirst(
-    /* [out] */ Boolean* isBeforeFirst)
-{
-    VALIDATE_NOT_NULL(isBeforeFirst)
-    return AbstractWindowedCursor::IsBeforeFirst(isBeforeFirst);
-}
-
-ECode BulkCursorToCursorAdaptor::IsAfterLast(
-    /* [out] */ Boolean* isAfterLast)
-{
-    VALIDATE_NOT_NULL(isAfterLast)
-    return AbstractWindowedCursor::IsAfterLast(isAfterLast);
-}
-
-ECode BulkCursorToCursorAdaptor::GetColumnIndex(
-    /* [in] */ const String& columnName,
-    /* [out] */ Int32* columnIndex)
-{
-    VALIDATE_NOT_NULL(columnIndex)
-    return AbstractWindowedCursor::GetColumnIndex(columnName, columnIndex);
-}
-
-ECode BulkCursorToCursorAdaptor::GetColumnIndexOrThrow(
-    /* [in] */ const String& columnName,
-    /* [out] */ Int32* columnIndex)
-{
-    VALIDATE_NOT_NULL(columnIndex)
-    return AbstractWindowedCursor::GetColumnIndexOrThrow(columnName, columnIndex);
-}
-
-ECode BulkCursorToCursorAdaptor::GetColumnName(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ String* columnName)
-{
-    VALIDATE_NOT_NULL(columnName)
-    return AbstractWindowedCursor::GetColumnName(columnIndex, columnName);
-}
-
-ECode BulkCursorToCursorAdaptor::GetColumnCount(
-    /* [out] */ Int32* columnCount)
-{
-    VALIDATE_NOT_NULL(columnCount)
-    return AbstractWindowedCursor::GetColumnCount(columnCount);
-}
-
-ECode BulkCursorToCursorAdaptor::GetBlob(
-    /* [in] */ Int32 columnIndex,
-    /* [out, callee] */ ArrayOf<Byte>** blob)
-{
-    VALIDATE_NOT_NULL(blob)
-    return AbstractWindowedCursor::GetBlob(columnIndex, blob);
-}
-
-ECode BulkCursorToCursorAdaptor::GetString(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ String* columnValue)
-{
-    VALIDATE_NOT_NULL(columnValue)
-    return AbstractWindowedCursor::GetString(columnIndex, columnValue);
-}
-
-ECode BulkCursorToCursorAdaptor::CopyStringToBuffer(
-    /* [in] */ Int32 columnIndex,
-    /* [in, out] */ ICharArrayBuffer* buf)
-{
-    VALIDATE_NOT_NULL(buf)
-    return AbstractWindowedCursor::CopyStringToBuffer(columnIndex, buf);
-}
-
-ECode BulkCursorToCursorAdaptor::GetInt16(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Int16* columnValue)
-{
-    VALIDATE_NOT_NULL(columnValue)
-    return AbstractWindowedCursor::GetInt16(columnIndex, columnValue);
-}
-
-ECode BulkCursorToCursorAdaptor::GetInt32(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Int32* columnValue)
-{
-    VALIDATE_NOT_NULL(columnValue)
-    return AbstractWindowedCursor::GetInt32(columnIndex, columnValue);
-}
-
-ECode BulkCursorToCursorAdaptor::GetInt64(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Int64* columnValue)
-{
-    VALIDATE_NOT_NULL(columnValue)
-    return AbstractWindowedCursor::GetInt64(columnIndex, columnValue);
-}
-
-ECode BulkCursorToCursorAdaptor::GetFloat(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Float* columnValue)
-{
-    VALIDATE_NOT_NULL(columnValue)
-    return AbstractWindowedCursor::GetFloat(columnIndex, columnValue);
-}
-
-ECode BulkCursorToCursorAdaptor::GetDouble(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Double* columnValue)
-{
-    VALIDATE_NOT_NULL(columnValue)
-    return AbstractWindowedCursor::GetDouble(columnIndex, columnValue);
-}
-
-ECode BulkCursorToCursorAdaptor::GetType(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Int32* index)
-{
-    VALIDATE_NOT_NULL(index)
-    return AbstractWindowedCursor::GetType(columnIndex, index);
-}
-
-ECode BulkCursorToCursorAdaptor::IsNull(
-    /* [in] */ Int32 columnIndex,
-    /* [out] */ Boolean* isNull)
-{
-    VALIDATE_NOT_NULL(isNull)
-    return AbstractWindowedCursor::IsNull(columnIndex, isNull);
-}
-
-ECode BulkCursorToCursorAdaptor::IsClosed(
-    /* [out] */ Boolean* closed)
-{
-    VALIDATE_NOT_NULL(closed)
-    return AbstractWindowedCursor::IsClosed(closed);
-}
-
-ECode BulkCursorToCursorAdaptor::RegisterContentObserver(
-    /* [in] */ IContentObserver* observer)
-{
-    return AbstractWindowedCursor::RegisterContentObserver(observer);
-}
-
-ECode BulkCursorToCursorAdaptor::UnregisterContentObserver(
-    /* [in] */ IContentObserver* observer)
-{
-    return AbstractWindowedCursor::UnregisterContentObserver(observer);
-}
-
-ECode BulkCursorToCursorAdaptor::RegisterDataSetObserver(
-    /* [in] */ IDataSetObserver* observer)
-{
-    return AbstractWindowedCursor::RegisterDataSetObserver(observer);
-}
-
-ECode BulkCursorToCursorAdaptor::UnregisterDataSetObserver(
-    /* [in] */ IDataSetObserver* observer)
-{
-    return AbstractWindowedCursor::UnregisterDataSetObserver(observer);
-}
-
-ECode BulkCursorToCursorAdaptor::SetNotificationUri(
-    /* [in] */ IContentResolver* cr,
-    /* [in] */ IUri* uri)
-{
-    return AbstractWindowedCursor::SetNotificationUri(cr, uri);
-}
-
-ECode BulkCursorToCursorAdaptor::GetWantsAllOnMoveCalls(
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    return AbstractWindowedCursor::GetWantsAllOnMoveCalls(result);
 }
 
 } //Database

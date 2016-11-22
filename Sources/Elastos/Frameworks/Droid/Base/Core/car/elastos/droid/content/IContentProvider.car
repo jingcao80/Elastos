@@ -7,6 +7,8 @@ module
     interface Elastos.Droid.Content.IContentValues;
     interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
     interface Elastos.Droid.Database.ICursor;
+    interface Elastos.Droid.Database.IIContentObserver;
+    interface Elastos.Droid.Database.IBulkCursorDescriptor;
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.IICancellationSignal;
@@ -31,6 +33,18 @@ module
             [in] String sortOrder,
             [in] IICancellationSignal* cancellationSignal,
             [out] ICursor** cursor);
+
+        // internal use
+        Query(
+            [in] String callingPkg,
+            [in] IUri* uri,
+            [in] ArrayOf<String>* projection,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [in] String sortOrder,
+            [in] IIContentObserver* observer,
+            [in] IICancellationSignal* cancellationSignal,
+            [out] IBulkCursorDescriptor** descriptor);
 
         GetType(
             [in] IUri* uri,

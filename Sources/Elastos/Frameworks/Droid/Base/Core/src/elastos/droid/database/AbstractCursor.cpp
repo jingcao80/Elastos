@@ -445,11 +445,10 @@ ECode AbstractCursor::UnregisterDataSetObserver(
 ECode AbstractCursor::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    {    AutoLock syncLock(mSelfObserverLock);
-        mContentObservable->DispatchChange(selfChange);
-        if (mNotifyUri != NULL && selfChange) {
-            mContentResolver->NotifyChange(mNotifyUri, mSelfObserver);
-        }
+    AutoLock syncLock(mSelfObserverLock);
+    mContentObservable->DispatchChange(selfChange);
+    if (mNotifyUri != NULL && selfChange) {
+        mContentResolver->NotifyChange(mNotifyUri, mSelfObserver);
     }
     return NOERROR;
 }

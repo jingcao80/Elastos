@@ -1269,6 +1269,9 @@ private:
     //     /* [in] */ const char* format,
     //     /* [in] */ ...);
 
+    AutoPtr<IBinder> ToJBinder(
+        /* [in] */ IIContentProvider* provider);
+
 public:
 
     /** @hide */

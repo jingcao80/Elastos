@@ -1,12 +1,18 @@
 
 #include "elastos/droid/database/CBulkCursorDescriptor.h"
 #include "elastos/droid/database/CCursorWindow.h"
+#include "elastos/droid/database/BulkCursorNative.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::IBinder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Database {
 
-CAR_INTERFACE_IMPL(CBulkCursorDescriptor, Object, IParcelable);
+CAR_INTERFACE_IMPL_2(CBulkCursorDescriptor, Object, IBulkCursorDescriptor, IParcelable)
 
 CAR_OBJECT_IMPL(CBulkCursorDescriptor)
 
@@ -18,7 +24,16 @@ CBulkCursorDescriptor::CBulkCursorDescriptor()
 ECode CBulkCursorDescriptor::WriteToParcel(
     /* [in] */ IParcel* writeout)
 {
-    writeout->WriteInterfacePtr(mCursor);
+    AutoPtr<IBinder> binder;
+    IBulkCursorProxy* proxy = IBulkCursorProxy::Probe(mCursor);
+    if (proxy != NULL) {
+        proxy->AsBinder((IBinder**)&binder);
+    }
+    else {
+        binder = IBinder::Probe(mCursor);
+    }
+
+    writeout->WriteInterfacePtr(binder);
     writeout->WriteArrayOfString(mColumnNames);
     writeout->WriteBoolean(mWantsAllOnMoveCalls);
     writeout->WriteInt32(mCount);
@@ -29,21 +44,29 @@ ECode CBulkCursorDescriptor::WriteToParcel(
     else {
         writeout->WriteInt32(0);
     }
+
+    Logger::D("CBulkCursorDescriptor", " >> WriteToParcel: binder: %s, cursor: %s", TO_CSTR(binder), TO_CSTR(mCursor));
     return NOERROR;
 }
 
 ECode CBulkCursorDescriptor::ReadFromParcel(
     /* [in] */ IParcel* readin)
 {
-    readin->ReadInterfacePtr((Handle32*)&mCursor);
+    AutoPtr<IBinder> binder;
+    readin->ReadInterfacePtr((Handle32*)&binder);
     readin->ReadArrayOfString((ArrayOf<String>**)&mColumnNames);
     readin->ReadBoolean(&mWantsAllOnMoveCalls);
     readin->ReadInt32(&mCount);
     Int32 value;
-    if (readin->ReadInt32(&value), value != 0) {
+    readin->ReadInt32(&value);
+    if (value != 0) {
         CCursorWindow::New((ICursorWindow**)&mWindow);
         IParcelable::Probe(mWindow)->ReadFromParcel(readin);
     }
+
+    mCursor = BulkCursorNative::AsInterface(binder);
+
+    Logger::D("CBulkCursorDescriptor", " >> ReadFromParcel: binder: %s, cursor: %s", TO_CSTR(binder), TO_CSTR(mCursor));
     return NOERROR;
 }
 

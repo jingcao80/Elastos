@@ -2,7 +2,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Net.h"
-
 #include "elastos/droid/content/CContentProviderOperation.h"
 #include "elastos/droid/content/CContentProviderResult.h"
 #include "elastos/droid/content/CContentProviderTransport.h"
@@ -11,6 +10,8 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CCancellationSignalHelper.h"
 #include "elastos/droid/app/AppOpsManager.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -23,6 +24,8 @@ using Elastos::Droid::Os::ICancellationSignalHelper;
 using Elastos::Droid::Os::CCancellationSignalHelper;
 using Elastos::Droid::App::AppOpsManager;
 using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -31,7 +34,7 @@ namespace Content {
 
 static const String TAG("CContentProviderTransport");
 
-CAR_INTERFACE_IMPL_3(CContentProviderTransport, Object, IContentProviderTransport, IIContentProvider, IBinder)
+CAR_INTERFACE_IMPL(CContentProviderTransport, ContentProviderNative, IContentProviderTransport)
 
 CAR_OBJECT_IMPL(CContentProviderTransport)
 
@@ -41,13 +44,27 @@ CContentProviderTransport::CContentProviderTransport()
 {
 }
 
+CContentProviderTransport::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+
+    StringBuilder sb("CContentProviderTransport{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", provider:";
+    String provider;
+    GetProviderName(&provider);
+    sb += provider;
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
+}
+
 ECode CContentProviderTransport::constructor(
     /* [in] */ IContentProvider* owner)
 {
-    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(owner);
-    AutoPtr<IWeakReference> wr;
-    wrs->GetWeakReference((IWeakReference**)&wr);
-    mWeakContentProvider = wr;
+    IWeakReferenceSource::Probe(owner)->GetWeakReference((IWeakReference**)&mWeakContentProvider);
+    Logger::I(TAG, " >> constructor: %s", TO_CSTR(this));
     return NOERROR;
 }
 
@@ -55,11 +72,10 @@ ECode CContentProviderTransport::GetContentProvider(
     /* [out] */ IContentProvider** provider)
 {
     VALIDATE_NOT_NULL(provider)
-    *provider = NULL;
-    AutoPtr<IContentProvider> obj;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&obj);
-    *provider = obj;
-    REFCOUNT_ADD(*provider)
+    AutoPtr<IContentProvider> cp;
+    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&cp);
+    *provider = cp;
+    REFCOUNT_ADD(*provider);
     return NOERROR;
 }
 
@@ -86,8 +102,10 @@ ECode CContentProviderTransport::Query(
     VALIDATE_NOT_NULL(cursor);
     *cursor = NULL;
 
+    Logger::I(TAG, " >> %s Query: %s", TO_CSTR(this), TO_CSTR(inUri));
+
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -122,7 +140,7 @@ ECode CContentProviderTransport::GetType(
     *type = String(NULL);
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -143,7 +161,7 @@ ECode CContentProviderTransport::Insert(
     *insertedUri = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -183,7 +201,7 @@ ECode CContentProviderTransport::BulkInsert(
     *number = 0;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -213,7 +231,7 @@ ECode CContentProviderTransport::ApplyBatch(
     VALIDATE_NOT_NULL(operations)
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
 
@@ -300,7 +318,7 @@ ECode CContentProviderTransport::Delete(
     *rowsAffected = 0;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -333,7 +351,7 @@ ECode CContentProviderTransport::Update(
     *rowsAffected = 0;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -365,7 +383,7 @@ ECode CContentProviderTransport::OpenFile(
     *fileDescriptor = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -398,7 +416,7 @@ ECode CContentProviderTransport::OpenAssetFile(
     *fileDescriptor = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -431,7 +449,7 @@ ECode CContentProviderTransport::Call(
     *bundle = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
 
@@ -450,7 +468,7 @@ ECode CContentProviderTransport::GetStreamTypes(
     *streamTypes = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -473,7 +491,7 @@ ECode CContentProviderTransport::OpenTypedAssetFile(
     *fileDescriptor = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -513,7 +531,7 @@ ECode CContentProviderTransport::Canonicalize(
     *result = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -552,7 +570,7 @@ ECode CContentProviderTransport::Uncanonicalize(
     *result = NULL;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -617,7 +635,7 @@ ECode CContentProviderTransport::EnforceReadPermission(
     *result = op;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL)  return NOERROR;
 
     ContentProvider* cp = (ContentProvider*)contentProvider.Get();
@@ -642,7 +660,7 @@ ECode CContentProviderTransport::EnforceWritePermission(
     *result = op;
 
     AutoPtr<IContentProvider> contentProvider;
-    mWeakContentProvider->Resolve(EIID_IContentProvider, (IInterface**)&contentProvider);
+    GetContentProvider((IContentProvider**)&contentProvider);
     if (contentProvider == NULL) {
         Logger::D("CContentProviderTransport", "EnforceWritePermission contentProvider is NULL");
         return NOERROR;

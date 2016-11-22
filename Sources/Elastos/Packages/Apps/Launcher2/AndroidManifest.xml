@@ -23,6 +23,13 @@
 
     <original-package android:name="Elastos.Droid.Launcher2" />
 
+    <permission android:protectionLevel="normal"
+        android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <permission android:protectionLevel="normal"
+        android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <permission
         android:name="com.android.launcher.permission.PRELOAD_WORKSPACE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"

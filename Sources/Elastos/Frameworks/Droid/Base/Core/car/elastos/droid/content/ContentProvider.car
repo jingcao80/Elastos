@@ -16,6 +16,7 @@ module
     interface Elastos.Droid.Content.Res.IConfiguration;
     interface Elastos.Droid.Database.ICursor;
     interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.ICancellationSignal;
     interface Elastos.Droid.Os.IParcelFileDescriptor;
@@ -1048,6 +1049,11 @@ module
 
         GetProviderName(
             [out] String* name);
+    }
+
+    interface IContentProviderProxy {
+        AsBinder(
+            [out] IBinder** binder);
     }
 
     } // namespace Content

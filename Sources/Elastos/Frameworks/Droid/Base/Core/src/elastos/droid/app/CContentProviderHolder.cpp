@@ -1,6 +1,12 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/app/CContentProviderHolder.h"
+#include "elastos/droid/content/ContentProviderNative.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentProviderProxy;
+using Elastos::Droid::Content::ContentProviderNative;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -30,20 +36,38 @@ ECode CContentProviderHolder::constructor(
 ECode CContentProviderHolder::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
+    AutoPtr<IBinder> binder;
+    IContentProviderProxy* proxy = IContentProviderProxy::Probe(mProvider);
+    if (proxy) {
+        proxy->AsBinder((IBinder**)&binder);
+    }
+    else {
+        binder = IBinder::Probe(mProvider);
+    }
+
     dest->WriteInterfacePtr(mInfo.Get());
-    dest->WriteInterfacePtr(mProvider.Get());
+    dest->WriteInterfacePtr(binder.Get());
     dest->WriteInterfacePtr(mConnection.Get());
     dest->WriteBoolean(mNoReleaseNeeded);
+
+    Logger::I("CContentProviderHolder", " >>> WriteToParcel: binder:%s, provider: %s,",
+        TO_CSTR(binder), TO_CSTR(mProvider));
     return NOERROR;
 }
 
 ECode CContentProviderHolder::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    AutoPtr<IBinder> binder;
     source->ReadInterfacePtr((Handle32*)&mInfo);
-    source->ReadInterfacePtr((Handle32*)&mProvider);
+    source->ReadInterfacePtr((Handle32*)&binder);
     source->ReadInterfacePtr((Handle32*)&mConnection);
     source->ReadBoolean(&mNoReleaseNeeded);
+
+    mProvider = ContentProviderNative::AsInterface(binder);
+
+    Logger::I("CContentProviderHolder", " >>> ReadFromParcel: binder:%s, provider: %s",
+        TO_CSTR(binder), TO_CSTR(mProvider));
     return NOERROR;
 }
 

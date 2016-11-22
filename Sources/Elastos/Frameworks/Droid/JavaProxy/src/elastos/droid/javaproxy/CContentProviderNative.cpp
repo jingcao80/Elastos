@@ -3,7 +3,8 @@
 #include "elastos/droid/javaproxy/CCursorNative.h"
 #include "elastos/droid/javaproxy/CICancellationSignalNative.h"
 #include "elastos/droid/javaproxy/Util.h"
-#include "Elastos.CoreLibrary.Utility.h"
+#include <Elastos.Droid.Net.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/utility/logging/Logger.h>
 #include <unistd.h>
 
@@ -192,6 +193,22 @@ ECode CContentProviderNative::Query(
 
     // LOGGERD(TAG, "- CContentProviderNative::Query()");
     return ec;
+}
+
+ECode CContentProviderNative::Query(
+    /* [in] */ const String& callingPkg,
+    /* [in] */ IUri* uri,
+    /* [in] */ ArrayOf<String>* projection,
+    /* [in] */ const String& selection,
+    /* [in] */ ArrayOf<String>* selectionArgs,
+    /* [in] */ const String& sortOrder,
+    /* [in] */ IIContentObserver* observer,
+    /* [in] */ IICancellationSignal* cancellationSignal,
+    /* [out] */ IBulkCursorDescriptor** descriptor)
+{
+    LOGGERD("CContentProviderNative", " >> Query: %s, uri: %s", callingPkg.string(), TO_CSTR(uri));
+    assert(0 && "TODO");
+    return NOERROR;
 }
 
 ECode CContentProviderNative::OpenTypedAssetFile(
