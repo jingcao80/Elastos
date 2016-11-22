@@ -301,7 +301,7 @@ const Int32 CService::MESSAGE_POST_TOAST;
 ECode CService::constructor()
 {
     mHandler = new MyHandler(this);
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode CService::OnCreate(

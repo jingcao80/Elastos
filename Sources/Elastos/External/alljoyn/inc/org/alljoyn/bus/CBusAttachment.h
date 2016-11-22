@@ -1484,6 +1484,12 @@ private:
 
     AutoPtr<IDBusProxyObj> mDbus;
     AutoPtr<ProxyBusObject> mDbusbo;
+
+    /**
+     * The maximum number of concurrent method and signal handlers locally
+     * executing by default.
+     */
+    static const Int32 DEFAULT_CONCURRENCY;
 };
 
 } // namespace Bus

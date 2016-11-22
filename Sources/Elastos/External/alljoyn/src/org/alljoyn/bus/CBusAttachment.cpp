@@ -1,5 +1,6 @@
 
 #include "org/alljoyn/bus/CBusAttachment.h"
+#include "org/alljoyn/bus/NativeBusAttachment.h"
 
 using Org::Alljoyn::Bus::Ifaces::EIID_IDBusProxyObj;
 using Elastos::Utility::CHashSet;
@@ -26,6 +27,8 @@ const Int32 CBusAttachment::AuthListenerInternal::ONE_TIME_PWD;
 //============================================================================
 // CBusAttachment
 //============================================================================
+const Int32 CBusAttachment::DEFAULT_CONCURRENCY = 4;
+
 CAR_INTERFACE_IMPL(CBusAttachment, Object, IBusAttachment);
 
 CAR_OBJECT_IMPL(CBusAttachment);
@@ -82,7 +85,7 @@ ECode CBusAttachment::constructor(
     /* [in] */ const String& applicationName,
     /* [in] */ RemoteMessage policy)
 {
-    return NOERROR;
+    return constructor(applicationName, policy, DEFAULT_CONCURRENCY);
 }
 
 /**
@@ -93,7 +96,7 @@ ECode CBusAttachment::constructor(
 ECode CBusAttachment::constructor(
     /* [in] */ const String& applicationName)
 {
-    return NOERROR;
+    return constructor(applicationName, RemoteMessage_Ignore, DEFAULT_CONCURRENCY);
 }
 
 void CBusAttachment::Create(
@@ -101,7 +104,10 @@ void CBusAttachment::Create(
     /* [in] */ Boolean allowRemoteMessages,
     /* [in] */ Int32 concurrency)
 {
+    NativeBusAttachment* busPtr = new NativeBusAttachment(applicationName.string(), allowRemoteMessages, concurrency);
+    assert(busPtr != NULL);
 
+    mHandle = reinterpret_cast<Int64>(busPtr);
 }
 
 ECode CBusAttachment::EmitChangedSignal(
