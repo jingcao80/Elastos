@@ -179,6 +179,7 @@ private:
     CARAPI_(void) Destroy();
 
 private:
+    friend class CBusAttachment;
     friend class NativeBusAttachment;
 
     /**

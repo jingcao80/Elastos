@@ -29,6 +29,13 @@ public:
         QCC_UseOSLogging(true);
     }
 
+    ~StaticInitializer()
+    {
+    #ifdef ROUTER
+        AllJoynRouterShutdown();
+    #endif
+        AllJoynShutdown();
+    }
 };
 
 static StaticInitializer sInit;

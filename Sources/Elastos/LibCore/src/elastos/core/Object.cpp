@@ -11,6 +11,8 @@ using Elastos::Core::EIID_ISynchronize;
 namespace Elastos {
 namespace Core {
 
+static Boolean DEBUG = FALSE;
+
 Object::Object()
 {
     IncrementDllLockCount();
@@ -186,7 +188,7 @@ AutoPtr<IClassInfo> Object::GetClassInfo(
     AutoPtr<IClassInfo> classInfo;
     _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     if (classInfo == NULL) {
-        ALOGD("error: failed to GetClassInfo with %s. It is not a Car class.", TO_CSTR(obj));
+        if (DEBUG) ALOGD("error: failed to GetClassInfo with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return classInfo;
 }
@@ -201,7 +203,7 @@ AutoPtr<IClassLoader> Object::GetClassLoader(
         classLoader = ClassLoader::GetClassLoader(classInfo);
     }
     else {
-        ALOGW("error: Object::GetClassLoader failed to GetClassLoader with %s. It is not a Car class.", TO_CSTR(obj));
+        if (DEBUG) ALOGW("error: Object::GetClassLoader failed to GetClassLoader with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return classLoader;
 }
@@ -216,7 +218,7 @@ String Object::GetClassName(
         classInfo->GetName(&className);
     }
     else {
-        ALOGD("error: failed to GetClassName with %s. It is not a Car class.", TO_CSTR(obj));
+        if (DEBUG) ALOGD("error: failed to GetClassName with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return className;
 }
@@ -234,7 +236,7 @@ String Object::GetFullClassName(
         fullClassName = ns + String(".") + className;
     }
     else {
-        ALOGD("error: failed to GetFullClassName with %s. It is not a Car class.", TO_CSTR(obj));
+        if (DEBUG) ALOGD("error: failed to GetFullClassName with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return fullClassName;
 }
@@ -249,7 +251,7 @@ String Object::GetNamespace(
         classInfo->GetNamespace(&ns);
     }
     else {
-        ALOGD("error: failed to GetNamespace with %s. It is not a Car class.", TO_CSTR(obj));
+        if (DEBUG) ALOGD("error: failed to GetNamespace with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return ns;
 }
@@ -264,7 +266,7 @@ String Object::GetModulePath(
         moduleInfo->GetPath(&path);
     }
     else {
-        ALOGD("error: failed to GetModulePath with %s. It is not a Car class.", TO_CSTR(obj));
+        if (DEBUG) ALOGD("error: failed to GetModulePath with %s. It is not a Car class.", TO_CSTR(obj));
     }
     return path;
 }
