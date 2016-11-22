@@ -1,49 +1,63 @@
+#ifndef __ELASTOS_DROID_SETTINGS_LOCATION_DIMMABLEICONPREFERENCE_H__
+#define __ELASTOS_DROID_SETTINGS_LOCATION_DIMMABLEICONPREFERENCE_H__
 
-
-package com.android.settings.location;
+#include "elastos/droid/preference/Preference.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Utility::IAttributeSet;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Location {
 
 /**
  * A preference item that can dim the icon when it's disabled, either directly or because its parent
  * is disabled.
  */
-public class DimmableIconPreference extends Preference {
-    private static const Int32 ICON_ALPHA_ENABLED = 255;
-    private static const Int32 ICON_ALPHA_DISABLED = 102;
+class DimmableIconPreference
+    : public Elastos::Droid::Preference::Preference
+{
+public:
+    TO_STRING_IMPL("DimmableIconPreference")
 
-    public DimmableIconPreference(Context context, AttributeSet attrs, Int32 defStyle) {
-        Super(context, attrs, defStyle);
-    }
+    DimmableIconPreference();
 
-    public DimmableIconPreference(Context context, AttributeSet attrs) {
-        Super(context, attrs);
-    }
+    ~DimmableIconPreference();
 
-    public DimmableIconPreference(Context context) {
-        Super(context);
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs,
+        /* [in] */ Int32 defStyle);
 
-    private void DimIcon(Boolean dimmed) {
-        Drawable icon = GetIcon();
-        if (icon != NULL) {
-            icon->Mutate()->SetAlpha(dimmed ? ICON_ALPHA_DISABLED : ICON_ALPHA_ENABLED);
-            SetIcon(icon);
-        }
-    }
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IAttributeSet* attrs);
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
 
     //@Override
-    CARAPI OnParentChanged(Preference parent, Boolean disableChild) {
-        DimIcon(disableChild);
-        super->OnParentChanged(parent, disableChild);
-    }
+    CARAPI OnParentChanged(
+        /* [in] */ IPreference* parent,
+        /* [in] */ Boolean disableChild);
 
     //@Override
-    CARAPI SetEnabled(Boolean enabled) {
-        DimIcon(!enabled);
-        super->SetEnabled(enabled);
-    }
-}
+    CARAPI SetEnabled(
+        /* [in] */ Boolean enabled);
+
+private:
+    CARAPI_(void) DimIcon(
+        /* [in] */ Boolean dimmed);
+
+private:
+    static const Int32 ICON_ALPHA_ENABLED;
+    static const Int32 ICON_ALPHA_DISABLED;
+};
+
+} // namespace Location
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_LOCATION_DIMMABLEICONPREFERENCE_H__

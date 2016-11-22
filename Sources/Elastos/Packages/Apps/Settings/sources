@@ -87,6 +87,7 @@ ELASTOS_LIBS += src/elastos/droid/settings/dashboard/dashboard.lib
 ELASTOS_LIBS += src/elastos/droid/settings/deviceinfo/deviceinfo.lib
 ELASTOS_LIBS += src/elastos/droid/settings/drawable/drawable.lib
 ELASTOS_LIBS += src/elastos/droid/settings/inputmethod/inputmethod.lib
+ELASTOS_LIBS += src/elastos/droid/settings/location/location.lib
 ELASTOS_LIBS += src/elastos/droid/settings/notification/notification.lib
 ELASTOS_LIBS += src/elastos/droid/settings/search/search.lib
 ELASTOS_LIBS += src/elastos/droid/settings/voice/voice.lib

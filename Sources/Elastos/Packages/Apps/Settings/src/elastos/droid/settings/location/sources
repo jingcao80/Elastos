@@ -1,0 +1,15 @@
+TARGET_NAME = location
+TARGET_TYPE = lib
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
+
+SOURCES += LocationSettingsBase.cpp
+SOURCES += CLocationSettings.cpp
+SOURCES += CLocationMode.cpp
+SOURCES += DimmableIconPreference.cpp
+SOURCES += InjectedSetting.cpp
+SOURCES += CRadioButtonPreference.cpp
+SOURCES += RecentLocationApps.cpp
+SOURCES += SettingsInjector.cpp

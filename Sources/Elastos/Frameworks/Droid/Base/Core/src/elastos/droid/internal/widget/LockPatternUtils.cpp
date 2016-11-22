@@ -1186,7 +1186,7 @@ ECode LockPatternUtils::PasswordToHash(
 
 EXIT:
     if (FAILED(ec)) {
-        Slogger::W(TAG, String("Failed to encode string because of missing algorithm: ") + algo);
+        Slogger::W(TAG, "Failed to encode string because of missing algorithm: %s", algo.string());
         return NOERROR;
     }
 }

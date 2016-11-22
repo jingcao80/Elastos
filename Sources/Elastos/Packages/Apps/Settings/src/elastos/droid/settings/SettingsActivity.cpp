@@ -779,7 +779,6 @@ ECode SettingsActivity::OnCreate(
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Fuelgauge.CPowerUsageSummary")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Users.CUserSettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Nfc.CPaymentSettings")
-                    || initialFragmentName.Equals("Elastos.Droid.Settings.Location.CLocationSettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Accounts.CAccountSettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.CPrivacySettings")
                     || initialFragmentName.Equals("Elastos.Droid.Settings.Accessibility.CAccessibilitySettings")

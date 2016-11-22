@@ -1,130 +1,100 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_LOCATION_INJECTEDSETTING_H__
+#define __ELASTOS_DROID_SETTINGS_LOCATION_INJECTEDSETTING_H__
 
-package com.android.settings.location;
+#include "Elastos.Droid.Content.h"
+#include <elastos/core/Object.h>
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::Internal::Annotations::IImmutable;
-using Elastos::Droid::Internal::Utility::IPreconditions;
+using Elastos::Core::Object;
+
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Location {
 
 /**
  * Specifies a setting that is being injected into Settings &gt; Location &gt; Location services.
  *
  * @see android.location.SettingInjectorService
  */
-@Immutable
-class InjectedSetting {
+// @Immutable
+class InjectedSetting
+    : public Object
+    , public IInjectedSetting
+{
+public:
+    CAR_INTERFACE_DECL()
 
+    /**
+     * Returns a new instance, or NULL.
+     */
+    static CARAPI_(AutoPtr<InjectedSetting>) NewInstance(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& className,
+        /* [in] */ const String& title,
+        /* [in] */ Int32 iconId,
+        /* [in] */ const String& settingsActivity);
+
+    //@Override
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    /**
+     * Returns the intent to start the {@link #className} service.
+     */
+    virtual CARAPI_(AutoPtr<IIntent>) GetServiceIntent();
+
+    //@Override
+    CARAPI Equals(
+        /* [in] */ IInterface* o,
+        /* [out] */ Boolean* result);
+
+    //@Override
+    CARAPI GetHashCode(
+        /* [out] */ Int32* code);
+
+private:
+    InjectedSetting(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& className,
+        /* [in] */ const String& title,
+        /* [in] */ Int32 iconId,
+        /* [in] */ const String& settingsActivity);
+
+public:
     /**
      * Package for the subclass of {@link android.location.SettingInjectorService} and for the
      * settings activity.
      */
-    public final String packageName;
+    String mPackageName;
 
     /**
      * Class name for the subclass of {@link android.location.SettingInjectorService} that
      * specifies dynamic values for the location setting.
      */
-    public final String className;
+    String mClassName;
 
     /**
      * The {@link android.preference.Preference#GetTitle()} value.
      */
-    public final String title;
+    String mTitle;
 
     /**
      * The {@link android.preference.Preference#GetIcon()} value.
      */
-    public final Int32 iconId;
+    Int32 mIconId;
 
     /**
      * The activity to launch to allow the user to modify the settings value. Assumed to be in the
      * {@link #packageName} package.
      */
-    public final String settingsActivity;
+    String mSettingsActivity;
+};
 
-    private InjectedSetting(String packageName, String className,
-            String title, Int32 iconId, String settingsActivity) {
-        this.packageName = Preconditions->CheckNotNull(packageName, "packageName");
-        this.className = Preconditions->CheckNotNull(className, "className");
-        this.title = Preconditions->CheckNotNull(title, "title");
-        this.iconId = iconId;
-        this.settingsActivity = Preconditions->CheckNotNull(settingsActivity);
-    }
+} // namespace Location
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
 
-    /**
-     * Returns a new instance, or NULL.
-     */
-    public static InjectedSetting NewInstance(String packageName, String className,
-            String title, Int32 iconId, String settingsActivity) {
-        if (packageName == NULL || className == NULL ||
-                TextUtils->IsEmpty(title) || TextUtils->IsEmpty(settingsActivity)) {
-            if (Log->IsLoggable(SettingsInjector.TAG, Log.WARN)) {
-                Logger::W(SettingsInjector.TAG, "Illegal setting specification: package="
-                        + packageName + ", class=" + className
-                        + ", title=" + title + ", settingsActivity=" + settingsActivity);
-            }
-            return NULL;
-        }
-        return new InjectedSetting(packageName, className, title, iconId, settingsActivity);
-    }
-
-    //@Override
-    CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return "InjectedSetting{" +
-                "mPackageName='" + packageName + '\'' +
-                ", mClassName='" + className + '\'' +
-                ", label=" + title +
-                ", iconId=" + iconId +
-                ", settingsActivity='" + settingsActivity + '\'' +
-                '}';
-    }
-
-    /**
-     * Returns the intent to start the {@link #className} service.
-     */
-    public Intent GetServiceIntent() {
-        Intent intent = new Intent();
-        intent->SetClassName(packageName, className);
-        return intent;
-    }
-
-    //@Override
-    public Boolean Equals(Object o) {
-        if (this == o) return TRUE;
-        if (!(o instanceof InjectedSetting)) return FALSE;
-
-        InjectedSetting that = (InjectedSetting) o;
-
-        return packageName->Equals(that.packageName) && className->Equals(that.className)
-                && title->Equals(that.title) && iconId == that.iconId
-                && settingsActivity->Equals(that.settingsActivity);
-    }
-
-    //@Override
-    public Int32 HashCode() {
-        Int32 result = packageName->HashCode();
-        result = 31 * result + className->HashCode();
-        result = 31 * result + title->HashCode();
-        result = 31 * result + iconId;
-        result = 31 * result + settingsActivity->HashCode();
-        return result;
-    }
-}
+#endif //__ELASTOS_DROID_SETTINGS_LOCATION_INJECTEDSETTING_H__
