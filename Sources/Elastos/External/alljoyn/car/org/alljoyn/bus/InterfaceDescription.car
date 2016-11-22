@@ -1,0 +1,19 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    interface IInterfaceDescription {
+        /**
+         * Is the interface announced
+         */
+        IsAnnounced(
+            [out] Boolean* res);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

@@ -5,6 +5,9 @@
 #include "_Org.Alljoyn.Bus.h"
 #include <alljoyn/BusObject.h>
 #include <alljoyn/InterfaceDescription.h>
+#include <elastos/utility/etl/HashMap.h>
+
+using Elastos::Utility::Etl::HashMap;
 
 namespace Org {
 namespace Alljoyn {
@@ -23,7 +26,7 @@ public:
     ~NativeBusObject();
 
     QStatus AddInterfaces(
-        /* [in] */ ArrayOf<InterfaceID>* busInterfaces);
+        /* [in] */ ArrayOf<IInterfaceDescription*>* busInterfaces);
 
     void MethodHandler(
         /* [in] */ const ajn::InterfaceDescription::Member* member,
@@ -88,22 +91,26 @@ private:
     NativeBusObject(const NativeBusObject& other);
     NativeBusObject& operator =(const NativeBusObject& other);
 
-    // struct Property {
-    //     String signature;
-    //     jobject jget;
-    //     jobject jset;
-    // };
-    // typedef map<String, jobject> JMethod;
-    // typedef map<String, Property> JProperty;
-    AutoPtr<IBusObject> mBusObj;
+    class Property : public ElLightRefBase
+    {
+    public:
+        String mSignature;
+        AutoPtr<IMethodInfo> mGet;
+        AutoPtr<IMethodInfo> mSet;
+    };
+    typedef HashMap<String, AutoPtr<IMethodInfo> > MethodMap;
+    typedef HashMap<String, AutoPtr<Property> > PropertyMap;
+    AutoPtr<IWeakReference> mBusObj;
 
-    // JMethod methods;
-    // JProperty properties;
+    MethodMap mMethods;
+    PropertyMap mProperties;
     Object mMapLock;
 
     NativeBusAttachment* mBusPtr;
 
     AutoPtr<ITranslator> mTranslatorRef;
+
+    static const String TAG;
 };
 
 } // namespace Bus

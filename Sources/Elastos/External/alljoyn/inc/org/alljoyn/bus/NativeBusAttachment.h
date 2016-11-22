@@ -53,7 +53,7 @@ public:
     QStatus RegisterBusObject(
         /* [in] */ const char* objPath,
         /* [in] */ IBusObject* busObject,
-        /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+        /* [in] */ ArrayOf<IInterfaceDescription*>* busInterfaces,
         /* [in] */ Boolean secure,
         /* [in] */ const String& langTag,
         /* [in] */ const String& desc,

@@ -11,6 +11,10 @@ module
     merge("../../../../car/org/alljoyn/bus/BusAttachment.car");
     merge("../../../../car/org/alljoyn/bus/BusListener.car");
     merge("../../../../car/org/alljoyn/bus/BusObject.car");
+    merge("../../../../car/org/alljoyn/bus/BusObjectListener.car");
+    merge("../../../../car/org/alljoyn/bus/InterfaceDescription.car");
+    merge("../../../../car/org/alljoyn/bus/IntrospectionListener.car");
+    merge("../../../../car/org/alljoyn/bus/IntrospectionWithDescriptionListener.car");
     merge("../../../../car/org/alljoyn/bus/KeyStoreListener.car");
     merge("../../../../car/org/alljoyn/bus/MessageContext.car");
     merge("../../../../car/org/alljoyn/bus/Mutable.car");
