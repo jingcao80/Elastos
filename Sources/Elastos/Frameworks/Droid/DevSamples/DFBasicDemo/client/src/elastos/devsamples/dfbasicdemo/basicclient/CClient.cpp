@@ -403,7 +403,7 @@ const String CClient::TAG("BasicClient");
 ECode CClient::constructor()
 {
     mHandler = new MyHandler(this);
-    return NOERROR;
+    return Activity::constructor();
 }
 
 ECode CClient::OnCreate(
