@@ -1490,6 +1490,8 @@ private:
      * executing by default.
      */
     static const Int32 DEFAULT_CONCURRENCY;
+
+    static const String TAG;
 };
 
 } // namespace Bus

@@ -1,11 +1,17 @@
 
+#include "org/alljoyn/bus/BusListener.h"
 #include "org/alljoyn/bus/CBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
+#include "org/alljoyn/bus/NativeBusListener.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Org::Alljoyn::Bus::Ifaces::EIID_IDBusProxyObj;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::Concurrent::CExecutors;
 using Elastos::Utility::Concurrent::IExecutors;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Alljoyn {
@@ -28,6 +34,7 @@ const Int32 CBusAttachment::AuthListenerInternal::ONE_TIME_PWD;
 // CBusAttachment
 //============================================================================
 const Int32 CBusAttachment::DEFAULT_CONCURRENCY = 4;
+const String CBusAttachment::TAG("CBusAttachment");
 
 CAR_INTERFACE_IMPL(CBusAttachment, Object, IBusAttachment);
 
@@ -384,6 +391,26 @@ ECode CBusAttachment::CancelWhoImplements(
 ECode CBusAttachment::RegisterBusListener(
     /* [in] */ IBusListener* listener)
 {
+    if (listener == NULL) return NOERROR;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "RegisterBusListener(): Exception or NULL bus pointer");
+        return NOERROR;
+    }
+
+    {
+        AutoLock lock(busPtr->mBaCommonLock);
+
+        busPtr->mBusListeners.PushBack(listener);
+    }
+
+    NativeBusListener* ntListener = reinterpret_cast<NativeBusListener*>(((BusListener*)listener)->mHandle);
+
+    assert(ntListener);
+    ntListener->Setup(this);
+
+    busPtr->RegisterBusListener(*ntListener);
     return NOERROR;
 }
 
@@ -418,7 +445,7 @@ ECode CBusAttachment::RegisterBusObject(
     /* [in] */ IBusObject* busObj,
     /* [in] */ const String& objPath)
 {
-    return NOERROR;
+    return RegisterBusObject(busObj, objPath, FALSE, String(NULL), String(NULL), NULL);
 }
 
 ECode CBusAttachment::RegisterBusObject(
@@ -426,7 +453,7 @@ ECode CBusAttachment::RegisterBusObject(
     /* [in] */ const String& objPath,
     /* [in] */ Boolean secure)
 {
-    return NOERROR;
+    return RegisterBusObject(busObj, objPath, secure, String(NULL), String(NULL), NULL);
 }
 
 ECode CBusAttachment::RegisterBusObject(
@@ -436,7 +463,7 @@ ECode CBusAttachment::RegisterBusObject(
     /* [in] */ const String& languageTag,
     /* [in] */ const String& description)
 {
-    return NOERROR;
+    return RegisterBusObject(busObj, objPath, secure, languageTag, description, NULL);
 }
 
 ECode CBusAttachment::RegisterBusObject(
@@ -447,7 +474,22 @@ ECode CBusAttachment::RegisterBusObject(
     /* [in] */ const String& description,
     /* [in] */ ITranslator* dt)
 {
-    return NOERROR;
+    // try {
+    // AutoPtr<IList> descs;
+    // CArrayList::New((IList**)&descs);
+
+
+    // Status status = InterfaceDescription.create(this, busObj.getClass().getInterfaces(),
+    //                                             descs);
+    // if (status != Status.OK) {
+    //     return status;
+    // }
+    // return registerBusObject(objPath, busObj, descs.toArray(new InterfaceDescription[0]), secure,
+    //                          languageTag, description, dt);
+    // } catch (AnnotationBusException ex) {
+    //     BusException.log(ex);
+    //     return Status.BAD_ANNOTATION;
+    // }
 }
 
 ECode CBusAttachment::IsBusObjectSecure(
