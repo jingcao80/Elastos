@@ -52,8 +52,8 @@ ECode OpenSSLX509CertificateFactory::Parser::GenerateItem(
     VALIDATE_NOT_NULL(result)
     if (inStream == NULL) {
         // throw new ParsingException("inStream == NULL");
-        // return E_PARSING_EXCEPTION;
-        return NOERROR;
+        Logger::E("OpenSSLX509CertificateFactory", "ParsingException inStream == NULL");
+        return E_CERTIFICATE_PARSING_EXCEPTION;
     }
 
     Boolean markable = FALSE;
@@ -72,8 +72,8 @@ ECode OpenSSLX509CertificateFactory::Parser::GenerateItem(
         if (len < 0) {
             /* No need to reset here. The stream was empty or EOF. */
             // throw new ParsingException("inStream is empty");
-            // return E_PARSING_EXCEPTION;
-            return NOERROR;
+            Logger::E("OpenSSLX509CertificateFactory", "ParsingException inStream is empty");
+            return E_CERTIFICATE_PARSING_EXCEPTION;
         }
         pbis->Unread(buffer, 0, len);
 
@@ -129,12 +129,15 @@ ECode OpenSSLX509CertificateFactory::Parser::GenerateItems(
     VALIDATE_NOT_NULL(result)
     if (inStream == NULL) {
         // throw new ParsingException("inStream == NULL");
-        // return E_PARSING_EXCEPTION;
-        return NOERROR;
+        Logger::E("OpenSSLX509CertificateFactory", "ParsingException inStream == NULL");
+        return E_CERTIFICATE_PARSING_EXCEPTION;
     }
-    // try {
+
+    ECode ec = NOERROR;
+    // try
+    {
         Int32 avail = 0;
-        inStream->Available(&avail);
+        FAIL_GOTO(ec = inStream->Available(&avail), ERROR1)
         if (avail == 0) {
             AutoPtr<ICollections> cls;
             CCollections::AcquireSingleton((ICollections**)&cls);
@@ -144,9 +147,14 @@ ECode OpenSSLX509CertificateFactory::Parser::GenerateItems(
             REFCOUNT_ADD(*result)
             return NOERROR;
         }
-    // } catch (IOException e) {
-    //     throw new ParsingException("Problem reading input stream", e);
-    // }
+    }
+    // catch (IOException e)
+ERROR1:
+    if ((ECode)E_IO_EXCEPTION == ec) {
+        //throw new ParsingException("Problem reading input stream", e);
+        Logger::E("OpenSSLX509CertificateFactory", "ParsingException Problem reading input stream");
+        return E_CERTIFICATE_PARSING_EXCEPTION;
+    }
 
     Boolean markable = FALSE;
     inStream->IsMarkSupported(&markable);
@@ -157,35 +165,34 @@ ECode OpenSSLX509CertificateFactory::Parser::GenerateItems(
     /* Attempt to see if this is a PKCS#7 bag. */
     AutoPtr<IPushbackInputStream> pbis;
     CPushbackInputStream::New(inStream, PUSHBACK_SIZE, (IPushbackInputStream**)&pbis);
+
     // try {
-        AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(PKCS7_MARKER->GetLength());
+    AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(PKCS7_MARKER->GetLength());
+    Int32 len = 0;
+    IInputStream::Probe(pbis)->Read(buffer, &len);
 
-        Int32 len = 0;
-        IInputStream::Probe(pbis)->Read(buffer, &len);
-        if (len < 0) {
-            /* No need to reset here. The stream was empty or EOF. */
-            // throw new ParsingException("inStream is empty");
-            // return E_PARSING_EXCEPTION;
-            return NOERROR;
-        }
-        pbis->Unread(buffer, 0, len);
-
-        if (len == PKCS7_MARKER->GetLength() && Arrays::Equals(PKCS7_MARKER, buffer)) {
-            AutoPtr<IList> res;
-            FromPkcs7PemInputStream(IInputStream::Probe(pbis), (IList**)&res);
-            *result = ICollection::Probe(res);
-            REFCOUNT_ADD(*result)
-            return NOERROR;
-        }
-
-        /* PKCS#7 bags have a byte 0x06 at position 4 in the stream. */
-        if ((*buffer)[4] == 0x06) {
-            AutoPtr<IList> res;
-            FromPkcs7DerInputStream(IInputStream::Probe(pbis), (IList**)&res);
-            *result = ICollection::Probe(res);
-            REFCOUNT_ADD(*result)
-            return NOERROR;
-        }
+    if (len < 0) {
+        /* No need to reset here. The stream was empty or EOF. */
+        // throw new ParsingException("inStream is empty");
+        Logger::E("OpenSSLX509CertificateFactory", "ParsingException inStream is empty");
+        return E_CERTIFICATE_PARSING_EXCEPTION;
+    }
+    pbis->Unread(buffer, 0, len);
+    if (len == PKCS7_MARKER->GetLength() && Arrays::Equals(PKCS7_MARKER, buffer)) {
+        AutoPtr<IList> res;
+        FromPkcs7PemInputStream(IInputStream::Probe(pbis), (IList**)&res);
+        *result = ICollection::Probe(res);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    /* PKCS#7 bags have a byte 0x06 at position 4 in the stream. */
+    if ((*buffer)[4] == 0x06) {
+        AutoPtr<IList> res;
+        FromPkcs7DerInputStream(IInputStream::Probe(pbis), (IList**)&res);
+        *result = ICollection::Probe(res);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
     // } catch (Exception e) {
     //     if (markable) {
     //         try {
@@ -212,26 +219,30 @@ ECode OpenSSLX509CertificateFactory::Parser::GenerateItems(
             inStream->Mark(PUSHBACK_SIZE);
         }
 
-        // try {
-            GenerateItem(IInputStream::Probe(pbis), (IInterface**)&c);
+        // try
+        ECode ec = NOERROR;
+        {
+            FAIL_GOTO(ec = GenerateItem(IInputStream::Probe(pbis), (IInterface**)&c), ERROR2)
             coll->Add(c);
-        // } catch (ParsingException e) {
-        //     /*
-        //      * If this stream supports marking, attempt to reset it to
-        //      * the mark before the failure.
-        //      */
-        //     if (markable) {
-        //         try {
-        //             inStream.reset();
-        //         } catch (IOException ignored) {
-        //         }
-        //     }
+        } //catch (ParsingException e) {
+    ERROR2:
+        if ((ECode)E_CERTIFICATE_PARSING_EXCEPTION == ec) {
+            /*
+             * If this stream supports marking, attempt to reset it to
+             * the mark before the failure.
+             */
+            if (markable) {
+                //try {
+                inStream->Reset();
+                //} catch (IOException ignored) {
+                //}
+            }
 
-        //     c = NULL;
-        // }
+            c = NULL;
+        }
     } while (c != NULL);
 
-    *result = ICollection::Probe(coll);;
+    *result = ICollection::Probe(coll);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -347,7 +358,6 @@ static AutoPtr<ArrayOf<Byte> > InitPKCS7_MARKER()
     (*res)[13] = 'C';
     (*res)[14] = 'S';
     (*res)[15] = '7';
-    //(*res)[16] = '-';
     return res;
 }
 AutoPtr<ArrayOf<Byte> > OpenSSLX509CertificateFactory::PKCS7_MARKER = InitPKCS7_MARKER();
