@@ -7,6 +7,7 @@
 #include "elastos/coredef.h"
 #include "NativeCrypto.h"
 #include "CryptoUpcalls.h"
+#include "elastos/core/StringUtils.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/UniquePtr.h>
 #include <elastos/utility/etl/List.h>
@@ -32,6 +33,7 @@
 #include "AsynchronousCloseMonitor.h"
 #endif
 
+using Elastos::Core::StringUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::CByte;
@@ -42,6 +44,7 @@ using Elastos::Core::IByte;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
 using Elastos::Core::UniquePtr;
+using Elastos::Core::ISystem;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IFlushable;
 using Elastos::IO::IInputStream;
@@ -10559,6 +10562,136 @@ ECode NativeCrypto::ERR_peek_last_error(
     VALIDATE_NOT_NULL(error);
     *error = ::ERR_peek_last_error();
     return NOERROR;
+}
+
+ECode NativeCrypto::Make_Self_Signed_X509(
+    /* [in] */ Int64 pubkeycontext,
+    /* [in] */ Int64 privkeycontext,
+    /* [in] */ IBigInteger* serialNumber,
+    /* [in] */ IDate* start,
+    /* [in] */ IDate* end,
+    /* [in] */ const String& subjectName,
+    /* [in] */ const String& issuerName,
+    /* [in] */ const String& hashalg,
+    /* [in] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = 0;
+
+    AutoPtr<ArrayOf<Byte> > byteArray;
+    AutoPtr<ISystem> system;
+    Int64 currentmilliseconds;
+    Int64 smilliseconds;
+    Int64 emilliseconds;
+    EVP_PKEY* publickey;
+    EVP_PKEY* privatekey;
+    X509_NAME* name;
+    ASN1_TIME* notBefore;
+    ASN1_TIME* notAfter;
+
+    X509 *x;
+    BIGNUM *bn = BN_new();
+    if (bn == NULL) {
+        Logger::E("NativeCrypto", "Make_Self_Signed_X509, BN_new fail");
+        goto error;
+    }
+    BN_clear(bn);
+    if ((x = X509_new()) == NULL) {
+        Logger::E("NativeCrypto", "Make_Self_Signed_X509, X509_new fail");
+        goto error;
+    }
+
+    publickey = reinterpret_cast<EVP_PKEY*>(pubkeycontext);
+    //NOTE: if only the public key is OK????
+    privatekey = reinterpret_cast<EVP_PKEY*>(privkeycontext);
+    Logger::E("NativeCrypto", "leliang Make_Self_Signed_X509, pubkey:%p, privkey:%p", publickey, privatekey);
+
+    X509_set_version(x,2);
+    X509_set_pubkey(x, publickey);
+
+    serialNumber->ToByteArray((ArrayOf<Byte>**)&byteArray);//the byte array should be big-endian
+    BN_bin2bn(byteArray->GetPayload(), byteArray->GetLength(), bn);
+    BN_to_ASN1_INTEGER(bn, ::X509_get_serialNumber(x));
+
+    name = ::X509_get_subject_name(x);
+    //Logger::E("NativeCrypto", "leliang Make_Self_Signed_X509, line:%d, subjectName:%s", __LINE__, subjectName.string());
+    //update value from subjectName and issuerName
+    {
+        AutoPtr<ArrayOf<String> > strArray;
+        StringUtils::Split(subjectName, ",", (ArrayOf<String>**)&strArray);
+        for (Int32 i = 0; i < strArray->GetLength(); ++i) {
+            //Logger::E("NativeCrypto", "leliang line:%d, i:%d, v:%s:", __LINE__, i, (*strArray)[i].string());
+            AutoPtr<ArrayOf<String> > keyvalue;
+            StringUtils::Split((*strArray)[i].Trim(), "=", (ArrayOf<String>**)&keyvalue);
+            if (keyvalue->GetLength() == 2) {
+                //Logger::E("NativeCrypto", "leliang line:%d, key:%s, v:%s:", __LINE__, (*keyvalue)[0].string(), (*keyvalue)[1].string());
+                if ((*keyvalue)[0].Equals("C")) {
+                    X509_NAME_add_entry_by_txt(name,"C", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
+                }
+                else if ((*keyvalue)[0].Equals("L")) {
+                    X509_NAME_add_entry_by_txt(name,"L", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
+                }
+                else if ((*keyvalue)[0].Equals("ST")) {
+                    X509_NAME_add_entry_by_txt(name,"ST", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
+                }
+                else if ((*keyvalue)[0].Equals("CN")) {
+                    X509_NAME_add_entry_by_txt(name,"CN", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
+                }
+                else if ((*keyvalue)[0].Equals("O")) {
+                    X509_NAME_add_entry_by_txt(name,"O", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
+                }
+                else if ((*keyvalue)[0].Equals("OU")) {
+                    X509_NAME_add_entry_by_txt(name,"OU", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
+                }
+            }
+        }
+
+        X509_set_issuer_name(x,name);//self sign, so same as the subject
+    }
+
+    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&currentmilliseconds);
+    start->GetTime(&smilliseconds);
+    end->GetTime(&emilliseconds);
+    notBefore = X509_GET_NOTBEFORE(x);
+    notAfter = X509_GET_NOTAFTER(x);
+
+    X509_gmtime_adj(notBefore, (smilliseconds-currentmilliseconds)/1000);
+    X509_gmtime_adj(notAfter, (emilliseconds-currentmilliseconds)/1000);
+
+    if (hashalg.Equals("sha256")) {
+        if (!X509_sign(x,privatekey,EVP_sha256()))
+            goto error;
+    } else if (hashalg.Equals("sha1")) {
+        if (!X509_sign(x, privatekey,EVP_sha1()))
+            goto error;
+    } else {
+        Logger::E("NativeCrypto", "Make_Self_Signed_X509 X509_sign fail, not support hashalg!");
+        goto error;
+    }
+    //TODO test begin
+    {
+        FILE* fp = fopen("/data/data/certest.csr", "w");
+        Logger::E("NativeCrypto", "leliang Make_Self_Signed_X509, line:%d", __LINE__);
+        X509_print_fp(fp,x);
+        fclose(fp);
+    }
+    //TODO test end
+
+    *result = reinterpret_cast<uintptr_t>(x);
+error:
+    if (bn != NULL)
+        BN_free(bn);
+
+    if (*result != 0)
+        return NOERROR;
+    else
+    {
+        if (x != NULL) {
+            ::X509_free(x);
+        }
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 }
 
 } // namespace Conscrypt

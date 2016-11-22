@@ -7,11 +7,22 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
     </ImageView> -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
     <Button android:id="@+id/Button1"
         android:layout_width="500px"
         android:layout_height="wrap_content"
         android:text="Button1">
     </Button>
+    <Button android:id="@+id/selfsigned"
+        android:layout_width="500px"
+        android:layout_height="wrap_content"
+        android:text="selfSign Test">
+    </Button>
+    </LinearLayout>
+
     <Button android:id="@+id/Button2"
         android:layout_width="500px"
         android:layout_height="wrap_content"

@@ -175,6 +175,8 @@ SOURCES += COpenSSLMacHmacSHA224.cpp
 SOURCES += COpenSSLMacHmacSHA256.cpp
 SOURCES += COpenSSLMacHmacSHA384.cpp
 SOURCES += COpenSSLMacHmacSHA512.cpp
+SOURCES += OpenSSLX509V3CertificateGenerator.cpp
+SOURCES += COpenSSLX509V3CertificateGeneratorHelper.cpp
 
 SOURCES += Elastos.CoreLibrary.cpp
 

@@ -74,6 +74,7 @@ private:
 
     CARAPI CipherTest();
 
+    CARAPI SelfSignTest();
 private:
     AutoPtr<ArrayOf<Byte> > mRSAPublicEncoded;
     AutoPtr<ArrayOf<Byte> > mRSAPrivateEncoded;

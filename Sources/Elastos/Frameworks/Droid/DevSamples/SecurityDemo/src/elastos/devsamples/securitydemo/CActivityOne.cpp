@@ -14,6 +14,7 @@
 #include "Elastos.Droid.KeyStore.h"
 #include "elastos/security/KeyPairGenerator.h"
 #include <elastos/core/StringUtils.h>
+#include "_Org.Conscrypt.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringUtils;
@@ -103,7 +104,8 @@ using Elastos::Security::IKeyPairGenerator;
 using Elastos::Security::KeyPairGenerator;
 using Elastos::Security::IKeyPair;
 
-
+using Org::Conscrypt::IOpenSSLX509V3CertificateGeneratorHelper;
+using Org::Conscrypt::COpenSSLX509V3CertificateGeneratorHelper;
 
 namespace Elastos {
 namespace DevSamples {
@@ -163,6 +165,9 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::ciphertest) {
         return mHost->CipherTest();
+    }
+    else if (id == R::id::selfsigned) {
+        return mHost->SelfSignTest();
     }
 
     String data = String("testtesttest");
@@ -349,8 +354,9 @@ ECode CActivityOne::OnCreate(
     view = FindViewById(R::id::ciphertest);
     view->SetOnClickListener(l.Get());
 
-    //TODO : To be deleted.
-    //Services::Initialize();
+    view = NULL;
+    view = FindViewById(R::id::selfsigned);
+    view->SetOnClickListener(l.Get());
 
     return NOERROR;
 }
@@ -1142,6 +1148,44 @@ ECode CActivityOne::SignatureTest()
 ECode CActivityOne::CipherTest()
 {
     return CipherTest::Test();
+}
+
+ECode CActivityOne::SelfSignTest()
+{
+    Logger::I(TAG, " SelfSignTest begin");
+    AutoPtr<IOpenSSLX509V3CertificateGeneratorHelper> certGenHelper;
+    COpenSSLX509V3CertificateGeneratorHelper::AcquireSingleton((IOpenSSLX509V3CertificateGeneratorHelper**)&certGenHelper);
+
+    AutoPtr<IKeyPairGeneratorHelper> kpgHelper;
+    CKeyPairGeneratorHelper::AcquireSingleton((IKeyPairGeneratorHelper**)&kpgHelper);
+    AutoPtr<IKeyPairGenerator> keyPairGenerator;
+    kpgHelper->GetInstance(String("RSA"), String("ElastosOpenSSL"), (IKeyPairGenerator**)&keyPairGenerator);
+    keyPairGenerator->Initialize(1024);
+    AutoPtr<IKeyPair> keyPair;
+    keyPairGenerator->GenerateKeyPair((IKeyPair**)&keyPair);
+
+    AutoPtr<IPublicKey> pubKey;
+    keyPair->GetPublic((IPublicKey**)&pubKey);
+
+    AutoPtr<IPrivateKey> privKey;
+    keyPair->GetPrivate((IPrivateKey**)&privKey);
+
+    AutoPtr<IBigIntegerHelper> biHelper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
+    AutoPtr<IBigInteger> serialNumber;
+    biHelper->ValueOf(1234, (IBigInteger**)&serialNumber);
+    AutoPtr<IDate> start;
+    CDate::New(116, 1, 1, (IDate**)&start);
+    AutoPtr<IDate> end;
+    CDate::New(126, 1, 1, (IDate**)&end);
+    String subjectDNName("C=CN2, L=SH2, ST=SH2, CN=kortide2, O=kortide2, OU=OS2");
+
+    AutoPtr<IX509Certificate> cert;
+    certGenHelper->Generate(
+            pubKey, privKey, serialNumber, start, end, subjectDNName, subjectDNName, (IX509Certificate**)&cert);
+
+    Logger::I(TAG, " SelfSignTest end");
+    return NOERROR;
 }
 
 } // namespace SecurityDemo

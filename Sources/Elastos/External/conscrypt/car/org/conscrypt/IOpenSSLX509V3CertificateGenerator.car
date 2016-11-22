@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Elastos.Security.IPublicKey;
+    using interface Elastos.Security.IPrivateKey;
+    using interface Elastos.Utility.IDate;
+    using interface Elastos.Math.IBigInteger;
+    using interface Elastos.Security.Cert.IX509Certificate;
+
+    namespace Org {
+    namespace Conscrypt {
+
+    interface IOpenSSLX509V3CertificateGeneratorHelper {
+
+        /* subjectName:
+           ',' seperated value, such as 'C=CN, L=SH, ST=SH, CN=kortide, O=kortide, OU=OS'
+           Note: no extra spaces allowed
+         */
+        Generate(
+            [in] IPublicKey *pubkey,
+            [in] IPrivateKey *privkey,
+            [in] IBigInteger* serialNumber,
+            [in] IDate* start,
+            [in] IDate* end,
+            [in] String subjectName,
+            [in] String hashalg,
+            [out] IX509Certificate** result);
+    }
+
+    } // namespace Conscrypt
+    } // namespace Org
+}

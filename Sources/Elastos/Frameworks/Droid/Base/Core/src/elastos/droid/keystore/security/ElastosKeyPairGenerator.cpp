@@ -1,3 +1,4 @@
+#include "Elastos.CoreLibrary.Extensions.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Security.h"
 #include "_Org.Conscrypt.h"
@@ -13,7 +14,10 @@ using Org::Conscrypt::IOpenSSLEngine;
 using Org::Conscrypt::IOpenSSLEngineHelper;
 using Org::Conscrypt::COpenSSLEngineHelper;
 using Org::Conscrypt::EIID_IOpenSSLEngineHelper;
+using Org::Conscrypt::IOpenSSLX509V3CertificateGeneratorHelper;
+using Org::Conscrypt::COpenSSLX509V3CertificateGeneratorHelper;
 using Elastos::Math::IBigInteger;
+using Elastos::Security::IPrincipal;
 using Elastos::Security::IKeyPair;
 using Elastos::Security::CKeyPair;
 using Elastos::Security::IPrivateKey;
@@ -147,55 +151,67 @@ ERROR:
     }
 
     Logger::E("ElastosKeyPairGenerator", "=====[snow]=====TODO: need class X509V3CertificateGenerator from lib:bouncycastle");
-    //TODO AutoPtr<IX509V3CertificateGenerator> certGen;
-    //TODO CX509V3CertificateGenerator::New((IX509V3CertificateGenerator**)&certGen);
-    //TODO certGen->SetPublicKey(pubKey);
-    //TODO AutoPtr<IBigInteger> serialNumber;
-    //TODO mSpec->GetSerialNumber((IBigInteger**)&serialNumber);
-    //TODO certGen->SetSerialNumber(serialNumber);
-    //TODO AutoPtr<IX500Principal> subDN;
-    //TODO mSpec->GetSubjectDN((IX500Principal**)&subDN);
+    AutoPtr<IOpenSSLX509V3CertificateGeneratorHelper> certGenHelper;
+    COpenSSLX509V3CertificateGeneratorHelper::AcquireSingleton((IOpenSSLX509V3CertificateGeneratorHelper**)&certGenHelper);
+    //AutoPtr<IX509V3CertificateGenerator> certGen;
+    //CX509V3CertificateGenerator::New((IX509V3CertificateGenerator**)&certGen);
+    //certGen->SetPublicKey(pubKey);
+    AutoPtr<IBigInteger> serialNumber;
+    mSpec->GetSerialNumber((IBigInteger**)&serialNumber);
+    //certGen->SetSerialNumber(serialNumber);
+    AutoPtr<IX500Principal> subDN;
+    mSpec->GetSubjectDN((IX500Principal**)&subDN);
+    String subjectDNName;
+    IPrincipal::Probe(subDN)->GetName(&subjectDNName);
+
     //TODO certGen->SetSubjectDN(subDN);
     //TODO certGen->SetIssuerDN(subDN);
-    //TODO AutoPtr<IDate> start, end;
-    //TODO mSpec->GetStartDate((IDate**)&start);
-    //TODO mSpec->GetEndDate((IDate**)&end);
+    AutoPtr<IDate> start, end;
+    mSpec->GetStartDate((IDate**)&start);
+    mSpec->GetEndDate((IDate**)&end);
     //TODO certGen->SetNotBefore(start);
     //TODO certGen->SetNotAfter(end);
     //TODO mSpec->GetKeyType(&skeyType);
-    //TODO String sigAl;
-    //TODO GetDefaultSignatureAlgorithmForKeyType(skeyType, &sigAl);
+    String sigAl;
+    GetDefaultSignatureAlgorithmForKeyType(skeyType, &sigAl);
     //TODO certGen->SetSignatureAlgorithm(sigAl);
+    Logger::E("ElastosKeyPairGenerator", "=====[snow]=====TODO: need class X509V3CertificateGenerator from lib:bouncycastle");
 
-    //AutoPtr<IX509Certificate> cert;
+    AutoPtr<IX509Certificate> cert;
     //try {
-    //    certGen->Generate(privKey, (IX509Certificate**)&cert);
+    ec = certGenHelper->Generate(pubKey, privKey, serialNumber, start, end,
+                subjectDNName, String(NULL), (IX509Certificate**)&cert);
     //} catch (Exception e) {
-    //    Credentials.deleteAllTypesForAlias(mKeyStore, alias);
-    //    throw new IllegalStateException("Can't generate certificate", e);
-    //}
+    if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
+        //    Credentials.deleteAllTypesForAlias(mKeyStore, alias);
+        //    throw new IllegalStateException("Can't generate certificate", e);
+        Boolean bTmp;
+        Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
+        Logger::E("ElastosKeyPairGenerator", "Can't generate certificate");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // AutoPtr<ArrayOf<Byte> > certBytes;
+    AutoPtr<ArrayOf<Byte> > certBytes;
     // //try {
-    // ec = ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&certBytes);
+    ec = ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&certBytes);
     // //} catch (CertificateEncodingException e) {
-    // if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
-    //     Boolean bTmp;
-    //     Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
-    //     //throw new IllegalStateException("Can't get encoding of certificate", e);
-    //     Logger::E("ElastosKeyPairGenerator", "Can't get encoding of certificate");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    if (ec == (ECode)E_CERTIFICATE_ENCODING_EXCEPTION) {
+        Boolean bTmp;
+        Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
+        //throw new IllegalStateException("Can't get encoding of certificate", e);
+        Logger::E("ElastosKeyPairGenerator", "Can't get encoding of certificate");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // mSpec->GetFlags(&flags);
-    // Boolean put;
-    // if (!(mKeyStore->Put(Credentials::USER_CERTIFICATE + alias, certBytes, KeyStore::UID_SELF, flags, &put), put)) {
-    //     Boolean bTmp;
-    //     Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
-    //     //throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
-    //     Logger::E("ElastosKeyPairGenerator", "Can't store certificate in AndroidKeyStore");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    mSpec->GetFlags(&flags);
+    Boolean put;
+    if (!(mKeyStore->Put(Credentials::USER_CERTIFICATE + alias, certBytes, KeyStore::UID_SELF, flags, &put), put)) {
+        Boolean bTmp;
+        Credentials::DeleteAllTypesForAlias(mKeyStore, alias, &bTmp);
+        //throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
+        Logger::E("ElastosKeyPairGenerator", "Can't store certificate in AndroidKeyStore");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
     return CKeyPair::New(pubKey, privKey, keyPair);
 }

@@ -10,8 +10,12 @@ using Elastos::IO::IOutputStream;
 using Elastos::Security::Interfaces::IDSAPrivateKey;
 using Elastos::Security::Interfaces::IECPrivateKey;
 using Elastos::Security::Interfaces::IRSAPrivateKey;
+using Elastos::Security::IPrivateKey;
+using Elastos::Security::IPublicKey;
+using Elastos::Math::IBigInteger;
 using Elastos::Utility::ICalendar;
 using Elastos::Utility::IMap;
+using Elastos::Utility::IDate;
 using Elastosx::Security::Auth::X500::IX500Principal;
 
 namespace Org {
@@ -1252,6 +1256,17 @@ public:
 
     static CARAPI ERR_peek_last_error(
         /* [out] */ Int64* error);
+
+    static CARAPI Make_Self_Signed_X509(
+        /* [in] */ Int64 pubkeycontext,
+        /* [in] */ Int64 privkeycontext,
+        /* [in] */ IBigInteger* serialNumber,
+        /* [in] */ IDate* start,
+        /* [in] */ IDate* end,
+        /* [in] */ const String& subjectName,
+        /* [in] */ const String& issuerName,
+        /* [in] */ const String& hashalg,
+        /* [in] */ Int64* result);
 
 private:
     static CARAPI X509_NAME_hash(

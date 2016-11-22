@@ -74,6 +74,7 @@ module
     merge("../../../car/org/conscrypt/IOpenSSLX509CRLEntry.car");
     merge("../../../car/org/conscrypt/IOpenSSLX509CertificateFactory.car");
     merge("../../../car/org/conscrypt/IX509PublicKey.car");
+    merge("../../../car/org/conscrypt/IOpenSSLX509V3CertificateGenerator.car");
 
     using interface Elastos.Core.IArrayOf;
     using interface Elastos.Core.ICloneable;
@@ -1088,8 +1089,9 @@ module
         interface ICipherSpi;
     }
 
-
-
+    singleton class COpenSSLX509V3CertificateGeneratorHelper {
+        interface IOpenSSLX509V3CertificateGeneratorHelper;
+    }
 
     } // namespace Conscrypt
     } // namespace Org

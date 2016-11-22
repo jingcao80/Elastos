@@ -27,7 +27,7 @@ ECode KeyStore::KeystoreServiceWrapper::Init()
     android::sp<android::IBinder> binder = sm->getService(android::String16("android.security.keystore"));
 
     if (binder == NULL) {
-        // keystore service is now down, leave mCameraService as null
+        // keystore service is now down, leave mKeystoreService as null
         Logger::W(TAG, "keystore service is now down");
         return NOERROR;
     }
