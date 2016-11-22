@@ -1,24 +1,19 @@
-I/DEBUG   (  271):     #00 pc 01be9dcc  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  271):     #01 pc 01b6d3e8  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  271):     #02 pc 01b5ef30  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  271):     #03 pc 01b5e404  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  271):     #04 pc 01b4d03c  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  271):     #05 pc 00598124  /data/elastos/Elastos.Droid.SystemUI.eco
-I/DEBUG   (  271):     #06 pc 00595ec0  /data/elastos/Elastos.Droid.SystemUI.eco
-I/DEBUG   (  271):     #07 pc 026ae9a0  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Handler::DispatchMessage(Elastos::Droid::Os::IMessage*)+152)
-I/DEBUG   (  271):     #08 pc 026b1100  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Looper::Loop()+572)
-I/DEBUG   (  271):     #09 pc 026b0168  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::HandlerThread::Run()+212)
-I/DEBUG   (  271):     #10 pc 004ca860  /system/lib/Elastos.CoreLibrary.eco
+I/DEBUG   (  278):     #00 pc 0196d578  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  278):     #01 pc 018a6080  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  278):     #02 pc 018a97e4  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  278):     #03 pc 018a95e8  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  278):     #04 pc 017ce110  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Content::AsyncQueryHandler::WorkerHandler::HandleMessage(Elastos::Droid::Os::IMessage*)+828)
+I/DEBUG   (  278):     #05 pc 026ccbbc  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Handler::DispatchMessage(Elastos::Droid::Os::IMessage*)+604)
+I/DEBUG   (  278):     #06 pc 026cf158  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Looper::Loop()+572)
+I/DEBUG   (  278):     #07 pc 026ce1c0  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::HandlerThread::Run()+212)
+I/DEBUG   (  278):     #08 pc 004d6908  /system/lib/Elastos.CoreLibrary.eco
 
-
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/hardware/camera2/legacy/LegacyCameraDevice.cpp:567
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/hardware/camera2/legacy/CameraDeviceUserShim.cpp:581
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/hardware/camera2/impl/CameraDeviceImpl.cpp:1685 (discriminator 3)
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/hardware/camera2/impl/CameraDeviceImpl.cpp:1543 (discriminator 3)
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/hardware/camera2/impl/CameraCaptureSessionImpl.cpp:510 (discriminator 3)
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy/FlashlightController.cpp:454
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy/FlashlightController.cpp:123
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:676
+/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/database/BulkCursorToCursorAdaptor.cpp:45
+/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/content/ContentProviderNative.cpp:59 (discriminator 3)
+/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/ContentResolver.cpp:398
+/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/ContentResolver.cpp:358
+/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/AsyncQueryHandler.cpp:82
+/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:695
 /home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Looper.cpp:140
 /home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/HandlerThread.cpp:65
 /home/luozhaohui/Elastos5/Sources/Elastos/LibCore/src/elastos/core/NativeThread.cpp:988
