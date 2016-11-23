@@ -350,6 +350,23 @@ ECode CDreamManagerService::LocalService::ToString(
     return NOERROR;
 }
 
+CDreamManagerService::DreamControllerListener::DreamControllerListener(
+    /* [in] */ CDreamManagerService* host)
+    : mHost(host)
+{}
+
+// @Override
+ECode CDreamManagerService::DreamControllerListener::OnDreamStopped(
+    /* [in] */ IBinder* token)
+{
+    AutoLock lock(mHost->mLock);
+    if (mHost->mCurrentDreamToken == token) {
+        mHost->CleanupDreamLocked();
+    }
+
+    return NOERROR;
+}
+
 //============================================================================
 // CDreamManagerService
 //============================================================================
@@ -377,6 +394,7 @@ ECode CDreamManagerService::constructor(
     AutoPtr<ILooper> looper;
     FgThread::Get()->GetLooper((ILooper**)&looper);
     mHandler = new DreamHandler(looper);
+    mControllerListener = new DreamControllerListener(this);
     mController = new DreamController(context, IHandler::Probe(mHandler), mControllerListener);
     AutoPtr<IInterface> systemService;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&systemService);

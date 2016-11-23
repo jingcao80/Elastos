@@ -77,6 +77,7 @@ module
     using interface Elastos.Droid.Os.Storage.IIMountServiceListener;
     using interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
     using interface Elastos.Droid.Os.Storage.IIObbActionListener;
+    using interface Elastos.Droid.Service.Dreams.IIDreamService;
     using interface Elastos.Droid.Service.Notification.IINotificationListener;
     using interface Elastos.Droid.Service.Notification.IIConditionProvider;
     using interface Elastos.Droid.Service.Notification.IIConditionListener;
@@ -927,11 +928,12 @@ module
         interface IBinder;
     }
 
-    class CElSignatureParser {
+    class CIDreamServiceNative {
         constructor(
-            [in] Handle32 jVM);
+            [in] Handle64 jVM,
+            [in] Handle64 jInstance);
 
-        interface IElSignatureParser;
+        interface IIDreamService;
         interface IBinder;
     }
 

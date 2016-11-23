@@ -781,10 +781,6 @@ module
             [in] String packageName);
 
         ClearPreLaunchCheckPackages();
-
-        // TODO: delete this api after signature can be parsed
-        ParseSignatureByJava(
-            [in] IElSignatureParser* parser);
     }
 
     } // namespace Pm

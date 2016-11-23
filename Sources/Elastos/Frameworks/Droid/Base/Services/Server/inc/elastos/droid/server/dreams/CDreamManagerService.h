@@ -234,6 +234,20 @@ private:
         }
     };
 
+    class DreamControllerListener : public DreamController::Listener
+    {
+    public:
+        DreamControllerListener(
+            /* [in] */ CDreamManagerService* host);
+
+        // @Override
+        CARAPI OnDreamStopped(
+            /* [in] */ IBinder* token);
+
+    private:
+        CDreamManagerService* mHost;
+    };
+
 public:
     CAR_OBJECT_DECL()
 

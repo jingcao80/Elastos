@@ -85,7 +85,7 @@ private:
         CARAPI Run();
 
     private:
-        DreamRecord* mDRHost;
+        AutoPtr<DreamRecord> mDRHost;
     };
 
     class StopDreamRunnable
@@ -102,8 +102,8 @@ private:
         CARAPI Run();
 
     private:
-        DreamController* mDCHost;
-        DreamRecord* mOldDream;
+        AutoPtr<DreamController> mDCHost;
+        AutoPtr<DreamRecord> mOldDream;
     };
 
     class StopUnconnectedDreamRunnable

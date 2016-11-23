@@ -2235,9 +2235,6 @@ public:
 
     CARAPI ClearPreLaunchCheckPackages();
 
-    CARAPI ParseSignatureByJava(
-        /* [in] */ IElSignatureParser* parser);
-
 private:
     static CARAPI_(void) GetDefaultDisplayMetrics(
         /* [in] */ IContext* context,
