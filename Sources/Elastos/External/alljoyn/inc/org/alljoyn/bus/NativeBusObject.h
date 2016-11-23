@@ -5,6 +5,7 @@
 #include "_Org.Alljoyn.Bus.h"
 #include <alljoyn/BusObject.h>
 #include <alljoyn/InterfaceDescription.h>
+#include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Utility::Etl::HashMap;

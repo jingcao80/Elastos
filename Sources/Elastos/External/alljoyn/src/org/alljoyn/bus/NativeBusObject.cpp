@@ -1,8 +1,16 @@
 #include "org/alljoyn/bus/NativeBusObject.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
+#include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/NativeApi.h"
 #include <elastos/utility/logging/Logger.h>
+#include <alljoyn/SignatureUtils.h>
+#include <alljoyn/DBusStd.h>
 
 using Elastos::Utility::Logging::Logger;
+
+namespace Org {
+namespace Alljoyn {
+namespace Bus {
 
 static const Boolean DEBUG_LOG = FALSE;
 const String NativeBusObject::TAG("NativeBusObject");
@@ -68,7 +76,7 @@ QStatus NativeBusObject::AddInterfaces(
         assert(intf);
 
         Boolean isAnnounced = FALSE;
-        busInterface->IsAnnounced(isAnnounced);
+        busInterface->IsAnnounced(&isAnnounced);
 
         if (isAnnounced) {
             if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::AddInterfaces() isAnnounced returned true");
@@ -91,7 +99,7 @@ QStatus NativeBusObject::AddInterfaces(
 
         intf->GetMembers(membs, numMembs);
         for (size_t m = 0; m < numMembs; ++m) {
-            if (MESSAGE_METHOD_CALL == membs[m]->memberType) {
+            if (ajn::MESSAGE_METHOD_CALL == membs[m]->memberType) {
                 status = AddMethodHandler(membs[m], static_cast<ajn::MessageReceiver::MethodHandler>(&NativeBusObject::MethodHandler));
                 if (ER_OK != status) {
                     break;
@@ -103,13 +111,13 @@ QStatus NativeBusObject::AddInterfaces(
                     break;
                 }
 
-                AutoPtr<IMethodInfo> method = busInterface->>GetMember(name);
+                AutoPtr<IMethodInfo> method = busInterface->GetMember(name);
                 if (!method) {
                     status = ER_BUS_INTERFACE_NO_SUCH_MEMBER;
                     break;
                 }
 
-                String key = String(intf->GetName().c_str()) + membs[m]->name.c_str();
+                String key = String(intf->GetName()) + membs[m]->name.c_str();
                 mMethods[key] = method;
             }
         }
@@ -156,7 +164,7 @@ QStatus NativeBusObject::AddInterfaces(
                 break;
             }
 
-            String key = String(intf->GetName().c_str()) + props[p]->name.c_str();
+            String key = String(intf->GetName()) + props[p]->name.c_str();
             mProperties[key] = property;
         }
         delete [] props;
@@ -169,132 +177,21 @@ QStatus NativeBusObject::AddInterfaces(
     return ER_OK;
 }
 
-/**
- * Marshal an Object into a MsgArg.
- *
- * @param[in] signature the signature of the Object
- * @param[in] jarg the Object
- * @param[in] arg the MsgArg to marshal into
- * @return the marshalled MsgArg or NULL if the marshalling failed.  This will
- *         be the same as @param arg if marshalling succeeded.
- */
-static ajn::MsgArg* Marshal(
-    /* [in] */ const char* signature,
-    /* [in] */ IInterface* obj,
-    /* [in] */ ajn::MsgArg* arg)
-{
-    if (!signature) {
-        return NULL;
-    }
-
-    if (FAILED(MsgArg::Marshal((Int64)arg, String(signature), obj))) {
-        return NULL;
-    }
-    return arg;
-}
-
-/**
- * Marshal an Object[] into MsgArgs.  The arguments are marshalled into an
- * ALLJOYN_STRUCT with the members set to the marshalled Object[] elements.
- *
- * @param[in] signature the signature of the Object[]
- * @param[in] jargs the Object[]
- * @param[in] arg the MsgArg to marshal into
- * @return an ALLJOYN_STRUCT containing the marshalled MsgArgs or NULL if the
- *         marshalling failed.  This will be the same as @param arg if
- *         marshalling succeeded.
- */
-static ajn::MsgArg* Marshal(
-    /* [in] */ const char* signature,
-    /* [in] */ ArrayOf<IInterface*>* objs,
-    /* [in] */ ajn::MsgArg* arg)
-{
-    if (!signature) {
-        return NULL;
-    }
-    if (FAILED(MsgArg::Marshal((Int64)arg, String(signature), objs))) {
-        return NULL;
-    }
-    return arg;
-}
-
-/**
- * Unmarshal a single MsgArg into an Object.
- *
- * @param[in] arg the MsgArg
- * @param[in] jtype the Type of the Object to unmarshal into
- * @return the unmarshalled Java Object
- */
-static AutoPtr<IInterface> Unmarshal(
-    /* [in] */ const ajn::MsgArg* arg,
-    /* [in] */ IType* type)
-{
-    AutoPtr<IInterface> obj
-    if (FAILED(MsgArg::unmarshal((Int64)arg, type, (IInterface**)&obj)))
-        return NULL
-    return obj;
-}
-
-/**
- * Unmarshal MsgArgs into an Object[].
- *
- * @param[in] args the MsgArgs
- * @param[in] numArgs the number of MsgArgs
- * @param[in] jmethod the Method that will be invoked with the returned Object[]
- * @param[out] junmarshalled the unmarshalled Java Object[]
- */
-static QStatus Unmarshal(
-    /* [in] */ const ajn::MsgArg* args,
-    /* [in] */ size_t numArgs,
-    /* [in] */ IMethodInfo* method,
-    /* [out] */ IArgumentList** unmarshalled)
-{
-    ajn::MsgArg arg(ALLJOYN_STRUCT);
-    arg.v_struct.members = (MsgArg*)args;
-    arg.v_struct.numMembers = numArgs;
-    if (FAILED(MsgArg::Unmarshal(method, (Int64)&arg, unmarshalled))) {
-        return ER_FAIL;
-    }
-    return ER_OK;
-}
-
-/**
- * Unmarshal an AllJoyn message into an Object[].
- *
- * @param[in] msg the AllJoyn message received
- * @param[in] jmethod the Method that will be invoked with the returned Object[]
- * @param[out] junmarshalled the unmarshalled Java Objects
- */
-static QStatus Unmarshal(
-    /* [in] */ ajn::Message& msg,
-    /* [in] */ IMethodInfo* method,
-    /* [out] */ IArgumentList** unmarshalled)
-{
-    const ajn::MsgArg* args;
-    size_t numArgs;
-    msg->GetArgs(numArgs, args);
-    return Unmarshal(args, numArgs, method, unmarshalled);
-}
-
 void NativeBusObject::MethodHandler(
     /* [in] */ const ajn::InterfaceDescription::Member* member,
     /* [in] */ ajn::Message& msg)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodHandler()");
 
-    /*
-     * JScopedEnv will automagically attach the JVM to the current native
-     * thread.
-     */
 
-    ajn::MessageContext context(msg);
+    MessageContext context(msg);
     /*
      * The Java method is called via invoke() on the
      * java.lang.reflect.Method object.  This allows us to package up
      * all the message args into an Object[], saving us from having to
      * figure out the signature of each method to lookup.
      */
-    String key = String(member->iface->GetName().c_str()) + member->name.c_str();
+    String key = String(member->iface->GetName()) + member->name.c_str();
 
     /*
      * We're going to wander into a list of methods and pick one.  Lock the
@@ -325,7 +222,7 @@ void NativeBusObject::MethodHandler(
      * reference directly you will crash and burn.
      */
     AutoPtr<IInterface> busObj;
-    mBusObj->Resolve(EIID_IInterface, (IInterface**)busObj);
+    mBusObj->Resolve(EIID_IInterface, (IInterface**)&busObj);
     if (!busObj) {
         mMapLock.Unlock();
         Logger::E(TAG, "NativeBusObject::MethodHandler(): Can't get new local reference to BusObject");
@@ -335,7 +232,7 @@ void NativeBusObject::MethodHandler(
     mMapLock.Unlock();
 
     Int32 count;
-    args->GetParamCount(&count);
+    method->GetParamCount(&count);
     AutoPtr<IInterface> reply;
     args->SetOutputArgumentOfObjectPtrPtr(count - 1, (IInterface**)&reply);
 
@@ -348,117 +245,120 @@ void NativeBusObject::MethodHandler(
 }
 
 QStatus NativeBusObject::MethodReply(
-    /* [in] */ const InterfaceDescription::Member* member,
-    /* [in] */ Message& msg,
+    /* [in] */ const ajn::InterfaceDescription::Member* member,
+    /* [in] */ ajn::Message& msg,
     /* [in] */ QStatus status)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodReply()");
 
     qcc::String val;
-    if (member->GetAnnotation(org::freedesktop::DBus::AnnotateNoReply, val) && val == "true") {
+    if (member->GetAnnotation(ajn::org::freedesktop::DBus::AnnotateNoReply, val) && val == "true") {
         return ER_OK;
-    } else {
+    }
+    else {
         return BusObject::MethodReply(msg, status);
     }
 }
 
 QStatus NativeBusObject::MethodReply(
-    /* [in] */ const InterfaceDescription::Member* member,
-    /* [in] */ const Message& msg,
+    /* [in] */ const ajn::InterfaceDescription::Member* member,
+    /* [in] */ const ajn::Message& msg,
     /* [in] */ const char* error,
     /* [in] */ const char* errorMessage)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodReply()");
 
     qcc::String val;
-    if (member->GetAnnotation(org::freedesktop::DBus::AnnotateNoReply, val) && val == "true") {
+    if (member->GetAnnotation(ajn::org::freedesktop::DBus::AnnotateNoReply, val) && val == "true") {
         return ER_OK;
-    } else {
+    }
+    else {
         return BusObject::MethodReply(msg, error, errorMessage);
     }
 }
 
 QStatus NativeBusObject::MethodReply(
-    /* [in] */ const InterfaceDescription::Member* member,
-    /* [in] */ Message& msg,
+    /* [in] */ const ajn::InterfaceDescription::Member* member,
+    /* [in] */ ajn::Message& msg,
     /* [in] */ IInterface* reply)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodReply()");
 
     qcc::String val;
-    if (member->GetAnnotation(org::freedesktop::DBus::AnnotateNoReply, val) && val == "true") {
+    if (member->GetAnnotation(ajn::org::freedesktop::DBus::AnnotateNoReply, val) && val == "true") {
         if (!reply) {
             return ER_OK;
-        } else {
+        }
+        else {
             Logger::E(TAG, "Method %s is annotated as 'no reply' but value returned, replying anyway",
                           member->name.c_str());
         }
     }
     ajn::MsgArg replyArgs;
     QStatus status;
-    uint8_t completeTypes = SignatureUtils::CountCompleteTypes(member->returnSignature.c_str());
+    uint8_t completeTypes = ajn::SignatureUtils::CountCompleteTypes(member->returnSignature.c_str());
     if (reply) {
-        JLocalRef<jobjectArray> jreplyArgs;
+        AutoPtr<IArgumentList> args;
         if (completeTypes > 1) {
-            jmethodID mid = env->GetStaticMethodID(CLS_Signature, "structArgs",
-                                                   "(Ljava/lang/Object;)[Ljava/lang/Object;");
-            if (!mid) {
-                return MethodReply(member, msg, ER_FAIL);
-            }
-            jreplyArgs = (jobjectArray)CallStaticObjectMethod(env, CLS_Signature, mid, (jobject)jreply);
-            if (env->ExceptionCheck()) {
-                return MethodReply(member, msg, ER_FAIL);
-            }
-        } else {
+            assert(0);
+            // jmethodID mid = env->GetStaticMethodID(CLS_Signature, "structArgs",
+            //                                        "(Ljava/lang/Object;)[Ljava/lang/Object;");
+            // if (!mid) {
+            //     return MethodReply(member, msg, ER_FAIL);
+            // }
+            // jreplyArgs = (jobjectArray)CallStaticObjectMethod(env, CLS_Signature, mid, (jobject)jreply);
+            // if (env->ExceptionCheck()) {
+            //     return MethodReply(member, msg, ER_FAIL);
+            // }
+        }
+        else {
             /*
              * Create Object[] out of the invoke() return value to reuse
              * marshalling code in Marshal() for the reply message.
              */
-            jreplyArgs = env->NewObjectArray(1, CLS_Object, NULL);
-            if (!jreplyArgs) {
-                return MethodReply(member, msg, ER_FAIL);
-            }
-            env->SetObjectArrayElement(jreplyArgs, 0, jreply);
-            if (env->ExceptionCheck()) {
-                return MethodReply(member, msg, ER_FAIL);
-            }
+             assert(0);
+            // replyArgs = ArrayOf<IInterface*>::Alloc(1);
+            // if (!replyArgs) {
+            //     return MethodReply(member, msg, ER_FAIL);
+            // }
+            // replyArgs->Set(0, reply);
         }
-        if (!Marshal(member->returnSignature.c_str(), jreplyArgs, &replyArgs)) {
+        if (!Marshal(member->returnSignature.c_str(), args, &replyArgs)) {
             return MethodReply(member, msg, ER_FAIL);
         }
         status = BusObject::MethodReply(msg, replyArgs.v_struct.members, replyArgs.v_struct.numMembers);
-    } else if (completeTypes) {
+    }
+    else if (completeTypes) {
         String errorMessage(member->iface->GetName());
-        errorMessage += "." + member->name + " returned null";
-        Logger::E(TAG, errorMessage.c_str());
-        status = BusObject::MethodReply(msg, "org.alljoyn.bus.BusException", errorMessage.c_str());
-    } else {
-        status = BusObject::MethodReply(msg, (MsgArg*)NULL, 0);
+        errorMessage = errorMessage + "." + member->name.c_str() + " returned null";
+        Logger::E(TAG, errorMessage);
+        status = BusObject::MethodReply(msg, "org.alljoyn.bus.BusException", errorMessage.string());
     }
-    if (ER_OK != status) {
-        env->ThrowNew(CLS_BusException, QCC_StatusText(status));
+    else {
+        status = BusObject::MethodReply(msg, (ajn::MsgArg*)NULL, 0);
     }
+
     return status;
 }
 
 QStatus NativeBusObject::Signal(
     /* [in] */ const char* destination,
-    /* [in] */ SessionId sessionId,
+    /* [in] */ ajn::SessionId sessionId,
     /* [in] */ const char* ifaceName,
     /* [in] */ const char* signalName,
-    /* [in] */ const MsgArg* args,
+    /* [in] */ const ajn::MsgArg* args,
     /* [in] */ size_t numArgs,
     /* [in] */ uint32_t timeToLive,
     /* [in] */ uint8_t flags,
-    /* [in] */ Message& msg)
+    /* [in] */ ajn::Message& msg)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::Signal()");
 
-    const InterfaceDescription* intf = bus->GetInterface(ifaceName);
+    const ajn::InterfaceDescription* intf = bus->GetInterface(ifaceName);
     if (!intf) {
         return ER_BUS_OBJECT_NO_SUCH_INTERFACE;
     }
-    const InterfaceDescription::Member* signal = intf->GetMember(signalName);
+    const ajn::InterfaceDescription::Member* signal = intf->GetMember(signalName);
     if (!signal) {
         return ER_BUS_OBJECT_NO_SUCH_MEMBER;
     }
@@ -468,15 +368,9 @@ QStatus NativeBusObject::Signal(
 QStatus NativeBusObject::Get(
     /* [in] */ const char* ifcName,
     /* [in] */ const char* propName,
-    /* [in] */ MsgArg& val)
+    /* [in] */ ajn::MsgArg& val)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::Get()");
-
-    /*
-     * JScopedEnv will automagically attach the JVM to the current native
-     * thread.
-     */
-    JScopedEnv env;
 
     String key = String(ifcName) + propName;
 
@@ -487,21 +381,15 @@ QStatus NativeBusObject::Get(
      */
     mMapLock.Lock();
 
-    JProperty::const_iterator property = properties.find(key);
-    if (properties.end() == property) {
+    PropertyMap::Iterator property = mProperties.Find(key);
+    if (mProperties.End() == property) {
         mMapLock.Unlock();
         return ER_BUS_NO_SUCH_PROPERTY;
     }
-    if (!property->second.jget) {
+    IMethodInfo* method = property->mSecond->mGet;
+    if (!method) {
         mMapLock.Unlock();
         return ER_BUS_PROPERTY_ACCESS_DENIED;
-    }
-
-    JLocalRef<jclass> clazz = env->GetObjectClass(property->second.jget);
-    jmethodID mid = env->GetMethodID(clazz, "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;");
-    if (!mid) {
-        mMapLock.Unlock();
-        return ER_FAIL;
     }
 
     /*
@@ -509,20 +397,26 @@ QStatus NativeBusObject::Get(
      * get a "hard" reference to it and then use that.  If you try to use a weak
      * reference directly you will crash and burn.
      */
-    jobject jo = env->NewLocalRef(jbusObj);
-    if (!jo) {
+    AutoPtr<IInterface> busObj;
+    mBusObj->Resolve(EIID_IInterface, (IInterface**)&busObj);
+    if (!busObj) {
         mMapLock.Unlock();
         Logger::E(TAG, "NativeBusObject::Get(): Can't get new local reference to BusObject");
         return ER_FAIL;
     }
 
-    JLocalRef<jobject> jvalue = CallObjectMethod(env, property->second.jget, mid, jo, NULL);
-    if (env->ExceptionCheck()) {
+    AutoPtr<IArgumentList> args;
+    method->CreateArgumentList((IArgumentList**)&args);
+
+    AutoPtr<IInterface> value;
+    args->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&value);
+
+    if (FAILED(method->Invoke(busObj, args))) {
         mMapLock.Unlock();
         return ER_FAIL;
     }
 
-    if (!Marshal(property->second.signature.c_str(), (jobject)jvalue, &val)) {
+    if (!Marshal(property->mSecond->mSignature.string(), value, &val)) {
         mMapLock.Unlock();
         return ER_FAIL;
     }
@@ -534,15 +428,9 @@ QStatus NativeBusObject::Get(
 QStatus NativeBusObject::Set(
     /* [in] */ const char* ifcName,
     /* [in] */ const char* propName,
-    /* [in] */ MsgArg& val)
+    /* [in] */ ajn::MsgArg& val)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::Set()");
-
-    /*
-     * JScopedEnv will automagically attach the JVM to the current native
-     * thread.
-     */
-    JScopedEnv env;
 
     String key = String(ifcName) + propName;
 
@@ -553,28 +441,22 @@ QStatus NativeBusObject::Set(
      */
     mMapLock.Lock();
 
-    JProperty::const_iterator property = properties.find(key);
-    if (properties.end() == property) {
+    PropertyMap::Iterator property = mProperties.Find(key);
+    if (mProperties.End() == property) {
         mMapLock.Unlock();
         return ER_BUS_NO_SUCH_PROPERTY;
     }
-    if (!property->second.jset) {
+    IMethodInfo* method = property->mSecond->mSet;
+    if (!method) {
         mMapLock.Unlock();
         return ER_BUS_PROPERTY_ACCESS_DENIED;
     }
 
-    JLocalRef<jobjectArray> jvalue;
-    QStatus status = Unmarshal(&val, 1, property->second.jset, jvalue);
+    AutoPtr<IArgumentList> value;
+    QStatus status = Unmarshal(&val, 1, method, (IArgumentList**)&value);
     if (ER_OK != status) {
         mMapLock.Unlock();
         return status;
-    }
-
-    JLocalRef<jclass> clazz = env->GetObjectClass(property->second.jset);
-    jmethodID mid = env->GetMethodID(clazz, "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;");
-    if (!mid) {
-        mMapLock.Unlock();
-        return ER_FAIL;
     }
 
     /*
@@ -582,15 +464,15 @@ QStatus NativeBusObject::Set(
      * get a "hard" reference to it and then use that.  If you try to use a weak
      * reference directly you will crash and burn.
      */
-    jobject jo = env->NewLocalRef(jbusObj);
-    if (!jo) {
+    AutoPtr<IInterface> busObj;
+    mBusObj->Resolve(EIID_IInterface, (IInterface**)&busObj);
+    if (!busObj) {
         mMapLock.Unlock();
         Logger::E(TAG, "NativeBusObject::Set(): Can't get new local reference to BusObject");
         return ER_FAIL;
     }
 
-    CallObjectMethod(env, property->second.jset, mid, jo, (jobjectArray)jvalue);
-    if (env->ExceptionCheck()) {
+    if (FAILED(method->Invoke(busObj, value))) {
         mMapLock.Unlock();
         return ER_FAIL;
     }
@@ -599,7 +481,7 @@ QStatus NativeBusObject::Set(
     return ER_OK;
 }
 
-String NativeBusObject::GenerateIntrospection(
+qcc::String NativeBusObject::GenerateIntrospection(
     /* [in] */ const char* languageTag,
     /* [in] */ bool deep,
     /* [in] */ size_t indent) const
@@ -610,85 +492,46 @@ String NativeBusObject::GenerateIntrospection(
         return NativeBusObject::GenerateIntrospection(deep, indent);
     }
 
-    if (MID_generateIntrospectionWithDesc) {
-        /*
-         * JScopedEnv will automagically attach the JVM to the current native
-         * thread.
-         */
-        JScopedEnv env;
-
-        /*
-         * The weak global reference jbusObj cannot be directly used.  We have to
-         * get a "hard" reference to it and then use that.  If you try to use a weak
-         * reference directly you will crash and burn.
-         */
-        jobject jo = env->NewLocalRef(jbusObj);
-        if (!jo) {
-            Logger::E(TAG, "NativeBusObject::GenerateIntrospection(): Can't get new local reference to BusObject");
-            return "";
-        }
-
-        JLocalRef<jstring> jlang = env->NewStringUTF(languageTag);
-        JLocalRef<jstring> jintrospection = (jstring)CallObjectMethod(env,
-                                                                      jo, MID_generateIntrospectionWithDesc, (jstring)jlang, deep, indent);
-        if (env->ExceptionCheck()) {
+    AutoPtr<IIntrospectionWithDescriptionListener> busObj;
+    mBusObj->Resolve(EIID_IIntrospectionWithDescriptionListener, (IInterface**)&busObj);
+    if (busObj != NULL) {
+        String introspection;
+        if (FAILED(busObj->GenerateIntrospection(String(languageTag), deep, indent, &introspection))) {
             return BusObject::GenerateIntrospection(languageTag, deep, indent);
         }
 
-        JString introspection(jintrospection);
-        if (env->ExceptionCheck()) {
-            return BusObject::GenerateIntrospection(languageTag, deep, indent);
-        }
-
-        return String(introspection.c_str());
+        return qcc::String(introspection.string());
     }
 
     return BusObject::GenerateIntrospection(languageTag, deep, indent);
 }
 
-String NativeBusObject::GenerateIntrospection(
+qcc::String NativeBusObject::GenerateIntrospection(
     /* [in] */ bool deep,
     /* [in] */ size_t indent) const
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::GenerateIntrospection()");
 
-
+    AutoPtr<IIntrospectionWithDescriptionListener> busObj1;
+    mBusObj->Resolve(EIID_IIntrospectionWithDescriptionListener, (IInterface**)&busObj1);
+    AutoPtr<IIntrospectionListener> busObj2;
+    mBusObj->Resolve(EIID_IIntrospectionListener, (IInterface**)&busObj2);
     //Use either interface but prefer IntrospectionListener since it's more specific
-    if (MID_generateIntrospectionWithDesc || MID_generateIntrospection) {
-        /*
-         * JScopedEnv will automagically attach the JVM to the current native
-         * thread.
-         */
-        JScopedEnv env;
-
-        /*
-         * The weak global reference jbusObj cannot be directly used.  We have to
-         * get a "hard" reference to it and then use that.  If you try to use a weak
-         * reference directly you will crash and burn.
-         */
-        jobject jo = env->NewLocalRef(jbusObj);
-        if (!jo) {
-            Logger::E(TAG, "NativeBusObject::GenerateIntrospection(): Can't get new local reference to BusObject");
-            return "";
+    if (busObj1 != NULL || busObj2 != NULL) {
+        String introspection;
+        ECode ec;
+        if (busObj2 != NULL) {
+            ec = busObj2->GenerateIntrospection(deep, indent, &introspection);
+        }
+        else {
+            ec = busObj1->GenerateIntrospection(String(NULL), deep, indent, &introspection);
         }
 
-        JLocalRef<jstring> jintrospection;
-        if (MID_generateIntrospection) {
-            jintrospection = (jstring)CallObjectMethod(env, jo, MID_generateIntrospection, deep, indent);
-        } else {
-            jintrospection = (jstring)CallObjectMethod(env, jo, MID_generateIntrospectionWithDesc, deep, indent, NULL);
-        }
-
-        if (env->ExceptionCheck()) {
+        if (FAILED(ec)) {
             return BusObject::GenerateIntrospection(deep, indent);
         }
 
-        JString introspection(jintrospection);
-        if (env->ExceptionCheck()) {
-            return BusObject::GenerateIntrospection(deep, indent);
-        }
-
-        return String(introspection.c_str());
+        return qcc::String(introspection.string());
     }
 
     return BusObject::GenerateIntrospection(deep, indent);
@@ -699,25 +542,10 @@ void NativeBusObject::ObjectRegistered()
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::ObjectRegistered()");
 
     BusObject::ObjectRegistered();
-    if (NULL != MID_registered) {
-        /*
-         * JScopedEnv will automagically attach the JVM to the current native
-         * thread.
-         */
-        JScopedEnv env;
-
-        /*
-         * The weak global reference jbusObj cannot be directly used.  We have to
-         * get a "hard" reference to it and then use that.  If you try to use a weak
-         * reference directly you will crash and burn.
-         */
-        jobject jo = env->NewLocalRef(jbusObj);
-        if (!jo) {
-            Logger::E(TAG, "NativeBusObject::ObjectRegistered(): Can't get new local reference to BusObject");
-            return;
-        }
-
-        env->CallVoidMethod(jo, MID_registered);
+    AutoPtr<IBusObjectListener> busObj;
+    mBusObj->Resolve(EIID_IBusObjectListener, (IInterface**)&busObj);
+    if (busObj != NULL) {
+        busObj->Registered();
     }
 }
 
@@ -726,55 +554,33 @@ void NativeBusObject::ObjectUnregistered()
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::ObjectUnregistered()");
 
     BusObject::ObjectUnregistered();
-    if (NULL != MID_registered) {
-        /*
-         * JScopedEnv will automagically attach the JVM to the current native
-         * thread.
-         */
-        JScopedEnv env;
-
-        /*
-         * The weak global reference jbusObj cannot be directly used.  We have to
-         * get a "hard" reference to it and then use that.  If you try to use a weak
-         * reference directly you will crash and burn.
-         */
-        jobject jo = env->NewLocalRef(jbusObj);
-        if (!jo) {
-            Logger::E(TAG, "NativeBusObject::ObjectUnregistered(): Can't get new local reference to BusObject");
-            return;
-        }
-
-        env->CallVoidMethod(jo, MID_unregistered);
+    AutoPtr<IBusObjectListener> busObj;
+    mBusObj->Resolve(EIID_IBusObjectListener, (IInterface**)&busObj);
+    if (busObj != NULL) {
+        busObj->Unregistered();
     }
 }
 
 void NativeBusObject::SetDescriptions(
-    /* [in] */ jstring jlangTag,
-    /* [in] */ jstring jdescription,
-    /* [in] */ jobject jtranslator)
+    /* [in] */ const String& langTag,
+    /* [in] */ const String& description,
+    /* [in] */ ITranslator* translator)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::SetDescriptions()");
-    JNIEnv* env = GetEnv();
 
-    JString langTag(jlangTag);
-    JString description(jdescription);
-
-    if (langTag.c_str() && description.c_str()) {
-        SetDescription(langTag.c_str(), description.c_str());
+    if (langTag.string() && description.string()) {
+        SetDescription(langTag.string(), description.string());
     }
 
-    if (jtranslator) {
-        jobject jglobalref = env->NewGlobalRef(jtranslator);
-        if (!jglobalref) {
-            return;
-        }
-        jtranslatorRef = jglobalref;
-        JTranslator* translator = GetHandle<JTranslator*>(jtranslator);
-        if (env->ExceptionCheck()) {
-            Logger::E(TAG, "BusAttachment_setDescriptionTranslator(): Exception");
-            return;
-        }
-        assert(translator);
-        SetDescriptionTranslator(translator);
+    if (translator) {
+        mTranslatorRef = translator;
+        assert(0);
+        // NativeTranslator* nativeTranslator = reinterpret_cast<NativeTranslator*>(((Translator*)translator)->mHandle);
+        // assert(nativeTranslator);
+        // SetDescriptionTranslator(nativeTranslator);
     }
 }
+
+} // namespace Bus
+} // namespace Alljoyn
+} // namespace Org

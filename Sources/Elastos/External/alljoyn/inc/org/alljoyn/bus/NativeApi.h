@@ -125,6 +125,96 @@ ajn::MsgArg* Marshal(
     /* [in] */ IInterface* obj,
     /* [in] */ ajn::MsgArg* arg);
 
+
+/**
+ * Marshal an Object into a MsgArg.
+ *
+ * @param[in] signature the signature of the Object
+ * @param[in] jarg the Object
+ * @param[in] arg the MsgArg to marshal into
+ * @return the marshalled MsgArg or NULL if the marshalling failed.  This will
+ *         be the same as @param arg if marshalling succeeded.
+ */
+ajn::MsgArg* Marshal(
+    /* [in] */ const char* signature,
+    /* [in] */ PVoid obj,
+    /* [in] */ ajn::MsgArg* arg);
+
+/**
+ * Marshal an Object[] into MsgArgs.  The arguments are marshalled into an
+ * ALLJOYN_STRUCT with the members set to the marshalled Object[] elements.
+ *
+ * @param[in] signature the signature of the Object[]
+ * @param[in] jargs the Object[]
+ * @param[in] arg the MsgArg to marshal into
+ * @return an ALLJOYN_STRUCT containing the marshalled MsgArgs or NULL if the
+ *         marshalling failed.  This will be the same as @param arg if
+ *         marshalling succeeded.
+ */
+ajn::MsgArg* Marshal(
+    /* [in] */ const char* signature,
+    /* [in] */ IArgumentList* objs,
+    /* [in] */ ajn::MsgArg* arg);
+
+/**
+ * Unmarshal a single MsgArg into an Object.
+ *
+ * @param[in] arg the MsgArg
+ * @param[in] jtype the Type of the Object to unmarshal into
+ * @return the unmarshalled Java Object
+ */
+CARAPI Unmarshal(
+    /* [in] */ const ajn::MsgArg* arg,
+    /* [in] */ CarDataType type,
+    /* [out] */ PVoid object);
+
+/**
+ * Unmarshal MsgArgs into an Object[].
+ *
+ * @param[in] args the MsgArgs
+ * @param[in] numArgs the number of MsgArgs
+ * @param[in] jmethod the Method that will be invoked with the returned Object[]
+ * @param[out] junmarshalled the unmarshalled Java Object[]
+ */
+QStatus Unmarshal(
+    /* [in] */ const ajn::MsgArg* args,
+    /* [in] */ size_t numArgs,
+    /* [in] */ IMethodInfo* method,
+    /* [out] */ IArgumentList** unmarshalled);
+
+/**
+ * Unmarshal an AllJoyn message into an Object[].
+ *
+ * @param[in] msg the AllJoyn message received
+ * @param[in] jmethod the Method that will be invoked with the returned Object[]
+ * @param[out] junmarshalled the unmarshalled Java Objects
+ */
+QStatus Unmarshal(
+    /* [in] */ ajn::Message& msg,
+    /* [in] */ IMethodInfo* method,
+    /* [out] */ IArgumentList** unmarshalled);
+
+/**
+ * A MessageContext is an object that provides access to underlying AllJoyn
+ * Message information without having to plumb the Message out into the Java
+ * clients.  This results in cleaner client code since they only have to deal
+ * with the signatures they expect in the 99% case.  It does mean we have to do
+ * some gyrations here to keep the Message info straight, and we do have some
+ * additional API with respect to the C++ version.
+ *
+ * TODO:
+ * Message map is a global.  Why?
+ */
+class MessageContext {
+public:
+    static ajn::Message GetMessage();
+    MessageContext(const ajn::Message& msg);
+    ~MessageContext();
+private:
+    MessageContext(const MessageContext& other);
+    MessageContext& operator =(const MessageContext& other);
+};
+
 } // namespace Bus
 } // namespace Alljoyn
 } // namespace Org
