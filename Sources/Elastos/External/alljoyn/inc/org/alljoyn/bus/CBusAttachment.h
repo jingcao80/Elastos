@@ -1457,6 +1457,7 @@ private:
         /* [in] */ ITranslator* dt);
 
 private:
+    friend class InterfaceDescription;
     friend class NativeBusListener;
 
     AutoPtr<ISet> mRegisteredAboutListeners;

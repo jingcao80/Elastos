@@ -1,6 +1,7 @@
+#include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeBusObject.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
-#include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/NativeMessageContext.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/SignatureUtils.h>
@@ -184,7 +185,7 @@ void NativeBusObject::MethodHandler(
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodHandler()");
 
 
-    MessageContext context(msg);
+    NativeMessageContext context(msg);
     /*
      * The Java method is called via invoke() on the
      * java.lang.reflect.Method object.  This allows us to package up

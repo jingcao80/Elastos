@@ -61,34 +61,6 @@ public:
 
 static StaticInitializer sInit;
 
-HashMap<qcc::Thread*, ajn::Message> gMessageMap;
-Object gMessageMapLock;
-
-ajn::Message MessageContext::GetMessage()
-{
-    gMessageMapLock.Lock();
-    HashMap<qcc::Thread*, ajn::Message>::Iterator it = gMessageMap.Find(qcc::Thread::GetThread());
-    assert(gMessageMap.End() != it);
-    ajn::Message m = it->mSecond;
-    gMessageMapLock.Unlock();
-    return m;
-}
-
-MessageContext::MessageContext(const ajn::Message& msg)
-{
-    gMessageMapLock.Lock();
-    gMessageMap.Insert(Pair<qcc::Thread*, ajn::Message>(qcc::Thread::GetThread(), msg));
-    gMessageMapLock.Unlock();
-}
-
-MessageContext::~MessageContext()
-{
-    gMessageMapLock.Lock();
-    HashMap<qcc::Thread*, ajn::Message>::Iterator it = gMessageMap.Find(qcc::Thread::GetThread());
-    gMessageMap.Erase(it);
-    gMessageMapLock.Unlock();
-}
-
 /**
  * Marshal an Object into a MsgArg.
  *

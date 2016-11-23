@@ -33,6 +33,8 @@ private:
     };
 
 public:
+    InterfaceDescription();
+
     CAR_INTERFACE_DECL();
 
     /**
@@ -78,6 +80,9 @@ private:
         /* [in] */ Int32 numProps,
         /* [in] */ Int32 numMembers);
 
+    /** Activate the interface on the bus. */
+    CARAPI_(void) Activate();
+
     /**
      * Called by the native code when registering bus objects to obtain the member
      * implementations.
@@ -91,6 +96,10 @@ private:
      */
     CARAPI_(AutoPtr<ArrayOf<IMethodInfo*> >) GetProperty(
         /* [in] */ const String& name);
+
+    CARAPI_(void) ConfigureDescriptions(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ IInterfaceInfo* busInterface);
 
     CARAPI AddProperties(
         /* [in] */ IInterfaceInfo* busInterface);
@@ -116,6 +125,8 @@ private:
     static const Int32 AJ_IFC_SECURITY_REQUIRED  = 1; /**< Security is required for an interface */
     static const Int32 AJ_IFC_SECURITY_OFF       = 2; /**< Security does not apply to this interface */
 
+    static const String TAG;
+
     /**
      * The native interface description handle.
      *
@@ -133,6 +144,8 @@ private:
 
     /** The properties of this interface. */
     HashMap<String, AutoPtr<Property> > mProperties;
+
+    Boolean mAnnounced;
 };
 
 } // namespace Bus

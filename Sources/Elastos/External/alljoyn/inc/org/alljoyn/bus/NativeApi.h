@@ -8,6 +8,9 @@
 
 using Elastos::Core::Object;
 
+#undef org_alljoyn_bus_InterfaceDescription_AJ_IFC_SECURITY_OFF
+#define org_alljoyn_bus_InterfaceDescription_AJ_IFC_SECURITY_OFF 2L
+
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
@@ -193,27 +196,6 @@ QStatus Unmarshal(
     /* [in] */ ajn::Message& msg,
     /* [in] */ IMethodInfo* method,
     /* [out] */ IArgumentList** unmarshalled);
-
-/**
- * A MessageContext is an object that provides access to underlying AllJoyn
- * Message information without having to plumb the Message out into the Java
- * clients.  This results in cleaner client code since they only have to deal
- * with the signatures they expect in the 99% case.  It does mean we have to do
- * some gyrations here to keep the Message info straight, and we do have some
- * additional API with respect to the C++ version.
- *
- * TODO:
- * Message map is a global.  Why?
- */
-class MessageContext {
-public:
-    static ajn::Message GetMessage();
-    MessageContext(const ajn::Message& msg);
-    ~MessageContext();
-private:
-    MessageContext(const MessageContext& other);
-    MessageContext& operator =(const MessageContext& other);
-};
 
 } // namespace Bus
 } // namespace Alljoyn
