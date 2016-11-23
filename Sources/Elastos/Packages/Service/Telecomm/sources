@@ -82,3 +82,4 @@ APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_PACKAGE_NAME = Elastos.Droid.Server.Telecom
 APP_DIR_NAME = Telecom
+XDK_LOCAL_CERTIFICATE := platform

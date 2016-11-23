@@ -62,3 +62,4 @@ AAPT_FLAGS :=  --auto-add-overlay --extra-packages com.android.phone.common --ex
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_DIR_NAME = TeleService
+XDK_LOCAL_CERTIFICATE := platform

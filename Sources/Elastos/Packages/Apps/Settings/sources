@@ -107,3 +107,4 @@ RES_NAMESPACE = Elastos.Droid.Settings
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_DIR_NAME = Settings
+XDK_LOCAL_CERTIFICATE := platform

@@ -70,3 +70,4 @@ EXTRA_RES_DIR = $(MAKEDIR)/../Keyguard/res
 AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.keyguard
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_DIR_NAME = SystemUI
+XDK_LOCAL_CERTIFICATE := platform

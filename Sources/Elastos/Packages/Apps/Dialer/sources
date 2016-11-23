@@ -78,3 +78,4 @@ AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.incallui --extra-pa
 DIRRESOURCES += $(MAKEDIR)/res;
 
 APP_DIR_NAME = Dialer
+XDK_LOCAL_CERTIFICATE := shared

@@ -74,6 +74,12 @@ ifneq "$(XDK_TARGET_PRODUCT)" "devtools"
 ifeq "$(XDK_TARGET_PLATFORM)" "linux"
       PREBUILD_LIB = /usr/lib32
 endif
+ifndef CERTIFICATE_PATH
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+      XDK_CERTIFICATE_PATH = $(XDK_BUILD_PATH)/Prebuilt/JavaFramework/security
+      XDK_SIGNAPK_JAR = $(XDK_BUILD_PATH)/Prebuilt/JavaFramework/signapk.jar
+endif
+endif
 ifndef PREBUILD_PATH
 ifeq "$(XDK_TARGET_PLATFORM)" "android"
       PREBUILD_PATH = $(XDK_BUILD_PATH)/Prebuilt/Linux

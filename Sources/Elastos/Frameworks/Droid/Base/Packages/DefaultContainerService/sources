@@ -33,3 +33,4 @@ APP_PACKAGE_NAME = Elastos.Droid.DefContainer
 RES_NAMESPACE = Elastos.Droid.DefContainer
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_DIR_NAME = DefaultContainerService
+XDK_LOCAL_CERTIFICATE := platform
