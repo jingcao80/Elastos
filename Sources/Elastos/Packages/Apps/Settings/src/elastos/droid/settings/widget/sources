@@ -5,7 +5,7 @@ INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 INCLUDES += $(MAKEDIR)/../../../../../
 
-SOURCES = SwitchBar.cpp
-SOURCES += ToggleSwitch.cpp
+SOURCES = CSwitchBar.cpp
+SOURCES += CToggleSwitch.cpp
 SOURCES += CSettingsAppWidgetProvider.cpp
 SOURCES += widget.cpp

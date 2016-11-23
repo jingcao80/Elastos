@@ -2,14 +2,14 @@
 #define __ELASTOS_DROID_SETTINGS_WIDGET_CSWITCHBARSAVEDSTATE_H__
 
 #include "_Elastos_Droid_Settings_Widget_CSwitchBarSavedState.h"
-#include "elastos/droid/settings/widget/SwitchBar.h"
+#include "elastos/droid/settings/widget/CSwitchBar.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Settings {
 namespace Widget {
 
-CarClass(CSwitchBarSavedState), public SwitchBar::SavedState
+CarClass(CSwitchBarSavedState), public CSwitchBar::SavedState
 {
 public:
     CAR_OBJECT_DECL();

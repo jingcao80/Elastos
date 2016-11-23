@@ -161,6 +161,7 @@ module
     using interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
     using interface Elastos.Droid.Wifi.P2p.IWifiP2pGroup;
     using interface Elastos.Core.IComparable;
+    using interface Elastos.Core.ICharSequence;
     using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
@@ -588,6 +589,16 @@ module
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
         interface IDialogCreatable;
+    }
+
+    [local]
+    class CRecentLocationAppsAccessiblePreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] ICharSequence* contentDescription);
+
+        interface IPreference;
+        interface IComparable;
     }
 
     } // namespace Location

@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Content.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/content/CContentValues.h"
 #include "elastos/droid/content/ContentResolver.h"
 #include "elastos/droid/content/Intent.h"
@@ -20,7 +21,6 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/regex/Pattern.h>
 
@@ -1531,7 +1531,8 @@ ECode Settings::Secure::PutStringForUser(
         // TODO: once b/10491283 fixed, remove this hack
         Int32 iValue;
         StringUtils::Parse(value, &iValue);
-        return SetLocationModeForUser(resolver, iValue, userHandle);
+        *result = SetLocationModeForUser(resolver, iValue, userHandle);
+        return NOERROR;
     }
 
     Boolean flag = FALSE;
@@ -1577,28 +1578,28 @@ ECode Settings::Secure::GetInt32ForUser(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = def;
+    *value = 0;
 
     if (ISettingsSecure::LOCATION_MODE.Equals(name)) {
         // HACK ALERT: temporary hack to work around b/10491283.
         // TODO: once b/10491283 fixed, remove this hack
-        return GetLocationModeForUser(cr, userHandle);
+        *value = GetLocationModeForUser(cr, userHandle);
+        return NOERROR;
     }
     String v;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
-    Int32 _value;
-    if (v.IsNullOrEmpty()) {
-        _value = def;
-        return NOERROR;
-    } else {
-        _value = StringUtils::ParseInt32(v);
-        if (_value == 0) {
-            _value = def;
+    if (!v.IsNull()) {
+        Int32 _value;
+        ECode ec = StringUtils::Parse(v, &_value);
+        if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION){
+            *value = def;
             return NOERROR;
         }
+        *value = _value;
+        return NOERROR;
     }
-    *value = _value;
+    *value = def;
     return NOERROR;
     // } catch (NumberFormatException e) {
     //     return def;
@@ -1620,17 +1621,20 @@ ECode Settings::Secure::GetInt32ForUser(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value)
-     if (ISettingsSecure::LOCATION_MODE.Equals(name)) {
+    *value = 0;
+
+    if (ISettingsSecure::LOCATION_MODE.Equals(name)) {
         // HACK ALERT: temporary hack to work around b/10491283.
         // TODO: once b/10491283 fixed, remove this hack
-        return GetLocationModeForUser(cr, userHandle);
+        *value = GetLocationModeForUser(cr, userHandle);
+        return NOERROR;
     }
-    *value = 0;
     String v;
     FAIL_RETURN(GetStringForUser(cr, name, userHandle, &v))
     // try {
-    Int32 _value = StringUtils::ParseInt32(v);
-    if (_value == 0) {
+    Int32 _value;
+    ECode ec = StringUtils::Parse(v, &_value);
+    if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION) {
         return E_SETTING_NOT_FOUND_EXCEPTION;
     }
     *value = _value;
@@ -1812,6 +1816,7 @@ ECode Settings::Secure::GetFloatForUser(
     if (_value == 0) {
         return E_SETTING_NOT_FOUND_EXCEPTION;
     }
+    *value = _value;
     return NOERROR;
     // } catch (NumberFormatException e) {
     //     throw new SettingNotFoundException(name);

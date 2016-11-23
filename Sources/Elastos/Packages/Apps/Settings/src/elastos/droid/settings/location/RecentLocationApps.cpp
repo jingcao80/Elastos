@@ -1,5 +1,6 @@
 
 #include "elastos/droid/settings/location/RecentLocationApps.h"
+#include "elastos/droid/settings/location/CRecentLocationAppsAccessiblePreference.h"
 #include "elastos/droid/settings/applications/CInstalledAppDetails.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/UserHandle.h"
@@ -67,12 +68,16 @@ ECode RecentLocationApps::PackageEntryClickedListener::OnPreferenceClick(
 //                  RecentLocationApps::AccessiblePreference
 //===============================================================================
 
-RecentLocationApps::AccessiblePreference::AccessiblePreference(
+RecentLocationApps::AccessiblePreference::AccessiblePreference()
+{}
+
+ECode RecentLocationApps::AccessiblePreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICharSequence* contentDescription)
 {
     DimmableIconPreference::constructor(context);
     mContentDescription = contentDescription;
+    return NOERROR;
 }
 
 ECode RecentLocationApps::AccessiblePreference::OnBindView(
@@ -103,14 +108,15 @@ RecentLocationApps::RecentLocationApps(
     activity->GetPackageManager((IPackageManager**)&mPackageManager);
 }
 
-AutoPtr<RecentLocationApps::AccessiblePreference> RecentLocationApps::CreateRecentLocationEntry(
+AutoPtr<IPreference> RecentLocationApps::CreateRecentLocationEntry(
     /* [in] */ IDrawable* icon,
     /* [in] */ ICharSequence* label,
     /* [in] */ Boolean isHighBattery,
     /* [in] */ ICharSequence* contentDescription,
     /* [in] */ IPreferenceOnPreferenceClickListener* listener)
 {
-    AutoPtr<AccessiblePreference> pref = new AccessiblePreference(mActivity, contentDescription);
+    AutoPtr<IPreference> pref;
+    CRecentLocationAppsAccessiblePreference::New(mActivity, contentDescription, (IPreference**)&pref);
     pref->SetIcon(icon);
     pref->SetTitle(label);
     if (isHighBattery) {
@@ -231,7 +237,7 @@ AutoPtr<IPreference> RecentLocationApps::GetPreferenceFromOps(
     Int32 userId;
     helper->GetUserId(uid, &userId);
 
-    AutoPtr<AccessiblePreference> preference;
+    AutoPtr<IPreference> preference;
     // try {
         AutoPtr<IIPackageManager> ipm = AppGlobals::GetPackageManager();
         AutoPtr<IApplicationInfo> appInfo;

@@ -1,5 +1,5 @@
 
-#include "elastos/droid/settings/widget/ToggleSwitch.h"
+#include "elastos/droid/settings/widget/CToggleSwitch.h"
 #include "elastos/droid/widget/Switch.h"
 
 using Elastos::Droid::Content::IContext;
@@ -11,28 +11,30 @@ namespace Droid {
 namespace Settings {
 namespace Widget {
 
-CAR_INTERFACE_IMPL(ToggleSwitch, Switch, IToggleSwitch);
+CAR_INTERFACE_IMPL(CToggleSwitch, Switch, IToggleSwitch)
 
-ToggleSwitch::ToggleSwitch()
+CAR_OBJECT_IMPL(CToggleSwitch)
+
+CToggleSwitch::CToggleSwitch()
 {}
 
-ToggleSwitch::~ToggleSwitch()
+CToggleSwitch::~CToggleSwitch()
 {}
 
-ECode ToggleSwitch::constructor(
+ECode CToggleSwitch::constructor(
     /* [in] */ IContext* context)
 {
     return Switch::constructor(context);
 }
 
-ECode ToggleSwitch::constructor(
+ECode CToggleSwitch::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     return Switch::constructor(context, attrs);
 }
 
-ECode ToggleSwitch::constructor(
+ECode CToggleSwitch::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
@@ -40,7 +42,7 @@ ECode ToggleSwitch::constructor(
     return Switch::constructor(context, attrs, defStyleAttr);
 }
 
-ECode ToggleSwitch::constructor(
+ECode CToggleSwitch::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr,
@@ -49,14 +51,14 @@ ECode ToggleSwitch::constructor(
     return Switch::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
-ECode ToggleSwitch::SetOnBeforeCheckedChangeListener(
+ECode CToggleSwitch::SetOnBeforeCheckedChangeListener(
     /* [in] */ IToggleSwitchOnBeforeCheckedChangeListener* listener)
 {
     mOnBeforeListener = listener;
     return NOERROR;
 }
 
-ECode ToggleSwitch::SetChecked(
+ECode CToggleSwitch::SetChecked(
     /* [in] */ Boolean checked)
 {
     Boolean res;
@@ -67,7 +69,7 @@ ECode ToggleSwitch::SetChecked(
     return Switch::SetChecked(checked);
 }
 
-ECode ToggleSwitch::SetCheckedInternal(
+ECode CToggleSwitch::SetCheckedInternal(
     /* [in] */ Boolean checked)
 {
     return Switch::SetChecked(checked);

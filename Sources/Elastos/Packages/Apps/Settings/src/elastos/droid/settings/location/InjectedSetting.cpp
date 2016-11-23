@@ -8,9 +8,9 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::CPreconditions;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;

@@ -249,11 +249,12 @@ ECode SettingsInjector::Setting::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = FALSE;
 
     Boolean res;
-    return TO_IINTERFACE(this) == IInterface::Probe(o)
-            || (ISetting::Probe(o) != NULL && (mSetting->Equals(((IInjectedSetting*)((Setting*)ISetting::Probe(o))->mSetting), &res), res));
+    *result = TO_IINTERFACE(this) == IInterface::Probe(o)
+            || (ISetting::Probe(o) != NULL
+                && (mSetting->Equals(((IInjectedSetting*)((Setting*)ISetting::Probe(o))->mSetting), &res), res));
+    return NOERROR;
 }
 
 ECode SettingsInjector::Setting::GetHashCode(

@@ -137,6 +137,7 @@ ECode LocationSettingsBase::SetLocationMode(
     IContext::Probe(activity)->SendBroadcast(intent, Manifest::permission::WRITE_SECURE_SETTINGS);
     Boolean res;
     secure->PutInt32(GetContentResolver(), ISettingsSecure::LOCATION_MODE, mode, &res);
+
     return RefreshLocationMode();
 }
 

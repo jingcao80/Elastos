@@ -141,6 +141,8 @@ ECode CLocationSettings::constructor()
 ECode CLocationSettings::OnActivityCreated(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Logger::I(TAG, " >> enter CLocationSettings::OnActivityCreated");
+
     LocationSettingsBase::OnActivityCreated(savedInstanceState);
 
     AutoPtr<IActivity> act;
@@ -149,30 +151,38 @@ ECode CLocationSettings::OnActivityCreated(
 
     AutoPtr<ISwitchBar> bar;
     activity->GetSwitchBar((ISwitchBar**)&bar);
-    mSwitchBar =  (CSwitchBar*)bar.Get();
+    mSwitchBar = (CSwitchBar*)bar.Get();
     mSwitch = ISwitch::Probe(mSwitchBar->GetSwitch());
-    return mSwitchBar->Show();
+    mSwitchBar->Show();
+    Logger::I(TAG, " << leave CLocationSettings::OnActivityCreated");
+    return NOERROR;
 }
 
 ECode CLocationSettings::OnDestroyView()
 {
+    Logger::I(TAG, " >> enter CLocationSettings::OnDestroyView");
     LocationSettingsBase::OnDestroyView();
-    return mSwitchBar->Hide();
+    mSwitchBar->Hide();
+    Logger::I(TAG, " << leave CLocationSettings::OnDestroyView");
+    return NOERROR;
 }
 
 ECode CLocationSettings::OnResume()
 {
+    Logger::I(TAG, " >> enter CLocationSettings::OnResume");
     LocationSettingsBase::OnResume();
     CreatePreferenceHierarchy();
     if (!mValidListener) {
         mSwitchBar->AddOnSwitchChangeListener(mlistener);
         mValidListener = TRUE;
     }
+    Logger::I(TAG, " << leave CLocationSettings::OnResume");
     return NOERROR;
 }
 
 ECode CLocationSettings::OnPause()
 {
+    Logger::I(TAG, " >> enter CLocationSettings::OnPause");
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     ECode ec = IContext::Probe(activity)->UnregisterReceiver(mReceiver);
@@ -187,7 +197,9 @@ ECode CLocationSettings::OnPause()
         mSwitchBar->RemoveOnSwitchChangeListener(mlistener);
         mValidListener = FALSE;
     }
-    return LocationSettingsBase::OnPause();
+    LocationSettingsBase::OnPause();
+    Logger::I(TAG, " << leave CLocationSettings::OnPause");
+    return NOERROR;
 }
 
 void CLocationSettings::AddPreferencesSorted(

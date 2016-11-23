@@ -1,5 +1,5 @@
 
-#include "elastos/droid/settings/widget/SwitchBar.h"
+#include "elastos/droid/settings/widget/CSwitchBar.h"
 #include "elastos/droid/settings/widget/CSwitchBarSavedState.h"
 #include "elastos/droid/settings/widget/CToggleSwitch.h"
 #include "elastos/droid/view/LayoutInflater.h"
@@ -37,26 +37,26 @@ static AutoPtr< ArrayOf<Int32> > InitMARGIN_ATTRIBUTES()
     return args;
 }
 
-AutoPtr< ArrayOf<Int32> > SwitchBar::MARGIN_ATTRIBUTES = InitMARGIN_ATTRIBUTES();
+AutoPtr< ArrayOf<Int32> > CSwitchBar::MARGIN_ATTRIBUTES = InitMARGIN_ATTRIBUTES();
 
 //===============================================================================
-//                  SwitchBar::InnerListener
+//                  CSwitchBar::InnerListener
 //===============================================================================
 
-CAR_INTERFACE_IMPL_2(SwitchBar::InnerListener, Object, IViewOnClickListener, ICompoundButtonOnCheckedChangeListener)
+CAR_INTERFACE_IMPL_2(CSwitchBar::InnerListener, Object, IViewOnClickListener, ICompoundButtonOnCheckedChangeListener)
 
-SwitchBar::InnerListener::InnerListener(
-    /* [in] */ SwitchBar* host)
+CSwitchBar::InnerListener::InnerListener(
+    /* [in] */ CSwitchBar* host)
     : mHost(host)
 {}
 
-ECode SwitchBar::InnerListener::OnClick(
+ECode CSwitchBar::InnerListener::OnClick(
     /* [in] */ IView* v)
 {
     return mHost->OnClick(v);
 }
 
-ECode SwitchBar::InnerListener::OnCheckedChanged(
+ECode CSwitchBar::InnerListener::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
@@ -64,28 +64,28 @@ ECode SwitchBar::InnerListener::OnCheckedChanged(
 }
 
 //===============================================================================
-//                  SwitchBar::SavedState
+//                  CSwitchBar::SavedState
 //===============================================================================
 
-CAR_INTERFACE_IMPL(SwitchBar::SavedState, View::BaseSavedState, ISwitchBarSavedState);
+CAR_INTERFACE_IMPL(CSwitchBar::SavedState, View::BaseSavedState, ISwitchBarSavedState);
 
-SwitchBar::SavedState::SavedState()
+CSwitchBar::SavedState::SavedState()
     : mChecked(FALSE)
     , mVisible(FALSE)
 {}
 
-ECode SwitchBar::SavedState::constructor()
+ECode CSwitchBar::SavedState::constructor()
 {
     return View::BaseSavedState::constructor();
 }
 
-ECode SwitchBar::SavedState::constructor(
+ECode CSwitchBar::SavedState::constructor(
     /* [in] */ IParcelable* superState)
 {
     return View::BaseSavedState::constructor(superState);
 }
 
-ECode SwitchBar::SavedState::ReadFromParcel(
+ECode CSwitchBar::SavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     View::BaseSavedState::ReadFromParcel(source);
@@ -94,7 +94,7 @@ ECode SwitchBar::SavedState::ReadFromParcel(
     return NOERROR;
 }
 
-ECode SwitchBar::SavedState::WriteToParcel(
+ECode CSwitchBar::SavedState::WriteToParcel(
     /* [in] */ IParcel* out)
 {
     View::BaseSavedState::WriteToParcel(out);
@@ -103,7 +103,7 @@ ECode SwitchBar::SavedState::WriteToParcel(
     return NOERROR;
 }
 
-ECode SwitchBar::SavedState::ToString(
+ECode CSwitchBar::SavedState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
@@ -121,20 +121,20 @@ ECode SwitchBar::SavedState::ToString(
 }
 
 //===============================================================================
-//                  SwitchBar::SwitchBarOnSwitchChangeListener
+//                  CSwitchBar::SwitchBarOnSwitchChangeListener
 //===============================================================================
 
-CAR_INTERFACE_IMPL(SwitchBar::SwitchBarOnSwitchChangeListener, Object, ISwitchBarOnSwitchChangeListener);
+CAR_INTERFACE_IMPL(CSwitchBar::SwitchBarOnSwitchChangeListener, Object, ISwitchBarOnSwitchChangeListener);
 
-SwitchBar::SwitchBarOnSwitchChangeListener::SwitchBarOnSwitchChangeListener(
-    /* [in] */ SwitchBar* host)
+CSwitchBar::SwitchBarOnSwitchChangeListener::SwitchBarOnSwitchChangeListener(
+    /* [in] */ CSwitchBar* host)
     : mHost(host)
 {}
 
-SwitchBar::SwitchBarOnSwitchChangeListener::~SwitchBarOnSwitchChangeListener()
+CSwitchBar::SwitchBarOnSwitchChangeListener::~SwitchBarOnSwitchChangeListener()
 {}
 
-ECode SwitchBar::SwitchBarOnSwitchChangeListener::OnSwitchChanged(
+ECode CSwitchBar::SwitchBarOnSwitchChangeListener::OnSwitchChanged(
     /* [in] */ ISwitch* switchView,
     /* [in] */ Boolean isChecked)
 {
@@ -142,31 +142,33 @@ ECode SwitchBar::SwitchBarOnSwitchChangeListener::OnSwitchChanged(
 }
 
 //===============================================================================
-//                  SwitchBar
+//                  CSwitchBar
 //===============================================================================
 
-CAR_INTERFACE_IMPL(SwitchBar, LinearLayout, ISwitchBar)
+CAR_INTERFACE_IMPL(CSwitchBar, LinearLayout, ISwitchBar)
 
-SwitchBar::SwitchBar()
+CAR_OBJECT_IMPL(CSwitchBar)
+
+CSwitchBar::CSwitchBar()
 {}
 
-SwitchBar::~SwitchBar()
+CSwitchBar::~CSwitchBar()
 {}
 
-ECode SwitchBar::constructor(
+ECode CSwitchBar::constructor(
     /* [in] */ IContext* context)
 {
     return constructor(context, NULL);
 }
 
-ECode SwitchBar::constructor(
+ECode CSwitchBar::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
     return constructor(context, attrs, 0);
 }
 
-ECode SwitchBar::constructor(
+ECode CSwitchBar::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
@@ -174,7 +176,7 @@ ECode SwitchBar::constructor(
     return constructor(context, attrs, defStyleAttr, 0);
 }
 
-ECode SwitchBar::constructor(
+ECode CSwitchBar::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr,
@@ -229,33 +231,33 @@ ECode SwitchBar::constructor(
     return NOERROR;
 }
 
-ECode SwitchBar::SetTextViewLabel(
+ECode CSwitchBar::SetTextViewLabel(
     /* [in] */ Boolean isChecked)
 {
     return mTextView->SetText(isChecked ? R::string::switch_on_text : R::string::switch_off_text);
 }
 
-ECode SwitchBar::SetChecked(
+ECode CSwitchBar::SetChecked(
     /* [in] */ Boolean checked)
 {
     SetTextViewLabel(checked);
     return ICheckable::Probe(mSwitch)->SetChecked(checked);
 }
 
-ECode SwitchBar::SetCheckedInternal(
+ECode CSwitchBar::SetCheckedInternal(
     /* [in] */ Boolean checked)
 {
     SetTextViewLabel(checked);
     return ((CToggleSwitch*)mSwitch.Get())->SetCheckedInternal(checked);
 }
 
-ECode SwitchBar::IsChecked(
+ECode CSwitchBar::IsChecked(
     /* [out] */ Boolean* result)
 {
     return ICheckable::Probe(mSwitch)->IsChecked(result);
 }
 
-ECode SwitchBar::SetEnabled(
+ECode CSwitchBar::SetEnabled(
     /* [in] */ Boolean enabled)
 {
     LinearLayout::SetEnabled(enabled);
@@ -263,12 +265,12 @@ ECode SwitchBar::SetEnabled(
     return IView::Probe(mSwitch)->SetEnabled(enabled);
 }
 
-AutoPtr<IToggleSwitch> SwitchBar::GetSwitch()
+AutoPtr<IToggleSwitch> CSwitchBar::GetSwitch()
 {
     return mSwitch;
 }
 
-ECode SwitchBar::Show()
+ECode CSwitchBar::Show()
 {
     if (!IsShowing()) {
         SetVisibility(IView::VISIBLE);
@@ -277,7 +279,7 @@ ECode SwitchBar::Show()
     return NOERROR;
 }
 
-ECode SwitchBar::Hide()
+ECode CSwitchBar::Hide()
 {
     if (IsShowing()) {
         SetVisibility(IView::GONE);
@@ -286,14 +288,14 @@ ECode SwitchBar::Hide()
     return NOERROR;
 }
 
-Boolean SwitchBar::IsShowing()
+Boolean CSwitchBar::IsShowing()
 {
     Int32 visibility;
     GetVisibility(&visibility);
     return (visibility == IView::VISIBLE);
 }
 
-ECode SwitchBar::OnClick(
+ECode CSwitchBar::OnClick(
     /* [in] */ IView* v)
 {
     Boolean res;
@@ -302,7 +304,7 @@ ECode SwitchBar::OnClick(
     return SetChecked(isChecked);
 }
 
-ECode SwitchBar::PropagateChecked(
+ECode CSwitchBar::PropagateChecked(
     /* [in] */ Boolean isChecked)
 {
     Int32 count;
@@ -315,38 +317,38 @@ ECode SwitchBar::PropagateChecked(
     return NOERROR;
 }
 
-ECode SwitchBar::OnCheckedChanged(
+ECode CSwitchBar::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
     return PropagateChecked(isChecked);
 }
 
-ECode SwitchBar::AddOnSwitchChangeListener(
+ECode CSwitchBar::AddOnSwitchChangeListener(
     /* [in] */ ISwitchBarOnSwitchChangeListener* listener)
 {
     Boolean res;
     if (mSwitchChangeListeners->Contains(listener, &res), res) {
-        Slogger::E("SwitchBar", "Cannot add twice the same OnSwitchChangeListener");
+        Slogger::E("CSwitchBar", "Cannot add twice the same OnSwitchChangeListener");
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Cannot add twice the same OnSwitchChangeListener");
     }
     return mSwitchChangeListeners->Add(listener);
 }
 
-ECode SwitchBar::RemoveOnSwitchChangeListener(
+ECode CSwitchBar::RemoveOnSwitchChangeListener(
     /* [in] */ ISwitchBarOnSwitchChangeListener* listener)
 {
     Boolean res;
     if (mSwitchChangeListeners->Contains(listener, &res), !res) {
-        Slogger::E("SwitchBar", "Cannot remove OnSwitchChangeListener");
+        Slogger::E("CSwitchBar", "Cannot remove OnSwitchChangeListener");
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Cannot remove OnSwitchChangeListener");
     }
     return mSwitchChangeListeners->Remove(listener);
 }
 
-AutoPtr<IParcelable> SwitchBar::OnSaveInstanceState()
+AutoPtr<IParcelable> CSwitchBar::OnSaveInstanceState()
 {
     AutoPtr<IParcelable> superState = LinearLayout::OnSaveInstanceState();
 
@@ -358,7 +360,7 @@ AutoPtr<IParcelable> SwitchBar::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-ECode SwitchBar::OnRestoreInstanceState(
+ECode CSwitchBar::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<ISwitchBarSavedState> is = ISwitchBarSavedState::Probe(state);

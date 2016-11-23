@@ -27,6 +27,31 @@ namespace Location {
 class RecentLocationApps
     : public Object
 {
+public:
+    /**
+     * Subclass of {@link Preference} to intercept views and allow content description to be set on
+     * them for accessibility purposes.
+     */
+    class AccessiblePreference
+        : public DimmableIconPreference
+    {
+    public:
+        TO_STRING_IMPL("RecentLocationApps::AccessiblePreference")
+
+        AccessiblePreference();
+
+        CARAPI constructor(
+            /* [in] */ IContext* context,
+            /* [in] */ ICharSequence* contentDescription);
+
+        //@Override
+        CARAPI OnBindView(
+            /* [in] */ IView* view);
+
+    public:
+        AutoPtr<ICharSequence> mContentDescription;
+    };
+
 private:
     class PackageEntryClickedListener
         : public Object
@@ -51,28 +76,6 @@ private:
         String mPackage;
     };
 
-    /**
-     * Subclass of {@link Preference} to intercept views and allow content description to be set on
-     * them for accessibility purposes.
-     */
-    class AccessiblePreference
-        : public DimmableIconPreference
-    {
-    public:
-        TO_STRING_IMPL("RecentLocationApps::AccessiblePreference")
-
-        AccessiblePreference(
-            /* [in] */ IContext* context,
-            /* [in] */ ICharSequence* contentDescription);
-
-        //@Override
-        CARAPI OnBindView(
-            /* [in] */ IView* view);
-
-    public:
-        AutoPtr<ICharSequence> mContentDescription;
-    };
-
 public:
     TO_STRING_IMPL("RecentLocationApps");
 
@@ -85,7 +88,7 @@ public:
     virtual CARAPI_(AutoPtr<IList>) /*List<Preference>*/ GetAppList();
 
 private:
-    CARAPI_(AutoPtr<AccessiblePreference>) CreateRecentLocationEntry(
+    CARAPI_(AutoPtr<IPreference>) CreateRecentLocationEntry(
         /* [in] */ IDrawable* icon,
         /* [in] */ ICharSequence* label,
         /* [in] */ Boolean isHighBattery,

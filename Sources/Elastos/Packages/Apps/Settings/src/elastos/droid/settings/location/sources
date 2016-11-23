@@ -13,3 +13,4 @@ SOURCES += InjectedSetting.cpp
 SOURCES += CRadioButtonPreference.cpp
 SOURCES += RecentLocationApps.cpp
 SOURCES += SettingsInjector.cpp
+SOURCES += location.cpp

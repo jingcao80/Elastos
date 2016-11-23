@@ -15,6 +15,7 @@
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/provider/Settings.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::R;
 using Elastos::Droid::App::ActivityManagerNative;
@@ -30,6 +31,7 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -290,14 +292,16 @@ ECode CUserManager::HasUserRestriction(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    // try {
+
     Int32 id;
     userHandle->GetIdentifier(&id);
-    return mService->HasUserRestriction(restrictionKey, id, result);
-    // } catch (RemoteException re) {
-    //     Log.w(TAG, "Could not check user restrictions", re);
-    //     return false;
-    // }
+    ECode ec = mService->HasUserRestriction(restrictionKey, id, result);
+    if (ec == (ECode) E_REMOTE_EXCEPTION) {
+        Logger::W(TAG, "Could not check user restrictions 0x%08x", ec);
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CUserManager::GetSerialNumberForUser(
