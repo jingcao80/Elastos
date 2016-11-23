@@ -6,9 +6,13 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "org/alljoyn/bus/CBusAttachment.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Core::Object;
 using Elastos::Utility::IList;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
 
 namespace Org {
 namespace Alljoyn {
@@ -22,8 +26,24 @@ class InterfaceDescription
     : public Object
     , public IInterfaceDescription
 {
+private:
+    class Property : public Object
+    {
+
+    };
+
 public:
     CAR_INTERFACE_DECL();
+
+    /**
+     * Create the native interface description for the busInterface.
+     *
+     * @param busAttachment the connection the interface is on
+     * @param busInterface the interface
+     */
+    CARAPI Create(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ IInterfaceInfo* busInterface);
 
     /**
      * Create the native interface descriptions needed by
@@ -35,29 +55,66 @@ public:
      */
     static CARAPI Create(
         /* [in] */ CBusAttachment* busAttachment,
-        /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+        /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
         /* [in] */ IList* descs);
+
+    /**
+     * Get the DBus interface name.
+     *
+     * @param intf The interface.
+     */
+    static CARAPI_(String) GetName(
+        /* [in] */ IInterfaceInfo* intf);
 
     CARAPI IsAnnounced(
         /* [out] */ Boolean* res);
 
 private:
+    /** Allocate native resources. */
+    CARAPI Create(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ const String& name,
+        /* [in] */ Int32 securePolicy,
+        /* [in] */ Int32 numProps,
+        /* [in] */ Int32 numMembers);
+
     /**
      * Called by the native code when registering bus objects to obtain the member
      * implementations.
      */
-    AutoPtr<IMethodInfo> GetMember(
+    CARAPI_(AutoPtr<IMethodInfo>) GetMember(
         /* [in] */ const String& name);
 
     /**
      * Called by the native code when registering bus objects to obtain the property
      * implementations.
      */
-    AutoPtr<ArrayOf<IMethodInfo*> > GetProperty(
+    CARAPI_(AutoPtr<ArrayOf<IMethodInfo*> >) GetProperty(
         /* [in] */ const String& name);
+
+    CARAPI AddProperties(
+        /* [in] */ IInterfaceInfo* busInterface);
+
+    CARAPI GetMembers(
+        /* [in] */ IInterfaceInfo* busInterface);
+
+    CARAPI AddMembers(
+        /* [in] */ IInterfaceInfo* busInterface);
 
 private:
     friend class NativeBusObject;
+
+    static const Int32 INVALID     = 0; /**< An invalid member type. */
+    static const Int32 METHOD_CALL = 1; /**< A method call member. */
+    static const Int32 SIGNAL      = 4; /**< A signal member. */
+
+    static const Int32 READ        = 1;              /**< Read access type. */
+    static const Int32 WRITE       = 2;              /**< Write access type. */
+    static const Int32 RW          = READ | WRITE;   /**< Read-write access type. */
+
+    static const Int32 AJ_IFC_SECURITY_INHERIT   = 0; /**< Inherit the security of the object that implements the interface */
+    static const Int32 AJ_IFC_SECURITY_REQUIRED  = 1; /**< Security is required for an interface */
+    static const Int32 AJ_IFC_SECURITY_OFF       = 2; /**< Security does not apply to this interface */
 
     /**
      * The native interface description handle.
@@ -70,6 +127,12 @@ private:
      * allocate an object.
      */
     Int64 mHandle;
+
+    /** The members of this interface. */
+    List< AutoPtr<IMethodInfo> > mMembers;
+
+    /** The properties of this interface. */
+    HashMap<String, AutoPtr<Property> > mProperties;
 };
 
 } // namespace Bus

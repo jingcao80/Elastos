@@ -120,6 +120,30 @@ void CBusAttachment::Create(
     mHandle = reinterpret_cast<Int64>(busPtr);
 }
 
+ECode CBusAttachment::RegisterBusObject(
+    /* [in] */ const String& objPath,
+    /* [in] */ IBusObject* busObj,
+    /* [in] */ ArrayOf<IInterfaceDescription*>* busInterfaces,
+    /* [in] */ Boolean secure,
+    /* [in] */ const String& languageTag,
+    /* [in] */ const String& description,
+    /* [in] */ ITranslator* dt)
+{
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "RegisterBusObject(): NULL bus pointer");
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->RegisterBusObject(objPath.string(), busObj,
+            busInterfaces, secure, languageTag, description, dt);
+    if (status != ER_OK) {
+        Logger::E(TAG, "RegisterBusObject(): Exception");
+    }
+    return status;
+}
+
+
 ECode CBusAttachment::EmitChangedSignal(
     /* [in] */ IBusObject* busObject,
     /* [in] */ const String& ifcName,
@@ -484,14 +508,8 @@ ECode CBusAttachment::RegisterBusObject(
     CObject::ReflectClassInfo(busObj, (IClassInfo**)&clsInfo);
     Int32 count;
     clsInfo->GetInterfaceCount(&count);
-    AutoPtr< ArrayOf<IInterfaceInfo*> > itfInfos = ArrayOf<IInterfaceInfo*>::Alloc(count);
-    clsInfo->GetAllInterfaceInfos(itfInfos);
-    AutoPtr< ArrayOf<InterfaceID> > busInterfaces = ArrayOf<InterfaceID>::Alloc(count);
-    for (Int32 i = 0; i < count; i++) {
-        InterfaceID itfID;
-        (*itfInfos)[i]->GetId(&itfID);
-        (*busInterfaces)[i] = itfID;
-    }
+    AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(count);
+    clsInfo->GetAllInterfaceInfos(busInterfaces);
     ECode ec = InterfaceDescription::Create(this, busInterfaces, descs);
     if (ec != E_STATUS_OK) {
         return ec;
