@@ -1028,17 +1028,19 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_GetCertificate_NonExist_Encrypted_Failure();                        //OK
 
-    //return test->TestKeyStore_GetCertificateAlias_CAEntry_Encrypted_Success();                              //error
+    //return test->TestKeyStore_GetCertificateAlias_CAEntry_Encrypted_Success();                    //OK
 
-    //return test->TestKeyStore_GetCertificateAlias_PrivateKeyEntry_Encrypted_Success();                      //error
+    //return test->TestKeyStore_GetCertificateAlias_PrivateKeyEntry_Encrypted_Success();            //OK
 
-    //return test->TestKeyStore_GetCertificateAlias_CAEntry_WithPrivateKeyUsingCA_Encrypted_Success();        //error
+    //return test->TestKeyStore_GetCertificateAlias_CAEntry_WithPrivateKeyUsingCA_Encrypted_Success(); //OK
 
     //return test->TestKeyStore_GetCertificateAlias_NonExist_Empty_Encrypted_Failure();             //OK
 
     //return test->TestKeyStore_GetCertificateAlias_NonExist_Encrypted_Failure();                   //OK
 
     return test->TestKeyStore_GetCertificateChain_SingleLength_Encrypted_Success();                 //OK
+
+    //return test->TestKeyStore_GetCertificateChain_SingleLength_Encrypted_Success();               //OK
 
     //return test->TestKeyStore_GetCertificateChain_NonExist_Encrypted_Failure();                   //OK
 
@@ -1092,7 +1094,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_SetCertificate_PrivateKeyExists_Encrypted_Failure();                //OK
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Encrypted_Success();                                  //error
+    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Encrypted_Success();                       //OK
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_DSA_Unencrypted_Success();                            //error
 
@@ -1134,7 +1136,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_Store_OutputStream_Encrypted_Failure();                            //OK
 
-    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                          //error
+    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                        //error
 }
 
 ECode CActivityOne::SignatureTest()

@@ -346,7 +346,10 @@ ECode KeyStore::SetEntry(
     if (!mIsInit) {
         return E_KEY_STORE_EXCEPTION;
     }
-    if (!alias || !entry) {
+    if (alias.IsNull()) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    if (entry == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
     return mImplSpi->EngineSetEntry(alias, entry, param);

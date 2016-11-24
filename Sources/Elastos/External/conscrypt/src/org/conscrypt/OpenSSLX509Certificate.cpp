@@ -53,6 +53,7 @@ CAR_INTERFACE_IMPL(OpenSSLX509Certificate, X509Certificate, IOpenSSLX509Certific
 ECode OpenSSLX509Certificate::constructor(
     /* [in] */ Int64 ctx)
 {
+    X509Certificate::constructor();
     mContext = ctx;
     return NOERROR;
 }

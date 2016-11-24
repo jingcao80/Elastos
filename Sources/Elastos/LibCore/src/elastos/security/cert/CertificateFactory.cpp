@@ -60,6 +60,7 @@ ECode CertificateFactory::GetInstance(
     /* [in] */ const String& type,
     /* [out] */ ICertificateFactory** certFact)
 {
+
     if (type.IsNull()) {
         Logger::E(SERVICE, "type == null");
         return E_NULL_POINTER_EXCEPTION;
@@ -71,7 +72,8 @@ ECode CertificateFactory::GetInstance(
     sap->GetSpi((IInterface**)&spi);
     AutoPtr<IProvider> provider;
     sap->GetProvider((IProvider**)&provider);
-    *certFact = new CertificateFactory(ICertificateFactorySpi::Probe(spi), provider, type);
+    AutoPtr<ICertificateFactory> tmp = new CertificateFactory(ICertificateFactorySpi::Probe(spi), provider, type);
+    *certFact = tmp;
     REFCOUNT_ADD(*certFact);
     return NOERROR;
 }
@@ -115,7 +117,8 @@ ECode CertificateFactory::GetInstance(
     AutoPtr<IInterface> spi;
     ECode ec = ENGINE->GetInstance(type, provider, NULL, (IInterface**)&spi);
     if (FAILED(ec)) return E_CERTIFICATE_EXCEPTION;
-    *certFact = new CertificateFactory(ICertificateFactorySpi::Probe(spi), provider, type);
+    AutoPtr<ICertificateFactory> tmp = new CertificateFactory(ICertificateFactorySpi::Probe(spi), provider, type);
+    *certFact = tmp;
     REFCOUNT_ADD(*certFact);
     return NOERROR;
 }
