@@ -4,12 +4,20 @@
 #include "elastos/droid/javaproxy/CICancellationSignalNative.h"
 #include "elastos/droid/javaproxy/Util.h"
 #include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Database.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <unistd.h>
 
+using Elastos::Droid::Database::IBulkCursor;
+using Elastos::Droid::Database::ICursorToBulkCursorAdaptor;
+using Elastos::Droid::Database::CCursorToBulkCursorAdaptor;
 using Elastos::Droid::Content::EIID_IIContentProvider;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -206,9 +214,52 @@ ECode CContentProviderNative::Query(
     /* [in] */ IICancellationSignal* cancellationSignal,
     /* [out] */ IBulkCursorDescriptor** descriptor)
 {
-    LOGGERD("CContentProviderNative", " >> Query: %s, uri: %s", callingPkg.string(), TO_CSTR(uri));
-    assert(0 && "TODO");
-    return NOERROR;
+    // LOGGERD(TAG, "+ CContentProviderNative::QueryEx() uri: %s, selection: %s", TO_CSTR(uri), selection.string());
+
+    VALIDATE_NOT_NULL(descriptor)
+    *descriptor = NULL;
+
+    ECode ec = NOERROR;
+    AutoPtr<ICursor> cursor;
+    AutoPtr<ICursorToBulkCursorAdaptor> adaptor;
+
+    ec = Query(callingPkg, uri, projection, selection, selectionArgs, sortOrder, cancellationSignal, (ICursor**)&cursor);
+    if (cursor != NULL) {
+        // String name;
+        // GetProviderName(&name);
+        StringBuilder sb("CContentProviderNative{0x");
+        sb += StringUtils::ToHexString((Int32)mJInstance);
+        sb += "}";
+        String name = sb.ToString();
+
+        ec = CCursorToBulkCursorAdaptor::New(cursor, observer, name, (ICursorToBulkCursorAdaptor**)&adaptor);
+        FAIL_GOTO(ec, _EXIT_)
+        cursor = NULL;
+
+        AutoPtr<IBulkCursorDescriptor> desc;
+        ec = adaptor->GetBulkCursorDescriptor((IBulkCursorDescriptor**)&desc);
+        FAIL_GOTO(ec, _EXIT_)
+        adaptor = NULL;
+
+        *descriptor = desc;
+        REFCOUNT_ADD(*descriptor)
+    }
+
+_EXIT_:
+    if (FAILED(ec) || *descriptor == NULL) {
+        LOGGERE(TAG, " CContentProviderNative::QueryEx() failed. ec=%08x", ec);
+    }
+
+    if (adaptor != NULL) {
+        IBulkCursor::Probe(adaptor)->Close();
+    }
+
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+
+    // LOGGERD(TAG, "- CContentProviderNative::QueryEx() selection %s", selection.string());
+    return ec;
 }
 
 ECode CContentProviderNative::OpenTypedAssetFile(

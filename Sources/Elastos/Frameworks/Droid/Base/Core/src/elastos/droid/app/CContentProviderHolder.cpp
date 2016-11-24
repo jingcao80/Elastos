@@ -50,8 +50,6 @@ ECode CContentProviderHolder::WriteToParcel(
     dest->WriteInterfacePtr(mConnection.Get());
     dest->WriteBoolean(mNoReleaseNeeded);
 
-    Logger::I("CContentProviderHolder", " >>> WriteToParcel: binder:%s, provider: %s,",
-        TO_CSTR(binder), TO_CSTR(mProvider));
     return NOERROR;
 }
 
@@ -66,8 +64,6 @@ ECode CContentProviderHolder::ReadFromParcel(
 
     mProvider = ContentProviderNative::AsInterface(binder);
 
-    Logger::I("CContentProviderHolder", " >>> ReadFromParcel: binder:%s, provider: %s",
-        TO_CSTR(binder), TO_CSTR(mProvider));
     return NOERROR;
 }
 

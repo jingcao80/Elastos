@@ -42,7 +42,7 @@ protected:
 
     virtual CARAPI_(void) OnAllReferencesReleasedFromContainer();
 
-private:
+protected:
     Int32 mReferenceCount;
 };
 

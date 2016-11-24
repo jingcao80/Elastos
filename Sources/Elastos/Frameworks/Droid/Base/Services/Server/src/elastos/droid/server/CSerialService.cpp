@@ -108,14 +108,6 @@ ECode CSerialService::NativeOpen(
     return CParcelFileDescriptor::New(fileDes, descriptor);
 }
 
-ECode CSerialService::ToString(
-        /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = String(NULL);
-    return E_NOT_IMPLEMENTED;
-}
-
 } // Server
 } // Droid
 } // Elastos

@@ -28,16 +28,19 @@ ECode BulkCursorToCursorAdaptor::constructor()
 }
 
 ECode BulkCursorToCursorAdaptor::Initialize(
-    /* [in] */ IBulkCursorDescriptor* d)
+    /* [in] */ IBulkCursorDescriptor* desc)
 {
-    CBulkCursorDescriptor* desc = (CBulkCursorDescriptor*)d;
-    mBulkCursor = desc->mCursor;
-    mColumns = desc->mColumnNames;
+    mBulkCursor = NULL;
+    desc->GetCursor((IBulkCursor**)&mBulkCursor);
+    mColumns = NULL;
+    desc->GetColumnNames((ArrayOf<String>**)&mColumns);
     mRowIdColumnIndex = DatabaseUtils::FindRowIdColumnIndex(mColumns);
-    mWantsAllOnMoveCalls = desc->mWantsAllOnMoveCalls;
-    mCount = desc->mCount;
-    if (desc->mWindow != NULL) {
-        SetWindow(desc->mWindow);
+    desc->GetWantsAllOnMoveCalls(&mWantsAllOnMoveCalls);
+    desc->GetCount(&mCount);
+    AutoPtr<ICursorWindow> window;
+    desc->GetWindow((ICursorWindow**)&window);
+    if (window != NULL) {
+        SetWindow(window);
     }
     return NOERROR;
 }

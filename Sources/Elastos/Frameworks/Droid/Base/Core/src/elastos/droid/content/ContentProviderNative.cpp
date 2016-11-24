@@ -67,31 +67,25 @@ ECode ContentProviderProxy::Query(
     VALIDATE_NOT_NULL(cursor)
     *cursor = NULL;
 
-    Logger::D("ContentProviderProxy", " >> Query: %s, uri: %s", callingPkg.string(), TO_CSTR(uri));
+    AutoPtr<BulkCursorToCursorAdaptor> adaptor = new BulkCursorToCursorAdaptor();
+    adaptor->constructor();
 
-    return mRemote->Query(callingPkg, uri, projection, selection, selectionArgs,
-        sortOrder, cancellationSignal, cursor);
+    AutoPtr<IIContentObserver> observer;
+    adaptor->GetObserver((IIContentObserver**)&observer);
 
-    // AutoPtr<BulkCursorToCursorAdaptor> adaptor = new BulkCursorToCursorAdaptor();
-    // adaptor->constructor();
+    AutoPtr<IBulkCursorDescriptor> descriptor;
+    ECode ec = mRemote->Query(callingPkg, uri, projection, selection, selectionArgs,
+        sortOrder, observer, cancellationSignal, (IBulkCursorDescriptor**)&descriptor);
+    if (FAILED(ec) || descriptor == NULL) {
+        Logger::D("ContentProviderProxy", " Error: Failed to Query, ec=%08x", ec);
+        IBulkCursor::Probe(adaptor)->Close();
+        return ec;
+    }
 
-    // AutoPtr<IIContentObserver> observer;
-    // adaptor->GetObserver((IIContentObserver**)&observer);
-
-    // AutoPtr<IBulkCursorDescriptor> descriptor;
-    // ECode ec = mRemote->Query(callingPkg, uri, projection, selection, selectionArgs,
-    //     sortOrder, observer, cancellationSignal, (IBulkCursorDescriptor**)&descriptor);
-    // if (FAILED(ec) || descriptor == NULL) {
-    //     Logger::D("ContentProviderProxy", " Error: Failed to Query, ec=%08x", ec);
-    //     IBulkCursor::Probe(adaptor)->Close();
-    //     return ec;
-    // }
-
-    // Logger::D("ContentProviderProxy", " Query: %s", TO_CSTR(descriptor));
-    // adaptor->Initialize(descriptor);
-    // *cursor = adaptor.Get();
-    // REFCOUNT_ADD(*cursor)
-    // return NOERROR;
+    adaptor->Initialize(descriptor);
+    *cursor = adaptor.Get();
+    REFCOUNT_ADD(*cursor)
+    return NOERROR;
 }
 
 ECode ContentProviderProxy::Query(
@@ -268,7 +262,6 @@ ECode ContentProviderNative::Query(
     VALIDATE_NOT_NULL(descriptor)
     *descriptor = NULL;
 
-    Logger::D("ContentProviderNative", " >> Query: %s, uri: %s", callingPkg.string(), TO_CSTR(uri));
     ECode ec = NOERROR;
     AutoPtr<ICursor> cursor;
     AutoPtr<ICursorToBulkCursorAdaptor> adaptor;
@@ -286,6 +279,8 @@ ECode ContentProviderNative::Query(
         ec = adaptor->GetBulkCursorDescriptor(descriptor);
         FAIL_GOTO(ec, _EXIT_)
         adaptor = NULL;
+
+        (*descriptor)->SetWriteToParcelFlags(IParcelable::PARCELABLE_WRITE_RETURN_VALUE);
     }
 
 _EXIT_:

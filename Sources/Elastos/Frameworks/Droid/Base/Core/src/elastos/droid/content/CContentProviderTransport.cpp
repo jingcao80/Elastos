@@ -64,7 +64,6 @@ ECode CContentProviderTransport::constructor(
     /* [in] */ IContentProvider* owner)
 {
     IWeakReferenceSource::Probe(owner)->GetWeakReference((IWeakReference**)&mWeakContentProvider);
-    Logger::I(TAG, " >> constructor: %s", TO_CSTR(this));
     return NOERROR;
 }
 
@@ -101,8 +100,6 @@ ECode CContentProviderTransport::Query(
 {
     VALIDATE_NOT_NULL(cursor);
     *cursor = NULL;
-
-    Logger::I(TAG, " >> %s Query: %s", TO_CSTR(this), TO_CSTR(inUri));
 
     AutoPtr<IContentProvider> contentProvider;
     GetContentProvider((IContentProvider**)&contentProvider);
@@ -256,8 +253,7 @@ ECode CContentProviderTransport::ApplyBatch(
         if ((*userIds)[i] != IUserHandle::USER_CURRENT) {
           // Removing the user id from the uri.
             AutoPtr<IContentProviderOperation> newOp;
-            assert(0 && "TODO");
-            // CContentProviderOperation::New(operation, TRUE, (IContentProviderOperation**)&newOp);
+            CContentProviderOperation::New(operation, TRUE, (IContentProviderOperation**)&newOp);
             operations->Set(i, newOp);
             operation = newOp;
         }
@@ -291,9 +287,8 @@ ECode CContentProviderTransport::ApplyBatch(
             if ((*userIds)[i] != IUserHandle::USER_CURRENT) {
                 // Adding the userId to the uri.
                 AutoPtr<IContentProviderResult> newResult;
-                assert(0 && "TODO");
-                // CContentProviderResult::New((*temp)[i], (*userIds)[i],
-                //     (IContentProviderResult**)&newResult);
+                CContentProviderResult::New((*temp)[i], (*userIds)[i],
+                    (IContentProviderResult**)&newResult);
                 temp->Set(i, newResult);
             }
         }

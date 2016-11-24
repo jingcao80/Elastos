@@ -37,8 +37,7 @@ public:
         /* [in] */ const String& path,
         /* [out] */ IParcelFileDescriptor** descriptor);
 
-    CARAPI ToString(
-        /* [out] */ String* str);
+    TO_STRING_IMPL("CSerialService")
 
 private:
     CARAPI NativeOpen(

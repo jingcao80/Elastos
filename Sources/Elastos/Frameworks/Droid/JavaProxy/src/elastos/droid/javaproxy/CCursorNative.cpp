@@ -500,6 +500,8 @@ ECode CCursorNative::GetColumnName(
 ECode CCursorNative::GetColumnNames(
     /* [out, callee] */ ArrayOf<String>** columnNames)
 {
+    VALIDATE_NOT_NULL(columnNames)
+    *columnNames = NULL;
     // LOGGERD(TAG, "+ CCursorNative::GetColumnNames()");
 
     JNIEnv* env;
@@ -514,11 +516,11 @@ ECode CCursorNative::GetColumnNames(
     jobjectArray jcolumnNames = (jobjectArray)env->CallObjectMethod(mJInstance, m);
     Util::CheckErrorAndLog(env, TAG, "CallObjectMethod: GetColumnNames %d", __LINE__);
 
-    *columnNames = NULL;
     if (jcolumnNames != NULL) {
         jint jcount = env->GetArrayLength(jcolumnNames);
         if (jcount > 0) {
             *columnNames = ArrayOf<String>::Alloc((Int32)jcount);
+            REFCOUNT_ADD(*columnNames)
             if (*columnNames != NULL) {
                 for (Int32 i = 0; i < jcount; i++) {
                     jstring jcolumnName = (jstring)env->GetObjectArrayElement(jcolumnNames, i);
