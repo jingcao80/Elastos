@@ -23,6 +23,11 @@ using Elastos::Droid::Content::IIntentHelper;
 using Elastos::Droid::Content::CIntentHelper;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Internal::Telephony::CSmsApplication;
+using Elastos::Droid::Internal::Telephony::ISmsApplication;
+using Elastos::Droid::Internal::Telephony::ISmsApplicationData;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Nfc::INfcAdapter;
 using Elastos::Droid::Nfc::INfcManager;
 using Elastos::Droid::Net::INetworkInfo;
@@ -38,8 +43,6 @@ using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISearchIndexableResource;
 using Elastos::Droid::Provider::CSearchIndexableResource;
-using Elastos::Droid::Internal::Telephony::ISmsApplicationData;
-using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
@@ -247,162 +250,166 @@ ECode WirelessSettings::OnPreferenceTreeClick(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0 && "TODO");
 
-    // StringBuilder builder("onPreferenceTreeClick: preference=");
-    // builder += preference;
+    StringBuilder builder("onPreferenceTreeClick: preference=");
+    builder += preference;
 
-    // Log(builder.ToString());
-    // AutoPtr<IPreference> pref;
-    // if (preference == mAirplaneModePreference) {
-    //     AutoPtr<ISystemProperties> sys;
-    //     CSystemProperties::AcquireSingleton((ISystemProperties**)&sys);
-    //     String str;
-    //     sys->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &str);
-    //     if (StringUtils::ParseBoolean(str)) {
-    //         // In ECM mode launch ECM app dialog
-    //         AutoPtr<IIntent> intent;
-    //         CIntent::New(ITelephonyIntents::ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, NULL, (IIntent**)&intent);
-    //         StartActivityForResult(intent, REQUEST_CODE_EXIT_ECM);
-    //         *result = TRUE;
-    //         return NOERROR;
-    //     }
-    // }
-    // else if (preference == (FindPreference(CoreUtils::Convert(KEY_MANAGE_MOBILE_PLAN), (IPreference**)&pref), pref.Get())) {
-    //     OnManageMobilePlanClick();
-    // }
-    // Let the intents be launched by the Preference manager
+    Log(builder.ToString());
+    AutoPtr<IPreference> pref;
+    if (preference == IPreference::Probe(mAirplaneModePreference)) {
+        AutoPtr<ISystemProperties> sys;
+        CSystemProperties::AcquireSingleton((ISystemProperties**)&sys);
+        String str;
+        sys->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &str);
+        if (StringUtils::ParseBoolean(str)) {
+            // In ECM mode launch ECM app dialog
+            AutoPtr<IIntent> intent;
+            CIntent::New(ITelephonyIntents::ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, NULL, (IIntent**)&intent);
+            StartActivityForResult(intent, REQUEST_CODE_EXIT_ECM);
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    else if (preference == (FindPreference(CoreUtils::Convert(KEY_MANAGE_MOBILE_PLAN), (IPreference**)&pref), pref.Get())) {
+        OnManageMobilePlanClick();
+    }
+    //Let the intents be launched by the Preference manager
     return SettingsPreferenceFragment::OnPreferenceTreeClick(preferenceScreen, preference, result);
 }
 
 ECode WirelessSettings::OnManageMobilePlanClick()
 {
     Log(String("onManageMobilePlanClick:"));
-    assert(0 && "TODO");
 
-    // mManageMobilePlanMessage = NULL;
-    // AutoPtr<IActivity> activity;
-    // GetActivity((IActivity**)&activity);
-    // AutoPtr<IResources> resources;
-    // activity->GetResources((IResources**)&resources);
+    mManageMobilePlanMessage = NULL;
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<IResources> resources;
+    IContext::Probe(activity)->GetResources((IResources**)&resources);
 
-    // AutoPtr<INetworkInfo> ni;
-    // mCm->GetProvisioningOrActiveNetworkInfo((INetworkInfo**)&ni);
-    // Boolean res;
-    // mTm->HasIccCard(&res);
-    // if (res && (ni != NULL)) {
-    //     // Check for carrier apps that can handle provisioning first
-    //     AutoPtr<IIntent> provisioningIntent;
-    //     CIntent::New(ITelephonyIntents::ACTION_CARRIER_SETUP, (IIntent**)&provisioningIntent);
-    //     AutoPtr<IList> carrierPackages;
-    //     mTm->GetCarrierPackageNamesForIntent(provisioningIntent, (IList**)&carrierPackages);
-    //     if (carrierPackages != NULL && (carrierPackages->IsEmpty(&res), !res)) {
-    //         Int32 size;
-    //         carrierPackages->GetSize(&size);
-    //         if (size != 1) {
-    //             Logger::W(TAG, "Multiple matching carrier apps found, launching the first.");
-    //         }
-    //         AutoPtr<IInterface> obj;
-    //         carrierPackages->Get(0, (IInterface**)&obj);
-    //         String str;
-    //         ICharSequence::Probe(obj)->ToString(&str);
-    //         provisioningIntent->SetPackage(str);
-    //         StartActivity(provisioningIntent);
-    //         return NOERROR;
-    //     }
+    AutoPtr<INetworkInfo> ni;
+    mCm->GetProvisioningOrActiveNetworkInfo((INetworkInfo**)&ni);
+    Boolean res;
+    mTm->HasIccCard(&res);
+    if (res && (ni != NULL)) {
+        // Check for carrier apps that can handle provisioning first
+        AutoPtr<IIntent> provisioningIntent;
+        CIntent::New(ITelephonyIntents::ACTION_CARRIER_SETUP, (IIntent**)&provisioningIntent);
+        AutoPtr<IList> carrierPackages;
+        mTm->GetCarrierPackageNamesForIntent(provisioningIntent, (IList**)&carrierPackages);
+        if (carrierPackages != NULL && (carrierPackages->IsEmpty(&res), !res)) {
+            Int32 size;
+            carrierPackages->GetSize(&size);
+            if (size != 1) {
+                Logger::W(TAG, "Multiple matching carrier apps found, launching the first.");
+            }
+            AutoPtr<IInterface> obj;
+            carrierPackages->Get(0, (IInterface**)&obj);
+            String str;
+            ICharSequence::Probe(obj)->ToString(&str);
+            provisioningIntent->SetPackage(str);
+            StartActivity(provisioningIntent);
+            return NOERROR;
+        }
 
-    //     // Get provisioning URL
-    //     String url;
-    //     mCm->GetMobileProvisioningUrl(&url);
-    //     if (!TextUtils::IsEmpty(url)) {
-    //         AutoPtr<IIntentHelper> intentHelper;
-    //         CIntentHelper::AcquireSingleton((IIntentHelper**)&intentHelper);
-    //         AutoPtr<IIntent> intent;
-    //         intentHelper->MakeMainSelectorActivity(IIntent::ACTION_MAIN,
-    //                 Intent::CATEGORY_APP_BROWSER, (IIntent**)&intent);
-    //         AutoPtr<IUriHelper> uriHelper;
-    //         CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
-    //         AutoPtr<IUri> uri;
-    //         uriHelper->Parse(url, (IUri**)&uri);
-    //         intent->SetData(uri);
-    //         intent->SetFlags(IIntent::FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-    //                 IIntent::FLAG_ACTIVITY_NEW_TASK);
-    //         // try {
-    //         FAIL_RETURN(StartActivity(intent));
-    //         // } catch (ActivityNotFoundException e) {
-    //         //     Logger::W(TAG, "onManageMobilePlanClick: startActivity failed" + e);
-    //         // }
-    //     }
-    //     else {
-    //         // No provisioning URL
-    //         String operatorName;
-    //         mTm->GetSimOperatorName(&operatorName);
-    //         if (TextUtils::IsEmpty(operatorName)) {
-    //             // Use NetworkOperatorName as second choice in case there is no
-    //             // SPN (Service Provider Name on the SIM). Such as with T-mobile.
-    //             mTm->GetNetworkOperatorName(&operatorName);
-    //             if (TextUtils::IsEmpty(operatorName)) {
-    //                 resources->GetString(
-    //                         R::string::mobile_unknown_sim_operator, &mManageMobilePlanMessage);
-    //             }
-    //             else {
-    //                 resources->GetString(
-    //                         R::string::mobile_no_provisioning_url, operatorName, &mManageMobilePlanMessage);
-    //             }
-    //         }
-    //         else {
-    //             resources->GetString(
-    //                     R::string::mobile_no_provisioning_url, operatorName, &mManageMobilePlanMessage);
-    //         }
-    //     }
-    // }
-    // else if ((mTm->HasIccCard(&res), res) == FALSE) {
-    //     // No sim card
-    //     resources->GetString(R::string::mobile_insert_sim_card, &mManageMobilePlanMessage);
-    // }
-    // else {
-    //     // NetworkInfo is NULL, there is no connection
-    //     resources->GetString(R::string::mobile_connect_to_internet, &mManageMobilePlanMessage);
-    // }
-    // if (!TextUtils::IsEmpty(mManageMobilePlanMessage)) {
-    //     Log(String("onManageMobilePlanClick: message=") + mManageMobilePlanMessage);
-    //     ShowDialog(MANAGE_MOBILE_PLAN_DIALOG_ID);
-    // }
+        // Get provisioning URL
+        String url;
+        mCm->GetMobileProvisioningUrl(&url);
+        if (!TextUtils::IsEmpty(url)) {
+            AutoPtr<IIntentHelper> intentHelper;
+            CIntentHelper::AcquireSingleton((IIntentHelper**)&intentHelper);
+            AutoPtr<IIntent> intent;
+            intentHelper->MakeMainSelectorActivity(IIntent::ACTION_MAIN,
+                    IIntent::CATEGORY_APP_BROWSER, (IIntent**)&intent);
+            AutoPtr<IUriHelper> uriHelper;
+            CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
+            AutoPtr<IUri> uri;
+            uriHelper->Parse(url, (IUri**)&uri);
+            intent->SetData(uri);
+            intent->SetFlags(IIntent::FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                    IIntent::FLAG_ACTIVITY_NEW_TASK);
+            // try {
+            FAIL_RETURN(StartActivity(intent));
+            // } catch (ActivityNotFoundException e) {
+            //     Logger::W(TAG, "onManageMobilePlanClick: startActivity failed" + e);
+            // }
+        }
+        else {
+            // No provisioning URL
+            String operatorName;
+            mTm->GetSimOperatorName(&operatorName);
+            if (TextUtils::IsEmpty(operatorName)) {
+                // Use NetworkOperatorName as second choice in case there is no
+                // SPN (Service Provider Name on the SIM). Such as with T-mobile.
+                mTm->GetNetworkOperatorName(&operatorName);
+                if (TextUtils::IsEmpty(operatorName)) {
+                    resources->GetString(
+                            R::string::mobile_unknown_sim_operator, &mManageMobilePlanMessage);
+                }
+                else {
+                    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+                    args->Set(0, CoreUtils::Convert(operatorName));
+                    resources->GetString(
+                            R::string::mobile_no_provisioning_url, args, &mManageMobilePlanMessage);
+                }
+            }
+            else {
+                AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+                args->Set(0, CoreUtils::Convert(operatorName));
+                resources->GetString(
+                        R::string::mobile_no_provisioning_url, args, &mManageMobilePlanMessage);
+            }
+        }
+    }
+    else if ((mTm->HasIccCard(&res), res) == FALSE) {
+        // No sim card
+        resources->GetString(R::string::mobile_insert_sim_card, &mManageMobilePlanMessage);
+    }
+    else {
+        // NetworkInfo is NULL, there is no connection
+        resources->GetString(R::string::mobile_connect_to_internet, &mManageMobilePlanMessage);
+    }
+    if (!TextUtils::IsEmpty(mManageMobilePlanMessage)) {
+        Log(String("onManageMobilePlanClick: message=") + mManageMobilePlanMessage);
+        ShowDialog(MANAGE_MOBILE_PLAN_DIALOG_ID);
+    }
     return NOERROR;
 }
 
 void WirelessSettings::InitSmsApplicationSetting()
 {
     Log(String("initSmsApplicationSetting:"));
-    assert(0 && "TODO");
-    // AutoPtr<IActivity> activity;
-    // GetActivity((IActivity**)&activity);
-    // AutoPtr<ICollection> smsApplications; //  Collection<SmsApplicationData>
-    // SmsApplication->GetApplicationCollection(IContext::Probe(activity), (ICollection**)&smsApplications);
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<ISmsApplication> sa;
+    CSmsApplication::AcquireSingleton((ISmsApplication**)&sa);
+    AutoPtr<ICollection> smsApplications; //  Collection<SmsApplicationData>
+    sa->GetApplicationCollection(IContext::Probe(activity), (ICollection**)&smsApplications);
 
-    // // If the list is empty the dialog will be empty, but we will not crash.
-    // Int32 count;
-    // smsApplications->GetSize(&count);
-    // AutoPtr< ArrayOf<String> > packageNames = ArrayOf<String>::Alloc(count);
-    // Int32 i = 0;
-    // AutoPtr<IIterator> iterator;
-    // smsApplications->GetIterator((IIterator**)&iterator);
-    // Boolean res;
-    // while (iterator->HasNext(&res), res) {
-    //     AutoPtr<IInterface> obj;
-    //     iterator->GetNext((IInterface**)&obj);
-    //     ISmsApplicationData* smsApplicationData = ISmsApplicationData::Probe(obj);
-    //     (*packageNames)[i] = (SmsApplicationData*)smsApplicationData->mPackageName;
-    //     i++;
-    // }
+    // If the list is empty the dialog will be empty, but we will not crash.
+    Int32 count;
+    smsApplications->GetSize(&count);
+    AutoPtr< ArrayOf<String> > packageNames = ArrayOf<String>::Alloc(count);
+    Int32 i = 0;
+    AutoPtr<IIterator> iterator;
+    smsApplications->GetIterator((IIterator**)&iterator);
+    Boolean res;
+    while (iterator->HasNext(&res), res) {
+        AutoPtr<IInterface> obj;
+        iterator->GetNext((IInterface**)&obj);
+        assert(0 && "TODO");
+        // ISmsApplicationData* smsApplicationData = ISmsApplicationData::Probe(obj);
+        // (*packageNames)[i] = ((SmsApplicationData*)smsApplicationData)->mPackageName;
+        i++;
+    }
 
-    // String defaultPackageName = NULL;
-    // AutoPtr<IComponentName> appName;
-    // SmsApplication->GetDefaultSmsApplication(IContext::Probe(activity), TRUE, (IComponentName**)&appName);
-    // if (appName != NULL) {
-    //     appName->GetPackageName(&defaultPackageName);
-    // }
-    // mSmsApplicationPreference->SetPackageNames(packageNames, defaultPackageName);
+    String defaultPackageName;
+    AutoPtr<IComponentName> appName;
+    sa->GetDefaultSmsApplication(IContext::Probe(activity), TRUE, (IComponentName**)&appName);
+    if (appName != NULL) {
+        appName->GetPackageName(&defaultPackageName);
+    }
+    mSmsApplicationPreference->SetPackageNames(packageNames, defaultPackageName);
 }
 
 ECode WirelessSettings::OnCreateDialog(
@@ -633,8 +640,8 @@ ECode WirelessSettings::OnResume()
 {
     SettingsPreferenceFragment::OnResume();
 
+    mAirplaneModeEnabler->Resume();
     assert(0 && "TODO");
-    // mAirplaneModeEnabler->Resume();
     // if (mNfcEnabler != NULL) {
     //     mNfcEnabler->Resume();
     // }
@@ -660,8 +667,8 @@ ECode WirelessSettings::OnPause()
 {
     SettingsPreferenceFragment::OnPause();
 
+    mAirplaneModeEnabler->Pause();
     assert(0 && "TODO");
-    // mAirplaneModeEnabler->Pause();
     // if (mNfcEnabler != NULL) {
     //     mNfcEnabler->Pause();
     // }

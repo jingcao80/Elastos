@@ -5,6 +5,8 @@
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
 #include "elastos/droid/settings/search/BaseSearchIndexProvider.h"
+#include "elastos/droid/settings/CAppListPreference.h"
+#include "elastos/droid/settings/AirplaneModeEnabler.h"
 #include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Settings::Search::BaseSearchIndexProvider;
@@ -31,8 +33,6 @@ using Elastos::Droid::Settings::SettingsPreferenceFragment;
 using Elastos::Droid::Settings::Search::IIndexableSearchIndexProvider;
 using Elastos::Droid::Telephony::ITelephonyManager;
 
-// using Elastos::Droid::Internal::Telephony::ISmsApplication;
-// using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 // using Elastos::Droid::Settings::Nfc::INfcEnabler;
 
 namespace Elastos {
@@ -162,7 +162,7 @@ private:
     static const String KEY_TOGGLE_NSD; //network service discovery
     static const String KEY_CELL_BROADCAST_SETTINGS;
 
-    // private AirplaneModeEnabler mAirplaneModeEnabler;
+    AutoPtr<AirplaneModeEnabler> mAirplaneModeEnabler;
     AutoPtr<ISwitchPreference> mAirplaneModePreference;
     // private NfcEnabler mNfcEnabler;
     // private NfcAdapter mNfcAdapter;
@@ -176,9 +176,9 @@ private:
     static const Int32 MANAGE_MOBILE_PLAN_DIALOG_ID;
     static const String SAVED_MANAGE_MOBILE_PLAN_MSG;
 
-    // private AppListPreference mSmsApplicationPreference;
+    AutoPtr<CAppListPreference> mSmsApplicationPreference;
 
-    // private String mManageMobilePlanMessage;
+    String mManageMobilePlanMessage;
 
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;
 };
@@ -188,4 +188,3 @@ private:
 } // namespace Elastos
 
 #endif //__ELASTOS_DROID_SETTINGS_WIRELESSSETTINGS_H__
-

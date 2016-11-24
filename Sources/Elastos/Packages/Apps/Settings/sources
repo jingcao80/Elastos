@@ -19,6 +19,7 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += AirplaneModeEnabler.cpp
 SOURCES += CApplicationSettings.cpp
+SOURCES += CAppListPreference.cpp
 SOURCES += CAppPicker.cpp
 SOURCES += CBugreportPreference.cpp
 SOURCES += CLocalePicker.cpp

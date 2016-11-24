@@ -1304,6 +1304,20 @@ module
         interface IDialogCreatable;
     }
 
+    [local]
+    class CAppListPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IListPreference;
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogInterfaceOnClickListener;
+    }
+
     class CAppPicker {
         constructor();
 

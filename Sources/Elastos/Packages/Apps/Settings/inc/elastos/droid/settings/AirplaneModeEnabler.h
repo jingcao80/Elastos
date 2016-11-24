@@ -2,25 +2,20 @@
 #ifndef __ELASTOS_DROID_SETTINGS_AIRPLANEMODEENABLER_H__
 #define __ELASTOS_DROID_SETTINGS_AIRPLANEMODEENABLER_H__
 
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Preference.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
-// using Elastos::Droid::Content::IIntent;
-// using Elastos::Droid::Database::IContentObserver;
-// using Elastos::Droid::Os::IHandler;
-// using Elastos::Droid::Os::IMessage;
-// using Elastos::Droid::Os::ISystemProperties;
-// using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Internal::Telephony::IPhoneStateIntentReceiver;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
-// using Elastos::Droid::Preference::ICheckBoxPreference;
-// using Elastos::Droid::Preference::IPreference;
-// using Elastos::Droid::Preference::ISwitchPreference;
-// using Elastos::Droid::Provider::ISettings;
-
-// using Elastos::Droid::Internal::Telephony::IPhoneStateIntentReceiver;
-// using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Preference::ISwitchPreference;
 
 namespace Elastos {
 namespace Droid {
@@ -30,77 +25,77 @@ class AirplaneModeEnabler
     : public Object
     , public IPreferenceOnPreferenceChangeListener
 {
+private:
+    class MyHandler
+        : public Handler
+    {
+    public:
+        TO_STRING_IMPL("AirplaneModeEnabler::MyHandler")
+
+        MyHandler(
+            /* [in] */ AirplaneModeEnabler* host);
+
+        CARAPI constructor();
+
+        //@Override
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
+        AirplaneModeEnabler* mHost;
+    };
+
+    class MyContentObserver
+        : public ContentObserver
+    {
+    public:
+        TO_STRING_IMPL("AirplaneModeEnabler::MyContentObserver")
+
+        MyContentObserver(
+            /* [in] */ AirplaneModeEnabler* host);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
+
+        //@Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        AirplaneModeEnabler* mHost;
+    };
+
 public:
-    CAR_INTERFACE_DECL();
-    // private final Context mContext;
+    CAR_INTERFACE_DECL()
 
-    // private PhoneStateIntentReceiver mPhoneStateReceiver;
+    TO_STRING_IMPL("AirplaneModeEnabler")
 
-    // private final SwitchPreference mSwitchPref;
+    AirplaneModeEnabler(
+        /* [in] */ IContext* context,
+        /* [in] */ ISwitchPreference* airplaneModeCheckBoxPreference);
 
-    // private static const Int32 EVENT_SERVICE_STATE_CHANGED = 3;
+    CARAPI Resume();
 
-    // private Handler mHandler = new Handler() {
-    //     //@Override
-    //     CARAPI HandleMessage(Message msg) {
-    //         switch (msg.what) {
-    //             case EVENT_SERVICE_STATE_CHANGED:
-    //                 OnAirplaneModeChanged();
-    //                 break;
-    //         }
-    //     }
-    // };
-
-    // private ContentObserver mAirplaneModeObserver = new ContentObserver(new Handler()) {
-    //     //@Override
-    //     CARAPI OnChange(Boolean selfChange) {
-    //         OnAirplaneModeChanged();
-    //     }
-    // };
-
-    // public AirplaneModeEnabler(Context context, SwitchPreference airplaneModeCheckBoxPreference) {
-
-    //     mContext = context;
-    //     mSwitchPref = airplaneModeCheckBoxPreference;
-
-    //     airplaneModeCheckBoxPreference->SetPersistent(FALSE);
-
-    //     mPhoneStateReceiver = new PhoneStateIntentReceiver(mContext, mHandler);
-    //     mPhoneStateReceiver->NotifyServiceState(EVENT_SERVICE_STATE_CHANGED);
-    // }
-
-    // CARAPI Resume() {
-
-    //     mSwitchPref->SetChecked(IsAirplaneModeOn(mContext));
-
-    //     mPhoneStateReceiver->RegisterIntent();
-    //     mSwitchPref->SetOnPreferenceChangeListener(this);
-    //     mContext->GetContentResolver()->RegisterContentObserver(
-    //             Settings::Global::>GetUriFor(Settings::Global::AIRPLANE_MODE_ON), TRUE,
-    //             mAirplaneModeObserver);
-    // }
-
-    // CARAPI Pause() {
-    //     mPhoneStateReceiver->UnregisterIntent();
-    //     mSwitchPref->SetOnPreferenceChangeListener(NULL);
-    //     mContext->GetContentResolver()->UnregisterContentObserver(mAirplaneModeObserver);
-    // }
+    CARAPI Pause();
 
     static CARAPI_(Boolean) IsAirplaneModeOn(
         /* [in] */ IContext* context);
 
-    // private void SetAirplaneModeOn(Boolean enabling) {
-    //     // Change the system setting
-    //     Settings::Global::>PutInt(mContext->GetContentResolver(), Settings::Global::AIRPLANE_MODE_ON,
-    //                             enabling ? 1 : 0);
-    //     // Update the UI to reflect system setting
-    //     mSwitchPref->SetChecked(enabling);
+    /**
+     * Called when someone clicks on the checkbox preference.
+     */
+    CARAPI OnPreferenceChange(
+        /* [in] */ IPreference* preference,
+        /* [in] */ IInterface* newValue,
+        /* [out] */ Boolean* result);
 
-    //     // Post the intent
-    //     Intent intent = new Intent(IIntent::ACTION_AIRPLANE_MODE_CHANGED);
-    //     intent->PutExtra("state", enabling);
-    //     mContext->SendBroadcastAsUser(intent, UserHandle.ALL);
-    // }
+    CARAPI SetAirplaneModeInECM(
+        /* [in] */ Boolean isECMExit,
+        /* [in] */ Boolean isAirplaneModeOn);
+
+private:
+    CARAPI_(void) SetAirplaneModeOn(
+        /* [in] */ Boolean enabling);
 
     /**
      * Called when we've received confirmation that the airplane mode was set.
@@ -110,33 +105,20 @@ public:
      * - handle the case of wifi/bluetooth failures
      * - mobile does not send failure notification, fail on timeout.
      */
-    // private void OnAirplaneModeChanged() {
-    //     mSwitchPref->SetChecked(IsAirplaneModeOn(mContext));
-    // }
+    CARAPI_(void) OnAirplaneModeChanged();
 
-    /**
-     * Called when someone clicks on the checkbox preference.
-     */
-    // public Boolean OnPreferenceChange(Preference preference, Object newValue) {
-    //     if (Boolean->ParseBoolean(
-    //                 SystemProperties->Get(TelephonyProperties.PROPERTY_INECM_MODE))) {
-    //         // In ECM mode, do not update database at this point
-    //     } else {
-    //         SetAirplaneModeOn((Boolean) newValue);
-    //     }
-    //     return TRUE;
-    // }
+private:
+    AutoPtr<IContext> mContext;
 
-    // CARAPI SetAirplaneModeInECM(Boolean isECMExit, Boolean isAirplaneModeOn) {
-    //     if (isECMExit) {
-    //         // update database based on the current checkbox state
-    //         SetAirplaneModeOn(isAirplaneModeOn);
-    //     } else {
-    //         // update summary
-    //         OnAirplaneModeChanged();
-    //     }
-    // }
+    AutoPtr<IPhoneStateIntentReceiver> mPhoneStateReceiver;
 
+    AutoPtr<ISwitchPreference> mSwitchPref;
+
+    static const Int32 EVENT_SERVICE_STATE_CHANGED = 3;
+
+    AutoPtr<MyHandler> mHandler;
+
+    AutoPtr<MyContentObserver> mAirplaneModeObserver;
 };
 
 } // namespace Settings
