@@ -405,7 +405,7 @@ ECode OpenSSLRSAPrivateKey::ToString(
     Boolean engineBased = FALSE;
     mKey->IsEngineBased(&engineBased);
     if (engineBased) {
-        sb.Append("key=");
+        sb.Append("(EnginBased)key=");
         sb.Append(mKey);
         sb.Append('}');
     }

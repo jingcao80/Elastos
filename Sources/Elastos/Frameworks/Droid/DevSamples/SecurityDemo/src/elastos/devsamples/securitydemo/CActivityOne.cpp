@@ -26,6 +26,7 @@ using Elastos::IO::IFileInputStream;
 using Elastos::IO::IStringBufferInputStream;
 using Elastos::IO::CStringBufferInputStream;
 using Elastos::IO::IInputStream;
+using Elastos::Security::CSecureRandom;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::CKeyPairGeneratorHelper;
@@ -168,6 +169,9 @@ ECode CActivityOne::MyListener::OnClick(
     }
     else if (id == R::id::selfsigned) {
         return mHost->SelfSignTest();
+    }
+    else if (id == R::id::elastoskeypair) {
+        return mHost->ElastosKeyPairZLL();
     }
 
     String data = String("testtesttest");
@@ -356,6 +360,10 @@ ECode CActivityOne::OnCreate(
 
     view = NULL;
     view = FindViewById(R::id::selfsigned);
+    view->SetOnClickListener(l.Get());
+
+    view = NULL;
+    view = FindViewById(R::id::elastoskeypair);
     view->SetOnClickListener(l.Get());
 
     return NOERROR;
@@ -1175,9 +1183,9 @@ ECode CActivityOne::SelfSignTest()
     AutoPtr<IBigIntegerHelper> biHelper;
     CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
     AutoPtr<IBigInteger> serialNumber;
-    biHelper->ValueOf(1234, (IBigInteger**)&serialNumber);
+    biHelper->ValueOf(12345, (IBigInteger**)&serialNumber);
     AutoPtr<IDate> start;
-    CDate::New(116, 1, 1, (IDate**)&start);
+    CDate::New(116, 11, 23, (IDate**)&start);
     AutoPtr<IDate> end;
     CDate::New(126, 1, 1, (IDate**)&end);
     String subjectDNName("C=CN2, L=SH2, ST=SH2, CN=kortide2, O=kortide2, OU=OS2");
@@ -1187,6 +1195,156 @@ ECode CActivityOne::SelfSignTest()
             pubKey, privKey, serialNumber, start, end, subjectDNName, subjectDNName, (IX509Certificate**)&cert);
 
     Logger::I(TAG, " SelfSignTest end");
+    return NOERROR;
+}
+
+ECode CActivityOne::ElastosKeyPairZLL()
+{
+    Logger::D(TAG, "begin ElastosKeyPairZLL");
+    //AutoPtr<Elastos::Droid::KeyStore::Security::IKeyStore> androidKeyStore;
+    //AutoPtr<Elastos::Droid::KeyStore::Security::IKeyStoreHelper> helpre;
+    //Elastos::Droid::KeyStore::Security::CKeyStoreHelper::AcquireSingleton(
+    //        (Elastos::Droid::KeyStore::Security::IKeyStoreHelper**)&helpre);
+    //helpre->GetInstance((Elastos::Droid::KeyStore::Security::IKeyStore**)&androidKeyStore);
+
+    //Boolean res;
+    //androidKeyStore->Reset(&res);
+    //assert(res == TRUE);
+    //androidKeyStore->IsUnlocked(&res);
+    //assert(res == FALSE);
+
+    //androidKeyStore->Password(String("1111"), &res);
+    //assert(res == TRUE);
+
+    //androidKeyStore->IsUnlocked(&res);
+    //assert(res == TRUE);
+
+    //AutoPtr<ArrayOf<String> > aliases;
+    //androidKeyStore->Saw(String(""), (ArrayOf<String>**)&aliases);
+    //assert(aliases != NULL);
+    //assert(0 == aliases->GetLength());
+
+    AutoPtr<IKeyPairGeneratorHelper> kpgHelper;
+    CKeyPairGeneratorHelper::AcquireSingleton((IKeyPairGeneratorHelper**)&kpgHelper);
+    AutoPtr<IKeyPairGenerator> keyPairGenerator;
+    kpgHelper->GetInstance(String("RSA"), String("ElastosKeyStore"), (IKeyPairGenerator**)&keyPairGenerator);
+
+    AutoPtr<IKeyPairGeneratorSpecBuilder> builder;
+    CKeyPairGeneratorSpecBuilder::New(this, (IKeyPairGeneratorSpecBuilder**)&builder);
+    builder->SetAlias(String("ZLLTest"));
+    //builder->SetKeyType(String("RSA"));
+    builder->SetKeyType(String("DSA"));
+    //builder->SetKeySize(1024);
+    AutoPtr<IX500Principal> dn;
+    CX500Principal::New(String("CN=test1"), (IX500Principal**)&dn);
+    builder->SetSubject(dn);
+
+    AutoPtr<IBigIntegerHelper> helper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&helper);
+    AutoPtr<IBigInteger> serialNumber1;
+    helper->ValueOf(2L, (IBigInteger**)&serialNumber1);
+    builder->SetSerialNumber(serialNumber1);
+    AutoPtr<IDate> start;
+    CDate::New(116, 11, 23, (IDate**)&start);
+    AutoPtr<IDate> end;
+    CDate::New(126, 1, 1, (IDate**)&end);
+    builder->SetStartDate(start);
+    builder->SetEndDate(end);
+    //builder->SetEncryptionRequired();
+    AutoPtr<IKeyPairGeneratorSpec> spec;
+    builder->Build((IKeyPairGeneratorSpec**)&spec);
+
+    //AutoPtr<ISecureRandom> r;
+    //CSecureRandom::New((ISecureRandom**)&r);
+
+    //keyPairGenerator->Initialize(IAlgorithmParameterSpec::Probe(spec), r);
+    keyPairGenerator->Initialize(IAlgorithmParameterSpec::Probe(spec));
+
+
+    AutoPtr<IKeyPair> keyPair;
+    keyPairGenerator->GenerateKeyPair((IKeyPair**)&keyPair);
+
+    AutoPtr<IPublicKey> publicKey;
+    keyPair->GetPublic((IPublicKey**)&publicKey);
+
+    AutoPtr<IPrivateKey> privateKey;
+    keyPair->GetPrivate((IPrivateKey**)&privateKey);
+
+    AutoPtr<ArrayOf<Byte> > publicEncoded;
+    IKey::Probe(publicKey)->GetEncoded((ArrayOf<Byte>**)&publicEncoded);
+    if (publicEncoded != NULL) {
+        String publicStr = StringUtils::ToHexString(*publicEncoded);
+        Logger::D(TAG, "RSA publicKey string is : %s, ", publicStr.string());
+    }
+    else {
+        Logger::D(TAG, "RSA publicKey string is : NULL,");
+    }
+
+    AutoPtr<ArrayOf<Byte> > privateEncoded;
+    IKey::Probe(privateKey)->GetEncoded((ArrayOf<Byte>**)&privateEncoded);
+    if (privateEncoded != NULL) {
+        String privateStr = StringUtils::ToHexString(*privateEncoded);
+        Logger::D(TAG, "RSA privateKey string is : %s,", privateStr.string());
+    }
+    else {
+        // because using an OpenSSL ENGINE, see: OpenSSLRSAPrivateKey::GetEncoded
+        Logger::D(TAG, "RSA privateKey string is : NULL,");
+    }
+
+#if true
+    Logger::D(TAG, "ElastosKeyPairZLL begin signature with the privateKey and publicKey");
+    AutoPtr<ISignatureHelper> sh;
+    CSignatureHelper::AcquireSingleton((ISignatureHelper**)&sh);
+    //String algorithm("MD5withRSA");
+    String algorithm("SHA1withDSA");
+    AutoPtr<ISignature> sig;
+    ECode ec = sh->GetInstance(algorithm, (ISignature**)&sig);
+    ASSERT_SUCCEEDED(ec);
+    sig->InitSign(privateKey);
+    ec = sig->Update(algorithm.GetBytes());
+    ASSERT_SUCCEEDED(ec);
+
+    AutoPtr<ArrayOf<Byte> > signature;
+    ec = sig->Sign((ArrayOf<Byte>**)&signature);
+    ASSERT_SUCCEEDED(ec);
+    assert(signature != NULL && "Signature must not be null");
+
+    ec = sig->InitVerify(publicKey);
+    ASSERT_SUCCEEDED(ec);
+    //ec = sig->Update(String("MD5withRSA").GetBytes());
+    ec = sig->Update(String("SHA1withDSA").GetBytes());
+
+    Boolean isVerified = FALSE;
+    ec = sig->Verify(signature, &isVerified);
+    ASSERT_SUCCEEDED(ec);
+    assert("Signature must match expected signature" && isVerified);
+
+    Logger::D(TAG, "ElastosKeyPairZLL end signature with the privateKey and publicKey");
+#endif
+    //=====================================================================
+#if true
+    Logger::I(TAG, "ElastosKeyPairZLL begin selfsigned certificate");
+    AutoPtr<IOpenSSLX509V3CertificateGeneratorHelper> certGenHelper;
+    COpenSSLX509V3CertificateGeneratorHelper::AcquireSingleton((IOpenSSLX509V3CertificateGeneratorHelper**)&certGenHelper);
+
+    AutoPtr<IBigIntegerHelper> biHelper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
+    AutoPtr<IBigInteger> serialNumber;
+    biHelper->ValueOf(1234567, (IBigInteger**)&serialNumber);
+    AutoPtr<IDate> start2;
+    CDate::New(116, 11, 24, (IDate**)&start2);
+    AutoPtr<IDate> end2;
+    CDate::New(126, 1, 1, (IDate**)&end2);
+    String subjectDNName("C=CN, L=SH, ST=SH2, CN=kortide2, O=kortide2, OU=OS2");
+
+    AutoPtr<IX509Certificate> cert;
+    certGenHelper->Generate(
+                    publicKey, privateKey, serialNumber, start2, end2, subjectDNName, subjectDNName, (IX509Certificate**)&cert);
+
+    Logger::I(TAG, "ElastosKeyPairZLL end selfsigned certificate");
+#endif
+    Logger::D(TAG, "end ElastosKeyPairZLL");
+
     return NOERROR;
 }
 

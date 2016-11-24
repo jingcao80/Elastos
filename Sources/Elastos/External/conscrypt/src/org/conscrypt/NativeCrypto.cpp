@@ -10604,7 +10604,6 @@ ECode NativeCrypto::Make_Self_Signed_X509(
     publickey = reinterpret_cast<EVP_PKEY*>(pubkeycontext);
     //NOTE: if only the public key is OK????
     privatekey = reinterpret_cast<EVP_PKEY*>(privkeycontext);
-    Logger::E("NativeCrypto", "leliang Make_Self_Signed_X509, pubkey:%p, privkey:%p", publickey, privatekey);
 
     X509_set_version(x,2);
     X509_set_pubkey(x, publickey);
@@ -10614,17 +10613,14 @@ ECode NativeCrypto::Make_Self_Signed_X509(
     BN_to_ASN1_INTEGER(bn, ::X509_get_serialNumber(x));
 
     name = ::X509_get_subject_name(x);
-    //Logger::E("NativeCrypto", "leliang Make_Self_Signed_X509, line:%d, subjectName:%s", __LINE__, subjectName.string());
     //update value from subjectName and issuerName
     {
         AutoPtr<ArrayOf<String> > strArray;
         StringUtils::Split(subjectName, ",", (ArrayOf<String>**)&strArray);
         for (Int32 i = 0; i < strArray->GetLength(); ++i) {
-            //Logger::E("NativeCrypto", "leliang line:%d, i:%d, v:%s:", __LINE__, i, (*strArray)[i].string());
             AutoPtr<ArrayOf<String> > keyvalue;
             StringUtils::Split((*strArray)[i].Trim(), "=", (ArrayOf<String>**)&keyvalue);
             if (keyvalue->GetLength() == 2) {
-                //Logger::E("NativeCrypto", "leliang line:%d, key:%s, v:%s:", __LINE__, (*keyvalue)[0].string(), (*keyvalue)[1].string());
                 if ((*keyvalue)[0].Equals("C")) {
                     X509_NAME_add_entry_by_txt(name,"C", MBSTRING_ASC, (const unsigned char*)((*keyvalue)[1].string()), -1, -1, 0);
                 }
@@ -10669,14 +10665,6 @@ ECode NativeCrypto::Make_Self_Signed_X509(
         Logger::E("NativeCrypto", "Make_Self_Signed_X509 X509_sign fail, not support hashalg!");
         goto error;
     }
-    //TODO test begin
-    {
-        FILE* fp = fopen("/data/data/certest.csr", "w");
-        Logger::E("NativeCrypto", "leliang Make_Self_Signed_X509, line:%d", __LINE__);
-        X509_print_fp(fp,x);
-        fclose(fp);
-    }
-    //TODO test end
 
     *result = reinterpret_cast<uintptr_t>(x);
 error:

@@ -28,15 +28,6 @@ public:
         /* [in] */ const String& subjectName,
         /* [in] */ const String& hashalg,
         /* [out] */ IX509Certificate** result);
-private:
-    static AutoPtr<IOpenSSLKey> FromPublicKey(
-        /* [in] */ IPublicKey* key);
-
-    static AutoPtr<IOpenSSLKey> FromPrivateKey(
-        /* [in] */ IPrivateKey* key);
-
-    static AutoPtr<IOpenSSLKey> WrapPrivateKey(
-        /* [in] */ IPrivateKey* key);
 
 };
 

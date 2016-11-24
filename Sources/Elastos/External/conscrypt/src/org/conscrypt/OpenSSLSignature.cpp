@@ -3,6 +3,9 @@
 #include "COpenSSLDigestContext.h"
 #include "NativeCrypto.h"
 #include "OpenSSLKey.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Conscrypt {
@@ -319,6 +322,7 @@ void OpenSSLSignature::CheckEngineType(
             if (pkeyType != INativeCrypto::EVP_PKEY_RSA) {
                 // throw new InvalidKeyException("Signature initialized as " + engineType
                 //         + " (not RSA)");
+                Logger::E("OpenSSLSignature", "Signature initialized as %d (not RSA)", mEngineType);
                 return;
             }
             break;
@@ -326,6 +330,7 @@ void OpenSSLSignature::CheckEngineType(
             if (pkeyType != INativeCrypto::EVP_PKEY_DSA) {
                 // throw new InvalidKeyException("Signature initialized as " + engineType
                 //         + " (not DSA)");
+                Logger::E("OpenSSLSignature", "Signature initialized as %d (not DSA)", mEngineType);
                 return;
             }
             break;
@@ -333,10 +338,12 @@ void OpenSSLSignature::CheckEngineType(
             if (pkeyType != INativeCrypto::EVP_PKEY_EC) {
                 // throw new InvalidKeyException("Signature initialized as " + engineType
                 //         + " (not EC)");
+                Logger::E("OpenSSLSignature", "Signature initialized as %d (not EC)", mEngineType);
                 return;
             }
             break;
         default: {
+            Logger::E("OpenSSLSignature", "Key must be of type %d", mEngineType);
             // throw new InvalidKeyException("Key must be of type " + engineType);
             return;
         }

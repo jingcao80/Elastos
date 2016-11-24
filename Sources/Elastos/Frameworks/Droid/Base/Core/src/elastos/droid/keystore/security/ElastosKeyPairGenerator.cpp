@@ -155,27 +155,18 @@ ERROR:
     COpenSSLX509V3CertificateGeneratorHelper::AcquireSingleton((IOpenSSLX509V3CertificateGeneratorHelper**)&certGenHelper);
     //AutoPtr<IX509V3CertificateGenerator> certGen;
     //CX509V3CertificateGenerator::New((IX509V3CertificateGenerator**)&certGen);
-    //certGen->SetPublicKey(pubKey);
     AutoPtr<IBigInteger> serialNumber;
     mSpec->GetSerialNumber((IBigInteger**)&serialNumber);
-    //certGen->SetSerialNumber(serialNumber);
     AutoPtr<IX500Principal> subDN;
     mSpec->GetSubjectDN((IX500Principal**)&subDN);
     String subjectDNName;
     IPrincipal::Probe(subDN)->GetName(&subjectDNName);
 
-    //TODO certGen->SetSubjectDN(subDN);
-    //TODO certGen->SetIssuerDN(subDN);
     AutoPtr<IDate> start, end;
     mSpec->GetStartDate((IDate**)&start);
     mSpec->GetEndDate((IDate**)&end);
-    //TODO certGen->SetNotBefore(start);
-    //TODO certGen->SetNotAfter(end);
-    //TODO mSpec->GetKeyType(&skeyType);
     String sigAl;
     GetDefaultSignatureAlgorithmForKeyType(skeyType, &sigAl);
-    //TODO certGen->SetSignatureAlgorithm(sigAl);
-    Logger::E("ElastosKeyPairGenerator", "=====[snow]=====TODO: need class X509V3CertificateGenerator from lib:bouncycastle");
 
     AutoPtr<IX509Certificate> cert;
     //try {
