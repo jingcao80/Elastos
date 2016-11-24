@@ -1,5 +1,6 @@
 
 #include "CService.h"
+#include "CBasicService.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -94,6 +95,14 @@ ECode CService::MyHandler::ToString(
 //  CService::BasicService
 //======================================================================
 CAR_INTERFACE_IMPL_2(CService::BasicService, Object, IBasicInterface, IBusObject)
+CAR_OBJECT_IMPL(CBasicService)
+
+ECode CService::BasicService::constructor(
+    /* [in] */ IObject* host)
+{
+    mHost = (CService*)host;
+    return NOERROR;
+}
 
 ECode CService::BasicService::Cat(
     /* [in] */ const String& inStr1,
@@ -328,7 +337,9 @@ ECode CService::OnCreate(
     mBusHandler->constructor(looper, this);
 
     /* Start our service. */
-    mBasicService = new BasicService(this);
+    AutoPtr<IBasicInterface> bi;
+    CBasicService::New(this, (IBasicInterface**)&bi);
+    mBasicService = (BasicService*)bi.Get();
     Boolean result;
     mBusHandler->SendEmptyMessage(BusHandler::CONNECT, &result);
     return NOERROR;

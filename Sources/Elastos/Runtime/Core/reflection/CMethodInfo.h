@@ -36,6 +36,9 @@ public:
     CARAPI GetName(
         /* [out] */ String* name);
 
+    CARAPI GetSignature(
+        /* [out] */ String* signature);
+
     CARAPI GetAnnotation(
         /* [out] */ String* annotation);
 

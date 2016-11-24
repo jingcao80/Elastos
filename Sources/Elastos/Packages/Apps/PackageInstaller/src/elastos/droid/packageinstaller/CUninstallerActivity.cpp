@@ -347,12 +347,14 @@ ECode CUninstallerActivity::DispatchAborted()
 void CUninstallerActivity::ShowConfirmationDialog()
 {
     AutoPtr<UninstallAlertDialogFragment> fragment = new UninstallAlertDialogFragment();
+    fragment->constructor();
     ShowDialogFragment(fragment);
 }
 
 void CUninstallerActivity::ShowAppNotFound()
 {
     AutoPtr<AppNotFoundDialogFragment> fragment = new AppNotFoundDialogFragment();
+    fragment->constructor();
     ShowDialogFragment(fragment);
 }
 

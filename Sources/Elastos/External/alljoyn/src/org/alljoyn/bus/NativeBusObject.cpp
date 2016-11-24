@@ -409,15 +409,14 @@ QStatus NativeBusObject::Get(
     AutoPtr<IArgumentList> args;
     method->CreateArgumentList((IArgumentList**)&args);
 
-    AutoPtr<IInterface> value;
-    args->SetOutputArgumentOfObjectPtrPtr(0, (IInterface**)&value);
-
+    //TODO:
+    PVoid arg;
     if (FAILED(method->Invoke(busObj, args))) {
         mMapLock.Unlock();
         return ER_FAIL;
     }
 
-    if (!Marshal(property->mSecond->mSignature.string(), value, &val)) {
+    if (!Marshal(property->mSecond->mSignature.string(), arg, &val)) {
         mMapLock.Unlock();
         return ER_FAIL;
     }

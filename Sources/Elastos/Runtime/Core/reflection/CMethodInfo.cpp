@@ -115,6 +115,17 @@ ECode CMethodInfo::GetName(
     return NOERROR;
 }
 
+ECode CMethodInfo::GetSignature(
+    /* [out] */ String* signature)
+{
+    if (signature == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    *signature = adjustNameAddr(mBase, mMethodDescriptor->mSignature);
+    return NOERROR;
+}
+
 ECode CMethodInfo::GetAnnotation(
     /* [out] */ String* annotation)
 {

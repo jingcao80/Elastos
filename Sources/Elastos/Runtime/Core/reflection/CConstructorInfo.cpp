@@ -67,6 +67,12 @@ ECode CConstructorInfo::GetName(
     return mMethodInfo->GetName(name);
 }
 
+ECode CConstructorInfo::GetSignature(
+    /* [out] */ String* signature)
+{
+    return mMethodInfo->GetSignature(signature);
+}
+
 ECode CConstructorInfo::GetAnnotation(
     /* [out] */ String* annotation)
 {

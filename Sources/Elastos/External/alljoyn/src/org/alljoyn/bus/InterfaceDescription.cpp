@@ -94,22 +94,159 @@ ECode InterfaceDescription::Create(
     return status;
 }
 
+ECode InterfaceDescription::AddMember(
+    /* [in] */ Int32 type,
+    /* [in] */ const String& name,
+    /* [in] */ const String& inputSig,
+    /* [in] */ const String& outSig,
+    /* [in] */ Int32 annotation,
+    /* [in] */ const String& accessPerm)
+{
+    ajn::InterfaceDescription* intf = reinterpret_cast<ajn::InterfaceDescription*>(mHandle);
+    assert(intf);
+
+    QStatus status = intf->AddMember((ajn::AllJoynMessageType)type, name.string(), inputSig.string(),
+            outSig.string(), NULL, annotation, accessPerm.string());
+    if (ER_BUS_MEMBER_ALREADY_EXISTS == status || ER_BUS_INTERFACE_ACTIVATED == status) {
+        /*
+         * We know that a member exists with the same name, but check that the other parameters
+         * are identical as well before returning ER_OK.  See also the comment in create above.
+         */
+        const ajn::InterfaceDescription::Member* member = intf->GetMember(name.string());
+        if (member &&
+            (member->memberType == (ajn::AllJoynMessageType)type) &&
+            (name.string() && member->name == name.string()) &&
+            (inputSig.string() && member->signature == inputSig.string()) &&
+            (outSig.string() && member->returnSignature == outSig.string())) {
+
+            // for reverse compatibility:
+            // two annotations can be represented in the int variable 'annotation': DEPRECATED and NOREPLY
+            // make sure these int values matches with what's in the full annotations map
+            bool annotations_match = true;
+            if (annotation & ajn::MEMBER_ANNOTATE_DEPRECATED) {
+                qcc::String val;
+                if (!member->GetAnnotation(ajn::org::freedesktop::DBus::AnnotateDeprecated, val) || val != "true") {
+                    annotations_match = false;
+                }
+            }
+
+            if (annotation & ajn::MEMBER_ANNOTATE_NO_REPLY) {
+                qcc::String val;
+                if (!member->GetAnnotation(ajn::org::freedesktop::DBus::AnnotateNoReply, val) || val != "true") {
+                    annotations_match = false;
+                }
+            }
+
+            if (annotations_match) {
+                status = ER_OK;
+            }
+        }
+    }
+    return status;
+}
+
+void InterfaceDescription::Activate()
+{
+    ajn::InterfaceDescription* intf = reinterpret_cast<ajn::InterfaceDescription*>(mHandle);
+    assert(intf);
+    intf->Activate();
+}
+
+String InterfaceDescription::GetName(
+    /* [in] */ IInterfaceInfo* intf)
+{
+    // BusInterface busIntf = intf.getAnnotation(BusInterface.class);
+    // if (busIntf != null && busIntf.name().length() > 0) {
+    //     return busIntf.name();
+    // } else {
+    //     return intf.getName();
+    // }
+    String ns, name;
+    intf->GetNamespace(&ns);
+    intf->GetName(&name);
+    String fullName = ns + "." + name;
+    return fullName;
+}
+
 ECode InterfaceDescription::IsAnnounced(
     /* [out] */ Boolean* res)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res)
+    *res = mAnnounced;
+    return NOERROR;
+}
+
+/**
+ * Get the DBus member or property name.
+ *
+ * @param method The method.
+ */
+String InterfaceDescription::GetName(
+    /* [in] */ IMethodInfo* method)
+{
+    // BusMethod busMethod = method.getAnnotation(BusMethod.class);
+    // if (busMethod != null && busMethod.name().length() > 0) {
+    //     return busMethod.name();
+    // }
+    // BusSignal busSignal = method.getAnnotation(BusSignal.class);
+    // if (busSignal != null && busSignal.name().length() > 0) {
+    //     return busSignal.name();
+    // }
+    // BusProperty busProperty = method.getAnnotation(BusProperty.class);
+    // if (busProperty != null) {
+    //     if (busProperty.name().length() > 0) {
+    //         return busProperty.name();
+    //     } else {
+    //         /* The rest of the method name following the "get" or "set" prefix. */
+    //         return method.getName().substring(3);
+    //     }
+    // }
+    String name;
+    method->GetName(&name);
+    return name;
+}
+
+String InterfaceDescription::GetInputSig(
+    /* [in] */ IMethodInfo* method)
+{
+    // BusMethod busMethod = method.getAnnotation(BusMethod.class);
+    // if (busMethod != null && busMethod.signature().length() > 0) {
+    //     return Signature.typeSig(method.getGenericParameterTypes(), busMethod.signature());
+    // }
+    // BusSignal busSignal = method.getAnnotation(BusSignal.class);
+    // if (busSignal != null && busSignal.signature().length() > 0) {
+    //     return Signature.typeSig(method.getGenericParameterTypes(), busSignal.signature());
+    // }
+    // return Signature.typeSig(method.getGenericParameterTypes(), null);
+    String signature;
+    method->GetSignature(&signature);
+    return signature;
+}
+
+String InterfaceDescription::GetOutSig(
+    /* [in] */ IMethodInfo* method)
+{
+    // BusMethod busMethod = method.getAnnotation(BusMethod.class);
+    // if (busMethod != null && busMethod.replySignature().length() > 0) {
+    //     return Signature.typeSig(method.getGenericReturnType(), busMethod.replySignature());
+    // }
+    // BusSignal busSignal = method.getAnnotation(BusSignal.class);
+    // if (busSignal != null && busSignal.replySignature().length() > 0) {
+    //     return Signature.typeSig(method.getGenericReturnType(), busSignal.replySignature());
+    // }
+    // return Signature.typeSig(method.getGenericReturnType(), null);
+    return String(NULL);
 }
 
 AutoPtr<IMethodInfo> InterfaceDescription::GetMember(
     /* [in] */ const String& name)
 {
-    assert(0);
-    // for (Method m : members) {
-    //     if (InterfaceDescription.getName(m).equals(name)) {
-    //         return m;
-    //     }
-    // }
+    List< AutoPtr<IMethodInfo> >::Iterator it = mMembers.Begin();
+    for (; it != mMembers.End(); ++it) {
+        IMethodInfo* m = *it;
+        if (GetName(m).Equals(name))
+            return m;
+    }
     return NULL;
 }
 
@@ -205,6 +342,66 @@ ECode InterfaceDescription::Create(
     return E_STATUS_OK;
 }
 
+ECode InterfaceDescription::ConfigureDescriptions(
+    /* [in] */ CBusAttachment* busAttachment,
+    /* [in] */ IInterfaceInfo* busInterface)
+{
+    // TODO:
+    // BusInterface ifcNote = busInterface.getAnnotation(BusInterface.class);
+    // if(null == ifcNote) return;
+
+    // Boolean hasDescriptions = false;
+
+    // if(!ifcNote.description().equals("")){
+    //     setDescription(ifcNote.description());
+    //     hasDescriptions = true;
+    // }
+
+    // for(Method method : busInterface.getMethods()) {
+    //     String name = getName(method);
+
+    //     BusMethod methodNote = method.getAnnotation(BusMethod.class);
+    //     if(null != methodNote && (methodNote.description().length() > 0)){
+    //         setMemberDescription(name, methodNote.description(), false);
+    //         hasDescriptions = true;
+    //     }
+
+    //     BusSignal signalNote = method.getAnnotation(BusSignal.class);
+    //     if(null != signalNote && (signalNote.description().length() > 0)){
+    //         setMemberDescription(name, signalNote.description(), signalNote.sessionless());
+    //         hasDescriptions = true;
+    //     }
+
+    //     BusProperty propNote = method.getAnnotation(BusProperty.class);
+    //     if(null != propNote && (propNote.description().length() > 0)){
+    //         setPropertyDescription(name, propNote.description());
+    //         hasDescriptions = true;
+    //     }
+    // }
+
+    // if(hasDescriptions) {
+    //     setDescriptionLanguage(ifcNote.descriptionLanguage());
+    // }
+
+    // try{
+    //     if(ifcNote.descriptionTranslator().length() > 0){
+    //         //We store these so as not to create a separate instance each time it is used.
+    //         //Although this means we'll be holding on to each instance forever this is probably
+    //         //not a problem since most Translators will need to live forever anyway
+    //         Translator dt = translatorCache.get(ifcNote.descriptionTranslator());
+    //         if(null == dt) {
+    //             Class<?> c = Class.forName(ifcNote.descriptionTranslator());
+    //             dt = (Translator)c.newInstance();
+    //             translatorCache.put(ifcNote.descriptionTranslator(), dt);
+    //         }
+    //         setDescriptionTranslator(busAttachment, dt);
+    //     }
+    // }catch(Exception e) {
+    //     e.printStackTrace();
+    // }
+    return NOERROR;
+}
+
 ECode InterfaceDescription::AddProperties(
     /* [in] */ IInterfaceInfo* busInterface)
 {
@@ -263,44 +460,52 @@ ECode InterfaceDescription::GetMembers(
 ECode InterfaceDescription::AddMembers(
     /* [in] */ IInterfaceInfo* busInterface)
 {
-    // for (Method member : members) {
-    //     int type = INVALID;
-    //     int annotation = 0;
-    //     String accessPerm = null;
-    //     BusMethod m = member.getAnnotation(BusMethod.class);
-    //     BusSignal s = member.getAnnotation(BusSignal.class);
-    //     AccessPermission ap = member.getAnnotation(AccessPermission.class);
+    List< AutoPtr<IMethodInfo> >::Iterator it = mMembers.Begin();
+    for (; it != mMembers.End(); ++it) {
+        IMethodInfo* member = *it;
+        // int type = INVALID;
+        // int annotation = 0;
+        // String accessPerm = null;
+        // BusMethod m = member.getAnnotation(BusMethod.class);
+        // BusSignal s = member.getAnnotation(BusSignal.class);
+        // AccessPermission ap = member.getAnnotation(AccessPermission.class);
 
-    //     if (m != null) {
-    //         type = METHOD_CALL;
-    //         annotation = m.annotation();
-    //     } else if (s != null) {
-    //         type = SIGNAL;
-    //         annotation = s.annotation();
-    //     }
-    //     if (type != INVALID) {
-    //         if(ap != null) {
-    //             accessPerm = ap.value();
-    //         }
+        // if (m != null) {
+        //     type = METHOD_CALL;
+        //     annotation = m.annotation();
+        // } else if (s != null) {
+        //     type = SIGNAL;
+        //     annotation = s.annotation();
+        // }
+        // if (type != INVALID) {
+        //     if(ap != null) {
+        //         accessPerm = ap.value();
+        //     }
 
-    //         String memberName = getName(member);
-    //         Status status = addMember(type, memberName, getInputSig(member),
-    //                                   getOutSig(member), annotation, accessPerm);
-    //         if (status != Status.OK) {
-    //             return status;
-    //         }
+        //     String memberName = getName(member);
+        //     Status status = addMember(type, memberName, getInputSig(member),
+        //                               getOutSig(member), annotation, accessPerm);
+        //     if (status != Status.OK) {
+        //         return status;
+        //     }
 
-    //         // pull out the DBus annotations
-    //         BusAnnotations dbusAnnotations = member.getAnnotation(BusAnnotations.class);
-    //         if (dbusAnnotations != null)
-    //         {
-    //             for (BusAnnotation busAnnotation : dbusAnnotations.value()) {
-    //                 addMemberAnnotation(memberName, busAnnotation.name(), busAnnotation.value());
-    //             }
-    //         }
-    //     }
-    // }
-    // return Status.OK;
+        //     // pull out the DBus annotations
+        //     BusAnnotations dbusAnnotations = member.getAnnotation(BusAnnotations.class);
+        //     if (dbusAnnotations != null)
+        //     {
+        //         for (BusAnnotation busAnnotation : dbusAnnotations.value()) {
+        //             addMemberAnnotation(memberName, busAnnotation.name(), busAnnotation.value());
+        //         }
+        //     }
+        // }
+
+        ECode status = AddMember(METHOD_CALL, GetName(member), GetInputSig(member),
+                        GetOutSig(member), 0, String(NULL));
+        if (status != E_STATUS_OK) {
+            return status;
+        }
+    }
+    return E_STATUS_OK;
 }
 
 /**
@@ -322,7 +527,11 @@ ECode InterfaceDescription::Create(
         intf->GetNamespace(&ns);
         intf->GetName(&name);
         String fullName = ns + "." + name;
-        if (fullName.Equals("org.freedesktop.DBus.Properties")) {
+        if (fullName.Equals("org.freedesktop.DBus.Properties")
+            || name.Equals("IInterface")
+            || name.Equals("IObject")
+            || name.Equals("ISynchronize")
+            || name.Equals("IWeakReferenceSource")) {
             /* The Properties interface is handled automatically by the underlying library. */
             continue;
         }

@@ -41,6 +41,33 @@ namespace BasicService {
 CarClass(CService)
     , public Activity
 {
+public:
+    class BasicService
+        : public Object
+        , public IBasicInterface
+        , public IBusObject
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI constructor(
+            /* [in] */ IObject* host);
+
+        CARAPI Cat(
+            /* [in] */ const String& inStr1,
+            /* [in] */ const String& inStr2,
+            /* [out] */ String* result);
+
+    private:
+        /* Helper function to send a message to the UI thread. */
+        CARAPI_(void) SendUiMessage(
+            /* [in] */ Int32 what,
+            /* [in] */ const String& str);
+
+    private:
+        CService* mHost;
+    };
+
 private:
     class MyHandler
         : public Handler
@@ -54,34 +81,6 @@ private:
 
         CARAPI ToString(
             /* [out] */ String* str);
-
-    private:
-        CService* mHost;
-    };
-
-    class BasicService
-        : public Object
-        , public IBasicInterface
-        , public IBusObject
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        BasicService(
-            /* [in] */ CService* host)
-            : mHost(host)
-        {}
-
-        CARAPI Cat(
-            /* [in] */ const String& inStr1,
-            /* [in] */ const String& inStr2,
-            /* [out] */ String* result);
-
-    private:
-        /* Helper function to send a message to the UI thread. */
-        CARAPI_(void) SendUiMessage(
-            /* [in] */ Int32 what,
-            /* [in] */ const String& str);
 
     private:
         CService* mHost;

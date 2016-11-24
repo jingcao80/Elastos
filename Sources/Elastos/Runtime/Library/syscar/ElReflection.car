@@ -217,6 +217,9 @@ library
         GetName(
             [out] String* name);
 
+        GetSignature(
+            [out] String* signature);
+
         GetParamCount(
             [out] Int32* count);
 

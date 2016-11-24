@@ -34,6 +34,9 @@ public:
     CARAPI GetName(
         /* [out] */ String* name);
 
+    CARAPI GetSignature(
+        /* [out] */ String* signature);
+
     CARAPI GetParamCount(
         /* [out] */ Int32* count);
 

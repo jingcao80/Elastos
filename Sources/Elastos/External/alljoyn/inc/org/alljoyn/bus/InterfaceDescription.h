@@ -71,6 +71,30 @@ public:
     CARAPI IsAnnounced(
         /* [out] */ Boolean* res);
 
+    /**
+     * Get the DBus member or property name.
+     *
+     * @param method The method.
+     */
+    static CARAPI_(String) GetName(
+        /* [in] */ IMethodInfo* method);
+
+    /**
+     * Get the DBus member input signature.
+     *
+     * @param method The method.
+     */
+    static CARAPI_(String) GetInputSig(
+        /* [in] */ IMethodInfo* method);
+
+    /**
+     * Get the DBus member output signature.
+     *
+     * @param method the method
+     */
+    static CARAPI_(String) GetOutSig(
+        /* [in] */ IMethodInfo* method);
+
 private:
     /** Allocate native resources. */
     CARAPI Create(
@@ -79,6 +103,15 @@ private:
         /* [in] */ Int32 securePolicy,
         /* [in] */ Int32 numProps,
         /* [in] */ Int32 numMembers);
+
+    /** Add a member to the native interface description. */
+    CARAPI AddMember(
+        /* [in] */ Int32 type,
+        /* [in] */ const String& name,
+        /* [in] */ const String& inputSig,
+        /* [in] */ const String& outSig,
+        /* [in] */ Int32 annotation,
+        /* [in] */ const String& accessPerm);
 
     /** Activate the interface on the bus. */
     CARAPI_(void) Activate();
@@ -97,7 +130,7 @@ private:
     CARAPI_(AutoPtr<ArrayOf<IMethodInfo*> >) GetProperty(
         /* [in] */ const String& name);
 
-    CARAPI_(void) ConfigureDescriptions(
+    CARAPI ConfigureDescriptions(
         /* [in] */ CBusAttachment* busAttachment,
         /* [in] */ IInterfaceInfo* busInterface);
 

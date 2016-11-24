@@ -72,6 +72,18 @@ ECode CCallbackMethodInfo::GetName(
     return NOERROR;
 }
 
+ECode CCallbackMethodInfo::GetSignature(
+    /* [out] */ String* signature)
+{
+    if (signature == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    *signature = adjustNameAddr(mMethodInfo->mClsModule->mBase,
+            mMethodDescriptor->mSignature);
+    return NOERROR;
+}
+
 ECode CCallbackMethodInfo::GetParamCount(
     /* [out] */ Int32* count)
 {
