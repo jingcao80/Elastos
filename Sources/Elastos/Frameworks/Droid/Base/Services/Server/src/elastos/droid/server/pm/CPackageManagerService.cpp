@@ -16511,7 +16511,7 @@ void CPackageManagerService::ClearExternalStorageDataSync(
 
     AutoPtr<ClearStorageConnection> conn = new ClearStorageConnection();
     Boolean res = FALSE;
-    mContext->BindServiceAsUser(containerIntent, conn, IContext::BIND_AUTO_CREATE, IUserHandle::USER_OWNER, &res);
+    mContext->BindServiceAsUser(containerIntent, conn, IContext::BIND_AUTO_CREATE, UserHandle::OWNER, &res);
     if (res) {
         // try {
         for (Int32 i = 0; i < users->GetLength(); i++) {

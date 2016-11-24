@@ -63,7 +63,7 @@ private:
         CAR_INTERFACE_DECL()
 
         PackageEntryClickedListener(
-            /* [in] */ RecentLocationApps* host,
+            /* [in] */ CSettingsActivity* activity,
             /* [in] */ const String& packageName);
 
         //@Override
@@ -72,7 +72,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        RecentLocationApps* mHost;
+        AutoPtr<CSettingsActivity> mActivity;
         String mPackage;
     };
 
@@ -81,6 +81,8 @@ public:
 
     RecentLocationApps(
         /* [in] */ CSettingsActivity* activity);
+
+    ~RecentLocationApps();
 
     /**
      * Fills a list of applications which queried location recently within specified time.

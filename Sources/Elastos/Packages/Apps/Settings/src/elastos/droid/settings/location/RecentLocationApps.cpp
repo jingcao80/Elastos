@@ -42,9 +42,9 @@ namespace Location {
 CAR_INTERFACE_IMPL(RecentLocationApps::PackageEntryClickedListener, Object, IPreferenceOnPreferenceClickListener)
 
 RecentLocationApps::PackageEntryClickedListener::PackageEntryClickedListener(
-    /* [in] */ RecentLocationApps* host,
+    /* [in] */ CSettingsActivity* activity,
     /* [in] */ const String& packageName)
-    : mHost(host)
+    : mActivity(activity)
     , mPackage(packageName)
 {}
 
@@ -58,7 +58,7 @@ ECode RecentLocationApps::PackageEntryClickedListener::OnPreferenceClick(
     AutoPtr<IBundle> args;
     CBundle::New((IBundle**)&args);
     args->PutString(CInstalledAppDetails::ARG_PACKAGE_NAME, mPackage);
-    mHost->mActivity->StartPreferencePanel(String("Elastos.Droid.Settings.Applications.CInstalledAppDetails"), args,
+    mActivity->StartPreferencePanel(String("Elastos.Droid.Settings.Applications.CInstalledAppDetails"), args,
             R::string::application_info_label, NULL, NULL, 0);
     *result = TRUE;
     return NOERROR;
@@ -106,6 +106,11 @@ RecentLocationApps::RecentLocationApps(
 {
     mActivity = activity;
     activity->GetPackageManager((IPackageManager**)&mPackageManager);
+}
+
+RecentLocationApps::~RecentLocationApps()
+{
+    Logger::D(TAG, "~RecentLocationApps()");
 }
 
 AutoPtr<IPreference> RecentLocationApps::CreateRecentLocationEntry(
@@ -223,7 +228,7 @@ AutoPtr<IPreference> RecentLocationApps::GetPreferenceFromOps(
 
     if (!highBattery && !normalBattery) {
         if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
-            Logger::V(TAG, packageName + " hadn't used location within the time interval.");
+            Logger::V(TAG, "%s hadn't used location within the time interval.", packageName.string());
         }
         return NULL;
     }
@@ -263,7 +268,7 @@ AutoPtr<IPreference> RecentLocationApps::GetPreferenceFromOps(
         mPackageManager->GetApplicationLabel(appInfo, (ICharSequence**)&appLabel);
         AutoPtr<ICharSequence> badgedAppLabel;
         mPackageManager->GetUserBadgedLabel(appLabel, userHandle, (ICharSequence**)&badgedAppLabel);
-        AutoPtr<IPreferenceOnPreferenceClickListener> listener = new PackageEntryClickedListener(this, packageName);
+        AutoPtr<IPreferenceOnPreferenceClickListener> listener = new PackageEntryClickedListener(mActivity, packageName);
         preference = CreateRecentLocationEntry(icon, appLabel, highBattery, badgedAppLabel, listener);
     // } catch (RemoteException e) {
     //     Logger::W(TAG, "Error while retrieving application info for package " + packageName
