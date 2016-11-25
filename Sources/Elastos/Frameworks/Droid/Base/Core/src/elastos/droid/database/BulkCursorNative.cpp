@@ -36,7 +36,7 @@ ECode BulkCursorProxy::GetWindow(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<ICursorWindow> window;
-    return mRemote->GetWindow(position, (ICursorWindow**)&window);
+    mRemote->GetWindow(position, (ICursorWindow**)&window);
     *result = window;
     REFCOUNT_ADD(*result);
 
