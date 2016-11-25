@@ -519,8 +519,9 @@ ECode OpenSSLCipher::EngineInitInternal(
     /* [in] */ Int32 opmode,
     /* [in] */ IKey* key,
     /* [in] */ ArrayOf<Byte>* iv,
-    /* [in] */ ISecureRandom* random)
+    /* [in] */ ISecureRandom* sr)
 {
+    AutoPtr<ISecureRandom> random = sr;
     if (opmode == ICipher::ENCRYPT_MODE || opmode == ICipher::WRAP_MODE) {
         mEncrypting = TRUE;
     }

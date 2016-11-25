@@ -283,12 +283,15 @@ ECode OpenSSLEngineImpl::GetSession(
     /* [out] */ ISSLSession** result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<ISSLSession> ssl;
     if (mSslSession == NULL) {
-        *result = SSLNullSession::GetNullSession();
-        REFCOUNT_ADD(*result)
-        return NOERROR;
+        ssl = SSLNullSession::GetNullSession();
     }
-    *result = ISSLSession::Probe(mSslSession);
+    else {
+        ssl = ISSLSession::Probe(mSslSession);
+    }
+
+    *result = ssl;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

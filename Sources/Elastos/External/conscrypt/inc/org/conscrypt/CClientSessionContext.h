@@ -81,7 +81,7 @@ protected:
         /* [in] */ ISSLSession* session);
 
 public:
-    AutoPtr<IMap/*<HostAndPort, SSLSession>*/> mSessionsByHostAndPort; // = new HashMap<HostAndPort, SSLSession>();
+    AutoPtr<IMap> mSessionsByHostAndPort; // = new HashMap<HostAndPort, SSLSession>();
 
 private:
     AutoPtr<ISSLClientSessionCache> mPersistentCache;

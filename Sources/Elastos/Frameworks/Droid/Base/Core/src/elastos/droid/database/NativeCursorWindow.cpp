@@ -3,8 +3,15 @@
 #define LOG_TAG "NativeCursorWindow"
 
 #include "elastos/droid/database/NativeCursorWindow.h"
+#include <binder/Parcel.h>
+#include <utils/Log.h>
+#include <utils/String8.h>
+
 #include <cutils/ashmem.h>
 #include <sys/mman.h>
+
+#include <assert.h>
+#include <stdlib.h>
 
 namespace Elastos {
 namespace Droid {
@@ -63,12 +70,14 @@ android::status_t NativeCursorWindow::create(const String& name, size_t size, Na
 }
 
 android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCursorWindow** outCursorWindow) {
-    String name;
-    parcel->ReadString(&name);
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
+
+    android::String8 str8(p->readString8());
+    String name(str8.string());
 
     android::status_t result;
-    int ashmemFd;
-    parcel->ReadFileDescriptor(&ashmemFd);
+    int ashmemFd = p->readFileDescriptor();
     if (ashmemFd == int(android::BAD_TYPE)) {
         result = android::BAD_TYPE;
     } else {
@@ -104,9 +113,13 @@ android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCu
 }
 
 android::status_t NativeCursorWindow::writeToParcel(IParcel* parcel) {
-    android::status_t status = parcel->WriteString(mName);
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
+
+    android::String8 name(mName.string());
+    android::status_t status = p->writeString8(name);
     if (!status) {
-        status = parcel->WriteDupFileDescriptor(mAshmemFd);
+        status = p->writeDupFileDescriptor(mAshmemFd);
     }
     return status;
 }

@@ -617,7 +617,7 @@ ECode CDevelopmentSettings::OnResume()
         AutoPtr<IView> emptyViewTmp;
         tmp->FindViewById(Elastos::Droid::R::id::empty, (IView**)&emptyViewTmp);
         ITextView* emptyView = ITextView::Probe(emptyViewTmp);
-        AutoPtr<IListView>listView;
+        AutoPtr<IListView> listView;
         GetListView((IListView**)&listView);
         IAdapterView::Probe(listView)->SetEmptyView(emptyViewTmp);
         if (emptyView != NULL) {

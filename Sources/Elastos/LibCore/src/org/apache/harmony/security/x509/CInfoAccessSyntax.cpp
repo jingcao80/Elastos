@@ -44,8 +44,8 @@ ECode CInfoAccessSyntax::MyASN1SequenceOf::GetValues(
 {
     VALIDATE_NOT_NULL(values);
 
-    *values = ICollection::Probe(
-            ((CInfoAccessSyntax*)IInfoAccessSyntax::Probe(object))->mAccessDescriptions);
+    CInfoAccessSyntax* ias = (CInfoAccessSyntax*)IInfoAccessSyntax::Probe(object);
+    *values = ICollection::Probe(ias->mAccessDescriptions);
     REFCOUNT_ADD(*values);
     return NOERROR;
 }

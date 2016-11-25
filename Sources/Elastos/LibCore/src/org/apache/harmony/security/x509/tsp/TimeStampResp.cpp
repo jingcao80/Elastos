@@ -37,6 +37,7 @@ ECode TimeStampResp::MyASN1Sequence::GetDecodedObject(
     AutoPtr<TimeStampResp> tmp = new TimeStampResp();
     tmp->constructor(IPKIStatusInfo::Probe(obj), IContentInfo::Probe(obj2));
     *object = TO_IINTERFACE(tmp);
+    REFCOUNT_ADD(*object)
     return NOERROR;
 }
 

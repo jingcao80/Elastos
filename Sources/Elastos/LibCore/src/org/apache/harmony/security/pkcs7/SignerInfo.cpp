@@ -170,7 +170,7 @@ AutoPtr<IASN1Sequence> SignerInfo::InitStatic()
     AutoPtr<IASN1Type> aso;
     CASN1SetOf::New(IASN1Type::Probe(CAttributeTypeAndValue::ASN1), (IASN1Type**)&aso);
     tmp = NULL;
-    CASN1Implicit::New(1, aso, (IASN1Implicit**)&tmp);
+    CASN1Implicit::New(1, aso, (IASN1Type**)&tmp);
     argForASN1->Set(6, tmp);
     AutoPtr<ASN1SequenceDerived2> ret = new ASN1SequenceDerived2;
     ret->constructor(argForASN1);

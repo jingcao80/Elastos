@@ -27,7 +27,7 @@ AutoPtr<IMap> COpenSSLECKeyPairGenerator::SIZE_TO_CURVE_NAME;
 
 Boolean COpenSSLECKeyPairGenerator::Init()
 {
-    CHashMap::New((IHashMap**)&SIZE_TO_CURVE_NAME);
+    CHashMap::New((IMap**)&SIZE_TO_CURVE_NAME);
 
     /* NIST curves */
     SIZE_TO_CURVE_NAME->Put(CoreUtils::Convert((Int32)192),

@@ -96,7 +96,8 @@ ECode ASN1NamedBitList::GetDecodedObject(
 
     if (bitsNumber == 0) {
         // empty bit string
-        *object = GetBooleanArray(value);
+        AutoPtr<IInterface> arr = GetBooleanArray(value);
+        *object = arr;
         REFCOUNT_ADD(*object)
         return NOERROR;
     }
@@ -118,7 +119,8 @@ ECode ASN1NamedBitList::GetDecodedObject(
         (*value)[j] = ((*SET_MASK)[k] & octet) != 0;
     }
 
-    *object = GetBooleanArray(value);
+    AutoPtr<IInterface> arr = GetBooleanArray(value);
+    *object = arr;
     REFCOUNT_ADD(*object)
     return NOERROR;
 }

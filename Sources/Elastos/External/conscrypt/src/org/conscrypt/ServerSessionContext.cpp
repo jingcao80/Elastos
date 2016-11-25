@@ -54,6 +54,7 @@ ECode ServerSessionContext::GetSession(
     AbstractSessionContext::GetSession(sessionId, (ISSLSession**)&session);
     if (session != NULL) {
         *result = session;
+        REFCOUNT_ADD(*result)
         return NOERROR;
     }
 

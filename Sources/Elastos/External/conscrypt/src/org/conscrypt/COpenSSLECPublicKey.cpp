@@ -156,7 +156,8 @@ ECode COpenSSLECPublicKey::GetW(
     /* [out] */ IECPoint** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = GetPublicKey();
+    AutoPtr<IECPoint> pk = GetPublicKey();
+    *result = pk;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

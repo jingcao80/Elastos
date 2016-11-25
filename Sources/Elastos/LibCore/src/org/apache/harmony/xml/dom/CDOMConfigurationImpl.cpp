@@ -499,7 +499,9 @@ ECode CDOMConfigurationImpl::Normalize(
                 CheckTextValidity(cdata->buffer);
                 break;
             }
-            cdata->ReplaceWithText((IText**)&node);
+            AutoPtr<IText> temp;
+            cdata->ReplaceWithText((IText**)&temp);
+            node = Org::W3c::Dom::INode::Probe(temp);
             // fall through
         }
         case INode::TEXT_NODE:

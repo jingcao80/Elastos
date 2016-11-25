@@ -331,7 +331,7 @@ Boolean EthernetNetworkFactory::SetStaticIpAddress(
     AutoPtr<IInetAddress> gateway;
     AutoPtr<IArrayList> dnsServers;
     staticConfig->GetIpAddress((ILinkAddress**)&ipAddress);
-    staticConfig->GetGateway((IInetAddress**)&dnsServers);
+    staticConfig->GetGateway((IInetAddress**)&gateway);
     staticConfig->GetDnsServers((IArrayList**)&dnsServers);
     Int32 size;
     if (ipAddress != NULL && gateway != NULL &&

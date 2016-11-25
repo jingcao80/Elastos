@@ -66,9 +66,9 @@ ECode CDefaultSSLContextImpl::GetKeyManagers(
 
     AutoPtr<IInputStream> is;
     // try {
-    AutoPtr<IFileInputStream> fis;
-    CFileInputStream::New(keystore, (IFileInputStream**)&fis);
-    CBufferedInputStream::New(IInputStream::Probe(fis), (IBufferedInputStream**)&is);
+    AutoPtr<IInputStream> fis;
+    CFileInputStream::New(keystore, (IInputStream**)&fis);
+    CBufferedInputStream::New(fis, (IInputStream**)&is);
 
     ks->Load(is, pwd);
     // } finally {
@@ -124,9 +124,9 @@ ECode CDefaultSSLContextImpl::GetTrustManagers(
 
     AutoPtr<IInputStream> is;
     // try {
-    AutoPtr<IFileInputStream> fis;
-    CFileInputStream::New(keystore, (IFileInputStream**)&fis);
-    CBufferedInputStream::New(IInputStream::Probe(fis), (IBufferedInputStream**)&is);
+    AutoPtr<IInputStream> fis;
+    CFileInputStream::New(keystore, (IInputStream**)&fis);
+    CBufferedInputStream::New(fis, (IInputStream**)&is);
 
     ks->Load(is, pwd);
     // } finally {

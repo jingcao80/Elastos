@@ -171,17 +171,19 @@ String CName::GetName0(
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mRdn->Get(i, (IInterface**)&obj);
-        AutoPtr<IList/*<AttributeTypeAndValue*/> atavList = IList::Probe(obj);
+        AutoPtr<IList> atavList = IList::Probe(obj);    ///<AttributeTypeAndValue*/
 
         if (IX500Principal::CANONICAL == format) {
-            CArrayList/*<AttributeTypeAndValue>*/::New(ICollection::Probe(atavList), (IList**)&atavList);
+            AutoPtr<IList> temp;
+            CArrayList::New(ICollection::Probe(atavList), (IList**)&temp);///*<AttributeTypeAndValue>*/
+            atavList = temp;
             AutoPtr<IComparator> c;
             CAttributeTypeAndValueComparator::New((IComparator**)&c);
             Collections::Sort(atavList, c);
         }
 
         // Relative Distinguished Name to string
-        AutoPtr<IIterator/*<AttributeTypeAndValue*/> it;
+        AutoPtr<IIterator> it; ///*<AttributeTypeAndValue*/
         atavList->GetIterator((IIterator**)&it);
         Boolean has = FALSE;
         while (it->HasNext(&has), has) {
