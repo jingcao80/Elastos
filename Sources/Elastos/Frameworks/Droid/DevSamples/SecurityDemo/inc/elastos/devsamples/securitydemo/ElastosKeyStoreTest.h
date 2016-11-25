@@ -25,7 +25,8 @@ class ElastosKeyStoreTest
     : public Object
 {
 public:
-    ElastosKeyStoreTest();
+    ElastosKeyStoreTest(
+        /* [in] */ IContext* c);
 
     CARAPI TestKeyStore_Aliases_Encrypted_Success();
 

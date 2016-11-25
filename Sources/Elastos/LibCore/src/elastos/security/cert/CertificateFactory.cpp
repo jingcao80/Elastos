@@ -60,7 +60,6 @@ ECode CertificateFactory::GetInstance(
     /* [in] */ const String& type,
     /* [out] */ ICertificateFactory** certFact)
 {
-
     if (type.IsNull()) {
         Logger::E(SERVICE, "type == null");
         return E_NULL_POINTER_EXCEPTION;

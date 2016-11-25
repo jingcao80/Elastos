@@ -1196,7 +1196,9 @@ AutoPtr<IDate> ElastosKeyStoreTest::NOW_PLUS_10_YEARS = initNOW_PLUS_10_YEARS();
 
 const Int32 ElastosKeyStoreTest::SLOP_TIME_MILLIS = 15000L;
 
-ElastosKeyStoreTest::ElastosKeyStoreTest()
+ElastosKeyStoreTest::ElastosKeyStoreTest(
+    /* [in] */ IContext* c)
+    : mContext(c)
 {
     AutoPtr<Elastos::Droid::KeyStore::Security::IKeyStoreHelper> helper;
     Elastos::Droid::KeyStore::Security::CKeyStoreHelper::AcquireSingleton(
@@ -3537,7 +3539,7 @@ ERROR:
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    assert(0);
+    Logger::E("ElastosKeyStoreTest", "=====[snow]=====GenerateCertificate TODO: NEED CX509V3CertificateGenerator");
     // AutoPtr<IX509V3CertificateGenerator> certGen;
     // CX509V3CertificateGenerator::New((IX509V3CertificateGenerator**)&certGen);
     // certGen->SetPublicKey(pubKey);
@@ -3863,9 +3865,9 @@ ECode ElastosKeyStoreTest::TestKeyStore_Load_InputStreamSupplied_Encrypted_Failu
     CByteArrayInputStream::New(buf, (IByteArrayInputStream**)&is);
 
     //try {
-    mKeyStore->Load(IInputStream::Probe(is), NULL);
+    ECode ec = mKeyStore->Load(IInputStream::Probe(is), NULL);
     //fail("Should throw IllegalArgumentException when InputStream is supplied");
-    assert(0 != NOERROR);
+    assert(ec != NOERROR);
     //} catch (IllegalArgumentException success) {
     //}
 

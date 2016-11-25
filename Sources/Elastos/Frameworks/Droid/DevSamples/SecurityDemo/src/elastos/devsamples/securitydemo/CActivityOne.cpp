@@ -1014,7 +1014,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
     //setprop elastos.class.path /system/lib/Elastos.Droid.Core.eco:/system/lib/Org.Conscrypt.eco
     //Services::Initialize();
 
-    AutoPtr<ElastosKeyStoreTest> test = new ElastosKeyStoreTest();
+    AutoPtr<ElastosKeyStoreTest> test = new ElastosKeyStoreTest(this);
 
     //return test->TestKeyStore_Aliases_Encrypted_Success();                                        //OK
 
@@ -1046,8 +1046,6 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_GetCertificateAlias_NonExist_Encrypted_Failure();                   //OK
 
-    return test->TestKeyStore_GetCertificateChain_SingleLength_Encrypted_Success();                 //OK
-
     //return test->TestKeyStore_GetCertificateChain_SingleLength_Encrypted_Success();               //OK
 
     //return test->TestKeyStore_GetCertificateChain_NonExist_Encrypted_Failure();                   //OK
@@ -1058,13 +1056,13 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_GetCreationDate_CAEntry_Encrypted_Success();                        //OK
 
-    //return test->TestKeyStore_GetEntry_NullParams_Encrypted_Success();                                      //error
+    //return test->TestKeyStore_GetEntry_NullParams_Encrypted_Success();                            //OK
 
-    //return test->TestKeyStore_GetEntry_DSA_NullParams_Unencrypted_Success();                                //error
+    //return test->TestKeyStore_GetEntry_DSA_NullParams_Unencrypted_Success();                      //OK
 
     //return test->TestKeyStore_GetEntry_EC_NullParams_Unencrypted_Success();                                 //error
 
-    //return test->TestKeyStore_GetEntry_RSA_NullParams_Unencrypted_Success();                                //error
+    //return test->TestKeyStore_GetEntry_RSA_NullParams_Unencrypted_Success();                      //OK
 
     //return test->TestKeyStore_GetEntry_Nonexistent_NullParams_Encrypted_Failure();                //OK
 
@@ -1104,47 +1102,47 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Encrypted_Success();                       //OK
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_DSA_Unencrypted_Success();                            //error
+    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_DSA_Unencrypted_Success();                 //OK
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_EC_Unencrypted_Success();                             //error
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_RSA_Unencrypted_Success();                            //error
+    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_RSA_Unencrypted_Success();                 //OK
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Params_Unencrypted_Failure();                         //error
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_PrivateKeyEntry_Encrypted_Success();       //error
+    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_PrivateKeyEntry_Encrypted_Success(); //OK
 
-    //return test->TestKeyStore_SetEntry_CAEntry_Overwrites_PrivateKeyEntry_Encrypted_Success();               //error
+    //return test->TestKeyStore_SetEntry_CAEntry_Overwrites_PrivateKeyEntry_Encrypted_Success();    //OK
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_CAEntry_Encrypted_Success();               //error
+    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_CAEntry_Encrypted_Success();    //OK
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_ShortPrivateKeyEntry_Encrypted_Success();  //error
+    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_ShortPrivateKeyEntry_Encrypted_Success(); //OK
 
-    //return test->TestKeyStore_SetEntry_CAEntry_Overwrites_CAEntry_Encrypted_Success();                       //error
+    //return test->TestKeyStore_SetEntry_CAEntry_Overwrites_CAEntry_Encrypted_Success();            //OK
 
-    //return test->TestKeyStore_SetKeyEntry_ProtectedKey_Encrypted_Failure();                      //OK
+    //return test->TestKeyStore_SetKeyEntry_ProtectedKey_Encrypted_Failure();                       //OK
 
-    //return test->TestKeyStore_SetKeyEntry_Encrypted_Success();                                               //error
+    //return test->TestKeyStore_SetKeyEntry_Encrypted_Success();                                    //OK
 
-    //return test->TestKeyStore_SetKeyEntry_Replaced_Encrypted_Success();                                      //error
+    //return test->TestKeyStore_SetKeyEntry_Replaced_Encrypted_Success();                           //OK
 
-    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_Encrypted_Success();                                 //error
+    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_Encrypted_Success();                                 //error need CX509V3CertificateGenerator
 
-    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_DifferentPrivateKey_Encrypted_Failure();             //error
+    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_DifferentPrivateKey_Encrypted_Failure();             //error need CX509V3CertificateGenerator
 
-    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_UnencryptedToEncrypted_Failure();                    //error
+    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_UnencryptedToEncrypted_Failure();                    //error need CX509V3CertificateGenerator
 
     //return test->TestKeyStore_Size_Encrypted_Success();                                          //OK
 
     //return test->TestKeyStore_Store_LoadStoreParam_Encrypted_Failure();                          //OK
 
-    //eturn test->TestKeyStore_Load_InputStreamSupplied_Encrypted_Failure();                                   //error
+    //return test->TestKeyStore_Load_InputStreamSupplied_Encrypted_Failure();                      //OK
 
     //return test->TestKeyStore_Load_PasswordSupplied_Encrypted_Failure();                         //OK
 
     //return test->TestKeyStore_Store_OutputStream_Encrypted_Failure();                            //OK
 
-    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                        //error
+    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                        //error need CX509V3CertificateGenerator
 }
 
 ECode CActivityOne::SignatureTest()
