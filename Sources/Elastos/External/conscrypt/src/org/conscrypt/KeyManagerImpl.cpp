@@ -30,7 +30,7 @@ ECode KeyManagerImpl::constructor(
     /* [in] */ ArrayOf<Char32>* pwd)
 {
     CHashTable::New((IHashTable**)&mHash);
-    AutoPtr<IEnumeration/*<String>*/> aliases;
+    AutoPtr<IEnumeration> aliases;  ///*<String>*/
     // try {
     keyStore->Aliases((IEnumeration**)&aliases);
     // } catch (KeyStoreException e) {

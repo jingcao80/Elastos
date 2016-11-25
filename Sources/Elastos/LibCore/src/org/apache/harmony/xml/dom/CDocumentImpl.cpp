@@ -572,7 +572,7 @@ AutoPtr<NodeImpl> CDocumentImpl::ShallowCopy(
                 String name;
                 attr->GetName(&name);
                 AutoPtr<IAttr> iattr;
-                CreateAttribute(name, (IAttr**)&attr);
+                CreateAttribute(name, (IAttr**)&iattr);
                 attrCopy = (CAttrImpl*)(iattr.Get());
             }
             String value;

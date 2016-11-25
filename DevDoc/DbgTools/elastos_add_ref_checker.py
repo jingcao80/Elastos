@@ -279,7 +279,7 @@ def log_ignored(path, usedType, param, value):
     if key in type_cast_ignored_list:
         return
 
-    ignored_file = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.ignored'
+    ignored_file = '/home/luozhaohui/Elastos5/DevDoc/DbgTools/elastos_add_ref_checker.ignored'
     logFile = open(ignored_file, 'a')
     logFile.write('    \'' + key + '\',\n')
     logFile.close()

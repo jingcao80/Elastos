@@ -31,10 +31,14 @@ ECode OpenSSLContextImpl::constructor(
         DEFAULT_SSL_CONTEXT_IMPL = IDefaultSSLContextImpl::Probe(this);
     }
     else {
+        AutoPtr<ISSLSessionContext> clientCtx;
         ISSLContextSpi::Probe(DEFAULT_SSL_CONTEXT_IMPL)->EngineGetClientSessionContext(
-            (ISSLSessionContext**)&clientSessionContext);
+            (ISSLSessionContext**)&clientCtx);
+        clientSessionContext = IClientSessionContext::Probe(clientCtx);
+        AutoPtr<ISSLSessionContext> serverCtx;
         ISSLContextSpi::Probe(DEFAULT_SSL_CONTEXT_IMPL)->EngineGetServerSessionContext(
-            (ISSLSessionContext**)&serverSessionContext);
+            (ISSLSessionContext**)&serverCtx);
+        serverSessionContext = IServerSessionContext::Probe(serverCtx);
     }
 
     AutoPtr<ArrayOf<IKeyManager*> > keyManager;

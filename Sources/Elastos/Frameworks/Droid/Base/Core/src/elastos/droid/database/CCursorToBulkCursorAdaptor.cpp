@@ -254,35 +254,34 @@ ECode CCursorToBulkCursorAdaptor::Requery(
     *result = 0;
 
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mLock);
-        FAIL_RETURN(ThrowIfCursorIsClosed())
 
-        CloseFilledWindowLocked();
+    AutoLock syncLock(mLock);
+    FAIL_RETURN(ThrowIfCursorIsClosed())
 
-        //try {
-        Boolean isSuccess;
-        ec = ICursor::Probe(mCursor)->Requery(&isSuccess);
-        if (ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
-            Boolean isClosed;
-            ICursor::Probe(mCursor)->IsClosed(&isClosed);
-            Logger::E(TAG, "%s Requery misuse db, cursor isClosed:%d, 0x%08x", mProviderName.string(), isClosed, ec);
-            return ec;
-        }
-        if (!isSuccess) {
-            *result = -1;
-            return NOERROR;
-        }
-        //} catch (IllegalStateException e) {
-            // IllegalStateException leakProgram = new IllegalStateException(
-            //         mProviderName + " Requery misuse db, mCursor isClosed:" +
-            //         mCursor.isClosed(), e);
-            // throw leakProgram;
-        //}
-        UnregisterObserverProxyLocked();
-        CreateAndRegisterObserverProxyLocked(observer);
-        ec =  ICursor::Probe(mCursor)->GetCount(result);
+    CloseFilledWindowLocked();
+
+    //try {
+    Boolean isSuccess;
+    ec = ICursor::Probe(mCursor)->Requery(&isSuccess);
+    if (ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
+        Boolean isClosed;
+        ICursor::Probe(mCursor)->IsClosed(&isClosed);
+        Logger::E(TAG, "%s Requery misuse db, cursor isClosed:%d, 0x%08x", mProviderName.string(), isClosed, ec);
+        return ec;
     }
-    return ec;
+    if (!isSuccess) {
+        *result = -1;
+        return NOERROR;
+    }
+    //} catch (IllegalStateException e) {
+        // IllegalStateException leakProgram = new IllegalStateException(
+        //         mProviderName + " Requery misuse db, mCursor isClosed:" +
+        //         mCursor.isClosed(), e);
+        // throw leakProgram;
+    //}
+    UnregisterObserverProxyLocked();
+    CreateAndRegisterObserverProxyLocked(observer);
+    return  ICursor::Probe(mCursor)->GetCount(result);
 }
 
 ECode CCursorToBulkCursorAdaptor::CreateAndRegisterObserverProxyLocked(

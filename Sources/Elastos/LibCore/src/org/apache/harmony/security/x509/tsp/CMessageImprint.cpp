@@ -98,7 +98,7 @@ ECode CMessageImprint::GetASN1(
     VALIDATE_NOT_NULL(ppAsn1);
 
     *ppAsn1 = ASN1;
-    REFCOUNT_ADD(*ppAsn1 );
+    REFCOUNT_ADD(*ppAsn1)
     return NOERROR;
 }
 

@@ -36,7 +36,7 @@ OpenSSLSessionImpl::OpenSSLSessionImpl()
     , mCipherSuite(String(NULL))
     , mProtocol(String(NULL))
 {
-    CHashMap::New((IHashMap**)&mValues);
+    CHashMap::New((IMap**)&mValues);
 }
 
 ECode OpenSSLSessionImpl::constructor(

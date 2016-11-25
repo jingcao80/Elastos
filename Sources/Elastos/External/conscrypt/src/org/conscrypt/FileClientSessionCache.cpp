@@ -311,7 +311,7 @@ void FileClientSessionCache::Impl::IndexFiles()
         // Files on disk only, sorted by last modified time.
         // TODO: Use last access time.
         AutoPtr<ISet/*<CacheFile>*/> diskOnly;
-        CTreeSet::New((ITreeSet**)&diskOnly);
+        CTreeSet::New((ISet**)&diskOnly);
 
         Boolean b;
         for (Int32 i = 0; i < initialFiles->GetLength(); i++) {

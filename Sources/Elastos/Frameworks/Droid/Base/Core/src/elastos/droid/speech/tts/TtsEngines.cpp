@@ -643,6 +643,7 @@ ECode TtsEngines::ParseLocaleString(
     }
 
     *ret = mLocale;
+    REFCOUNT_ADD(*ret)
     return NOERROR;
 }
 

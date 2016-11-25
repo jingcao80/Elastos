@@ -233,7 +233,8 @@ void DocumentBuilderImpl::Parse(
 
             AutoPtr<IProcessingInstruction> pi;
             document->CreateProcessingInstruction(target, data, (IProcessingInstruction**)&pi);
-            node->AppendChild(INode::Probe(pi), (INode**)&pi);
+            AutoPtr<INode> temp;
+            node->AppendChild(INode::Probe(pi), (INode**)&temp);
         } else if (token == IXmlPullParser::DOCDECL) {
             String name;
             parser->GetRootElementName(&name);

@@ -215,7 +215,7 @@ def get_finename(path):
 #     if key in ignored_list:
 #         return
 
-#     ignored_file = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.ignored'
+#     ignored_file = '/home/luozhaohui/Elastos5/DevDoc/DbgTools/elastos_cast_checker.ignored'
 #     logFile = open(ignored_file, 'a')
 #     logFile.write('    \'' + key + '\',\n')
 #     logFile.close()

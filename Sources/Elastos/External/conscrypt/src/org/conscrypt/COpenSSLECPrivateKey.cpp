@@ -203,7 +203,8 @@ ECode COpenSSLECPrivateKey::GetS(
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
-    *result = GetPrivateKey();
+    AutoPtr<IBigInteger> bi = GetPrivateKey();
+    *result = bi;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

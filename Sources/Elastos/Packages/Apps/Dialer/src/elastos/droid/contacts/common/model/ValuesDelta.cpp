@@ -479,9 +479,10 @@ ECode ValuesDelta::GetCompleteValues(
 }
 
 AutoPtr<IValuesDelta> ValuesDelta::MergeAfter(
-    /* [in] */ IValuesDelta* local,
+    /* [in] */ IValuesDelta* inLocal,
     /* [in] */ IValuesDelta* remote)
 {
+    AutoPtr<IValuesDelta> local = inLocal;
     // Bail early if trying to merge delete with missing local
     Boolean isDelete, isTransient;
     if (local == NULL && ((remote->IsDelete(&isDelete), isDelete) || (remote->IsTransient(&isTransient), isTransient))) return NULL;

@@ -468,10 +468,11 @@ ECode CPinnedHeaderListView::OnInterceptTouchEvent(
     }
 
     if (mScrollState == IAbsListViewOnScrollListener::SCROLL_STATE_IDLE) {
-        Int32 y;
-        ev->GetY((Float*)&y);
-        Int32 x;
-        ev->GetX((Float*)&x);
+        Float fval;
+        ev->GetY(&fval);
+        Int32 y = fval;
+        ev->GetX(&fval);
+        Int32 x = fval;
         for (Int32 i = mSize; --i >= 0;) {
             AutoPtr<PinnedHeader> header = (*mHeaders)[i];
             // For RTL layouts, this also takes into account that the scrollbar is on the left

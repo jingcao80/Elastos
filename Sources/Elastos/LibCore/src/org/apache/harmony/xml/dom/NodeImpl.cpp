@@ -1099,9 +1099,9 @@ ECode NodeImpl::GetFeature(
     VALIDATE_NOT_NULL(obj);
     *obj = NULL;
     Boolean res;
-    if (IsSupported(feature, version, &res), res)
-    {
-        *obj = (Object*)(this);
+    if (IsSupported(feature, version, &res), res) {
+        *obj = this;
+        REFCOUNT_ADD(*obj);
     }
     return NOERROR;
 }

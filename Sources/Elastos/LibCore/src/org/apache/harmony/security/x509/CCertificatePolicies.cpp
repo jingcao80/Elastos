@@ -40,7 +40,7 @@ ECode CCertificatePolicies::MyASN1SequenceOf::GetDecodedObject(
 
     AutoPtr<ICertificatePolicies> policies;
     CCertificatePolicies::New(IList::Probe(con), array, (ICertificatePolicies**)&policies);
-    *object = TO_IINTERFACE(policies);
+    *object = policies.Get();
     REFCOUNT_ADD(*object );
     return NOERROR;
 }

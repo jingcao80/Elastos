@@ -418,6 +418,7 @@ ECode CarCallbackInterfaceProxy::GetMethodInfoByIndex(
     }
 
     *methodInfo = (*mMethodInfos)[index];
+    (*methodInfo)->AddRef();
 
     return NOERROR;
 }

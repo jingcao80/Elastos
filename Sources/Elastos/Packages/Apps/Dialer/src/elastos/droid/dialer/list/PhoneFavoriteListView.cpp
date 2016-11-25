@@ -124,7 +124,9 @@ ECode PhoneFavoriteListView::constructor(
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> configuration;
     helper->Get(context, (IViewConfiguration**)&configuration);
-    configuration->GetScaledPagingTouchSlop((Int32*)&mTouchSlop);
+    Int32 ival;
+    configuration->GetScaledPagingTouchSlop(&ival);
+    mTouchSlop = ival;
     mDragDropController->AddOnDragDropListener(this);
 
     return NOERROR;
@@ -140,7 +142,9 @@ ECode PhoneFavoriteListView::OnConfigurationChanged(
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> configuration;
     helper->Get(context, (IViewConfiguration**)&configuration);
-    configuration->GetScaledPagingTouchSlop((Int32*)&mTouchSlop);
+    Int32 ival;
+    configuration->GetScaledPagingTouchSlop(&ival);
+    mTouchSlop = ival;
 
     return NOERROR;
 }
@@ -154,8 +158,11 @@ ECode PhoneFavoriteListView::OnInterceptTouchEvent(
     Int32 action;
     ev->GetAction(&action);
     if (action == IMotionEvent::ACTION_DOWN) {
-        ev->GetX((Float*)&mTouchDownForDragStartX);
-        ev->GetY((Float*)&mTouchDownForDragStartY);
+        Float fval;
+        ev->GetX(&fval);
+        mTouchDownForDragStartX = fval;
+        ev->GetY(&fval);
+        mTouchDownForDragStartY = fval;
     }
 
     return GridView::OnInterceptTouchEvent(ev, result);

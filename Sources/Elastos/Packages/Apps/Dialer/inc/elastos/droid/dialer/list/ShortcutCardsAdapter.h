@@ -276,7 +276,7 @@ private:
 
     AutoPtr<IDataSetObserver> mObserver;
 
-    AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
+    AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
 
     AutoPtr<ISwipeHelperOnItemGestureListener> mCallLogOnItemSwipeListene;
     AutoPtr<ICallLogQueryHandlerListener> mCallLogQueryHandlerListener;

@@ -204,18 +204,19 @@ void MoreContactUtils::SetHeaderViewBottomPadding(
     /* [in] */ ITextView* textView,
     /* [in] */ Boolean isFirstRow)
 {
-    Int32 topPadding;
+    Float fval = 0;
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     if (isFirstRow) {
         resources->GetDimension(
-                Elastos::Droid::Dialer::R::dimen::frequently_contacted_title_top_margin_when_first_row, (Float*)&topPadding);
+                Elastos::Droid::Dialer::R::dimen::frequently_contacted_title_top_margin_when_first_row, &fval);
     }
     else {
         resources->GetDimension(
-                Elastos::Droid::Dialer::R::dimen::frequently_contacted_title_top_margin, (Float*)&topPadding);
+                Elastos::Droid::Dialer::R::dimen::frequently_contacted_title_top_margin, &fval);
     }
 
+    Int32 topPadding = fval;
     AutoPtr<IView> view = IView::Probe(textView);
     Int32 start, end, bottom;
     view->GetPaddingStart(&start);

@@ -606,7 +606,7 @@ void convertNPVariantToCarValue_In(NPVariant value, CarValue* result)
 
             CarDataType elementType = 0;
             AutoPtr<IDataTypeInfo> aElementDataTypeInfo;
-            (*(ILocalPtrInfo **)&dataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
+            ILocalPtrInfo::Probe(dataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
             aElementDataTypeInfo->GetDataType(&elementType);
 
             switch (elementType) {
@@ -1794,7 +1794,7 @@ void convertV8ValueToCarValue_CallerAllocOut(v8::Handle<v8::Value>& v8Arg, CarVa
 
             AutoPtr<IDataTypeInfo> paramTypeInfo = carArg.mTypeInfo;
             AutoPtr<IDataTypeInfo> elementDataTypeInfo;
-            (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ICarArrayInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             CarDataType elementDataType;
             elementDataTypeInfo->GetDataType(&elementDataType);
 

@@ -109,7 +109,7 @@ private:
 
 private:
     // hashed key store information
-    AutoPtr<IHashTable/*<String, PrivateKeyEntry>*/> mHash;
+    AutoPtr<IHashTable> mHash;  /*<String, PrivateKeyEntry>*/
 };
 
 } // namespace Conscrypt

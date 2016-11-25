@@ -83,7 +83,7 @@ ECode CDOMImplementationImpl::GetFeature(
     Boolean hasFeature;
     HasFeature(feature, version, &hasFeature);
     if (hasFeature) {
-        *obj = (Object*)(this);
+        *obj = this;
         REFCOUNT_ADD(*obj);
     }
 
