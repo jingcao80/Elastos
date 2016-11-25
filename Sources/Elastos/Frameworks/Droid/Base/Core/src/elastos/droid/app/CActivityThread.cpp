@@ -161,7 +161,7 @@ const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
 const Boolean CActivityThread::DEBUG_CONFIGURATION = FALSE;
 const Boolean CActivityThread::DEBUG_SERVICE = FALSE;
 const Boolean CActivityThread::DEBUG_MEMORY_TRIM = FALSE;
-const Boolean CActivityThread::DEBUG_PROVIDER = TRUE;
+const Boolean CActivityThread::DEBUG_PROVIDER = FALSE;
 
 const Int64 CActivityThread::MIN_TIME_BETWEEN_GCS;
 const Int32 CActivityThread::SQLITE_MEM_RELEASED_EVENT_LOG_TAG;

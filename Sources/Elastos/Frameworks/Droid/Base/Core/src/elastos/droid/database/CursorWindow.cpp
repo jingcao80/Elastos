@@ -10,27 +10,28 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/Character.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Core::AutoLock;
 using Elastos::Core::Character;
+using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Database {
 
-const String CursorWindow::STATS_TAG("CursorWindow");
+static const String TAG("CCursorWindow");
 
 Int32 CursorWindow::sCursorWindowSize = -1;
 HashMap<Int64, Int32> CursorWindow::sWindowToPidMap;
@@ -57,24 +58,35 @@ CursorWindow::CursorWindow()
 
 CursorWindow::~CursorWindow()
 {
-    //try {
+    if (mReferenceCount != 0) {
+        Logger::E(TAG, " >> ~CursorWindow: memory leak! mReferenceCount: %d", mReferenceCount);
+
+        String name;
+        GetName(&name);
+        StringBuilder sb("CursorWindow{0x");
+        sb += StringUtils::ToHexString((Int32)this);
+        sb += ", name:";
+        sb += name;
+        sb += ", windowPtr:0x";
+        sb += StringUtils::ToHexString(mWindowPtr);
+        sb += "}";
+        Logger::E(TAG, " >> ~CursorWindow: %s", sb.ToString().string());
+    }
+
     if (mCloseGuard != NULL) {
         mCloseGuard->WarnIfOpen();
     }
     Dispose();
-    //} finally {
-    // SQLiteClosable::Finalize();
-    //}
 }
 
 static ECode ThrowExceptionWithRowCol(Int32 row, Int32 column) {
-    Slogger::E(String("CursorWindow"), "Couldn't read row %d, col %d from CursorWindow.  Make sure the Cursor is initialized correctly before accessing data from it."
+    Logger::E(TAG, "Couldn't read row %d, col %d from CursorWindow.  Make sure the Cursor is initialized correctly before accessing data from it."
             , row, column);
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
 static ECode ThrowUnknownTypeException(Int32 type) {
-    Slogger::E(String("CursorWindow"), "UNKNOWN type %d", type);
+    Logger::E(TAG, "UNKNOWN type %d", type);
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
@@ -134,7 +146,7 @@ ECode CursorWindow::NativeWriteToParcel(
 
     android::status_t status = window->writeToParcel(parcel);
     if (status) {
-        Slogger::E(STATS_TAG, "Could not write CursorWindow to Parcel due to error %d.", status);
+        Logger::E(TAG, "Could not write CursorWindow to Parcel due to error %d.", status);
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -297,7 +309,7 @@ ECode CursorWindow::NativeGetString(
     }
     else if (type == NativeCursorWindow::FIELD_TYPE_BLOB) {
         *str = String(NULL);
-        Slogger::E(STATS_TAG, "Unable to convert BLOB to string");
+        Logger::E(TAG, "Unable to convert BLOB to string");
         return E_SQLITE3_EXCEPTION;
     }
     else {
@@ -395,7 +407,7 @@ ECode CursorWindow::NativeCopyStringToBuffer(
         ClearCharArrayBuffer(buffer);
     }
     else if (type == NativeCursorWindow::FIELD_TYPE_BLOB) {
-        Slogger::E(STATS_TAG, "Unable to convert BLOB to string");
+        Logger::E(TAG, "Unable to convert BLOB to string");
         return E_SQLITE3_EXCEPTION;
     }
 
@@ -435,7 +447,7 @@ ECode CursorWindow::NativeGetInt64(
     }
     else if (type == NativeCursorWindow::FIELD_TYPE_BLOB) {
         *value = 0;
-        Slogger::E(STATS_TAG, "Unable to convert BLOB to long");
+        Logger::E(TAG, "Unable to convert BLOB to long");
         return E_SQLITE3_EXCEPTION;
     } else {
         *value = 0;
@@ -478,7 +490,7 @@ ECode CursorWindow::NativeGetDouble(
     }
     else if (type == NativeCursorWindow::FIELD_TYPE_BLOB) {
         *value = 0.0;
-        Slogger::E(STATS_TAG, "Unable to convert BLOB to double");
+        Logger::E(TAG, "Unable to convert BLOB to double");
         return E_SQLITE3_EXCEPTION;
     }
     else {
@@ -617,7 +629,7 @@ ECode CursorWindow::constructor(
     if (mWindowPtr == 0) {
         //throw new CursorWindowAllocationException("Cursor window allocation of " +
         //        (sCursorWindowSize / 1024) + " kb failed. " + printStats());
-        Slogger::E(STATS_TAG, "Cursor window allocation of %d kb failed. %s", (GetCursorWindowSize() / 1024), PrintStats().string());
+        Logger::E(TAG, "Cursor window allocation of %d kb failed. %s", (GetCursorWindowSize() / 1024), PrintStats().string());
         return E_CURSOR_WINDOW_ALLOCATION_EXCEPTION;
     }
     mCloseGuard->Open(String("CursorWindow::Close"));
@@ -655,12 +667,9 @@ ECode CursorWindow::GetName(
 ECode CursorWindow::Clear()
 {
     AcquireReference();
-    //try {
     mStartPos = 0;
     NativeClear(mWindowPtr);
-    //} finally {
     ReleaseReference();
-    //}
     return NOERROR;
 }
 
@@ -684,11 +693,9 @@ ECode CursorWindow::GetNumRows(
 {
     VALIDATE_NOT_NULL(num)
     AcquireReference();
-    //try {
     *num = NativeGetNumRows(mWindowPtr);
-    //} finally {
     ReleaseReference();
-    //}
+
     return NOERROR;
 }
 
@@ -698,11 +705,8 @@ ECode CursorWindow::SetNumColumns(
 {
     VALIDATE_NOT_NULL(succeeded)
     AcquireReference();
-    //try {
     *succeeded = NativeSetNumColumns(mWindowPtr, columnNum);
-    //} finally {
     ReleaseReference();
-    //}
     return NOERROR;
 }
 
@@ -711,22 +715,16 @@ ECode CursorWindow::AllocRow(
 {
     VALIDATE_NOT_NULL(succeeded)
     AcquireReference();
-    //try {
     *succeeded = NativeAllocRow(mWindowPtr);
-    //} finally {
     ReleaseReference();
-    //}
     return NOERROR;
 }
 
 ECode CursorWindow::FreeLastRow()
 {
     AcquireReference();
-    //try {
     NativeFreeLastRow(mWindowPtr);
-    //} finally {
     ReleaseReference();
-    //}
     return NOERROR;
 }
 
@@ -797,11 +795,8 @@ ECode CursorWindow::GetType(
 {
     VALIDATE_NOT_NULL(type)
     AcquireReference();
-    //try {
     *type = NativeGetType(mWindowPtr, row - mStartPos, column);
-    //} finally {
     ReleaseReference();
-    //}
     return NOERROR;
 }
 
@@ -841,8 +836,7 @@ ECode CursorWindow::CopyStringToBuffer(
     /* [in] */ ICharArrayBuffer* buffer)
 {
     if (buffer == NULL) {
-        //throw new IllegalArgumentException("CharArrayBuffer should not be null");
-        Slogger::E(STATS_TAG, "CharArrayBuffer should not be null");
+        Logger::E(TAG, "CharArrayBuffer should not be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AcquireReference();
@@ -1006,10 +1000,10 @@ ECode CursorWindow::NewFromParcel(
     VALIDATE_NOT_NULL(cw)
     AutoPtr<ICursorWindow> cursorWindow;
     CCursorWindow::New((ICursorWindow**)&cursorWindow);
-    AutoPtr<IParcelable> p = IParcelable::Probe(cursorWindow);
-    p->ReadFromParcel(parcel);
+    IParcelable::Probe(cursorWindow)->ReadFromParcel(parcel);
     *cw = cursorWindow;
     REFCOUNT_ADD(*cw)
+
     return NOERROR;
 }
 
@@ -1019,10 +1013,11 @@ ECode CursorWindow::ReadFromParcel(
     source->ReadInt32(&mStartPos);
     mWindowPtr = NativeCreateFromParcel(source);
     if (mWindowPtr == 0) {
-        Slogger::E("CursorWindow", "Cursor window could not be created from binder.");
+        Logger::E("CursorWindow", "Cursor window could not be created from binder.");
         return E_CURSOR_WINDOW_ALLOCATION_EXCEPTION;
     }
     mName = NativeGetName(mWindowPtr);
+
     return NOERROR;
 }
 
@@ -1037,7 +1032,7 @@ ECode CursorWindow::WriteToParcel(
     ReleaseReference();
     //}
 
-    Slogger::E("CursorWindow", "WriteToParcel TODO no flags!");
+    // move to CBulkCursorDescriptor::~CBulkCursorDescriptor()
     // if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
     //     ReleaseReference();
     // }
@@ -1046,6 +1041,7 @@ ECode CursorWindow::WriteToParcel(
 
 void CursorWindow::OnAllReferencesReleased()
 {
+    // Logger::D(TAG, " >> OnAllReferencesReleased: Dispose() %s", TO_CSTR(this));
     Dispose();
 }
 
@@ -1053,24 +1049,22 @@ void CursorWindow::RecordNewWindow(
     /* [in] */ Int32 pid,
     /* [in] */ Int64 window)
 {
-    {    AutoLock syncLock(sWindowToPidMapLock);
-        sWindowToPidMap[window] = pid;
-        // if (Log.isLoggable(STATS_TAG, Log.VERBOSE)) {
-        //     Log.i(STATS_TAG, "Created a new Cursor. " + printStats());
-        // }
-    }
+    AutoLock syncLock(sWindowToPidMapLock);
+    sWindowToPidMap[window] = pid;
+    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    //     Log.i(TAG, "Created a new Cursor. " + printStats());
+    // }
 }
 
 void CursorWindow::RecordClosingOfWindow(
     /* [in] */ Int64 window)
 {
-    {    AutoLock syncLock(sWindowToPidMapLock);
-        if (sWindowToPidMap.IsEmpty()) {
-            // this means we are not in the ContentProvider.
-            return;
-        }
-        sWindowToPidMap.Erase(window);
+    AutoLock syncLock(sWindowToPidMapLock);
+    if (sWindowToPidMap.IsEmpty()) {
+        // this means we are not in the ContentProvider.
+        return;
     }
+    sWindowToPidMap.Erase(window);
 }
 
 String CursorWindow::PrintStats()
@@ -1080,7 +1074,8 @@ String CursorWindow::PrintStats()
     Int32 total = 0;
     HashMap<Int32, Int32> pidCounts;
 
-    {    AutoLock syncLock(sWindowToPidMapLock);
+    {
+        AutoLock syncLock(sWindowToPidMapLock);
         if (sWindowToPidMap.IsEmpty()) {
             // this means we are not in the ContentProvider.
             return String("");
@@ -1130,9 +1125,12 @@ ECode CursorWindow::ToString(
     VALIDATE_NOT_NULL(str)
     String name;
     GetName(&name);
-    StringBuilder sb(name);
-    sb += " {";
-    sb += mWindowPtr;
+    StringBuilder sb("CursorWindow{0x");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", name:";
+    sb += name;
+    sb += ", windowPtr:0x";
+    sb += StringUtils::ToHexString(mWindowPtr);
     sb += "}";
     *str = sb.ToString();
     return NOERROR;

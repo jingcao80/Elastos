@@ -638,8 +638,6 @@ public:
     Int64 mWindowPtr;
 
 private:
-    static const String STATS_TAG;
-
     // This static member will be evaluated when first used.
     static Int32 sCursorWindowSize;
 

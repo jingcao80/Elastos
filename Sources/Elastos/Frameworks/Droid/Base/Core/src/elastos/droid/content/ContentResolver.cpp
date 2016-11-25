@@ -2102,12 +2102,12 @@ ECode ContentResolver::MaybeLogQueryToEventLog(
     // ActivityThread.currentPackageName() only returns non-null if the
     // current thread is an application main thread.  This parameter tells
     // us whether an event loop is blocked, and if so, which app it is.
-    String blockingPackage = AppGlobals::GetInitialPackage();
-    Logger::I(TAG, "Query: uri:%s, projection:%s, selection:%s, sortOrder:%s, "
-        "durationMillis:%lld, blockingPackage:%s, samplePercent:%d",
-        TO_CSTR(uri), projectionBuffer.ToString().string(),
-        selection.string(), sortOrder.string(),
-        durationMillis, blockingPackage.string(), samplePercent);
+    // String blockingPackage = AppGlobals::GetInitialPackage();
+    // Logger::I(TAG, "Query: uri:%s, projection:%s, selection:%s, sortOrder:%s, "
+    //     "durationMillis:%lld, blockingPackage:%s, samplePercent:%d",
+    //     TO_CSTR(uri), projectionBuffer.ToString().string(),
+    //     selection.string(), sortOrder.string(),
+    //     durationMillis, blockingPackage.string(), samplePercent);
     return NOERROR;
 }
 

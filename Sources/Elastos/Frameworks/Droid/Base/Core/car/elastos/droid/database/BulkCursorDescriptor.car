@@ -15,6 +15,38 @@ module
      */
     [deprecated]
     interface IBulkCursorDescriptor {
+        SetWriteToParcelFlags(
+            [in] Int32 flags);
+
+        SetCursor(
+            [in] IBulkCursor* cursor);
+
+        GetCursor(
+            [out] IBulkCursor** cursor);
+
+        SetColumnNames(
+            [in] ArrayOf<String>* columnNames);
+
+        GetColumnNames(
+            [out, callee] ArrayOf<String>* columnNames);
+
+        SetWantsAllOnMoveCalls(
+            [in] Boolean wantsAllOnMoveCalls);
+
+        GetWantsAllOnMoveCalls(
+            [out] Boolean* wantsAllOnMoveCalls);
+
+        SetCount(
+            [in] Int32 count);
+
+        GetCount(
+            [out] Int32* count);
+
+        SetWindow(
+            [in] ICursorWindow* window);
+
+        GetWindow(
+            [out] ICursorWindow** window);
     }
 
     interface ICursorToBulkCursorAdaptor {

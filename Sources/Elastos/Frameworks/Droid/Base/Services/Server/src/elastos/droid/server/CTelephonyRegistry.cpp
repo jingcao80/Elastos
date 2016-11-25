@@ -980,6 +980,7 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
         CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
+        Slogger::D(TAG, "NotifyDataConnectionForSubscriber phoneId: %d", phoneId);
         Boolean modified = FALSE;
         if (state == ITelephonyManager::DATA_CONNECTED) {
             AutoPtr<IArrayList> p = (*mConnectedApns)[phoneId];

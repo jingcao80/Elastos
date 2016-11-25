@@ -1,11 +1,11 @@
 
 #include "elastos/droid/database/sqlite/SQLiteClosable.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -25,11 +25,10 @@ void SQLiteClosable::OnAllReferencesReleasedFromContainer()
 
 ECode SQLiteClosable::AcquireReference()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mReferenceCount <= 0) {
-            // throw new IllegalStateException(
-            //                 "attempt to re-open an already-closed object: " + this);
-            Slogger::E(String("SQLiteClosable"), "attempt to re-open an already-closed object: %p", this);
+            Logger::E("SQLiteClosable", "attempt to re-open an already-closed object: %p", this);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         mReferenceCount++;
@@ -41,7 +40,8 @@ ECode SQLiteClosable::ReleaseReference()
 {
     Boolean refCountIsZero = FALSE;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         refCountIsZero = --mReferenceCount == 0;
     }
 
@@ -56,7 +56,8 @@ ECode SQLiteClosable::ReleaseReferenceFromContainer()
 {
     Boolean refCountIsZero = FALSE;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         refCountIsZero = --mReferenceCount == 0;
     }
 

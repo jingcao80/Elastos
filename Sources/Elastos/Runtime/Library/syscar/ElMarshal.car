@@ -166,6 +166,23 @@ library
     }
 
     interface IParcelable {
+        /**
+         * Flag for use with {@link #writeToParcel}: the object being written
+         * is a return value, that is the result of a function such as
+         * "<code>Parcelable someFunction()</code>",
+         * "<code>void someFunction(out Parcelable)</code>", or
+         * "<code>void someFunction(inout Parcelable)</code>".  Some implementations
+         * may want to release resources at this point.
+         */
+        const Int32 PARCELABLE_WRITE_RETURN_VALUE = 0x0001;
+        
+        /**
+         * Bit masks for use with {@link #describeContents}: each bit represents a
+         * kind of object considered to have potential special significance when
+         * marshalled.
+         */
+        const Int32 CONTENTS_FILE_DESCRIPTOR = 0x0001;
+
         ReadFromParcel(
             [in] IParcel* source);
 

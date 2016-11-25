@@ -60,6 +60,11 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI constructor(
+        /* [in] */ ICursor* cursor,
+        /* [in] */ IIContentObserver* observer,
+        /* [in] */ const String& providerName);
+
     /**
      * Returns an object that contains sufficient metadata to reconstruct
      * the cursor remotely.  May throw if an error occurs when executing the query
@@ -90,15 +95,9 @@ public:
         /* [in] */ IBundle* extras,
         /* [out] */ IBundle** result);
 
-    CARAPI ToString(
-        /* [out] */ String* str);
-
     CARAPI ProxyDied();
 
-    CARAPI constructor(
-        /* [in] */ ICursor* cursor,
-        /* [in] */ IIContentObserver* observer,
-        /* [in] */ const String& providerName);
+    TO_STRING_IMPL("CCursorToBulkCursorAdaptor")
 
 private:
     CARAPI_(void) CloseFilledWindowLocked();

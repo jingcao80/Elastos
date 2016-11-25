@@ -21,20 +21,59 @@ public:
 
     CBulkCursorDescriptor();
 
+    ~CBulkCursorDescriptor();
+
+    CARAPI constructor();
+
     CARAPI WriteToParcel(
         /* [in] */ IParcel* writeout);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* readin);
 
-    CARAPI constructor();
+    CARAPI SetCursor(
+        /* [in] */ IBulkCursor* cursor);
 
-public:
+    CARAPI GetCursor(
+        /* [out] */ IBulkCursor** cursor);
+
+    CARAPI SetColumnNames(
+        /* [in] */ ArrayOf<String>* columnNames);
+
+    CARAPI GetColumnNames(
+        /* [out, callee] */ ArrayOf<String>** columnNames);
+
+    CARAPI SetWantsAllOnMoveCalls(
+        /* [in] */ Boolean wantsAllOnMoveCalls);
+
+    CARAPI GetWantsAllOnMoveCalls(
+        /* [out] */ Boolean* wantsAllOnMoveCalls);
+
+    CARAPI SetCount(
+        /* [in] */ Int32 count);
+
+    CARAPI GetCount(
+        /* [out] */ Int32* count);
+
+    CARAPI SetWindow(
+        /* [in] */ ICursorWindow* window);
+
+    CARAPI GetWindow(
+        /* [out] */ ICursorWindow** window);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    CARAPI SetWriteToParcelFlags(
+        /* [in] */ Int32 flags);
+
+private:
     AutoPtr<IBulkCursor> mCursor;
     AutoPtr< ArrayOf<String> > mColumnNames;
     Boolean mWantsAllOnMoveCalls;
     Int32 mCount;
     AutoPtr<ICursorWindow> mWindow;
+    Int32 mWriteToParcelFlags;
 };
 
 } //Database
