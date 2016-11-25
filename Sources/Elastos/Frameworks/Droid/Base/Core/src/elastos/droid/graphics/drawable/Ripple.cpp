@@ -654,10 +654,10 @@ void Ripple::RemoveSelf()
     // The owner will invalidate itself.
     if (!mCanceled) {
         assert(mWeakHost != NULL);
-        AutoPtr<IInterface> obj;
+        AutoPtr<IRippleDrawable> obj;
         mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&obj);
         if (obj) {
-            RippleDrawable* owner = (RippleDrawable*)IRippleDrawable::Probe(obj);
+            RippleDrawable* owner = (RippleDrawable*)obj.Get();
             owner->RemoveRipple(this);
         }
     }
@@ -666,10 +666,10 @@ void Ripple::RemoveSelf()
 void Ripple::InvalidateSelf()
 {
     assert(mWeakHost != NULL);
-    AutoPtr<IInterface> obj;
+    AutoPtr<IRippleDrawable> obj;
     mWeakHost->Resolve(EIID_IRippleDrawable, (IInterface**)&obj);
     if (obj) {
-        RippleDrawable* owner = (RippleDrawable*)IRippleDrawable::Probe(obj);
+        RippleDrawable* owner = (RippleDrawable*)obj.Get();
         owner->InvalidateSelf();
     }
 }

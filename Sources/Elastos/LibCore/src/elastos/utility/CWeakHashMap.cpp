@@ -12,8 +12,9 @@ CWeakHashMap::Entry::Entry(
     /* [in] */ IInterface* key,
     /* [in] */ IInterface* object)
 {
-    if (IWeakReferenceSource::Probe(key)) {
-        IWeakReferenceSource::Probe(key)->GetWeakReference((IWeakReference**)&mKey);
+    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(key);
+    if (wrs) {
+        wrs->GetWeakReference((IWeakReference**)&mKey);
     }
     mIsNull = key == NULL;
     mHash = mIsNull ? 0 : Object::GetHashCode(key);

@@ -3001,7 +3001,7 @@ ECode CTreeMap::BoundedMap::GetNavigableKeySet(
 
     //Using IWeakReference to avoid treemap was released ahead of time.
     if (mKeySet != NULL) {
-        AutoPtr<IInterface> result;
+        AutoPtr<INavigableSet> result;
         mKeySet->Resolve(EIID_INavigableSet, (IInterface**)&result);
         if (result != NULL) {
             *outnav = INavigableSet::Probe(result);

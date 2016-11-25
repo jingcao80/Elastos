@@ -350,11 +350,10 @@ LoadedPkg::ServiceDispatcher::DeathMonitor::DeathMonitor(
 //@Override
 ECode LoadedPkg::ServiceDispatcher::DeathMonitor::ProxyDied()
 {
-    AutoPtr<IInterface> obj;
-    mOwner->Resolve(EIID_IInterface, (IInterface**)&obj);
-    IServiceDispatcher* sdObj = IServiceDispatcher::Probe(obj);
-    if (sdObj) {
-        ServiceDispatcher* sd = (ServiceDispatcher*)sdObj;
+    AutoPtr<IServiceDispatcher> obj;
+    mOwner->Resolve(EIID_IServiceDispatcher, (IInterface**)&obj);
+    if (obj) {
+        ServiceDispatcher* sd = (ServiceDispatcher*)obj.Get();
         return sd->Death(mName, mService);
     }
 

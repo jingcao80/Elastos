@@ -37,12 +37,11 @@ ECode CInnerReceiver::PerformReceive(
     /* [in] */ Boolean sticky,
     /* [in] */ Int32 sendingUser)
 {
-    AutoPtr<IInterface> obj;
-    mDispatcher->Resolve(EIID_IInterface, (IInterface**)&obj);
-    IReceiverDispatcher* rd = IReceiverDispatcher::Probe(obj);
+    AutoPtr<IReceiverDispatcher> rd;
+    mDispatcher->Resolve(EIID_IReceiverDispatcher, (IInterface**)&rd);
     AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher;
     if (rd != NULL) {
-        dispatcher = (LoadedPkg::ReceiverDispatcher*)rd;
+        dispatcher = (LoadedPkg::ReceiverDispatcher*)rd.Get();
     }
 
     if (CActivityThread::DEBUG_BROADCAST) {

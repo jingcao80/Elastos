@@ -175,8 +175,6 @@ private:
     String mSortOrder;
     AutoPtr<ICursor> mCursor;
     AutoPtr<ICancellationSignal> mCancellationSignal;
-    Object mCursorLoaderLock;
-
 };
 
 }

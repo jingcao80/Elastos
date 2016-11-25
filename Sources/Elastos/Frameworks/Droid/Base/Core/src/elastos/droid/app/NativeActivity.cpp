@@ -127,9 +127,9 @@ ECode NativeActivity::NativeContentView::GetNativeActivity(
     /* [out] */ INativeActivity** activity)
 {
     VALIDATE_NOT_NULL(activity)
-    AutoPtr<IInterface> obj;
-    mWeakNativeActivity->Resolve(EIID_IInterface, (IInterface**)&obj);
-    *activity = INativeActivity::Probe(obj);
+    AutoPtr<INativeActivity> obj;
+    mWeakNativeActivity->Resolve(EIID_INativeActivity, (IInterface**)&obj);
+    *activity = obj;
     REFCOUNT_ADD(*activity)
     return NOERROR;
 }

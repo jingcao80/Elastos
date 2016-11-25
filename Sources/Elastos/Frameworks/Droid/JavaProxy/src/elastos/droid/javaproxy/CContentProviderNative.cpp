@@ -145,8 +145,19 @@ ECode CContentProviderNative::Query(
         if (clsid == ECLSID_CICancellationSignalNative) {
             jcancellationSignal = ((CICancellationSignalNative*)cancellationSignal)->mJInstance;
         }
-        else
-            LOGGERE(TAG, "Query() cancellationSignal not NULL!");
+        else {
+            jclass kclass = env->FindClass("android/os/ElCancellationSignalProxy");
+            Util::CheckErrorAndLog(env, TAG, "FindClass: ElCancellationSignalProxy %d", __LINE__);
+
+            jmethodID m = env->GetMethodID(kclass, "<init>", "(J)V");
+            Util::CheckErrorAndLog(env, TAG, "GetMethodID: <init> %d", __LINE__);
+
+            jcancellationSignal = env->NewObject(kclass, m, (jlong)cancellationSignal);
+            Util::CheckErrorAndLog(env, TAG, "NewObject: ElCancellationSignalProxy %d", __LINE__);
+            cancellationSignal->AddRef();
+
+            env->DeleteLocalRef(kclass);
+        }
     }
 
     jclass c = env->FindClass("android/content/IContentProvider");
@@ -203,6 +214,41 @@ ECode CContentProviderNative::Query(
     return ec;
 }
 
+static String GetJavaClassName(
+    /* [in] */ JNIEnv* env,
+    /* [in] */ jobject obj)
+{
+    jclass cls, clsobj;
+    jmethodID getName;
+    jstring jstr;
+    String className;
+    char *temp;
+    jboolean isCopy;
+
+    /* Get the class of the object */
+    cls = env->GetObjectClass(obj);
+
+    /* take that Class object and get it's Class object */
+    clsobj = env->GetObjectClass(cls);
+
+    /* get the Class.getName() methodid */
+    getName = env->GetMethodID(clsobj, "getName", "()Ljava/lang/String;");
+
+    /* Get the jstring name of the object, from the Class class. */
+    jstr = (jstring)env->CallObjectMethod(cls, getName);
+
+    /* Convert the name into a char* */
+    temp = (char *)env->GetStringUTFChars(jstr, &isCopy);
+    className = String(temp);
+    env->ReleaseStringUTFChars(jstr, temp);
+
+    env->DeleteLocalRef(cls);
+    env->DeleteLocalRef(clsobj);
+    env->DeleteLocalRef(jstr);
+
+    return className;
+}
+
 ECode CContentProviderNative::Query(
     /* [in] */ const String& callingPkg,
     /* [in] */ IUri* uri,
@@ -227,10 +273,9 @@ ECode CContentProviderNative::Query(
     if (cursor != NULL) {
         // String name;
         // GetProviderName(&name);
-        StringBuilder sb("CContentProviderNative{0x");
-        sb += StringUtils::ToHexString((Int32)mJInstance);
-        sb += "}";
-        String name = sb.ToString();
+        JNIEnv* env;
+        mJVM->AttachCurrentThread(&env, NULL);
+        String name = GetJavaClassName(env, mJInstance);
 
         ec = CCursorToBulkCursorAdaptor::New(cursor, observer, name, (ICursorToBulkCursorAdaptor**)&adaptor);
         FAIL_GOTO(ec, _EXIT_)

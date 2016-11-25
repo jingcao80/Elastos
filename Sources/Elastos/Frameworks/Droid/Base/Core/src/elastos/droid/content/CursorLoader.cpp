@@ -1,11 +1,13 @@
 
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Net.h"
+#include "elastos/droid/os/CCancellationSignal.h"
 #include "elastos/droid/content/CursorLoader.h"
 #include "elastos/droid/content/CLoaderForceLoadContentObserver.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/Arrays.h>
 
+using Elastos::Droid::Os::CCancellationSignal;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Arrays;
@@ -247,14 +249,15 @@ ECode CursorLoader::LoadInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoLock lock(mCursorLoaderLock);
+    AutoLock lock(this);
     Boolean isCanceled = FALSE;
     if ((IsLoadInBackgroundCanceled(&isCanceled), isCanceled)) {
 //        throw new OperationCanceledException();
         return E_RUNTIME_EXCEPTION;
     }
 
-//***    FAIL_RETURN(CCancellationSignal::New((ICancellationSignal**)&mCancellationSignal));
+    mCancellationSignal = NULL;
+    FAIL_RETURN(CCancellationSignal::New((ICancellationSignal**)&mCancellationSignal));
     // try {
     AutoPtr<IContext> context;
     ECode ec = Loader::GetContext((IContext**)&context);
@@ -310,7 +313,7 @@ ECode CursorLoader::LoadInBackground(
 ECode CursorLoader::CancelLoadInBackground()
 {
     AsyncTaskLoader::CancelLoadInBackground();
-    AutoLock lock(mCursorLoaderLock);
+    AutoLock lock(this);
 
     if (NULL != mCancellationSignal) {
         FAIL_RETURN(mCancellationSignal->Cancel());

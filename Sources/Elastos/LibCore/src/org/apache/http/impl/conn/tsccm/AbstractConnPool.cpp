@@ -178,7 +178,7 @@ void AbstractConnPool::Shutdown()
         }
         iter->Remove();
         AutoPtr<IInterface> entryInt;
-        per->Resolve(EIID_BasicPoolEntry,  (IInterface**)&entryInt);
+        per->Resolve(EIID_IInterface,  (IInterface**)&entryInt);
         AutoPtr<BasicPoolEntry> entry = reinterpret_cast<BasicPoolEntry*>(entryInt->Probe(EIID_BasicPoolEntry));
         if (entry != NULL) {
             AutoPtr<IOperatedClientConnection> conn = entry->GetConnection();
