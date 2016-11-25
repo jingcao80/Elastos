@@ -16,8 +16,11 @@
 #include <elastos/core/StringUtils.h>
 #include "_Org.Conscrypt.h"
 #include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Utility.h"
 
 using Elastos::Core::StringUtils;
+using Elastos::Droid::Utility::CBase64;
+using Elastos::Droid::Utility::IBase64;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IImageView;
@@ -39,10 +42,12 @@ using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::IKeyPairGenerator;
 using Elastos::Security::IKeyPairGeneratorHelper;
 using Elastos::Security::IKeyStore;
+using Elastos::Security::IKeyStoreEntry;
 using Elastos::Security::IKeyStoreHelper;
 using Elastos::Security::IKeyFactoryHelper;
 using Elastos::Security::CKeyFactoryHelper;
 using Elastos::Security::IKeyFactory;
+using Elastos::Security::IKeyStorePrivateKeyEntry;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::IPrincipal;
@@ -76,6 +81,9 @@ using Elastos::Security::Spec::CECPoint;
 using Elastos::Security::Spec::IPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::IX509EncodedKeySpec;
+using Elastos::Utility::CCalendarHelper;
+using Elastos::Utility::ICalendar;
+using Elastos::Utility::ICalendarHelper;
 using Elastos::Utility::Logging::Logger;
 using Org::Apache::Harmony::Security::Fortress::Services;
 
@@ -173,6 +181,9 @@ ECode CActivityOne::MyListener::OnClick(
     else if (id == R::id::elastoskeypair) {
         return mHost->ElastosKeyPairZLL();
     }
+    else {
+        return mHost->KeyStoreTest();
+    }
 
     String data = String("testtesttest");
     AutoPtr<ArrayOf<Byte> > signatureData;
@@ -188,6 +199,45 @@ ECode CActivityOne::MyListener::OnClick(
     Logger::I(TAG, String("alias:") + alias);
     Logger::I(TAG, String("data:") + data);
 
+    //==============================
+    AutoPtr<IKeyPairGeneratorHelper> kpgHelper;
+    CKeyPairGeneratorHelper::AcquireSingleton((IKeyPairGeneratorHelper**)&kpgHelper);
+    AutoPtr<IKeyPairGenerator> kpg;
+    kpgHelper->GetInstance(String("RSA"), String("ElastosKeyStore"), (IKeyPairGenerator**)&kpg);
+
+    AutoPtr<IContext> ctx;
+    mHost->GetApplicationContext((IContext**)&ctx);
+    AutoPtr<ICalendarHelper> calHelper;
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&calHelper);
+    AutoPtr<ICalendar> cal;
+    calHelper->GetInstance((ICalendar**)&cal);
+    AutoPtr<IDate> now;
+    cal->GetTime((IDate**)&now);
+    AutoPtr<IDate> end;
+    cal->Add(ICalendar::YEAR, 1);
+    cal->GetTime((IDate**)&end);
+    AutoPtr<IBigIntegerHelper> biHelper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
+    AutoPtr<IBigInteger> bi;
+    biHelper->ValueOf(1, (IBigInteger**)&bi);
+    AutoPtr<IX500Principal> x500p;
+    CX500Principal::New(String("CN=test1"), (IX500Principal**)&x500p);
+
+    AutoPtr<IKeyPairGeneratorSpecBuilder> kpgBuilder;
+    CKeyPairGeneratorSpecBuilder::New(ctx, (IKeyPairGeneratorSpecBuilder**)&kpgBuilder);
+    kpgBuilder->SetAlias(alias);
+    kpgBuilder->SetStartDate(now);
+    kpgBuilder->SetEndDate(end);
+    kpgBuilder->SetSerialNumber(bi);
+    kpgBuilder->SetSubject(x500p);
+    AutoPtr<IKeyPairGeneratorSpec> spec;
+    kpgBuilder->Build((IKeyPairGeneratorSpec**)&spec);
+
+    kpg->Initialize(IAlgorithmParameterSpec::Probe(spec));
+    AutoPtr<IKeyPair> kp;
+    kpg->GenerateKeyPair((IKeyPair**)&kp);
+    //==============================
+
     // create inputstream for the jks file
     AutoPtr<IInputStream> inputStream;
     // try {
@@ -202,8 +252,9 @@ ECode CActivityOne::MyListener::OnClick(
     // try {
     AutoPtr<IKeyStoreHelper> ksHelper;
     CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
-    ksHelper->GetInstance(String("JKS"), (IKeyStore**)&keyStore);
-    keyStore->Load(inputStream, storepassword.GetChars());
+    ksHelper->GetInstance(String("ElastosKeyStore"), (IKeyStore**)&keyStore);
+    // keyStore->Load(inputStream, storepassword.GetChars());
+    keyStore->Load(NULL, NULL);
     // } catch (KeyStoreException e) {
     //     e.printStackTrace();
     // } catch (NoSuchAlgorithmException e) {
@@ -213,6 +264,7 @@ ECode CActivityOne::MyListener::OnClick(
     // } catch (IOException e) {
     //     e.printStackTrace();
     // }
+
     //get private from the keystore
     AutoPtr<IPrivateKey> privatekey;
     // try {
@@ -251,8 +303,9 @@ ECode CActivityOne::MyListener::OnClick(
     // load keystore
     AutoPtr<IKeyStore> keyStorePub;
     // try {
-    ksHelper->GetInstance(String("JKS"), (IKeyStore**)&keyStorePub);
-    keyStorePub->Load(inputStreamPub, storepassword.GetChars());
+    ksHelper->GetInstance(String("ElastosKeyStore"), (IKeyStore**)&keyStorePub);
+    // keyStorePub->Load(inputStreamPub, storepassword.GetChars());
+    keyStore->Load(NULL, NULL);
     // } catch (KeyStoreException e) {
     //     e.printStackTrace();
     // } catch (NoSuchAlgorithmException e) {
@@ -294,6 +347,94 @@ ECode CActivityOne::MyListener::OnClick(
     //     e.printStackTrace();
     // }
 
+    return NOERROR;
+}
+
+ECode CActivityOne::KeyStoreTest()
+{
+    Logger::I(TAG, "===== CActivityOne::KeyStoreTest =====");
+    String alias = String("kortide");
+    String data = String("testtesttest");
+
+    AutoPtr<IContext> ctx;
+    GetApplicationContext((IContext**)&ctx);
+    AutoPtr<ICalendarHelper> calHelper;
+    CCalendarHelper::AcquireSingleton((ICalendarHelper**)&calHelper);
+    AutoPtr<ICalendar> cal;
+    calHelper->GetInstance((ICalendar**)&cal);
+    AutoPtr<IDate> now;
+    cal->GetTime((IDate**)&now);
+    AutoPtr<IDate> end;
+    cal->Add(ICalendar::YEAR, 1);
+    cal->GetTime((IDate**)&end);
+    AutoPtr<IBigIntegerHelper> biHelper;
+    CBigIntegerHelper::AcquireSingleton((IBigIntegerHelper**)&biHelper);
+    AutoPtr<IBigInteger> bi;
+    biHelper->ValueOf(1, (IBigInteger**)&bi);
+    AutoPtr<IX500Principal> x500p;
+    CX500Principal::New(String("CN=test1"), (IX500Principal**)&x500p);
+
+    AutoPtr<IKeyStoreHelper> ksHelper;
+    CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&ksHelper);
+    AutoPtr<IKeyStore> keyStore;
+    ksHelper->GetInstance(String("ElastosKeyStore"), (IKeyStore**)&keyStore);
+    keyStore->Load(NULL, NULL);
+
+    AutoPtr<IKeyStoreEntry> entry;
+    keyStore->GetEntry(alias, NULL, (IKeyStoreEntry**)&entry);
+    Logger::D(TAG, "===== entry = %p =====", entry.Get());
+    AutoPtr<IKeyStorePrivateKeyEntry> pke = IKeyStorePrivateKeyEntry::Probe(entry);
+    if (pke == NULL) {
+        Logger::E(TAG, "===== Not an instance of a PrivateKeyEntry =====");
+        return NOERROR;
+    }
+
+    //try to signature
+    AutoPtr<ISignatureHelper> sHelper;
+    CSignatureHelper::AcquireSingleton((ISignatureHelper**)&sHelper);
+    AutoPtr<ISignature> signature;
+    sHelper->GetInstance(String("MD5withRSA"), (ISignature**)&signature);
+    AutoPtr<IPrivateKey> privatekey;
+    pke->GetPrivateKey((IPrivateKey**)&privatekey);
+    signature->InitSign(privatekey);
+    signature->Update(data.GetBytes());
+    AutoPtr<ArrayOf<Byte> > signatureData;
+    signature->Sign((ArrayOf<Byte>**)&signatureData);
+    AutoPtr<IBase64> base64;
+    CBase64::AcquireSingleton((IBase64**)&base64);
+    String base64Data;
+    base64->EncodeToString(signatureData, IBase64::DEFAULT, &base64Data);
+    Logger::I(TAG, "===== CActivityOne::KeyStoreTest, base64Data = %s =====", base64Data.string());
+
+    //Verify
+    AutoPtr<ArrayOf<Byte> > dataBytes = data.GetBytes();
+    AutoPtr<ArrayOf<Byte> > signatureBytes;
+    // try {
+    base64->Decode(base64Data, IBase64::DEFAULT, (ArrayOf<Byte>**)&signatureBytes);
+    // } catch (IllegalArgumentException e) {
+    //     signature = new byte[0];
+    // }
+
+    keyStore = NULL;
+    ksHelper->GetInstance(String("ElastosKeyStore"), (IKeyStore**)&keyStore);
+    keyStore->Load(NULL, NULL);
+    entry = NULL;
+    keyStore->GetEntry(alias, NULL, (IKeyStoreEntry**)&entry);
+    AutoPtr<IKeyStorePrivateKeyEntry> privateKeyEntry = IKeyStorePrivateKeyEntry::Probe(entry);
+    if (privateKeyEntry == NULL) {
+        Logger::E(TAG, "===== Not an instance of a PrivateKeyEntry =====");
+        return NOERROR;
+    }
+
+    AutoPtr<ISignature> s;
+    sHelper->GetInstance(String("MD5withRSA"), (ISignature**)&s);
+    AutoPtr<ICertificate> cert;
+    privateKeyEntry->GetCertificate((ICertificate**)&cert);
+    s->InitVerify(cert);
+    s->Update(dataBytes);
+    Boolean b;
+    s->Verify(signatureBytes, &b);
+    Logger::I(TAG, "===== CActivityOne::KeyStoreTest, Verify = %d =====", b);
     return NOERROR;
 }
 
