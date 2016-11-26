@@ -29,4 +29,10 @@ module
 
         interface IAnnotation;
     }
+
+    [@Elastos.CoreLibrary.Annotation.BasicInterface(name = "Elastos.Annotation.Sample")]
+    interface IAnnotation2 {
+        [@Elastos.CoreLibrary.Annotation.BasicMethod]
+        M1();
+    }
 }

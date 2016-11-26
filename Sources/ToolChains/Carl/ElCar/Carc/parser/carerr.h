@@ -56,6 +56,7 @@ enum CARErrorNo {
     CAR_E_IllegalMethodAnnotation,
     CAR_E_IllegalInterfaceProperties,
     CAR_E_IllegalClassProperties,
+    CAR_E_IllegalClassOrInterfaceAnnotation,
     CAR_E_ExpectInterfaceName,
     CAR_E_ExpectClassName,
     CAR_E_ExpectStructName,
@@ -133,6 +134,9 @@ enum CARErrorNo {
     CAR_E_InvalidUUNM,
     CAR_E_NotIntegerConst,
     CAR_E_TypeAmbiguous,
+    CAR_E_ExpectAnnotationName,
+    CAR_E_TooManyAnnotation,
+    CAR_E_DupAnnotationName,
 };
 
 extern "C" void ErrorReport(CARErrorNo, ...);

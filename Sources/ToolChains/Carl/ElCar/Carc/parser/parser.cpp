@@ -2375,6 +2375,105 @@ int P_MergeLibrary()
     return Ret_Continue;
 }
 
+// @ident(ident = "xxxx", ident = "xxxx")
+// @ident
+int P_Annotation(AnnotationDescriptor** pAnnotationDescs, int index)
+{
+    CARToken token = GetToken(s_pFile);
+
+    if (token != Token_ident) {
+        ErrorReport(CAR_E_ExpectAnnotationName, g_szCurrentToken);
+        return Ret_AbortOnError;
+    }
+
+    char *tokenStr = g_szCurrentToken;
+    char *pszName = NULL;
+    char *pszNamespace = NULL;
+    char *dot = strrchr(tokenStr, '.');
+    if (dot != NULL) {
+        pszNamespace = (char *)malloc(dot - tokenStr + 1);
+        memcpy(pszNamespace, g_szCurrentToken, dot - tokenStr);
+        pszNamespace[dot - tokenStr] = '\0';
+        tokenStr = dot + 1;
+    }
+    pszName = (char*)malloc(strlen(tokenStr) + 1);
+    strcpy(pszName, tokenStr);
+
+    for (int i = 0; i < index; i++) {
+        if (!strcmp(pAnnotationDescs[i]->mName, pszName) &&
+            ((pAnnotationDescs[i]->mNameSpace == NULL && pszNamespace == NULL) ||
+            (pAnnotationDescs[i]->mNameSpace != NULL && pszNamespace != NULL &&
+                !strcmp(pAnnotationDescs[i]->mNameSpace, pszNamespace)))) {
+            ErrorReport(CAR_E_DupAnnotationName, pszName);
+            free(pszName);
+            if (pszNamespace != NULL) free(pszNamespace);
+            return Ret_AbortOnError;
+        }
+    }
+
+    int keyPairCount = 0;
+    KeyValuePair* pKeyValuePairs[MAX_ANNOTATION_KEY_VALUE_PAIR_NUMBER];
+
+    if ((token = PeekToken(s_pFile)) == Token_S_lparen) {
+        while (token != Token_S_rparen) {
+            GetToken(s_pFile);
+
+            token = GetToken(s_pFile);
+            if (token != Token_ident) {
+                ErrorReport(CAR_E_UnexpectSymbol, g_szCurrentToken);
+                return Ret_AbortOnError;
+            }
+
+            KeyValuePair* pKeyValuePair = new KeyValuePair();
+            pKeyValuePair->mKey = (char*)malloc(strlen(g_szCurrentToken) + 1);
+            strcpy(pKeyValuePair->mKey, g_szCurrentToken);
+
+            if (GetToken(s_pFile) != Token_S_assign) {
+                free(pKeyValuePair->mKey);
+                delete pKeyValuePair;
+                ErrorReport(CAR_E_ExpectSymbol, "=");
+                return Ret_AbortOnError;
+            }
+
+            if (GetToken(s_pFile) != Token_string) {
+                free(pKeyValuePair->mKey);
+                delete pKeyValuePair;
+                ErrorReport(CAR_E_UnexpectSymbol, g_szCurrentToken);
+                return Ret_AbortOnError;
+            }
+
+            int strLen = strlen(g_szCurrentToken);
+            pKeyValuePair->mValue = (char*)malloc(strLen - 1);
+            memcpy(pKeyValuePair->mValue, g_szCurrentToken + 1, strLen - 2);
+            pKeyValuePair->mValue[strLen - 2] = '\0';
+
+            token = PeekToken(s_pFile);
+            if (token != Token_S_comma && token != Token_S_rparen) {
+                free(pKeyValuePair->mKey);
+                free(pKeyValuePair->mValue);
+                delete pKeyValuePair;
+                ErrorReport(CAR_E_UnexpectSymbol, g_szCurrentToken);
+                return Ret_AbortOnError;
+            }
+
+            pKeyValuePairs[keyPairCount++] = pKeyValuePair;
+        }
+
+        GetToken(s_pFile);
+    }
+
+    pAnnotationDescs[index] = new AnnotationDescriptor();
+    pAnnotationDescs[index]->mName = pszName;
+    pAnnotationDescs[index]->mNameSpace = pszNamespace;
+    pAnnotationDescs[index]->mKeyValuePairCount = keyPairCount;
+    pAnnotationDescs[index]->mKeyValuePair = (KeyValuePair**)malloc(sizeof(KeyValuePair*) * keyPairCount);
+    for (int i = 0; i < keyPairCount; i++) {
+        pAnnotationDescs[index]->mKeyValuePair[i] = pKeyValuePairs[i];
+    }
+
+    return Ret_Continue;
+}
+
 #define OPKIND_NONE 0
 #define OPKIND_AND 1
 #define OPKIND_EOR 2
@@ -2819,7 +2918,7 @@ int P_Integer32(InterfaceDescriptor* pInterface, InterfaceConstDescriptor *pDesc
                 else if (opKind == OPKIND_MULTIP) {
                     pDesc->mV.mInt32Value.mValue *= doNot ? ~v : v;
                 }
-                else if (opKind = OPKIND_ADD) {
+                else if (opKind == OPKIND_ADD) {
                     pDesc->mV.mInt32Value.mValue += doNot ? ~v : v;
                 }
                 pDesc->mV.mInt32Value.mFormat = format;
@@ -3892,8 +3991,9 @@ int P_Method(InterfaceDirEntry *pItfDirEntry, BOOL isDeprecated)
 {
     int n;
     CARToken token;
-	char* annotation = NULL;
     DWORD attribs = 0;
+    int annotationCount = 0;
+    AnnotationDescriptor *pAnnotationDescs[MAX_ANNOTATION_NUMBER];
     InterfaceDescriptor *pDesc = pItfDirEntry->mDesc;
 
     token = GetToken(s_pFile);
@@ -3905,13 +4005,15 @@ int P_Method(InterfaceDirEntry *pItfDirEntry, BOOL isDeprecated)
                 token = GetToken(s_pFile);
             }
             else if (token == Token_S_at) {
-                token = GetToken(s_pFile);
-                if (token != Token_ident) {
+                if (annotationCount >= MAX_ANNOTATION_NUMBER) {
+                    ErrorReport(CAR_E_TooManyAnnotation);
+                    return Ret_AbortOnError;
+                }
+                if (P_Annotation(pAnnotationDescs, annotationCount) == Ret_AbortOnError) {
                     ErrorReport(CAR_E_IllegalMethodAnnotation, g_szCurrentToken);
                     return Ret_AbortOnError;
                 }
-                annotation = (char*)malloc(sizeof(g_szCurrentToken) + 1);
-                strcpy(annotation, g_szCurrentToken);
+                annotationCount++;
                 token = GetToken(s_pFile);
             }
             else {
@@ -3933,7 +4035,11 @@ int P_Method(InterfaceDirEntry *pItfDirEntry, BOOL isDeprecated)
     }
     pDesc->mMethods[n]->mType.mType = Type_ECode;
     if (pDesc->mAttribs & InterfaceAttrib_oneway) attribs |= MethodAttrib_Oneway;
-    pDesc->mMethods[n]->mAnnotation = annotation;
+    pDesc->mMethods[n]->mAnnotationCount = annotationCount;
+    pDesc->mMethods[n]->mAnnotations = (AnnotationDescriptor**)malloc(sizeof(AnnotationDescriptor*) * annotationCount);
+    for (int i = 0; i < annotationCount; i++) {
+        pDesc->mMethods[n]->mAnnotations[i] = pAnnotationDescs[i];
+    }
     pDesc->mMethods[n]->mAttribs = attribs;
 
     if (GetToken(s_pFile) != Token_S_lparen) {
@@ -4074,7 +4180,7 @@ int P_InterfaceBody(InterfaceDirEntry *pDirEntry, BOOL isDeprecated)
 // INTERFACE   -> [ ITF_PROPERTIES ] ITF_ID [ ITF_BODY | s_semicolon ]
 // ITF_ID      -> interface ident
 //
-int P_Interface(CARToken token, DWORD properties)
+int P_Interface(CARToken token, DWORD properties, int annotationCount, AnnotationDescriptor **pAnnotationDescs)
 {
     int r, ret;
     DWORD attribs = 0;
@@ -4163,6 +4269,13 @@ int P_Interface(CARToken token, DWORD properties)
     pDesc = s_pModule->mInterfaceDirs[r]->mDesc;
     pDesc->mAttribs = attribs;
     s_pModule->mDefinedInterfaceIndexes[s_pModule->mDefinedInterfaceCount++] = r;
+    if (annotationCount > 0) {
+        pDesc->mAnnotationCount = annotationCount;
+        pDesc->mAnnotations = (AnnotationDescriptor**)malloc(sizeof(AnnotationDescriptor*) * annotationCount);
+        for (int i = 0; i < annotationCount; i++) {
+            pDesc->mAnnotations[i] = pAnnotationDescs[i];
+        }
+    }
 
     ret = P_InterfaceBody(s_pModule->mInterfaceDirs[r], isDeprecated);
     if (ret != Ret_Continue) return ret;
@@ -4944,7 +5057,8 @@ void AddGenericParent(
 int P_ClassCtorMethod(ClassDirEntry *pClass, BOOL isDeprecated)
 {
     InterfaceDescriptor *pIntfDesc = NULL;
-    char* annotation = NULL;
+    int annotationCount = 0;
+    AnnotationDescriptor *pAnnotationDescs[MAX_ANNOTATION_NUMBER];
     ClassDescriptor *pClsDesc;
     pClsDesc = pClass->mDesc;
 
@@ -4958,24 +5072,23 @@ int P_ClassCtorMethod(ClassDirEntry *pClass, BOOL isDeprecated)
     CARToken token = GetToken(s_pFile);
     if (token == Token_S_lbracket) {
         token = GetToken(s_pFile);
-        if (token != Token_S_rbracket) {
+        while (token != Token_S_rbracket) {
             if (token == Token_S_at) {
-                token = GetToken(s_pFile);
-                if (token != Token_ident) {
+                if (annotationCount >= MAX_ANNOTATION_NUMBER) {
+                    ErrorReport(CAR_E_TooManyAnnotation);
+                    return Ret_AbortOnError;
+                }
+                if (P_Annotation(pAnnotationDescs, annotationCount) == Ret_AbortOnError) {
                     ErrorReport(CAR_E_IllegalMethodAnnotation, g_szCurrentToken);
                     return Ret_AbortOnError;
                 }
-                annotation = (char*)malloc(sizeof(g_szCurrentToken) + 1);
-                strcpy(annotation, g_szCurrentToken);
-                if (GetToken(s_pFile) != Token_S_rbracket) {
-                    ErrorReport(CAR_E_ExpectSymbol, "]");
-                    return Ret_AbortOnError;
-                }
+                annotationCount++;
             }
             else {
                 ErrorReport(CAR_E_IllegalMethodProperties, g_szCurrentToken);
                 return Ret_AbortOnError;
             }
+            token = GetToken(s_pFile);
         }
         token = GetToken(s_pFile);
     }
@@ -4990,7 +5103,11 @@ int P_ClassCtorMethod(ClassDirEntry *pClass, BOOL isDeprecated)
         return Ret_AbortOnError;
     }
     pIntfDesc->mMethods[n]->mType.mType = Type_ECode;
-    pIntfDesc->mMethods[n]->mAnnotation = annotation;
+    pIntfDesc->mMethods[n]->mAnnotationCount = annotationCount;
+    pIntfDesc->mMethods[n]->mAnnotations = (AnnotationDescriptor**)malloc(sizeof(AnnotationDescriptor*) * annotationCount);
+    for (int i = 0; i < annotationCount; i++) {
+        pIntfDesc->mMethods[n]->mAnnotations[i] = pAnnotationDescs[i];
+    }
 
     if (GetToken(s_pFile) != Token_S_lparen) {
         ErrorReport(CAR_E_ExpectSymbol, "(");
@@ -5387,7 +5504,7 @@ int P_ClassBody(ClassDirEntry *pClass, BOOL isDeprecated)
 // CLS_ID      -> CLS_TYPE ident
 // CLS_TYPE    -> k_class | k_category | k_aspect | k_regime | k_domain
 //
-int P_Class(CARToken token, DWORD properties)
+int P_Class(CARToken token, DWORD properties, int annotationCount, AnnotationDescriptor** pAnnotationDescs)
 {
     int r;
     //TempClassAttribs attr;
@@ -5533,6 +5650,14 @@ int P_Class(CARToken token, DWORD properties)
     pDesc = pClass->mDesc;
     pDesc->mAttribs = attribs;
 
+    if (annotationCount > 0) {
+        pDesc->mAnnotationCount = annotationCount;
+        pDesc->mAnnotations = (AnnotationDescriptor**)malloc(sizeof(AnnotationDescriptor*) * annotationCount);
+        for (int i = 0; i < annotationCount; i++) {
+            pDesc->mAnnotations[i] = pAnnotationDescs[i];
+        }
+    }
+
     return P_ClassBody(s_pModule->mClassDirs[r], isDeprecated);
 }
 
@@ -5542,6 +5667,8 @@ int P_Class(CARToken token, DWORD properties)
 int P_InterfaceAndClass(CARToken token)
 {
     DWORD props = 0;
+    int annotationCount = 0;
+    AnnotationDescriptor *pAnnotationDescs[MAX_ANNOTATION_NUMBER];
 
     if (Token_S_lbracket == token) {
         //parse properties
@@ -5573,12 +5700,25 @@ int P_InterfaceAndClass(CARToken token)
                         props |= Prop_parcelable;
                         break;
 
+                    case Token_S_at: {
+                        if (annotationCount >= MAX_ANNOTATION_NUMBER) {
+                            ErrorReport(CAR_E_TooManyAnnotation);
+                            return Ret_AbortOnError;
+                        }
+                        if (P_Annotation(pAnnotationDescs, annotationCount) == Ret_AbortOnError) {
+                            ErrorReport(CAR_E_IllegalClassOrInterfaceAnnotation);
+                            return Ret_AbortOnError;
+                        }
+                        annotationCount++;
+                        break;
+                    }
+
                     default:
                         ErrorReport(CAR_E_UnexpectSymbol, g_szCurrentToken);
                 }
 
                 token = GetToken(s_pFile);
-            }while(Token_S_comma == token);
+            } while(Token_S_comma == token);
 
             if (Token_S_rbracket != token) {
                 ErrorReport(CAR_E_ExpectSymbol, ", or ]");
@@ -5592,10 +5732,10 @@ int P_InterfaceAndClass(CARToken token)
         case Token_K_interface:
         case Token_K_callbacks:
         case Token_K_delegates:
-            return P_Interface(token, props);
+            return P_Interface(token, props, annotationCount, pAnnotationDescs);
 
         default:
-            return P_Class(token, props);
+            return P_Class(token, props, annotationCount, pAnnotationDescs);
     }
 }
 

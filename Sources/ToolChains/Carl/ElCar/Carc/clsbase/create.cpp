@@ -229,7 +229,6 @@ void DeleteMethods(MethodDescriptor *pMethod)
         DeleteParam(pMethod->mParams[n]);
     }
     delete [] pMethod->mParams;
-    if (pMethod->mAnnotation != NULL) delete pMethod->mAnnotation;
     delete pMethod->mSignature;
     delete pMethod->mName;
     delete pMethod;

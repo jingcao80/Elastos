@@ -23,6 +23,7 @@ library
     interface IDelegateProxy;
     interface ICallbackInvocation;
     interface ICallbackArgumentList;
+    interface IAnnotationInfo;
 
     interface IVariable;
     interface IVariableOfCarArray;
@@ -185,6 +186,12 @@ library
         GetNamespace(
             [out] String* ns);
 
+        GetAnnotationCount(
+            [out] Int32* count);
+
+        GetAllAnnotationInfos(
+            [out] ArrayOf<IAnnotationInfo*> annotationInfos);
+
         GetId(
             [out] InterfaceID* iid);
 
@@ -237,8 +244,11 @@ library
 
     [local]
     interface IMethodInfo extends IFunctionInfo {
-        GetAnnotation(
-            [out] String* annotation);
+        GetAnnotationCount(
+            [out] Int32* count);
+
+        GetAllAnnotationInfos(
+            [out] ArrayOf<IAnnotationInfo*> annotationInfos);
 
         CreateArgumentList(
             [out] IArgumentList** argumentList);
@@ -1023,6 +1033,12 @@ library
         SetClassLoader(
             [in] IInterface* loader);
 
+        GetAnnotationCount(
+            [out] Int32* count);
+
+        GetAllAnnotationInfos(
+            [out] ArrayOf<IAnnotationInfo*> annotationInfos);
+
         IsSingleton(
             [out] Boolean* isSingleton);
 
@@ -1286,6 +1302,28 @@ library
         GetObjectPtrArgument(
             [in] Int32 index,
             [out] PInterface* value);
+    }
+
+    [local]
+    interface IAnnotationInfo {
+        GetName(
+            [out] String* name);
+
+        GetNamespace(
+            [out] String* ns);
+
+        GetSize(
+            [out] Int32* size);
+
+        GetKeys(
+            [out, callee] ArrayOf<String>* keys);
+
+        GetValue(
+            [in] String key,
+            [out] String* value);
+
+        GetValues(
+            [out, callee] ArrayOf<String>* values);
     }
 }
 

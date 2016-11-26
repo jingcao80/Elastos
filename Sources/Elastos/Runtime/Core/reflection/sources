@@ -30,6 +30,7 @@ SOURCES += CObjInfoList.cpp
 SOURCES += CEntryList.cpp
 SOURCES += refutil.cpp
 SOURCES += reflection.cpp
+SOURCES += CAnnotationInfo.cpp
 SOURCES += CArgumentList.cpp
 SOURCES += CCallbackArgumentList.cpp
 SOURCES += CCallbackMethodInfo.cpp

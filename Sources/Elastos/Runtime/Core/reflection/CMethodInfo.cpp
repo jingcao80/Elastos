@@ -126,14 +126,26 @@ ECode CMethodInfo::GetSignature(
     return NOERROR;
 }
 
-ECode CMethodInfo::GetAnnotation(
-    /* [out] */ String* annotation)
+ECode CMethodInfo::GetAnnotationCount(
+    /* [out] */ Int32* count)
 {
-    if (annotation == NULL) {
+    if (!count) {
         return E_INVALID_ARGUMENT;
     }
 
-    *annotation = adjustNameAddr(mBase, mMethodDescriptor->mAnnotation);
+    *count = mMethodDescriptor->mAnnotationCount;
+    return NOERROR;
+}
+
+
+ECode CMethodInfo::GetAllAnnotationInfos(
+    /* [out] */ ArrayOf<IAnnotationInfo *>* annotationInfos)
+{
+    if (!annotationInfos || !annotationInfos->GetLength()) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    annotationInfos->Copy(mAnnotationInfos);
 
     return NOERROR;
 }

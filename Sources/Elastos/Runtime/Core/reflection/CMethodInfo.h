@@ -39,8 +39,11 @@ public:
     CARAPI GetSignature(
         /* [out] */ String* signature);
 
-    CARAPI GetAnnotation(
-        /* [out] */ String* annotation);
+    CARAPI GetAnnotationCount(
+        /* [out] */ Int32* count);
+
+    CARAPI GetAllAnnotationInfos(
+        /* [out] */ ArrayOf<IAnnotationInfo *>* annotationInfos);
 
     CARAPI GetParamCount(
         /* [out] */ Int32* count);
@@ -87,6 +90,7 @@ public:
     AutoPtr<CClsModule> mClsModule;
 
 private:
+    ArrayOf<IAnnotationInfo *>* mAnnotationInfos;
     ArrayOf<IParamInfo *>*  mParameterInfos;
     ParmElement*            mParamElem;
     UInt32                  mParamBufSize;

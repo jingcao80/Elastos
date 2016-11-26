@@ -33,6 +33,8 @@ const int MAX_ALIAS_NUMBER = 4096;
 const int MAX_LIBRARY_NUMBER = 32;
 const int MAX_ARRAY_NUMBER = 4096;
 const int MAX_CONST_NUMBER = 4096;
+const int MAX_ANNOTATION_NUMBER = 32;
+const int MAX_ANNOTATION_KEY_VALUE_PAIR_NUMBER = 64;
 
 const unsigned int STRUCT_MAX_ALIGN_SIZE = 4;
 
@@ -86,6 +88,24 @@ struct FileDirEntry
     char*               mPath;
 };
 
+struct KeyValuePair
+{
+    char*                   mKey;
+    char*                   mValue;
+};
+
+typedef struct KeyValuePair KeyValuePair;
+
+struct AnnotationDescriptor
+{
+    char*                   mName;
+    char*                   mNameSpace;
+    unsigned short          mKeyValuePairCount;
+    KeyValuePair**          mKeyValuePair;
+};
+
+typedef struct AnnotationDescriptor AnnotationDescriptor;
+
 typedef struct TypeDescriptor
 {
     CARDataType         mType;
@@ -117,12 +137,14 @@ struct ClassDescriptor
     CLSID               mClsid;
     unsigned short      mParentIndex;
     unsigned short      mCtorIndex;
+    unsigned short      mAnnotationCount;
     unsigned short      mInterfaceCount;
     unsigned short      mAggregateCount;
     unsigned short      mClassCount;               // only for aspect
     unsigned short      mAspectCount;
     unsigned long       mAttribs;
 
+    AnnotationDescriptor**  mAnnotations;
     ClassInterface**    mInterfaces;
     unsigned short*     mAggrIndexes;
     unsigned short*     mAspectIndexes;
@@ -166,11 +188,13 @@ struct InterfaceDirEntry
 struct InterfaceDescriptor
 {
     IID                 mIID;
+    unsigned short      mAnnotationCount;
     unsigned short      mConstCount;
     unsigned short      mMethodCount;
     unsigned short      mParentIndex;
     DWORD               mAttribs;
 
+    AnnotationDescriptor**      mAnnotations;
     InterfaceConstDescriptor**  mConsts;
     MethodDescriptor**  mMethods;
 
@@ -187,8 +211,9 @@ struct MethodDescriptor
 {
     char*               mName;
     char*               mSignature;
-    char*               mAnnotation;
     TypeDescriptor      mType;
+    unsigned short      mAnnotationCount;
+    AnnotationDescriptor**  mAnnotations;
     unsigned short      mParamCount;
     ParamDescriptor**   mParams;
     DWORD               mAttribs;

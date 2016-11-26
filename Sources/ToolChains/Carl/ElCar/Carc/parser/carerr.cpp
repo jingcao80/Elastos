@@ -69,6 +69,8 @@ static ErrorMessage s_errorMessages[] = {
         "The interface has illegal properties." },
     { CAR_E_IllegalClassProperties, \
         "The class has illegal properties." },
+    { CAR_E_IllegalClassOrInterfaceAnnotation, \
+        "The class or interface has illegal annotation." },
     { CAR_E_ExpectInterfaceName, "Interface name expected." },
     { CAR_E_ExpectClassName, "Class name expected." },
     { CAR_E_ExpectStructName, "Struct name expected." },
@@ -170,6 +172,9 @@ static ErrorMessage s_errorMessages[] = {
     { CAR_E_InvalidUUNM, "The Universal Unique Name of this CAR module is not valid."},
     { CAR_E_NotIntegerConst, "The const \"%s\" is not integer."},
     { CAR_E_TypeAmbiguous, "The type \"%s\" is ambiguous."},
+    { CAR_E_ExpectAnnotationName, "Annotation name expected." },
+    { CAR_E_TooManyAnnotation, "Too many annotation defined." },
+    { CAR_E_DupAnnotationName, "Annotation name %s is duplicated." },
 };
 
 const int c_nErrorNumber = \

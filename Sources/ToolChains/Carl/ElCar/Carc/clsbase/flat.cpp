@@ -29,6 +29,8 @@ private:
 
     int WriteFileDirEntry(FileDirEntry *pEntry);
 
+    int WriteAnnotationDescriptor(AnnotationDescriptor *pDesc);
+
     int WriteClassDirEntry(ClassDirEntry *pEntry);
     int WriteClassDescriptor(ClassDescriptor *pDesc);
 
@@ -98,6 +100,17 @@ int CFlatBuffer::WriteClassDescriptor(ClassDescriptor *pDesc)
 
     memcpy(&d, pDesc, sizeof(ClassDescriptor));
 
+    if (d.mAnnotationCount > 0) {
+        p = (int *)_alloca(d.mAnnotationCount * sizeof(int));
+
+        for (n = 0; n < d.mAnnotationCount; n++) {
+            p[n] = WriteAnnotationDescriptor(d.mAnnotations[n]);
+        }
+
+        d.mAnnotations = (AnnotationDescriptor **) \
+            WriteData(p, d.mAnnotationCount * sizeof(int));
+    }
+
     if (d.mInterfaceCount > 0) {
         p = (int *)_alloca(d.mInterfaceCount * sizeof(int));
 
@@ -135,6 +148,15 @@ int CFlatBuffer::WriteFileDirEntry(FileDirEntry *pFileDirEntry)
     }
 
     return WriteData(&entry, sizeof(FileDirEntry));
+}
+
+int CFlatBuffer::WriteAnnotationDescriptor(AnnotationDescriptor *pDesc)
+{
+    AnnotationDescriptor d;
+
+    memcpy(&d, pDesc, sizeof(AnnotationDescriptor));
+
+
 }
 
 int CFlatBuffer::WriteClassDirEntry(ClassDirEntry *pClassDirEntry)
@@ -194,7 +216,17 @@ int CFlatBuffer::WriteMethodDescriptor(MethodDescriptor *pDesc)
     }
     d.mName = (char *)WriteString(d.mName);
     d.mSignature = (char *)WriteString(d.mSignature);
-    if (d.mAnnotation != NULL) d.mAnnotation = (char *)WriteString(d.mAnnotation);
+
+    if (d.mAnnotationCount > 0) {
+        p = (int *)_alloca(d.mAnnotationCount * sizeof(int));
+
+        for (n = 0; n < d.mAnnotationCount; n++) {
+            p[n] = WriteAnnotationDescriptor(d.mAnnotations[n]);
+        }
+
+        d.mAnnotations = (AnnotationDescriptor **) \
+            WriteData(p, d.mAnnotationCount * sizeof(int));
+    }
 
     return WriteData(&d, sizeof(MethodDescriptor));
 }
@@ -206,6 +238,17 @@ int CFlatBuffer::WriteInterfaceDescriptor(
     InterfaceDescriptor d;
 
     memcpy(&d, pDesc, sizeof(InterfaceDescriptor));
+
+    if (d.mAnnotationCount > 0) {
+        p = (int *)_alloca(d.mAnnotationCount * sizeof(int));
+
+        for (n = 0; n < d.mAnnotationCount; n++) {
+            p[n] = WriteAnnotationDescriptor(d.mAnnotations[n]);
+        }
+
+        d.mAnnotations = (AnnotationDescriptor **) \
+            WriteData(p, d.mAnnotationCount * sizeof(int));
+    }
 
     if (d.mConstCount > 0) {
         p = (int *)_alloca(d.mConstCount * sizeof(int));
@@ -559,14 +602,44 @@ int CalcFileSize(FileDirEntry *p)
     return size;
 }
 
+int CalcKeyPairSize(KeyValuePair* p)
+{
+    int size = sizeof(KeyValuePair);
+
+    if (p->mKey) size += StringAlignSize(p->mKey);
+    if (p->mValue) size += StringAlignSize(p->mValue);
+
+    return size;
+}
+
+int CalcAnnotationSize(AnnotationDescriptor *p)
+{
+    int n, size = sizeof(AnnotationDescriptor);
+
+    if (p->mName) size += StringAlignSize(p->mName);
+    if (p->mNameSpace) size += StringAlignSize(p->mNameSpace);
+
+    for (n = 0; n < p->mKeyValuePairCount; n++) {
+        size += CalcKeyPairSize(p->mKeyValuePair[n]);
+    }
+    size += n * sizeof(KeyValuePair*);
+
+    return size;
+}
+
 int CalcClassSize(ClassDirEntry *p)
 {
-    int size = sizeof(ClassDirEntry);
+    int n, size = sizeof(ClassDirEntry);
 
     size += StringAlignSize(p->mName);
     if (p->mNameSpace) size += StringAlignSize(p->mNameSpace);
 
     size += sizeof(ClassDescriptor);
+
+    for (n = 0; n < p->mDesc->mAnnotationCount++; n++) {
+        size += CalcAnnotationSize(p->mDesc->mAnnotations[n]);
+    }
+    size += n * sizeof(AnnotationDescriptor*);
 
     size += p->mDesc->mInterfaceCount * \
         (sizeof(ClassInterface) + sizeof(ClassInterface *));
@@ -597,9 +670,10 @@ int CalcMethodSize(MethodDescriptor *p)
 
     size += StringAlignSize(p->mName);
     size += StringAlignSize(p->mSignature);
-    if (p->mAnnotation != NULL) {
-        size += StringAlignSize(p->mAnnotation);
+    for (n = 0; n < p->mAnnotationCount++; n++) {
+        size += CalcAnnotationSize(p->mAnnotations[n]);
     }
+    size += n * sizeof(AnnotationDescriptor*);
 
     for (n = 0; n < p->mParamCount; n++) {
         if (p->mParams[n]->mType.mNestedType) {
@@ -620,6 +694,11 @@ int CalcInterfaceSize(InterfaceDirEntry *p)
     if (p->mNameSpace) size += StringAlignSize(p->mNameSpace);
 
     size += sizeof(InterfaceDescriptor);
+
+    for (n = 0; n < p->mDesc->mAnnotationCount; n++) {
+        size += CalcAnnotationSize(p->mDesc->mAnnotations[n]);
+    }
+    size += n * sizeof(AnnotationDescriptor *);
 
     for (n = 0; n < p->mDesc->mConstCount; n++) {
         size += CalcInterfaceConstSize(p->mDesc->mConsts[n]);
