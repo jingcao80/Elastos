@@ -32,6 +32,29 @@ void DeleteFileDirEntry(FileDirEntry* pFileDir)
     delete pFileDir;
 }
 
+void DeleteKeyValuePair(KeyValuePair* pPair)
+{
+    assert(pPair != NULL);
+
+    if (pPair->mKey) delete pPair->mKey;
+    if (pPair->mValue) delete pPair->mValue;
+    delete pPair;
+}
+
+void DeleteAnnotation(AnnotationDescriptor* pDesc)
+{
+    assert(pDesc != NULL);
+
+    if (pDesc->mName) delete pDesc->mName;
+    if (pDesc->mNameSpace) delete pDesc->mNameSpace;
+
+    for (int n = 0; n < pDesc->mKeyValuePairCount; n++) {
+        DeleteKeyValuePair(pDesc->mKeyValuePairs[n]);
+    }
+    delete [] pDesc->mKeyValuePairs;
+    delete pDesc;
+}
+
 ClassInterface *NewClassInterface(USHORT index)
 {
     ClassInterface *pClassInterface;
@@ -84,6 +107,10 @@ ClassDirEntry *NewClassDirEntry(const char *pszName, const char *pszNamespace)
     if (!pClass->mDesc) goto ErrorExit;
     memset(pClass->mDesc, 0, sizeof(ClassDescriptor));
 
+    pClass->mDesc->mAnnotations = \
+        new AnnotationDescriptor *[MAX_ANNOTATION_NUMBER];
+    if (!pClass->mDesc->mAnnotations) goto ErrorExit;
+
     pClass->mDesc->mInterfaces = \
         new ClassInterface *[MAX_CLASS_INTERFACE_NUMBER];
     if (!pClass->mDesc->mInterfaces) goto ErrorExit;
@@ -118,6 +145,8 @@ ErrorExit:
             delete [] pClass->mDesc->mAggrIndexes;
         if (pClass->mDesc->mInterfaces)
             delete [] pClass->mDesc->mInterfaces;
+        if (pClass->mDesc->mAnnotations)
+            delete [] pClass->mDesc->mAnnotations;
         delete pClass->mDesc;
     }
     delete pClass;
@@ -132,6 +161,10 @@ void DeleteClassDirEntry(ClassDirEntry *pClass)
     assert(pClass->mDesc->mAggrIndexes != NULL);
     assert(pClass->mDesc->mAspectIndexes != NULL);
 
+    for (int n = 0; n < pClass->mDesc->mAnnotationCount; n++) {
+        DeleteAnnotation(pClass->mDesc->mAnnotations[n]);
+    }
+    delete [] pClass->mDesc->mAnnotations;
     for (int n = 0; n < pClass->mDesc->mInterfaceCount; n++) {
         DeleteClassInterface(pClass->mDesc->mInterfaces[n]);
     }
@@ -161,6 +194,14 @@ InterfaceConstDescriptor *NewInterfaceConstDirEntry(const char *pszName)
     }
     strcpy(pConst->mName, pszName);
     return pConst;
+}
+
+void DeleteInterfaceConst(InterfaceConstDescriptor *pDesc)
+{
+    assert(pDesc != NULL);
+
+    if (pDesc->mName) delete pDesc->mName;
+    delete pDesc;
 }
 
 ParamDescriptor *NewParam(const char *pszName)
@@ -202,6 +243,10 @@ MethodDescriptor *NewMethod(const char *pszName)
     if (!pMethod) return NULL;
     memset(pMethod, 0, sizeof(MethodDescriptor));
 
+    pMethod->mAnnotations = \
+        new AnnotationDescriptor *[MAX_ANNOTATION_NUMBER];
+    if (!pMethod->mAnnotations) goto ErrorExit;
+
     pMethod->mParams = \
         new ParamDescriptor *[MAX_PARAM_NUMBER];
     if (!pMethod->mParams) goto ErrorExit;
@@ -215,16 +260,22 @@ MethodDescriptor *NewMethod(const char *pszName)
 ErrorExit:
     if (pMethod->mParams)
         delete [] pMethod->mParams;
+    if (pMethod->mAnnotations)
+        delete [] pMethod->mAnnotations;
     delete pMethod;
     return NULL;
 }
 
-void DeleteMethods(MethodDescriptor *pMethod)
+void DeleteMethod(MethodDescriptor *pMethod)
 {
     assert(pMethod != NULL);
     assert(pMethod->mName != NULL);
     assert(pMethod->mParams != NULL);
 
+    for (int n = 0; n < pMethod->mAnnotationCount; n++) {
+        DeleteAnnotation(pMethod->mAnnotations[n]);
+    }
+    delete [] pMethod->mAnnotations;
     for (int n = 0; n < pMethod->mParamCount; n++) {
         DeleteParam(pMethod->mParams[n]);
     }
@@ -248,6 +299,10 @@ InterfaceDirEntry *NewInterfaceDirEntry(const char *pszName, const char *pszName
     if (!pInterface->mDesc) goto ErrorExit;
     memset(pInterface->mDesc, 0, sizeof(InterfaceDescriptor));
 
+    pInterface->mDesc->mAnnotations = \
+        new AnnotationDescriptor *[MAX_ANNOTATION_NUMBER];
+    if (!pInterface->mDesc->mAnnotations) goto ErrorExit;
+
     pInterface->mDesc->mConsts = \
         new InterfaceConstDescriptor *[MAX_INTERFACE_CONST_NUMBER];
     if (!pInterface->mDesc->mConsts) goto ErrorExit;
@@ -269,6 +324,10 @@ InterfaceDirEntry *NewInterfaceDirEntry(const char *pszName, const char *pszName
 
 ErrorExit:
     if (pInterface->mDesc) {
+        if (pInterface->mDesc->mAnnotations)
+            delete [] pInterface->mDesc->mAnnotations;
+        if (pInterface->mDesc->mConsts)
+            delete [] pInterface->mDesc->mConsts;
         if (pInterface->mDesc->mMethods)
             delete [] pInterface->mDesc->mMethods;
         delete pInterface->mDesc;
@@ -284,8 +343,16 @@ void DeleteInterfaceDirEntry(InterfaceDirEntry *pInterface)
     assert(pInterface->mDesc != NULL);
     assert(pInterface->mDesc->mMethods != NULL);
 
+    for (int n = 0; n < pInterface->mDesc->mAnnotationCount; n++) {
+        DeleteAnnotation(pInterface->mDesc->mAnnotations[n]);
+    }
+    delete [] pInterface->mDesc->mAnnotations;
+    for (int n = 0; n < pInterface->mDesc->mConstCount; n++) {
+        DeleteInterfaceConst(pInterface->mDesc->mConsts[n]);
+    }
+    delete [] pInterface->mDesc->mConsts;
     for (int n = 0; n < pInterface->mDesc->mMethodCount; n++) {
-        DeleteMethods(pInterface->mDesc->mMethods[n]);
+        DeleteMethod(pInterface->mDesc->mMethods[n]);
     }
     delete [] pInterface->mDesc->mMethods;
     delete pInterface->mDesc;

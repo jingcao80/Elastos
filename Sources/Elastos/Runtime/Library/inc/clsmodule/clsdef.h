@@ -101,7 +101,7 @@ struct AnnotationDescriptor
     char*                   mName;
     char*                   mNameSpace;
     unsigned short          mKeyValuePairCount;
-    KeyValuePair**          mKeyValuePair;
+    KeyValuePair**          mKeyValuePairs;
 };
 
 typedef struct AnnotationDescriptor AnnotationDescriptor;

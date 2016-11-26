@@ -322,6 +322,49 @@ void CalcStructAlignedSize(const CLSModule *pModule, StructDescriptor *pDesc)
         strcpy(pDest->mNameSpace, pSrc->mNameSpace);                \
     }
 
+KeyValuePair* KeyValuePairCopy(KeyValuePair *pSrc)
+{
+    KeyValuePair *pDest = new KeyValuePair();
+
+    if (pSrc->mKey != NULL) {
+        pDest->mKey = new char[strlen(pSrc->mKey) + 1];
+        strcpy(pDest->mKey, pSrc->mKey);
+    }
+    else pDest->mKey = NULL;
+
+    if (pSrc->mValue != NULL) {
+        pDest->mValue = new char[strlen(pSrc->mValue) + 1];
+        strcpy(pDest->mValue, pSrc->mValue);
+    }
+    else pDest->mValue = NULL;
+
+    return pDest;
+}
+
+AnnotationDescriptor* AnnotationCopy(AnnotationDescriptor *pSrc)
+{
+    AnnotationDescriptor *pDest = new AnnotationDescriptor();
+    pDest->mName = new char[strlen(pSrc->mName) + 1];
+    strcpy(pDest->mName, pSrc->mName);
+
+    if (pSrc->mNameSpace != NULL) {
+        pDest->mNameSpace = new char[strlen(pSrc->mNameSpace) + 1];
+        strcpy(pDest->mNameSpace, pSrc->mNameSpace);
+    }
+    else pDest->mNameSpace = NULL;
+
+    pDest->mKeyValuePairCount = pSrc->mKeyValuePairCount;
+    if (pDest->mKeyValuePairCount > 0) {
+        pDest->mKeyValuePairs = new KeyValuePair *[pDest->mKeyValuePairCount];
+        for (int n = 0; n < pDest->mKeyValuePairCount; n++) {
+            pDest->mKeyValuePairs[n] = KeyValuePairCopy(pSrc->mKeyValuePairs[n]);
+        }
+    }
+    else pDest->mKeyValuePairs = NULL;
+
+    return pDest;
+}
+
 int ClassDescriptorCopy(
     const CLSModule *pSrcModule,
     const ClassDescriptor *pSrc,
@@ -367,6 +410,10 @@ int ClassDescriptorCopy(
                     pSrc->mClassIndexes[n], pDestModule, bNameSpace);
         if (m < 0) _Return (m);
         pDest->mClassIndexes[pDest->mClassCount++] = m;
+    }
+
+    for (n = 0; n < pSrc->mAnnotationCount; n++) {
+        pDest->mAnnotations[n] = AnnotationCopy(pSrc->mAnnotations[n]);
     }
 
     for (n = 0; n < pSrc->mInterfaceCount; n++) {
@@ -428,6 +475,10 @@ int ClassDescriptorXCopy(
 
     for (n = 0; n < pSrc->mClassCount; n++) {
         pDest->mClassIndexes[pDest->mClassCount++] = pSrc->mClassIndexes[n];
+    }
+
+    for (n = 0; n < pSrc->mAnnotationCount; n++) {
+        pDest->mAnnotations[n] = AnnotationCopy(pSrc->mAnnotations[n]);
     }
 
     for (n = 0; n < pSrc->mInterfaceCount; n++) {
@@ -578,6 +629,10 @@ int MethodCopy(
                 pDestModule, &pDest->mType, bNameSpace);
     if (n < 0) _Return (n);
 
+    for (n = 0; n < pSrc->mAnnotationCount; n++) {
+        pDest->mAnnotations[n] = AnnotationCopy(pSrc->mAnnotations[n]);
+    }
+
     for (n = 0; n < pSrc->mParamCount; n++) {
         m = CreateMethodParam(pSrc->mParams[n]->mName, pDest);
         if (m < 0) _Return (m);
@@ -609,6 +664,10 @@ int MethodXCopy(
                 pDestModule, &pDest->mType, bNameSpace);
     if (n < 0) _Return (n);
 
+    for (n = 0; n < pSrc->mAnnotationCount; n++) {
+        pDest->mAnnotations[n] = AnnotationCopy(pSrc->mAnnotations[n]);
+    }
+
     for (n = 0; n < pSrc->mParamCount; n++) {
         m = CreateMethodParam(pSrc->mParams[n]->mName, pDest);
         if (m < 0) _Return (m);
@@ -635,6 +694,10 @@ int InterfaceDescriptorCopy(
 
     pDest->mAttribs = pSrc->mAttribs;
     memcpy(&pDest->mIID, &pSrc->mIID, sizeof(IID));
+
+    for (n = 0; n < pSrc->mAnnotationCount; n++) {
+        pDest->mAnnotations[n] = AnnotationCopy(pSrc->mAnnotations[n]);
+    }
 
     for (n = 0; n < pSrc->mConstCount; n++) {
         m = CreateInterfaceConstDirEntry(pSrc->mConsts[n]->mName, pDest);
@@ -668,6 +731,10 @@ int InterfaceDescriptorXCopy(
 
     pDest->mAttribs = pSrc->mAttribs;
     memcpy(&pDest->mIID, &pSrc->mIID, sizeof(IID));
+
+    for (n = 0; n < pSrc->mAnnotationCount; n++) {
+        pDest->mAnnotations[n] = AnnotationCopy(pSrc->mAnnotations[n]);
+    }
 
     for (n = 0; n < pSrc->mConstCount; n++) {
         m = CreateInterfaceConstDirEntry(pSrc->mConsts[n]->mName, pDest);

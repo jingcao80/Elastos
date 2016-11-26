@@ -2466,9 +2466,9 @@ int P_Annotation(AnnotationDescriptor** pAnnotationDescs, int index)
     pAnnotationDescs[index]->mName = pszName;
     pAnnotationDescs[index]->mNameSpace = pszNamespace;
     pAnnotationDescs[index]->mKeyValuePairCount = keyPairCount;
-    pAnnotationDescs[index]->mKeyValuePair = (KeyValuePair**)malloc(sizeof(KeyValuePair*) * keyPairCount);
+    pAnnotationDescs[index]->mKeyValuePairs = (KeyValuePair**)malloc(sizeof(KeyValuePair*) * keyPairCount);
     for (int i = 0; i < keyPairCount; i++) {
-        pAnnotationDescs[index]->mKeyValuePair[i] = pKeyValuePairs[i];
+        pAnnotationDescs[index]->mKeyValuePairs[i] = pKeyValuePairs[i];
     }
 
     return Ret_Continue;

@@ -29,6 +29,8 @@ private:
 
     int WriteFileDirEntry(FileDirEntry *pEntry);
 
+    int WriteKeyValuePair(KeyValuePair *pPair);
+
     int WriteAnnotationDescriptor(AnnotationDescriptor *pDesc);
 
     int WriteClassDirEntry(ClassDirEntry *pEntry);
@@ -150,13 +152,41 @@ int CFlatBuffer::WriteFileDirEntry(FileDirEntry *pFileDirEntry)
     return WriteData(&entry, sizeof(FileDirEntry));
 }
 
+int CFlatBuffer::WriteKeyValuePair(KeyValuePair *pPair)
+{
+    KeyValuePair pair;
+
+    memcpy(&pair, pPair, sizeof(KeyValuePair));
+
+    if (pair.mKey) {
+        pair.mKey = (char *)WriteString(pair.mKey);
+    }
+    if (pair.mValue) {
+        pair.mValue = (char *)WriteString(pair.mValue);
+    }
+
+    return WriteData(&pair, sizeof(KeyValuePair));
+}
+
 int CFlatBuffer::WriteAnnotationDescriptor(AnnotationDescriptor *pDesc)
 {
+    int *p, n;
     AnnotationDescriptor d;
 
     memcpy(&d, pDesc, sizeof(AnnotationDescriptor));
 
+    if (d.mKeyValuePairCount > 0) {
+        p = (int *)_alloca(d.mKeyValuePairCount * sizeof(int));
 
+        for (n = 0; n < d.mKeyValuePairCount; n++) {
+            p[n] = WriteKeyValuePair(d.mKeyValuePairs[n]);
+        }
+
+        d.mKeyValuePairs = (KeyValuePair **) \
+            WriteData(p, d.mKeyValuePairCount * sizeof(int));
+    }
+
+    return WriteData(&d, sizeof(AnnotationDescriptor));
 }
 
 int CFlatBuffer::WriteClassDirEntry(ClassDirEntry *pClassDirEntry)
@@ -620,7 +650,7 @@ int CalcAnnotationSize(AnnotationDescriptor *p)
     if (p->mNameSpace) size += StringAlignSize(p->mNameSpace);
 
     for (n = 0; n < p->mKeyValuePairCount; n++) {
-        size += CalcKeyPairSize(p->mKeyValuePair[n]);
+        size += CalcKeyPairSize(p->mKeyValuePairs[n]);
     }
     size += n * sizeof(KeyValuePair*);
 
@@ -636,7 +666,7 @@ int CalcClassSize(ClassDirEntry *p)
 
     size += sizeof(ClassDescriptor);
 
-    for (n = 0; n < p->mDesc->mAnnotationCount++; n++) {
+    for (n = 0; n < p->mDesc->mAnnotationCount; n++) {
         size += CalcAnnotationSize(p->mDesc->mAnnotations[n]);
     }
     size += n * sizeof(AnnotationDescriptor*);
@@ -670,7 +700,7 @@ int CalcMethodSize(MethodDescriptor *p)
 
     size += StringAlignSize(p->mName);
     size += StringAlignSize(p->mSignature);
-    for (n = 0; n < p->mAnnotationCount++; n++) {
+    for (n = 0; n < p->mAnnotationCount; n++) {
         size += CalcAnnotationSize(p->mAnnotations[n]);
     }
     size += n * sizeof(AnnotationDescriptor*);

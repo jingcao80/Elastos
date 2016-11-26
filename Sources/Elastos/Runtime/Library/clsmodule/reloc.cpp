@@ -12,9 +12,40 @@ void MapFileDirEntry(
     if (p->mPath) p->mPath += sBase;
 }
 
+void MapKeyValuePair(KeyValuePair* p)
+{
+    p->mKey += sBase;
+    p->mValue += sBase;
+}
+
+void MapAnnotationDescriptor(
+    /* [in] */ AnnotationDescriptor* p)
+{
+    p->mName += sBase;
+    if (p->mNameSpace) p->mNameSpace += sBase;
+
+    if (0 != p->mKeyValuePairCount) {
+        p->mKeyValuePairs = (KeyValuePair**)((int)p->mKeyValuePairs + sBase);
+
+        for (int n = 0; n < p->mKeyValuePairCount; n++) {
+            p->mKeyValuePairs[n] = (KeyValuePair*)((int)p->mKeyValuePairs[n] + sBase);
+            MapKeyValuePair(p->mKeyValuePairs[n]);
+        }
+    }
+}
+
 void MapClassDescriptor(
     /* [in] */ ClassDescriptor* p)
 {
+    if (0 != p->mAnnotationCount) {
+        p->mAnnotations = (AnnotationDescriptor**)((int)p->mAnnotations + sBase);
+
+        for (int n = 0; n < p->mAnnotationCount; n++) {
+            p->mAnnotations[n] = (AnnotationDescriptor*)((int)p->mAnnotations[n] + sBase);
+            MapAnnotationDescriptor(p->mAnnotations[n]);
+        }
+    }
+
     if (0 != p->mAggregateCount) {
         p->mAggrIndexes = (USHORT *)((int)p->mAggrIndexes + sBase);
     }
@@ -58,6 +89,15 @@ void MapMethodDescriptor(
     p->mName += sBase;
     p->mSignature += sBase;
 
+    if (0 != p->mAnnotationCount) {
+        p->mAnnotations = (AnnotationDescriptor **)((int)p->mAnnotations + sBase);
+
+        for (int n = 0; n < p->mAnnotationCount; n++) {
+            p->mAnnotations[n] = (AnnotationDescriptor *)((int)p->mAnnotations[n] + sBase);
+            MapAnnotationDescriptor(p->mAnnotations[n]);
+        }
+    }
+
     if (0 != p->mParamCount) {
         p->mParams = (ParamDescriptor **)((int)p->mParams + sBase);
 
@@ -76,6 +116,15 @@ void MapMethodDescriptor(
 void MapInterfaceDescriptor(
     /* [in] */ InterfaceDescriptor* p)
 {
+    if (0 != p->mAnnotationCount) {
+        p->mAnnotations = (AnnotationDescriptor **)((int)p->mAnnotations + sBase);
+
+        for (int n = 0; n < p->mAnnotationCount; n++) {
+            p->mAnnotations[n] = (AnnotationDescriptor *)((int)p->mAnnotations[n] + sBase);
+            MapAnnotationDescriptor(p->mAnnotations[n]);
+        }
+    }
+
     if (0 != p->mConstCount) {
         p->mConsts = (InterfaceConstDescriptor **)((int)p->mConsts + sBase);
 
