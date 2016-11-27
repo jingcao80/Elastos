@@ -3037,9 +3037,9 @@ ECode RemoteViews::GetMethod(
                 className.string(), methodName.string(), paramType.string());
         }
         else {
-            String annotation;
-            method->GetAnnotation(&annotation);
-            if (!annotation.Equals(String("RemotableViewMethod"))) {
+            AutoPtr<IAnnotationInfo> annotation;
+            method->GetAnnotation(String("RemotableViewMethod"), (IAnnotationInfo**)&annotation);
+            if (annotation == NULL) {
                 Slogger::E("RemoteViews", "view: %s can't use method with RemoteViews: %s, param:%s",
                     className.string(), methodName.string(), paramType.string());
             }

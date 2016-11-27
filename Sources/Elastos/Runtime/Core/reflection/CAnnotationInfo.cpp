@@ -4,6 +4,53 @@
 
 #include "CAnnotationInfo.h"
 
+CAnnotationInfo::CAnnotationInfo(
+    /* [in] */ AnnotationDescriptor* annoDesc)
+    : mAnnotationDescriptor(annoDesc)
+{}
+
+CAnnotationInfo::~CAnnotationInfo()
+{
+    mAnnotationDescriptor = NULL;
+}
+
+UInt32 CAnnotationInfo::AddRef()
+{
+    return ElLightRefBase::AddRef();
+}
+
+UInt32 CAnnotationInfo::Release()
+{
+    Int32 ref = atomic_dec(&mRef);
+
+    if (0 == ref) {
+        delete this;
+    }
+    assert(ref >= 0);
+    return ref;
+}
+
+PInterface CAnnotationInfo::Probe(
+    /* [in] */ REIID riid)
+{
+    if (riid == EIID_IInterface) {
+        return (PInterface)this;
+    }
+    else if (riid == EIID_IAnnotationInfo) {
+        return (IAnnotationInfo *)this;
+    }
+    else {
+        return NULL;
+    }
+}
+
+ECode CAnnotationInfo::GetInterfaceID(
+    /* [in] */ IInterface* object,
+    /* [out] */ InterfaceID* iid)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CAnnotationInfo::GetName(
     /* [out] */ String* name)
 {
@@ -70,7 +117,7 @@ ECode CAnnotationInfo::GetValue(
         }
     }
 
-    *value = (*mValues)[i];
+    *value = (*mValues)[index];
     return NOERROR;
 }
 
@@ -94,7 +141,7 @@ void CAnnotationInfo::AcquireKeys()
         Int32 size = mAnnotationDescriptor->mKeyValuePairCount;
         mKeys = ArrayOf<String>::Alloc(size);
         for (Int32 i = 0; i < size; i++) {
-            (*mKeys)[i] = mAnnotationDescriptor->mKeyValuePair[i]->mKey;
+            (*mKeys)[i] = mAnnotationDescriptor->mKeyValuePairs[i]->mKey;
         }
     }
 }
@@ -105,7 +152,7 @@ void CAnnotationInfo::AcquireValues()
         Int32 size = mAnnotationDescriptor->mKeyValuePairCount;
         mValues = ArrayOf<String>::Alloc(size);
         for (Int32 i = 0; i < size; i++) {
-            (*mValues)[i] = mAnnotationDescriptor->mKeyValuePair[i]->mValue;
+            (*mValues)[i] = mAnnotationDescriptor->mKeyValuePairs[i]->mValue;
         }
     }
 }

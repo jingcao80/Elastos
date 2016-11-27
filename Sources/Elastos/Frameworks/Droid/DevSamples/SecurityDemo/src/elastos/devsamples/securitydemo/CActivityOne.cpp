@@ -1284,6 +1284,8 @@ ECode CActivityOne::ButtonElastosKeyStore()
     //return test->TestKeyStore_Store_OutputStream_Encrypted_Failure();                            //OK
 
     //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                        //error need CX509V3CertificateGenerator
+
+    return NOERROR;
 }
 
 ECode CActivityOne::SignatureTest()

@@ -6,6 +6,7 @@
 #include "CParamInfo.h"
 #include "CArgumentList.h"
 #include "CCallbackArgumentList.h"
+#include "CAnnotationInfo.h"
 
 #define INVALID_PARAM_COUNT 0xFFFFFFFF
 
@@ -145,7 +146,38 @@ ECode CMethodInfo::GetAllAnnotationInfos(
         return E_INVALID_ARGUMENT;
     }
 
+    AcquireAnnotationInfos();
+
     annotationInfos->Copy(mAnnotationInfos);
+
+    return NOERROR;
+}
+
+ECode CMethodInfo::GetAnnotation(
+    /* [in] */ const String& fullName,
+    /* [out] */ IAnnotationInfo** annotationInfo)
+{
+    *annotationInfo = NULL;
+
+    if (fullName.IsNullOrEmpty() || annotationInfo == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    AcquireAnnotationInfos();
+
+    for (Int32 i = 0; i < mAnnotationInfos->GetLength(); i++) {
+        String name, nameSpace;
+        (*mAnnotationInfos)[i]->GetName(&name);
+        (*mAnnotationInfos)[i]->GetNamespace(&nameSpace);
+        if (!nameSpace.IsNullOrEmpty()) {
+            name = nameSpace + "." + name;
+        }
+        if (name.Equals(fullName)) {
+            *annotationInfo = (*mAnnotationInfos)[i];
+            REFCOUNT_ADD(*annotationInfo);
+            return NOERROR;
+        }
+    }
 
     return NOERROR;
 }
@@ -465,4 +497,16 @@ ECode CMethodInfo::Invoke(
     VObject* vobj = reinterpret_cast<VObject*>(object);
     void* methodAddr = vobj->mVtab->mMethods[METHOD_INDEX(mIndex)];
     return (ECode)invoke(methodAddr, paramBuf,  mParamBufSize);
+}
+
+ECode CMethodInfo::AcquireAnnotationInfos()
+{
+    if (mAnnotationInfos == NULL && mMethodDescriptor->mAnnotationCount > 0) {
+        mAnnotationInfos = ArrayOf<IAnnotationInfo*>::Alloc(mMethodDescriptor->mAnnotationCount);
+        for (Int32 i = 0; i < mMethodDescriptor->mAnnotationCount; i++) {
+            CAnnotationInfo* info = new CAnnotationInfo(mMethodDescriptor->mAnnotations[i]);
+            mAnnotationInfos->Set(i, (IAnnotationInfo*)info);
+        }
+    }
+    return NOERROR;
 }

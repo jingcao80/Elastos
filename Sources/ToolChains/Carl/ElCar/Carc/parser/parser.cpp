@@ -2442,10 +2442,8 @@ int P_Annotation(AnnotationDescriptor** pAnnotationDescs, int index)
                 return Ret_AbortOnError;
             }
 
-            int strLen = strlen(g_szCurrentToken);
-            pKeyValuePair->mValue = (char*)malloc(strLen - 1);
-            memcpy(pKeyValuePair->mValue, g_szCurrentToken + 1, strLen - 2);
-            pKeyValuePair->mValue[strLen - 2] = '\0';
+            pKeyValuePair->mValue = (char*)malloc(strlen(g_szCurrentToken) + 1);
+            strcpy(pKeyValuePair->mValue, g_szCurrentToken);
 
             token = PeekToken(s_pFile);
             if (token != Token_S_comma && token != Token_S_rparen) {
@@ -5083,12 +5081,13 @@ int P_ClassCtorMethod(ClassDirEntry *pClass, BOOL isDeprecated)
                     return Ret_AbortOnError;
                 }
                 annotationCount++;
+                token = GetToken(s_pFile);
             }
             else {
                 ErrorReport(CAR_E_IllegalMethodProperties, g_szCurrentToken);
                 return Ret_AbortOnError;
             }
-            token = GetToken(s_pFile);
+            if (token == Token_S_comma) token = GetToken(s_pFile);
         }
         token = GetToken(s_pFile);
     }

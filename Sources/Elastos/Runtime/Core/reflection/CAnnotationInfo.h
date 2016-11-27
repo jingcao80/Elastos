@@ -5,12 +5,28 @@
 #ifndef __CANNOTATIONINFO_H__
 #define __CANNOTATIONINFO_H__
 
+#include "CEntryList.h"
+
 class CAnnotationInfo
     : public ElLightRefBase
     , public IAnnotationInfo
 {
 public:
-    CAnnotationInfo();
+    CAnnotationInfo(
+        /* [in] */ AnnotationDescriptor* annoDesc);
+
+    virtual ~CAnnotationInfo();
+
+    CARAPI_(PInterface) Probe(
+        /* [in] */ REIID riid);
+
+    CARAPI_(UInt32) AddRef();
+
+    CARAPI_(UInt32) Release();
+
+    CARAPI GetInterfaceID(
+        /* [in] */ IInterface* object,
+        /* [out] */ InterfaceID* iid);
 
     CARAPI GetName(
         /* [out] */ String* name);

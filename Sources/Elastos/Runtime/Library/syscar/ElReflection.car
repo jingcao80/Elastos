@@ -192,6 +192,10 @@ library
         GetAllAnnotationInfos(
             [out] ArrayOf<IAnnotationInfo*> annotationInfos);
 
+        GetAnnotation(
+            [in] String fullName,
+            [out] IAnnotationInfo** annotationInfo);
+
         GetId(
             [out] InterfaceID* iid);
 
@@ -249,6 +253,10 @@ library
 
         GetAllAnnotationInfos(
             [out] ArrayOf<IAnnotationInfo*> annotationInfos);
+
+        GetAnnotation(
+            [in] String fullName,
+            [out] IAnnotationInfo** annotationInfo);
 
         CreateArgumentList(
             [out] IArgumentList** argumentList);
@@ -1039,6 +1047,10 @@ library
         GetAllAnnotationInfos(
             [out] ArrayOf<IAnnotationInfo*> annotationInfos);
 
+        GetAnnotation(
+            [in] String fullName,
+            [out] IAnnotationInfo** annotationInfo);
+
         IsSingleton(
             [out] Boolean* isSingleton);
 
@@ -1167,8 +1179,15 @@ library
 
     [local]
     interface IConstructorInfo extends IFunctionInfo {
+        GetAnnotationCount(
+            [out] Int32* count);
+
+        GetAllAnnotationInfos(
+            [out] ArrayOf<IAnnotationInfo*> annotationInfos);
+
         GetAnnotation(
-            [out] String* annotation);
+            [in] String fullName,
+            [out] IAnnotationInfo** annotationInfo);
 
         CreateArgumentList(
             [out] IArgumentList** argumentList);

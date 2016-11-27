@@ -45,6 +45,10 @@ public:
     CARAPI GetAllAnnotationInfos(
         /* [out] */ ArrayOf<IAnnotationInfo *>* annotationInfos);
 
+    CARAPI GetAnnotation(
+        /* [in] */ const String& fullName,
+        /* [out] */ IAnnotationInfo** annotationInfo);
+
     CARAPI GetParamCount(
         /* [out] */ Int32* count);
 
@@ -83,6 +87,8 @@ public:
         /* [in] */ ICallbackMethodInfo* callbackMethodInfo,
         /* [out] */ ICallbackArgumentList** cbArgumentList);
 
+    CARAPI AcquireAnnotationInfos();
+
 public:
     MethodDescriptor*   mMethodDescriptor;
     UInt32              mIndex;
@@ -90,7 +96,7 @@ public:
     AutoPtr<CClsModule> mClsModule;
 
 private:
-    ArrayOf<IAnnotationInfo *>* mAnnotationInfos;
+    AutoPtr< ArrayOf<IAnnotationInfo*> > mAnnotationInfos;
     ArrayOf<IParamInfo *>*  mParameterInfos;
     ParmElement*            mParamElem;
     UInt32                  mParamBufSize;

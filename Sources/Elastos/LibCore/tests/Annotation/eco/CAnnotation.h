@@ -31,6 +31,8 @@ public:
 
     CARAPI M5();
 
+    CARAPI M6();
+
 private:
     // TODO: Add your private member variables here.
 };

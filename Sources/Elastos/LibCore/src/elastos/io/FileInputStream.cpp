@@ -97,7 +97,9 @@ ECode FileInputStream::Available(
 ECode FileInputStream::Close()
 {
     mGuard->Close();
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
+
         if (mChannel != NULL) {
             ICloseable::Probe(mChannel)->Close();
         }

@@ -46,4 +46,8 @@ ECode CAnnotation::M5()
     return E_NOT_IMPLEMENTED;
 }
 
-
+ECode CAnnotation::M6()
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}

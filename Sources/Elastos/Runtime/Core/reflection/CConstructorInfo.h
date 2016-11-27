@@ -35,8 +35,15 @@ public:
     CARAPI GetSignature(
         /* [out] */ String* signature);
 
+    CARAPI GetAnnotationCount(
+        /* [out] */ Int32* count);
+
+    CARAPI GetAllAnnotationInfos(
+        /* [out] */ ArrayOf<IAnnotationInfo *>* annotationInfos);
+
     CARAPI GetAnnotation(
-        /* [out] */ String* annotation);
+        /* [in] */ const String& fullName,
+        /* [out] */ IAnnotationInfo** annotationInfo);
 
     CARAPI GetParamCount(
         /* [out] */ Int32* count);

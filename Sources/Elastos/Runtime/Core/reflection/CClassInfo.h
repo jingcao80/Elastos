@@ -56,6 +56,16 @@ public:
     CARAPI SetClassLoader(
         /* [in] */ IInterface* loader);
 
+    CARAPI GetAnnotationCount(
+        /* [out] */ Int32* count);
+
+    CARAPI GetAllAnnotationInfos(
+        /* [out] */ ArrayOf<IAnnotationInfo*>* annotationInfos);
+
+    CARAPI GetAnnotation(
+        /* [in] */ const String& fullName,
+        /* [out] */ IAnnotationInfo** annotationInfo);
+
     CARAPI IsSingleton(
         /* [out] */ Boolean* isSingleton);
 
@@ -201,6 +211,8 @@ public:
 
     CARAPI AcquireCBMethodList();
 
+    CARAPI AcquireAnnotationInfos();
+
     CARAPI CreateObjInRgm(
         /* [in] */ PRegime rgm,
         /* [out] */ PInterface* object);
@@ -239,6 +251,8 @@ private:
     AutoPtr<CClassInfo> mCtorClassInfo;
     AutoPtr<IClassInfo> mGenericInfo;
     AutoPtr<IInterface> mClassLoader;
+
+    AutoPtr< ArrayOf<IAnnotationInfo*> > mAnnotationInfos;
 };
 
 #endif // __CCLASSINFO_H__

@@ -3,6 +3,7 @@ module
 {
     importlib("Elastos.CoreLibrary.eco");
 
+    [@Elastos.CoreLibrary.Annotation.BasicInterface(name = "Elastos.Annotation.Sample")]
     interface IAnnotation {
 
         [ oneway ] M1();
@@ -17,22 +18,24 @@ module
 
         [@NotMainThread]
         M5();
+
+        [@Elastos.CoreLibrary.Annotation.BasicInterface(name = "Elastos.Annotation.Sample"),
+         @Elastos.CoreLibrary.Annotation.BasicMethod]
+        M6();
     }
 
+    [@Elastos.CoreLibrary.Annotation.BasicInterface(name = "Elastos.Annotation.Sample"),
+     @Elastos.CoreLibrary.Annotation.BasicMethod]
     class CAnnotation {
         [@MainThread]
         constructor();
 
-        [@NotMainThread]
+        [@NotMainThread,
+         @Elastos.CoreLibrary.Annotation.BasicInterface(name = "Elastos.Annotation.Sample"),
+         @Elastos.CoreLibrary.Annotation.BasicMethod]
         constructor(
             [in] Int32 data);
 
         interface IAnnotation;
-    }
-
-    [@Elastos.CoreLibrary.Annotation.BasicInterface(name = "Elastos.Annotation.Sample")]
-    interface IAnnotation2 {
-        [@Elastos.CoreLibrary.Annotation.BasicMethod]
-        M1();
     }
 }

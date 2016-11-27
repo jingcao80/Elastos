@@ -43,6 +43,16 @@ public:
     CARAPI GetNamespace(
         /* [out] */ String* ns);
 
+    CARAPI GetAnnotationCount(
+        /* [out] */ Int32* count);
+
+    CARAPI GetAllAnnotationInfos(
+        /* [out] */ ArrayOf<IAnnotationInfo*>* annotationInfos);
+
+    CARAPI GetAnnotation(
+        /* [in] */ const String& fullName,
+        /* [out] */ IAnnotationInfo** annotationInfo);
+
     CARAPI GetId(
         /* [out] */ InterfaceID* id);
 
@@ -73,6 +83,8 @@ public:
 
     CARAPI AcquireMethodList();
 
+    CARAPI AcquireAnnotationInfos();
+
 private:
     AutoPtr<CClsModule>     mClsModule;
     CLSModule*              mClsMod;
@@ -80,6 +92,7 @@ private:
     InterfaceDirEntry*      mInterfaceDirEntry;
     InterfaceDescriptor*    mDesc;
     IFIndexEntry*           mIFList;
+    AutoPtr< ArrayOf<IAnnotationInfo*> > mAnnotationInfos;
 
     UInt32  mIndex;
     UInt32  mIFCount;

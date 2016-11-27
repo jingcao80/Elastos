@@ -1115,7 +1115,9 @@ ECode Thread::PopInterruptAction(
     AutoPtr<IInterface> removed;
     mInterruptActions->Remove(size - 1, (IInterface**)&removed);
     if (interruptAction != IRunnable::Probe(removed)) {
+#if defined(_DEBUG)
         ALOGE("Expected %s but was %s", TO_CSTR(interruptAction), TO_CSTR(removed));
+#endif
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

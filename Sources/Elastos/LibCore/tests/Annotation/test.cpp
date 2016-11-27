@@ -4,6 +4,26 @@
 
 using namespace Elastos;
 
+void DumpAnnotation(IAnnotationInfo* annotation)
+{
+    String name, nameSpace;
+    annotation->GetName(&name);
+    annotation->GetNamespace(&nameSpace);
+
+    Int32 N;
+    annotation->GetSize(&N);
+
+    AutoPtr< ArrayOf<String> > keys;
+    AutoPtr< ArrayOf<String> > values;
+    annotation->GetKeys((ArrayOf<String>**)&keys);
+    annotation->GetValues((ArrayOf<String>**)&values);
+
+    printf("Annotation name: %s, namespace: %s, keyValueCount: %d\n", name.string(), nameSpace.string(), N);
+    for (Int32 i = 0; i < N; i++) {
+        printf("No.%d key: %s, value: %s\n", i, (*keys)[i].string(), (*values)[i].string());
+    }
+}
+
 int main(int argc, char** argv)
 {
     printf("======== testAnnotation() ======\n");
@@ -28,6 +48,25 @@ int main(int argc, char** argv)
         return ec;
     }
 
+    Int32 annotationCount;
+    classInfo->GetAnnotationCount(&annotationCount);
+    AutoPtr< ArrayOf<IAnnotationInfo*> > annotations = ArrayOf<IAnnotationInfo*>::Alloc(annotationCount);
+    classInfo->GetAllAnnotationInfos(annotations);
+    printf("class %s has %d annotations:\n", klassName.string(), annotationCount);
+    for (Int32 i = 0; i < annotationCount; i++) {
+        DumpAnnotation((*annotations)[i]);
+    }
+
+    AutoPtr<IInterfaceInfo> interfaceInfo;
+    classInfo->GetInterfaceInfo(String("IAnnotation"), (IInterfaceInfo**)&interfaceInfo);
+    interfaceInfo->GetAnnotationCount(&annotationCount);
+    annotations = ArrayOf<IAnnotationInfo*>::Alloc(annotationCount);
+    interfaceInfo->GetAllAnnotationInfos(annotations);
+    printf("interface IAnnotation has %d annotations:\n", annotationCount);
+    for (Int32 i = 0; i < annotationCount; i++) {
+        DumpAnnotation((*annotations)[i]);
+    }
+
     // M4
     //
     ec = classInfo->GetMethodInfo(String("M4"), String("()E"), (IMethodInfo**)&methodInfo);
@@ -36,32 +75,31 @@ int main(int argc, char** argv)
         return ec;
     }
 
-    String annotation;
-    ec = methodInfo->GetAnnotation(&annotation);
-    if (FAILED(ec)) {
-        printf("Get \"M4\" method annotation failed!\n");
-        return ec;
+    methodInfo->GetAnnotationCount(&annotationCount);
+    annotations = ArrayOf<IAnnotationInfo*>::Alloc(annotationCount);
+    methodInfo->GetAllAnnotationInfos(annotations);
+    printf("method M4 has %d annotations:\n", annotationCount);
+    for (Int32 i = 0; i < annotationCount; i++) {
+        DumpAnnotation((*annotations)[i]);
     }
 
-    printf("M4 annotation: %s\n", annotation.string());
-
+    // M6
+    //
     methodInfo = NULL;
 
-    // M5
-    //
-    ec = classInfo->GetMethodInfo(String("M5"), String("()E"), (IMethodInfo**)&methodInfo);
+    ec = classInfo->GetMethodInfo(String("M6"), String("()E"), (IMethodInfo**)&methodInfo);
     if (FAILED(ec)) {
         printf("Acquire \"M5\" method info failed!\n");
         return ec;
     }
 
-    ec = methodInfo->GetAnnotation(&annotation);
-    if (FAILED(ec)) {
-        printf("Get \"M5\" method annotation failed!\n");
-        return ec;
+    methodInfo->GetAnnotationCount(&annotationCount);
+    annotations = ArrayOf<IAnnotationInfo*>::Alloc(annotationCount);
+    methodInfo->GetAllAnnotationInfos(annotations);
+    printf("method M6 has %d annotations:\n", annotationCount);
+    for (Int32 i = 0; i < annotationCount; i++) {
+        DumpAnnotation((*annotations)[i]);
     }
-
-    printf("M5 annotation: %s\n", annotation.string());
 
     Int32 count;
     ec = classInfo->GetConstructorCount(&count);
@@ -81,13 +119,13 @@ int main(int argc, char** argv)
 
     for (Int32 i = 0; i < count; i++) {
         IConstructorInfo* constructorInfo = (*constructorInfos)[i];
-        ec = constructorInfo->GetAnnotation(&annotation);
-        if (FAILED(ec)) {
-            printf("Get constructor annotation failed!\n");
-            return ec;
+        constructorInfo->GetAnnotationCount(&annotationCount);
+        annotations = ArrayOf<IAnnotationInfo*>::Alloc(annotationCount);
+        constructorInfo->GetAllAnnotationInfos(annotations);
+        printf("constructor %d has %d annotations:\n", i, annotationCount);
+        for (Int32 i = 0; i < annotationCount; i++) {
+            DumpAnnotation((*annotations)[i]);
         }
-
-        printf("%d constructor annotation: %s\n", i, annotation.string());
     }
 
     return 0;

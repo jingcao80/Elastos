@@ -175,6 +175,11 @@ int CFlatBuffer::WriteAnnotationDescriptor(AnnotationDescriptor *pDesc)
 
     memcpy(&d, pDesc, sizeof(AnnotationDescriptor));
 
+    d.mName = (char *)WriteString(d.mName);
+    if (d.mNameSpace) {
+        d.mNameSpace = (char *)WriteString(d.mNameSpace);
+    }
+
     if (d.mKeyValuePairCount > 0) {
         p = (int *)_alloca(d.mKeyValuePairCount * sizeof(int));
 

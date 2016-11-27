@@ -73,14 +73,23 @@ ECode CConstructorInfo::GetSignature(
     return mMethodInfo->GetSignature(signature);
 }
 
-ECode CConstructorInfo::GetAnnotation(
-    /* [out] */ String* annotation)
+ECode CConstructorInfo::GetAnnotationCount(
+    /* [out] */ Int32* count)
 {
-    if (annotation == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
+    return mMethodInfo->GetAnnotationCount(count);
+}
 
-    return mMethodInfo->GetAnnotation(annotation);
+ECode CConstructorInfo::GetAllAnnotationInfos(
+    /* [out] */ ArrayOf<IAnnotationInfo *>* annotationInfos)
+{
+    return mMethodInfo->GetAllAnnotationInfos(annotationInfos);
+}
+
+ECode CConstructorInfo::GetAnnotation(
+    /* [in] */ const String& fullName,
+    /* [out] */ IAnnotationInfo** annotationInfo)
+{
+    return mMethodInfo->GetAnnotation(fullName, annotationInfo);
 }
 
 ECode CConstructorInfo::GetParamCount(

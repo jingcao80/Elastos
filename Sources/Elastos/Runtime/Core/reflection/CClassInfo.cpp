@@ -5,6 +5,7 @@
 #include "CClassInfo.h"
 #include "CCallbackMethodInfo.h"
 #include "CConstructorInfo.h"
+#include "CAnnotationInfo.h"
 
 CClassInfo::CClassInfo(
     /* [in] */ CClsModule* clsModule,
@@ -141,6 +142,59 @@ ECode CClassInfo::SetClassLoader(
     /* [in] */ IInterface* loader)
 {
     mClassLoader = loader;
+    return NOERROR;
+}
+
+ECode CClassInfo::GetAnnotationCount(
+    /* [out] */ Int32* count)
+{
+    if (count == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    *count = mDesc->mAnnotationCount;
+    return NOERROR;
+}
+
+ECode CClassInfo::GetAllAnnotationInfos(
+    /* [out] */ ArrayOf<IAnnotationInfo*>* annotationInfos)
+{
+    if (annotationInfos == NULL || annotationInfos->GetLength() <= 0) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    AcquireAnnotationInfos();
+
+    annotationInfos->Copy(mAnnotationInfos);
+    return NOERROR;
+}
+
+ECode CClassInfo::GetAnnotation(
+    /* [in] */ const String& fullName,
+    /* [out] */ IAnnotationInfo** annotationInfo)
+{
+    *annotationInfo = NULL;
+
+    if (fullName.IsNullOrEmpty() || annotationInfo == NULL) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    AcquireAnnotationInfos();
+
+    for (Int32 i = 0; i < mAnnotationInfos->GetLength(); i++) {
+        String name, nameSpace;
+        (*mAnnotationInfos)[i]->GetName(&name);
+        (*mAnnotationInfos)[i]->GetNamespace(&nameSpace);
+        if (!nameSpace.IsNullOrEmpty()) {
+            name = nameSpace + "." + name;
+        }
+        if (name.Equals(fullName)) {
+            *annotationInfo = (*mAnnotationInfos)[i];
+            REFCOUNT_ADD(*annotationInfo);
+            return NOERROR;
+        }
+    }
+
     return NOERROR;
 }
 
@@ -1139,4 +1193,16 @@ EExit:
     }
 
     return E_OUT_OF_MEMORY;
+}
+
+ECode CClassInfo::AcquireAnnotationInfos()
+{
+    if (mAnnotationInfos == NULL && mDesc->mAnnotationCount > 0) {
+        mAnnotationInfos = ArrayOf<IAnnotationInfo*>::Alloc(mDesc->mAnnotationCount);
+        for (Int32 i = 0; i < mDesc->mAnnotationCount; i++) {
+            CAnnotationInfo* info = new CAnnotationInfo(mDesc->mAnnotations[i]);
+            mAnnotationInfos->Set(i, (IAnnotationInfo*)info);
+        }
+    }
+    return NOERROR;
 }
