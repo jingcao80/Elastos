@@ -173,13 +173,15 @@ ECode CClassInfo::GetAnnotation(
     /* [in] */ const String& fullName,
     /* [out] */ IAnnotationInfo** annotationInfo)
 {
-    *annotationInfo = NULL;
-
     if (fullName.IsNullOrEmpty() || annotationInfo == NULL) {
         return E_INVALID_ARGUMENT;
     }
 
+    *annotationInfo = NULL;
+
     AcquireAnnotationInfos();
+
+    if (mAnnotationInfos == NULL) return NOERROR;
 
     for (Int32 i = 0; i < mAnnotationInfos->GetLength(); i++) {
         String name, nameSpace;

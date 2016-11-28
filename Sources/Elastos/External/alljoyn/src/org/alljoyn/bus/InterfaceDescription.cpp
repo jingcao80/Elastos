@@ -461,7 +461,7 @@ ECode InterfaceDescription::ConfigureDescriptions(
         }
     }
 
-    if(hasDescriptions) {
+    if (hasDescriptions) {
         String descriptionLanguage;
         ifcNote->GetValue(String("descriptionLanguage"), &descriptionLanguage);
         SetDescriptionLanguage(descriptionLanguage);
@@ -470,7 +470,7 @@ ECode InterfaceDescription::ConfigureDescriptions(
     // try{
         String descriptionTranslator;
         ifcNote->GetValue(String("descriptionTranslator"), &descriptionTranslator);
-        if(descriptionTranslator.GetLength() > 0){
+        if (descriptionTranslator.GetLength() > 0) {
             //We store these so as not to create a separate instance each time it is used.
             //Although this means we'll be holding on to each instance forever this is probably
             //not a problem since most Translators will need to live forever anyway

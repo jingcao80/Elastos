@@ -267,7 +267,7 @@ ECode CClient::BusHandler::HandleMessage(
 
         break;
     }
-    case (JOIN_SESSION): {
+    case JOIN_SESSION: {
         /*
          * If discovery is currently being stopped don't join to any other sessions.
          */

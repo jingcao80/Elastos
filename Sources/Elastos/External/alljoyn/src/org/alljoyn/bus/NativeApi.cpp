@@ -16,11 +16,40 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
-class StaticInitializer
+// class StaticInitializer
+// {
+// public:
+//     StaticInitializer()
+//     {
+//         if (AllJoynInit() != ER_OK) {
+//             Logger::E("StaticInitializer", "StaticInitializer() call AllJoynInit failed.");
+//             return;
+//         }
+//     #ifdef ROUTER
+//         if (AllJoynRouterInit() != ER_OK) {
+//             AllJoynShutdown();
+//             Logger::E("StaticInitializer", "StaticInitializer() call AllJoynRouterInit failed.");
+//             return;
+//         }
+//     #endif
+//         QCC_UseOSLogging(true);
+//     }
+
+//     ~StaticInitializer()
+//     {
+//     #ifdef ROUTER
+//         AllJoynRouterShutdown();
+//     #endif
+//         AllJoynShutdown();
+//     }
+// };
+
+// static StaticInitializer sInit;
+static Boolean sInitialized = FALSE;
+
+void GlobalInitialize()
 {
-public:
-    StaticInitializer()
-    {
+    if (!sInitialized) {
         if (AllJoynInit() != ER_OK) {
             Logger::E("StaticInitializer", "StaticInitializer() call AllJoynInit failed.");
             return;
@@ -33,18 +62,10 @@ public:
         }
     #endif
         QCC_UseOSLogging(true);
-    }
 
-    ~StaticInitializer()
-    {
-    #ifdef ROUTER
-        AllJoynRouterShutdown();
-    #endif
-        AllJoynShutdown();
+        sInitialized = TRUE;
     }
-};
-
-static StaticInitializer sInit;
+}
 
 /**
  * A map of Java Objects to NativeBusObjects.

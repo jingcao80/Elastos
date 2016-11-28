@@ -4,6 +4,8 @@
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
+#include "org/alljoyn/bus/NativeSessionPortListener.h"
+#include "org/alljoyn/bus/SessionPortListener.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -19,6 +21,8 @@ using Elastos::Utility::Logging::Logger;
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
+
+extern void GlobalInitialize();
 
 //============================================================================
 // CBusAttachment::AuthListenerInternal
@@ -46,7 +50,9 @@ CAR_OBJECT_IMPL(CBusAttachment);
 CBusAttachment::CBusAttachment()
     : mIsShared(FALSE)
     , mIsConnected(FALSE)
-{}
+{
+    GlobalInitialize();
+}
 
 /**
  * Constructs a BusAttachment.
@@ -158,7 +164,18 @@ ECode CBusAttachment::RequestName(
     /* [in] */ const String& name,
     /* [in] */ Int32 flags)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "RequestName(): NULL bus pointer");
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->RequestName(name.string(), flags);
+    if (status != ER_OK) {
+        Logger::E(TAG, "RequestName(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::ReleaseName(
@@ -183,7 +200,18 @@ ECode CBusAttachment::AdvertiseName(
     /* [in] */ const String& name,
     /* [in] */ Int16 transports)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "AdvertiseName(): NULL bus pointer");
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->AdvertiseName(name.string(), transports);
+    if (status != ER_OK) {
+        Logger::E(TAG, "AdvertiseName(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::CancelAdvertiseName(
@@ -220,10 +248,55 @@ ECode CBusAttachment::CancelFindAdvertisedNameByTransport(
 }
 
 ECode CBusAttachment::BindSessionPort(
-    /* [in] */ IMutableInteger16Value* sessionPort,
+    /* [in] */ IMutableInteger16Value* _sessionPort,
     /* [in] */ ISessionOpts* opts,
-    /* [in] */ ISessionPortListener* listener)
+    /* [in] */ ISessionPortListener* _listener)
 {
+    ajn::SessionPort sessionPort;
+    Int16 value;
+    _sessionPort->GetValue(&value);
+    sessionPort = value;
+
+    ajn::SessionOpts sessionOpts;
+    Byte traffic;
+    opts->GetTraffic(&traffic);
+    sessionOpts.traffic = static_cast<ajn::SessionOpts::TrafficType>(traffic);
+
+    Boolean isMultipoint;
+    opts->IsMultipoint(&isMultipoint);
+    sessionOpts.isMultipoint = isMultipoint;
+
+    Byte proximity;
+    opts->GetProximity(&proximity);
+    sessionOpts.proximity = proximity;
+
+    Int16 transports;
+    opts->GetTransports(&transports);
+    sessionOpts.transports = transports;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "BindSessionPort(): Exception or NULL bus pointer");
+        return NOERROR;
+    }
+
+    NativeSessionPortListener* listener = reinterpret_cast<NativeSessionPortListener*>(((SessionPortListener*)_listener)->mHandle);
+    assert(listener);
+
+    QStatus status = busPtr->BindSessionPort(sessionPort, sessionOpts, *listener);
+
+    if (status == ER_OK) {
+        AutoLock lock(busPtr->mBaCommonLock);
+
+        busPtr->mSessionPortListenerMap[sessionPort] = _listener;
+    }
+    else {
+        Logger::E(TAG, "BindSessionPort(): Exception(0x%08x)", status);
+        return status;
+    }
+
+    _sessionPort->SetValue(sessionPort);
+
     return NOERROR;
 }
 

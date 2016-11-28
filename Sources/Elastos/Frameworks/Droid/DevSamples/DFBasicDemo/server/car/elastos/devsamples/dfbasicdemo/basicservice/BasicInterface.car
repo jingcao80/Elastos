@@ -6,7 +6,10 @@ module
     namespace DFBasicDemo {
     namespace BasicService {
 
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.Bus.sample")]
     interface IBasicInterface {
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
         Cat(
             [in] String inStr1,
             [in] String inStr2,

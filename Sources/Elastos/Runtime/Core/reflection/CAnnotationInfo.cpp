@@ -94,7 +94,7 @@ ECode CAnnotationInfo::GetKeys(
     AcquireKeys();
 
     *keys = mKeys;
-    (*keys)->AddRef();
+    REFCOUNT_ADD(*keys);
     return NOERROR;
 }
 
@@ -105,6 +105,8 @@ ECode CAnnotationInfo::GetValue(
     if (value == NULL) {
         return E_INVALID_ARGUMENT;
     }
+
+    *value = NULL;
 
     AcquireKeys();
     AcquireValues();
@@ -117,7 +119,7 @@ ECode CAnnotationInfo::GetValue(
         }
     }
 
-    *value = (*mValues)[index];
+    if (index != -1) *value = (*mValues)[index];
     return NOERROR;
 }
 
@@ -131,7 +133,7 @@ ECode CAnnotationInfo::GetValues(
     AcquireValues();
 
     *values = mValues;
-    (*values)->AddRef();
+    REFCOUNT_ADD(*values);
     return NOERROR;
 }
 
