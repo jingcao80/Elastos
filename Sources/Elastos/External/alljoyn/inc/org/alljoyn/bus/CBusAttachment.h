@@ -10,6 +10,7 @@
 
 using Org::Alljoyn::Bus::Ifaces::IDBusProxyObj;
 using Elastos::Core::Object;
+using Elastos::Utility::IHashSet;
 using Elastos::Utility::ISet;
 using Elastos::Utility::Concurrent::IExecutorService;
 
@@ -22,8 +23,45 @@ CarClass(CBusAttachment)
     , public IBusAttachment
 {
 private:
-    class AuthListenerInternal : public Object
+    class AuthListenerInternal
+        : public Object
+        , public IAuthListenerInternal
     {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI SetAuthListener(
+            /* [in] */ IAuthListener* authListener);
+
+        CARAPI AuthListenerSet(
+            /* [out] */ Boolean* result);
+
+        CARAPI SetSecurityViolationListener(
+            /* [in] */ ISecurityViolationListener* violationListener);
+
+        CARAPI RequestCredentials(
+            /* [in] */ const String& authMechanism,
+            /* [in] */ const String& authPeer,
+            /* [in] */ Int32 authCount,
+            /* [in] */ const String& userName,
+            /* [in] */ Int32 credMask,
+            /* [out] */ ICredentials** credentials);
+
+        CARAPI VerifyCredentials(
+            /* [in] */ const String& authMechanism,
+            /* [in] */ const String& peerName,
+            /* [in] */ const String& userName,
+            /* [in] */ const String& cert,
+            /* [out] */ Boolean* result);
+
+        CARAPI SecurityViolation(
+            /* [in] */ ECode status);
+
+        CARAPI AuthenticationComplete(
+            /* [in] */ const String& authMechanism,
+            /* [in] */ const String& peerName,
+            /* [in] */ Boolean success);
+
     private:
         static const Int32 PASSWORD       = 0x0001;
         static const Int32 USER_NAME      = 0x0002;
@@ -1447,6 +1485,15 @@ private:
         /* [in] */ Boolean allowRemoteMessages,
         /* [in] */ Int32 concurrency);
 
+    /** Start and connect to the bus. */
+    CARAPI Connect(
+        /* [in] */ const String& connectArgs,
+        /* [in] */ IKeyStoreListener* keyStoreListener,
+        /* [in] */ const String& authMechanisms,
+        /* [in] */ AuthListenerInternal* busAuthListener,
+        /* [in] */ const String& keyStoreFileName,
+        /* [in] */ Boolean isShared);
+
     CARAPI RegisterBusObject(
         /* [in] */ const String& objPath,
         /* [in] */ IBusObject* busObj,
@@ -1455,6 +1502,8 @@ private:
         /* [in] */ const String& languageTag,
         /* [in] */ const String& description,
         /* [in] */ ITranslator* dt);
+
+    static CARAPI_(AutoPtr<IHashSet>) Init_sBusAttachmentSet();
 
 private:
     friend class InterfaceDescription;
@@ -1500,6 +1549,11 @@ private:
      * executing by default.
      */
     static const Int32 DEFAULT_CONCURRENCY;
+
+    /* Set of all the connected BusAttachments. Maintain a weakreference so we dont delay garbage collection */
+    static AutoPtr<IHashSet> sBusAttachmentSet;
+
+    static Boolean sShutdownHookRegistered;
 
     static const String TAG;
 };

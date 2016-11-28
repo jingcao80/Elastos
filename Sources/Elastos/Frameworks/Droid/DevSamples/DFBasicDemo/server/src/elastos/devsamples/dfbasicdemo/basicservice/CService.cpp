@@ -217,6 +217,20 @@ ECode CService::BusHandler::HandleMessage(
         }
 
         /*
+         * The next step in making a service available to other AllJoyn peers is to connect the
+         * BusAttachment to the bus with a well-known name.
+         */
+        /*
+         * connect the BusAttachement to the bus
+         */
+        ec = mBus->Connect();
+        mHost->LogStatus(String("BusAttachment.connect()"), ec);
+        if (ec != (ECode)E_STATUS_OK) {
+            mHost->Finish();
+            return NOERROR;
+        }
+
+        /*
          * Create a new session listening on the contact port of the chat service.
          */
         AutoPtr<IMutableInteger16Value> contactPort;

@@ -11,6 +11,8 @@
 
 using Org::Alljoyn::Bus::Ifaces::EIID_IDBusProxyObj;
 using Elastos::Core::AutoLock;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::IList;
@@ -36,11 +38,68 @@ const Int32 CBusAttachment::AuthListenerInternal::EXPIRATION;
 const Int32 CBusAttachment::AuthListenerInternal::NEW_PASSWORD;
 const Int32 CBusAttachment::AuthListenerInternal::ONE_TIME_PWD;
 
+CAR_INTERFACE_IMPL(CBusAttachment::AuthListenerInternal, Object, IAuthListenerInternal);
+
+ECode CBusAttachment::AuthListenerInternal::SetAuthListener(
+    /* [in] */ IAuthListener* authListener)
+{
+    return NOERROR;
+}
+
+ECode CBusAttachment::AuthListenerInternal::AuthListenerSet(
+    /* [out] */ Boolean* result)
+{
+    return NOERROR;
+}
+
+ECode CBusAttachment::AuthListenerInternal::SetSecurityViolationListener(
+    /* [in] */ ISecurityViolationListener* violationListener)
+{
+    return NOERROR;
+}
+
+ECode CBusAttachment::AuthListenerInternal::RequestCredentials(
+    /* [in] */ const String& authMechanism,
+    /* [in] */ const String& authPeer,
+    /* [in] */ Int32 authCount,
+    /* [in] */ const String& userName,
+    /* [in] */ Int32 credMask,
+    /* [out] */ ICredentials** credentials)
+{
+    return NOERROR;
+}
+
+ECode CBusAttachment::AuthListenerInternal::VerifyCredentials(
+    /* [in] */ const String& authMechanism,
+    /* [in] */ const String& peerName,
+    /* [in] */ const String& userName,
+    /* [in] */ const String& cert,
+    /* [out] */ Boolean* result)
+{
+    return NOERROR;
+}
+
+ECode CBusAttachment::AuthListenerInternal::SecurityViolation(
+    /* [in] */ ECode status)
+{
+    return NOERROR;
+}
+
+ECode CBusAttachment::AuthListenerInternal::AuthenticationComplete(
+    /* [in] */ const String& authMechanism,
+    /* [in] */ const String& peerName,
+    /* [in] */ Boolean success)
+{
+    return NOERROR;
+}
+
 
 //============================================================================
 // CBusAttachment
 //============================================================================
 const Int32 CBusAttachment::DEFAULT_CONCURRENCY = 4;
+AutoPtr<IHashSet> CBusAttachment::sBusAttachmentSet = CBusAttachment::Init_sBusAttachmentSet();
+Boolean CBusAttachment::sShutdownHookRegistered = FALSE;
 const String CBusAttachment::TAG("CBusAttachment");
 
 CAR_INTERFACE_IMPL(CBusAttachment, Object, IBusAttachment);
@@ -124,6 +183,28 @@ void CBusAttachment::Create(
     assert(busPtr != NULL);
 
     mHandle = reinterpret_cast<Int64>(busPtr);
+}
+
+ECode CBusAttachment::Connect(
+    /* [in] */ const String& connectArgs,
+    /* [in] */ IKeyStoreListener* keyStoreListener,
+    /* [in] */ const String& authMechanisms,
+    /* [in] */ AuthListenerInternal* busAuthListener,
+    /* [in] */ const String& keyStoreFileName,
+    /* [in] */ Boolean isShared)
+{
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "Connect(): NULL bus pointer");
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->Connect(connectArgs.string(), keyStoreListener, authMechanisms.string(),
+            busAuthListener, keyStoreFileName.string(), isShared);
+    if (status != ER_OK) {
+        Logger::E(TAG, "Connect(): Exception");
+    }
+    return status;
 }
 
 ECode CBusAttachment::RegisterBusObject(
@@ -527,7 +608,36 @@ ECode CBusAttachment::ReleaseResources()
 
 ECode CBusAttachment::Connect()
 {
-    return NOERROR;
+    /*
+     * os.name is one of the standard system properties will be used to
+     * decide the value of org.alljoyn.bus.address.
+     */
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetProperty(String("org.alljoyn.bus.address"), String("unix:abstract=alljoyn"), &mAddress);
+    if (!mAddress.IsNull()) {
+        ECode ec = Connect(mAddress, mKeyStoreListener, mAuthMechanisms, mBusAuthListener, mKeyStoreFileName, mIsShared);
+        if (ec == (ECode)E_STATUS_OK) {
+            /* Add this BusAttachment to the busAttachmentSet */
+            {
+                AutoLock lock(sBusAttachmentSet);
+                /* Register a shutdown hook if it is not already registered. */
+                if (sShutdownHookRegistered == FALSE) {
+                    // TODO:
+                    // Runtime.getRuntime().addShutdownHook(new ShutdownHookThread());
+                    sShutdownHookRegistered = TRUE;
+                }
+                AutoPtr<IWeakReference> wr;
+                GetWeakReference((IWeakReference**)&wr);
+                sBusAttachmentSet->Add(wr);
+            }
+            mIsConnected = TRUE;
+        }
+        return ec;
+    }
+    else {
+        return E_STATUS_INVALID_CONNECT_ARGS;
+    }
 }
 
 ECode CBusAttachment::IsConnected(
@@ -763,6 +873,13 @@ ECode CBusAttachment::GetMessageContext(
 ECode CBusAttachment::EnableConcurrentCallbacks()
 {
     return NOERROR;
+}
+
+AutoPtr<IHashSet> CBusAttachment::Init_sBusAttachmentSet()
+{
+    AutoPtr<IHashSet> hashSet;
+    CHashSet::New((IHashSet**)&hashSet);
+    return hashSet;
 }
 
 } // namespace Bus
