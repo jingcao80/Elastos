@@ -33,7 +33,29 @@ namespace ContentResolverDemo {
 static const String TAG("ContentResolverDemo::CActivityOne");
 
 //=======================================================================
-// MyListener
+// CActivityOne::MyContentObserver
+//=======================================================================
+CActivityOne::MyContentObserver::MyContentObserver()
+    : mHost(NULL)
+{}
+
+ECode CActivityOne::MyContentObserver::constructor(
+    /* [in] */ CActivityOne* host)
+{
+    mHost = host;
+    return ContentObserver::constructor();
+}
+
+//@Override
+ECode CActivityOne::MyContentObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    Logger::I(TAG, " >> MyContentObserver::OnChange: selfChange: %d", selfChange);
+    return NOERROR;
+}
+
+//=======================================================================
+// CActivityOne::MyListener
 //=======================================================================
 
 CAR_INTERFACE_IMPL(CActivityOne::MyListener, Object, IViewOnClickListener)
@@ -127,6 +149,14 @@ ECode CActivityOne::OnCreate(
 
     IAdapterView* adapterView = IAdapterView::Probe(view);
     adapterView->SetAdapter(mAdapter);
+
+    mContentObserver = new MyContentObserver();
+    mContentObserver->constructor(this);
+
+    AutoPtr<IContentResolver> resolver;
+    GetContentResolver((IContentResolver**)&resolver);
+    resolver->RegisterContentObserver(
+        Utils::CONTENT_URI, TRUE, mContentObserver.Get());
     return NOERROR;
 }
 
@@ -157,6 +187,10 @@ ECode CActivityOne::OnStop()
 ECode CActivityOne::OnDestroy()
 {
     Logger::I(TAG, " >> OnDestroy()");
+    AutoPtr<IContentResolver> resolver;
+    GetContentResolver((IContentResolver**)&resolver);
+    resolver->UnregisterContentObserver(mContentObserver.Get());
+
     return Activity::OnDestroy();
 }
 

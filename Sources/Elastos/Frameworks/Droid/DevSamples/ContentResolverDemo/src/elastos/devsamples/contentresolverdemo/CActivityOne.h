@@ -3,12 +3,14 @@
 #define __Elastos_DevSamples_ContentResolverDemo_CActivityOne_H__
 
 #include <elastos/droid/app/Activity.h>
+#include <elastos/droid/database/ContentObserver.h>
 #include <Elastos.Droid.Widget.h>
 #include "_Elastos_DevSamples_ContentResolverDemo_CActivityOne.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Database::ContentObserver;
 
 namespace Elastos {
 namespace DevSamples {
@@ -18,6 +20,25 @@ CarClass(CActivityOne)
     , public Activity
 {
 public:
+    class MyContentObserver
+        : public ContentObserver
+    {
+    public:
+        TO_STRING_IMPL("CActivityOne::MyContentObserver")
+
+        MyContentObserver();
+
+        CARAPI constructor(
+            /* [in] */ CActivityOne* host);
+
+        //@Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CActivityOne* mHost;
+    };
+
     class MyListener
         : public Object
         , public IViewOnClickListener
@@ -89,6 +110,7 @@ private:
 private:
     AutoPtr<IAdapter> mAdapter;
     AutoPtr<ICursor> mCursor;
+    AutoPtr<MyContentObserver> mContentObserver;
 };
 
 } // namespace ContentResolverDemo

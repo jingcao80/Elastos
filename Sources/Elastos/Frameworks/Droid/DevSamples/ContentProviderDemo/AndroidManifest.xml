@@ -31,6 +31,9 @@
             android:authorities="elastos.kesalin.users"
             android:exported="true"
             android:multiprocess="false">
+        <path-permission
+            android:readPermission="android.permission.READ_EXTERNAL_STORAGE"
+            android:writePermission="android.permission.WRITE_EXTERNAL_STORAGTE" />
         </provider>
     </application>
 

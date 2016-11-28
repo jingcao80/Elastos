@@ -8,6 +8,9 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="21" />
 
+    <uses-premission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-premission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
     <permission android:protectionLevel="normal"
         android:name="android.permission.INTERACT_ACROSS_USERS" />
     <permission android:protectionLevel="normal"
