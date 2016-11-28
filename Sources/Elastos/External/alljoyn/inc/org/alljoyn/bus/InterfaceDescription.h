@@ -113,6 +113,26 @@ private:
         /* [in] */ Int32 annotation,
         /* [in] */ const String& accessPerm);
 
+    CARAPI_(void) SetDescriptionLanguage(
+        /* [in] */ const String& language);
+
+    CARAPI_(void) SetDescription(
+        /* [in] */ const String& Description);
+
+    // CARAPI_(void) SetDescriptionTranslator(
+    //     /* [in] */ IBusAttachment* busAttachment,
+    //     /* [in] */ ITranslator* dt);
+
+    CARAPI SetMemberDescription(
+        /* [in] */ const String& member,
+        /* [in] */ const String& description,
+        /* [in] */ Boolean isSessionlessSignal);
+
+    CARAPI SetPropertyDescription(
+        /* [in] */ const String& propName,
+        /* [in] */ const String& description);
+
+
     /** Activate the interface on the bus. */
     CARAPI_(void) Activate();
 

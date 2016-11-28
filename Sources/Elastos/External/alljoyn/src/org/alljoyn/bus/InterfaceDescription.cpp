@@ -1,11 +1,13 @@
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/AllJoynStd.h>
 #include <alljoyn/DBusStd.h>
 #include <alljoyn/InterfaceDescription.h>
 
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Org {
@@ -145,6 +147,42 @@ ECode InterfaceDescription::AddMember(
     return status;
 }
 
+void InterfaceDescription::SetDescriptionLanguage(
+    /* [in] */ const String& language)
+{
+    assert(0);
+}
+
+void InterfaceDescription::SetDescription(
+    /* [in] */ const String& Description)
+{
+    assert(0);
+}
+
+// void InterfaceDescription::SetDescriptionTranslator(
+//     /* [in] */ IBusAttachment* busAttachment,
+//     /* [in] */ ITranslator* dt)
+// {
+//     assert(0);
+// }
+
+ECode InterfaceDescription::SetMemberDescription(
+    /* [in] */ const String& member,
+    /* [in] */ const String& description,
+    /* [in] */ Boolean isSessionlessSignal)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode InterfaceDescription::SetPropertyDescription(
+    /* [in] */ const String& propName,
+    /* [in] */ const String& description)
+{
+    assert(0);
+    return NOERROR;
+}
+
 void InterfaceDescription::Activate()
 {
     ajn::InterfaceDescription* intf = reinterpret_cast<ajn::InterfaceDescription*>(mHandle);
@@ -155,17 +193,19 @@ void InterfaceDescription::Activate()
 String InterfaceDescription::GetName(
     /* [in] */ IInterfaceInfo* intf)
 {
-    // BusInterface busIntf = intf.getAnnotation(BusInterface.class);
-    // if (busIntf != null && busIntf.name().length() > 0) {
-    //     return busIntf.name();
-    // } else {
-    //     return intf.getName();
-    // }
-    String ns, name;
-    intf->GetNamespace(&ns);
-    intf->GetName(&name);
-    String fullName = ns + "." + name;
-    return fullName;
+    AutoPtr<IAnnotationInfo> busIntf;
+    intf->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&busIntf);
+    String name;
+    if (busIntf != NULL && (busIntf->GetValue(String("name"), &name), name.GetLength() > 0)) {
+        return name;
+    }
+    else {
+        String ns, name;
+        intf->GetNamespace(&ns);
+        intf->GetName(&name);
+        String fullName = ns + "." + name;
+        return fullName;
+    }
 }
 
 ECode InterfaceDescription::IsAnnounced(
@@ -184,24 +224,31 @@ ECode InterfaceDescription::IsAnnounced(
 String InterfaceDescription::GetName(
     /* [in] */ IMethodInfo* method)
 {
-    // BusMethod busMethod = method.getAnnotation(BusMethod.class);
-    // if (busMethod != null && busMethod.name().length() > 0) {
-    //     return busMethod.name();
-    // }
-    // BusSignal busSignal = method.getAnnotation(BusSignal.class);
-    // if (busSignal != null && busSignal.name().length() > 0) {
-    //     return busSignal.name();
-    // }
-    // BusProperty busProperty = method.getAnnotation(BusProperty.class);
-    // if (busProperty != null) {
-    //     if (busProperty.name().length() > 0) {
-    //         return busProperty.name();
-    //     } else {
-    //         /* The rest of the method name following the "get" or "set" prefix. */
-    //         return method.getName().substring(3);
-    //     }
-    // }
+    AutoPtr<IAnnotationInfo> busMethod;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String name;
+    if (busMethod != NULL && (busMethod->GetValue(String("name"), &name), name.GetLength() > 0)) {
+        return name;
+    }
+    AutoPtr<IAnnotationInfo> busSignal;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
+    if (busSignal != NULL && (busSignal->GetValue(String("name"), &name), name.GetLength() > 0)) {
+        return name;
+    }
+    AutoPtr<IAnnotationInfo> busProperty;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&busProperty);
+    if (busProperty != NULL) {
+        busProperty->GetValue(String("name"), &name);
+        if (name.GetLength() > 0) {
+            return name;
+        }
+        else {
+            /* The rest of the method name following the "get" or "set" prefix. */
+            String name;
+            method->GetName(&name);
+            return name.Substring(3);
+        }
+    }
     method->GetName(&name);
     return name;
 }
@@ -209,16 +256,22 @@ String InterfaceDescription::GetName(
 String InterfaceDescription::GetInputSig(
     /* [in] */ IMethodInfo* method)
 {
-    // BusMethod busMethod = method.getAnnotation(BusMethod.class);
-    // if (busMethod != null && busMethod.signature().length() > 0) {
-    //     return Signature.typeSig(method.getGenericParameterTypes(), busMethod.signature());
-    // }
-    // BusSignal busSignal = method.getAnnotation(BusSignal.class);
-    // if (busSignal != null && busSignal.signature().length() > 0) {
-    //     return Signature.typeSig(method.getGenericParameterTypes(), busSignal.signature());
-    // }
-    // return Signature.typeSig(method.getGenericParameterTypes(), null);
+    AutoPtr<IAnnotationInfo> busMethod;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String signature;
+    if (busMethod != NULL && (busMethod->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
+        // TODO:
+        // return Signature.typeSig(method.getGenericParameterTypes(), busMethod.signature());
+    }
+    AutoPtr<IAnnotationInfo> busSignal;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
+    if (busSignal != NULL && (busSignal->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
+        // TODO:
+        // return Signature.typeSig(method.getGenericParameterTypes(), busSignal.signature());
+    }
+
+    // TODO:
+    // return Signature.typeSig(method.getGenericParameterTypes(), null);
     method->GetSignature(&signature);
     return signature;
 }
@@ -226,14 +279,21 @@ String InterfaceDescription::GetInputSig(
 String InterfaceDescription::GetOutSig(
     /* [in] */ IMethodInfo* method)
 {
-    // BusMethod busMethod = method.getAnnotation(BusMethod.class);
-    // if (busMethod != null && busMethod.replySignature().length() > 0) {
-    //     return Signature.typeSig(method.getGenericReturnType(), busMethod.replySignature());
-    // }
-    // BusSignal busSignal = method.getAnnotation(BusSignal.class);
-    // if (busSignal != null && busSignal.replySignature().length() > 0) {
-    //     return Signature.typeSig(method.getGenericReturnType(), busSignal.replySignature());
-    // }
+    AutoPtr<IAnnotationInfo> busMethod;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
+    String replySignature;
+    if (busMethod != NULL && (busMethod->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
+        // TODO:
+        // return Signature.typeSig(method.getGenericReturnType(), busMethod.replySignature());
+    }
+    AutoPtr<IAnnotationInfo> busSignal;
+    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
+    if (busSignal != NULL && (busSignal->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
+        // TODO:
+        // return Signature.typeSig(method.getGenericReturnType(), busSignal.replySignature());
+    }
+
+    // TODO:
     // return Signature.typeSig(method.getGenericReturnType(), null);
     return String(NULL);
 }
@@ -281,25 +341,29 @@ ECode InterfaceDescription::Create(
     }
 
     Int32 securePolicy = AJ_IFC_SECURITY_INHERIT;
-    // TODO:
-    // Secure secureAnnotation = busInterface.getAnnotation(Secure.class);
-    // if (secureAnnotation != null) {
-    //     if (secureAnnotation.value().equals("required")) {
-    //         securePolicy = AJ_IFC_SECURITY_REQUIRED;
-    //     } else if (secureAnnotation.value().equals("off")) {
-    //         securePolicy = AJ_IFC_SECURITY_OFF;
-    //     } else {
-    //         /*
-    //          * In C++ if an interface provides an unknown security annotation
-    //          * it automatically defaults to the inherit for security. For
-    //          * that reason the Java code will do the same.
-    //          */
-    //         securePolicy = AJ_IFC_SECURITY_INHERIT;
-    //     }
-    // }
-    // else {
+    AutoPtr<IAnnotationInfo> secureAnnotation;
+    busInterface->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.Secure"), (IAnnotationInfo**)&secureAnnotation);
+    if (secureAnnotation != NULL) {
+        String value;
+        secureAnnotation->GetValue(String("value"), &value);
+        if (value.Equals("required")) {
+            securePolicy = AJ_IFC_SECURITY_REQUIRED;
+        }
+        else if (value.Equals("off")) {
+            securePolicy = AJ_IFC_SECURITY_OFF;
+        }
+        else {
+            /*
+             * In C++ if an interface provides an unknown security annotation
+             * it automatically defaults to the inherit for security. For
+             * that reason the Java code will do the same.
+             */
+            securePolicy = AJ_IFC_SECURITY_INHERIT;
+        }
+    }
+    else {
         securePolicy = AJ_IFC_SECURITY_INHERIT;
-    // }
+    }
     ec = Create(busAttachment, GetName(busInterface), securePolicy,
             mProperties.GetSize(), mMembers.GetSize());
     if (ec != E_STATUS_OK) {
@@ -326,17 +390,21 @@ ECode InterfaceDescription::Create(
 
     ConfigureDescriptions(busAttachment, busInterface);
 
-    // TODO:
-    // BusInterface intf = busInterface.getAnnotation(BusInterface.class);
-    // if (intf != null) {
-    //     if(intf.announced().equals("true")) {
-    //         announced = true;
-    //     } else {
-    //         announced = false;
-    //     }
-    // } else {
-    //     announced = false;
-    // }
+    AutoPtr<IAnnotationInfo> intf;
+    busInterface->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&intf);
+    if (intf != NULL) {
+        String announced;
+        intf->GetValue(String("announced"), &announced);
+        if(announced.Equals("true")) {
+            mAnnounced = TRUE;
+        }
+        else {
+            mAnnounced = FALSE;
+        }
+    }
+    else {
+        mAnnounced = FALSE;
+    }
 
     Activate();
     return E_STATUS_OK;
@@ -346,56 +414,75 @@ ECode InterfaceDescription::ConfigureDescriptions(
     /* [in] */ CBusAttachment* busAttachment,
     /* [in] */ IInterfaceInfo* busInterface)
 {
-    // TODO:
-    // BusInterface ifcNote = busInterface.getAnnotation(BusInterface.class);
-    // if(null == ifcNote) return;
+    AutoPtr<IAnnotationInfo> ifcNote;
+    busInterface->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&ifcNote);
+    if(NULL == ifcNote)
+        return NOERROR;
 
-    // Boolean hasDescriptions = false;
+    Boolean hasDescriptions = FALSE;
 
-    // if(!ifcNote.description().equals("")){
-    //     setDescription(ifcNote.description());
-    //     hasDescriptions = true;
-    // }
+    String description;
+    ifcNote->GetValue(String("description"), &description);
+    if(!description.IsNullOrEmpty()){
+        SetDescription(description);
+        hasDescriptions = TRUE;
+    }
 
-    // for(Method method : busInterface.getMethods()) {
-    //     String name = getName(method);
+    Int32 count;
+    busInterface->GetMethodCount(&count);
+    AutoPtr< ArrayOf<IMethodInfo*> > methods = ArrayOf<IMethodInfo*>::Alloc(count);
+    busInterface->GetAllMethodInfos(methods);
+    for (Int32 i = 0; i < methods->GetLength(); i++) {
+        IMethodInfo* method = (*methods)[i];
+        String name = GetName(method);
 
-    //     BusMethod methodNote = method.getAnnotation(BusMethod.class);
-    //     if(null != methodNote && (methodNote.description().length() > 0)){
-    //         setMemberDescription(name, methodNote.description(), false);
-    //         hasDescriptions = true;
-    //     }
+        AutoPtr<IAnnotationInfo> methodNote;
+        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&methodNote);
+        String description;
+        if (methodNote != NULL && (methodNote->GetValue(String("description"), &description), description.GetLength() > 0)) {
+            SetMemberDescription(name, description, FALSE);
+            hasDescriptions = TRUE;
+        }
 
-    //     BusSignal signalNote = method.getAnnotation(BusSignal.class);
-    //     if(null != signalNote && (signalNote.description().length() > 0)){
-    //         setMemberDescription(name, signalNote.description(), signalNote.sessionless());
-    //         hasDescriptions = true;
-    //     }
+        AutoPtr<IAnnotationInfo> signalNote;
+        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&signalNote);
+        if (signalNote != NULL && (signalNote->GetValue(String("description"), &description), description.GetLength() > 0)) {
+            String sessionless;
+            signalNote->GetValue(String("sessionless"), &sessionless);
+            SetMemberDescription(name, description, StringUtils::ParseBoolean(sessionless));
+            hasDescriptions = TRUE;
+        }
 
-    //     BusProperty propNote = method.getAnnotation(BusProperty.class);
-    //     if(null != propNote && (propNote.description().length() > 0)){
-    //         setPropertyDescription(name, propNote.description());
-    //         hasDescriptions = true;
-    //     }
-    // }
+        AutoPtr<IAnnotationInfo> propNote;
+        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&propNote);
+        if (propNote != NULL && (propNote->GetValue(String("description"), &description), description.GetLength() > 0)) {
+            SetPropertyDescription(name, description);
+            hasDescriptions = TRUE;
+        }
+    }
 
-    // if(hasDescriptions) {
-    //     setDescriptionLanguage(ifcNote.descriptionLanguage());
-    // }
+    if(hasDescriptions) {
+        String descriptionLanguage;
+        ifcNote->GetValue(String("descriptionLanguage"), &descriptionLanguage);
+        SetDescriptionLanguage(descriptionLanguage);
+    }
 
     // try{
-    //     if(ifcNote.descriptionTranslator().length() > 0){
-    //         //We store these so as not to create a separate instance each time it is used.
-    //         //Although this means we'll be holding on to each instance forever this is probably
-    //         //not a problem since most Translators will need to live forever anyway
-    //         Translator dt = translatorCache.get(ifcNote.descriptionTranslator());
-    //         if(null == dt) {
-    //             Class<?> c = Class.forName(ifcNote.descriptionTranslator());
-    //             dt = (Translator)c.newInstance();
-    //             translatorCache.put(ifcNote.descriptionTranslator(), dt);
-    //         }
-    //         setDescriptionTranslator(busAttachment, dt);
-    //     }
+        String descriptionTranslator;
+        ifcNote->GetValue(String("descriptionTranslator"), &descriptionTranslator);
+        if(descriptionTranslator.GetLength() > 0){
+            //We store these so as not to create a separate instance each time it is used.
+            //Although this means we'll be holding on to each instance forever this is probably
+            //not a problem since most Translators will need to live forever anyway
+            // TODO:
+            // AutoPtr<ITranslator> dt = mTranslatorCache[descriptionTranslator];
+            // if (dt == NULL) {
+            //     Class<?> c = Class.forName(ifcNote.descriptionTranslator());
+            //     dt = (Translator)c.newInstance();
+            //     mTranslatorCache.put(ifcNote.descriptionTranslator(), dt);
+            // }
+            // SetDescriptionTranslator(busAttachment, dt);
+        }
     // }catch(Exception e) {
     //     e.printStackTrace();
     // }
@@ -446,13 +533,16 @@ ECode InterfaceDescription::GetMembers(
     busInterface->GetAllMethodInfos(methods);
     for (Int32 i = 0; i < methods->GetLength(); i++) {
         IMethodInfo* method = (*methods)[i];
-        mMembers.PushBack(method);
-        // TODO:
-        // if (method.getAnnotation(BusMethod.class) != null) {
-        //     members.add(method);
-        // } else if (method.getAnnotation(BusSignal.class) != null) {
-        //     members.add(method);
-        // }
+        AutoPtr<IAnnotationInfo> busMethod;
+        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
+        AutoPtr<IAnnotationInfo> busSignal;
+        if (busMethod != NULL) {
+            mMembers.PushBack(method);
+        }
+        else if (method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"),
+            (IAnnotationInfo**)&busSignal), busSignal != NULL) {
+            mMembers.PushBack(method);
+        }
     }
     return E_STATUS_OK;
 }
@@ -463,46 +553,48 @@ ECode InterfaceDescription::AddMembers(
     List< AutoPtr<IMethodInfo> >::Iterator it = mMembers.Begin();
     for (; it != mMembers.End(); ++it) {
         IMethodInfo* member = *it;
-        // int type = INVALID;
-        // int annotation = 0;
-        // String accessPerm = null;
-        // BusMethod m = member.getAnnotation(BusMethod.class);
-        // BusSignal s = member.getAnnotation(BusSignal.class);
-        // AccessPermission ap = member.getAnnotation(AccessPermission.class);
+        Int32 type = INVALID;
+        Int32 annotation = 0;
+        String accessPerm;
+        AutoPtr<IAnnotationInfo> m;
+        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&m);
+        AutoPtr<IAnnotationInfo> s;
+        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&s);
+        AutoPtr<IAnnotationInfo> ap;
+        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.AccessPermission"), (IAnnotationInfo**)&ap);
 
-        // if (m != null) {
-        //     type = METHOD_CALL;
-        //     annotation = m.annotation();
-        // } else if (s != null) {
-        //     type = SIGNAL;
-        //     annotation = s.annotation();
-        // }
-        // if (type != INVALID) {
-        //     if(ap != null) {
-        //         accessPerm = ap.value();
-        //     }
+        String value;
+        if (m != NULL) {
+            type = METHOD_CALL;
+            m->GetValue(String("annotation"), &value);
+            annotation = StringUtils::ParseInt32(value);
+        }
+        else if (s != NULL) {
+            type = SIGNAL;
+            s->GetValue(String("annotation"), &value);
+            annotation = StringUtils::ParseInt32(value);
+        }
+        if (type != INVALID) {
+            if(ap != NULL) {
+                s->GetValue(String("value"), &accessPerm);
+            }
 
-        //     String memberName = getName(member);
-        //     Status status = addMember(type, memberName, getInputSig(member),
-        //                               getOutSig(member), annotation, accessPerm);
-        //     if (status != Status.OK) {
-        //         return status;
-        //     }
+            String memberName = GetName(member);
+            ECode status = AddMember(type, memberName, GetInputSig(member),
+                                      GetOutSig(member), annotation, accessPerm);
+            if (status != E_STATUS_OK) {
+                return status;
+            }
 
-        //     // pull out the DBus annotations
-        //     BusAnnotations dbusAnnotations = member.getAnnotation(BusAnnotations.class);
-        //     if (dbusAnnotations != null)
-        //     {
-        //         for (BusAnnotation busAnnotation : dbusAnnotations.value()) {
-        //             addMemberAnnotation(memberName, busAnnotation.name(), busAnnotation.value());
-        //         }
-        //     }
-        // }
-
-        ECode status = AddMember(METHOD_CALL, GetName(member), GetInputSig(member),
-                        GetOutSig(member), 0, String(NULL));
-        if (status != E_STATUS_OK) {
-            return status;
+            // pull out the DBus annotations
+            AutoPtr<IAnnotationInfo> dbusAnnotations;
+            member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusAnnotations"),
+                (IAnnotationInfo**)&dbusAnnotations);
+            // if (dbusAnnotations != NULL) {
+            //     for (BusAnnotation busAnnotation : dbusAnnotations.value()) {
+            //         addMemberAnnotation(memberName, busAnnotation.name(), busAnnotation.value());
+            //     }
+            // }
         }
     }
     return E_STATUS_OK;
@@ -523,20 +615,15 @@ ECode InterfaceDescription::Create(
 {
     for (Int32 i = 0; i < busInterfaces->GetLength(); i++) {
         IInterfaceInfo* intf = (*busInterfaces)[i];
-        String ns, name;
-        intf->GetNamespace(&ns);
-        intf->GetName(&name);
-        String fullName = ns + "." + name;
-        if (fullName.Equals("org.freedesktop.DBus.Properties")
-            || name.Equals("IInterface")
-            || name.Equals("IObject")
-            || name.Equals("ISynchronize")
-            || name.Equals("IWeakReferenceSource")) {
+        String fullName = GetName(intf);
+        if (fullName.Equals("Org.Freedesktop.DBus.Properties")) {
             /* The Properties interface is handled automatically by the underlying library. */
             continue;
         }
-        // TODO:
-        // if (intf.getAnnotation(BusInterface.class) != null) {
+
+        AutoPtr<IAnnotationInfo> ifcNote;
+        intf->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&ifcNote);
+        if (ifcNote != NULL) {
             AutoPtr<InterfaceDescription> desc = new InterfaceDescription();
 
             ECode ec = desc->Create(busAttachment, intf);
@@ -544,7 +631,7 @@ ECode InterfaceDescription::Create(
                 return ec;
             }
             descs->Add((IInterfaceDescription*)desc.Get());
-        // }
+        }
     }
     return E_STATUS_OK;
 }

@@ -6532,10 +6532,6 @@ Boolean CPackageManagerService::IsAllowedSignature(
     /* [in] */ PackageParser::Package* pkg,
     /* [in] */ const String& permissionName)
 {
-    // TODO: delete, add by xihao
-    if (pkg->mIsEpk)
-        return TRUE;
-
     for (Int32 i = 0; i < pkg->mSignatures->GetLength(); ++i) {
         AutoPtr<ISignature> pkgSig = (*pkg->mSignatures)[i];
         AutoPtr<HashSet<String> > perms;
@@ -9089,7 +9085,7 @@ ECode CPackageManagerService::CollectCertificatesLI(
         // Slogger::W(TAG, "PackageSetting for %s is missing signatures. Collecting certs again to recover them.",
         //         ps->mName.string());
     }
-
+    Slogger::W("xihaoc", "Collecting certs for %s", pkg->mPackageName.string());
     // try {
     if (FAILED(pp->CollectCertificates(pkg, parseFlags, readBuffer))) {
         sLastScanError = pp->GetParseError();
@@ -9421,10 +9417,6 @@ ECode CPackageManagerService::VerifySignaturesLP(
     /* [in] */ PackageSetting* pkgSetting,
     /* [in] */ PackageParser::Package* pkg)
 {
-    // TODO: delete, add by xihao
-    if (pkg->mIsEpk)
-        return NOERROR;
-
     if (pkgSetting->mSignatures->mSignatures != NULL) {
         // Already existing package. Make sure signatures match
         Boolean match = CompareSignatures(pkgSetting->mSignatures->mSignatures, pkg->mSignatures)
@@ -13768,10 +13760,6 @@ Boolean CPackageManagerService::GrantSignaturePermission(
     /* [in] */ BasePermission* bp,
     /* [in] */ HashSet<String>* origPermissions)
 {
-    // TODO: delete, add by xihao
-    if (pkg->mIsEpk)
-        return TRUE;
-
     Boolean allowed;
     allowed = (CompareSignatures(bp->mPackageSetting->mSignatures->mSignatures, pkg->mSignatures)
                     == IPackageManager::SIGNATURE_MATCH)
@@ -15553,8 +15541,6 @@ void CPackageManagerService::InstallPackageLI(
     }
 
     // try {
-    // TODO: delete, add by xihao
-    if (!pkg->mIsEpk) {
         if (FAILED(pp->CollectCertificates(pkg, parseFlags, readBuffer))) {
             res->SetError(String("Failed collect during installPackageLI"), pp->GetParseError(), ec);
             return;
@@ -15564,7 +15550,6 @@ void CPackageManagerService::InstallPackageLI(
             res->SetError(String("Failed collect during installPackageLI"), pp->GetParseError(), ec);
             return;
         }
-    }
     // } catch (PackageParserException e) {
     //     res.setError("Failed collect during installPackageLI", e);
     //     return;
