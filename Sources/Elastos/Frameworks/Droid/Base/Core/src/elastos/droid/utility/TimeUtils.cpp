@@ -183,7 +183,7 @@ AutoPtr<ArrayOf<ITimeZone *> > TimeUtils::GetTimeZonesWithUniqueOffsets(
         if (found == FALSE) {
             if (DBG) {
                 tz->GetID(&id);
-                Logger::D(TAG, "getTimeZonesWithUniqueOffsets: add unique offset=%d zone->GetID=",
+                Logger::D(TAG, "getTimeZonesWithUniqueOffsets: add unique offset=%d zone->GetID=%s",
                     offset1, id.string());
             }
 
@@ -191,9 +191,17 @@ AutoPtr<ArrayOf<ITimeZone *> > TimeUtils::GetTimeZonesWithUniqueOffsets(
         }
     }
 
+    AutoPtr<ArrayOf<ITimeZone *> > uniqueTimeZones2 = ArrayOf<ITimeZone *>::Alloc(count);
+    Int32 index = 0;
+    for (Int32 j = 0; j < uniqueTimeZones->GetLength(); j++) {
+        AutoPtr<ITimeZone> ttz = (*uniqueTimeZones)[j];
+        if (ttz != NULL) {
+            uniqueTimeZones2->Set(index++, ttz);
+        }
+    }
     {    AutoLock syncLock(sLastUniqueLockObj);
         // Cache the last result
-        sLastUniqueZoneOffsets = uniqueTimeZones;
+        sLastUniqueZoneOffsets = uniqueTimeZones2;
         sLastUniqueCountry = country;
     }
 
@@ -237,7 +245,7 @@ AutoPtr<ArrayOf<ITimeZone *> > TimeUtils::GetTimeZones(
         XmlUtils::NextElement(parser);
 
         parser->GetName(&element);
-        if (element.IsNull() || !(element.Equals(strTimeZones))) {
+        if (element.IsNull() || !(element.Equals(String("timezone")))) {
             break;
         }
 
