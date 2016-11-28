@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_DIALER_CALLLOG_CCALLLOGACTIVITY_H__
 
 #include "_Elastos_Droid_Dialer_CallLog_CCallLogActivity.h"
-#include "elastos/apps/dialer/calllog/CallLogActivity.h"
+#include "elastos/droid/dialer/calllog/CallLogActivity.h"
 
 namespace Elastos {
 namespace Droid {

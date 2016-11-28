@@ -1,7 +1,7 @@
 
 #include "elastos/droid/dialer/calllog/ClearCallLogDialog.h"
 #include "elastos/droid/dialer/calllog/CClearCallLogDialog.h"
-#include "elastos/droid/dialerbind/CObjectFactory.h"
+// #include "elastos/droid/dialerbind/CObjectFactory.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Provider::CCalls;
-using Elastos::Apps::DialerBind::CObjectFactory;
+// using Elastos::Apps::DialerBind::CObjectFactory;
 
 namespace Elastos {
 namespace Droid {
@@ -104,18 +104,20 @@ ECode ClearCallLogDialog::MyAsyncTask::OnPostExecute(
 //=================================================================
 CAR_INTERFACE_IMPL(ClearCallLogDialog, DialogFragment, IClearCallLogDialog);
 
-AutoPtr<ICachedNumberLookupService> ClearCallLogDialog::mCachedNumberLookupService =
-        CObjectFactory::NewCachedNumberLookupService();
+AutoPtr<ICachedNumberLookupService> ClearCallLogDialog::mCachedNumberLookupService = NULL;
+        // CObjectFactory::NewCachedNumberLookupService();
 
-ClearCallLogDialog::ClearCallLogDialog()
-{}
+ECode ClearCallLogDialog::constructor()
+{
+    return DialogFragment::constructor();
+}
 
 void ClearCallLogDialog::Show(
     /* [in] */ IFragmentManager* fragmentManager)
 {
-    AutoPtr<IClearCallLogDialog> dialog;
-    CClearCallLogDialog::New((IClearCallLogDialog**)&dialog);
-    IDialogFragment::Probe(dialog)->Show(fragmentManager, String("deleteCallLog"));
+    AutoPtr<IDialogFragment> dialog;
+    CClearCallLogDialog::New((IDialogFragment**)&dialog);
+    dialog->Show(fragmentManager, String("deleteCallLog"));
 }
 
 ECode ClearCallLogDialog::OnCreateDialog(

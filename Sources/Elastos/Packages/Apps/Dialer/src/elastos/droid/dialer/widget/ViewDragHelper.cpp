@@ -328,14 +328,11 @@ void ViewDragHelper::Abort()
 {
     Cancel();
     if (mDragState == STATE_SETTLING) {
-        Int32 oldX;
+        Int32 oldX, oldY, newX, newY;
         mScroller->GetCurrX(&oldX);
-        Int32 oldY;
         mScroller->GetCurrY(&oldY);
         mScroller->AbortAnimation();
-        Int32 newX;
         mScroller->GetCurrX(&newX);
-        Int32 newY;
         mScroller->GetCurrY(&newY);
         mCallback->OnViewPositionChanged(mCapturedView, newX, newY, newX - oldX, newY - oldY);
     }
@@ -360,17 +357,14 @@ ECode ViewDragHelper::SettleCapturedViewAt(
 {
     VALIDATE_NOT_NULL(result);
     if (!mReleaseInProgress) {
-        Logger::E(TAG, "Cannot settleCapturedViewAt outside of a call to "
-                 "Callback#onViewReleased");
+        Logger::E(TAG, "Cannot settleCapturedViewAt outside of a call to Callback#onViewReleased");
         return E_ILLEGAL_STATE_EXCEPTION;
-        // throw new IllegalStateException("Cannot settleCapturedViewAt outside of a call to " +
-        //         "Callback#onViewReleased");
     }
 
-    assert(0 && "TODO");
-    // *result = ForceSettleCapturedViewAt(finalLeft, finalTop,
-    //         (int) VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
-    //         (int) VelocityTrackerCompat.getYVelocity(mVelocityTracker, mActivePointerId));
+    Float x, y;
+    mVelocityTracker->GetXVelocity(&x); // VelocityTrackerCompat.getXVelocity
+    mVelocityTracker->GetYVelocity(&y); // VelocityTrackerCompat.getYVelocity
+    *result = ForceSettleCapturedViewAt(constLeft, constTop, (Int32)x, (Int32)y);
     return NOERROR;
 }
 
@@ -500,20 +494,16 @@ ECode ViewDragHelper::FlingCapturedView(
         Logger::E(TAG, "Cannot flingCapturedView outside of a call to "
                 "Callback#onViewReleased");
         return E_ILLEGAL_STATE_EXCEPTION;
-        // throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
-        //         "Callback#onViewReleased");
     }
 
-    Int32 yVelocity;
-    assert(0 && "TODO");
-    // (Int32) VelocityTrackerCompat
-    //         .getYVelocity(mVelocityTracker, mActivePointerId);
+    Float x, y;
+    mVelocityTracker->GetXVelocity(&x); // VelocityTrackerCompat.getXVelocity
+    mVelocityTracker->GetYVelocity(&y); // VelocityTrackerCompat.getYVelocity
+    Int32 yVelocity = y;
     Int32 left, top;
     mCapturedView->GetLeft(&left);
     mCapturedView->GetTop(&top);
-    // mScroller.fling(left, top,
-    //         (int) VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
-    //         yVelocity, minLeft, maxLeft, minTop, maxTop);
+    mScroller->Fling(left, top, (Int32) x, yVelocity, minLeft, maxLeft, minTop, maxTop);
     mFinalScrollY = yVelocity < 0 ? minTop : maxTop;
 
     SetDragState(STATE_SETTLING);
@@ -531,8 +521,6 @@ ECode ViewDragHelper::FlingCapturedView(
         Logger::E(TAG, "Cannot flingCapturedView outside of a call to "
                 "Callback#onViewReleased");
         return E_ILLEGAL_STATE_EXCEPTION;
-        // throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
-        //         "Callback#onViewReleased");
     }
     mScroller->AbortAnimation();
     Int32 left, top;
@@ -816,10 +804,10 @@ Boolean ViewDragHelper::CanScroll(
         }
     }
 
-    assert(0 && "TODO");
-    // return checkV && (ViewCompat.canScrollHorizontally(v, -dx) ||
-    //         ViewCompat.canScrollVertically(v, -dy));
-    return FALSE;
+    Boolean bval;
+    return checkV && (
+        (v->CanScrollHorizontally(-dx, &bval), bval)
+        || (v->CanScrollVertically(-dy, &bval), bval));
 }
 
 Boolean ViewDragHelper::ShouldInterceptTouchEvent(
@@ -1234,14 +1222,14 @@ Boolean ViewDragHelper::IsEdgeTouched(
 void ViewDragHelper::ReleaseViewForPointerUp()
 {
     mVelocityTracker->ComputeCurrentVelocity(1000, mMaxVelocity);
-    assert(0 && "TODO");
-    // Float xvel = ClampMag(
-    //         VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
-    //         mMinVelocity, mMaxVelocity);
-    // Float yvel = ClampMag(
-    //         VelocityTrackerCompat.getYVelocity(mVelocityTracker, mActivePointerId),
-    //         mMinVelocity, mMaxVelocity);
-    // DispatchViewReleased(xvel, yvel);
+
+    Float x, y;
+    mVelocityTracker->GetXVelocity(&x); // VelocityTrackerCompat.getXVelocity
+    mVelocityTracker->GetYVelocity(&y); // VelocityTrackerCompat.getYVelocity
+
+    Float xvel = ClampMag(x, mMinVelocity, mMaxVelocity);
+    Float yvel = ClampMag(y, mMinVelocity, mMaxVelocity);
+    DispatchViewReleased(xvel, yvel);
 }
 
 void ViewDragHelper::DragTo(
@@ -1252,9 +1240,8 @@ void ViewDragHelper::DragTo(
 {
     Int32 clampedX = left;
     Int32 clampedY = top;
-    Int32 oldLeft;
+    Int32 oldLeft, oldTop;
     mCapturedView->GetLeft(&oldLeft);
-    Int32 oldTop;
     mCapturedView->GetTop(&oldTop);
     if (dx != 0) {
         mCallback->ClampViewPositionHorizontal(mCapturedView, left, dx, &clampedX);
@@ -1328,10 +1315,11 @@ Int32 ViewDragHelper::GetEdgesTouched(
     Int32 result = 0;
 
     Int32 left, right, top, bottom;
-    IView::Probe(mParentView)->GetLeft(&left);
-    IView::Probe(mParentView)->GetRight(&right);
-    IView::Probe(mParentView)->GetTop(&top);
-    IView::Probe(mParentView)->GetBottom(&bottom);
+    IView* parentView = IView::Probe(mParentView);
+    parentView->GetLeft(&left);
+    parentView->GetRight(&right);
+    parentView->GetTop(&top);
+    parentView->GetBottom(&bottom);
     if (x < left + mEdgeSize) result |= EDGE_LEFT;
     if (y < top + mEdgeSize) result |= EDGE_TOP;
     if (x > right - mEdgeSize) result |= EDGE_RIGHT;

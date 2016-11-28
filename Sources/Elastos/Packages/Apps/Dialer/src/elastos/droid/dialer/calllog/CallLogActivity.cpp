@@ -1,15 +1,16 @@
 
 #include "R.h"
 #include "elastos/droid/dialer/calllog/CallLogActivity.h"
-#include "elastos/droid/dialer/calllog/CCallLogFragment.h"
+// #include "elastos/droid/dialer/calllog/CCallLogFragment.h"
 #include "elastos/droid/dialer/calllog/ClearCallLogDialog.h"
-#include "elastos/droid/dialer/calllog/CCallLogQueryHandler.h"
-#include "elastos/droid/dialer/voicemail/CVoicemailStatusHelperImpl.h"
+// #include "elastos/droid/dialer/calllog/CCallLogQueryHandler.h"
+// #include "elastos/droid/dialer/voicemail/CVoicemailStatusHelperImpl.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/R.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::App::IFragmentManager;
@@ -18,13 +19,16 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Widget::IAdapter;
-using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelperImpl;
-using Elastos::Apps::Dialer::Voicemail::CVoicemailStatusHelperImpl;
+// using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelperImpl;
+// using Elastos::Apps::Dialer::Voicemail::CVoicemailStatusHelperImpl;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace CallLog {
+
+static const String TAG("CCallLogActivity");
 
 const Int32 CallLogActivity::WAIT_FOR_VOICEMAIL_PROVIDER_TIMEOUT_MS = 300;
 const Int32 CallLogActivity::TAB_INDEX_ALL = 0;
@@ -115,14 +119,15 @@ ECode CallLogActivity::WaitForVoicemailTimeoutRunnable::Run()
 //=================================================================
 // CallLogActivity
 //=================================================================
-// TODO:
-// CAR_INTERFACE_IMPL_2(CallLogActivity, AnalyticsActivity, ICallLogActivity, ICallLogQueryHandlerListener);
-CAR_INTERFACE_IMPL_2(CallLogActivity, Activity, ICallLogActivity, ICallLogQueryHandlerListener);
+CAR_INTERFACE_IMPL_2(CallLogActivity, AnalyticsActivity, ICallLogActivity, ICallLogQueryHandlerListener);
 
 CallLogActivity::CallLogActivity()
 {
-    AutoPtr<WaitForVoicemailTimeoutRunnable> runnable = new WaitForVoicemailTimeoutRunnable(this);
-    mWaitForVoicemailTimeoutRunnable = IRunnable::Probe(runnable);
+}
+
+ECode CallLogActivity::constructor()
+{
+    return AnalyticsActivity::constructor();
 }
 
 ECode CallLogActivity::DispatchTouchEvent(
@@ -146,8 +151,9 @@ ECode CallLogActivity::DispatchTouchEvent(
 ECode CallLogActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    assert(0 && "TODO");
-    // AnalyticsActivity::OnCreate(savedInstanceState);
+    Logger::I(TAG, " >> OnCreate");
+
+    AnalyticsActivity::OnCreate(savedInstanceState);
 
     CHandler::New((IHandler**)&mHandler);
 
@@ -204,6 +210,7 @@ ECode CallLogActivity::OnCreate(
     // mViewPagerTabs = IViewPagerTabs::Probe(view);
     // mViewPager->SetOnPageChangeListener(mViewPagerTabs);
 
+    mWaitForVoicemailTimeoutRunnable = new WaitForVoicemailTimeoutRunnable(this);
     if (startingTab == TAB_INDEX_VOICEMAIL) {
         // The addition of the voicemail tab is an asynchronous process, so wait till the tab
         // is added, before attempting to switch to it. If the querying of CP2 for voicemail
@@ -219,7 +226,8 @@ ECode CallLogActivity::OnCreate(
         // mViewPager->SetCurrentItem(startingTab);
     }
 
-    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelper**)&mVoicemailStatusHelper);
+    assert(0 && "TODO");
+    // CVoicemailStatusHelperImpl::New((IVoicemailStatusHelper**)&mVoicemailStatusHelper);
     return NOERROR;
 }
 
@@ -229,10 +237,9 @@ ECode CallLogActivity::OnResume()
     // AnalyticsActivity::OnResume();
     AutoPtr<IContentResolver> resolver;
     GetContentResolver((IContentResolver**)&resolver);
-    AutoPtr<ICallLogQueryHandler> callLogQueryHandler;
-    CCallLogQueryHandler::New(resolver,
-            (ICallLogQueryHandlerListener*)this, (ICallLogQueryHandler**)&callLogQueryHandler);
-    callLogQueryHandler->FetchVoicemailStatus();
+    // AutoPtr<ICallLogQueryHandler> callLogQueryHandler;
+    // CCallLogQueryHandler::New(resolver, this, (ICallLogQueryHandler**)&callLogQueryHandler);
+    // callLogQueryHandler->FetchVoicemailStatus();
 
     return NOERROR;
 }
@@ -259,10 +266,11 @@ ECode CallLogActivity::OnPrepareOptionsMenu(
 
     // If onPrepareOptionsMenu is called before fragments loaded. Don't do anything.
     if (mAllCallsFragment != NULL && itemDeleteAll != NULL) {
-        AutoPtr<ICallLogAdapter> adapter = ((CCallLogFragment*)mAllCallsFragment.Get())->GetAdapter();
-        Boolean isEmpty = FALSE;
-        itemDeleteAll->SetVisible(adapter != NULL
-                && (IAdapter::Probe(adapter)->IsEmpty(&isEmpty), !isEmpty));
+        assert(0 && "TODO");
+        // AutoPtr<ICallLogAdapter> adapter = ((CCallLogFragment*)mAllCallsFragment.Get())->GetAdapter();
+        // Boolean isEmpty = FALSE;
+        // itemDeleteAll->SetVisible(adapter != NULL
+        //         && (IAdapter::Probe(adapter)->IsEmpty(&isEmpty), !isEmpty));
     }
     *res = TRUE;
 

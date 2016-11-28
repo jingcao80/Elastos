@@ -43,7 +43,7 @@ module
     merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
 //    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogActivity.car");
+    merge("car/elastos/droid/dialer/calllog/CallLogActivity.car");
     merge("car/elastos/droid/dialer/calllog/CallLogAdapter.car");
     merge("car/elastos/droid/dialer/calllog/CallLogFragment.car");
     merge("car/elastos/droid/dialer/calllog/CallLogGroupBuilder.car");
@@ -51,7 +51,7 @@ module
     merge("car/elastos/droid/dialer/calllog/CallLogNotificationsService.car");
     merge("car/elastos/droid/dialer/calllog/CallLogQueryHandler.car");
     merge("car/elastos/droid/dialer/calllog/CallTypeIconsView.car");
-//    merge("car/elastos/droid/dialer/calllog/ClearCallLogDialog.car");
+    merge("car/elastos/droid/dialer/calllog/ClearCallLogDialog.car");
     merge("car/elastos/droid/dialer/calllog/ContactInfo.car");
     merge("car/elastos/droid/dialer/calllog/DefaultVoicemailNotifier.car");
     merge("car/elastos/droid/dialer/calllog/IntentProvider.car");
@@ -149,7 +149,7 @@ module
     using interface Elastos.Droid.App.IFragment;
 //    using interface Elastos.Droid.App.IListFragment;
     using interface Elastos.Droid.App.IApplication;
-//    using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.App.IIntentService;
 //    using interface Elastos.Droid.App.IListActivity;
@@ -166,8 +166,8 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
 //    using interface Elastos.Droid.Content.IBroadcastReceiver;
-//    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
-//    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
 //    using interface Elastos.Droid.Content.ILoader;
     using interface Elastos.Droid.Content.Res.IResources;
 //    using interface Elastos.Droid.Database.IContentObserver;
@@ -254,7 +254,7 @@ module
     using interface Elastos.Droid.DialerBind.Analytics.IAnalyticsInterface;
 
     interface Elastos.Droid.Dialer.Activity.ITransactionSafeActivity;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogActivity;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogActivity;
 //    interface Elastos.Droid.Dialer.CallLog.ICallDetailHistoryAdapter;
     interface Elastos.Droid.Dialer.CallLog.ICallFetcher;
     interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
@@ -341,24 +341,25 @@ module
 //        interface ICallDetailHistoryAdapter;
 //    }
 //
-//    class CCallLogActivity {
-//        constructor();
-//        interface IContext;
-//        interface IContextWrapper;
-//        interface IContextThemeWrapper;
-//        interface ILayoutInflaterFactory;
-//        interface ILayoutInflaterFactory2;
-//        interface IWindowCallback;
-//        interface IKeyEventCallback;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IOnWindowDismissedCallback;
-//        interface IActivity;
-//        // TODO:
-//        // interface IAnalyticsInterface;
-//        interface ICallLogActivity;
-//    }
+    class CCallLogActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+        interface IAnalyticsInterface;
+        interface ICallLogActivity;
+    }
+
     [local]
     class CCallLogListItemView {
         constructor(
@@ -408,17 +409,16 @@ module
         interface ICallTypeIconsView;
     }
 
-//    class CClearCallLogDialog {
-//        interface IFragment;
-//        interface IDialogInterfaceOnCancelListener;
-//        interface IDialogInterfaceOnDismissListener;
-//        interface IDialogFragment;
-//        interface IClearCallLogDialog;
-//    }
-//
-//    singleton class CClearCallLogDialogHelper {
-//        interface IClearCallLogDialogHelper;
-//    }
+    class CClearCallLogDialog {
+        constructor();
+
+        interface IFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogFragment;
+        interface IClearCallLogDialog;
+    }
+
 
     } // CallLog
     } // Dialer

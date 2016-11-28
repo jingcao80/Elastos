@@ -6,7 +6,9 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include <elastos/core/Runnable.h>
 #include "elastos/droid/app/Activity.h"
+#include "elastos/droid/dialerbind/analytics/AnalyticsActivity.h"
 
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Os::IBundle;
@@ -14,8 +16,8 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IMotionEvent;
-using Elastos::Core::IRunnable;
-
+using Elastos::Core::Runnable;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsActivity;
 using Elastos::Droid::Dialer::Voicemail::IVoicemailStatusHelper;
 
 namespace Elastos {
@@ -24,9 +26,7 @@ namespace Dialer {
 namespace CallLog {
 
 class CallLogActivity
-    // TODO:
-    //: public AnalyticsActivity
-    : public Elastos::Droid::App::Activity
+    : public AnalyticsActivity
     , public ICallLogActivity
     , public ICallLogQueryHandlerListener
 {
@@ -59,12 +59,9 @@ public:
 
 private:
     class WaitForVoicemailTimeoutRunnable
-        : public Object
-        , public IRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL();
-
         WaitForVoicemailTimeoutRunnable(
             /* [in] */ CallLogActivity* host);
 
@@ -78,6 +75,8 @@ public:
     CAR_INTERFACE_DECL();
 
     CallLogActivity();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI DispatchTouchEvent(

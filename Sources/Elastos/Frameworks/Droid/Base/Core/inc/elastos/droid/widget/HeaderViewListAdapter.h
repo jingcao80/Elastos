@@ -99,8 +99,6 @@ private:
     CARAPI_(Boolean) AreAllListInfosSelectable(
         /* [in] */ IArrayList* info);
 
-    static CARAPI_(Boolean) InitStatic();
-
 private:
     AutoPtr<IListAdapter> mAdapter;
     AutoPtr<IArrayList> mHeaderViewInfos;
@@ -108,7 +106,6 @@ private:
 
     // Used as a placeholder in case the provided info views are indeed null.
     // Currently only used by some CTS tests, which may be removed.
-    static Boolean sInit;
     static AutoPtr<IArrayList> EMPTY_INFO_LIST;
 
     Boolean mAreAllFixedViewsSelectable;

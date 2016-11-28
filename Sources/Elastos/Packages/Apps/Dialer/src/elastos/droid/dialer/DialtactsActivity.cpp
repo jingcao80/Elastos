@@ -14,6 +14,7 @@
 // #include "Elastos.Droid.Telephony.h"
 // #include "Elastos.Droid.View.h"
 // #include "Elastos.Droid.Widget.h"
+#include "elastos/droid/contacts/common/CallUtil.h"
 #include <elastos/droid/contacts/common/interactions/TouchPointManager.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/R.h>
@@ -30,7 +31,7 @@ using Elastos::Droid::App::IFragmentTransaction;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 // using Elastos::Droid::Content::Res::IResources;
-// using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogActivity;
+using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogActivity;
 using Elastos::Droid::Dialer::List::ISpeedDialFragment;
 using Elastos::Droid::Net::IUri;
 // using Elastos::Droid::Os::IBundle;
@@ -82,7 +83,9 @@ using Elastos::Droid::Dialer::Widget::CSearchEditTextLayout;
 using Elastos::Droid::Dialer::Widget::EIID_IActionBarControllerActivityUi;
 using Elastos::Droid::Dialer::Widget::EIID_IOnBackButtonClickedListener;
 using Elastos::Droid::Dialer::Util::DialerUtils;
+// using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogActivity;
 using Elastos::Droid::DialerBind::DatabaseHelperManager;
+using Elastos::Droid::Contacts::Common::CallUtil;
 using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
 using Elastos::Droid::Contacts::Common::List::EIID_IOnPhoneNumberPickerActionListener;
 using Elastos::Droid::Contacts::Common::List::IContactEntryListFragment;
@@ -708,8 +711,8 @@ ECode DialtactsActivity::OnAttachFragment(
 void DialtactsActivity::HandleMenuSettings()
 {
     AutoPtr<IIntent> intent;
-    assert(0 && "TODO");
     // CIntent::New(this, ECLSID_CDialerSettingsActivity, (IIntent**)&intent);
+    assert(0 && "TODO HandleMenuSettings");
     StartActivity(intent);
 }
 
@@ -1369,8 +1372,7 @@ ECode DialtactsActivity::ShowCallHistory()
     // Use explicit CallLogActivity intent instead of ACTION_VIEW +
     // CONTENT_TYPE, so that we always open our call log from our dialer
     AutoPtr<IIntent> intent;
-    assert(0);
-    // CIntent::New(this, ECLSID_CCallLogActivity, (IIntent**)&intent);
+    CIntent::New(this, ECLSID_CCallLogActivity, (IIntent**)&intent);
     StartActivity(intent);
     return NOERROR;
 }
@@ -1449,11 +1451,11 @@ ECode DialtactsActivity::OnCallNumberDirectly(
 {
     String origin;
     GetCallOrigin(&origin);
-    assert(0 && "TODO");
-    // AutoPtr<IIntent> intent = isVideoCall ?
-    //         CallUtil::GetVideoCallIntent(phoneNumber, origin) :
-    //         CallUtil::GetCallIntent(phoneNumber, origin);
-    // DialerUtils::StartActivityWithErrorToast(this, intent);
+
+    AutoPtr<IIntent> intent = isVideoCall ?
+            CallUtil::GetVideoCallIntent(phoneNumber, origin) :
+            CallUtil::GetCallIntent(phoneNumber, origin);
+    DialerUtils::StartActivityWithErrorToast(this, intent);
     mClearSearchOnPause = TRUE;
     return NOERROR;
 }

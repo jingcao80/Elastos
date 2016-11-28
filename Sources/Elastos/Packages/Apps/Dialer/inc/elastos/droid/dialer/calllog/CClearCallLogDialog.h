@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_DIALER_CALLLOG_CCLEARCALLLOGDIALOG_H__
 
 #include "_Elastos_Droid_Dialer_CallLog_CClearCallLogDialog.h"
-#include "elastos/apps/dialer/calllog/ClearCallLogDialog.h"
+#include "elastos/droid/dialer/calllog/ClearCallLogDialog.h"
 
 namespace Elastos {
 namespace Droid {

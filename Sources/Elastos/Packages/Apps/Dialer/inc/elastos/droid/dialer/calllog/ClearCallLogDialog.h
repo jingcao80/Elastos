@@ -79,7 +79,7 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    ClearCallLogDialog();
+    CARAPI constructor();
 
     /** Preferred way to show this dialog */
     static CARAPI_(void) Show(

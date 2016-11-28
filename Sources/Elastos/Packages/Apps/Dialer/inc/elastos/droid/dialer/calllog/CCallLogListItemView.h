@@ -25,18 +25,6 @@ public:
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
-
-    CARAPI constructor(
-        /* [in] */ IContext* context);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int32 defStyle);
 };
 
 } // CallLog
