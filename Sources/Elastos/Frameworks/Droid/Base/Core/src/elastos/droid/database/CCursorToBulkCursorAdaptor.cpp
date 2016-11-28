@@ -69,9 +69,8 @@ ECode CCursorToBulkCursorAdaptor::ContentObserverProxy::OnChange(
 
 const String CCursorToBulkCursorAdaptor::TAG("CCursorToBulkCursorAdaptor");
 
-CAR_INTERFACE_IMPL_4(CCursorToBulkCursorAdaptor, Object, \
-    ICursorToBulkCursorAdaptor, IBulkCursor, \
-    IBinder, IProxyDeathRecipient)
+CAR_INTERFACE_IMPL_2(CCursorToBulkCursorAdaptor, BulkCursorNative, \
+    ICursorToBulkCursorAdaptor, IProxyDeathRecipient)
 
 CAR_OBJECT_IMPL(CCursorToBulkCursorAdaptor)
 
@@ -155,11 +154,14 @@ ECode CCursorToBulkCursorAdaptor::GetBulkCursorDescriptor(
     AutoPtr<ICursorWindow> window;
     mCursor->GetWindow((ICursorWindow**)&window);
     d->SetWindow(window);
-    if (window != NULL) {
-        // Acquire a reference to the window because its reference count will be
-        // decremented when it is returned as part of the binder call reply parcel.
-        ISQLiteClosable::Probe(window)->AcquireReference();
-    }
+
+    // disabled by luo.zhaohui, do not AcquireReference and there is no need to ReleaseReference.
+    // if (window != NULL) {
+    //     // Acquire a reference to the window because its reference count will be
+    //     // decremented when it is returned as part of the binder call reply parcel.
+    //     ISQLiteClosable::Probe(window)->AcquireReference();
+    //     d->SetWriteToParcelFlags(IParcelable::PARCELABLE_WRITE_RETURN_VALUE);
+    // }
 
     *result = d;
     REFCOUNT_ADD(*result)
@@ -204,11 +206,12 @@ ECode CCursorToBulkCursorAdaptor::GetWindow(
         mCursor->FillWindow(position, window);
     }
 
-    if (window != NULL) {
-        // Acquire a reference to the window because its reference count will be
-        // decremented when it is returned as part of the binder call reply parcel.
-        ISQLiteClosable::Probe(window)->AcquireReference();
-    }
+    // disabled by luo.zhaohui, do not AcquireReference and there is no need to ReleaseReference.
+    // if (window != NULL) {
+    //     // Acquire a reference to the window because its reference count will be
+    //     // decremented when it is returned as part of the binder call reply parcel.
+    //     ISQLiteClosable::Probe(window)->AcquireReference();
+    // }
     *result = window;
     REFCOUNT_ADD(*result)
 

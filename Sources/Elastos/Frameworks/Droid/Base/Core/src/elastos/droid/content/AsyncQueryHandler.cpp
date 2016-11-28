@@ -20,7 +20,7 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
-const String AsyncQueryHandler::TAG("AsyncQuery");
+const String AsyncQueryHandler::TAG("AsyncQueryHandler");
 const Boolean AsyncQueryHandler::localLOGV = FALSE;
 const Int32 AsyncQueryHandler::EVENT_ARG_QUERY;
 const Int32 AsyncQueryHandler::EVENT_ARG_INSERT;
@@ -73,6 +73,10 @@ ECode AsyncQueryHandler::WorkerHandler::HandleMessage(
     Int32 token = what;
     Int32 event = arg1;
 
+    if (AsyncQueryHandler::localLOGV) {
+        Logger::D(TAG, "WorkerHandler.handleMsg: msg.arg1=%d, reply.what=%d", arg1, what);
+    }
+
     switch (event) {
         case AsyncQueryHandler::EVENT_ARG_QUERY:
         {
@@ -119,16 +123,12 @@ ECode AsyncQueryHandler::WorkerHandler::HandleMessage(
         }
     }
 
-    if (AsyncQueryHandler::localLOGV) {
-        Logger::D(TAG, "WorkerHandler.handleMsg: msg.arg1=%d, reply.what=%d", arg1, what);
-    }
-
     // passing the original token value back to the caller
     // on top of the event values in arg1.
     AutoPtr<IHandler> replyHandler = args->mHandler;
 
     AutoPtr<IMessage> reply;
-    replyHandler->ObtainMessage(token, 1, 0, TO_IINTERFACE(args), (IMessage**)&reply);
+    replyHandler->ObtainMessage(token, arg1, 0, TO_IINTERFACE(args), (IMessage**)&reply);
     return reply->SendToTarget();
 }
 
@@ -196,7 +196,6 @@ ECode AsyncQueryHandler::StartQuery(
     /* [in] */ const String& orderBy)
 {
     // Use the token as what so cancelOperations works properly
-
     AutoPtr<WorkerArgs> args = new WorkerArgs();
     args->mHandler = this;
     args->mUri = uri;

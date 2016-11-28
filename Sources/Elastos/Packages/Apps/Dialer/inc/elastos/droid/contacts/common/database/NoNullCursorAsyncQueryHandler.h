@@ -25,6 +25,8 @@ private:
     class CookieWithProjection : public Object
     {
     public:
+        TO_STRING_IMPL("NoNullCursorAsyncQueryHandler::CookieWithProjection")
+
         CookieWithProjection(
             /* [in] */ IInterface* cookie,
             /* [in] */ ArrayOf<String>* projection)

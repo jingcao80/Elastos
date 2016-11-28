@@ -92,7 +92,7 @@ CAR_INTERFACE_IMPL(ContactEntryListFragment::PreferencesChangeListener, Object, 
 
 ECode ContactEntryListFragment::PreferencesChangeListener::OnChange()
 {
-    if(mHost->LoadPreferences()) {
+    if (mHost->LoadPreferences()) {
         mHost->ReloadData();
     }
     return NOERROR;
@@ -212,15 +212,15 @@ ContactEntryListFragment::ContactEntryListFragment()
     , mLoadPriorityDirectoriesOnly(FALSE)
     , mDefaultVerticalScrollbarPosition(0)
 {
-    mVerticalScrollbarPosition = GetDefaultVerticalScrollbarPosition();
-    mSIMStateReceiver = new SIMStateReceiver(this);
-    mDelayedDirectorySearchHandler = new DelayedDirectorySearchHandler(this);
-    // TODO: no PreferencesChangeListener
-    // mPreferencesChangeListener  = new PreferencesChangeListener(this);
 }
 
 ECode ContactEntryListFragment::constructor()
 {
+    mVerticalScrollbarPosition = GetDefaultVerticalScrollbarPosition();
+    mSIMStateReceiver = new SIMStateReceiver(this);
+    mDelayedDirectorySearchHandler = new DelayedDirectorySearchHandler(this);
+    mPreferencesChangeListener  = new PreferencesChangeListener(this);
+
     return AnalyticsFragment::constructor();
 }
 
@@ -419,8 +419,10 @@ void ContactEntryListFragment::StartLoading()
         else {
             AutoPtr<ILoaderManager> lm;
             GetLoaderManager((ILoaderManager**)&lm);
-            AutoPtr<ILoader> l;
-            lm->InitLoader(i, NULL, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+            if (lm) {
+                AutoPtr<ILoader> l;
+                lm->InitLoader(i, NULL, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+            }
         }
     }
 
@@ -488,11 +490,12 @@ void ContactEntryListFragment::StartLoadingDirectoryPartition(
         AutoPtr<IBundle> args;
         CBundle::New((IBundle**)&args);
         args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
-        // TODO:
-        // AutoPtr<ILoaderManager> lm;
-        // GetLoaderManager((ILoaderManager**)&lm);
-        // AutoPtr<ILoader> l;
-        // lm->InitLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+        AutoPtr<ILoaderManager> lm;
+        GetLoaderManager((ILoaderManager**)&lm);
+        if (lm) {
+            AutoPtr<ILoader> l;
+            lm->InitLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+        }
     }
 }
 
@@ -518,12 +521,14 @@ void ContactEntryListFragment::LoadDirectoryPartition(
     args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
     AutoPtr<ILoaderManager> lm;
     GetLoaderManager((ILoaderManager**)&lm);
-    AutoPtr<ILoader> l;
-    if (lm->GetLoader(partitionIndex, (ILoader**)&l), l != NULL) {
-        lm->DestroyLoader(partitionIndex);
+    if (lm) {
+        AutoPtr<ILoader> l;
+        if (lm->GetLoader(partitionIndex, (ILoader**)&l), l != NULL) {
+            lm->DestroyLoader(partitionIndex);
+        }
+        AutoPtr<ILoader> loader;
+        lm->RestartLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&loader);
     }
-    AutoPtr<ILoader> loader;
-    lm->RestartLoader(partitionIndex, args, ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&loader);
 }
 
 void ContactEntryListFragment::RemovePendingDirectorySearchRequests()
@@ -557,9 +562,11 @@ ECode ContactEntryListFragment::OnLoadFinished(
                     mDirectoryListStatus = STATUS_LOADING;
                     AutoPtr<ILoaderManager> lm;
                     GetLoaderManager((ILoaderManager**)&lm);
-                    AutoPtr<ILoader> l;
-                    lm->InitLoader(DIRECTORY_LOADER_ID, NULL,
-                            ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+                    if (lm) {
+                        AutoPtr<ILoader> l;
+                        lm->InitLoader(DIRECTORY_LOADER_ID, NULL,
+                                ILoaderManagerLoaderCallbacks::Probe(this), (ILoader**)&l);
+                    }
                 }
                 else {
                     StartLoading();
@@ -570,7 +577,9 @@ ECode ContactEntryListFragment::OnLoadFinished(
             mDirectoryListStatus = STATUS_NOT_LOADED;
             AutoPtr<ILoaderManager> lm;
             GetLoaderManager((ILoaderManager**)&lm);
-            lm->DestroyLoader(DIRECTORY_LOADER_ID);
+            if (lm) {
+                lm->DestroyLoader(DIRECTORY_LOADER_ID);
+            }
         }
     }
     return NOERROR;
@@ -815,7 +824,9 @@ void ContactEntryListFragment::SetSearchMode(
             mDirectoryListStatus = STATUS_NOT_LOADED;
             AutoPtr<ILoaderManager> lm;
             GetLoaderManager((ILoaderManager**)&lm);
-            lm->DestroyLoader(DIRECTORY_LOADER_ID);
+            if (lm) {
+                lm->DestroyLoader(DIRECTORY_LOADER_ID);
+            }
         }
 
         if (mAdapter != NULL) {

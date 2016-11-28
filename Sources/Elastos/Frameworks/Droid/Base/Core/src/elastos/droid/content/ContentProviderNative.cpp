@@ -279,8 +279,6 @@ ECode ContentProviderNative::Query(
         ec = adaptor->GetBulkCursorDescriptor(descriptor);
         FAIL_GOTO(ec, _EXIT_)
         adaptor = NULL;
-
-        (*descriptor)->SetWriteToParcelFlags(IParcelable::PARCELABLE_WRITE_RETURN_VALUE);
     }
 
 _EXIT_:
