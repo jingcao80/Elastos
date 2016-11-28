@@ -167,7 +167,7 @@ ECode UiccCardApplication::constructor(
     mContext = c;
     mCi = ci;
 
-    Logger::E("leliang", "line:%d, func:%s, type:%d, state:%d\n", __LINE__, __func__, cas->mApp_type, mAppState);
+    //Logger::E("leliang", "line:%d, func:%s, type:%d, state:%d\n", __LINE__, __func__, cas->mApp_type, mAppState);
     //test leliang type:2, state: 5
     mIccFh = CreateIccFileHandler(cas->mApp_type);
     mIccRecords = CreateIccRecords(cas->mApp_type, mContext, mCi);

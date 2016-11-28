@@ -1680,6 +1680,13 @@ void CGsmServiceStateTracker::PollStateDone()
                         //     " testOneUniqueOffsetPath=" + testOneUniqueOffsetPath +
                         //     "', do nothing");
                     }
+                    // china
+                    if (iso.Equals(String("cn"))) {
+                        //zone = (*uniqueZones)[0];
+                        //String str;
+                        //zone->GetID(&str);
+                        SetAndBroadcastNetworkSetTimeZone(String("Asia/Shanghai"));
+                    }
                 }
             }
 
