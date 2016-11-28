@@ -29,14 +29,15 @@ CBulkCursorDescriptor::CBulkCursorDescriptor()
 
 CBulkCursorDescriptor::~CBulkCursorDescriptor()
 {
+    // disabled by luo.zhaohui, do not AcquireReference and there is no need to ReleaseReference.
     // see CursorWindow::WriteToParcel(): PARCELABLE_WRITE_RETURN_VALUE
-    if (mWriteToParcelFlags & IParcelable::PARCELABLE_WRITE_RETURN_VALUE) {
-        if (mWindow != NULL) {
-            // Logger::I("CBulkCursorDescriptor",
-            //     " >> ~CBulkCursorDescriptor: mWindow->ReleaseReference() for PARCELABLE_WRITE_RETURN_VALUE");
-            ISQLiteClosable::Probe(mWindow)->ReleaseReference();
-        }
-    }
+    // if (mWriteToParcelFlags & IParcelable::PARCELABLE_WRITE_RETURN_VALUE) {
+    //     if (mWindow != NULL) {
+    //         // Logger::I("CBulkCursorDescriptor",
+    //         //     " >> ~CBulkCursorDescriptor: mWindow->ReleaseReference() for PARCELABLE_WRITE_RETURN_VALUE");
+    //         ISQLiteClosable::Probe(mWindow)->ReleaseReference();
+    //     }
+    // }
 }
 
 ECode CBulkCursorDescriptor::SetWriteToParcelFlags(

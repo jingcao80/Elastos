@@ -678,10 +678,8 @@ ECode Handler::DispatchMessage(
     else {
         AutoPtr<IHandlerCallback> handlerCallBack = mCallback;
         if (handlerCallBack == NULL && mWeakCallback != NULL) {
-            AutoPtr<IInterface> obj;
-            mWeakCallback->Resolve(EIID_IInterface, (IInterface**)&obj);
-            handlerCallBack = IHandlerCallback::Probe(obj);
-            assert(handlerCallBack != NULL);
+            AutoPtr<IHandlerCallback> obj;
+            mWeakCallback->Resolve(EIID_IHandlerCallback, (IInterface**)&handlerCallBack);
         }
 
         if (handlerCallBack != NULL) {

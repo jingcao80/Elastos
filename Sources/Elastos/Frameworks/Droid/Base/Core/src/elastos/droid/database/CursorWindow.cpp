@@ -1032,6 +1032,7 @@ ECode CursorWindow::WriteToParcel(
     ReleaseReference();
     //}
 
+    // disabled by luo.zhaohui, do not AcquireReference and there is no need to ReleaseReference.
     // move to CBulkCursorDescriptor::~CBulkCursorDescriptor()
     // if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
     //     ReleaseReference();

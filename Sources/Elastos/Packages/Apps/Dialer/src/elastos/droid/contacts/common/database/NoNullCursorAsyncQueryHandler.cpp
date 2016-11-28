@@ -1,8 +1,10 @@
 
 #include "elastos/droid/contacts/common/database/NoNullCursorAsyncQueryHandler.h"
 #include "elastos/droid/contacts/common/database/EmptyCursor.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Contacts::Common::Database::EIID_INoNullCursorAsyncQueryHandler;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -28,25 +30,26 @@ ECode NoNullCursorAsyncQueryHandler::StartQuery(
     /* [in] */ const String& orderBy)
 {
     AutoPtr<CookieWithProjection> projectionCookie = new CookieWithProjection(cookie, projection);
-    return AsyncQueryHandler::StartQuery(token, (IObject*)projectionCookie, uri, projection, selection, selectionArgs,
+    return AsyncQueryHandler::StartQuery(token, TO_IINTERFACE(projectionCookie), uri, projection, selection, selectionArgs,
             orderBy);
 }
 
 ECode NoNullCursorAsyncQueryHandler::OnQueryComplete(
     /* [in] */ Int32 token,
     /* [in] */ IInterface* cookie,
-    /* [in] */ ICursor* cursor)
+    /* [in] */ ICursor* inCursor)
 {
-    AutoPtr<CookieWithProjection> projectionCookie = (CookieWithProjection*)(IObject*)cookie;
-
-    AsyncQueryHandler::OnQueryComplete(token, projectionCookie->mOriginalCookie, cursor);
+    AutoPtr<ICursor> cursor = inCursor;
+    AutoPtr<CookieWithProjection> projectionCookie = (CookieWithProjection*)IObject::Probe(cookie);
+    AutoPtr<IInterface> originalCookie = projectionCookie->mOriginalCookie;
+    AsyncQueryHandler::OnQueryComplete(token, originalCookie, cursor);
 
     if (cursor == NULL) {
         AutoPtr<EmptyCursor> emptyCursor = new EmptyCursor();
         emptyCursor->constructor(projectionCookie->mProjection);
         cursor = (ICursor*)emptyCursor;
     }
-    return OnNotNullableQueryComplete(token, projectionCookie->mOriginalCookie, cursor);
+    return OnNotNullableQueryComplete(token, originalCookie, cursor);
 }
 
 } // namespace Database

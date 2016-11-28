@@ -3,6 +3,7 @@
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_Database_CCursorToBulkCursorAdaptor.h"
+#include "elastos/droid/database/BulkCursorNative.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/database/CBulkCursorDescriptor.h"
 #include <elastos/core/Object.h>
@@ -22,10 +23,8 @@ namespace Database {
  * {@hide}
  */
 CarClass(CCursorToBulkCursorAdaptor)
-    , public Object
+    , public BulkCursorNative
     , public ICursorToBulkCursorAdaptor
-    , public IBulkCursor
-    , public IBinder
     , public IProxyDeathRecipient
 {
 private:

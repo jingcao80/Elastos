@@ -35,17 +35,7 @@ ECode BulkCursorProxy::GetWindow(
     /* [out] */ ICursorWindow** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<ICursorWindow> window;
-    mRemote->GetWindow(position, (ICursorWindow**)&window);
-    *result = window;
-    REFCOUNT_ADD(*result);
-
-    // for PARCELABLE_WRITE_RETURN_VALUE
-    ISQLiteClosable* closeable =  ISQLiteClosable::Probe(window);
-    if (closeable) {
-        closeable->ReleaseReference();
-    }
-    return NOERROR;
+    return mRemote->GetWindow(position, result);
 }
 
 ECode BulkCursorProxy::OnMove(
@@ -103,20 +93,6 @@ AutoPtr<IBulkCursor> BulkCursorNative::AsInterface(
 
     return IBulkCursor::Probe(binder);
 }
-
-// ECode BulkCursorNative::GetWindow(
-//     /* [in] */ Int32 position,
-//     /* [out] */ ICursorWindow** cursorWindow)
-// {
-    // for PARCELABLE_WRITE_RETURN_VALUE
-    // ISQLiteClosable* closeable =  ISQLiteClosable::Probe(window);
-    // if (closeable) {
-    //     closeable->ReleaseReference();
-    // }
-//     return NOERROR;
-// }
-
-
 
 } //Database
 } //Droid
