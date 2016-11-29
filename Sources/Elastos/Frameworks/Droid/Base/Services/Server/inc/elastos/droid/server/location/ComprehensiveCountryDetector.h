@@ -111,6 +111,8 @@ private:
         MyPhoneStateListener(
             /* [in] */ ComprehensiveCountryDetector* host);
 
+        CARAPI constructor();
+
         //@Override
         CARAPI OnServiceStateChanged(
             /* [in] */ Elastos::Droid::Telephony::IServiceState* serviceState);

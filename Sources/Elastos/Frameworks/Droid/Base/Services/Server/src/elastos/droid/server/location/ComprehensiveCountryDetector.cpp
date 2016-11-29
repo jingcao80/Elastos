@@ -450,6 +450,7 @@ void ComprehensiveCountryDetector::AddPhoneStateListener()
     AutoLock syncLock(this);
     if (mPhoneStateListener == NULL) {
         AutoPtr<MyPhoneStateListener> psl = new MyPhoneStateListener(this);
+        psl->constructor();
         mPhoneStateListener = (IPhoneStateListener*)psl.Get();
         mTelephonyManager->Listen(mPhoneStateListener.Get(), IPhoneStateListener::LISTEN_SERVICE_STATE);
     }
@@ -580,6 +581,11 @@ ComprehensiveCountryDetector::MyPhoneStateListener::MyPhoneStateListener(
     /* [in] */ ComprehensiveCountryDetector* host)
     : mHost(host)
 {}
+
+ECode ComprehensiveCountryDetector::MyPhoneStateListener::constructor()
+{
+    return PhoneStateListener::constructor();
+}
 
 ECode ComprehensiveCountryDetector::MyPhoneStateListener::OnServiceStateChanged(
     /* [in] */ Elastos::Droid::Telephony::IServiceState* serviceState)
