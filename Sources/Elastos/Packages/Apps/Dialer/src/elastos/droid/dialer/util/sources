@@ -5,8 +5,7 @@ INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
-#SOURCES += AsyncTaskExecutors.cpp
-#SOURCES += CAsyncTaskExecutors.cpp
+SOURCES += AsyncTaskExecutors.cpp
 SOURCES += DialerUtils.cpp
 SOURCES += EmptyLoader.cpp
 SOURCES += ExpirableCache.cpp

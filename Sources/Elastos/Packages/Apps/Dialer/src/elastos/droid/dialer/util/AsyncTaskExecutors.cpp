@@ -1,16 +1,21 @@
 
 #include "elastos/droid/dialer/util/AsyncTaskExecutors.h"
+#include "elastos/droid/os/AsyncTask.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Thread.h>
 
+using Elastos::Droid::Dialer::Util::EIID_IAsyncTaskExecutor;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::CPreconditions;
+using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
 using Elastos::Core::IThread;
 using Elastos::Core::Thread;
+using Elastos::Core::AutoLock;
 
 namespace Elastos {
 namespace Droid {
@@ -29,58 +34,53 @@ AsyncTaskExecutors::SimpleAsyncTaskExecutor::SimpleAsyncTaskExecutor(
 
 ECode AsyncTaskExecutors::SimpleAsyncTaskExecutor::Submit(
     /* [in] */ IInterface* identifier,
-    /* [in] */ IObject* task,
-    /* [in] */ ArrayOf<IInteface*>* params,
-    /* [out] */ IObject** resultTask)
+    /* [in] */ IInterface* task,
+    /* [in] */ ArrayOf<IInterface*>* params)
 {
-    VALIDATE_NOT_NULL(resultTask);
-
     AsyncTaskExecutors::CheckCalledFromUiThread();
-    return ((AsyncTask*)task)->ExecuteOnExecutor(mExecutor, params);
+    return ((AsyncTask*)(IObject*)task)->ExecuteOnExecutor(mExecutor, params);
 }
+
 
 //=================================================================
 // AsyncTaskExecutors
 //=================================================================
-AutoPtr<IAsyncTaskExecutorFactory> AsyncTaskExecutors::mInjectedAsyncTaskExecutorFactory;
+AutoPtr<IAsyncTaskExecutorFactory> AsyncTaskExecutors::sInjectedAsyncTaskExecutorFactory;
 Object AsyncTaskExecutors::sSyncObject;
 
 AutoPtr<IAsyncTaskExecutor> AsyncTaskExecutors::CreateAsyncTaskExecutor()
 {
-    synchronized (sSyncObject) {
-        if (mInjectedAsyncTaskExecutorFactory != NULL) {
-            AutoPtr<IAsyncTaskExecutor> executor;
-            mInjectedAsyncTaskExecutorFactory->CreateAsyncTaskExecutor(
-                    (IAsyncTaskExecutor**)&executor);
-            return executor;
-        }
-        AutoPtr<SimpleAsyncTaskExecutor> simpleExecutor = new SimpleAsyncTaskExecutor(
-                AsyncTask::SERIAL_EXECUTOR);
-        return (IAsyncTaskExecutor*)simpleExecutor;
+    AutoLock syncLock(sSyncObject);
+    if (sInjectedAsyncTaskExecutorFactory != NULL) {
+        AutoPtr<IAsyncTaskExecutor> executor;
+        sInjectedAsyncTaskExecutorFactory->CreateAsyncTaskExecutor(
+                (IAsyncTaskExecutor**)&executor);
+        return executor;
     }
+    AutoPtr<SimpleAsyncTaskExecutor> simpleExecutor = new SimpleAsyncTaskExecutor(
+            AsyncTask::SERIAL_EXECUTOR);
+    return (IAsyncTaskExecutor*)simpleExecutor;
 }
 
 AutoPtr<IAsyncTaskExecutor> AsyncTaskExecutors::CreateThreadPoolExecutor()
 {
-    synchronized (sSyncObject) {
-        if (mInjectedAsyncTaskExecutorFactory != null) {
-            utoPtr<IAsyncTaskExecutor> executor;
-            mInjectedAsyncTaskExecutorFactory->CreateAsyncTaskExecutor(
-                    (IAsyncTaskExecutor**)&executor);
-            return executor;
-        }
-        AutoPtr<SimpleAsyncTaskExecutor> simpleExecutor = new SimpleAsyncTaskExecutor(
-                AsyncTask::THREAD_POOL_EXECUTOR);
-        return (IAsyncTaskExecutor*)simpleExecutor;
+    AutoLock syncLock(sSyncObject);
+    if (sInjectedAsyncTaskExecutorFactory != NULL) {
+        AutoPtr<IAsyncTaskExecutor> executor;
+        sInjectedAsyncTaskExecutorFactory->CreateAsyncTaskExecutor(
+                (IAsyncTaskExecutor**)&executor);
+        return executor;
     }
+    AutoPtr<SimpleAsyncTaskExecutor> simpleExecutor = new SimpleAsyncTaskExecutor(
+            AsyncTask::THREAD_POOL_EXECUTOR);
+    return (IAsyncTaskExecutor*)simpleExecutor;
 }
 
 void AsyncTaskExecutors::SetFactoryForTest(
     /* [in] */ IAsyncTaskExecutorFactory* factory)
 {
-    synchronized (sSyncObject) {
-        mInjectedAsyncTaskExecutorFactory = factory;
-    }
+    AutoLock syncLock(sSyncObject);
+    sInjectedAsyncTaskExecutorFactory = factory;
 }
 
 void AsyncTaskExecutors::CheckCalledFromUiThread()
@@ -90,14 +90,14 @@ void AsyncTaskExecutors::CheckCalledFromUiThread()
     AutoPtr<ILooper> looper;
     helper->GetMainLooper((ILooper**)&looper);
     AutoPtr<IThread> thread;
-    looper->GetThread(&thread);
+    looper->GetThread((IThread**)&thread);
     AutoPtr<IThread> currentThread = Thread::GetCurrentThread();
-    String str;
-    IObject::Probe(currentThread)->ToString(&str);
+    // String str;
+    // IObject::Probe(currentThread)->ToString(&str);
 
     AutoPtr<IPreconditions> preconditions;
     CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    preconditions->CheckState(currentThread == thread);
+    preconditions->CheckState(currentThread == thread/*, "submit method must be called from ui thread, was: " + str*/);
 }
 
 } // Util

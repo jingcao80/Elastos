@@ -5,7 +5,6 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/dialer/calllog/DefaultVoicemailNotifier.h"
-// #include "elastos/droid/dialer/CCallDetailActivity.h"
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
@@ -29,11 +28,11 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Dialer::ECLSID_CCallDetailActivity;
 using Elastos::Droid::Dialer::CallLog::EIID_IVoicemailNotifier;
 using Elastos::Droid::Dialer::CallLog::EIID_IDefaultVoicemailNotifierNewCall;
 using Elastos::Droid::Dialer::CallLog::EIID_IDefaultVoicemailNotifierNewCallsQuery;
 using Elastos::Droid::Dialer::CallLog::EIID_IDefaultVoicemailNotifierNameLookupQuery;
-// using Elastos::Droid::Dialer::CallLog::ECLSID_CCallDetailActivity;
 using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogNotificationsService;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Net::IUriHelper;
@@ -363,20 +362,18 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
     if (newCalls->GetLength() == 1) {
         // Open the voicemail directly.
         AutoPtr<NewCall> newCall = (NewCall*)(*newCalls)[0];
-        assert(0);
-        // CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&contentIntent);
+        CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&contentIntent);
         contentIntent->SetData(newCall->mCallsUri);
         contentIntent->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
                 IParcelable::Probe(newCall->mVoicemailUri));
 
         AutoPtr<IIntent> playIntent;
-        assert(0);
-        // CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&playIntent);
-        // playIntent->SetData(newCall->mCallsUri);
-        // playIntent->PutExtra(CCallDetailActivity::EXTRA_VOICEMAIL_URI,
-        //         IParcelable::Probe(newCall->mVoicemailUri));
-        // playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
-        // playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_FROM_NOTIFICATION, TRUE);
+        CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&playIntent);
+        playIntent->SetData(newCall->mCallsUri);
+        playIntent->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
+                IParcelable::Probe(newCall->mVoicemailUri));
+        playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
+        playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_FROM_NOTIFICATION, TRUE);
 
         String action;
         resources->GetString(R::string::notification_action_voicemail_play, &action);

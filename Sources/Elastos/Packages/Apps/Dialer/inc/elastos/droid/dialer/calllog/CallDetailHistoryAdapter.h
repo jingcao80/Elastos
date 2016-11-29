@@ -2,7 +2,8 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLLOG_CALLDETAILHISTORYADAPTER_H__
 #define __ELASTOS_DROID_DIALER_CALLLOG_CALLDETAILHISTORYADAPTER_H__
 
-#include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/dialer/PhoneCallDetails.h"
+#include "elastos/droid/dialer/calllog/CallTypeHelper.h"
 #include "elastos/droid/widget/BaseAdapter.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
@@ -12,6 +13,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Utility::IArrayList;
+using Elastos::Core::IArrayOf;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger64;
 
@@ -22,18 +24,13 @@ namespace CallLog {
 
 class CallDetailHistoryAdapter
     : public BaseAdapter
-    , public ICallDetailHistoryAdapter
 {
 public:
-    CAR_INTERFACE_DECL();
-
-    CallDetailHistoryAdapter();
-
-    CARAPI constructor(
+    CallDetailHistoryAdapter(
         /* [in] */ IContext* context,
         /* [in] */ ILayoutInflater* layoutInflater,
-        /* [in] */ ICallTypeHelper* callTypeHelper,
-        /* [in] */ ArrayOf<IPhoneCallDetails*>* phoneCallDetails);
+        /* [in] */ CallTypeHelper* callTypeHelper,
+        /* [in] */ IArrayOf* phoneCallDetails);
 
     // @Override
     CARAPI IsEnabled(
@@ -83,18 +80,18 @@ private:
      */
     CARAPI_(AutoPtr<ICharSequence>) FormatDurationAndDataUsage(
         /* [in] */ Int64 elapsedSeconds,
-        /* [in] */ IInteger64* dataUsage);
+        /* [in] */ Int64 dataUsage);
 
 private:
     /** The top element is a blank header, which is hidden under the rest of the UI. */
-    static const Int32 VIEW_TYPE_HEADER; // = 0;
+    static const Int32 VIEW_TYPE_HEADER = 0;
     /** Each history item shows the detail of a call. */
-    static const Int32 VIEW_TYPE_HISTORY_ITEM; // = 1;
+    static const Int32 VIEW_TYPE_HISTORY_ITEM = 1;
 
     AutoPtr<IContext> mContext;
     AutoPtr<ILayoutInflater> mLayoutInflater;
-    AutoPtr<ICallTypeHelper> mCallTypeHelper;
-    AutoPtr<ArrayOf<IPhoneCallDetails*> > mPhoneCallDetails;
+    AutoPtr<CallTypeHelper> mCallTypeHelper;
+    AutoPtr<IArrayOf> mPhoneCallDetails;
 
     /**
      * List of items to be concatenated together for duration strings.

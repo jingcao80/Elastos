@@ -42,7 +42,6 @@ module
     merge("car/elastos/droid/contacts/common/preference/ContactsPreferences.car");
     merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
-//    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");
     merge("car/elastos/droid/dialer/calllog/CallLogActivity.car");
     merge("car/elastos/droid/dialer/calllog/CallLogAdapter.car");
     merge("car/elastos/droid/dialer/calllog/CallLogFragment.car");
@@ -89,11 +88,10 @@ module
 //    merge("car/elastos/droid/dialer/settings/DefaultRingtonePreference.car");
 //    merge("car/elastos/droid/dialer/settings/DialerSettingsActivity.car");
 //    merge("car/elastos/droid/dialer/settings/GeneralSettingsFragment.car");
-//    merge("car/elastos/droid/dialer/util/AsyncTaskExecutor.car");
-//    merge("car/elastos/droid/dialer/util/AsyncTaskExecutors.car");
+    merge("car/elastos/droid/dialer/util/AsyncTaskExecutor.car");
+    merge("car/elastos/droid/dialer/util/AsyncTaskExecutors.car");
     merge("car/elastos/droid/dialer/util/ExpirableCache.car");
 //    merge("car/elastos/droid/dialer/util/OrientationUtil.car");
-//    merge("car/elastos/droid/dialer/voicemail/VoicemailPlaybackFragment.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailPlaybackPresenter.car");
     merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelper.car");
     merge("car/elastos/droid/dialer/widget/ActionBarController.car");
@@ -101,11 +99,10 @@ module
     merge("car/elastos/droid/dialer/widget/SearchEditTextLayout.car");
     merge("car/elastos/droid/dialer/widget/ViewDragHelper.car");
     merge("car/elastos/droid/dialer/CallDetailActivity.car");
-//    merge("car/elastos/droid/dialer/CallDetailActivityQueryHandler.car");
 //    merge("car/elastos/droid/dialer/DialerBackupAgent.car");
     merge("car/elastos/droid/dialer/DialtactsActivity.car");
-//    merge("car/elastos/droid/dialer/ProximitySensorAware.car");
-//    merge("car/elastos/droid/dialer/ProximitySensorManager.car");
+    merge("car/elastos/droid/dialer/ProximitySensorAware.car");
+    merge("car/elastos/droid/dialer/ProximitySensorManager.car");
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
 //    merge("car/elastos/droid/dialerbind/ObjectFactory.car");
     merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
@@ -255,7 +252,6 @@ module
 
     interface Elastos.Droid.Dialer.Activity.ITransactionSafeActivity;
     interface Elastos.Droid.Dialer.CallLog.ICallLogActivity;
-//    interface Elastos.Droid.Dialer.CallLog.ICallDetailHistoryAdapter;
     interface Elastos.Droid.Dialer.CallLog.ICallFetcher;
     interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogListItemView;
@@ -296,26 +292,18 @@ module
 //    interface Elastos.Droid.Dialer.List.IOnDataSetChangedForAnimationListener;
 //    interface Elastos.Droid.Dialer.Settings.IDefaultRingtonePreference;
 //    interface Elastos.Droid.Dialer.Settings.IGeneralSettingsFragment;
-//    interface Elastos.Droid.Dialer.Util.IAsyncTaskExecutors;
 //    interface Elastos.Droid.Dialer.Util.IDialerUtils;
 //    interface Elastos.Droid.Dialer.Util.IOrientationUtil;
-//    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackFragment;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackPresenterPlaybackView;
-//    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackPresenter;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailStatusHelper;
     interface Elastos.Droid.Dialer.Widget.IActionBarControllerActivityUi;
     interface Elastos.Droid.Dialer.Widget.ISearchEditTextLayout;
 //    interface Elastos.Droid.Dialer.Widget.IOverlappingPaneLayout;
 //    interface Elastos.Droid.Dialer.Widget.IViewDragHelperHelper;
-//    interface Elastos.Droid.Dialer.IProximitySensorAware;
 //    interface Elastos.Droid.Dialer.ICallDetailActivity;
-//    interface Elastos.Droid.Dialer.ICallDetailActivityQueryHandler;
 //    interface Elastos.Droid.Dialer.IDialerApplication;
 //    interface Elastos.Droid.Dialer.IDialerBackupAgent;
     interface Elastos.Droid.Dialer.IDialtactsActivity;
-//    interface Elastos.Droid.Dialer.IDialtactsActivityHelper;
-//    interface Elastos.Droid.Dialer.IProximitySensorManager;
-//    interface Elastos.Droid.Dialer.IProximitySensorManagerListener;
 //    interface Elastos.Droid.Dialer.ISpecialCharSequenceMgr;
 //    interface Elastos.Droid.DialerBind.IDatabaseHelperManager;
 //    interface Elastos.Droid.DialerBind.IObjectFactory;
@@ -326,21 +314,6 @@ module
     namespace Dialer {
     namespace CallLog {
 
-//    [deprecated, local]
-//    class CCallDetailHistoryAdapter {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] ILayoutInflater* layoutInflater,
-//            [in] ICallTypeHelper* callTypeHelper,
-//            [in] ArrayOf<IPhoneCallDetails*>* phoneCallDetails);
-//
-//        interface IListAdapter;
-//        interface ISpinnerAdapter;
-//        interface IAdapter;
-//        interface IBaseAdapter;
-//        interface ICallDetailHistoryAdapter;
-//    }
-//
     class CCallLogActivity {
         constructor();
 
@@ -829,10 +802,6 @@ module
 //    namespace Dialer {
 //    namespace Util {
 //
-//    singleton class CAsyncTaskExecutors {
-//        interface IAsyncTaskExecutors;
-//    }
-//
 //    singleton class CDialerUtils {
 //        interface IDialerUtils;
 //    }
@@ -845,43 +814,7 @@ module
 //    } // Dialer
 //    } // Droid
 //    } // Elastos
-//
-//
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace Voicemail {
-//
-//    class CVoicemailPlaybackFragment {
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IFragment;
-//        // TODO:
-//        // interface IAnalyticsFragment;
-//        interface IVoicemailPlaybackFragment;
-//    }
-//
-//    [local]
-//    class CVoicemailPlaybackPresenter {
-//        // constructor(
-//        //     [in] IVoicemailPlaybackPresenterPlaybackView* view,
-//        //     [in] IMediaPlayerProxy* player,
-//        //     [in] IUri* voicemailUri,
-//        //     [in] IScheduledExecutorService* executorService,
-//        //     [in] Boolean startPlayingImmediately,
-//        //     [in] IAsyncTaskExecutor* asyncTaskExecutor,
-//        //     [in] IPowerManagerWakeLock* wakeLock);
-//
-//        interface IVoicemailPlaybackPresenter;
-//    }
-//
-//    } // Voicemail
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
-//
-//
+
     namespace Elastos {
     namespace Droid {
     namespace Dialer {
@@ -952,33 +885,23 @@ module
     namespace Droid {
     namespace Dialer {
 
-//    class CCallDetailActivity {
-//        interface IContext;
-//        interface IContextWrapper;
-//        interface IContextThemeWrapper;
-//        interface ILayoutInflaterFactory;
-//        interface ILayoutInflaterFactory2;
-//        interface IWindowCallback;
-//        interface IKeyEventCallback;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IOnWindowDismissedCallback;
-//        interface IProximitySensorAware;
-//        interface ICallDetailActivity;
-//    }
-//
-//    [local]
-//    class CCallDetailActivityQueryHandler {
-//        constructor(
-//            [in] ICallDetailActivity* callDetailActivity);
-//
-//        interface IHandler;
-//        interface IAsyncQueryHandler;
-//        // TODO:
-//        // interface INoNullCursorAsyncQueryHandler;
-//        interface ICallDetailActivityQueryHandler;
-//    }
+    class CCallDetailActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IProximitySensorAware;
+        interface ICallDetailActivity;
+    }
 
     class CDialerApplication {
         interface IContextWrapper;
@@ -1019,23 +942,6 @@ module
         interface IActionBarControllerActivityUi;
         interface IDialtactsActivity;
     }
-
-//    singleton class CDialtactsActivityHelper {
-//        interface IDialtactsActivityHelper;
-//    }
-//
-//    [local]
-//    class CProximitySensorManager {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IProximitySensorManagerListener* listener);
-//
-//        interface IProximitySensorManager;
-//    }
-//
-//    singleton class CSpecialCharSequenceMgr {
-//        interface ISpecialCharSequenceMgr;
-//    }
 
     } // Dialer
     } // Droid

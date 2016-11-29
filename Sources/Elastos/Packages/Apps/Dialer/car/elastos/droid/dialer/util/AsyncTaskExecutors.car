@@ -11,28 +11,6 @@ module
             [out] IAsyncTaskExecutor** executor);
     }
 
-    interface IAsyncTaskExecutors {
-        /**
-         * Creates an AsyncTaskExecutor that submits tasks to run with
-         * {@link AsyncTask#SERIAL_EXECUTOR}.
-         */
-        CreateAsyncTaskExecutor(
-            [out] IAsyncTaskExecutor** executor);
-
-        /**
-         * Creates an AsyncTaskExecutor that submits tasks to run with
-         * {@link AsyncTask#THREAD_POOL_EXECUTOR}.
-         */
-        CreateThreadPoolExecutor(
-            [out] IAsyncTaskExecutor** executor);
-
-        // @NeededForTesting
-        SetFactoryForTest(
-            [in] IAsyncTaskExecutorFactory* factory);
-
-        CheckCalledFromUiThread();
-    }
-
     } // Util
     } // Dialer
     } // Droid

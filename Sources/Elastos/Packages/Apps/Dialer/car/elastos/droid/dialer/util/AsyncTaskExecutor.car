@@ -32,9 +32,8 @@ module
          */
         Submit(
             [in] IInterface* identifier,
-            [in] IObject* task,
-            [in] ArrayOf<IInterface*>* params,
-            [out] IObject** resultTask);
+            [in] IInterface* task,
+            [in] ArrayOf<IInterface*>* params);
     }
 
     } // Util

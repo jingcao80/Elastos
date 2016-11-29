@@ -9,8 +9,6 @@ CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
 #SOURCES += VoicemailPlaybackFragment.cpp
-#SOURCES += CVoicemailPlaybackFragment.cpp
 #SOURCES += VoicemailPlaybackPresenter.cpp
-#SOURCES += CVoicemailPlaybackPresenter.cpp
 SOURCES += VoicemailStatusHelperImpl.cpp
 SOURCES += VoicemailStatusHelperStatusMessage.cpp

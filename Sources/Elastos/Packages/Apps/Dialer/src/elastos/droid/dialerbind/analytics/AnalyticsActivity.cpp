@@ -8,6 +8,11 @@ namespace Analytics {
 
 CAR_INTERFACE_IMPL(AnalyticsActivity, Activity, IAnalyticsInterface)
 
+ECode AnalyticsActivity::constructor()
+{
+    return Activity::constructor();
+}
+
 ECode AnalyticsActivity::SendHitEvent(
     /* [in] */ const String& categoryId,
     /* [in] */ const String& actionId,
