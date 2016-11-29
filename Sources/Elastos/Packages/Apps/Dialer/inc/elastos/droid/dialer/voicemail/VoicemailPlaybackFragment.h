@@ -2,8 +2,7 @@
 #define __ELASTOS_DROID_DIALER_VOICEMAIL_VOICEMAILPLAYBACKFRAGMENT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/app/Fragment.h>
-#include <elastos/core/Object.h>
+#include "elastos/droid/dialerbind/analytics/AnalyticsFragment.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
@@ -19,6 +18,7 @@ using Elastos::Droid::App::Fragment;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::IContentObserver;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
@@ -51,10 +51,7 @@ namespace Voicemail {
  */
 // @NotThreadSafe
 class VoicemailPlaybackFragment
-    // TODO:
-    /*: public AnalyticsFragment*/
-    : public Fragment
-    , public IVoicemailPlaybackFragment
+    : public AnalyticsFragment
 {
 private:
     /**
@@ -332,9 +329,9 @@ private:
 
 private:
     static Object mLock;
-    static const String TAG; // = "VoicemailPlayback";
-    static const Int32 NUMBER_OF_THREADS_IN_POOL; // = 2;
-    static const String HAS_CONTENT_PROJECTION[];
+    static const String TAG;
+    static const Int32 NUMBER_OF_THREADS_IN_POOL = 2;
+    static const AutoPtr<ArrayOf<String> > HAS_CONTENT_PROJECTION;
 
     AutoPtr<IVoicemailPlaybackPresenter> mPresenter;
     static Int32 mMediaPlayerRefCount; // = 0;

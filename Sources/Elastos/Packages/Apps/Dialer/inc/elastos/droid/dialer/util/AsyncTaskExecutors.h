@@ -37,9 +37,8 @@ private:
 
         CARAPI Submit(
             /* [in] */ IInterface* identifier,
-            /* [in] */ IObject* task,
-            /* [in] */ ArrayOf<IInteface*>* params,
-            /* [out] */ IObject** resultTask);
+            /* [in] */ IInterface* task,
+            /* [in] */ ArrayOf<IInterface*>* params);
 
     private:
         AutoPtr<IExecutor> mExecutor;
@@ -69,7 +68,7 @@ private:
      * A single instance of the {@link AsyncTaskExecutorFactory}, to which we delegate if it is
      * non-null, for injecting when testing.
      */
-    static AutoPtr<IAsyncTaskExecutorFactory> mInjectedAsyncTaskExecutorFactory;
+    static AutoPtr<IAsyncTaskExecutorFactory> sInjectedAsyncTaskExecutorFactory;
     static Object sSyncObject;
 };
 

@@ -1,23 +1,28 @@
-#ifndef __ELASTOS_DROID_DIALER_CPROXIMITYSENSERMANAGER_H__
-#define __ELASTOS_DROID_DIALER_CPROXIMITYSENSERMANAGER_H__
+#ifndef __ELASTOS_DROID_DIALER_PROXIMITYSENSERMANAGER_H__
+#define __ELASTOS_DROID_DIALER_PROXIMITYSENSERMANAGER_H__
 
-#include "_Elastos_Droid_Dialer_CProximitySensorManager.h"
+#include "_Elastos.Droid.Dialer.h"
+#include "Elastos.Droid.Hardware.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Hardware::ISensor;
 using Elastos::Droid::Hardware::ISensorEventListener;
+using Elastos::Droid::Hardware::ISensorEvent;
 using Elastos::Droid::Hardware::ISensorManager;
-using Elastos::Droid::Dialer::IProximitySensorManager;
-using Elastos::Droid::Dialer::IProximitySensorManagerListener;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 
-CarClass(CProximitySensorManager)
-    , public Object
-    , public IProximitySensorManager
+class ProximitySensorManager : public Object
 {
+public:
+    enum State {
+        NEAR,
+        FAR,
+    };
+
 private:
     /**
      * The listener to the state of the sensor.
@@ -64,14 +69,15 @@ private:
 
     private:
         /** Returns the state of the sensor given its current value. */
-        CARAPI_(IProximitySensorManager::State) GetStateFromValue(
+        CARAPI_(State) GetStateFromValue(
             /* [in] */ Float value);
 
         // @GuardedBy("this")
         CARAPI_(void) UnregisterWithoutNotification();
 
     private:
-        static const Float FAR_THRESHOLD; // = 5.0f;
+        static const Float FAR_THRESHOLD = 5.0f;
+
         AutoPtr<ISensorManager> mSensorManager;
         AutoPtr<ISensor> mProximitySensor;
         Float mMaxValue;
@@ -83,7 +89,7 @@ private:
          * Before registering and after unregistering we are always in the {@link State#FAR} state.
          */
         /* @GuardedBy("this") */
-        IProximitySensorManager::State mLastState;
+        State mLastState;
 
         /**
          * If this flag is set to true, we are waiting to reach the {@link State#FAR} state and
@@ -94,13 +100,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
-    CAR_OBJECT_DECL()
-
-    CProximitySensorManager();
-
-    CARAPI constructor(
+    ProximitySensorManager(
         /* [in] */ IContext* context,
         /* [in] */ IProximitySensorManagerListener* listener);
 
@@ -111,7 +111,7 @@ public:
      * <p>
      * This method is idempotent.
      */
-    CARAPI Enable();
+    CARAPI_(void) Enable();
 
     /**
      * Disables the proximity manager.
@@ -128,7 +128,7 @@ public:
      * <p>
      * This method is idempotent.
      */
-    CARAPI Disable(
+    CARAPI_(void) Disable(
         /* [in] */ Boolean waitForFarState);
 
 private:
@@ -146,4 +146,4 @@ private:
 } // Droid
 } // Elastos
 
-#endif //__ELASTOS_DROID_DIALER_CPROXIMITYSENSERMANAGER_H__
+#endif //__ELASTOS_DROID_DIALER_PROXIMITYSENSERMANAGER_H__

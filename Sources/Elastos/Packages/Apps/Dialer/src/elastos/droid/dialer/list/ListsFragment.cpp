@@ -119,43 +119,43 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
     VALIDATE_NOT_NULL(item)
     *item = NULL;
 
-    Int32 rtl;
-    mHost->GetRtlPosition(position, &rtl);
-    switch (rtl) {
-        case TAB_INDEX_SPEED_DIAL:
-        {
-            AutoPtr<SpeedDialFragment> fragment = new SpeedDialFragment();
-            fragment->constructor();
-            mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
-            *item = IFragment::Probe(mHost->mSpeedDialFragment);
-            REFCOUNT_ADD(*item)
-            return NOERROR;
-        }
-        case TAB_INDEX_RECENTS:
-        {
-            AutoPtr<ISystem> sys;
-            CSystem::AcquireSingleton((ISystem**)&sys);
-            Int64 value;
-            sys->GetCurrentTimeMillis(&value);
-            AutoPtr<CallLogFragment> fragment = new CallLogFragment();
-            fragment->constructor();
-            mHost->mRecentsFragment = (ICallLogFragment*)fragment;
-            fragment->constructor(CallLogQueryHandler::CALL_TYPE_ALL,
-                    MAX_RECENTS_ENTRIES, value - OLDEST_RECENTS_DATE);
-            mHost->mRecentsFragment->SetHasFooterView(TRUE);
-            *item = IFragment::Probe(mHost->mRecentsFragment);
-            REFCOUNT_ADD(*item);
-            return NOERROR;
-        }
-        case TAB_INDEX_ALL_CONTACTS:
-            mHost->mAllContactsFragment = NULL;
-            CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
-            *item = IFragment::Probe(mHost->mAllContactsFragment);
-            REFCOUNT_ADD(*item);
-            return NOERROR;
-    }
-    // throw new IllegalStateException("No fragment at position " + position);
-    Logger::E(ListsFragment::TAG, "No fragment at position %d", position);
+    // Int32 rtl;
+    // mHost->GetRtlPosition(position, &rtl);
+    // switch (rtl) {
+    //     case TAB_INDEX_SPEED_DIAL:
+    //     {
+    //         AutoPtr<SpeedDialFragment> fragment = new SpeedDialFragment();
+    //         fragment->constructor();
+    //         mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
+    //         *item = IFragment::Probe(mHost->mSpeedDialFragment);
+    //         REFCOUNT_ADD(*item)
+    //         return NOERROR;
+    //     }
+    //     case TAB_INDEX_RECENTS:
+    //     {
+    //         AutoPtr<ISystem> sys;
+    //         CSystem::AcquireSingleton((ISystem**)&sys);
+    //         Int64 value;
+    //         sys->GetCurrentTimeMillis(&value);
+    //         AutoPtr<CallLogFragment> fragment = new CallLogFragment();
+    //         fragment->constructor();
+    //         mHost->mRecentsFragment = (ICallLogFragment*)fragment;
+    //         fragment->constructor(CallLogQueryHandler::CALL_TYPE_ALL,
+    //                 MAX_RECENTS_ENTRIES, value - OLDEST_RECENTS_DATE);
+    //         mHost->mRecentsFragment->SetHasFooterView(TRUE);
+    //         *item = IFragment::Probe(mHost->mRecentsFragment);
+    //         REFCOUNT_ADD(*item);
+    //         return NOERROR;
+    //     }
+    //     case TAB_INDEX_ALL_CONTACTS:
+    //         mHost->mAllContactsFragment = NULL;
+    //         CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
+    //         *item = IFragment::Probe(mHost->mAllContactsFragment);
+    //         REFCOUNT_ADD(*item);
+    //         return NOERROR;
+    // }
+    // // throw new IllegalStateException("No fragment at position " + position);
+    // Logger::E(ListsFragment::TAG, "No fragment at position %d", position);
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
@@ -169,19 +169,19 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     // On rotation the FragmentManager handles rotation. Therefore getItem() isn't called.
     // Copy the fragments that the FragmentManager finds so that we can store them in
     // instance variables for later.
-    AutoPtr<IInterface> fragment;
-    FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
-    if (ISpeedDialFragment::Probe(fragment) != NULL) {
-        mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
-    }
-    else if (ICallLogFragment::Probe(fragment) != NULL) {
-        mHost->mRecentsFragment = ICallLogFragment::Probe(fragment);
-    }
-    else if (IAllContactsFragment::Probe(fragment) != NULL) {
-        mHost->mAllContactsFragment = IAllContactsFragment::Probe(fragment);
-    }
-    *item = fragment;
-    REFCOUNT_ADD(*item);
+    // AutoPtr<IInterface> fragment;
+    // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
+    // if (ISpeedDialFragment::Probe(fragment) != NULL) {
+    //     mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
+    // }
+    // else if (ICallLogFragment::Probe(fragment) != NULL) {
+    //     mHost->mRecentsFragment = ICallLogFragment::Probe(fragment);
+    // }
+    // else if (IAllContactsFragment::Probe(fragment) != NULL) {
+    //     mHost->mAllContactsFragment = IAllContactsFragment::Probe(fragment);
+    // }
+    // *item = fragment;
+    // REFCOUNT_ADD(*item);
     return NOERROR;
 }
 

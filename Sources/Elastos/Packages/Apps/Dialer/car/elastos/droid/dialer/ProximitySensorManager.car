@@ -4,43 +4,6 @@ module
     namespace Droid {
     namespace Dialer {
 
-    enum ProximitySensorManagerState {
-        ProximitySensorManagerState_NEAR,
-        ProximitySensorManagerState_FAR
-    }
-
-    /**
-     * Manages the proximity sensor and notifies a listener when enabled.
-     */
-    interface IProximitySensorManager {
-        /**
-         * Enables the proximity manager.
-         * <p>
-         * The listener will start getting notifications of events.
-         * <p>
-         * This method is idempotent.
-         */
-        Enable();
-
-        /**
-         * Disables the proximity manager.
-         * <p>
-         * The listener will stop receiving notifications of events, possibly after receiving a last
-         * {@link Listener#onFar()} callback.
-         * <p>
-         * If {@code waitForFarState} is true, if the sensor is not currently in the {@link State#FAR}
-         * state, the listener will receive a {@link Listener#onFar()} callback the next time the sensor
-         * actually reaches the {@link State#FAR} state.
-         * <p>
-         * If {@code waitForFarState} is false, the listener will receive a {@link Listener#onFar()}
-         * callback immediately if the sensor is currently not in the {@link State#FAR} state.
-         * <p>
-         * This method is idempotent.
-         */
-        Disable(
-            [in] Boolean waitForFarState);
-    }
-
     /**
     * Listener of the state of the proximity sensor.
     * <p>

@@ -13,9 +13,10 @@ CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
 SOURCES += calllog.cpp
-#SOURCES += CallDetailHistoryAdapter.cpp
-#SOURCES += CCallDetailHistoryAdapter.cpp
 SOURCES += CallLogActivity.cpp
+SOURCES += CallDetailHistoryAdapter.cpp
+#SOURCES += CallLogActivity.cpp
+#SOURCES += CCallLogActivity.cpp
 SOURCES += CallLogAdapter.cpp
 SOURCES += CallLogFragment.cpp
 SOURCES += CallLogGroupBuilder.cpp

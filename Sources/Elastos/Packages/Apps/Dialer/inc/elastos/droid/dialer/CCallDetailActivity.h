@@ -2,13 +2,31 @@
 #define __ELASTOS_DROID_DIALER_CCALLDETAILACTIVITY_H__
 
 #include "_Elastos_Droid_Dialer_CCallDetailActivity.h"
-#include "elastos/droid/app/Activity.h"
-// #include <AnalyticsActivity.h>
+#include "elastos/droid/dialer/ProximitySensorManager.h"
+#include "elastos/droid/dialer/CallDetailActivityQueryHandler.h"
+#include "elastos/droid/dialer/PhoneCallDetails.h"
+#include "elastos/droid/dialer/calllog/CallTypeHelper.h"
+#include "elastos/droid/dialer/calllog/PhoneNumberDisplayHelper.h"
+#include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
+#include "elastos/droid/dialer/voicemail/VoicemailStatusHelperStatusMessage.h"
+#include "elastos/droid/dialerbind/analytics/AnalyticsActivity.h"
 #include "elastos/droid/os/AsyncTask.h"
+#include "elastos/core/Runnable.h"
 #include "elastos/core/StringBuilder.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Text.h"
 
+using Elastos::Droid::Contacts::Common::IContactPhotoManager;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Dialer::CallLog::CallTypeHelper;
+using Elastos::Droid::Dialer::CallLog::ContactInfoHelper;
+using Elastos::Droid::Dialer::CallLog::PhoneNumberDisplayHelper;
+using Elastos::Droid::Dialer::Util::IAsyncTaskExecutor;
+using Elastos::Droid::Dialer::Voicemail::IVoicemailStatusHelper;
+using Elastos::Droid::Dialer::Voicemail::VoicemailStatusHelperStatusMessage;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsActivity;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IBundle;
@@ -21,29 +39,22 @@ using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IQuickContactBadge;
+using Elastos::Core::Runnable;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::IRunnable;
 using Elastos::Core::StringBuilder;
-using Elastos::Droid::Dialer::ICallDetailActivity;
-using Elastos::Droid::Dialer::IProximitySensorAware;
-using Elastos::Droid::Dialer::IProximitySensorManager;
-using Elastos::Droid::Dialer::IProximitySensorManagerListener;
-using Elastos::Droid::Dialer::CallLog::ICallTypeHelper;
-using Elastos::Droid::Dialer::CallLog::IContactInfoHelper;
-using Elastos::Droid::Dialer::CallLog::IPhoneNumberDisplayHelper;
-using Elastos::Droid::Dialer::Util::IAsyncTaskExecutor;
-using Elastos::Droid::Dialer::Voicemail::IVoicemailStatusHelper;
-using Elastos::Droid::Dialer::Voicemail::IVoicemailStatusHelperStatusMessage;
-// using Elastos::Droid::DialerBinder::AnalyticsActivity;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 
+/**
+ * Displays the details of a specific call log entry.
+ * <p>
+ * This activity can be either started with the URI of a single call log entry, or with the
+ * {@link #EXTRA_CALL_LOG_IDS} extra to specify a group of call log entries.
+ */
 CarClass(CCallDetailActivity)
-    // TODO:
-    // , public AnalyticsActivity
-    , public Elastos::Droid::App::Activity
+    , public AnalyticsActivity
     , public IProximitySensorAware
     , public ICallDetailActivity
 {
@@ -55,15 +66,13 @@ private:
     {
     private:
         /** Used to show a blank view and hide the action bar. */
-        class BlankRunnable
-            : public Object
-            , public IRunnable
+        class BlankRunnable : public Runnable
         {
         public:
-            CAR_INTERFACE_DECL();
-
             BlankRunnable(
-                /* [in] */ CCallDetailActivity* host);
+                /* [in] */ CCallDetailActivity* host)
+                : mHost(host)
+            {}
 
             CARAPI Run();
 
@@ -71,13 +80,9 @@ private:
             CCallDetailActivity* mHost;
         };
 
-        class UnblankRunnable
-            : public Object
-            , public IRunnable
+        class UnblankRunnable : public Runnable
         {
         public:
-            CAR_INTERFACE_DECL();
-
             UnblankRunnable(
                 /* [in] */ CCallDetailActivity* host);
 
@@ -88,7 +93,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         ProximitySensorListener(
             /* [in] */ CCallDetailActivity* host);
@@ -105,17 +110,18 @@ private:
         CARAPI_(void) PostDelayed(
             /* [in] */ IRunnable* runnable,
             /* [in] */ Int64 delayMillis);
+
     private:
         CCallDetailActivity* mHost;
         AutoPtr<IRunnable> mBlankRunnable;
         AutoPtr<IRunnable> mUnblankRunnable;
     };
 
-    class MarkVoiceMailAsReadTask
-        : public AsyncTask
+    class MarkVoiceMailAsReadTask : public AsyncTask
     {
     public:
         MarkVoiceMailAsReadTask(
+            /* [in] */ IUri* voicemailUri,
             /* [in] */ CCallDetailActivity* host);
 
         // @Override
@@ -124,12 +130,12 @@ private:
             /* [out] */ IInterface** result);
 
     private:
+        AutoPtr<IUri> mVoicemailUri;
         CCallDetailActivity* mHost;
     };
 
 
-    class UpdateContactDetailsTask
-        : public AsyncTask
+    class UpdateContactDetailsTask : public AsyncTask
     {
     public:
         UpdateContactDetailsTask(
@@ -153,14 +159,13 @@ private:
          * @return The phone number type or location.
          */
         CARAPI_(AutoPtr<ICharSequence>) GetNumberTypeOrLocation(
-            /* [in] */ IPhoneCallDetails* details);
+            /* [in] */ PhoneCallDetails* details);
 
     private:
         CCallDetailActivity* mHost;
     };
 
-    class ViewEntry
-        : public Object
+    class ViewEntry : public Object
     {
     public:
         ViewEntry(
@@ -187,6 +192,7 @@ private:
         AutoPtr<IIntent> mSecondaryIntent;
         /** The description for accessibility of the secondary action. */
         String mSecondaryDescription;
+
     private:
         CCallDetailActivity* mHost;
     };
@@ -196,17 +202,17 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         StatusMessageViewOnClickListener(
-            /* [in] */ IVoicemailStatusHelperStatusMessage* messge,
+            /* [in] */ VoicemailStatusHelperStatusMessage* messge,
             /* [in] */ CCallDetailActivity* host);
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<IVoicemailStatusHelperStatusMessage> mMessage;
+        AutoPtr<VoicemailStatusHelperStatusMessage> mMessage;
         CCallDetailActivity* mHost;
     };
 
@@ -253,11 +259,13 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL();
+    CAR_OBJECT_DECL()
 
     CCallDetailActivity();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI OnCreate(
@@ -282,17 +290,19 @@ public:
         /* [in] */ IMenu* menu,
         /* [out] */ Boolean* res);
 
-    CARAPI OnMenuRemoveFromCallLog(
+    CARAPI_(void) OnMenuRemoveFromCallLog(
         /* [in] */ IMenuItem* menuItem);
 
-    CARAPI OnMenuEditNumberBeforeCall(
+    CARAPI_(void) OnMenuEditNumberBeforeCall(
         /* [in] */ IMenuItem* menuItem);
 
-    CARAPI OnMenuTrashVoicemail(
+    CARAPI_(void) OnMenuTrashVoicemail(
         /* [in] */ IMenuItem* menuItem);
 
+    // @Override
     CARAPI EnableProximitySensor();
 
+    // @Override
     CARAPI DisableProximitySensor(
         /* [in] */ Boolean waitForFarState);
 
@@ -300,7 +310,9 @@ protected:
     CARAPI_(void) UpdateVoicemailStatusMessage(
         /* [in] */ ICursor* statusCursor);
 
+    // @Override
     CARAPI OnPause();
+
 private:
     /**
      * Handle voicemail playback or hide voicemail ui.
@@ -323,7 +335,7 @@ private:
      * <p>
      * If both are available, the data on the intent takes precedence.
      */
-    CARAPI_(AutoPtr<ArrayOf<IUri> >) GetCallLogEntryUris();
+    CARAPI_(AutoPtr<ArrayOf<IUri*> >) GetCallLogEntryUris();
 
     /**
      * Update user interface with details of given call.
@@ -331,12 +343,12 @@ private:
      * @param callUris URIs into {@link CallLog.Calls} of the calls to be displayed
      */
     CARAPI_(void) UpdateData(
-        /* [in] */ ArrayOf<IUri>* callUris);
+        /* [in] */ ArrayOf<IUri*>* callUris);
 
     /** Return the phone call details for a given call log URI. */
     CARAPI GetPhoneCallDetailsForUri(
         /* [in] */ IUri* callUri,
-        /* [out] */ IPhoneCallDetails ** details);
+        /* [out] */ PhoneCallDetails** details);
 
     /** Load the contact photos and places them in the corresponding views. */
     CARAPI_(void) LoadContactPhotos(
@@ -346,7 +358,7 @@ private:
         /* [in] */ const String& lookupKey,
         /* [in] */ Int32 contactType);
 
-    CARAPI_(AutoPtr<IVoicemailStatusHelperStatusMessage>) GetStatusMessage(
+    CARAPI_(AutoPtr<VoicemailStatusHelperStatusMessage>) GetStatusMessage(
         /* [in] */ ICursor* statusCursor);
 
     CARAPI_(void) CloseSystemDialogs();
@@ -355,55 +367,52 @@ private:
     static CARAPI_(AutoPtr<ICharSequence>) ForceLeftToRight(
         /* [in] */ ICharSequence* text);
 
+public:
+    /** The enumeration of {@link AsyncTask} objects used in this class. */
+    enum Tasks {
+        MARK_VOICEMAIL_READ,
+        DELETE_VOICEMAIL_AND_FINISH,
+        REMOVE_FROM_CALL_LOG_AND_FINISH,
+        UPDATE_PHONE_CALL_DETAILS,
+    };
+
+    static const AutoPtr<ArrayOf<String> > CALL_LOG_PROJECTION;
+
+    static const Int32 DATE_COLUMN_INDEX = 0;
+    static const Int32 DURATION_COLUMN_INDEX = 1;
+    static const Int32 NUMBER_COLUMN_INDEX = 2;
+    static const Int32 CALL_TYPE_COLUMN_INDEX = 3;
+    static const Int32 COUNTRY_ISO_COLUMN_INDEX = 4;
+    static const Int32 GEOCODED_LOCATION_COLUMN_INDEX = 5;
+    static const Int32 NUMBER_PRESENTATION_COLUMN_INDEX = 6;
+    static const Int32 ACCOUNT_COMPONENT_NAME = 7;
+    static const Int32 ACCOUNT_ID = 8;
+    static const Int32 FEATURES = 9;
+    static const Int32 DATA_USAGE = 10;
+    static const Int32 TRANSCRIPTION_COLUMN_INDEX = 11;
+
 private:
-    static const String TAG; // = "CallDetail";
+    static const String TAG;
 
-    static const Int32 LOADER_ID; // = 0;
-    static const String BUNDLE_CONTACT_URI_EXTRA; // = "contact_uri_extra";
+    static const Int32 LOADER_ID = 0;
+    static const String BUNDLE_CONTACT_URI_EXTRA;
 
-    static const Char32 LEFT_TO_RIGHT_EMBEDDING; // = '\u202A';
-    static const Char32 POP_DIRECTIONAL_FORMATTING; // = '\u202C';
+    static const Char32 LEFT_TO_RIGHT_EMBEDDING = 0x202A;
+    static const Char32 POP_DIRECTIONAL_FORMATTING = 0x202C;
 
     /** The time to wait before enabling the blank the screen due to the proximity sensor. */
-    static const Int64 PROXIMITY_BLANK_DELAY_MILLIS; // = 100;
+    static const Int64 PROXIMITY_BLANK_DELAY_MILLIS = 100;
     /** The time to wait before disabling the blank the screen due to the proximity sensor. */
-    static const Int64 PROXIMITY_UNBLANK_DELAY_MILLIS; // = 500;
+    static const Int64 PROXIMITY_UNBLANK_DELAY_MILLIS = 500;
 
-public:
-    /** A long array extra containing ids of call log entries to display. */
-    static const String EXTRA_CALL_LOG_IDS; // = "EXTRA_CALL_LOG_IDS";
-    /** If we are started with a voicemail, we'll find the uri to play with this extra. */
-    static const String EXTRA_VOICEMAIL_URI; // = "EXTRA_VOICEMAIL_URI";
-    /** If we should immediately start playback of the voicemail, this extra will be set to true. */
-    static const String EXTRA_VOICEMAIL_START_PLAYBACK; // = "EXTRA_VOICEMAIL_START_PLAYBACK";
-    /** If the activity was triggered from a notification. */
-    static const String EXTRA_FROM_NOTIFICATION; // = "EXTRA_FROM_NOTIFICATION";
-
-    static const String VOICEMAIL_FRAGMENT_TAG; // = "voicemail_fragment";
-
-    static const String CALL_LOG_PROJECTION[];
-
-    static Int32 DATE_COLUMN_INDEX; // = 0;
-    static Int32 DURATION_COLUMN_INDEX; // = 1;
-    static Int32 NUMBER_COLUMN_INDEX; // = 2;
-    static Int32 CALL_TYPE_COLUMN_INDEX; // = 3;
-    static Int32 COUNTRY_ISO_COLUMN_INDEX; // = 4;
-    static Int32 GEOCODED_LOCATION_COLUMN_INDEX; // = 5;
-    static Int32 NUMBER_PRESENTATION_COLUMN_INDEX; // = 6;
-    static Int32 ACCOUNT_COMPONENT_NAME; // = 7;
-    static Int32 ACCOUNT_ID; // = 8;
-    static Int32 FEATURES; // = 9;
-    static Int32 DATA_USAGE; // = 10;
-    static Int32 TRANSCRIPTION_COLUMN_INDEX; // = 11;
-private:
-    AutoPtr<ICallTypeHelper> CallTypeHelper;
-    AutoPtr<IPhoneNumberDisplayHelper> mPhoneNumberHelper;
+    AutoPtr<CallTypeHelper> mCallTypeHelper;
+    AutoPtr<PhoneNumberDisplayHelper> mPhoneNumberHelper;
     AutoPtr<IQuickContactBadge> mQuickContactBadge;
     AutoPtr<ITextView> mCallerName;
     AutoPtr<ITextView> mCallerNumber;
     AutoPtr<ITextView> mAccountLabel;
     AutoPtr<IAsyncTaskExecutor> mAsyncTaskExecutor;
-    AutoPtr<IContactInfoHelper> mContactInfoHelper;
+    AutoPtr<ContactInfoHelper> mContactInfoHelper;
 
     String mNumber;
     String mDefaultCountryIso;
@@ -411,10 +420,9 @@ private:
     AutoPtr<ILayoutInflater> mInflater;
     AutoPtr<IResources> mResources;
     /** Helper to load contact photos. */
-    // TODO:
-    // AutoPtr<IContactPhotoManager> mContactPhotoManager;
+    AutoPtr<IContactPhotoManager> mContactPhotoManager;
     /** Helper to make async queries to content resolver. */
-    AutoPtr<ICallDetailActivityQueryHandler> mAsyncQueryHandler;
+    AutoPtr<CallDetailActivityQueryHandler> mAsyncQueryHandler;
     /** Helper to get voicemail status messages. */
     AutoPtr<IVoicemailStatusHelper> mVoicemailStatusHelper;
     // Views related to voicemail status message.
@@ -434,8 +442,11 @@ private:
     /** Whether we should show "remove from call log" in the options menu. */
     Boolean mHasRemoveFromCallLogOption;
 
-    AutoPtr<IProximitySensorManager> mProximitySensorManager;
+    AutoPtr<ProximitySensorManager> mProximitySensorManager;
     AutoPtr<ProximitySensorListener> mProximitySensorListener;
+
+    friend class UpdateContactDetailsTask;
+    friend class CallDetailActivityQueryHandler;
 };
 
 } // Dialer

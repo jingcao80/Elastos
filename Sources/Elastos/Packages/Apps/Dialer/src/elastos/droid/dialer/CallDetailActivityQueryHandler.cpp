@@ -1,11 +1,19 @@
 
 #include "elastos/droid/dialer/CallDetailActivityQueryHandler.h"
+#include "elastos/droid/dialer/CCallDetailActivity.h"
+#include "elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Dialer::Voicemail::VoicemailStatusHelperImpl;
 using Elastos::Droid::Provider::IVoicemailContractStatus;
 using Elastos::Droid::Provider::CVoicemailContractStatus;
+using Elastos::Droid::Provider::IVoicemails;
+using Elastos::Core::AutoLock;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -13,28 +21,24 @@ namespace Droid {
 namespace Dialer {
 
 const String CallDetailActivityQueryHandler::TAG("CallDetail");
-const Int32 CallDetailActivityQueryHandler::QUERY_VOICEMAIL_CONTENT_TOKEN = 101;
-const Int32 CallDetailActivityQueryHandler::QUERY_VOICEMAIL_STATUS_TOKEN = 102;
-const Int32 CallDetailActivityQueryHandler::SOURCE_PACKAGE_COLUMN_INDEX = 0;
-const Int32 CallDetailActivityQueryHandler::HAS_CONTENT_COLUMN_INDEX = 1;
-
-CAR_INTERFACE_IMPL(CallDetailActivityQueryHandler,
-        /*NoNullCursorAsyncQueryHandler*/Object, ICallDetailActivityQueryHandler);
+const Int32 CallDetailActivityQueryHandler::QUERY_VOICEMAIL_CONTENT_TOKEN;
+const Int32 CallDetailActivityQueryHandler::QUERY_VOICEMAIL_STATUS_TOKEN;
+const Int32 CallDetailActivityQueryHandler::SOURCE_PACKAGE_COLUMN_INDEX;
+const Int32 CallDetailActivityQueryHandler::HAS_CONTENT_COLUMN_INDEX;
 
 CallDetailActivityQueryHandler::CallDetailActivityQueryHandler()
 {
     VOICEMAIL_CONTENT_PROJECTION = ArrayOf<String>::Alloc(2);
-    VOICEMAIL_CONTENT_PROJECTION->Set(0, IVoicemailContractVoicemails::SOURCE_PACKAGE);
-    VOICEMAIL_CONTENT_PROJECTION->Set(1, IVoicemailContractVoicemails::HAS_CONTENT);
+    VOICEMAIL_CONTENT_PROJECTION->Set(0, IVoicemails::SOURCE_PACKAGE);
+    VOICEMAIL_CONTENT_PROJECTION->Set(1, IVoicemails::HAS_CONTENT);
 }
 
 ECode CallDetailActivityQueryHandler::constructor(
-    /* [in] */ ICallDetailActivity* callDetailActivity)
+    /* [in] */ CCallDetailActivity* callDetailActivity)
 {
     AutoPtr<IContentResolver> resolver;
     callDetailActivity->GetContentResolver((IContentResolver**)&resolver);
-    asser(0 && "TODO");
-    // NoNullCursorAsyncQueryHandler::constructor(resolver);
+    NoNullCursorAsyncQueryHandler::constructor(resolver);
     mCallDetailActivity = callDetailActivity;
     return NOERROR;
 }
@@ -46,12 +50,13 @@ ECode CallDetailActivityQueryHandler::StartVoicemailStatusQuery(
             VOICEMAIL_CONTENT_PROJECTION, String(NULL), NULL, String(NULL));
 }
 
-ECode CallDetailActivityQueryHandler::OnQueryComplete(
+ECode CallDetailActivityQueryHandler::OnNotNullableQueryComplete(
     /* [in] */ Int32 token,
     /* [in] */ IInterface* cookie,
     /* [in] */ ICursor* cursor)
 {
     // try {
+    AutoLock lock(this);
     if (token == QUERY_VOICEMAIL_CONTENT_TOKEN) {
         // Query voicemail status only if this voicemail record does not have audio.
         if (MoveToFirst(cursor) && HasNoAudio(cursor)) {
@@ -77,8 +82,7 @@ ECode CallDetailActivityQueryHandler::OnQueryComplete(
     //     MoreCloseables.closeQuietly(cursor);
     // }
 
-    assert(0 && "TODO");
-    // MoreCloseables.closeQuietly(cursor);
+    ICloseable::Probe(cursor)->Close();
     return NOERROR;
 }
 

@@ -96,36 +96,6 @@ module
             [in] Int32 streamType);
     }
 
-    /** The enumeration of {@link AsyncTask} objects we use in this class. */
-    enum VoicemailPlaybackPresenterTasks {
-        VoicemailPlaybackPresenterTasks_CHECK_FOR_CONTENT,
-        VoicemailPlaybackPresenterTasks_CHECK_CONTENT_AFTER_CHANGE,
-        VoicemailPlaybackPresenterTasks_PREPARE_MEDIA_PLAYER,
-        VoicemailPlaybackPresenterTasks_RESET_PREPARE_START_MEDIA_PLAYER,
-    }
-
-    [local]
-    interface IVoicemailPlaybackPresenter {
-        OnCreate(
-            [in] IBundle* bundle);
-
-        OnSaveInstanceState(
-            [in] IBundle* outState);
-
-        OnDestroy();
-
-        CreateRateDecreaseListener(
-            [out] IViewOnClickListener** listener);
-
-        CreateRateIncreaseListener(
-            [out] IViewOnClickListener** listener);
-
-        HandleCompletion(
-            [in] IMediaPlayer* mediaPlayer);
-
-        OnPause();
-    }
-
     } // Voicemail
     } // Dialer
     } // Droid

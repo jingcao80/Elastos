@@ -6,14 +6,6 @@ module
     namespace Droid {
     namespace Dialer {
 
-    /** The enumeration of {@link AsyncTask} objects used in this class. */
-    enum CallDetailActivityTasks {
-        CallDetailActivityTasks_MARK_VOICEMAIL_READ,
-        CallDetailActivityTasks_DELETE_VOICEMAIL_AND_FINISH,
-        CallDetailActivityTasks_REMOVE_FROM_CALL_LOG_AND_FINISH,
-        CallDetailActivityTasks_UPDATE_PHONE_CALL_DETAILS,
-    }
-
     /**
      * @Involve
      * interface Elastos.Droid.Content.IContext
@@ -41,15 +33,6 @@ module
         const String EXTRA_FROM_NOTIFICATION = "EXTRA_FROM_NOTIFICATION";
 
         const String VOICEMAIL_FRAGMENT_TAG = "voicemail_fragment";
-
-        OnMenuRemoveFromCallLog(
-            [in] IMenuItem* menuItem);
-
-        OnMenuEditNumberBeforeCall(
-            [in] IMenuItem* menuItem);
-
-        OnMenuTrashVoicemail(
-            [in] IMenuItem* menuItem);
     }
 
     } //Dialer

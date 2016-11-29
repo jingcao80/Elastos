@@ -17,7 +17,9 @@ class AnalyticsActivity
     , public IAnalyticsInterface
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
     CARAPI SendHitEvent(
         /* [in] */ const String& categoryId,

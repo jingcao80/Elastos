@@ -15,7 +15,7 @@ module
          * @param waitForFarState if true and the sensor is currently in the near state, it will wait
          *         until it is again in the far state before stopping to track its state.
          */
-        disableProximitySensor(
+        DisableProximitySensor(
             [in] Boolean waitForFarState);
 
     }

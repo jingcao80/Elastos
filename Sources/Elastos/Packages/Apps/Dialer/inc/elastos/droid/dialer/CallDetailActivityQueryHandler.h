@@ -1,11 +1,11 @@
 #ifndef __ELASTOS_DROID_DIALER_CALLDETAILACTIVITYQUERYHANDLER_H__
 #define __ELASTOS_DROID_DIALER_CALLDETAILACTIVITYQUERYHANDLER_H__
 
-#include "_Elastos.App.Dialer.h"
+#include "elastos/droid/contacts/common/database/NoNullCursorAsyncQueryHandler.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
-// #include "NoNullCursorAsyncQueryHandler.h"
 
+using Elastos::Droid::Contacts::Common::Database::NoNullCursorAsyncQueryHandler;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Net::IUri;
 
@@ -13,22 +13,19 @@ namespace Elastos {
 namespace Droid {
 namespace Dialer {
 
+class CCallDetailActivity;
+
 /**
  * Class used by {@link CallDetailActivity} to fire async content resolver queries.
  */
 class CallDetailActivityQueryHandler
-    // TODO:
-    // : public NoNullCursorAsyncQueryHandler
-    : public Object
-    , public ICallDetailActivityQueryHandler
+    : public NoNullCursorAsyncQueryHandler
 {
 public:
-    CAR_INTERFACE_DECL();
-
     CallDetailActivityQueryHandler();
 
     CARAPI constructor(
-        /* [in] */ ICallDetailActivity* callDetailActivity);
+        /* [in] */ CCallDetailActivity* callDetailActivity);
 
     /**
      * Fires a query to update voicemail status for the given voicemail record. On completion of the
@@ -44,7 +41,7 @@ public:
 
 protected:
     // @Override
-    /*synchronized*/ CARAPI OnNotNullableQueryComplete(
+    CARAPI OnNotNullableQueryComplete(
         /* [in] */ Int32 token,
         /* [in] */ IInterface* cookie,
         /* [in] */ ICursor* cursor);
@@ -61,16 +58,16 @@ private:
         /* [in] */ ICursor* voicemailCursor);
 
 private:
-    static const String TAG; // = "CallDetail";
-    static const Int32 QUERY_VOICEMAIL_CONTENT_TOKEN; // = 101;
-    static const Int32 QUERY_VOICEMAIL_STATUS_TOKEN; // = 102;
+    static const String TAG;
+    static const Int32 QUERY_VOICEMAIL_CONTENT_TOKEN = 101;
+    static const Int32 QUERY_VOICEMAIL_STATUS_TOKEN = 102;
 
     AutoPtr<ArrayOf<String> > VOICEMAIL_CONTENT_PROJECTION;
 
-    static const Int32 SOURCE_PACKAGE_COLUMN_INDEX; // = 0;
-    static const Int32 HAS_CONTENT_COLUMN_INDEX; // = 1;
+    static const Int32 SOURCE_PACKAGE_COLUMN_INDEX = 0;
+    static const Int32 HAS_CONTENT_COLUMN_INDEX = 1;
 
-    AutoPtr<ICallDetailActivity> mCallDetailActivity;
+    AutoPtr<CCallDetailActivity> mCallDetailActivity;
 };
 
 } // Dialer
