@@ -3,6 +3,7 @@ TARGET_NAME= Org.Alljoyn.Bus
 TARGET_TYPE= eco
 
 C_DEFINES += -DQCC_OS_GROUP_POSIX
+C_DEFINES += -DROUTER
 
 EXPORT_ALL_SYMBOLS=1
 
@@ -52,6 +53,7 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(PREBUILD_LIB)/liballjoyn.a
+LIBRARIES += $(PREBUILD_LIB)/libajrouter.a
 LIBRARIES += -lgnustl_shared -llog
 #LIBRARIES += $(PREBUILD_LIB)/libm.a
 #LIBRARIES += -lbinder -linput -llog -lutils
