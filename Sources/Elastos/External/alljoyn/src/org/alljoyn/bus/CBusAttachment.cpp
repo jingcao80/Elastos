@@ -25,7 +25,16 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
+static const String TAG("CBusAttachment");
+
 extern void GlobalInitialize();
+
+typedef enum {
+    BA_HSL,     // BusAttachment hosted session listener index
+    BA_JSL,     // BusAttachment joined session listener index
+    BA_SL,     // BusAttachment session listener index
+    BA_LAST     // indicates the size of the enum
+} BusAttachmentSessionListenerIndex;
 
 //============================================================================
 // CBusAttachment::AuthListenerInternal
@@ -98,8 +107,15 @@ ECode CBusAttachment::AuthListenerInternal::AuthenticationComplete(
 //============================================================================
 // CBusAttachment
 //============================================================================
+static AutoPtr<IHashSet> Init_sBusAttachmentSet()
+{
+    AutoPtr<IHashSet> hashSet;
+    CHashSet::New((IHashSet**)&hashSet);
+    return hashSet;
+}
+
 const Int32 CBusAttachment::DEFAULT_CONCURRENCY = 4;
-AutoPtr<IHashSet> CBusAttachment::sBusAttachmentSet = CBusAttachment::Init_sBusAttachmentSet();
+AutoPtr<IHashSet> CBusAttachment::sBusAttachmentSet = Init_sBusAttachmentSet();
 Boolean CBusAttachment::sShutdownHookRegistered = FALSE;
 const String CBusAttachment::TAG("CBusAttachment");
 
@@ -196,7 +212,7 @@ ECode CBusAttachment::Connect(
 {
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
-        Logger::E(TAG, "Connect(): NULL bus pointer");
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
         return ER_FAIL;
     }
 
@@ -219,7 +235,7 @@ ECode CBusAttachment::RegisterBusObject(
 {
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
-        Logger::E(TAG, "RegisterBusObject(): NULL bus pointer");
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
         return ER_FAIL;
     }
 
@@ -240,7 +256,7 @@ ECode CBusAttachment::EmitChangedSignal(
 {
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
-        Logger::E(TAG, "RegisterBusObject(): NULL bus pointer");
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
         return ER_FAIL;
     }
 
@@ -258,7 +274,7 @@ ECode CBusAttachment::RequestName(
 {
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
-        Logger::E(TAG, "RequestName(): NULL bus pointer");
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
         return ER_FAIL;
     }
 
@@ -279,7 +295,12 @@ ECode CBusAttachment::ReleaseName(
         return ER_FAIL;
     }
 
-    return busPtr->ReleaseName(name.string());
+    QStatus status = busPtr->ReleaseName(name.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "ReleaseName(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::AddMatch(
@@ -291,7 +312,12 @@ ECode CBusAttachment::AddMatch(
         return ER_FAIL;
     }
 
-    return busPtr->AddMatch(rule.string());
+    QStatus status = busPtr->AddMatch(rule.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "AddMatch(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::RemoveMatch(
@@ -303,7 +329,12 @@ ECode CBusAttachment::RemoveMatch(
         return ER_FAIL;
     }
 
-    return busPtr->RemoveMatch(rule.string());
+    QStatus status = busPtr->RemoveMatch(rule.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "RemoveMatch(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::AdvertiseName(
@@ -334,7 +365,12 @@ ECode CBusAttachment::CancelAdvertiseName(
         return ER_FAIL;
     }
 
-    return busPtr->CancelAdvertiseName(name.string(), transports);
+    QStatus status = busPtr->CancelAdvertiseName(name.string(), transports);
+    if (status != ER_OK) {
+        Logger::E(TAG, "CancelAdvertiseName(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::FindAdvertisedName(
@@ -346,7 +382,12 @@ ECode CBusAttachment::FindAdvertisedName(
         return ER_FAIL;
     }
 
-    return busPtr->FindAdvertisedName(namePrefix.string());
+    QStatus status = busPtr->FindAdvertisedName(namePrefix.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "FindAdvertisedName(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::FindAdvertisedNameByTransport(
@@ -359,8 +400,13 @@ ECode CBusAttachment::FindAdvertisedNameByTransport(
         return ER_FAIL;
     }
 
-    return busPtr->FindAdvertisedNameByTransport(
+    QStatus status = busPtr->FindAdvertisedNameByTransport(
         namePrefix.string(), transports);
+    if (status != ER_OK) {
+        Logger::E(TAG, "FindAdvertisedNameByTransport(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::CancelFindAdvertisedName(
@@ -372,7 +418,12 @@ ECode CBusAttachment::CancelFindAdvertisedName(
         return ER_FAIL;
     }
 
-    return busPtr->CancelFindAdvertisedName(namePrefix.string());
+    QStatus status = busPtr->CancelFindAdvertisedName(namePrefix.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "CancelFindAdvertisedName(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::CancelFindAdvertisedNameByTransport(
@@ -385,8 +436,13 @@ ECode CBusAttachment::CancelFindAdvertisedNameByTransport(
         return ER_FAIL;
     }
 
-    return busPtr->CancelFindAdvertisedNameByTransport(
+    QStatus status = busPtr->CancelFindAdvertisedNameByTransport(
         namePrefix.string(), transports);
+    if (status != ER_OK) {
+        Logger::E(TAG, "CancelFindAdvertisedNameByTransport(): Exception(0x%08x)", status);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::BindSessionPort(
@@ -457,7 +513,12 @@ ECode CBusAttachment::UnbindSessionPort(
         return ER_FAIL;
     }
 
-    return busPtr->UnbindSessionPort(sessionPort);
+    QStatus status = busPtr->UnbindSessionPort(sessionPort);
+    if (status == ER_OK) {
+        AutoLock lock(busPtr->mBaCommonLock);
+        busPtr->mSessionPortListenerMap[sessionPort] = NULL;
+    }
+    return status;
 }
 
 ECode CBusAttachment::JoinSession(
@@ -483,40 +544,72 @@ ECode CBusAttachment::JoinSession(
     return NOERROR;
 }
 
-ECode CBusAttachment::LeaveSession(
-    /* [in] */ Int32 sessionId)
+static ECode LeaveGenericSession(
+    /* [in] */ Int64 handle,
+    /* [in] */ Int32 sessionId,
+    /* [in] */ BusAttachmentSessionListenerIndex index)
 {
-    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(handle);
     if (busPtr == NULL) {
         Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
         return ER_FAIL;
     }
 
-    return busPtr->LeaveSession(sessionId);
+    /*
+     * Make the AllJoyn call.
+     */
+    QStatus status = ER_OK;
+    switch (index) {
+    case BA_HSL:
+        status = busPtr->LeaveHostedSession(sessionId);
+        if (ER_OK == status) {
+            busPtr->mSessionListenerMap[sessionId].mHostedListener = NULL;
+        }
+        break;
+
+    case BA_JSL:
+        status = busPtr->LeaveJoinedSession(sessionId);
+        if (ER_OK == status) {
+            busPtr->mSessionListenerMap[sessionId].mJoinedListener = NULL;
+        }
+        break;
+
+    case BA_SL:
+        status = busPtr->LeaveSession(sessionId);
+        if (ER_OK == status) {
+            busPtr->mSessionListenerMap[sessionId].mListener = NULL;
+        }
+        break;
+
+    default:
+        Logger::E(TAG, "Exception unknown BusAttachmentSessionListenerIndex %d", index);
+        assert(0);
+        return ER_FAIL;
+    }
+
+    if (status != ER_OK) {
+        Logger::I(TAG, "Error: LeaveGenericSession");
+    }
+
+    return status;
+}
+
+ECode CBusAttachment::LeaveSession(
+    /* [in] */ Int32 sessionId)
+{
+    return LeaveGenericSession(mHandle, sessionId, BA_SL);
 }
 
 ECode CBusAttachment::LeaveHostedSession(
     /* [in] */ Int32 sessionId)
 {
-    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
-    if (busPtr == NULL) {
-        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
-        return ER_FAIL;
-    }
-
-    return busPtr->LeaveHostedSession(sessionId);
+    return LeaveGenericSession(mHandle, sessionId, BA_HSL);
 }
 
 ECode CBusAttachment::LeaveJoinedSession(
     /* [in] */ Int32 sessionId)
 {
-    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
-    if (busPtr == NULL) {
-        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
-        return ER_FAIL;
-    }
-
-    return busPtr->LeaveJoinedSession(sessionId);
+    return LeaveGenericSession(mHandle, sessionId, BA_JSL);
 }
 
 ECode CBusAttachment::RemoveSessionMember(
@@ -561,9 +654,19 @@ ECode CBusAttachment::GetSessionFd(
         return ER_FAIL;
     }
 
-    Int32 fd;
-    sockFd->GetValue(&fd);
-    return busPtr->GetSessionFd(sessionId, fd);
+    qcc::SocketFd sockfd = -1; //qcc::INVALID_SOCKET_FD;
+
+    QStatus status = busPtr->GetSessionFd(sessionId, sockfd);
+
+    if (status != ER_OK) {
+        Logger::E(TAG, "GetSessionFd(): fails");
+        return status;
+    }
+
+    /*
+     * Store the sockFd in its corresponding out parameter.
+     */
+    return sockFd->SetValue(sockfd);
 }
 
 ECode CBusAttachment::SetLinkTimeout(
@@ -579,7 +682,15 @@ ECode CBusAttachment::SetLinkTimeout(
     Int32 timeout;
     linkTimeout->GetValue(&timeout);
     uint32_t t = timeout;
-    return busPtr->SetLinkTimeout(sessionId, t);
+    QStatus status = busPtr->SetLinkTimeout(sessionId, t);
+    if (status == ER_OK) {
+        timeout  = t;
+        return linkTimeout->SetValue(timeout);
+    }
+    else {
+        Logger::E(TAG, "SetLinkTimeout(): fails");
+    }
+    return status;
 }
 
 ECode CBusAttachment::GetPeerGUID(
@@ -592,10 +703,17 @@ ECode CBusAttachment::GetPeerGUID(
         return ER_FAIL;
     }
 
-    String str;
-    guid->GetValue(&str);
-    qcc::String qstr(str.string());
-    return busPtr->GetPeerGUID(name.string(), qstr);
+
+    qcc::String guidstr;
+    QStatus status = busPtr->GetPeerGUID(name.string(), guidstr);
+    if (status == ER_OK) {
+        String str(guidstr.c_str());
+        return guid->SetValue(str);
+    }
+    else {
+        Logger::E(TAG, "GetPeerGUID(): fails");
+    }
+    return status;
 }
 
 ECode CBusAttachment::Ping(
@@ -608,7 +726,11 @@ ECode CBusAttachment::Ping(
         return ER_FAIL;
     }
 
-    return busPtr->Ping(name.string(), timeout);
+    QStatus status = busPtr->Ping(name.string(), timeout);
+    if (status != ER_OK) {
+        Logger::E(TAG, "GetPeerGUID(): fails");
+    }
+    return status;
 }
 
 ECode CBusAttachment::PingAsync(
@@ -1020,6 +1142,7 @@ ECode CBusAttachment::GetProxyBusObject(
 ECode CBusAttachment::GetUniqueName(
     /* [out] */ String* uniqueName)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -1303,12 +1426,6 @@ ECode CBusAttachment::EnableConcurrentCallbacks()
     return NOERROR;
 }
 
-AutoPtr<IHashSet> CBusAttachment::Init_sBusAttachmentSet()
-{
-    AutoPtr<IHashSet> hashSet;
-    CHashSet::New((IHashSet**)&hashSet);
-    return hashSet;
-}
 
 } // namespace Bus
 } // namespace Alljoyn

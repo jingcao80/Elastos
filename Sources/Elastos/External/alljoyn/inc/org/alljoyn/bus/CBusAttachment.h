@@ -1503,8 +1503,6 @@ private:
         /* [in] */ const String& description,
         /* [in] */ ITranslator* dt);
 
-    static CARAPI_(AutoPtr<IHashSet>) Init_sBusAttachmentSet();
-
 private:
     friend class InterfaceDescription;
     friend class NativeBusListener;
