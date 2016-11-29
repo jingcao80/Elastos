@@ -112,6 +112,7 @@ private:
     CARAPI_(void) Destroy();
 
 private:
+    friend class CBusAttachment;
     /**
      * The opaque pointer to the underlying C++ object which is actually tied
      * to the AllJoyn code.

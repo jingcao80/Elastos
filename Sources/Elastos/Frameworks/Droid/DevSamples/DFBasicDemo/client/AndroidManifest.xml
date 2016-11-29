@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="Elastos.DevSamples.DFBasicDemo.BasicClient"
-      android:versionCode="1"
-      android:versionName="1.0">
-
-    <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="21" />
-
+      android:versionCode="15090000"
+      android:versionName="15.09.00">
+    <!-- Permission required to use the TCP transport -->
+    <uses-sdk android:minSdkVersion="16"></uses-sdk>
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
     <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".CClient"
                   android:label="@string/app_name"
-                  android:theme="@android:style/Theme.NoTitleBar">
+                  android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

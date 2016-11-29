@@ -4,7 +4,9 @@
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
+#include "org/alljoyn/bus/NativeSessionListener.h"
 #include "org/alljoyn/bus/NativeSessionPortListener.h"
+#include "org/alljoyn/bus/SessionListener.h"
 #include "org/alljoyn/bus/SessionPortListener.h"
 #include "org/alljoyn/bus/NativeMessageContext.h"
 #include <elastos/core/AutoLock.h>
@@ -524,12 +526,56 @@ ECode CBusAttachment::UnbindSessionPort(
 ECode CBusAttachment::JoinSession(
     /* [in] */ const String& sessionHost,
     /* [in] */ Int16 sessionPort,
-    /* [in] */ IMutableInteger32Value* sessionId,
+    /* [in] */ IMutableInteger32Value* _sessionId,
     /* [in] */ ISessionOpts* opts,
-    /* [in] */ ISessionListener* listener)
+    /* [in] */ ISessionListener* _listener)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    ajn::SessionOpts sessionOpts;
+    Byte traffic;
+    opts->GetTraffic(&traffic);
+    sessionOpts.traffic = static_cast<ajn::SessionOpts::TrafficType>(traffic);
+
+    Boolean isMultipoint;
+    opts->IsMultipoint(&isMultipoint);
+    sessionOpts.isMultipoint = isMultipoint;
+
+    Byte proximity;
+    opts->GetProximity(&proximity);
+    sessionOpts.proximity = proximity;
+
+    Int16 transports;
+    opts->GetTransports(&transports);
+    sessionOpts.transports = transports;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "JoinSession(): Exception or NULL bus pointer");
+        return NOERROR;
+    }
+
+    NativeSessionListener* listener = reinterpret_cast<NativeSessionListener*>(((SessionListener*)_listener)->mHandle);
+    assert(listener);
+
+    ajn::SessionId sessionId = 0;
+
+    QStatus status = busPtr->JoinSession(sessionHost.string(), sessionPort, listener, sessionId, sessionOpts);
+
+    if (status == ER_OK) {
+        AutoLock lock(busPtr->mBaCommonLock);
+        busPtr->mSessionListenerMap[sessionId].mListener = _listener;
+    }
+    else {
+        return status;
+    }
+
+    _sessionId->SetValue(sessionId);
+
+    opts->SetTraffic(sessionOpts.traffic);
+    opts->SetMultipoint(sessionOpts.isMultipoint);
+    opts->SetProximity(sessionOpts.proximity);
+    opts->SetTransports(sessionOpts.transports);
+
+    return status;
 }
 
 ECode CBusAttachment::JoinSession(
