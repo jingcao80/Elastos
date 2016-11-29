@@ -234,8 +234,13 @@ void NativeBusObject::MethodHandler(
 
     Int32 count;
     method->GetParamCount(&count);
-    AutoPtr<IInterface> reply;
-    args->SetOutputArgumentOfObjectPtrPtr(count - 1, (IInterface**)&reply);
+    AutoPtr<IParamInfo> paramInfo;
+    method->GetParamInfoByIndex(count - 1, (IParamInfo**)&paramInfo);
+    ParamIOAttribute ioAttr;
+    paramInfo->GetIOAttribute(&ioAttr);
+    AutoPtr<IInterface> reply; //TODO: maybe not IInterface
+    if (ioAttr != ParamIOAttribute_In)
+        args->SetOutputArgumentOfObjectPtrPtr(count - 1, (IInterface**)&reply);
 
     if (FAILED(method->Invoke(busObj, args))) {
         MethodReply(member, msg, ER_FAIL);
@@ -299,7 +304,7 @@ QStatus NativeBusObject::MethodReply(
     QStatus status;
     uint8_t completeTypes = ajn::SignatureUtils::CountCompleteTypes(member->returnSignature.c_str());
     if (reply) {
-        AutoPtr<IArgumentList> args;
+        AutoPtr<ArrayOf<IInterface*> > args;
         if (completeTypes > 1) {
             assert(0);
             // jmethodID mid = env->GetStaticMethodID(CLS_Signature, "structArgs",

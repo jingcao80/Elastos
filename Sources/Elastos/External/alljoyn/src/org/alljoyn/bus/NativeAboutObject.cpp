@@ -42,7 +42,7 @@ QStatus NativeAboutObject::GetAboutData(
         status = CheckForThrownException(ec);
         if (ER_OK == status) {
             // Marshal the returned value
-            if (Marshal("a{sv}", announceArg, msgArg) == NULL) {
+            if (Marshal("a{sv}", (PVoid)announceArg.Get(), msgArg) == NULL) {
                 Logger::E("NativeAboutObject", "GetMsgArgAnnounce() marshaling error");
                 return ER_FAIL;
             }
@@ -65,7 +65,7 @@ QStatus NativeAboutObject::GetAnnouncedAboutData(
         // check for ErrorReplyBusException exception
         status = CheckForThrownException(ec);
         if (ER_OK == status) {
-            if (Marshal("a{sv}", announceArg, msgArg) == NULL) {
+            if (Marshal("a{sv}", (PVoid)announceArg.Get(), msgArg) == NULL) {
                 Logger::E("NativeAboutObject", "GetMsgArgAnnounce() marshaling error");
                 return ER_FAIL;
             }

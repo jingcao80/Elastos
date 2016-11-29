@@ -3,6 +3,9 @@
 #define __ORG_ALLJOYN_BUS_MSGARG_H__
 
 #include <elastos/coredef.h>
+#include <Elastos.CoreLibrary.Core.h>
+
+using Elastos::Core::IBoolean;
 
 namespace Org {
 namespace Alljoyn {
@@ -17,6 +20,203 @@ namespace Bus {
 class MsgArg
 {
 public:
+    /*
+     * Accessor functions for talking to the native MsgArgs.  The msgArg
+     * parameter is a native (MsgArg *).
+     */
+    static CARAPI_(Int32) GetTypeId(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Byte) GetByte(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int16) GetInt16(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int16) GetUint16(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Boolean) GetBool(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int32) GetUint32(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int32) GetInt32(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int64) GetInt64(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int64) GetUint64(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Double) GetDouble(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(String) GetString(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(String) GetObjPath(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(String) GetSignature(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Byte> >) GetByteArray(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Int16> >) GetInt16Array(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Int16> >) GetUint16Array(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Boolean> >) GetBoolArray(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Int32> >) GetUint32Array(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Int32> >) GetInt32Array(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Int64> >) GetInt64Array(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Int64> >) GetUint64Array(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(AutoPtr<ArrayOf<Double> >) GetDoubleArray(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int64) GetKey(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int64) GetVal(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int32) GetNumElements(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int64) GetElement(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ Int32 index);
+
+    static CARAPI_(String) GetElemSig(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int32) GetNumMembers(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI_(Int64) GetMember(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ Int32 index);
+
+    /*
+     * Accessor functions for setting native MsgArgs.  The msgArg
+     * parameter is a native (MsgArg *).
+     */
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Byte arg);
+
+    static CARAPI SetBoolean(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Boolean arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Int16 arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Int32 arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Int64 arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Double arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ const String& arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<Byte>* arg);
+
+    static CARAPI SetBooleanArray(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<Boolean>* arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<Int16>* arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<Int32>* arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<Int64>* arg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<Double>* arg);
+
+    static CARAPI SetArray(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& elemSig,
+        /* [in] */ Int32 numElements);
+
+    static CARAPI SetStruct(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ Int32 numMembers);
+
+    static CARAPI SetDictEntry(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI SetVariant(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ Int64 val);
+
+    static CARAPI SetVariant(
+        /* [in] */ Int64 msgArg);
+
+    static CARAPI Set(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ ArrayOf<IBoolean*>* arg);
+
+    /**
+     * Returns a string representation of the signature of an array of message
+     * args.
+     *
+     * @param msgArgs an array of message arg values
+     * @return the signature string for the message args
+     */
+    static CARAPI_(String) GetSignature(
+        /* [in] */ ArrayOf<Int64>* msgArgs);
+
     /**
      * Unmarshals a native MsgArg into a Java object.
      *
@@ -71,10 +271,53 @@ public:
     static CARAPI Marshal(
         /* [in] */ Int64 msgArg,
         /* [in] */ const String& sig,
-        /* [in] */ IArgumentList* args);
+        /* [in] */ ArrayOf<IInterface*>* args);
 
 private:
     MsgArg();
+
+    static CARAPI UnmarshalInternal(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ CarDataType type,
+        /* [in] */ IArgumentList* args,
+        /* [in] */ Int32 index);
+
+private:
+    /*
+     * The AllJoyn data type IDs.
+     */
+    static const Int32 ALLJOYN_INVALID;
+    static const Int32 ALLJOYN_ARRAY;
+    static const Int32 ALLJOYN_BOOLEAN;
+    static const Int32 ALLJOYN_DOUBLE;
+    static const Int32 ALLJOYN_DICT_ENTRY;
+    static const Int32 ALLJOYN_SIGNATURE;
+    static const Int32 ALLJOYN_INT32;
+    static const Int32 ALLJOYN_INT16;
+    static const Int32 ALLJOYN_OBJECT_PATH;
+    static const Int32 ALLJOYN_UINT16;
+    static const Int32 ALLJOYN_STRUCT;
+    static const Int32 ALLJOYN_STRING;
+    static const Int32 ALLJOYN_UINT64;
+    static const Int32 ALLJOYN_UINT32;
+    static const Int32 ALLJOYN_VARIANT;
+    static const Int32 ALLJOYN_INT64;
+    static const Int32 ALLJOYN_BYTE;
+
+    static const Int32 ALLJOYN_STRUCT_OPEN;
+    static const Int32 ALLJOYN_STRUCT_CLOSE;
+    static const Int32 ALLJOYN_DICT_ENTRY_OPEN;
+    static const Int32 ALLJOYN_DICT_ENTRY_CLOSE;
+
+    static const Int32 ALLJOYN_BOOLEAN_ARRAY;
+    static const Int32 ALLJOYN_DOUBLE_ARRAY;
+    static const Int32 ALLJOYN_INT32_ARRAY;
+    static const Int32 ALLJOYN_INT16_ARRAY;
+    static const Int32 ALLJOYN_UINT16_ARRAY;
+    static const Int32 ALLJOYN_UINT64_ARRAY;
+    static const Int32 ALLJOYN_UINT32_ARRAY;
+    static const Int32 ALLJOYN_INT64_ARRAY;
+    static const Int32 ALLJOYN_BYTE_ARRAY;
 };
 
 } // namespace Bus

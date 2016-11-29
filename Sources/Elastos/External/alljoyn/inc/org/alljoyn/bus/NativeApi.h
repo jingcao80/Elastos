@@ -125,21 +125,6 @@ AutoPtr<IBusObject> GetGlobalRefForObject(
  */
 ajn::MsgArg* Marshal(
     /* [in] */ const char* signature,
-    /* [in] */ IInterface* obj,
-    /* [in] */ ajn::MsgArg* arg);
-
-
-/**
- * Marshal an Object into a MsgArg.
- *
- * @param[in] signature the signature of the Object
- * @param[in] jarg the Object
- * @param[in] arg the MsgArg to marshal into
- * @return the marshalled MsgArg or NULL if the marshalling failed.  This will
- *         be the same as @param arg if marshalling succeeded.
- */
-ajn::MsgArg* Marshal(
-    /* [in] */ const char* signature,
     /* [in] */ PVoid obj,
     /* [in] */ ajn::MsgArg* arg);
 
@@ -156,7 +141,7 @@ ajn::MsgArg* Marshal(
  */
 ajn::MsgArg* Marshal(
     /* [in] */ const char* signature,
-    /* [in] */ IArgumentList* objs,
+    /* [in] */ ArrayOf<IInterface*>* objs,
     /* [in] */ ajn::MsgArg* arg);
 
 /**

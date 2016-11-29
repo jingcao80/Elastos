@@ -288,7 +288,7 @@ ajn::MsgArg* Marshal(
  */
 ajn::MsgArg* Marshal(
     /* [in] */ const char* signature,
-    /* [in] */ IArgumentList* objs,
+    /* [in] */ ArrayOf<IInterface*>* objs,
     /* [in] */ ajn::MsgArg* arg)
 {
     if (!signature) {
