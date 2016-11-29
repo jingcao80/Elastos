@@ -62,6 +62,18 @@ public:
     void UnregisterBusObject(
         /* [in] */ IBusObject* busObject);
 
+    QStatus EmitChangedSignal(
+        /* [in] */ IBusObject* busObject,
+        /* [in] */ const char* ifaceName,
+        /* [in] */ const char* propName,
+        /* [in] */ IInterface* val,
+        /* [in] */ Int32 sessionId);
+
+    QStatus SetAnnounceFlag(
+        /* [in] */ IBusObject* busObject,
+        /* [in] */ const char* ifaceName,
+        /* [in] */ Boolean isAnnounced);
+
     template <typename T>
     QStatus RegisterSignalHandler(
         /* [in] */ const char* ifaceName,
@@ -262,7 +274,7 @@ public:
      * the operation. Note that this member is public since we trust that the
      * native binding we wrote will use it correctly.
      */
-    List<NativePendingAsyncJoin*> mPendingAsyncJoins;
+    List< AutoPtr<NativePendingAsyncJoin> > mPendingAsyncJoins;
 
     /**
      * A List of pending asynchronous ping operation informations.  We store
@@ -270,7 +282,7 @@ public:
      * the operation. Note that this member is public since we trust that the
      * native binding we wrote will use it correctly.
      */
-    List<NativePendingAsyncPing*> mPendingAsyncPings;
+    List< AutoPtr<NativePendingAsyncPing> > mPendingAsyncPings;
 
 private:
     /*

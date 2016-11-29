@@ -6,6 +6,7 @@
 #include "org/alljoyn/bus/NativeBusListener.h"
 #include "org/alljoyn/bus/NativeSessionPortListener.h"
 #include "org/alljoyn/bus/SessionPortListener.h"
+#include "org/alljoyn/bus/NativeMessageContext.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -230,7 +231,6 @@ ECode CBusAttachment::RegisterBusObject(
     return status;
 }
 
-
 ECode CBusAttachment::EmitChangedSignal(
     /* [in] */ IBusObject* busObject,
     /* [in] */ const String& ifcName,
@@ -238,7 +238,18 @@ ECode CBusAttachment::EmitChangedSignal(
     /* [in] */ IInterface* val,
     /* [in] */ Int32 sessionId)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "RegisterBusObject(): NULL bus pointer");
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->EmitChangedSignal(busObject,
+        ifcName.string(), propName.string(), val, sessionId);
+    if (status != ER_OK) {
+        Logger::E(TAG, "RegisterBusObject(): Exception");
+    }
+    return status;
 }
 
 ECode CBusAttachment::RequestName(
@@ -262,19 +273,37 @@ ECode CBusAttachment::RequestName(
 ECode CBusAttachment::ReleaseName(
     /* [in] */ const String& name)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->ReleaseName(name.string());
 }
 
 ECode CBusAttachment::AddMatch(
     /* [in] */ const String& rule)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->AddMatch(rule.string());
 }
 
 ECode CBusAttachment::RemoveMatch(
     /* [in] */ const String& rule)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->RemoveMatch(rule.string());
 }
 
 ECode CBusAttachment::AdvertiseName(
@@ -299,33 +328,65 @@ ECode CBusAttachment::CancelAdvertiseName(
     /* [in] */ const String& name,
     /* [in] */ Int16 transports)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->CancelAdvertiseName(name.string(), transports);
 }
 
 ECode CBusAttachment::FindAdvertisedName(
     /* [in] */ const String& namePrefix)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->FindAdvertisedName(namePrefix.string());
 }
 
 ECode CBusAttachment::FindAdvertisedNameByTransport(
     /* [in] */ const String& namePrefix,
     /* [in] */ Int16 transports)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->FindAdvertisedNameByTransport(
+        namePrefix.string(), transports);
 }
 
 ECode CBusAttachment::CancelFindAdvertisedName(
     /* [in] */ const String& namePrefix)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->CancelFindAdvertisedName(namePrefix.string());
 }
 
 ECode CBusAttachment::CancelFindAdvertisedNameByTransport(
     /* [in] */ const String& namePrefix,
     /* [in] */ Int16 transports)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->CancelFindAdvertisedNameByTransport(
+        namePrefix.string(), transports);
 }
 
 ECode CBusAttachment::BindSessionPort(
@@ -377,20 +438,26 @@ ECode CBusAttachment::BindSessionPort(
     }
 
     _sessionPort->SetValue(sessionPort);
-
     return NOERROR;
 }
 
 ECode CBusAttachment::SetDescriptionTranslator(
     /* [in] */ ITranslator* translator)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::UnbindSessionPort(
     /* [in] */ Int16 sessionPort)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->UnbindSessionPort(sessionPort);
 }
 
 ECode CBusAttachment::JoinSession(
@@ -400,6 +467,7 @@ ECode CBusAttachment::JoinSession(
     /* [in] */ ISessionOpts* opts,
     /* [in] */ ISessionListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -411,31 +479,51 @@ ECode CBusAttachment::JoinSession(
     /* [in] */ IOnJoinSessionListener* onJoinSession,
     /* [in] */ IInterface* context)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::LeaveSession(
     /* [in] */ Int32 sessionId)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->LeaveSession(sessionId);
 }
 
 ECode CBusAttachment::LeaveHostedSession(
     /* [in] */ Int32 sessionId)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->LeaveHostedSession(sessionId);
 }
 
 ECode CBusAttachment::LeaveJoinedSession(
     /* [in] */ Int32 sessionId)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->LeaveJoinedSession(sessionId);
 }
 
 ECode CBusAttachment::RemoveSessionMember(
     /* [in] */ Int32 sessionId,
     /* [in] */ const String& sessionMemberName)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -443,6 +531,7 @@ ECode CBusAttachment::SetSessionListener(
     /* [in] */ Int32 sessionId,
     /* [in] */ ISessionListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -450,6 +539,7 @@ ECode CBusAttachment::SetJoinedSessionListener(
     /* [in] */ Int32 sessionId,
     /* [in] */ ISessionListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -457,6 +547,7 @@ ECode CBusAttachment::SetHostedSessionListener(
     /* [in] */ Int32 sessionId,
     /* [in] */ ISessionListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -464,28 +555,60 @@ ECode CBusAttachment::GetSessionFd(
     /* [in] */ Int32 sessionId,
     /* [in] */ IMutableInteger32Value* sockFd)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    Int32 fd;
+    sockFd->GetValue(&fd);
+    return busPtr->GetSessionFd(sessionId, fd);
 }
 
 ECode CBusAttachment::SetLinkTimeout(
     /* [in] */ Int32 sessionId,
     /* [in] */ IMutableInteger32Value* linkTimeout)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    Int32 timeout;
+    linkTimeout->GetValue(&timeout);
+    uint32_t t = timeout;
+    return busPtr->SetLinkTimeout(sessionId, t);
 }
 
 ECode CBusAttachment::GetPeerGUID(
     /* [in] */ const String& name,
     /* [in] */ IMutableStringValue* guid)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    String str;
+    guid->GetValue(&str);
+    qcc::String qstr(str.string());
+    return busPtr->GetPeerGUID(name.string(), qstr);
 }
 
 ECode CBusAttachment::Ping(
     /* [in] */ const String& name,
     /* [in] */ Int32 timeout)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    return busPtr->Ping(name.string(), timeout);
 }
 
 ECode CBusAttachment::PingAsync(
@@ -494,7 +617,14 @@ ECode CBusAttachment::PingAsync(
     /* [in] */ IOnPingListener* onPing,
     /* [in] */ IInterface* context)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    assert(0 && "TODO");
+    return busPtr->PingAsync(name.string(), timeout, 0, 0);
 }
 
 ECode CBusAttachment::Ping(
@@ -503,19 +633,28 @@ ECode CBusAttachment::Ping(
     /* [in] */ IOnPingListener* onPing,
     /* [in] */ IInterface* context)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    assert(0 && "TODO");
+    return busPtr->Ping(name.string(), timeout);
 }
 
 ECode CBusAttachment::SetDaemonDebug(
     /* [in] */ const String& moduleName,
     /* [in] */ Int32 level)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::SetLogLevels(
     /* [in] */ const String& logEnv)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -523,24 +662,28 @@ ECode CBusAttachment::SetDebugLevel(
     /* [in] */ const String& moduleName,
     /* [in] */ Int32 level)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::UseOSLogging(
     /* [in] */ Boolean useOSLog)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::RegisterAboutListener(
     /* [in] */ IAboutListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::UnregisterAboutListener(
     /* [in] */ IAboutListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -551,22 +694,110 @@ ECode CBusAttachment::UnregisterAboutListener(
 
 ECode CBusAttachment::SetAnnounceFlag(
     /* [in] */ IBusObject* busObject,
-    /* [in] */ const String& ifcName,
+    /* [in] */ const String& ifaceName,
     /* [in] */ Boolean isAnnounced)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->SetAnnounceFlag(busObject, ifaceName.string(), isAnnounced);
+    if (status != ER_OK) {
+        Logger::E(TAG, "SetAnnounceFlag(): Exception");
+        return status;
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::WhoImplements(
     /* [in] */ ArrayOf<String>* interfaces)
 {
-    return NOERROR;
+    QStatus status = ER_OK;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    int len = (interfaces != NULL) ? interfaces->GetLength() : 0;
+    if (0 == len) {
+        // both null and size zero interfaces are used the same.
+        status = busPtr->WhoImplements(NULL, 0);
+    }
+    else {
+        const char** rawIntfString = new const char*[len];
+        memset(rawIntfString, 0, len * sizeof(const char*));
+
+        for (int i = 0; i < len; ++i) {
+            String str = (*interfaces)[i];
+            if (NULL == str) {
+                Logger::E(TAG, "BusAttachment::WhoImplements(): Exception");
+                status = ER_BAD_ARG_1;
+                goto cleanup;
+            }
+
+            rawIntfString[i] = str.string();
+            if (NULL == rawIntfString[i]) {
+                status = ER_BAD_ARG_1;
+                goto cleanup;
+            }
+        }
+        status = busPtr->WhoImplements(rawIntfString, len);
+
+    cleanup:
+        delete [] rawIntfString;
+        rawIntfString = NULL;
+    }
+    return status;
 }
 
 ECode CBusAttachment::CancelWhoImplements(
     /* [in] */ ArrayOf<String>* interfaces)
 {
-    return NOERROR;
+    QStatus status = ER_OK;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    int len = (interfaces != NULL) ? interfaces->GetLength() : 0;
+    if (0 == len) {
+        // both null and size zero interfaces are used the same.
+        status = busPtr->CancelWhoImplements(NULL, 0);
+    }
+    else {
+        const char** rawIntfString = new const char*[len];
+        memset(rawIntfString, 0, len * sizeof(const char*));
+
+        for (int i = 0; i < len; ++i) {
+            String str = (*interfaces)[i];
+            if (NULL == str) {
+                Logger::E(TAG, "BusAttachment_whoImplements(): Exception");
+                status = ER_BAD_ARG_1;
+                goto cleanup;
+            }
+
+            rawIntfString[i] = str.string();
+            if (NULL == rawIntfString[i]) {
+                status = ER_BAD_ARG_1;
+                goto cleanup;
+            }
+        }
+
+        status = busPtr->CancelWhoImplements(rawIntfString, len);
+
+    cleanup:
+        delete [] rawIntfString;
+        rawIntfString = NULL;
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::RegisterBusListener(
@@ -576,8 +807,8 @@ ECode CBusAttachment::RegisterBusListener(
 
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
-        Logger::E(TAG, "RegisterBusListener(): Exception or NULL bus pointer");
-        return NOERROR;
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
     }
 
     {
@@ -598,11 +829,33 @@ ECode CBusAttachment::RegisterBusListener(
 ECode CBusAttachment::UnregisterBusListener(
     /* [in] */ IBusListener* listener)
 {
+    if (listener == NULL) return NOERROR;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    NativeBusListener* ntListener = reinterpret_cast<NativeBusListener*>(((BusListener*)listener)->mHandle);
+    assert(ntListener);
+    busPtr->UnregisterBusListener(*ntListener);
+
+    {
+        AutoLock lock(busPtr->mBaCommonLock);
+        AutoPtr<IBusListener> temp(listener);
+        List< AutoPtr<IBusListener> >::Iterator it = Find(
+            busPtr->mBusListeners.Begin(), busPtr->mBusListeners.End(), temp);
+        if (it != busPtr->mBusListeners.End()) {
+            busPtr->mBusListeners.Erase(it);
+        }
+    }
     return NOERROR;
 }
 
 ECode CBusAttachment::ReleaseResources()
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -643,11 +896,28 @@ ECode CBusAttachment::Connect()
 ECode CBusAttachment::IsConnected(
     /* [out] */ Boolean* connected)
 {
+    VALIDATE_NOT_NULL(connected)
+    *connected = FALSE;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    *connected = busPtr->IsConnected();
     return NOERROR;
 }
 
 ECode CBusAttachment::Disconnect()
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    busPtr->Disconnect();
     return NOERROR;
 }
 
@@ -708,15 +978,23 @@ ECode CBusAttachment::RegisterBusObject(
 }
 
 ECode CBusAttachment::IsBusObjectSecure(
-    /* [in] */ IBusObject* busObj,
+    /* [in] */ IBusObject* busObject,
     /* [out] */ Boolean* secure)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::UnregisterBusObject(
-    /* [in] */ IBusObject* obj)
+    /* [in] */ IBusObject* busObject)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    busPtr->UnregisterBusObject(busObject);
     return NOERROR;
 }
 
@@ -727,6 +1005,7 @@ ECode CBusAttachment::GetProxyBusObject(
     /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
     /* [out] */ IProxyBusObject** proxy)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -747,6 +1026,16 @@ ECode CBusAttachment::GetUniqueName(
 ECode CBusAttachment::GetGlobalGUIDString(
     /* [out] */ String* guid)
 {
+    VALIDATE_NOT_NULL(guid)
+    *guid = NULL;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    *guid = String(busPtr->GetGlobalGUIDString().c_str());
     return NOERROR;
 }
 
@@ -756,7 +1045,7 @@ ECode CBusAttachment::RegisterSignalHandler(
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod)
 {
-    return NOERROR;
+    return RegisterSignalHandler(ifaceName, signalName, obj, handlerMethod, String(NULL));
 }
 
 ECode CBusAttachment::RegisterSignalHandler(
@@ -764,8 +1053,17 @@ ECode CBusAttachment::RegisterSignalHandler(
     /* [in] */ const String& signalName,
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod,
-    /* [in] */ const String& source)
+    /* [in] */ const String& ancillary)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    assert(0 && "TODO");
+    // return busPtr->RegisterSignalHandler(ifaceName.string(), signalName.string(),
+    //     obj, handlerMethod, ancillary.string());
     return NOERROR;
 }
 
@@ -776,12 +1074,14 @@ ECode CBusAttachment::RegisterSignalHandlerWithRule(
     /* [in] */ IMethodInfo* handlerMethod,
     /* [in] */ const String& matchRule)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::RegisterSignalHandlers(
     /* [in] */ IInterface* obj)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -789,29 +1089,57 @@ ECode CBusAttachment::UnregisterSignalHandler(
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    busPtr->UnregisterSignalHandler(obj, handlerMethod);
     return NOERROR;
 }
 
 ECode CBusAttachment::UnregisterSignalHandlers(
     /* [in] */ IInterface* obj)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::RegisterKeyStoreListener(
     /* [in] */ IKeyStoreListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::ClearKeyStore()
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    busPtr->ClearKeyStore();
     return NOERROR;
 }
 
 ECode CBusAttachment::ClearKeys(
     /* [in] */ const String& guid)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->ClearKeys(guid.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "ClearKeys(): Exception");
+        return status;
+    }
+
     return NOERROR;
 }
 
@@ -819,6 +1147,19 @@ ECode CBusAttachment::SetKeyExpiration(
     /* [in] */ const String& guid,
     /* [in] */ Int32 timeout)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->SetKeyExpiration(guid.string(), timeout);
+
+    if (status != ER_OK) {
+        Logger::E(TAG, "SetKeyExpiration(): Exception");
+        return status;
+    }
+
     return NOERROR;
 }
 
@@ -826,12 +1167,40 @@ ECode CBusAttachment::GetKeyExpiration(
     /* [in] */ const String& guid,
     /* [in] */ IMutableInteger32Value* timeout)
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    /*
+     * Make the AllJoyn call.
+     */
+    uint32_t t = 0;
+    QStatus status = busPtr->GetKeyExpiration(guid.string(), t);
+
+    if (status != ER_OK) {
+        Logger::E(TAG, "GetKeyExpiration(): Exception");
+        return status;
+    }
+
+    return timeout->SetValue(t);
 }
 
 ECode CBusAttachment::ReloadKeyStore()
 {
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->ReloadKeyStore();
+
+    if (status != ER_OK) {
+        Logger::E(TAG, "ReloadKeyStore(): Exception");
+    }
+    return status;
 }
 
 ECode CBusAttachment::RegisterAuthListener(
@@ -840,6 +1209,7 @@ ECode CBusAttachment::RegisterAuthListener(
     /* [in] */ const String& keyStoreFileName,
     /* [in] */ Boolean isShared)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -848,6 +1218,7 @@ ECode CBusAttachment::RegisterAuthListener(
     /* [in] */ IAuthListener* listener,
     /* [in] */ const String& keyStoreFileName)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
@@ -855,23 +1226,80 @@ ECode CBusAttachment::RegisterAuthListener(
     /* [in] */ const String& authMechanisms,
     /* [in] */ IAuthListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::RegisterSecurityViolationListener(
     /* [in] */ ISecurityViolationListener* listener)
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::GetMessageContext(
     /* [out] */ IMessageContext** context)
 {
+    VALIDATE_NOT_NULL(context)
+    *context = NULL;
+
+    ajn::Message msg = NativeMessageContext::GetMessage();
+
+    String jobjectPath(msg->GetObjectPath());
+    if (NULL == jobjectPath) {
+        return NOERROR;
+    }
+
+    String jinterfaceName(msg->GetInterface());
+    if (NULL == jinterfaceName) {
+        return NOERROR;
+    }
+
+    String jmemberName(msg->GetMemberName());
+    if (NULL == jmemberName) {
+        return NOERROR;
+    }
+
+    String jdestination(msg->GetDestination());
+    if (NULL == jdestination) {
+        return NOERROR;
+    }
+
+    String jsender(msg->GetSender());
+    if (NULL == jsender) {
+        return NOERROR;
+    }
+
+    String jsignature(msg->GetSignature());
+    if (NULL == jsignature) {
+        return NOERROR;
+    }
+
+    String jauthMechanism(msg->GetAuthMechanism().c_str());
+    if (NULL == jauthMechanism) {
+        return NOERROR;
+    }
+
+    ajn::SessionId sessionId = msg->GetSessionId();
+    uint32_t serial = msg->GetCallSerial();
+
+    assert(0 && "TODO");
+    // return CMessageContext::New(mid, msg->IsUnreliable(), jobjectPath,
+    //     jinterfaceName, jmemberName, jdestination,
+    //     jsender, sessionId, jsignature, jauthMechanism,
+    //     serial, context);
     return NOERROR;
 }
 
 ECode CBusAttachment::EnableConcurrentCallbacks()
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    busPtr->EnableConcurrentCallbacks();
     return NOERROR;
 }
 

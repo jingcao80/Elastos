@@ -4,7 +4,9 @@
 
 #include "_Org.Alljoyn.Bus.h"
 #include "Elastos.Droid.Content.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::Droid::Content::IContext;
 
 namespace Org {
@@ -12,6 +14,7 @@ namespace Alljoyn {
 namespace Bus {
 
 class NativePendingAsyncJoin
+    : public Object
 {
 public:
     NativePendingAsyncJoin(

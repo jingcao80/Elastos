@@ -4,14 +4,17 @@
 
 #include "_Org.Alljoyn.Bus.h"
 #include "Elastos.Droid.Content.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Core::Object;
 
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
 class NativePendingAsyncPing
+    : public Object
 {
 public:
     NativePendingAsyncPing(

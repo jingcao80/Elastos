@@ -4,6 +4,7 @@
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
 #include "org/alljoyn/bus/NativeBusObject.h"
+#include <alljoyn/MsgArg.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -13,6 +14,8 @@ using Elastos::Utility::Logging::Logger;
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
+
+static const String TAG("NativeBusAttachment");
 
 NativeBusAttachment::NativeBusAttachment(
     /* [in] */ const char* applicationName,
@@ -85,7 +88,7 @@ void NativeBusAttachment::Disconnect()
     if (IsConnected()) {
         QStatus status = BusAttachment::Disconnect();
         if (ER_OK != status) {
-            Logger::E("NativeBusAttachment", "Disconnect failed");
+            Logger::E(TAG, "Disconnect failed");
         }
     }
 
@@ -94,12 +97,12 @@ void NativeBusAttachment::Disconnect()
     if (IsStarted()) {
         QStatus status = Stop();
         if (ER_OK != status) {
-            Logger::E("NativeBusAttachment", "Stop failed");
+            Logger::E(TAG, "Stop failed");
         }
 
         status = Join();
         if (ER_OK != status) {
-            Logger::E("NativeBusAttachment", "Join failed");
+            Logger::E(TAG, "Join failed");
         }
     }
 
@@ -126,9 +129,6 @@ void NativeBusAttachment::Disconnect()
      * async join.  We assume that since we have done a disconnect/stop/join, there
      * will never be a callback firing that expects to call out into one of these.
      */
-    for (List<NativePendingAsyncJoin*>::Iterator i = mPendingAsyncJoins.Begin(); i != mPendingAsyncJoins.End(); ++i) {
-        delete (*i);
-    }
     mPendingAsyncJoins.Clear();
 
     /*
@@ -136,9 +136,6 @@ void NativeBusAttachment::Disconnect()
      * async ping.  We assume that since we have done a disconnect/stop/join, there
      * will never be a callback firing that expects to call out into one of these.
      */
-    for (List<NativePendingAsyncPing*>::Iterator i = mPendingAsyncPings.Begin(); i != mPendingAsyncPings.End(); ++i) {
-        delete (*i);
-    }
     mPendingAsyncPings.Clear();
 
     /*
@@ -344,13 +341,13 @@ void NativeBusAttachment::UnregisterBusObject(
      * Attachment.
      */
     if (!IsLocalBusObject(busObject)) {
-        Logger::E("NativeBusAttachment", "UnregisterBusObject(): No existing Bus Object");
+        Logger::E(TAG, "UnregisterBusObject(): No existing Bus Object");
         return;
     }
 
     NativeBusObject* cppObject = GetBackingObject(busObject);
     if (cppObject == NULL) {
-        Logger::E("NativeBusAttachment", "UnregisterBusObject(): No existing Backing Object");
+        Logger::E(TAG, "UnregisterBusObject(): No existing Backing Object");
         return;
     }
 
@@ -392,6 +389,73 @@ void NativeBusAttachment::UnregisterBusObject(
      * invalid, so mark it as such.
      */
     ForgetLocalBusObject(jo);
+}
+
+QStatus NativeBusAttachment::EmitChangedSignal(
+    /* [in] */ IBusObject* busObject,
+    /* [in] */ const char* ifaceName,
+    /* [in] */ const char* propName,
+    /* [in] */ IInterface* val,
+    /* [in] */ Int32 sessionId)
+{
+    AutoLock lock1(gBusObjectMapLock);
+
+    NativeBusObject* cppObject = GetBackingObject(busObject);
+    if (cppObject == NULL) {
+        Logger::E(TAG, "EmitChangedSignal(): No existing Backing Object");
+        return ER_FAIL;
+    }
+
+    QStatus status = ER_OK;
+
+    ajn::MsgArg* arg = NULL;
+    ajn::MsgArg value;
+
+    if (propName) {
+        const ajn::BusAttachment& bus = cppObject->GetBusAttachment();
+        const ajn::InterfaceDescription* iface = bus.GetInterface(ifaceName);
+        assert(iface);
+        const ajn::InterfaceDescription::Property* prop = iface->GetProperty(propName);
+        assert(prop);
+        // arg = MsgArg::::Marshal(prop->signature.c_str(), propName, &value);
+        assert(0 && "TODO");
+    }
+
+    if (cppObject) {
+        cppObject->EmitPropChanged(ifaceName, propName, (arg ? *arg : value), sessionId);
+    }
+
+    return status;
+}
+
+QStatus NativeBusAttachment::SetAnnounceFlag(
+    /* [in] */ IBusObject* busObject,
+    /* [in] */ const char* ifaceName,
+    /* [in] */ Boolean isAnnounced)
+{
+    AutoLock lock(gBusObjectMapLock);
+
+    NativeBusObject* cppObject = GetBackingObject(busObject);
+
+    if (!cppObject) {
+        Logger::E(TAG, "SetAnnounceFlag: BusObject not found");
+        return ER_BUS_NO_SUCH_OBJECT;
+    }
+
+    QStatus status = ER_OK;
+    const ajn::InterfaceDescription* iface = GetInterface(ifaceName);
+    if (!iface) {
+        return ER_BUS_OBJECT_NO_SUCH_INTERFACE;
+    }
+
+    if (isAnnounced) {
+        status = cppObject->SetAnnounceFlag(iface, ajn::BusObject::ANNOUNCED);
+    }
+    else {
+        status = cppObject->SetAnnounceFlag(iface, ajn::BusObject::UNANNOUNCED);
+    }
+
+    return status;
 }
 
 template <typename T>

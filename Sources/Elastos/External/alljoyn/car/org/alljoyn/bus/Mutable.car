@@ -22,6 +22,11 @@ module
     }
 
     interface IMutableStringValue {
+        GetValue(
+            [out] String* value);
+
+        SetValue(
+            [in] String value);
 
     }
 

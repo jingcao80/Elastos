@@ -251,6 +251,24 @@ NativeBusObject* GetBackingObject(
     return NULL;
 }
 
+
+/**
+ * Given a Java object that someone is claiming has been registered as a bus
+ * object with a bus attachment; return the corresponding strong reference to it
+ * that we must have saved.
+ */
+AutoPtr<IBusObject> GetGlobalRefForObject(
+    /* [in] */ IBusObject* busObject)
+{
+    AutoPtr<IBusObject> temp(busObject);
+    Map<AutoPtr<IBusObject>, Pair<uint32_t, NativeBusObject*> >::Iterator i = gBusObjectMap.Find(temp);
+    if (i != gBusObjectMap.End()) {
+        return i->mFirst;
+    }
+
+    return NULL;
+}
+
 /**
  * Marshal an Object into a MsgArg.
  *
