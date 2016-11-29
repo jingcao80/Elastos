@@ -78,7 +78,7 @@ ECode ContentProviderProxy::Query(
         sortOrder, observer, cancellationSignal, (IBulkCursorDescriptor**)&descriptor);
     if (FAILED(ec) || descriptor == NULL) {
         Logger::D("ContentProviderProxy", " Error: Failed to Query, ec=%08x", ec);
-        IBulkCursor::Probe(adaptor)->Close();
+        adaptor->Close();
         return ec;
     }
 
