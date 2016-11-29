@@ -1,6 +1,7 @@
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
+#include "org/alljoyn/bus/Signature.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/AllJoynStd.h>
@@ -256,46 +257,59 @@ String InterfaceDescription::GetName(
 String InterfaceDescription::GetInputSig(
     /* [in] */ IMethodInfo* method)
 {
+    Int32 count;
+    method->GetParamCount(&count);
+    AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
+    method->GetAllParamInfos(paramInfos);
+
+    AutoPtr<IParamInfo> paramInfo;
+    ParamIOAttribute ioAttr;
+    (*paramInfos)[count - 1]->GetIOAttribute(&ioAttr);
+    if (ioAttr != ParamIOAttribute_In) {
+        paramInfos->Set(count - 1, NULL);
+    }
+
     AutoPtr<IAnnotationInfo> busMethod;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String signature;
     if (busMethod != NULL && (busMethod->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
-        // TODO:
-        // return Signature.typeSig(method.getGenericParameterTypes(), busMethod.signature());
+        return Signature::TypeSig(paramInfos, signature);
     }
     AutoPtr<IAnnotationInfo> busSignal;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
-        // TODO:
-        // return Signature.typeSig(method.getGenericParameterTypes(), busSignal.signature());
+        return Signature::TypeSig(paramInfos, signature);
     }
 
-    // TODO:
-    // return Signature.typeSig(method.getGenericParameterTypes(), null);
-    method->GetSignature(&signature);
-    return signature;
+    return Signature::TypeSig(paramInfos, String(NULL));
 }
 
 String InterfaceDescription::GetOutSig(
     /* [in] */ IMethodInfo* method)
 {
+    Int32 count;
+    method->GetParamCount(&count);
+    AutoPtr<IParamInfo> paramInfo;
+    method->GetParamInfoByIndex(count - 1, (IParamInfo**)&paramInfo);
+    ParamIOAttribute ioAttr;
+    paramInfo->GetIOAttribute(&ioAttr);
+    if (ioAttr == ParamIOAttribute_In) {
+        paramInfo = NULL;
+    }
+
     AutoPtr<IAnnotationInfo> busMethod;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String replySignature;
     if (busMethod != NULL && (busMethod->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
-        // TODO:
-        // return Signature.typeSig(method.getGenericReturnType(), busMethod.replySignature());
+        return Signature::TypeSig(paramInfo, replySignature);
     }
     AutoPtr<IAnnotationInfo> busSignal;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
-        // TODO:
-        // return Signature.typeSig(method.getGenericReturnType(), busSignal.replySignature());
+        return Signature::TypeSig(paramInfo, replySignature);
     }
 
-    // TODO:
-    // return Signature.typeSig(method.getGenericReturnType(), null);
-    return String(NULL);
+    return Signature::TypeSig(paramInfo, String(NULL));
 }
 
 AutoPtr<IMethodInfo> InterfaceDescription::GetMember(

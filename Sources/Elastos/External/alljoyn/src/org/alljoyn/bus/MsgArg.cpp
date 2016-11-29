@@ -1,15 +1,189 @@
 
 #include "org/alljoyn/bus/MsgArg.h"
-#include "_Org.Alljoyn.Bus.h"
+#include "org/alljoyn/bus/Signature.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/MsgArg.h>
 #include <alljoyn/MsgArgUtils.h>
+#include "_Org.Alljoyn.Bus.h"
 
 using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
+
+MsgArg::CarValue::CarValue(
+    /* [in] */ CarDataType type)
+    : mIOAttribute(ParamIOAttribute_In)
+    , mType(type)
+    , mByteValue(0)
+    , mBooleanValue(FALSE)
+    , mInt16Value(0)
+    , mInt32Value(0)
+    , mInt64Value(0)
+    , mDoubleValue(0.0)
+    , mEnumValue(0)
+    , mCarQuintet(NULL)
+    , mElementType(0)
+{
+}
+
+MsgArg::CarValue::~CarValue()
+{
+    switch (mElementType) {
+        case CarDataType_Int16:
+        case CarDataType_Int32:
+        case CarDataType_Int64:
+        case CarDataType_Byte:
+        case CarDataType_Char32:
+        case CarDataType_Float:
+        case CarDataType_Double:
+        case CarDataType_Boolean:
+        case CarDataType_ECode:
+        case CarDataType_Enum:
+        case CarDataType_EMuid:
+        case CarDataType_EGuid:
+            _CarQuintet_Release(mCarQuintet);
+            mCarQuintet = NULL;
+            break;
+        case CarDataType_String: {
+            ArrayOf<String>* strArray = reinterpret_cast< ArrayOf<String>* >(mCarQuintet);
+            strArray->Release();
+            mCarQuintet = NULL;
+            break;
+        }
+        case CarDataType_Interface: {
+            ArrayOf<IInterface*>* itfArray = reinterpret_cast< ArrayOf<IInterface*>* >(mCarQuintet);
+            itfArray->Release();
+            mCarQuintet = NULL;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+PVoid MsgArg::CarValue::ToValuePtr()
+{
+    PVoid arg = NULL;
+    switch (mType) {
+        case CarDataType_Int16:
+            arg = &mInt16Value;
+            break;
+        case CarDataType_Int32:
+            arg = &mInt32Value;
+            break;
+        case CarDataType_Int64:
+            arg = &mInt64Value;
+            break;
+        case CarDataType_Byte:
+            arg = &mByteValue;
+            break;
+        case CarDataType_Double:
+            arg = &mDoubleValue;
+            break;
+        case CarDataType_String:
+            arg = &mStringValue;
+            break;
+        case CarDataType_Boolean:
+            arg = &mBooleanValue;
+            break;
+        case CarDataType_Enum:
+            arg = &mEnumValue;
+            break;
+        case CarDataType_ArrayOf:
+            arg = &mCarQuintet;
+            break;
+        case CarDataType_Interface:
+            arg = &mObjectValue;
+            break;
+        default:
+            Logger::E("MsgArg", "CarValue::ToValuePtr unimplemented type = %d", mType);
+    }
+    return arg;
+}
+
+ECode MsgArg::CarValue::SetToArgumentList(
+    /* [in] */ IArgumentList* args,
+    /* [in] */ Int32 index)
+{
+    if (mIOAttribute == ParamIOAttribute_In) {
+        switch (mType) {
+            case CarDataType_Int16:
+                args->SetInputArgumentOfInt16(index, mInt16Value);
+                break;
+            case CarDataType_Int32:
+                args->SetInputArgumentOfInt32(index, mInt32Value);
+                break;
+            case CarDataType_Int64:
+                args->SetInputArgumentOfInt64(index, mInt64Value);
+                break;
+            case CarDataType_Byte:
+                args->SetInputArgumentOfByte(index, mByteValue);
+                break;
+            case CarDataType_Double:
+                args->SetInputArgumentOfDouble(index, mDoubleValue);
+                break;
+            case CarDataType_String:
+                args->SetInputArgumentOfString(index, mStringValue);
+                break;
+            case CarDataType_Boolean:
+                args->SetInputArgumentOfBoolean(index, mBooleanValue);
+                break;
+            case CarDataType_Enum:
+                args->SetInputArgumentOfEnum(index, mEnumValue);
+                break;
+            case CarDataType_ArrayOf: {
+                args->SetInputArgumentOfCarArray(index, mCarQuintet);
+                break;
+            case CarDataType_Interface:
+                args->SetInputArgumentOfObjectPtr(index, mObjectValue);
+                break;
+            default:
+                Logger::E("MsgArg", "CarValue::SetToArgumentList unimplemented type = %d", mType);
+            }
+        }
+    }
+    else {
+        switch (mType) {
+            case CarDataType_Int16:
+                args->SetOutputArgumentOfInt16Ptr(index, &mInt16Value);
+                break;
+            case CarDataType_Int32:
+                args->SetOutputArgumentOfInt32Ptr(index, &mInt32Value);
+                break;
+            case CarDataType_Int64:
+                args->SetOutputArgumentOfInt64Ptr(index, &mInt64Value);
+                break;
+            case CarDataType_Byte:
+                args->SetOutputArgumentOfBytePtr(index, &mByteValue);
+                break;
+            case CarDataType_Double:
+                args->SetOutputArgumentOfDoublePtr(index, &mDoubleValue);
+                break;
+            case CarDataType_String:
+                args->SetOutputArgumentOfStringPtr(index, &mStringValue);
+                break;
+            case CarDataType_Boolean:
+                args->SetOutputArgumentOfBooleanPtr(index, &mBooleanValue);
+                break;
+            case CarDataType_Enum:
+                args->SetOutputArgumentOfEnumPtr(index, &mEnumValue);
+                break;
+            case CarDataType_ArrayOf: {
+                args->SetOutputArgumentOfCarArrayPtrPtr(index, &mCarQuintet);
+                break;
+            case CarDataType_Interface:
+                args->SetOutputArgumentOfObjectPtrPtr(index, (IInterface**)&mObjectValue);
+                break;
+            default:
+                Logger::E("MsgArg", "CarValue::SetToArgumentList unimplemented type = %d", mType);
+            }
+        }
+    }
+    return NOERROR;
+}
 
 const Int32 MsgArg::ALLJOYN_INVALID          =  0;
 const Int32 MsgArg::ALLJOYN_ARRAY            = 'a';
@@ -43,6 +217,9 @@ const Int32 MsgArg::ALLJOYN_UINT64_ARRAY     = ('t' << 8) | 'a';
 const Int32 MsgArg::ALLJOYN_UINT32_ARRAY     = ('u' << 8) | 'a';
 const Int32 MsgArg::ALLJOYN_INT64_ARRAY      = ('x' << 8) | 'a';
 const Int32 MsgArg::ALLJOYN_BYTE_ARRAY       = ('y' << 8) | 'a';
+
+Map<AutoPtr<IArgumentList>, AutoPtr<ArrayOf<MsgArg::CarValue*> > > MsgArg::sRecords;
+Object MsgArg::sLock;
 
 Int32 MsgArg::GetTypeId(
     /* [in] */ Int64 _msgArg)
@@ -747,7 +924,7 @@ ECode MsgArg::Unmarshal(
                     Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&component);
                     array->Set(i, component);
                 }
-                *(ArrayOf<IInterface*>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -765,7 +942,7 @@ ECode MsgArg::Unmarshal(
                 //     }
                 //     return B;
                 // }
-                *(ArrayOf<Boolean>**)object = b;
+                *(PCarQuintet*)object = b;
                 b->AddRef();
             }
             break;
@@ -780,7 +957,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_BYTE_ARRAY:
             {
                 AutoPtr<ArrayOf<Byte> > b = GetByteArray(msgArg);
-                *(ArrayOf<Byte>**)object = b;
+                *(PCarQuintet*)object = b;
                 b->AddRef();
             }
             break;
@@ -790,7 +967,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_DOUBLE_ARRAY:
             {
                 AutoPtr<ArrayOf<Double> > array = GetDoubleArray(msgArg);
-                *(ArrayOf<Double>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -805,7 +982,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_INT16_ARRAY:
             {
                 AutoPtr<ArrayOf<Int16> > array = GetInt16Array(msgArg);
-                *(ArrayOf<Int16>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -820,7 +997,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_INT32_ARRAY:
             {
                 AutoPtr<ArrayOf<Int32> > array = GetInt32Array(msgArg);
-                *(ArrayOf<Int32>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -835,7 +1012,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_INT64_ARRAY:
             {
                 AutoPtr<ArrayOf<Int64> > array = GetInt64Array(msgArg);
-                *(ArrayOf<Int64>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -876,7 +1053,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_UINT16_ARRAY:
             {
                 AutoPtr<ArrayOf<Int16> > array = GetUint16Array(msgArg);
-                *(ArrayOf<Int16>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -891,7 +1068,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_UINT32_ARRAY:
             {
                 AutoPtr<ArrayOf<Int32> > array = GetUint32Array(msgArg);
-                *(ArrayOf<Int32>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -906,7 +1083,7 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_UINT64_ARRAY:
             {
                 AutoPtr<ArrayOf<Int64> > array = GetUint64Array(msgArg);
-                *(ArrayOf<Int64>**)object = array;
+                *(PCarQuintet*)object = array;
                 array->AddRef();
             }
             break;
@@ -926,16 +1103,6 @@ ECode MsgArg::Unmarshal(
     //                                   + "' into " + type, th);
     // }
 
-    return NOERROR;
-}
-
-ECode MsgArg::UnmarshalInternal(
-    /* [in] */ Int64 msgArg,
-    /* [in] */ CarDataType type,
-    /* [in] */ IArgumentList* args,
-    /* [in] */ Int32 index)
-{
-    assert(0);
     return NOERROR;
 }
 
@@ -974,14 +1141,27 @@ ECode MsgArg::Unmarshal(
             return NOERROR;
         }
     }
+    AutoPtr<ArrayOf<CarValue*> > array = ArrayOf<CarValue*>::Alloc(numArgs);
     method->CreateArgumentList(args);
     for (Int32 i = 0; i < numArgs; ++i) {
         AutoPtr<IDataTypeInfo> typeInfo;
         (*paramInfos)[i]->GetTypeInfo((IDataTypeInfo**)&typeInfo);
         CarDataType type;
         typeInfo->GetDataType(&type);
-        UnmarshalInternal(GetMember(msgArgs, i), type, *args, i);
+        AutoPtr<CarValue> value = new CarValue(type);
+        PVoid arg = value->ToValuePtr();
+        if (type == CarDataType_ArrayOf) {
+            AutoPtr<IDataTypeInfo> elementTypeInfo;
+            ICarArrayInfo::Probe(typeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+            elementTypeInfo->GetDataType(&value->mElementType);
+        }
+        if (SUCCEEDED(Unmarshal(GetMember(msgArgs, i), type, arg))) {
+            array->Set(i, value);
+            value->SetToArgumentList(*args, i);
+        }
     }
+    AutoLock lock(sLock);
+    sRecords[*args] = array;
     return NOERROR;
 }
 
@@ -1165,9 +1345,9 @@ ECode MsgArg::Marshal(
 ECode MsgArg::Marshal(
     /* [in] */ Int64 msgArg,
     /* [in] */ const String& sig,
-    /* [in] */ ArrayOf<IInterface*>* args)
+    /* [in] */ ArrayOf<Int64>* args)
 {
-    AutoPtr<ArrayOf<String> > sigs;// = Signature.split(sig);
+    AutoPtr<ArrayOf<String> > sigs = Signature::Split(sig);
     if (sigs == NULL) {
         Logger::E("MsgArg", "cannot marshal args into '%s', bad signature", sig.string());
         assert(0);
@@ -1177,6 +1357,14 @@ ECode MsgArg::Marshal(
     for (Int32 i = 0; i < GetNumMembers(msgArg); ++i) {
         Marshal(GetMember(msgArg, i), (*sigs)[i], (PVoid)(*args)[i]);
     }
+    return NOERROR;
+}
+
+ECode MsgArg::ReleaseRecord(
+    /* [in] */ IArgumentList* args)
+{
+    AutoLock lock(sLock);
+    sRecords.Erase(args);
     return NOERROR;
 }
 

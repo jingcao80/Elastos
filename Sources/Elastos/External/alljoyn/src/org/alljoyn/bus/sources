@@ -41,6 +41,7 @@ SOURCES += NativeSignalHandler.cpp
 SOURCES += ProxyBusObject.cpp
 SOURCES += SessionListener.cpp
 SOURCES += SessionPortListener.cpp
+SOURCES += Signature.cpp
 SOURCES += Org.Alljoyn.Bus.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp

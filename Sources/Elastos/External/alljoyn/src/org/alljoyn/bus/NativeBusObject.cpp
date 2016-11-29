@@ -3,6 +3,7 @@
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeMessageContext.h"
 #include "org/alljoyn/bus/NativeApi.h"
+#include "org/alljoyn/bus/MsgArg.h"
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/SignatureUtils.h>
 #include <alljoyn/DBusStd.h>
@@ -226,6 +227,7 @@ void NativeBusObject::MethodHandler(
     mBusObj->Resolve(EIID_IInterface, (IInterface**)&busObj);
     if (!busObj) {
         mMapLock.Unlock();
+        MsgArg::ReleaseRecord(args);
         Logger::E(TAG, "NativeBusObject::MethodHandler(): Can't get new local reference to BusObject");
         return;
     }
@@ -238,16 +240,27 @@ void NativeBusObject::MethodHandler(
     method->GetParamInfoByIndex(count - 1, (IParamInfo**)&paramInfo);
     ParamIOAttribute ioAttr;
     paramInfo->GetIOAttribute(&ioAttr);
-    AutoPtr<IInterface> reply; //TODO: maybe not IInterface
-    if (ioAttr != ParamIOAttribute_In)
-        args->SetOutputArgumentOfObjectPtrPtr(count - 1, (IInterface**)&reply);
+    AutoPtr<MsgArg::CarValue> value;
+    PVoid reply = NULL;
+    if (ioAttr != ParamIOAttribute_In) {
+        AutoPtr<IDataTypeInfo> typeInfo;
+        paramInfo->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        CarDataType type;
+        typeInfo->GetDataType(&type);
+        value = new MsgArg::CarValue(type);
+        value->mIOAttribute = ioAttr;
+        value->SetToArgumentList(args, count - 1);
+        reply = value->ToValuePtr();
+    }
 
     if (FAILED(method->Invoke(busObj, args))) {
         MethodReply(member, msg, ER_FAIL);
+        MsgArg::ReleaseRecord(args);
         return;
     }
 
     MethodReply(member, msg, reply);
+    MsgArg::ReleaseRecord(args);
 }
 
 QStatus NativeBusObject::MethodReply(
@@ -286,7 +299,7 @@ QStatus NativeBusObject::MethodReply(
 QStatus NativeBusObject::MethodReply(
     /* [in] */ const ajn::InterfaceDescription::Member* member,
     /* [in] */ ajn::Message& msg,
-    /* [in] */ IInterface* reply)
+    /* [in] */ PVoid reply)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodReply()");
 
@@ -304,7 +317,7 @@ QStatus NativeBusObject::MethodReply(
     QStatus status;
     uint8_t completeTypes = ajn::SignatureUtils::CountCompleteTypes(member->returnSignature.c_str());
     if (reply) {
-        AutoPtr<ArrayOf<IInterface*> > args;
+        AutoPtr<ArrayOf<Int64> > args;
         if (completeTypes > 1) {
             assert(0);
             // jmethodID mid = env->GetStaticMethodID(CLS_Signature, "structArgs",
@@ -322,12 +335,11 @@ QStatus NativeBusObject::MethodReply(
              * Create Object[] out of the invoke() return value to reuse
              * marshalling code in Marshal() for the reply message.
              */
-             assert(0);
-            // replyArgs = ArrayOf<IInterface*>::Alloc(1);
-            // if (!replyArgs) {
-            //     return MethodReply(member, msg, ER_FAIL);
-            // }
-            // replyArgs->Set(0, reply);
+            args = ArrayOf<Int64>::Alloc(1);
+            if (!args) {
+                return MethodReply(member, msg, ER_FAIL);
+            }
+            args->Set(0, (Int64)reply);
         }
         if (!Marshal(member->returnSignature.c_str(), args, &replyArgs)) {
             return MethodReply(member, msg, ER_FAIL);
@@ -414,13 +426,21 @@ QStatus NativeBusObject::Get(
     AutoPtr<IArgumentList> args;
     method->CreateArgumentList((IArgumentList**)&args);
 
-    //TODO:
-    PVoid arg;
+    AutoPtr<IParamInfo> paramInfo;
+    method->GetParamInfoByIndex(0, (IParamInfo**)&paramInfo);
+    AutoPtr<IDataTypeInfo> typeInfo;
+    paramInfo->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+    CarDataType type;
+    typeInfo->GetDataType(&type);
+    AutoPtr<MsgArg::CarValue> value = new MsgArg::CarValue(type);
+    value->mIOAttribute = ParamIOAttribute_CallerAllocOut;
+    value->SetToArgumentList(args, 0);
     if (FAILED(method->Invoke(busObj, args))) {
         mMapLock.Unlock();
         return ER_FAIL;
     }
 
+    PVoid arg = value->ToValuePtr();
     if (!Marshal(property->mSecond->mSignature.string(), arg, &val)) {
         mMapLock.Unlock();
         return ER_FAIL;
@@ -461,6 +481,7 @@ QStatus NativeBusObject::Set(
     QStatus status = Unmarshal(&val, 1, method, (IArgumentList**)&value);
     if (ER_OK != status) {
         mMapLock.Unlock();
+        MsgArg::ReleaseRecord(value);
         return status;
     }
 
@@ -474,15 +495,18 @@ QStatus NativeBusObject::Set(
     if (!busObj) {
         mMapLock.Unlock();
         Logger::E(TAG, "NativeBusObject::Set(): Can't get new local reference to BusObject");
+        MsgArg::ReleaseRecord(value);
         return ER_FAIL;
     }
 
     if (FAILED(method->Invoke(busObj, value))) {
         mMapLock.Unlock();
+        MsgArg::ReleaseRecord(value);
         return ER_FAIL;
     }
 
     mMapLock.Unlock();
+    MsgArg::ReleaseRecord(value);
     return ER_OK;
 }
 

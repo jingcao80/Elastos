@@ -4,8 +4,11 @@
 
 #include <elastos/coredef.h>
 #include <Elastos.CoreLibrary.Core.h>
+#include <elastos/utility/etl/Map.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Core::IBoolean;
+using Elastos::Utility::Etl::Map;
 
 namespace Org {
 namespace Alljoyn {
@@ -19,6 +22,37 @@ namespace Bus {
  */
 class MsgArg
 {
+public:
+    class CarValue : public ElLightRefBase
+    {
+    public:
+        CarValue(
+            /* [in] */ CarDataType type);
+
+        ~CarValue();
+
+        CARAPI_(PVoid) ToValuePtr();
+
+        CARAPI SetToArgumentList(
+            /* [in] */ IArgumentList* args,
+            /* [in] */ Int32 index);
+
+    public:
+        ParamIOAttribute mIOAttribute;
+        CarDataType mType;
+        Byte mByteValue;
+        Boolean mBooleanValue;
+        Int16 mInt16Value;
+        Int32 mInt32Value;
+        Int64 mInt64Value;
+        Double mDoubleValue;
+        String mStringValue;
+        Int32 mEnumValue;
+        PCarQuintet mCarQuintet;
+        CarDataType mElementType;
+        AutoPtr<IInterface> mObjectValue;
+    };
+
 public:
     /*
      * Accessor functions for talking to the native MsgArgs.  The msgArg
@@ -271,16 +305,13 @@ public:
     static CARAPI Marshal(
         /* [in] */ Int64 msgArg,
         /* [in] */ const String& sig,
-        /* [in] */ ArrayOf<IInterface*>* args);
+        /* [in] */ ArrayOf<Int64>* args);
+
+    static CARAPI ReleaseRecord(
+        /* [in] */ IArgumentList* args);
 
 private:
     MsgArg();
-
-    static CARAPI UnmarshalInternal(
-        /* [in] */ Int64 msgArg,
-        /* [in] */ CarDataType type,
-        /* [in] */ IArgumentList* args,
-        /* [in] */ Int32 index);
 
 private:
     /*
@@ -318,6 +349,9 @@ private:
     static const Int32 ALLJOYN_UINT32_ARRAY;
     static const Int32 ALLJOYN_INT64_ARRAY;
     static const Int32 ALLJOYN_BYTE_ARRAY;
+
+    static Map<AutoPtr<IArgumentList>, AutoPtr<ArrayOf<CarValue*> > > sRecords;
+    static Object sLock;
 };
 
 } // namespace Bus

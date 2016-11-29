@@ -47,7 +47,7 @@ public:
     QStatus MethodReply(
         /* [in] */ const ajn::InterfaceDescription::Member* member,
         /* [in] */ ajn::Message& msg,
-        /* [in] */ IInterface* reply);
+        /* [in] */ PVoid reply);
 
     QStatus Signal(
         /* [in] */ const char* destination,
