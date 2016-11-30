@@ -222,7 +222,7 @@ ECode CBusAttachment::Connect(
     QStatus status = busPtr->Connect(connectArgs.string(), keyStoreListener, authMechanisms.string(),
             busAuthListener, keyStoreFileName.string(), isShared);
     if (status != ER_OK) {
-        Logger::E(TAG, "Connect(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -245,7 +245,7 @@ ECode CBusAttachment::RegisterBusObject(
     QStatus status = busPtr->RegisterBusObject(objPath.string(), busObj,
             busInterfaces, secure, languageTag, description, dt);
     if (status != ER_OK) {
-        Logger::E(TAG, "RegisterBusObject(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -266,7 +266,7 @@ ECode CBusAttachment::EmitChangedSignal(
     QStatus status = busPtr->EmitChangedSignal(busObject,
         ifcName.string(), propName.string(), val, sessionId);
     if (status != ER_OK) {
-        Logger::E(TAG, "RegisterBusObject(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -283,7 +283,7 @@ ECode CBusAttachment::RequestName(
 
     QStatus status = busPtr->RequestName(name.string(), flags);
     if (status != ER_OK) {
-        Logger::E(TAG, "RequestName(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -300,7 +300,7 @@ ECode CBusAttachment::ReleaseName(
 
     QStatus status = busPtr->ReleaseName(name.string());
     if (status != ER_OK) {
-        Logger::E(TAG, "ReleaseName(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -317,7 +317,7 @@ ECode CBusAttachment::AddMatch(
 
     QStatus status = busPtr->AddMatch(rule.string());
     if (status != ER_OK) {
-        Logger::E(TAG, "AddMatch(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -334,7 +334,7 @@ ECode CBusAttachment::RemoveMatch(
 
     QStatus status = busPtr->RemoveMatch(rule.string());
     if (status != ER_OK) {
-        Logger::E(TAG, "RemoveMatch(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -352,7 +352,7 @@ ECode CBusAttachment::AdvertiseName(
 
     QStatus status = busPtr->AdvertiseName(name.string(), transports);
     if (status != ER_OK) {
-        Logger::E(TAG, "AdvertiseName(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -370,7 +370,7 @@ ECode CBusAttachment::CancelAdvertiseName(
 
     QStatus status = busPtr->CancelAdvertiseName(name.string(), transports);
     if (status != ER_OK) {
-        Logger::E(TAG, "CancelAdvertiseName(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -387,7 +387,7 @@ ECode CBusAttachment::FindAdvertisedName(
 
     QStatus status = busPtr->FindAdvertisedName(namePrefix.string());
     if (status != ER_OK) {
-        Logger::E(TAG, "FindAdvertisedName(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -406,7 +406,7 @@ ECode CBusAttachment::FindAdvertisedNameByTransport(
     QStatus status = busPtr->FindAdvertisedNameByTransport(
         namePrefix.string(), transports);
     if (status != ER_OK) {
-        Logger::E(TAG, "FindAdvertisedNameByTransport(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -423,7 +423,7 @@ ECode CBusAttachment::CancelFindAdvertisedName(
 
     QStatus status = busPtr->CancelFindAdvertisedName(namePrefix.string());
     if (status != ER_OK) {
-        Logger::E(TAG, "CancelFindAdvertisedName(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -442,7 +442,7 @@ ECode CBusAttachment::CancelFindAdvertisedNameByTransport(
     QStatus status = busPtr->CancelFindAdvertisedNameByTransport(
         namePrefix.string(), transports);
     if (status != ER_OK) {
-        Logger::E(TAG, "CancelFindAdvertisedNameByTransport(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -492,7 +492,7 @@ ECode CBusAttachment::BindSessionPort(
         busPtr->mSessionPortListenerMap[sessionPort] = _listener;
     }
     else {
-        Logger::E(TAG, "BindSessionPort(): Exception(0x%08x)", status);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -520,6 +520,9 @@ ECode CBusAttachment::UnbindSessionPort(
     if (status == ER_OK) {
         AutoLock lock(busPtr->mBaCommonLock);
         busPtr->mSessionPortListenerMap[sessionPort] = NULL;
+    }
+    else {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -635,7 +638,7 @@ static ECode LeaveGenericSession(
     }
 
     if (status != ER_OK) {
-        Logger::I(TAG, "Error: LeaveGenericSession");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
 
     return status;
@@ -706,7 +709,7 @@ ECode CBusAttachment::GetSessionFd(
     QStatus status = busPtr->GetSessionFd(sessionId, sockfd);
 
     if (status != ER_OK) {
-        Logger::E(TAG, "GetSessionFd(): fails");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -735,7 +738,7 @@ ECode CBusAttachment::SetLinkTimeout(
         return linkTimeout->SetValue(timeout);
     }
     else {
-        Logger::E(TAG, "SetLinkTimeout(): fails");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -758,7 +761,7 @@ ECode CBusAttachment::GetPeerGUID(
         return guid->SetValue(str);
     }
     else {
-        Logger::E(TAG, "GetPeerGUID(): fails");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -775,7 +778,7 @@ ECode CBusAttachment::Ping(
 
     QStatus status = busPtr->Ping(name.string(), timeout);
     if (status != ER_OK) {
-        Logger::E(TAG, "GetPeerGUID(): fails");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
@@ -874,7 +877,7 @@ ECode CBusAttachment::SetAnnounceFlag(
 
     QStatus status = busPtr->SetAnnounceFlag(busObject, ifaceName.string(), isAnnounced);
     if (status != ER_OK) {
-        Logger::E(TAG, "SetAnnounceFlag(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -1306,7 +1309,7 @@ ECode CBusAttachment::ClearKeys(
 
     QStatus status = busPtr->ClearKeys(guid.string());
     if (status != ER_OK) {
-        Logger::E(TAG, "ClearKeys(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -1326,7 +1329,7 @@ ECode CBusAttachment::SetKeyExpiration(
     QStatus status = busPtr->SetKeyExpiration(guid.string(), timeout);
 
     if (status != ER_OK) {
-        Logger::E(TAG, "SetKeyExpiration(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -1350,7 +1353,7 @@ ECode CBusAttachment::GetKeyExpiration(
     QStatus status = busPtr->GetKeyExpiration(guid.string(), t);
 
     if (status != ER_OK) {
-        Logger::E(TAG, "GetKeyExpiration(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -1368,7 +1371,7 @@ ECode CBusAttachment::ReloadKeyStore()
     QStatus status = busPtr->ReloadKeyStore();
 
     if (status != ER_OK) {
-        Logger::E(TAG, "ReloadKeyStore(): Exception");
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
     }
     return status;
 }
