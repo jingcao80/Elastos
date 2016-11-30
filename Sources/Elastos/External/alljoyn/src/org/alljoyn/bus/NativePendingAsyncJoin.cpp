@@ -8,7 +8,7 @@ namespace Bus {
 NativePendingAsyncJoin::NativePendingAsyncJoin(
     /* [in] */ ISessionListener* sessionListener,
     /* [in] */ IOnJoinSessionListener* onJoinSessionListener,
-    /* [in] */ IContext* context)
+    /* [in] */ IInterface* context)
     : mSessionListener(sessionListener)
     , mOnJoinSessionListener(onJoinSessionListener)
     , mContext(context)

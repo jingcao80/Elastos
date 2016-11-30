@@ -6,6 +6,7 @@
 #include "org/alljoyn/bus/NativeBusListener.h"
 #include "org/alljoyn/bus/NativeSessionListener.h"
 #include "org/alljoyn/bus/NativeSessionPortListener.h"
+#include "org/alljoyn/bus/NativePendingAsyncJoin.h"
 #include "org/alljoyn/bus/SessionListener.h"
 #include "org/alljoyn/bus/SessionPortListener.h"
 #include "org/alljoyn/bus/NativeMessageContext.h"
@@ -16,6 +17,7 @@ using Org::Alljoyn::Bus::Ifaces::EIID_IDBusProxyObj;
 using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::IList;
@@ -30,13 +32,6 @@ namespace Bus {
 static const String TAG("CBusAttachment");
 
 extern void GlobalInitialize();
-
-typedef enum {
-    BA_HSL,     // BusAttachment hosted session listener index
-    BA_JSL,     // BusAttachment joined session listener index
-    BA_SL,     // BusAttachment session listener index
-    BA_LAST     // indicates the size of the enum
-} BusAttachmentSessionListenerIndex;
 
 //============================================================================
 // CBusAttachment::AuthListenerInternal
@@ -501,9 +496,25 @@ ECode CBusAttachment::BindSessionPort(
 }
 
 ECode CBusAttachment::SetDescriptionTranslator(
-    /* [in] */ ITranslator* translator)
+    /* [in] */ ITranslator* _translator)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
     assert(0 && "TODO");
+    // NativeTranslator* translator = NULL;
+    // if (_translator) {
+    //     translator = reinterpret_cast<NativeTranslator*>(((Translator*)_translator))->mHandle);
+    //     assert(translator);
+
+    //     AutoLock lock(busPtr->mBaCommonLock);
+    //     busPtr->mTranslators.PushBack(_translator);
+    // }
+
+    // busPtr->SetDescriptionTranslator(translator);
     return NOERROR;
 }
 
@@ -534,6 +545,12 @@ ECode CBusAttachment::JoinSession(
     /* [in] */ ISessionOpts* opts,
     /* [in] */ ISessionListener* _listener)
 {
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
     ajn::SessionOpts sessionOpts;
     Byte traffic;
     opts->GetTraffic(&traffic);
@@ -551,12 +568,6 @@ ECode CBusAttachment::JoinSession(
     opts->GetTransports(&transports);
     sessionOpts.transports = transports;
 
-    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
-    if (busPtr == NULL) {
-        Logger::E(TAG, "JoinSession(): Exception or NULL bus pointer");
-        return NOERROR;
-    }
-
     NativeSessionListener* listener = reinterpret_cast<NativeSessionListener*>(((SessionListener*)_listener)->mHandle);
     assert(listener);
 
@@ -569,6 +580,7 @@ ECode CBusAttachment::JoinSession(
         busPtr->mSessionListenerMap[sessionId].mListener = _listener;
     }
     else {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
@@ -586,48 +598,105 @@ ECode CBusAttachment::JoinSession(
     /* [in] */ const String& sessionHost,
     /* [in] */ Int16 sessionPort,
     /* [in] */ ISessionOpts* opts,
-    /* [in] */ ISessionListener* listener,
+    /* [in] */ ISessionListener* _listener,
     /* [in] */ IOnJoinSessionListener* onJoinSession,
     /* [in] */ IInterface* context)
 {
-    assert(0 && "TODO");
-    return NOERROR;
-}
-
-static ECode LeaveGenericSession(
-    /* [in] */ Int64 handle,
-    /* [in] */ Int32 sessionId,
-    /* [in] */ BusAttachmentSessionListenerIndex index)
-{
-    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(handle);
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
         Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
         return ER_FAIL;
     }
 
+    ajn::SessionOpts sessionOpts;
+    Byte traffic;
+    opts->GetTraffic(&traffic);
+    sessionOpts.traffic = static_cast<ajn::SessionOpts::TrafficType>(traffic);
+
+    Boolean isMultipoint;
+    opts->IsMultipoint(&isMultipoint);
+    sessionOpts.isMultipoint = isMultipoint;
+
+    Byte proximity;
+    opts->GetProximity(&proximity);
+    sessionOpts.proximity = proximity;
+
+    Int16 transports;
+    opts->GetTransports(&transports);
+    sessionOpts.transports = transports;
+
+    AutoPtr<NativePendingAsyncJoin> paj = new NativePendingAsyncJoin(_listener, onJoinSession, context);
+
+    NativeSessionListener* listener = reinterpret_cast<NativeSessionListener*>(((SessionListener*)_listener)->mHandle);
+    assert(listener);
+
+    QStatus status = ER_OK;
+
+    assert(0 && "TODO");
+    // NativeOnJoinSessionListener* callback = reinterpret_cast<NativeOnJoinSessionListener*>(((OnJoinSessionListener*)_listener)->mHandle);
+    // assert(callback);
+    // callback->Setup(busPtr);
+
+    // status = busPtr->JoinSessionAsync(
+    //     sessionHost.string(), sessionPort, listener, sessionOpts, callback, paj);
+
+    if (status == ER_OK) {
+        AutoLock lock(busPtr->mBaCommonLock);
+        busPtr->mPendingAsyncJoins.PushBack(paj);
+    }
+    else {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+        return status;
+    }
+
+    return status;
+}
+
+ECode CBusAttachment::LeaveGenericSession(
+    /* [in] */ Int32 sessionId,
+    /* [in] */ BusAttachmentSessionListenerIndex index)
+{
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = ER_OK;
+
     /*
      * Make the AllJoyn call.
      */
-    QStatus status = ER_OK;
+    HashMap<ajn::SessionId, NativeBusAttachment::BusAttachmentSessionListeners>::Iterator it;
+    it = busPtr->mSessionListenerMap.Find(sessionId);
     switch (index) {
     case BA_HSL:
         status = busPtr->LeaveHostedSession(sessionId);
         if (ER_OK == status) {
-            busPtr->mSessionListenerMap[sessionId].mHostedListener = NULL;
+            AutoLock lock(busPtr->mBaCommonLock);
+            if (it != busPtr->mSessionListenerMap.End()) {
+                it->mSecond.mHostedListener = NULL;
+            }
         }
         break;
 
     case BA_JSL:
         status = busPtr->LeaveJoinedSession(sessionId);
         if (ER_OK == status) {
-            busPtr->mSessionListenerMap[sessionId].mJoinedListener = NULL;
+            AutoLock lock(busPtr->mBaCommonLock);
+            if (it != busPtr->mSessionListenerMap.End()) {
+                it->mSecond.mJoinedListener = NULL;
+            }
         }
         break;
 
     case BA_SL:
         status = busPtr->LeaveSession(sessionId);
         if (ER_OK == status) {
-            busPtr->mSessionListenerMap[sessionId].mListener = NULL;
+            AutoLock lock(busPtr->mBaCommonLock);
+            if (it != busPtr->mSessionListenerMap.End()) {
+                it->mSecond.mListener = NULL;
+            }
         }
         break;
 
@@ -647,51 +716,124 @@ static ECode LeaveGenericSession(
 ECode CBusAttachment::LeaveSession(
     /* [in] */ Int32 sessionId)
 {
-    return LeaveGenericSession(mHandle, sessionId, BA_SL);
+    return LeaveGenericSession(sessionId, BA_SL);
 }
 
 ECode CBusAttachment::LeaveHostedSession(
     /* [in] */ Int32 sessionId)
 {
-    return LeaveGenericSession(mHandle, sessionId, BA_HSL);
+    return LeaveGenericSession(sessionId, BA_HSL);
 }
 
 ECode CBusAttachment::LeaveJoinedSession(
     /* [in] */ Int32 sessionId)
 {
-    return LeaveGenericSession(mHandle, sessionId, BA_JSL);
+    return LeaveGenericSession(sessionId, BA_JSL);
 }
 
 ECode CBusAttachment::RemoveSessionMember(
     /* [in] */ Int32 sessionId,
     /* [in] */ const String& sessionMemberName)
 {
-    assert(0 && "TODO");
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->RemoveSessionMember(sessionId, sessionMemberName.string());
+    if (status != ER_OK) {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+    }
     return NOERROR;
+}
+
+ECode CBusAttachment::SetGenericSessionListener(
+    /* [in] */ Int32 sessionId,
+    /* [in] */ ISessionListener* _listener,
+    /* [in] */ BusAttachmentSessionListenerIndex index)
+{
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    NativeSessionListener* listener = NULL;
+    if (_listener) {
+        listener = reinterpret_cast<NativeSessionListener*>(((SessionListener*)_listener)->mHandle);
+        assert(listener);
+    }
+
+    QStatus status = ER_OK;
+
+    /*
+     * Make the AllJoyn call.
+     */
+    HashMap<ajn::SessionId, NativeBusAttachment::BusAttachmentSessionListeners>::Iterator it;
+    it = busPtr->mSessionListenerMap.Find(sessionId);
+    switch (index) {
+    case BA_HSL:
+        status = busPtr->SetHostedSessionListener(sessionId, listener);
+        if (status == ER_OK) {
+            AutoLock lock(busPtr->mBaCommonLock);
+            if (it != busPtr->mSessionListenerMap.End()) {
+                it->mSecond.mHostedListener = _listener;
+            }
+        }
+        break;
+
+    case BA_JSL:
+        status = busPtr->SetJoinedSessionListener(sessionId, listener);
+        if (status == ER_OK) {
+            AutoLock lock(busPtr->mBaCommonLock);
+            if (it != busPtr->mSessionListenerMap.End()) {
+                it->mSecond.mJoinedListener = _listener;
+            }
+        }
+        break;
+
+    case BA_SL:
+        status = busPtr->SetSessionListener(sessionId, listener);
+        if (status == ER_OK) {
+            AutoLock lock(busPtr->mBaCommonLock);
+            if (it != busPtr->mSessionListenerMap.End()) {
+                it->mSecond.mListener = _listener;
+            }
+        }
+        break;
+
+    default:
+        Logger::E(TAG, "Exception unknown BusAttachmentSessionListenerIndex %d", index);
+        assert(0);
+    }
+
+    if (status != ER_OK) {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+    }
+
+    return status;
 }
 
 ECode CBusAttachment::SetSessionListener(
     /* [in] */ Int32 sessionId,
     /* [in] */ ISessionListener* listener)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return SetGenericSessionListener(sessionId, listener, BA_SL);
 }
 
 ECode CBusAttachment::SetJoinedSessionListener(
     /* [in] */ Int32 sessionId,
     /* [in] */ ISessionListener* listener)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return SetGenericSessionListener(sessionId, listener, BA_JSL);
 }
 
 ECode CBusAttachment::SetHostedSessionListener(
     /* [in] */ Int32 sessionId,
     /* [in] */ ISessionListener* listener)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return SetGenericSessionListener(sessionId, listener, BA_HSL);
 }
 
 ECode CBusAttachment::GetSessionFd(
@@ -753,7 +895,6 @@ ECode CBusAttachment::GetPeerGUID(
         return ER_FAIL;
     }
 
-
     qcc::String guidstr;
     QStatus status = busPtr->GetPeerGUID(name.string(), guidstr);
     if (status == ER_OK) {
@@ -795,8 +936,28 @@ ECode CBusAttachment::PingAsync(
         return ER_FAIL;
     }
 
+    QStatus status = ER_OK;
+
     assert(0 && "TODO");
-    return busPtr->PingAsync(name.string(), timeout, 0, 0);
+    // NativeOnPingListener* callback = reinterpret_cast<NativeOnPingListener*>(((OnPingListener*)onPing)->mHandle);
+    // assert(callback);
+
+    // callback->Setup(busPtr);
+
+    // NativePendingAsyncPing* pap = new NativePendingAsyncPing(onPing, context);
+
+    // status = busPtr->PingAsync(name.c_str(), timeout, callback, pap);
+
+    // if (status == ER_OK) {
+    //     AutoLock lock(busPtr->mBaCommonLock);
+
+    //     busPtr->mPendingAsyncPings.PushBack(pap);
+    // }
+    // else {
+    //     Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+    // }
+
+    return status;
 }
 
 ECode CBusAttachment::Ping(
@@ -805,14 +966,7 @@ ECode CBusAttachment::Ping(
     /* [in] */ IOnPingListener* onPing,
     /* [in] */ IInterface* context)
 {
-    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
-    if (busPtr == NULL) {
-        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
-        return ER_FAIL;
-    }
-
-    assert(0 && "TODO");
-    return busPtr->Ping(name.string(), timeout);
+    return PingAsync(name, timeout, onPing, context);
 }
 
 ECode CBusAttachment::SetDaemonDebug(
@@ -848,14 +1002,24 @@ ECode CBusAttachment::UseOSLogging(
 ECode CBusAttachment::RegisterAboutListener(
     /* [in] */ IAboutListener* listener)
 {
-    assert(0 && "TODO");
+    Boolean bval;
+    mRegisteredAboutListeners->IsEmpty(&bval);
+    if (bval) {
+        RegisterSignalHandlers((IBusAttachment*)this);
+    }
+    mRegisteredAboutListeners->Add(listener);
     return NOERROR;
 }
 
 ECode CBusAttachment::UnregisterAboutListener(
     /* [in] */ IAboutListener* listener)
 {
-    assert(0 && "TODO");
+    mRegisteredAboutListeners->Remove(listener);
+    Boolean bval;
+    mRegisteredAboutListeners->IsEmpty(&bval);
+    if (bval) {
+        UnregisterSignalHandlers((IBusAttachment*)this);
+    }
     return NOERROR;
 }
 
@@ -1027,8 +1191,49 @@ ECode CBusAttachment::UnregisterBusListener(
 
 ECode CBusAttachment::ReleaseResources()
 {
-    assert(0 && "TODO");
+    AutoLock lock(sBusAttachmentSet);
+
+    ReleaseWithoutRemove();
+
+    /* Remove this bus attachment from the busAttachmentSet */
+    AutoPtr<IIterator> it;
+    sBusAttachmentSet->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IBusAttachment> attachment;
+        IWeakReference::Probe(obj)->Resolve(EIID_IBusAttachment, (IInterface**)&attachment);
+        if (attachment && Object::Equals(attachment, (IBusAttachment*)this)) {
+            it->Remove();
+        }
+    }
     return NOERROR;
+}
+
+void CBusAttachment::ReleaseWithoutRemove()
+{
+    if (mIsConnected == TRUE) {
+        Disconnect();
+    }
+    if (mDbusbo != NULL) {
+        mDbusbo->ReleaseResources();
+        mDbusbo = NULL;
+    }
+    mDbus = NULL;
+    Destroy();
+}
+
+void CBusAttachment::Destroy()
+{
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return;
+    }
+
+    busPtr->Destroy();
+    mHandle = 0;
 }
 
 ECode CBusAttachment::Connect()
@@ -1153,7 +1358,15 @@ ECode CBusAttachment::IsBusObjectSecure(
     /* [in] */ IBusObject* busObject,
     /* [out] */ Boolean* secure)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(secure)
+    *secure = FALSE;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+    *secure =  busPtr->IsSecureBusObject(busObject);
     return NOERROR;
 }
 
@@ -1178,6 +1391,7 @@ ECode CBusAttachment::GetProxyBusObject(
     /* [out] */ IProxyBusObject** proxy)
 {
     assert(0 && "TODO");
+    // return CProxyBusObject::New(this, busName, objPath, sessionId, busInterfaces, proxy);
     return NOERROR;
 }
 
@@ -1192,7 +1406,16 @@ ECode CBusAttachment::GetProxyBusObject(
 ECode CBusAttachment::GetUniqueName(
     /* [out] */ String* uniqueName)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(uniqueName)
+    *uniqueName = NULL;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    *uniqueName = String(busPtr->GetUniqueName().c_str());
     return NOERROR;
 }
 
@@ -1218,7 +1441,7 @@ ECode CBusAttachment::RegisterSignalHandler(
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod)
 {
-    return RegisterSignalHandler(ifaceName, signalName, obj, handlerMethod, String(NULL));
+    return RegisterSignalHandler(ifaceName, signalName, obj, handlerMethod, String(""));
 }
 
 ECode CBusAttachment::RegisterSignalHandler(
@@ -1226,7 +1449,7 @@ ECode CBusAttachment::RegisterSignalHandler(
     /* [in] */ const String& signalName,
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod,
-    /* [in] */ const String& ancillary)
+    /* [in] */ const String& source)
 {
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
     if (busPtr == NULL) {
@@ -1234,10 +1457,34 @@ ECode CBusAttachment::RegisterSignalHandler(
         return ER_FAIL;
     }
 
-    assert(0 && "TODO");
-    // return busPtr->RegisterSignalHandler(ifaceName.string(), signalName.string(),
-    //     obj, handlerMethod, ancillary.string());
-    return NOERROR;
+    QStatus status = busPtr->RegisterNativeSignalHandlerWithSrcPath(
+        ifaceName.string(), signalName.string(), obj, handlerMethod, source.string());
+    if (status == ER_BUS_NO_SUCH_INTERFACE) {
+        assert(0 && "TODO");
+        // try {
+        //     Class<?> iface = Class.forName(ifaceName);
+        //     InterfaceDescription desc = new InterfaceDescription();
+        //     status = desc.create(this, iface);
+        //     if (status == Status.OK) {
+        //         ifaceName = InterfaceDescription.getName(iface);
+        //         try {
+        //             Method signal = iface.getMethod(signalName, handlerMethod.getParameterTypes());
+        //             signalName = InterfaceDescription.getName(signal);
+        //         } catch (NoSuchMethodException ex) {
+        //             // Ignore, use signalName parameter provided
+        //         }
+        //         status = registerNativeSignalHandlerWithSrcPath(ifaceName, signalName, obj, handlerMethod,
+        //                                              source);
+        //     }
+        // } catch (ClassNotFoundException ex) {
+        //     BusException.log(ex);
+        //     status = Status.BUS_NO_SUCH_INTERFACE;
+        // } catch (AnnotationBusException ex) {
+        //     BusException.log(ex);
+        //     status = Status.BAD_ANNOTATION;
+        // }
+    }
+    return status;
 }
 
 ECode CBusAttachment::RegisterSignalHandlerWithRule(
@@ -1247,15 +1494,86 @@ ECode CBusAttachment::RegisterSignalHandlerWithRule(
     /* [in] */ IMethodInfo* handlerMethod,
     /* [in] */ const String& matchRule)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    QStatus status = busPtr->RegisterNativeSignalHandlerWithRule(
+        ifaceName.string(), signalName.string(), obj, handlerMethod, matchRule.string());
+    if (status == ER_BUS_NO_SUCH_INTERFACE) {
+        assert(0 && "TODO");
+        // try {
+        //     Class<?> iface = Class.forName(ifaceName);
+        //     ajn::InterfaceDescription desc = new ajn::InterfaceDescription();
+        //     status = desc.create(this, iface);
+        //     if (status == ER_OK) {
+        //         ifaceName = InterfaceDescription.getName(iface);
+        //         // try {
+        //             Method signal = iface.getMethod(signalName, handlerMethod.getParameterTypes());
+        //             signalName = InterfaceDescription.getName(signal);
+        //         // }
+        //         // catch (NoSuchMethodException ex) {
+        //         //     // Ignore, use signalName parameter provided
+        //         // }
+        //         status = busPtr->RegisterNativeSignalHandlerWithRule(ifaceName, signalName, obj, handlerMethod, matchRule);
+        //     }
+        // }
+        // catch (ClassNotFoundException ex) {
+        //     BusException.log(ex);
+        //     status = ER_BUS_NO_SUCH_INTERFACE;
+        // }
+        // catch (AnnotationBusException ex) {
+        //     BusException.log(ex);
+        //     status = ER_BAD_ANNOTATION;
+        // }
+    }
+    return status;
 }
 
 ECode CBusAttachment::RegisterSignalHandlers(
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    VALIDATE_NOT_NULL(obj)
+
+    ECode ec = NOERROR;
+
+    Int32 count;
+    AutoPtr<IClassInfo> classInfo = Object::GetClassInfo(obj);
+    classInfo->GetMethodCount(&count);
+    if (count > 0) {
+        IMethodInfo* method;
+        AutoPtr< ArrayOf<IMethodInfo *> > methodInfos = ArrayOf<IMethodInfo *>::Alloc(count);
+        for (Int32 i = 0; i < count; ++count) {
+            method = (*methodInfos)[i];
+            AutoPtr<IAnnotationInfo> annotation;
+            method->GetAnnotation(
+                String("Org.Alljoyn.Bus.Annotation.BusSignalHandler"),
+                (IAnnotationInfo**)&annotation);
+            if (annotation != NULL) {
+
+                AutoPtr< ArrayOf<String> > keys;
+                annotation->GetKeys((ArrayOf<String>**)&keys);
+                String matchRule;
+                annotation->GetValue(String("rule"), &matchRule);
+                if (matchRule.IsNullOrEmpty()) {
+                    annotation->GetValue(String("source"), &matchRule);
+                }
+
+                String ifaceName, signalName;
+                annotation->GetValue(String("iface"), &ifaceName);
+                annotation->GetValue(String("signal"), &signalName);
+
+                ec = RegisterSignalHandler(ifaceName, signalName, obj, method, matchRule);
+                if (FAILED(ec)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    return ec;
 }
 
 ECode CBusAttachment::UnregisterSignalHandler(
@@ -1275,14 +1593,33 @@ ECode CBusAttachment::UnregisterSignalHandler(
 ECode CBusAttachment::UnregisterSignalHandlers(
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO");
+    VALIDATE_NOT_NULL(obj)
+
+    Int32 count;
+    AutoPtr<IClassInfo> classInfo = Object::GetClassInfo(obj);
+    classInfo->GetMethodCount(&count);
+    if (count > 0) {
+        IMethodInfo* method;
+        AutoPtr< ArrayOf<IMethodInfo *> > methodInfos = ArrayOf<IMethodInfo *>::Alloc(count);
+        for (Int32 i = 0; i < count; ++count) {
+            method = (*methodInfos)[i];
+            AutoPtr<IAnnotationInfo> annotation;
+            method->GetAnnotation(
+                String("Org.Alljoyn.Bus.Annotation.BusSignalHandler"),
+                (IAnnotationInfo**)&annotation);
+            if (annotation != NULL) {
+                UnregisterSignalHandler(obj, method);
+            }
+        }
+    }
+
     return NOERROR;
 }
 
 ECode CBusAttachment::RegisterKeyStoreListener(
     /* [in] */ IKeyStoreListener* listener)
 {
-    assert(0 && "TODO");
+    mKeyStoreListener = listener;
     return NOERROR;
 }
 
@@ -1352,12 +1689,14 @@ ECode CBusAttachment::GetKeyExpiration(
     uint32_t t = 0;
     QStatus status = busPtr->GetKeyExpiration(guid.string(), t);
 
+    timeout->SetValue(t);
+
     if (status != ER_OK) {
         Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
         return status;
     }
 
-    return timeout->SetValue(t);
+    return status;
 }
 
 ECode CBusAttachment::ReloadKeyStore()
@@ -1382,7 +1721,34 @@ ECode CBusAttachment::RegisterAuthListener(
     /* [in] */ const String& keyStoreFileName,
     /* [in] */ Boolean isShared)
 {
-    assert(0 && "TODO");
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "%s(): NULL bus pointer", __FUNCTION__);
+        return ER_FAIL;
+    }
+
+    /*
+     * It is not possible to register multiple AuthListeners or replace an
+     * existing AuthListener.
+     */
+    Boolean bval;
+    mBusAuthListener->AuthListenerSet(&bval);
+    if (bval) {
+        Logger::D(TAG, "%s: ER_ALREADY_REGISTERED", __FUNCTION__);
+        return NOERROR;
+    }
+
+    mAuthMechanisms = authMechanisms;
+    mBusAuthListener->SetAuthListener(listener);
+    mKeyStoreFileName = keyStoreFileName;
+    mIsShared = isShared;
+    QStatus status = busPtr->EnablePeerSecurity(mAuthMechanisms, mBusAuthListener,
+        mKeyStoreFileName, isShared);
+    if (status != ER_OK) {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+        mBusAuthListener->SetAuthListener(NULL);
+        mAuthMechanisms = NULL;
+    }
     return NOERROR;
 }
 
@@ -1391,23 +1757,20 @@ ECode CBusAttachment::RegisterAuthListener(
     /* [in] */ IAuthListener* listener,
     /* [in] */ const String& keyStoreFileName)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return RegisterAuthListener(authMechanisms, listener, keyStoreFileName, FALSE);
 }
 
 ECode CBusAttachment::RegisterAuthListener(
     /* [in] */ const String& authMechanisms,
     /* [in] */ IAuthListener* listener)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return RegisterAuthListener(authMechanisms, listener, String(NULL), FALSE);
 }
 
 ECode CBusAttachment::RegisterSecurityViolationListener(
     /* [in] */ ISecurityViolationListener* listener)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return mBusAuthListener->SetSecurityViolationListener(listener);
 }
 
 ECode CBusAttachment::GetMessageContext(

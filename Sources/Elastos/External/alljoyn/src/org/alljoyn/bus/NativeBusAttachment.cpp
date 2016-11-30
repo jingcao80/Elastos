@@ -39,6 +39,49 @@ NativeBusAttachment::~NativeBusAttachment()
     assert(mBusObjects.GetSize() == 0);
 }
 
+
+void NativeBusAttachment::Destroy()
+{
+    /*
+     * We want to allow users to forget the BusAttachent in Java by setting a
+     * reference to null.  We want to reclaim all of our resources, including
+     * those held by BusObjects which hold references to our bus attachment.  We
+     * don't want to force our user to explicitly unregister those bus objects,
+     * which is the only way we can get an indication that the BusObject is
+     * going away.  This is becuase BusObjects are interfaces and we have no way
+     * to hook the finalize on those objects and drive release of the underlying
+     * resources.
+     *
+     * So we want to and can use this method (destroy) to drive the release of
+     * all of the Java bus object C++ backing objects.  Since the garbage
+     * collector has run on the bus attachment (we are running here) we know
+     * there is no way for a user to access the bus attachment.  We assume that
+     * the BusAttachment release() and or finalize() methods have ensured that
+     * the BusAttachment is disconnected and stopped, so it will never call out
+     * to any of its associated objects.
+     *
+     * So, we release references to the Bus Objects that this particular Bus
+     * Attachment holds now.  The theory is that nothing else can be accessing
+     * the bus attachment or the bus obejcts, so we don't need to take the
+     * multithread locks any more than the bus attachment destructor will.
+     */
+    List< AutoPtr<IBusObject> >::Iterator it;
+    for (it = mBusObjects.Begin(); it != mBusObjects.End(); ++it) {
+        /*
+         * If we are the last BusAttachment to use this bus Object, we acquire
+         * the memory management responsibility for the associated C++ object.
+         * This is a vestige of an obsolete idea, but we still need to do it.
+         * We expect we will always have the memory management responsibility.
+         */
+        NativeBusObject* cppObject = DecRefBackingObject(*it);
+        if (cppObject) {
+            delete cppObject;
+            cppObject = NULL;
+        }
+    }
+    mBusObjects.Clear();
+}
+
 QStatus NativeBusAttachment::Connect(
     /* [in] */ const char* connectArgs,
     /* [in] */ IKeyStoreListener* keyStoreListener,
@@ -225,6 +268,20 @@ QStatus NativeBusAttachment::EnablePeerSecurity(
     }
 
     return status;
+}
+
+bool NativeBusAttachment::IsSecureBusObject(
+    /* [in] */ IBusObject* busObject)
+{
+    AutoLock lock(gBusObjectMapLock);
+
+    NativeBusObject* ntBusObject = GetBackingObject(busObject);
+    if (ntBusObject) {
+        Logger::E(TAG, "%s: Exception.", __FUNCTION__);
+        return false;
+    }
+
+    return ntBusObject->IsSecure();
 }
 
 bool NativeBusAttachment::IsLocalBusObject(
@@ -508,6 +565,29 @@ void NativeBusAttachment::UnregisterSignalHandler(
         }
     }
 }
+
+QStatus NativeBusAttachment::RegisterNativeSignalHandlerWithSrcPath(
+    /* [in] */ const char* ifaceName,
+    /* [in] */ const char* signalName,
+    /* [in] */ IInterface* signalHandler,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ const char* ancillary)
+{
+    return RegisterSignalHandler<NativeSignalHandlerWithSrc>(
+        ifaceName, signalName, signalHandler, method, ancillary);
+}
+
+QStatus NativeBusAttachment::RegisterNativeSignalHandlerWithRule(
+    /* [in] */ const char* ifaceName,
+    /* [in] */ const char* signalName,
+    /* [in] */ IInterface* signalHandler,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ const char* ancillary)
+{
+    return RegisterSignalHandler<NativeSignalHandlerWithRule>(
+        ifaceName, signalName, signalHandler, method, ancillary);
+}
+
 
 } // namespace Bus
 } // namespace Alljoyn

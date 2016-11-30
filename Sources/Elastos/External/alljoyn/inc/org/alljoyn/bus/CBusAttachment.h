@@ -18,6 +18,13 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
+typedef enum {
+    BA_HSL,     // BusAttachment hosted session listener index
+    BA_JSL,     // BusAttachment joined session listener index
+    BA_SL,     // BusAttachment session listener index
+    BA_LAST     // indicates the size of the enum
+} BusAttachmentSessionListenerIndex;
+
 CarClass(CBusAttachment)
     , public Object
     , public IBusAttachment
@@ -1502,6 +1509,19 @@ private:
         /* [in] */ const String& languageTag,
         /* [in] */ const String& description,
         /* [in] */ ITranslator* dt);
+
+    void ReleaseWithoutRemove();
+
+    void Destroy();
+
+    ECode LeaveGenericSession(
+        /* [in] */ Int32 sessionId,
+        /* [in] */ BusAttachmentSessionListenerIndex index);
+
+    ECode SetGenericSessionListener(
+        /* [in] */ Int32 sessionId,
+        /* [in] */ ISessionListener* _listener,
+        /* [in] */ BusAttachmentSessionListenerIndex index);
 
 private:
     friend class InterfaceDescription;

@@ -20,7 +20,7 @@ public:
     NativePendingAsyncJoin(
         /* [in] */ ISessionListener* sessionListener,
         /* [in] */ IOnJoinSessionListener* onJoinSessionListener,
-        /* [in] */ IContext* context);
+        /* [in] */ IInterface* context);
 
 private:
     NativePendingAsyncJoin(const NativePendingAsyncJoin& other);
@@ -29,7 +29,7 @@ private:
 public:
     AutoPtr<ISessionListener> mSessionListener;
     AutoPtr<IOnJoinSessionListener> mOnJoinSessionListener;
-    AutoPtr<IContext> mContext;
+    AutoPtr<IInterface> mContext;
 };
 
 } // namespace Bus
