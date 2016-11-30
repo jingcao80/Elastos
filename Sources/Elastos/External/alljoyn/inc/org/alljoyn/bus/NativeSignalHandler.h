@@ -20,7 +20,7 @@ public:
 
     virtual ~NativeSignalHandler();
 
-    bool IsSameObject(
+    Boolean IsSameObject(
         /* [in] */ IInterface* obj,
         /* [in] */ IMethodInfo* method);
 
@@ -48,6 +48,55 @@ protected:
     const ajn::InterfaceDescription::Member* mMember;
     qcc::String mAncillaryData; /* can be both source or matchRule; */
 };
+
+class NativeSignalHandlerWithSrc
+    : public NativeSignalHandler
+{
+public:
+    NativeSignalHandlerWithSrc(
+        /* [in] */ IInterface* obj,
+        /* [in] */ IMethodInfo* method)
+        : NativeSignalHandler(obj, method)
+    { }
+
+    virtual QStatus Register(
+        /* [in] */ ajn::BusAttachment& bus,
+        /* [in] */ const char* ifaceName,
+        /* [in] */ const char* signalName,
+        /* [in] */ const char* ancillary);
+
+private:
+    NativeSignalHandlerWithSrc(const NativeSignalHandlerWithSrc& other);
+    NativeSignalHandlerWithSrc& operator =(const NativeSignalHandlerWithSrc& other);
+
+    void Unregister(
+        /* [in] */ ajn::BusAttachment& bus);
+};
+
+class NativeSignalHandlerWithRule
+    : public NativeSignalHandler
+{
+public:
+    NativeSignalHandlerWithRule(
+        /* [in] */ IInterface* obj,
+        /* [in] */ IMethodInfo* method)
+        : NativeSignalHandler(obj, method)
+    {}
+
+    virtual QStatus Register(
+        /* [in] */ ajn::BusAttachment& bus,
+        /* [in] */ const char* ifaceName,
+        /* [in] */ const char* signalName,
+        /* [in] */ const char* ancillary);
+
+private:
+    NativeSignalHandlerWithRule(const NativeSignalHandlerWithRule& other);
+    NativeSignalHandlerWithRule& operator =(const NativeSignalHandlerWithRule& other);
+
+    void Unregister(
+        /* [in] */ ajn::BusAttachment& bus);
+};
+
 
 } // namespace Bus
 } // namespace Alljoyn

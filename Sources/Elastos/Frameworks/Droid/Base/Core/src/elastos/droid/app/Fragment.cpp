@@ -967,8 +967,7 @@ ECode Fragment::ToString(
 
     StringBuilder sb(128);
 
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(TO_IINTERFACE(this), (IClassInfo**)&classInfo);
+    AutoPtr<IClassInfo> classInfo = Object::GetClassInfo(TO_IINTERFACE(this));
     String className("Fragment");
     if (classInfo != NULL) {
         classInfo->GetName(&className);

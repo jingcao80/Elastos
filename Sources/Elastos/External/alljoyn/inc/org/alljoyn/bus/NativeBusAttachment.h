@@ -86,11 +86,30 @@ public:
         /* [in] */ IInterface* signalHandler,
         /* [in] */ IMethodInfo* method);
 
+    QStatus RegisterNativeSignalHandlerWithSrcPath(
+        /* [in] */ const char* ifaceName,
+        /* [in] */ const char* signalName,
+        /* [in] */ IInterface* signalHandler,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ const char* ancillary);
+
+    QStatus RegisterNativeSignalHandlerWithRule(
+        /* [in] */ const char* ifaceName,
+        /* [in] */ const char* signalName,
+        /* [in] */ IInterface* signalHandler,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ const char* ancillary);
+
     bool IsLocalBusObject(
         /* [in] */ IBusObject* busObject);
 
     void ForgetLocalBusObject(
         /* [in] */ IBusObject* busObject);
+
+    bool IsSecureBusObject(
+        /* [in] */ IBusObject* busObject);
+
+    void Destroy();
 
     int32_t IncRef(void)
     {
