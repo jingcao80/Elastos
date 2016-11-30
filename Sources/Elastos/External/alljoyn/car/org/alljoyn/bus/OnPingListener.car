@@ -6,7 +6,9 @@ module
     namespace Bus {
 
     interface IOnPingListener {
-
+		OnPing(
+	        [in] Int32 status,
+	        [in] IInterface* context);
     }
 
     } // namespace Bus

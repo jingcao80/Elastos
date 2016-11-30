@@ -16,17 +16,45 @@ class Translator
     , public ITranslator
 {
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
-    /**
-     * Destroy native resources held by objects of this class.
-     */
     Translator();
 
-    /**
-     * Destroy native resources held by objects of this class.
-     */
     virtual ~Translator();
+
+    CARAPI constructor();
+
+    /**
+     * Get the number of target languages this Translator supports
+     *
+     * @return numver of target languages
+     */
+    virtual CARAPI NumTargetLanguages(
+        /* [out] */ Int32* num) = 0;
+
+    /**
+     * Retrieve one of the list of target languages this Translator supports
+     *
+     * @param index the index of the requested target language within the list
+     * @return The requested target language or null if index is out of bounds
+     */
+    virtual CARAPI GetTargetLanguage(
+        /* [in] */ Int32 index,
+        /* [out] */ String* str) = 0;
+
+    /**
+     * Translate a string into another language
+     *
+     * @param fromLanguage the language to translate from
+     * @param toLanguage the language to translate to
+     * @param fromText the text to be translated
+     * @return the translated text or null if it can not be translated
+     */
+    virtual CARAPI Translate(
+        /* [in] */ const String& fromLanguage,
+        /* [in] */ const String& toLanguage,
+        /* [in] */ const String& fromText,
+        /* [out] */ String* str) = 0;
 
 private:
     /**
@@ -43,10 +71,8 @@ private:
 
 private:
     friend class InterfaceDescription;
-    /**
-     * The opaque pointer to the underlying C++ object which is actually tied
-     * to the AllJoyn code.
-     */
+    friend class CBusAttachment;
+
     Int64 mHandle;
 };
 

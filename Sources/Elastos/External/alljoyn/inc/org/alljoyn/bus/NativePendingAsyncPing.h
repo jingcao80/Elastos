@@ -19,7 +19,7 @@ class NativePendingAsyncPing
 public:
     NativePendingAsyncPing(
         /* [in] */ IOnPingListener* onPingListener,
-        /* [in] */ IContext* context);
+        /* [in] */ IInterface* context);
 
 private:
     /**
@@ -33,7 +33,7 @@ private:
 
 public:
     AutoPtr<IOnPingListener> mOnPingListener;
-    AutoPtr<IContext> mContext;
+    AutoPtr<IInterface> mContext;
 };
 
 } // namespace Bus

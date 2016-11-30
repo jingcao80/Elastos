@@ -86,6 +86,8 @@ private:
 public:
     CBusAttachment();
 
+    ~CBusAttachment();
+
     CAR_INTERFACE_DECL();
 
     CAR_OBJECT_DECL();

@@ -9,8 +9,17 @@
 #include "org/alljoyn/bus/NativeSessionListener.h"
 #include "org/alljoyn/bus/NativeSessionPortListener.h"
 #include "org/alljoyn/bus/NativePendingAsyncJoin.h"
+#include "org/alljoyn/bus/NativeMessageContext.h"
+#include "org/alljoyn/bus/NativeTranslator.h"
+#include "org/alljoyn/bus/NativeOnJoinSessionListener.h"
+#include "org/alljoyn/bus/NativeOnPingListener.h"
+#include "org/alljoyn/bus/Translator.h"
+#include "org/alljoyn/bus/ProxyBusObject.h"
 #include "org/alljoyn/bus/SessionListener.h"
 #include "org/alljoyn/bus/SessionPortListener.h"
+#include "org/alljoyn/bus/OnJoinSessionListener.h"
+#include "org/alljoyn/bus/OnPingListener.h"
+#include "org/alljoyn/bus/MessageContext.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -126,6 +135,17 @@ CBusAttachment::CBusAttachment()
     , mIsConnected(FALSE)
 {
     GlobalInitialize();
+}
+
+CBusAttachment::~CBusAttachment()
+{
+    if (mIsConnected == TRUE) {
+        Disconnect();
+    }
+
+    mDbusbo = NULL;
+    mDbus = NULL;
+    Destroy();
 }
 
 /**
@@ -506,17 +526,16 @@ ECode CBusAttachment::SetDescriptionTranslator(
         return ER_FAIL;
     }
 
-    assert(0 && "TODO");
-    // NativeTranslator* translator = NULL;
-    // if (_translator) {
-    //     translator = reinterpret_cast<NativeTranslator*>(((Translator*)_translator))->mHandle);
-    //     assert(translator);
+    NativeTranslator* translator = NULL;
+    if (_translator) {
+        translator = reinterpret_cast<NativeTranslator*>(((Translator*)_translator)->mHandle);
+        assert(translator);
 
-    //     AutoLock lock(busPtr->mBaCommonLock);
-    //     busPtr->mTranslators.PushBack(_translator);
-    // }
+        AutoLock lock(busPtr->mBaCommonLock);
+        busPtr->mTranslators.PushBack(_translator);
+    }
 
-    // busPtr->SetDescriptionTranslator(translator);
+    busPtr->SetDescriptionTranslator(translator);
     return NOERROR;
 }
 
@@ -634,13 +653,12 @@ ECode CBusAttachment::JoinSession(
 
     QStatus status = ER_OK;
 
-    assert(0 && "TODO");
-    // NativeOnJoinSessionListener* callback = reinterpret_cast<NativeOnJoinSessionListener*>(((OnJoinSessionListener*)_listener)->mHandle);
-    // assert(callback);
-    // callback->Setup(busPtr);
+    NativeOnJoinSessionListener* callback = reinterpret_cast<NativeOnJoinSessionListener*>(((OnJoinSessionListener*)_listener)->mHandle);
+    assert(callback);
+    callback->Setup(busPtr);
 
-    // status = busPtr->JoinSessionAsync(
-    //     sessionHost.string(), sessionPort, listener, sessionOpts, callback, paj);
+    status = busPtr->JoinSessionAsync(
+        sessionHost.string(), sessionPort, listener, sessionOpts, callback, paj);
 
     if (status == ER_OK) {
         AutoLock lock(busPtr->mBaCommonLock);
@@ -940,24 +958,23 @@ ECode CBusAttachment::PingAsync(
 
     QStatus status = ER_OK;
 
-    assert(0 && "TODO");
-    // NativeOnPingListener* callback = reinterpret_cast<NativeOnPingListener*>(((OnPingListener*)onPing)->mHandle);
-    // assert(callback);
+    NativeOnPingListener* callback = reinterpret_cast<NativeOnPingListener*>(((OnPingListener*)onPing)->mHandle);
+    assert(callback);
 
-    // callback->Setup(busPtr);
+    callback->Setup(busPtr);
 
-    // NativePendingAsyncPing* pap = new NativePendingAsyncPing(onPing, context);
+    NativePendingAsyncPing* pap = new NativePendingAsyncPing(onPing, context);
 
-    // status = busPtr->PingAsync(name.c_str(), timeout, callback, pap);
+    status = busPtr->PingAsync(name.string(), timeout, callback, pap);
 
-    // if (status == ER_OK) {
-    //     AutoLock lock(busPtr->mBaCommonLock);
+    if (status == ER_OK) {
+        AutoLock lock(busPtr->mBaCommonLock);
 
-    //     busPtr->mPendingAsyncPings.PushBack(pap);
-    // }
-    // else {
-    //     Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
-    // }
+        busPtr->mPendingAsyncPings.PushBack(pap);
+    }
+    else {
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+    }
 
     return status;
 }
@@ -1392,12 +1409,11 @@ ECode CBusAttachment::GetProxyBusObject(
     /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
     /* [out] */ IProxyBusObject** proxy)
 {
-    VALIDATE_NOT_NULL(proxy);
-
-    ProxyBusObject* obj = new ProxyBusObject();
+    VALIDATE_NOT_NULL(proxy)
+    AutoPtr<ProxyBusObject> obj = new ProxyBusObject();
     obj->constructor(this, busName, objPath, sessionId, busInterfaces);
-    (*proxy) = (IProxyBusObject*)obj;
-    REFCOUNT_ADD(*proxy);
+    *proxy = obj;
+    REFCOUNT_ADD(*proxy)
     return NOERROR;
 }
 
@@ -1838,11 +1854,11 @@ ECode CBusAttachment::GetMessageContext(
     ajn::SessionId sessionId = msg->GetSessionId();
     uint32_t serial = msg->GetCallSerial();
 
-    assert(0 && "TODO");
-    // return CMessageContext::New(mid, msg->IsUnreliable(), jobjectPath,
-    //     jinterfaceName, jmemberName, jdestination,
-    //     jsender, sessionId, jsignature, jauthMechanism,
-    //     serial, context);
+    *context = new MessageContext(msg->IsUnreliable(), jobjectPath,
+        jinterfaceName, jmemberName, jdestination,
+        jsender, sessionId, jsignature, jauthMechanism,
+        serial);
+    REFCOUNT_ADD(*context);
     return NOERROR;
 }
 

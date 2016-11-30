@@ -7,7 +7,7 @@ namespace Bus {
 
 NativePendingAsyncPing::NativePendingAsyncPing(
     /* [in] */ IOnPingListener* onPingListener,
-    /* [in] */ IContext* context)
+    /* [in] */ IInterface* context)
     : mOnPingListener(onPingListener)
     , mContext(context)
 {}

@@ -4,7 +4,6 @@
 
 #include "_Org.Alljoyn.Bus.h"
 #include <alljoyn/Translator.h>
-#include <alljoyn/TransportMask.h>
 
 namespace Org {
 namespace Alljoyn {
@@ -14,7 +13,7 @@ class NativeTranslator : public ajn::Translator
 {
 public:
     NativeTranslator(
-        /* [in] */ ITranslator* sessionListener);
+        /* [in] */ ITranslator* translator);
 
     ~NativeTranslator();
 
@@ -34,6 +33,7 @@ private:
     NativeTranslator(const NativeTranslator& other);
     NativeTranslator& operator =(const NativeTranslator& other);
 
+private:
     AutoPtr<IWeakReference> mTranslator;
 };
 

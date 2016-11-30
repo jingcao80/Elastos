@@ -1,12 +1,35 @@
 
 module
 {
+	interface Org.Alljoyn.Bus.ISessionOpts;
+	
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
     interface IOnJoinSessionListener {
-
+	    /**
+	     * Notification callback that happens when a response to an asynchronous
+	     * joinSession request is ready.
+	     *
+	     * Any implementation of this function must be multithread safe.  See the
+	     * class documentation for details.
+	     *
+	     * @param status <ul><li>OK if the session was joined.</li>
+	     *                   <li>BUS_NOT_CONNECTED if a connection has not been made with a local
+	     *                       bus</li>
+	     *                   <li>other error status codes indicating a failure.</li></ul>
+	     * @param sessionId Set to the unique identifier for session.
+	     * @param opts      Set to the actual session options of the joined session.
+	     * @param context   The user-defined context object supplied in the call to {@link
+	     *                  BusAttachment#joinSession(String, short, SessionOpts, SessionListener,
+	     *                  OnJoinSessionListener, Object)}.
+	     */
+	    OnJoinSession(
+	        [in] Int32 status,
+	        [in] Int32 sessionId,
+	        [in] ISessionOpts* opts,
+	        [in] IInterface* context);
     }
 
     } // namespace Bus

@@ -1,4 +1,3 @@
-
 #include "org/alljoyn/bus/NativeTranslator.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -8,11 +7,11 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
+
 NativeTranslator::NativeTranslator(
-    /* [in] */ ITranslator* sessionListener)
+    /* [in] */ ITranslator* translator)
 {
-    IWeakReferenceSource::Probe(sessionListener)->GetWeakReference((IWeakReference**)&mTranslator);
-    assert(mTranslator != NULL);
+    IWeakReferenceSource::Probe(translator)->GetWeakReference((IWeakReference**)&mTranslator);
 }
 
 NativeTranslator::~NativeTranslator()
