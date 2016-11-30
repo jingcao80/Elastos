@@ -146,7 +146,7 @@ ELASTOS_LIBS += ../org/kxml2/io/org.kxml2.io.lib
 ELASTOS_LIBS += ../org/json/org.json.lib
 
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
-LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+#LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 #LIBRARIES += $(PREBUILD_LIB)/libm.a
 LIBRARIES += -lcutils -licuuc -licui18n -lm -lssl -lcrypto -lsqlite
 LIBRARIES += -llog -lselinux -lz -lutils -lziparchive -lfdlibm

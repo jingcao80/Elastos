@@ -173,7 +173,7 @@ SYSTEM_INCLUDES := $(INCLUDES)
 
 # default C_FLAGS
 ifeq "$(XDK_COMPILER)" "gnu"
-C_FLAGS= -fno-exceptions
+C_FLAGS += -fno-exceptions
 endif
 
 

@@ -10,10 +10,10 @@ _ELASTOS_NAMESPACE_USING
 Boolean AttachElastosDll();
 void DetachElastosDll();
 
-EXTERN_C _ELASTOS Boolean __stdcall DllMain(
-    PVoid hDllHandle,
-    UInt32 dwReason,
-    PVoid preserved)
+EXTERN_C int DllMain(
+    void* hDllHandle,
+    unsigned int dwReason,
+    void* preserved)
 {
     _ELASTOS Boolean ret = TRUE;
     // TODO: PALDisableThreadLibraryCalls((HMODULE)hModule);
@@ -32,6 +32,6 @@ EXTERN_C _ELASTOS Boolean __stdcall DllMain(
             break;
     }
 
-    return ret;
+    return ret ? 1 : 0;
 }
 

@@ -214,7 +214,7 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
           DLL_CRT_END=$(GCC_LIB_PATH)/32/libgcc.a
     endif
     ifeq "$(XDK_TARGET_PLATFORM)" "android"
-          DLL_FLAGS := $(DLL_FLAGS) $(LIBC_FLAGS) -nostdlib -shared -fPIC -Wl,--gc-sections -Wl,--no-undefined,--no-undefined-version
+          DLL_FLAGS := $(DLL_FLAGS) -nostdlib -shared -fPIC -Wl,--gc-sections -Wl,--no-undefined,--no-undefined-version
           ifeq "$(EXPORT_ALL_SYMBOLS)" ""
               DLL_FLAGS := $(DLL_FLAGS) $(DEF_FLAGS)
           else

@@ -14,25 +14,20 @@ extern void _crt_dll_setpointer();
 extern void _crt_dllexit();
 #endif
 
-typedef int BOOL;
-typedef void* HANDLE;
-typedef void* HINSTANCE;
-typedef unsigned int DWORD;
-typedef void* LPVOID;
 #define DLL_PROCESS_ATTACH 1
 #define DLL_PROCESS_DETACH 0
 
-BOOL WINAPI DllMain(
-        HINSTANCE hinstDLL,
-        DWORD dwReason,
-        LPVOID lpvReserved);
+int DllMain(
+        void* hinstDLL,
+        unsigned int dwReason,
+        void* lpvReserved);
 
-BOOL WINAPI _DllMainCRTStartup(
-        HANDLE  hDllHandle,
-        DWORD   dwReason,
-        LPVOID  lpreserved)
+int _DllMainCRTStartup(
+        void*  hDllHandle,
+        unsigned int   dwReason,
+        void*  lpreserved)
 {
-    BOOL ret;
+    int ret;
 
     if (dwReason == DLL_PROCESS_ATTACH) {
 #if defined(_win32) && defined(_MSVC)
