@@ -32,3 +32,4 @@ APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_PACKAGE_NAME = Elastos.DevSamples.SecurityDemo
 RES_NAMESPACE = Elastos.DevSamples.SecurityDemo
+ XDK_LOCAL_CERTIFICATE := platform

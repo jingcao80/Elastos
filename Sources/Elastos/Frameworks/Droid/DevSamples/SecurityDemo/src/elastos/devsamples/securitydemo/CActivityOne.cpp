@@ -1425,11 +1425,11 @@ ECode CActivityOne::ElastosKeyPairZLL()
     IKey::Probe(privateKey)->GetEncoded((ArrayOf<Byte>**)&privateEncoded);
     if (privateEncoded != NULL) {
         String privateStr = StringUtils::ToHexString(*privateEncoded);
-        Logger::D(TAG, "RSA privateKey string is : %s,", privateStr.string());
+        Logger::D(TAG, "DSA privateKey string is : %s,", privateStr.string());
     }
     else {
         // because using an OpenSSL ENGINE, see: OpenSSLRSAPrivateKey::GetEncoded
-        Logger::D(TAG, "RSA privateKey string is : NULL,");
+        Logger::D(TAG, "DSA privateKey string is : NULL,");
     }
 
 #if true

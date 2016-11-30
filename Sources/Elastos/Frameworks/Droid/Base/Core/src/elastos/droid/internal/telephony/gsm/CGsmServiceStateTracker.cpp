@@ -1681,6 +1681,9 @@ void CGsmServiceStateTracker::PollStateDone()
                         //     "', do nothing");
                     }
                     // china
+                    // in the tzdata there are two timezones for china: Asia/Shanghai and Asia/Urumqi
+                    // however, the official time in china is Asia/Shanghai, so no matter how many timezones
+                    // in the tzdata file, the timezone will always set to Asia/Shanghai.
                     if (iso.Equals(String("cn"))) {
                         //zone = (*uniqueZones)[0];
                         //String str;

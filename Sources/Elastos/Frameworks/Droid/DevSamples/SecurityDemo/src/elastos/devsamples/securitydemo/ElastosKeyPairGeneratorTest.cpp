@@ -10,7 +10,9 @@
 #include "Elastos.Droid.KeyStore.h"
 #include "elastos/utility/logging/Logger.h"
 #include "elastos/security/KeyPairGenerator.h"
+#include <elastos/core/StringUtils.h>
 
+using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Droid::KeyStore::Security::ICredentials;
@@ -385,6 +387,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
     AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::AllocInplace(barray, sizeof(barray)/sizeof(barray[0]));
     AutoPtr<IBigInteger> p;
     CBigInteger::New(1, *array, (IBigInteger**)&p);
+    //Logger::E("leliang", "ElastosKeyPairGeneratorTest, line:%d, p length:%d", __LINE__, array->GetLength());
 
     Byte barray2[] = {
         (Byte) 0xA1, (Byte) 0x9B, (Byte) 0x1D, (Byte) 0xC0, (Byte) 0xE3, (Byte) 0xF6,
@@ -395,6 +398,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
         (Byte) 0xA8, (Byte) 0xE5,
     };
     AutoPtr<ArrayOf<Byte> > array2 = ArrayOf<Byte>::AllocInplace(barray2, sizeof(barray2)/sizeof(barray2[0]));
+    //Logger::E("leliang", "ElastosKeyPairGeneratorTest, line:%d, q length:%d", __LINE__, array2->GetLength());
     AutoPtr<IBigInteger> q;
     CBigInteger::New(1, *array2, (IBigInteger**)&q);
 
@@ -445,6 +449,7 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
     };
     AutoPtr<ArrayOf<Byte> > array3 = ArrayOf<Byte>::AllocInplace(barray3, sizeof(barray3)/sizeof(barray3[0]));
     AutoPtr<IBigInteger> g;
+    //Logger::E("leliang", "ElastosKeyPairGeneratorTest, line:%d, g length:%d", __LINE__, array3->GetLength());
     CBigInteger::New(1, *array3, (IBigInteger**)&g);
 
     AutoPtr<IAlgorithmParameterSpec> spec;
@@ -468,6 +473,13 @@ ECode ElastosKeyPairGeneratorTest::TestKeyPairGenerator_GenerateKeyPair_DSA_Spec
     AutoPtr<IKeyPair> pair;
     mGenerator->GenerateKeyPair((IKeyPair**)&pair);
     assert(NULL != pair);
+
+    //AutoPtr<ArrayOf<Byte> > pubKeyBytes;
+    //AutoPtr<IPublicKey> pubKey;
+    //pair->GetPublic((IPublicKey**)&pubKey);
+    //IKey::Probe(pubKey)->GetEncoded((ArrayOf<Byte>**)&pubKeyBytes);
+    //Logger::E("leliang", "ElastosKeyPairGeneratorTest line:%d, pubKey:%s", __LINE__, StringUtils::ToHexString(*pubKeyBytes).string());
+
 
     AssertKeyPairCorrect(pair, TEST_ALIAS_1, String("DSA"), 2048, spec, TEST_DN_1, TEST_SERIAL_1, NOW,
             NOW_PLUS_10_YEARS);

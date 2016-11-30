@@ -58,7 +58,7 @@ private:
         /* [in] */ const String& keyType,
         /* [out] */ String* result);
 
-    static CARAPI_(AutoPtr< ArrayOf< ArrayOf<Byte>* > >) GetArgsForKeyType(
+    static CARAPI_(AutoPtr< ArrayOf<ByteArray > >) GetArgsForKeyType(
         /* [in] */ Int32 keyType,
         /* [in] */ IAlgorithmParameterSpec* spec);
 

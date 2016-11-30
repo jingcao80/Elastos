@@ -1091,6 +1091,8 @@ ECode CBigInteger::TwosComplement(
     /* Puts the little-endian Int32 array representing the magnitude
      * of this BigInteger into the big-endian byte array. */
     *bytes = ArrayOf<Byte>::Alloc(bytesLen);
+    REFCOUNT_ADD(*bytes);
+
     Int32 firstByteNumber = 0;
     Int32 highBytes;
     Int32 bytesInInteger = 4;

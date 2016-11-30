@@ -82,7 +82,7 @@ ECode ElastosKeyPairGenerator::GenerateKeyPair(
     Int32 keyType = KeyStore::GetKeyTypeForAlgorithm(skeyType);
     AutoPtr<IAlgorithmParameterSpec> aps;
     mSpec->GetAlgorithmParameterSpec((IAlgorithmParameterSpec**)&aps);
-    AutoPtr<ArrayOf<ArrayOf<Byte>*> > args = GetArgsForKeyType(keyType, aps);
+    AutoPtr<ArrayOf<ByteArray > > args = GetArgsForKeyType(keyType, aps);
 
     String privateKeyAlias = Credentials::USER_PRIVATE_KEY + alias;
     Int32 keySize;
@@ -226,7 +226,7 @@ ECode ElastosKeyPairGenerator::GetDefaultSignatureAlgorithmForKeyType(
     return NOERROR;
 }
 
-AutoPtr< ArrayOf< ArrayOf<Byte>* > > ElastosKeyPairGenerator::GetArgsForKeyType(
+AutoPtr< ArrayOf<ByteArray  > > ElastosKeyPairGenerator::GetArgsForKeyType(
     /* [in] */ Int32 keyType,
     /* [in] */ IAlgorithmParameterSpec* spec)
 {
@@ -238,7 +238,7 @@ AutoPtr< ArrayOf< ArrayOf<Byte>* > > ElastosKeyPairGenerator::GetArgsForKeyType(
                 rsaSpec->GetPublicExponent((IBigInteger**)&bi);
                 AutoPtr<ArrayOf<Byte> > array;
                 bi->ToByteArray((ArrayOf<Byte>**)&array);
-                AutoPtr<ArrayOf<ArrayOf<Byte>*> > result = ArrayOf<ArrayOf<Byte>* >::Alloc(1);
+                AutoPtr<ArrayOf<ByteArray > > result = ArrayOf<ByteArray >::Alloc(1);
                 result->Set(0, array);
                 return result;
             }
@@ -263,7 +263,7 @@ AutoPtr< ArrayOf< ArrayOf<Byte>* > > ElastosKeyPairGenerator::GetArgsForKeyType(
                 AutoPtr<ArrayOf<Byte> > array3;
                 bi3->ToByteArray((ArrayOf<Byte>**)&array3);
 
-                AutoPtr<ArrayOf<ArrayOf<Byte>*> > result = ArrayOf<ArrayOf<Byte>* >::Alloc(3);
+                AutoPtr<ArrayOf<ByteArray > > result = ArrayOf<ByteArray >::Alloc(3);
                 result->Set(0, array1);
                 result->Set(1, array2);
                 result->Set(2, array3);

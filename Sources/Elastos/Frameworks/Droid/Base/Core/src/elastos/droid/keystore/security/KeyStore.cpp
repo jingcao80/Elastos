@@ -204,9 +204,15 @@ ECode KeyStore::KeystoreServiceWrapper::Generate(
     VALIDATE_NOT_NULL(ret);
     *ret = 0;
     if (mKeystoreService.get() != NULL) {
-        android::Vector<android::sp<android::KeystoreArg> > args;
         Int32 len = 0;
-        if (_args != NULL && (len = _args->GetLength(), len > 0)) {
+        if (_args != 0) {
+            len = _args->GetLength();
+        }
+        // this container used to keep "AutoPtr<ArrayOf<Byte> > bytes"
+        // surrive the mKeystoreService->generate invoke
+        AutoPtr<ArrayOf<AutoPtr<ArrayOf<Byte> > > > container = ArrayOf<AutoPtr<ArrayOf<Byte> > >::Alloc(len);
+        android::Vector<android::sp<android::KeystoreArg> > args;
+        if (len > 0) {
             for (Int32 i = 0; i < len; i++) {
                 AutoPtr<IInterface> obj;
                 AutoPtr<IArrayOf> item = (*_args)[i];
@@ -221,6 +227,8 @@ ECode KeyStore::KeystoreServiceWrapper::Generate(
                         IByte::Probe(o)->GetValue(&v);
                         (*bytes)[j] = v;
                     }
+                    container->Set(i, bytes);//add to the container to prolong life
+
                     android::sp<android::KeystoreArg> arg = new android::KeystoreArg(
                             bytes->GetPayload(), size);
                     args.push_back(arg);
