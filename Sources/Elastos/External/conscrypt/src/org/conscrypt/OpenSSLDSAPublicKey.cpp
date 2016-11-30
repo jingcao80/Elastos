@@ -4,6 +4,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 
+using Elastos::IO::EIID_ISerializable;
 using Elastos::IO::IObjectInput;
 using Elastos::IO::IObjectOutput;
 using Elastos::Core::StringBuilder;
@@ -18,8 +19,8 @@ namespace Conscrypt {
 
 const Int64 OpenSSLDSAPublicKey::serialVersionUID;
 
-CAR_INTERFACE_IMPL_6(OpenSSLDSAPublicKey, Object, IOpenSSLDSAPublicKey,
-        IDSAPublicKey, IDSAKey, IKey, IPublicKey, IOpenSSLKeyHolder)
+CAR_INTERFACE_IMPL_7(OpenSSLDSAPublicKey, Object, IOpenSSLDSAPublicKey,
+        IDSAPublicKey, IDSAKey, IKey, IPublicKey, IOpenSSLKeyHolder, ISerializable)
 
 OpenSSLDSAPublicKey::OpenSSLDSAPublicKey()
 {

@@ -13,6 +13,7 @@
 
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
+using Elastos::IO::ISerializable;
 using Elastos::Math::IBigInteger;
 using Elastos::Security::Interfaces::IDSAKey;
 using Elastos::Security::Interfaces::IDSAParams;
@@ -32,6 +33,7 @@ class OpenSSLDSAPrivateKey
     , public IPrivateKey
     , public IOpenSSLKeyHolder
     , public Object
+    , public ISerializable
 {
 public:
     CAR_INTERFACE_DECL()

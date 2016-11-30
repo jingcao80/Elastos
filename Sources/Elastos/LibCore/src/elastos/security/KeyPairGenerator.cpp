@@ -92,11 +92,12 @@ ECode KeyPairGenerator::GetInstance(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<ISpiAndProvider> sap;
-    ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap);
+    FAIL_RETURN(ENGINE->GetInstance(algorithm, NULL, (ISpiAndProvider**)&sap));
     AutoPtr<IInterface> spi;
-    sap->GetSpi((IInterface**)&spi);
+    FAIL_RETURN(sap->GetSpi((IInterface**)&spi));
     AutoPtr<IProvider> provider;
-    sap->GetProvider((IProvider**)&provider);
+    FAIL_RETURN(sap->GetProvider((IProvider**)&provider));
+
     if (IKeyPairGenerator::Probe(spi)) {
         AutoPtr<IKeyPairGenerator> result = IKeyPairGenerator::Probe(spi);
         ((KeyPairGenerator*)result.Get())->mAlgorithm = algorithm;
@@ -126,7 +127,7 @@ ECode KeyPairGenerator::GetInstance(
     AutoPtr<ISecurity> security;
     CSecurity::AcquireSingleton((ISecurity**)&security);
     AutoPtr<IProvider> impProvider;
-    security->GetProvider(provider, (IProvider**)&impProvider);
+    FAIL_RETURN(security->GetProvider(provider, (IProvider**)&impProvider));
 
     if (impProvider == NULL) {
         // throw new NoSuchProviderException(provider);
@@ -150,7 +151,7 @@ ECode KeyPairGenerator::GetInstance(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<IInterface> spi;
-    ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi);
+    FAIL_RETURN(ENGINE->GetInstance(algorithm, provider, NULL, (IInterface**)&spi));
     if (IKeyPairGenerator::Probe(spi)) {
         AutoPtr<IKeyPairGenerator> result = IKeyPairGenerator::Probe(spi);
         ((KeyPairGenerator*)result.Get())->mAlgorithm = algorithm;

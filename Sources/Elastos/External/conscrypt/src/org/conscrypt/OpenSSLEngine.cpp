@@ -1,4 +1,5 @@
 #include "org/conscrypt/OpenSSLEngine.h"
+#include "org/conscrypt/COpenSSLEngine.h"
 #include "org/conscrypt/OpenSSLKey.h"
 #include "org/conscrypt/NativeCrypto.h"
 #include <elastos/core/AutoLock.h>
@@ -74,11 +75,7 @@ ECode OpenSSLEngine::GetInstance(
         NativeCrypto::ENGINE_add(engineCtx, &ret);
     }
 
-    AutoPtr<OpenSSLEngine> ret = new OpenSSLEngine();
-    ret->constructor(engineCtx);
-    *result = IOpenSSLEngine::Probe(ret);
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return COpenSSLEngine::New(engineCtx, result);
 }
 
 ECode OpenSSLEngine::GetPrivateKeyById(

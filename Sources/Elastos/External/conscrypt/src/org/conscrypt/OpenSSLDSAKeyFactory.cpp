@@ -1,7 +1,7 @@
 #include "org/conscrypt/OpenSSLDSAKeyFactory.h"
 #include "org/conscrypt/NativeCrypto.h"
 #include "org/conscrypt/OpenSSLDSAPrivateKey.h"
-#include "org/conscrypt/OpenSSLDSAPublicKey.h"
+#include "org/conscrypt/COpenSSLDSAPublicKey.h"
 #include "org/conscrypt/OpenSSLKey.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -36,8 +36,8 @@ ECode OpenSSLDSAKeyFactory::EngineGeneratePublic(
     }
 
     if (IDSAPublicKeySpec::Probe(keySpec) != NULL) {
-        AutoPtr<OpenSSLDSAPublicKey> key = new OpenSSLDSAPublicKey();
-        key->constructor(IDSAPublicKeySpec::Probe(keySpec));
+        AutoPtr<IOpenSSLDSAPublicKey> key;
+        COpenSSLDSAPublicKey::New(IDSAPublicKeySpec::Probe(keySpec), (IOpenSSLDSAPublicKey**)&key);
         *result = IPublicKey::Probe(key);
         REFCOUNT_ADD(*result)
         return NOERROR;

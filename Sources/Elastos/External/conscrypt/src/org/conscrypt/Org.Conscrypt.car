@@ -343,6 +343,8 @@ module
         interface IDSAPrivateKey;
         interface IDSAKey;
         interface IPrivateKey;
+        interface IKey;
+        interface ISerializable;
         interface IOpenSSLKeyHolder;
     }
 
@@ -361,6 +363,8 @@ module
         interface IDSAPublicKey;
         interface IDSAKey;
         interface IPublicKey;
+        interface IKey;
+        interface ISerializable;
         interface IOpenSSLKeyHolder;
     }
 

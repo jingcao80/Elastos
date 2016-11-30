@@ -13,6 +13,7 @@
 
 using Elastos::IO::IObjectInputStream;
 using Elastos::IO::IObjectOutputStream;
+using Elastos::IO::ISerializable;
 using Elastos::Math::IBigInteger;
 using Elastos::Security::Interfaces::IDSAKey;
 using Elastos::Security::Interfaces::IDSAParams;
@@ -25,13 +26,14 @@ namespace Org {
 namespace Conscrypt {
 
 class OpenSSLDSAPublicKey
-    : public IOpenSSLDSAPublicKey
+    : public Object
     , public IDSAPublicKey
     , public IDSAKey
     , public IKey
     , public IPublicKey
     , public IOpenSSLKeyHolder
-    , public Object
+    , public IOpenSSLDSAPublicKey
+    , public ISerializable
 {
 public:
     CAR_INTERFACE_DECL()

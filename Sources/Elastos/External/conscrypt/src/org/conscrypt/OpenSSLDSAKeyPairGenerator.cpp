@@ -1,7 +1,7 @@
 #include "org/conscrypt/OpenSSLDSAKeyPairGenerator.h"
 #include "org/conscrypt/NativeCrypto.h"
 #include "org/conscrypt/OpenSSLDSAPrivateKey.h"
-#include "org/conscrypt/OpenSSLDSAPublicKey.h"
+#include "org/conscrypt/COpenSSLDSAPublicKey.h"
 #include "org/conscrypt/OpenSSLKey.h"
 
 using Elastos::Security::CKeyPair;
@@ -46,8 +46,8 @@ ECode OpenSSLDSAKeyPairGenerator::GenerateKeyPair(
 
     AutoPtr<OpenSSLDSAPrivateKey> privKey = new OpenSSLDSAPrivateKey();
     privKey->constructor(IOpenSSLKey::Probe(key));
-    AutoPtr<OpenSSLDSAPublicKey> pubKey = new OpenSSLDSAPublicKey();
-    pubKey->constructor(IOpenSSLKey::Probe(key));
+    AutoPtr<IOpenSSLDSAPublicKey> pubKey;
+    COpenSSLDSAPublicKey::New(IOpenSSLKey::Probe(key), (IOpenSSLDSAPublicKey**)&pubKey);
 
     return CKeyPair::New(IPublicKey::Probe(pubKey), IPrivateKey::Probe(privKey), result);
 }

@@ -134,9 +134,9 @@ ECode OpenSSLDSAParams::Equals(
     other->GetQ((IBigInteger**)&q);
 
     Boolean b1, b2, b3;
-    IObject::Probe(g)->Equals(g, &b1);
-    IObject::Probe(p)->Equals(p, &b2);
-    IObject::Probe(q)->Equals(q, &b3);
+    IObject::Probe(mG)->Equals(g, &b1);
+    IObject::Probe(mP)->Equals(p, &b2);
+    IObject::Probe(mQ)->Equals(q, &b3);
     *result = b1 && b2 && b3;
     return NOERROR;
 }
