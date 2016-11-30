@@ -6,7 +6,37 @@ module
     namespace Bus {
 
     interface ITranslator {
+        /**
+         * Get the number of target languages this Translator supports
+         *
+         * @return numver of target languages
+         */
+        NumTargetLanguages(
+            [out] Int32* res);
 
+        /**
+         * Retrieve one of the list of target languages this Translator supports
+         *
+         * @param index the index of the requested target language within the list
+         * @return The requested target language or null if index is out of bounds
+         */
+        GetTargetLanguage(
+            [in] Int32 index,
+            [out] String* res);
+
+        /**
+         * Translate a string into another language
+         *
+         * @param fromLanguage the language to translate from
+         * @param toLanguage the language to translate to
+         * @param fromText the text to be translated
+         * @return the translated text or null if it can not be translated
+         */
+        Translate(
+            [in] String fromLanguage,
+            [in] String toLanguage,
+            [in] String fromText,
+            [out] String* res);
     }
 
     } // namespace Bus

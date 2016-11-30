@@ -1,5 +1,10 @@
 
 #include "org/alljoyn/bus/Signature.h"
+#include <alljoyn/MsgArg.h>
+#include "alljoyn/SignatureUtils.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Alljoyn {
@@ -8,11 +13,35 @@ namespace Bus {
 AutoPtr<ArrayOf<String> > Signature::Split(
     /* [in] */ const String& signature)
 {
+    const char* next = signature.string();
+    if (next) {
+        uint8_t count = ajn::SignatureUtils::CountCompleteTypes(next);
+        AutoPtr<ArrayOf<String> > signatures = ArrayOf<String>::Alloc(count);
+        if (!signatures) {
+            return NULL;
+        }
+        const char* prev = next;
+        for (Int32 i = 0; *next; ++i, prev = next) {
+            QStatus status = ajn::SignatureUtils::ParseCompleteType(next);
+            if (ER_OK != status) {
+                return NULL;
+            }
+            assert(i < count);
+
+            ptrdiff_t len = next - prev;
+            String type(prev, len);
+            (*signatures)[i] = type;
+        }
+        return signatures;
+    }
+    else {
+        return NULL;
+    }
     return NULL;
 }
 
 String Signature::TypeSig(
-    /* [in] */ IParamInfo* type,
+    /* [in] */ IDataTypeInfo* typeInfo,
     /* [in] */ const String& signature)
 {
     // if (type instanceof ParameterizedType) {
@@ -25,11 +54,62 @@ String Signature::TypeSig(
     //     throw new AnnotationBusException("cannot determine signature for " + type);
     // }
 
-    String sig("");
-    if (type == NULL)
-        return sig;
+    CarDataType type;
+    typeInfo->GetDataType(&type);
+    switch (type) {
+        case CarDataType_Byte:
+            return (signature == NULL) ? String("y") : signature;
+        case CarDataType_Boolean:
+            return (signature == NULL) ? String("b") : signature;
+        case CarDataType_Int16:
+            return (signature == NULL) ? String("n") : signature;
+        case CarDataType_Int32:
+            return (signature == NULL) ? String("i") : signature;
+        case CarDataType_Int64:
+            return (signature == NULL) ? String("x") : signature;
+        case CarDataType_Double:
+            return (signature == NULL) ? String("d") : signature;
+        case CarDataType_String:
+            return (signature == NULL) ? String("s") : signature;
+        // case CarDataType_Interface:
+        //     {
+        //         InterfaceID iid;
+        //         IInterfaceInfo::Probe(typeInfo)->GetId(&iid);
+        //         if (iid == EIID_IVariant) {
+        //             return (signature == NULL) ? String("y") : signature;
+        //         }
+        //     }
+        //     break;
+        case CarDataType_ArrayOf:
+            {
+                AutoPtr<IDataTypeInfo> elementTypeInfo;
+                ICarArrayInfo::Probe(typeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+                String sig = (signature == NULL) ? String("a") : signature.Substring(0, 1);
+                return sig + TypeSig(elementTypeInfo,
+                        (signature == NULL) ? signature : signature.Substring(1));
+            }
+        case CarDataType_Enum:
+            if (signature == NULL) {
+                Logger::E("Signature", "enum type is missing annotation");
+                assert(0);
+            }
+            break;
+        default:
+            break;
+    }
 
-    return sig;
+    // if (signature == NULL || signature.Equals("r")) {
+    //     String sig = TypeSig(structTypes(cls), structSig(cls));
+    //     if (sig.length() == 0) {
+    //         throw new AnnotationBusException("cannot determine signature for " + cls);
+    //     }
+    //     return "(" + sig + ")";
+    // }
+    // else {
+    //     /* Annotated application class - check that annotation is correct first */
+    //     return signature;
+    // }
+    return signature;
 }
 
 // private static String parameterizedTypeSig(ParameterizedType type, String signature)
@@ -101,7 +181,11 @@ String Signature::TypeSig(
     String sig("");
     AutoPtr<ArrayOf<String> > signatures = Split(signature);
     for (Int32 i = 0; i < types->GetLength(); ++i) {
-        sig += TypeSig((*types)[i], (signatures == NULL) ? String(NULL) : (*signatures)[i]);
+        if ((*types)[i] == NULL)
+            continue;
+        AutoPtr<IDataTypeInfo> type;
+        (*types)[i]->GetTypeInfo((IDataTypeInfo**)&type);
+        sig += TypeSig(type, (signatures == NULL) ? String(NULL) : (*signatures)[i]);
     }
     return sig;
 }

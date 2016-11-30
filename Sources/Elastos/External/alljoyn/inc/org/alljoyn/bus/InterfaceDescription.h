@@ -29,7 +29,23 @@ class InterfaceDescription
 private:
     class Property : public Object
     {
+    public:
+        Property(
+            /* [in] */ const String& name,
+            /* [in] */ const String& signature,
+            /* [in] */ HashMap<String, String>* annotations)
+        {
+            mName = name;
+            mSignature = signature;
+            mAnnotations = annotations;
+        }
 
+    public:
+        String mName;
+        AutoPtr<HashMap<String, String> > mAnnotations; // TreeMap
+        String mSignature;
+        AutoPtr<IMethodInfo> mGet;
+        AutoPtr<IMethodInfo> mSet;
     };
 
 public:
@@ -95,6 +111,14 @@ public:
     static CARAPI_(String) GetOutSig(
         /* [in] */ IMethodInfo* method);
 
+    /**
+     * Get the DBus property signature.
+     *
+     * @param method the method
+     */
+    static CARAPI_(String) GetPropertySig(
+        /* [in] */ IMethodInfo* method);
+
 private:
     /** Allocate native resources. */
     CARAPI Create(
@@ -113,15 +137,39 @@ private:
         /* [in] */ Int32 annotation,
         /* [in] */ const String& accessPerm);
 
+    /** Add an annotation to the specified interface member */
+    CARAPI AddMemberAnnotation(
+        /* [in] */ const String& member,
+        /* [in] */ const String& annotation,
+        /* [in] */ const String& value);
+
+    /** Add a property to the native interface description. */
+    CARAPI AddProperty(
+        /* [in] */ const String& name,
+        /* [in] */ const String& signature,
+        /* [in] */ Int32 access,
+        /* [in] */ Int32 annotation);
+
+    /** Add an annotation to the specified interface property */
+    CARAPI AddPropertyAnnotation(
+        /* [in] */ const String& property,
+        /* [in] */ const String& annotation,
+        /* [in] */ const String& value);
+
+    /** Add an annotation to the interface */
+    CARAPI AddAnnotation(
+        /* [in] */ const String& annotation,
+        /* [in] */ const String& value);
+
     CARAPI_(void) SetDescriptionLanguage(
         /* [in] */ const String& language);
 
     CARAPI_(void) SetDescription(
-        /* [in] */ const String& Description);
+        /* [in] */ const String& description);
 
-    // CARAPI_(void) SetDescriptionTranslator(
-    //     /* [in] */ IBusAttachment* busAttachment,
-    //     /* [in] */ ITranslator* dt);
+    CARAPI_(void) SetDescriptionTranslator(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ ITranslator* dt);
 
     CARAPI SetMemberDescription(
         /* [in] */ const String& member,
@@ -154,6 +202,9 @@ private:
         /* [in] */ CBusAttachment* busAttachment,
         /* [in] */ IInterfaceInfo* busInterface);
 
+    CARAPI GetProperties(
+        /* [in] */ IInterfaceInfo* busInterface);
+
     CARAPI AddProperties(
         /* [in] */ IInterfaceInfo* busInterface);
 
@@ -179,6 +230,8 @@ private:
     static const Int32 AJ_IFC_SECURITY_OFF       = 2; /**< Security does not apply to this interface */
 
     static const String TAG;
+
+    HashMap<String, AutoPtr<ITranslator> > mTranslatorCache;
 
     /**
      * The native interface description handle.

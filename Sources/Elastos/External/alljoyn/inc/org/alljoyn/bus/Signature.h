@@ -27,7 +27,7 @@ public:
      * @throws AnnotationBusException if the signature cannot be computed
      */
     static CARAPI_(String) TypeSig(
-        /* [in] */ IParamInfo* type,
+        /* [in] */ IDataTypeInfo* type,
         /* [in] */ const String& signature);
 
     /**
