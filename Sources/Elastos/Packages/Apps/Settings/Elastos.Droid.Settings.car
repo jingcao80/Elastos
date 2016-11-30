@@ -94,20 +94,25 @@ module
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Os.IHandler;
-    using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Os.IMessage;
+    using interface Elastos.Droid.Os.Storage.IStorageVolume;
     using interface Elastos.Droid.Preference.ICheckBoxPreference;
     using interface Elastos.Droid.Preference.IDialogPreference;
     using interface Elastos.Droid.Preference.IEditTextPreference;
+    using interface Elastos.Droid.Preference.IGenericInflaterParent;
     using interface Elastos.Droid.Preference.IListPreference;
+    using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Preference.IPreferenceCategory;
+    using interface Elastos.Droid.Preference.IPreferenceGroup;
     using interface Elastos.Droid.Preference.IPreferenceActivity;
-    using interface Elastos.Droid.Preference.IRingtonePreference;
-    using interface Elastos.Droid.Preference.ISeekBarPreference;
-    using interface Elastos.Droid.Preference.ISwitchPreference;
-    using interface Elastos.Droid.Preference.ITwoStatePreference;
     using interface Elastos.Droid.Preference.IPreferenceFragment;
     using interface Elastos.Droid.Preference.IPreferenceOnPreferenceClickListener;
     using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    using interface Elastos.Droid.Preference.IRingtonePreference;
+    using interface Elastos.Droid.Preference.ISeekBarPreference;
+    using interface Elastos.Droid.Preference.ISwitchPreference;
+    using interface Elastos.Droid.Preference.ITwoStatePreference;
     using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
     using interface Elastos.Droid.Service.Notification.IIConditionListener;
     using interface Elastos.Droid.Settings.IDialogCreatable;
@@ -147,6 +152,7 @@ module
     using interface Elastos.Droid.Widget.ILinearLayout;
     using interface Elastos.Droid.Widget.IRadioGroup;
     using interface Elastos.Droid.Widget.IRecyclerListener;
+    using interface Elastos.Droid.Widget.IRelativeLayout;
     using interface Elastos.Droid.Widget.ISwitch;
     using interface Elastos.Droid.Widget.ISpinnerAdapter;
     using interface Elastos.Droid.Widget.ISearchViewOnQueryTextListener;
@@ -382,6 +388,61 @@ module
     namespace Settings {
     namespace Deviceinfo {
 
+    [local]
+    class CFileItemInfoLayout {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IRelativeLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+
+        interface ICheckable;
+    }
+
+    class CMiscFilesHandler {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    [local]
+    class CPercentageBarChart {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
     class CStatus {
         constructor();
 
@@ -399,6 +460,122 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    }
+
+    [local]
+    class CStorageItemPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] Int32 titleRes,
+            [in] Int32 colorRes);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] ICharSequence* title,
+            [in] Int32 colorRes,
+            [in] Int32 userHandle);
+
+        interface IPreference;
+        interface IComparable;
+    }
+
+    [local]
+    class CUsageBarPreference {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface IPreference;
+        interface IComparable;
+    }
+
+    class CMemory {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IIndexable;
+    }
+
+    [local]
+    class CMemoryConfirmClearCacheFragment {
+        constructor();
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+    }
+
+    [local]
+    class CMemoryClearCacheObserver {
+        constructor(
+            [in] ISettingsPreferenceFragment* target,
+            [in] Int32 remaining);
+
+        interface IIPackageDataObserver;
+        interface IBinder;
+    }
+
+    [local]
+    class CStorageVolumePreferenceCategory {
+        constructor(
+            [in] IContext* ctx,
+            [in] IStorageVolume* volume);
+
+        interface IPreferenceCategory;
+        interface IPreferenceGroup;
+        interface IPreference;
+        interface IComparable;
+        interface IGenericInflaterParent;
+    }
+
+    [local]
+    class CStorageMeasurementStatsObserver {
+        constructor(
+            [in] Boolean isInternal,
+            [in] IMeasurementDetails* details,
+            [in] Int32 currentUser,
+            [in] IMessage* finished,
+            [in] Int32 remaining);
+
+        interface IIPackageStatsObserver;
+        interface IBinder;
+    }
+
+    class CUsbSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
     }
 
     } // namespace Deviceinfo
@@ -1853,6 +2030,22 @@ module
         interface IPreferenceActivity;
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
         interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CMediaFormat {
+        constructor();
+
         interface IActivity;
         interface IContext;
         interface IContextThemeWrapper;

@@ -11,7 +11,7 @@ namespace Droid {
 namespace Os {
 namespace Storage {
 
-class StorageEventListener
+class ECO_PUBLIC StorageEventListener
     : public Object
     , public IStorageEventListener
 {

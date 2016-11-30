@@ -136,6 +136,7 @@ EXPORT_HEADERS += elastos/droid/os/UEventObserver.h
 EXPORT_HEADERS += elastos/droid/os/SELinux.h
 EXPORT_HEADERS += elastos/droid/os/ResultReceiver.h
 EXPORT_HEADERS += elastos/droid/os/CountDownTimer.h
+EXPORT_HEADERS += elastos/droid/os/storage/StorageEventListener.h
 
 EXPORT_HEADERS += elastos/droid/provider/DocumentsProvider.h
 EXPORT_HEADERS += elastos/droid/provider/Settings.h
@@ -149,7 +150,9 @@ EXPORT_HEADERS += elastos/droid/preference/EditTextPreference.h
 EXPORT_HEADERS += elastos/droid/preference/ListPreference.h
 EXPORT_HEADERS += elastos/droid/preference/PreferenceActivity.h
 EXPORT_HEADERS += elastos/droid/preference/Preference.h
+EXPORT_HEADERS += elastos/droid/preference/PreferenceCategory.h
 EXPORT_HEADERS += elastos/droid/preference/PreferenceFragment.h
+EXPORT_HEADERS += elastos/droid/preference/PreferenceGroup.h
 EXPORT_HEADERS += elastos/droid/preference/RingtonePreference.h
 EXPORT_HEADERS += elastos/droid/preference/SeekBarDialogPreference.h
 EXPORT_HEADERS += elastos/droid/preference/SeekBarPreference.h

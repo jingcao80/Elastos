@@ -13,7 +13,7 @@ namespace Elastos {
 namespace Droid {
 namespace Preference {
 
-class PreferenceGroup
+class ECO_PUBLIC PreferenceGroup
     : public Preference
     , public IGenericInflaterParent
     , public IPreferenceGroup
@@ -92,7 +92,7 @@ protected:
         /* [in] */ IBundle* container);
 
 private:
-    CARAPI_(Boolean) RemovePreferenceInt(
+    ECO_LOCAL CARAPI_(Boolean) RemovePreferenceInt(
         /* [in] */  IPreference* preference);
 
 private:

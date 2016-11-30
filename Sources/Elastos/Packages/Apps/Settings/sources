@@ -48,6 +48,7 @@ SOURCES += CDeviceInfoSettings.cpp
 SOURCES += CDevelopmentSettings.cpp
 SOURCES += CIccLockSettings.cpp
 SOURCES += HomeSettings.cpp
+SOURCES += CMediaFormat.cpp
 SOURCES += Utils.cpp
 SOURCES += UserSpinnerAdapter.cpp
 SOURCES += CTrustAgentSettings.cpp

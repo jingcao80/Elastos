@@ -20,7 +20,7 @@ namespace Preference {
  * guide.</p>
  * </div>
  */
-class PreferenceCategory
+class ECO_PUBLIC PreferenceCategory
     : public PreferenceGroup
     , public IPreferenceCategory
 {
@@ -61,7 +61,7 @@ protected:
         /* [out] */ Boolean* result);
 
 private:
-    const static String TAG;
+    ECO_LOCAL const static String TAG;
 };
 
 }

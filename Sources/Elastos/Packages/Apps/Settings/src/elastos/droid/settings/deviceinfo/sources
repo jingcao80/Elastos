@@ -5,5 +5,14 @@ INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 INCLUDES += $(MAKEDIR)/../../../../../
 
+SOURCES += CFileItemInfoLayout.cpp
+SOURCES += CMemory.cpp
+SOURCES += CMiscFilesHandler.cpp
+SOURCES += CPercentageBarChart.cpp
 SOURCES += CStatus.cpp
+SOURCES += CStorageItemPreference.cpp
+SOURCES += CStorageVolumePreferenceCategory.cpp
+SOURCES += CUsageBarPreference.cpp
+SOURCES += CUsbSettings.cpp
 SOURCES += StorageMeasurement.cpp
+SOURCES += deviceinfo.cpp

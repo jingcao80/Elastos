@@ -6,6 +6,7 @@
 #include "Elastos.CoreLibrary.External.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Text.h"
+#include "elastos/droid/settings/deviceinfo/CMemory.h"
 #include "elastos/droid/settings/inputmethod/CInputMethodAndLanguageSettings.h"
 #include "elastos/droid/settings/notification/CNotificationSettings.h"
 #include "elastos/droid/settings/notification/COtherSoundSettings.h"
@@ -43,6 +44,7 @@ using Elastos::Droid::Settings::CScreenPinningSettings;
 using Elastos::Droid::Settings::CSecuritySettings;
 using Elastos::Droid::Settings::CWallpaperTypeSettings;
 using Elastos::Droid::Settings::CWirelessSettings;
+using Elastos::Droid::Settings::Deviceinfo::CMemory;
 using Elastos::Droid::Settings::Inputmethod::CInputMethodAndLanguageSettings;
 using Elastos::Droid::Settings::Notification::CNotificationSettings;
 using Elastos::Droid::Settings::Notification::COtherSoundSettings;
@@ -1355,7 +1357,8 @@ void Index::IndexOneRaw(
 Boolean Index::IsIndexableClass(
     /* [in] */ const String& className)
 {
-    if (className.Equals("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")
+    if (className.Equals("Elastos.Droid.Settings.Deviceinfo.CMemory")
+            || className.Equals("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")
             || className.Equals("Elastos.Droid.Settings.Notification.CNotificationSettings")
             || className.Equals("Elastos.Droid.Settings.Notification.COtherSoundSettings")
             || className.Equals("Elastos.Droid.Settings.Notification.CZenModeSettings")
@@ -1462,6 +1465,8 @@ AutoPtr<IIndexableSearchIndexProvider> Index::GetSearchIndexProvider(const Strin
 {
     static HashMap<String, AutoPtr<IIndexableSearchIndexProvider> > providerMap;
     if (providerMap.IsEmpty()) {
+        providerMap[String("Elastos.Droid.Settings.Deviceinfo.CMemory")]
+            = CMemory::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings")]
             = CInputMethodAndLanguageSettings::GetSEARCH_INDEX_DATA_PROVIDER();
         providerMap[String("Elastos.Droid.Settings.Notification.CNotificationSettings")]

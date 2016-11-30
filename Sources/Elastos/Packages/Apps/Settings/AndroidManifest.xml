@@ -1216,7 +1216,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="MediaFormat" android:label="@string/media_format_title">
+        <activity android:name="CMediaFormat" android:label="@string/media_format_title">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
