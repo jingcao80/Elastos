@@ -34,7 +34,7 @@ public:
         /* [in] */ const String& busName,
         /* [in] */ const String& objPath,
         /* [in] */ Int32 sessionId,
-        /* [in] */ ArrayOf<InterfaceID>* busInterfaces);
+        /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces);
 
     /**
      * Construct a ProxyBusObject.
@@ -51,7 +51,7 @@ public:
         /* [in] */ const String& busName,
         /* [in] */ const String& objPath,
         /* [in] */ Int32 sessionId,
-        /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+        /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
         /* [in] */ Boolean secure);
 
     /** Enable property caching for this proxy bus object. */

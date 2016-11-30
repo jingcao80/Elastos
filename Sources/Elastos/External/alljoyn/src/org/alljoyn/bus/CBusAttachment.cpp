@@ -155,8 +155,9 @@ ECode CBusAttachment::constructor(
      * it and can quickly release its resources when we're done with it.
      * The corresponding interface (dbus) is what we give the clients.
      */
-    AutoPtr< ArrayOf<InterfaceID> > busInterfaces = ArrayOf<InterfaceID>::Alloc(1);
-    (*busInterfaces)[0] = EIID_IDBusProxyObj;
+    AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(1);
+    assert(0);
+    // (*busInterfaces)[0] = EIID_IDBusProxyObj;
     mDbusbo = new ProxyBusObject();
     mDbusbo->constructor(this, String("org.freedesktop.DBus"), String("/org/freedesktop/DBus"), SESSION_ID_ANY,
             busInterfaces);
@@ -1170,7 +1171,7 @@ ECode CBusAttachment::GetProxyBusObject(
     /* [in] */ const String& busName,
     /* [in] */ const String& objPath,
     /* [in] */ Int32 sessionId,
-    /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+    /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
     /* [out] */ IProxyBusObject** proxy)
 {
     assert(0 && "TODO");

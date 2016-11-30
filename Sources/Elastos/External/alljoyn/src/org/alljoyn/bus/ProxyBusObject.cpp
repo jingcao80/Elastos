@@ -12,7 +12,7 @@ ECode ProxyBusObject::constructor(
     /* [in] */ const String& busName,
     /* [in] */ const String& objPath,
     /* [in] */ Int32 sessionId,
-    /* [in] */ ArrayOf<InterfaceID>* busInterfaces)
+    /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces)
 {
     return NOERROR;
 }
@@ -22,7 +22,7 @@ ECode ProxyBusObject::constructor(
     /* [in] */ const String& busName,
     /* [in] */ const String& objPath,
     /* [in] */ Int32 sessionId,
-    /* [in] */ ArrayOf<InterfaceID>* busInterfaces,
+    /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
     /* [in] */ Boolean secure)
 {
     return NOERROR;

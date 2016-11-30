@@ -1125,7 +1125,7 @@ module
             [in] String busName,
             [in] String objPath,
             [in] Int32 sessionId,
-            [in] ArrayOf<InterfaceID>* busInterfaces,
+            [in] ArrayOf<IInterfaceInfo*>* busInterfaces,
             [out] IProxyBusObject** proxy);
 
         /**
