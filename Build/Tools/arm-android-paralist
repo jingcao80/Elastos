@@ -38,7 +38,8 @@
   Elastos/LibCore/src/libcore/icu
   Elastos/LibCore/src/libcore/io
   Elastos/LibCore/src/libcore/utility
-  Elastos/LibCore/src/elastos/core
+  Elastos/LibCore/src/elastos/core/reflect
+> Elastos/LibCore/src/elastos/core
   Elastos/LibCore/src/elastos/io/channels/spi
 > Elastos/LibCore/src/elastos/io/channels
   Elastos/LibCore/src/elastos/io/charset/spi

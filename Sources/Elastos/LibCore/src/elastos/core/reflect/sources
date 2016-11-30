@@ -1,0 +1,23 @@
+
+TARGET_NAME= reflect
+TARGET_TYPE= lib
+
+C_DEFINES += -DELASTOS_CORELIBRARY
+
+include $(MAKEDIR)/../../../sources.inc
+
+#INCLUDES += $(PREBUILD_INC)/sys;
+#INCLUDES += $(PREBUILD_INC)/fdlibm;
+INCLUDES += ../../../corelibrary
+INCLUDES += $(MAKEDIR)/../../../../inc/;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/channels/spi;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility/regex;
+#INCLUDES += $(MAKEDIR)/../../../../inc/elastos/droid/system;
+#INCLUDES += $(MAKEDIR)/../../../../inc/libcore/icu;
+#INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility;
+
+SOURCES += CProxyFactory.cpp

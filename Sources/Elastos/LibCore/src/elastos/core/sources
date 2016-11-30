@@ -70,3 +70,4 @@ SOURCES += StringBuffer.cpp
 SOURCES += StringBuilder.cpp
 SOURCES += CaseMapper.cpp
 
+ELASTOS_LIBS += reflect/reflect.lib

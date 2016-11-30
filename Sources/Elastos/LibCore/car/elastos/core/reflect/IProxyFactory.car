@@ -1,0 +1,45 @@
+
+module
+{
+    interface Elastos.Core.IClassLoader;
+    interface Elastos.Core.Reflect.IInvocationHandler;
+
+    namespace Elastos {
+    namespace Core {
+    namespace Reflect {
+
+    [local, deprecated]
+    interface IProxyFactory {
+        /**
+         * Returns an instance of the dynamically built class for the specified
+         * interfaces. Method invocations on the returned instance are forwarded to
+         * the specified invocation handler. The interfaces must be visible from the
+         * supplied class loader; no duplicates are permitted. All non-public
+         * interfaces must be defined in the same package.
+         *
+         * @param loader
+         *            the class loader that will define the proxy class
+         * @param interfaces
+         *            an array of {@code Class} objects, each one identifying an
+         *            interface that will be implemented by the returned proxy
+         *            object
+         * @param invocationHandler
+         *            the invocation handler that handles the dispatched method
+         *            invocations
+         * @return a new proxy object that delegates to the handler {@code h}
+         * @throws IllegalArgumentException
+         *                if any of the interface restrictions are violated
+         * @throws NullPointerException
+         *                if the interfaces or any of its elements are null
+         */
+        NewProxyInstance(
+            [in] IClassLoader* loader,
+            [in] ArrayOf<IInterfaceInfo*>* interfaces,
+            [in] IInvocationHandler* invocationHandler,
+            [out] IInterface** prxObject);
+    }
+
+    } // namespace Reflect
+    } // namespace Core
+    } // namespace Elastos
+}

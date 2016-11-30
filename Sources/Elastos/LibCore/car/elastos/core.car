@@ -34,6 +34,9 @@ module
     merge("core/ISystem.car");
     merge("core/IThreadLocal.car");
 
+    merge("core/reflect/IInvocationHandler.car");
+    merge("core/reflect/IProxyFactory.car");
+
     merge("io/ISerializable.car");
 
     interface Elastos.Core.IRunnable;
@@ -408,6 +411,14 @@ module
         interface IThreadGroup;
     }
 
-        } // namespace Core
+    namespace Reflect {
+
+    singleton class CProxyFactory {
+        interface IProxyFactory;
+    }
+
+    } // namespace Reflect
+
+    } // namespace Core
     } // namepsace Elastos
 }
