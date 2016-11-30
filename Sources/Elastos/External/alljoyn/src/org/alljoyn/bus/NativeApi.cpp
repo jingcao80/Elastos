@@ -1,12 +1,15 @@
 
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/MsgArg.h"
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/etl/Map.h>
 #include <elastos/utility/etl/Pair.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/Init.h>
 #include <qcc/Log.h>
 
+using Elastos::Core::ClassLoader;
+using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::Etl::Map;
 using Elastos::Utility::Etl::Pair;
 using Elastos::Utility::Etl::MakePair;
@@ -372,6 +375,19 @@ QStatus Unmarshal(
     size_t numArgs;
     msg->GetArgs(numArgs, args);
     return Unmarshal(args, numArgs, method, unmarshalled);
+}
+
+static const String PATH("/system/lib/Org.Alljoyn.Bus.eco");
+static AutoPtr<IClassLoader> sClassLoader;
+
+AutoPtr<IClassLoader> GetModuleClassLoader()
+{
+    if (sClassLoader == NULL) {
+        CPathClassLoader::New(PATH, ClassLoader::GetSystemClassLoader(),
+                (IClassLoader**)&sClassLoader);
+    }
+
+    return sClassLoader;
 }
 
 } // namespace Bus

@@ -19,6 +19,7 @@ module
     interface Org.Alljoyn.Bus.ISessionOpts;
     interface Org.Alljoyn.Bus.ISessionPortListener;
     interface Org.Alljoyn.Bus.ITranslator;
+    interface Org.Alljoyn.Bus.Ifaces.IDBusProxyObj;
 
     namespace Org {
     namespace Alljoyn {
@@ -1153,11 +1154,13 @@ module
          *
          * @see org.alljoyn.bus.annotation.BusMethod
          */
-        // public ProxyBusObject getProxyBusObject(String busName,
-        //         String objPath,
-        //         int sessionId,
-        //         Class<?>[] busInterfaces,
-        //         boolean secure);
+        GetProxyBusObject(
+            [in] String busName,
+            [in] String objPath,
+            [in] Int32 sessionId,
+            [in] ArrayOf<IInterfaceInfo*>* busInterfaces,
+            [in] Boolean secure,
+            [out] IProxyBusObject** proxy);
 
         /**
          * Gets the DBusProxyObj interface of the org.freedesktop.DBus proxy object.
@@ -1166,7 +1169,8 @@ module
          *
          * @return the DBusProxyObj interface
          */
-        // public DBusProxyObj getDBusProxyObj();
+        GetDBusProxyObj(
+            [out] IDBusProxyObj** proxy);
 
         /**
          * Get the unique name of this BusAttachment.

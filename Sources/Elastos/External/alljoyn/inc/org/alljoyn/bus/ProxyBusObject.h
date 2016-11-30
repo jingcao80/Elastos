@@ -107,7 +107,7 @@ public:
      * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
      */
     CARAPI GetInterface(
-        /* [in] */ const InterfaceID& intfId,
+        /* [in] */ IInterfaceInfo* intfId,
         /* [out] */ IInterface** intf);
 
     /**
@@ -139,6 +139,9 @@ public:
      */
     CARAPI IsSecure(
         /* [out] */ Boolean* isSecure);
+
+private:
+    AutoPtr<IInterface> mProxy;
 };
 
 } // namespace Bus

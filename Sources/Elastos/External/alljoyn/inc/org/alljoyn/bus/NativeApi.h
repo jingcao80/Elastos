@@ -6,6 +6,7 @@
 #include "org/alljoyn/bus/NativeBusObject.h"
 #include <alljoyn/MsgArg.h>
 
+using Elastos::Core::IClassLoader;
 using Elastos::Core::Object;
 
 #undef org_alljoyn_bus_InterfaceDescription_AJ_IFC_SECURITY_OFF
@@ -181,6 +182,8 @@ QStatus Unmarshal(
     /* [in] */ ajn::Message& msg,
     /* [in] */ IMethodInfo* method,
     /* [out] */ IArgumentList** unmarshalled);
+
+AutoPtr<IClassLoader> GetModuleClassLoader();
 
 } // namespace Bus
 } // namespace Alljoyn

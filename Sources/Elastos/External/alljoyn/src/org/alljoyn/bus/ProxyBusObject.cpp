@@ -51,7 +51,7 @@ ECode ProxyBusObject::GetObjPath(
 }
 
 ECode ProxyBusObject::GetInterface(
-    /* [in] */ const InterfaceID& intfId,
+    /* [in] */ IInterfaceInfo* intfId,
     /* [out] */ IInterface** intf)
 {
     return NOERROR;

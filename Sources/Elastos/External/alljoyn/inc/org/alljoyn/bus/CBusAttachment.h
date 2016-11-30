@@ -1157,11 +1157,13 @@ public:
      *
      * @see org.alljoyn.bus.annotation.BusMethod
      */
-    // public ProxyBusObject getProxyBusObject(String busName,
-    //         String objPath,
-    //         int sessionId,
-    //         Class<?>[] busInterfaces,
-    //         boolean secure);
+    CARAPI GetProxyBusObject(
+        /* [in] */ const String& busName,
+        /* [in] */ const String& objPath,
+        /* [in] */ Int32 sessionId,
+        /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
+        /* [in] */ Boolean secure,
+        /* [out] */ IProxyBusObject** proxy);
 
     /**
      * Gets the DBusProxyObj interface of the org.freedesktop.DBus proxy object.
@@ -1170,7 +1172,8 @@ public:
      *
      * @return the DBusProxyObj interface
      */
-    // public DBusProxyObj getDBusProxyObj();
+    CARAPI GetDBusProxyObj(
+        /* [out] */ IDBusProxyObj** proxy);
 
     /**
      * Get the unique name of this BusAttachment.

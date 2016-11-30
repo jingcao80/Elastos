@@ -2,14 +2,15 @@
 #include "org/alljoyn/bus/BusListener.h"
 #include "org/alljoyn/bus/CBusAttachment.h"
 #include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
+#include "org/alljoyn/bus/NativeMessageContext.h"
 #include "org/alljoyn/bus/NativeSessionListener.h"
 #include "org/alljoyn/bus/NativeSessionPortListener.h"
 #include "org/alljoyn/bus/NativePendingAsyncJoin.h"
 #include "org/alljoyn/bus/SessionListener.h"
 #include "org/alljoyn/bus/SessionPortListener.h"
-#include "org/alljoyn/bus/NativeMessageContext.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -151,12 +152,13 @@ ECode CBusAttachment::constructor(
      * The corresponding interface (dbus) is what we give the clients.
      */
     AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(1);
-    assert(0);
-    // (*busInterfaces)[0] = EIID_IDBusProxyObj;
+    AutoPtr<IInterfaceInfo> dbusProxyObj;
+    GetModuleClassLoader()->LoadInterface(String("Org.Alljoyn.Bus.Ifaces.IDBusProxyObj"), (IInterfaceInfo**)&dbusProxyObj);
+    busInterfaces->Set(0, dbusProxyObj);
     mDbusbo = new ProxyBusObject();
     mDbusbo->constructor(this, String("org.freedesktop.DBus"), String("/org/freedesktop/DBus"), SESSION_ID_ANY,
             busInterfaces);
-    mDbusbo->GetInterface(EIID_IDBusProxyObj, (IInterface**)&mDbus);
+    mDbusbo->GetInterface(dbusProxyObj, (IInterface**)&mDbus);
     AutoPtr<IExecutors> executors;
     CExecutors::AcquireSingleton((IExecutors**)&executors);
     executors->NewSingleThreadExecutor((IExecutorService**)&mExecutor);
@@ -1390,18 +1392,35 @@ ECode CBusAttachment::GetProxyBusObject(
     /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
     /* [out] */ IProxyBusObject** proxy)
 {
-    assert(0 && "TODO");
-    // return CProxyBusObject::New(this, busName, objPath, sessionId, busInterfaces, proxy);
+    VALIDATE_NOT_NULL(proxy);
+
+    ProxyBusObject* obj = new ProxyBusObject();
+    obj->constructor(this, busName, objPath, sessionId, busInterfaces);
+    (*proxy) = (IProxyBusObject*)obj;
+    REFCOUNT_ADD(*proxy);
     return NOERROR;
 }
 
-// public ProxyBusObject getProxyBusObject(String busName,
-//         String objPath,
-//         int sessionId,
-//         Class<?>[] busInterfaces,
-//         boolean secure);
+ECode CBusAttachment::GetProxyBusObject(
+    /* [in] */ const String& busName,
+    /* [in] */ const String& objPath,
+    /* [in] */ Int32 sessionId,
+    /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces,
+    /* [in] */ Boolean secure,
+    /* [out] */ IProxyBusObject** proxy)
+{
+    VALIDATE_NOT_NULL(proxy);
 
-// public DBusProxyObj getDBusProxyObj();
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CBusAttachment::GetDBusProxyObj(
+    /* [out] */ IDBusProxyObj** proxy)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
 
 ECode CBusAttachment::GetUniqueName(
     /* [out] */ String* uniqueName)

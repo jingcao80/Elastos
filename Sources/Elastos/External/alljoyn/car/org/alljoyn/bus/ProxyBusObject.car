@@ -5,6 +5,7 @@ module
     namespace Alljoyn {
     namespace Bus {
 
+    [local]
     interface IProxyBusObject {
         /** Enable property caching for this proxy bus object. */
         EnablePropertyCaching();
@@ -59,7 +60,7 @@ module
          * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
          */
         GetInterface(
-            [in] InterfaceID intfId,
+            [in] IInterfaceInfo* intfId,
             [out] IInterface** intf);
 
         /**
