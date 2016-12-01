@@ -179,6 +179,10 @@ public:
         /* [in] */ IMenuItem* item,
         /* [out] */ Boolean* result);
 
+    // @Override
+    CARAPI GetClassID(
+        /* [out] */ ClassID* clsid);
+
 protected:
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

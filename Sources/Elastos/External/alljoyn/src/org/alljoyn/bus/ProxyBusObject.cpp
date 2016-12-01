@@ -1,6 +1,9 @@
 
 #include "org/alljoyn/bus/ProxyBusObject.h"
 
+using Elastos::Core::Reflect::CProxyFactory;
+using Elastos::Core::Reflect::IProxyFactory;
+
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
@@ -14,6 +17,9 @@ ECode ProxyBusObject::constructor(
     /* [in] */ Int32 sessionId,
     /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces)
 {
+    AutoPtr<IProxyFactory> pf;
+    CProxyFactory::AcquireSingleton((IProxyFactory**)&pf);
+    pf->NewProxyInstance(NULL, busInterfaces, NULL, (IInterface**)&mProxy);
     return NOERROR;
 }
 
@@ -51,9 +57,14 @@ ECode ProxyBusObject::GetObjPath(
 }
 
 ECode ProxyBusObject::GetInterface(
-    /* [in] */ IInterfaceInfo* intfId,
+    /* [in] */ IInterfaceInfo* intfInfo,
     /* [out] */ IInterface** intf)
 {
+    VALIDATE_NOT_NULL(intf);
+    InterfaceID iid;
+    intfInfo->GetId(&iid);
+    *intf = mProxy->Probe(iid);
+    REFCOUNT_ADD(*intf);
     return NOERROR;
 }
 

@@ -21,3 +21,4 @@ INCLUDES += $(MAKEDIR)/../../../../inc/;
 #INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility;
 
 SOURCES += CProxyFactory.cpp
+SOURCES += Proxy.cpp

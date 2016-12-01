@@ -167,6 +167,30 @@ ECode UnregisterModuleInfo(
     return E_DOES_NOT_EXIST;
 }
 
+ELAPI ECO_PUBLIC LookupInterfaceInfo(
+    /* [in] */ REMuid ritfid,
+    /* [out] */ CIInterfaceInfo** interfaceInfo)
+{
+    assert(interfaceInfo != NULL);
+
+    pthread_mutex_lock(&sModuleInfoLock);
+    CIModuleInfoNode* curNode = sModuleInfoList;
+    while (curNode != NULL) {
+        CIModuleInfo* modInfo = curNode->mModInfo;
+        for (Int32 m = 0; m < modInfo->mInterfaceNum; m++) {
+            if (modInfo->mInterfaces[m].mIID == ritfid) {
+                *interfaceInfo = &(modInfo->mInterfaces[m]);
+                pthread_mutex_unlock(&sModuleInfoLock);
+                return NOERROR;
+            }
+        }
+        curNode = curNode->mNext;
+    }
+    pthread_mutex_unlock(&sModuleInfoLock);
+
+    return E_DOES_NOT_EXIST;
+}
+
 ECode LookupClassInfo(
     /* [in] */ REMuid rclsid,
     /* [out] */ CIClassInfo** classInfo)

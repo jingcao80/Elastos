@@ -107,7 +107,7 @@ public:
      * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
      */
     CARAPI GetInterface(
-        /* [in] */ IInterfaceInfo* intfId,
+        /* [in] */ IInterfaceInfo* intfInfo,
         /* [out] */ IInterface** intf);
 
     /**

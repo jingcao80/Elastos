@@ -60,7 +60,7 @@ module
          * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
          */
         GetInterface(
-            [in] IInterfaceInfo* intfId,
+            [in] IInterfaceInfo* intfInfo,
             [out] IInterface** intf);
 
         /**

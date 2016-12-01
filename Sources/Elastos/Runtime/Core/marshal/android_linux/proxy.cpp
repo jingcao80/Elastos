@@ -1145,8 +1145,7 @@ ECode CObjectProxy::ToString(
 ECode CObjectProxy::GetWeakReference(
     /* [out] */ IWeakReference** weakReference)
 {
-    if (weakReference == NULL);
-        return E_INVALID_ARGUMENT;
+    if (weakReference == NULL) return E_INVALID_ARGUMENT;
     *weakReference = new WeakReferenceImpl((IProxy*)this, CreateWeak(this));
     (*weakReference)->AddRef();
     return NOERROR;

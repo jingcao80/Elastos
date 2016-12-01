@@ -1,5 +1,6 @@
 
 #include "elastos/core/reflect/CProxyFactory.h"
+#include "elastos/core/reflect/Proxy.h"
 
 namespace Elastos {
 namespace Core {
@@ -14,8 +15,8 @@ ECode CProxyFactory::NewProxyInstance(
     /* [in] */ IInvocationHandler* invocationHandler,
     /* [out] */ IInterface** prxObject)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    VALIDATE_NOT_NULL(prxObject);
+    return CObjectProxy::S_CreateObject(loader, interfaces, invocationHandler, prxObject);
 }
 
 } // namespace Reflect

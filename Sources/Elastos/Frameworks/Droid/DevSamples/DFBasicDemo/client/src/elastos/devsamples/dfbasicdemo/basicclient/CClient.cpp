@@ -312,7 +312,7 @@ ECode CClient::BusHandler::HandleMessage(
              * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
              * "/sample", uses sessionID of CONTACT_PORT, and implements the BasicInterface.
              */
-            AutoPtr<IModuleInfo> moduleInfo = Object::GetModuleInfo((IActivity*)this);
+            AutoPtr<IModuleInfo> moduleInfo = Object::GetModuleInfo((IActivity*)mHost);
             AutoPtr<IInterfaceInfo> itfcInfo;
             moduleInfo->GetInterfaceInfo(
                 String("Elastos.DevSamples.DFBasicDemo.BasicClient.IBasicInterface"),
@@ -518,6 +518,14 @@ void CClient::LogException(
     Boolean result;
     mHandler->SendMessage(toastMsg, &result);
     Logger::E(TAG, log.string());
+}
+
+ECode CClient::GetClassID(
+    /* [out] */ ClassID* clsid)
+{
+    VALIDATE_NOT_NULL(clsid);
+    *clsid = ECLSID_CClient;
+    return NOERROR;
 }
 
 } // namespace BasicClient

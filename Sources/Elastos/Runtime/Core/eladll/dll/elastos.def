@@ -80,6 +80,8 @@ EXPORTS
     _CObject_MarshalInterface                       @175    NONAME
     _CObject_UnmarshalInterface                     @176    NONAME
 
+    LookupInterfaceInfo                             @180    NONAME
+
     ;;============================================================
     ;; CAR data-type APIs, using ordinal 200-499
     ;;
