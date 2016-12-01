@@ -43,6 +43,12 @@ public:
     CARAPI GetNamespace(
         /* [out] */ String* ns);
 
+    CARAPI GetClassLoader(
+        /* [out] */ IInterface** loader);
+
+    CARAPI SetClassLoader(
+        /* [in] */ IInterface* loader);
+
     CARAPI GetAnnotationCount(
         /* [out] */ Int32* count);
 
@@ -92,6 +98,7 @@ private:
     InterfaceDirEntry*      mInterfaceDirEntry;
     InterfaceDescriptor*    mDesc;
     IFIndexEntry*           mIFList;
+    AutoPtr<IInterface>     mClassLoader;
     AutoPtr< ArrayOf<IAnnotationInfo*> > mAnnotationInfos;
 
     UInt32  mIndex;

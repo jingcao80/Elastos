@@ -186,6 +186,12 @@ library
         GetNamespace(
             [out] String* ns);
 
+        GetClassLoader(
+            [out] IInterface** loader);
+
+        SetClassLoader(
+            [in] IInterface* loader);
+
         GetAnnotationCount(
             [out] Int32* count);
 

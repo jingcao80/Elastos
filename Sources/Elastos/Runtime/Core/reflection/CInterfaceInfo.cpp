@@ -115,6 +115,26 @@ ECode CInterfaceInfo::GetNamespace(
     return NOERROR;
 }
 
+ECode CInterfaceInfo::GetClassLoader(
+    /* [out] */ IInterface** loader)
+{
+    if (!loader) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    *loader = mClassLoader;
+    REFCOUNT_ADD(*loader);
+
+    return NOERROR;
+}
+
+ECode CInterfaceInfo::SetClassLoader(
+    /* [in] */ IInterface* loader)
+{
+    mClassLoader = loader;
+    return NOERROR;
+}
+
 ECode CInterfaceInfo::GetAnnotationCount(
     /* [out] */ Int32* count)
 {
