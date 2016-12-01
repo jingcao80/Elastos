@@ -128,14 +128,14 @@ protected:
     /**
      * Publish the service so it is accessible to other services and apps.
      */
-    void PublishBinderService(
+    CARAPI_(void) PublishBinderService(
         /* [in] */ const String& name,
         /* [in] */ IBinder* service);
 
     /**
      * Publish the service so it is accessible to other services and apps.
      */
-    void PublishBinderService(
+    CARAPI_(void) PublishBinderService(
         /* [in] */ const String& name,
         /* [in] */ IBinder* service,
         /* [in] */ Boolean allowIsolated);
@@ -143,24 +143,24 @@ protected:
     /**
      * Get a binder service by its name.
      */
-    AutoPtr<IBinder> GetBinderService(
+    CARAPI_(AutoPtr<IBinder>) GetBinderService(
         /* [in] */ const String& name);
 
     /**
      * Publish the service so it is only accessible to the system process.
      */
-    void PublishLocalService(
+    CARAPI_(void) PublishLocalService(
         /* [in] */ const InterfaceID& type,
         /* [in] */ IInterface* service);
 
     /**
      * Get a local service by interface.
      */
-    AutoPtr<IInterface> GetLocalService(
+    CARAPI_(AutoPtr<IInterface>) GetLocalService(
         /* [in] */const InterfaceID& type);
 
 private:
-    AutoPtr<ISystemServiceManager> GetManager();
+    CARAPI_(AutoPtr<ISystemServiceManager>) GetManager();
 
 protected:
     AutoPtr<IContext> mContext;

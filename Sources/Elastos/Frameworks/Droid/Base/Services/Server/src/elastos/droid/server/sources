@@ -131,6 +131,7 @@ ELASTOS_LIBS += tv/tv.lib
 ELASTOS_LIBS += wm/wm.lib
 ELASTOS_LIBS += power/power.lib
 ELASTOS_LIBS += statusbar/statusbar.lib
+ELASTOS_LIBS += storage/storage.lib
 ELASTOS_LIBS += trust/trust.lib
 ELASTOS_LIBS += twilight/twilight.lib
 ELASTOS_LIBS += wallpaper/wallpaper.lib

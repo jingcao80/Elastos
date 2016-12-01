@@ -5,6 +5,7 @@
 #include "elastos/droid/server/pm/CParcelFileDescriptorFactory.h"
 #include "elastos/droid/server/pm/CPackageInstallObserver2.h"
 #include "elastos/droid/server/pm/DexFile.h"
+#include "elastos/droid/server/LocalServices.h"
 #include "elastos/droid/server/SystemConfig.h"
 #include "elastos/droid/server/ServiceThread.h"
 #include "elastos/droid/Manifest.h"
@@ -151,8 +152,11 @@ using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::CParcelableList;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
+using Elastos::Droid::Server::LocalServices;
 using Elastos::Droid::Server::SystemConfig;
 using Elastos::Droid::Server::ServiceThread;
+using Elastos::Droid::Server::Storage::IDeviceStorageMonitorInternal;
+using Elastos::Droid::Server::Storage::EIID_IDeviceStorageMonitorInternal;
 using Elastos::Droid::Services::SecurityBridge::Api::CPackageManagerMonitor;
 using Elastos::Droid::System::IStructStat;
 using Elastos::Droid::System::OsConstants;
@@ -3918,12 +3922,10 @@ ECode CPackageManagerService::ClearRunnable::Run()
     mHost->ClearExternalStorageDataSync(mPackageName, mUserId, TRUE);
     if (succeeded) {
         // invoke DeviceStorageMonitor's update method to clear any notifications
-        assert(0);
-        // TODO: DeviceStorageMonitorInternal has not been realized
-        // AutoPtr<DeviceStorageMonitorInternal> dsm = LocalServices::GetService(EIID_DeviceStorageMonitorInternal);
-        // if (dsm != NULL) {
-        //     dsm->CheckMemory();
-        // }
+        AutoPtr<IDeviceStorageMonitorInternal> dsm = IDeviceStorageMonitorInternal::Probe(LocalServices::GetService(EIID_IDeviceStorageMonitorInternal));
+        if (dsm != NULL) {
+            dsm->CheckMemory();
+        }
     }
     if (mObserver != NULL) {
         // try {
@@ -18637,17 +18639,17 @@ ECode CPackageManagerService::IsStorageLow(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     Int64 token = Binder::ClearCallingIdentity();
-    assert(0);
     // try {
-    // // AutoPtr<DeviceStorageMonitorInternal> dsm = LocalServices->GetService(EIID_DeviceStorageMonitorInternal);
-    // if (dsm != NULL) {
-    //     *result = dsm->IsMemoryLow();
-    // }
-    // else {
-    //     *result = FALSE;
-    // }
+    AutoPtr<IDeviceStorageMonitorInternal> dsm = IDeviceStorageMonitorInternal::Probe(LocalServices::GetService(EIID_IDeviceStorageMonitorInternal));
+    if (dsm != NULL) {
+        dsm->IsMemoryLow(result);
+    }
+    else {
+        *result = FALSE;
+    }
     // } finally {
     //     Binder.restoreCallingIdentity(token);
     // }

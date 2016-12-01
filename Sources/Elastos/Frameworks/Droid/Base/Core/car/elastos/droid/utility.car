@@ -288,6 +288,16 @@ module
         interface ICloneable;
     }
 
+    class CSparseInt64Array {
+        constructor();
+
+        constructor(
+            [in] Int32 initialCapacity);
+
+        interface ISparseInt64Array;
+        interface ICloneable;
+    }
+
     singleton class CSplineHelper {
         interface ISplineHelper;
     }

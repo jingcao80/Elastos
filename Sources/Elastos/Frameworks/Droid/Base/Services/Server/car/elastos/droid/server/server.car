@@ -92,6 +92,8 @@ module
 
     merge("statusbar/StatusBarManagerInternal.car");
 
+    merge("storage/DeviceStorageMonitorInternal.car");
+
     merge("trust/TrustManagerService.car");
 
     merge("tv/TvInputHal.car");
@@ -115,7 +117,6 @@ module
     // merge("power/SuspendBlocker.car");
     // merge("power/ScreenOnBlocker.car");
     // merge("RecognitionManagerService.car");
-    // merge("DeviceStorageMonitorService.car");
 
     interface Elastos.Droid.Server.Display.IColorFade;
     interface Elastos.Droid.Server.Display.IDisplayBlanker;
@@ -176,6 +177,7 @@ module
     using interface Elastos.Droid.Content.Pm.IIPackageInstaller;
     using interface Elastos.Droid.Content.Pm.IIPackageInstallerSession;
     using interface Elastos.Droid.Content.Pm.IIPackageManager;
+    using interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
     using interface Elastos.Droid.Content.Pm.IIPackageMoveObserver;
     using interface Elastos.Droid.Content.Pm.IPackageInstallerSessionParams;
     using interface Elastos.Droid.Content.Pm.IPackageManager;
@@ -702,14 +704,6 @@ module
         interface IIAssetAtlas;
         interface IBinder;
     }
-
-//     class CDeviceStorageMonitorService {
-//         constructor(
-//             [in] IContext* ctx);
-//
-//         interface IDeviceStorageMonitorService;
-//         interface IBinder;
-//     }
 
 //     class CBackupManagerService {
 //         constructor(
@@ -2222,6 +2216,33 @@ module
     namespace Elastos {
     namespace Droid {
     namespace Server {
+    namespace Storage {
+
+    [local]
+    class CDeviceStorageMonitorService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface ISystemService;
+    }
+
+    [local]
+    class CDeviceStorageMonitorServiceCachePackageDataObserver {
+        constructor(
+            [in] ISystemService* host);
+
+        interface IIPackageDataObserver;
+        interface IBinder;
+    }
+
+    } // namespace Storage
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
     namespace Twilight {
 
     [local]
@@ -2410,10 +2431,10 @@ module
         interface IVolumeControlAction;
     }
 
-    } // namespace Elastos
-    } // namespace Droid
-    } // namespace Server
     } // namespace Hdmi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
 
     namespace Elastos {
     namespace Droid {

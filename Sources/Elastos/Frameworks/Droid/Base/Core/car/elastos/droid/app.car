@@ -1305,6 +1305,7 @@ module
             [in] INotificationBuilder* builder);
 
         interface INotificationBigPictureStyle;
+        interface INotificationStyle;
     }
 
     [local]
@@ -1315,6 +1316,7 @@ module
             [in] INotificationBuilder* builder);
 
         interface INotificationBigTextStyle;
+        interface INotificationStyle;
     }
 
     [local]
@@ -1325,6 +1327,7 @@ module
             [in] INotificationBuilder* builder);
 
         interface INotificationInboxStyle;
+        interface INotificationStyle;
     }
 
     [local]
@@ -1335,6 +1338,7 @@ module
             [in] INotificationBuilder* builder);
 
         interface INotificationMediaStyle;
+        interface INotificationStyle;
     }
 
     [local, parcelable]

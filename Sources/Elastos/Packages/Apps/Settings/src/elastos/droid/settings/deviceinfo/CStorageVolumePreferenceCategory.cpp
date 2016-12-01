@@ -349,7 +349,7 @@ ECode CStorageVolumePreferenceCategory::Init()
     AutoPtr<IActivityThreadHelper> helper;
     CActivityThreadHelper::AcquireSingleton((IActivityThreadHelper**)&helper);
     AutoPtr<IIPackageManager> pm;
-    helper->GetPackageManager((IIPackageManager**)&helper);
+    helper->GetPackageManager((IIPackageManager**)&pm);
     // try {
     if (pm->IsStorageLow(&res), res) {
         CPreference::New(context, (IPreference**)&mStorageLow);
