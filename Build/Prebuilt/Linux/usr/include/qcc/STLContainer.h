@@ -118,24 +118,16 @@ using namespace std::tr1;
  * etc. respectively.  Thus we need to map the class names to unordered_*.
  * Additionally, the hash_* classes are in the __gnu_cxx namespace.
  */
-#include <ext/hash_map>
-#include <ext/hash_set>
+#include <stl/_hash_map.h>
+#include <stl/_hash_set.h>
 
-#define _BEGIN_NAMESPACE_CONTAINER_FOR_HASH namespace __gnu_cxx {
+#define _BEGIN_NAMESPACE_CONTAINER_FOR_HASH namespace std {
 #define _END_NAMESPACE_CONTAINER_FOR_HASH }
 
 #define unordered_map hash_map
 #define unordered_multimap hash_multimap
 #define unordered_set hash_set
 #define unordered_multiset hash_multiset
-
-namespace std {
-/*
- * Map everything in the __gnu_cxx namespace to the std namespace.
- */
-using namespace __gnu_cxx;
-}
-
 
 #else
 #error Unsupported Compiler/Platform

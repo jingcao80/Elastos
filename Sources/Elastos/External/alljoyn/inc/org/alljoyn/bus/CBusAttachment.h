@@ -1531,6 +1531,8 @@ private:
 private:
     friend class InterfaceDescription;
     friend class NativeBusListener;
+    friend class Observer;
+    friend class NativeObserver;
 
     AutoPtr<ISet> mRegisteredAboutListeners;
 

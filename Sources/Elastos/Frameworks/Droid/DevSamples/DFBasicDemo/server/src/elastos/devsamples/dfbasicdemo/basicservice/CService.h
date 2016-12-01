@@ -73,14 +73,13 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CService::MyHandler")
+
         MyHandler(
             /* [in] */ CService* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
 
     private:
         CService* mHost;
@@ -110,6 +109,8 @@ private:
         };
 
     public:
+        TO_STRING_IMPL("CService::BusHandler")
+
         CARAPI constructor(
             /* [in] */ ILooper* looper,
             /* [in] */ CService* host);
@@ -117,9 +118,6 @@ private:
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
-
-        CARAPI ToString(
-            /* [out] */ String* str);
 
     public:
         /* These are the messages sent to the BusHandler from the UI. */

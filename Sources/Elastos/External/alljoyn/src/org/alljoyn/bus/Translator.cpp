@@ -17,7 +17,6 @@ Translator::~Translator()
     Destroy();
 }
 
-
 ECode Translator::constructor()
 {
     Create();

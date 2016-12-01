@@ -288,7 +288,7 @@ bool NativeBusAttachment::IsLocalBusObject(
     /* [in] */ IBusObject* busObject)
 {
     for (List< AutoPtr<IBusObject> >::Iterator i = mBusObjects.Begin(); i != mBusObjects.End(); ++i) {
-        if (Object::Equals(busObject, (*i).Get())) {
+        if (busObject == (*i).Get()) {
             return true;
         }
     }
@@ -300,7 +300,7 @@ void NativeBusAttachment::ForgetLocalBusObject(
     /* [in] */ IBusObject* busObject)
 {
     for (List< AutoPtr<IBusObject> >::Iterator i = mBusObjects.Begin(); i != mBusObjects.End(); ++i) {
-        if (Object::Equals(busObject, (*i).Get())) {
+        if (busObject == (*i).Get()) {
             mBusObjects.Erase(i);
             return;
         }

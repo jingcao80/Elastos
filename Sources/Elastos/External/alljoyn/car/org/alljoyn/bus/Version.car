@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    interface IVersion {
+        /**
+         * Gives the version of AllJoyn Library
+         *
+         * @return the version of the AllJoyn Library
+         */
+        Get(
+            [out] String* ver);
+
+        /**
+         * Gives build information of AllJoyn Library
+         *
+         * @return build information of the AllJoyn Library
+         */
+        GetBuildInfo(
+            [out] String* info);
+
+        /**
+         * Gives the version of AllJoyn Library as a single number
+         *
+         * @return the version of the AllJoyn Library as a single number
+         */
+        GetNumeric(
+            [out] Int32* num);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

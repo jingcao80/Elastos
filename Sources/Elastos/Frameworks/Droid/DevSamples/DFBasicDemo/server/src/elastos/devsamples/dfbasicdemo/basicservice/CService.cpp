@@ -82,14 +82,6 @@ ECode CService::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-ECode CService::MyHandler::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = "CService::MyHandler";
-    return NOERROR;
-}
-
 
 //======================================================================
 //  CService::BasicService
@@ -303,15 +295,6 @@ ECode CService::BusHandler::HandleMessage(
     }
     return NOERROR;
 }
-
-ECode CService::BusHandler::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = "CService::BusHandler";
-    return NOERROR;
-}
-
 
 //======================================================================
 //  CService

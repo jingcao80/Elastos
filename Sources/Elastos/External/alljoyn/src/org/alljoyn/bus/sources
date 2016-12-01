@@ -4,6 +4,7 @@ TARGET_TYPE= eco
 
 C_DEFINES += -DQCC_OS_GROUP_POSIX
 C_DEFINES += -DROUTER
+C_DEFINES += -D_STLP_USE_NEWALLOC
 
 EXPORT_ALL_SYMBOLS=1
 
@@ -24,6 +25,7 @@ SOURCES += CMutableInteger16Value.cpp
 SOURCES += CMutableInteger32Value.cpp
 SOURCES += CSessionOpts.cpp
 SOURCES += InterfaceDescription.cpp
+SOURCES += MessageContext.cpp
 SOURCES += MsgArg.cpp
 SOURCES += NativeAboutObject.cpp
 SOURCES += NativeApi.cpp
@@ -39,16 +41,17 @@ SOURCES += NativeSessionListener.cpp
 SOURCES += NativeSessionPortListener.cpp
 SOURCES += NativeSignalHandler.cpp
 SOURCES += NativeTranslator.cpp
+SOURCES += NativeObserver.cpp
 SOURCES += NativeOnJoinSessionListener.cpp
 SOURCES += NativeOnPingListener.cpp
+SOURCES += Observer.cpp
+SOURCES += OnJoinSessionListener.cpp
+SOURCES += OnPingListener.cpp
 SOURCES += ProxyBusObject.cpp
 SOURCES += SessionListener.cpp
 SOURCES += SessionPortListener.cpp
 SOURCES += Signature.cpp
 SOURCES += Translator.cpp
-SOURCES += OnJoinSessionListener.cpp
-SOURCES += OnPingListener.cpp
-SOURCES += MessageContext.cpp
 SOURCES += Org.Alljoyn.Bus.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp

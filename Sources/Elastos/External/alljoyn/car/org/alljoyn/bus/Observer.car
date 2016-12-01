@@ -1,0 +1,127 @@
+
+module
+{
+    interface Org.Alljoyn.Bus.IProxyBusObject;
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * Listener for object life cycle events
+     */
+    interface IObserverListener {
+        /**
+         * A new object has been discovered.
+         *
+         * @param object a proxy for the discovered object, supporting all
+         *               mandatory interfaces, and those optional interfaces
+         *               that the object implements.
+         */
+        ObjectDiscovered(
+            [in] IProxyBusObject* object);
+
+        /**
+         * A previously discovered object has been lost.
+         *
+         * The proxy bus object is from this point on invalid. Even if the
+         * object reappears on the bus, you'll need a new proxy object (and
+         * objectDiscovered will provide you with that new proxy) to interact
+         * with the bus object.
+         *
+         * @param object the proxy for the object that has been lost.
+         */
+        ObjectLost(
+            [in] IProxyBusObject* object);
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Core.ICloseable
+     */
+    interface IObserver {
+        /**
+         * Register an {@link Observer.Listener}.
+         *
+         * @param listener the listener to register
+         * @param triggerOnExisting indicates whether the listener's
+         *            objectDiscovered callback should be invoked for all objects
+         *            that have been discovered prior to the registration of this
+         *            listener.
+         */
+        RegisterListener(
+            [in] IObserverListener* listener, 
+            [in] Boolean triggerOnExisting);
+
+        /**
+         * Register an {@link Observer.Listener}.
+         *
+         * The listener's objectDiscovered callback will be invoked for all objects
+         * that have been discovered prior to the registration of the listener.
+         *
+         * @param listener the listener to register
+         */
+        RegisterListener(
+            [in] IObserverListener* listener);
+
+        /**
+         * Unregister a previously registered {@link Observer.Listener}.
+         *
+         * @param listener the listener to unregister
+         */
+        UnregisterListener(
+            [in] IObserverListener* listener);
+
+        /**
+         * Unregister all listeners.
+         */
+        UnregisterAllListeners();
+
+        /**
+         * Retrieve a {@link ProxyBusObject}.
+         *
+         * If the supplied (busname, path) pair does not identify an object that has
+         * been discovered by this Observer, or identifies an object that has since
+         * disappeared from the bus, null will be returned.
+         *
+         * @param busname the non-null unique bus name of the peer hosting the bus
+         *            object
+         * @param path the non-null object's path
+         * @return the ProxyBusObject or null if not found
+         */
+        Get(
+            [in] String busname, 
+            [in] String path,
+            [out] IProxyBusObject** object);
+
+        /**
+         * Retrieve the first {@link ProxyBusObject}.
+         *
+         * The getFirst/getNext pair of methods is used for iteration over all
+         * discovered objects. null is returned to signal end of iteration.
+         *
+         * @return the first ProxyBusObject or null if no objects discovered
+         */
+        GetFirst(
+            [out] IProxyBusObject** object);
+
+        /**
+         * Retrieve the next {@link ProxyBusObject}.
+         *
+         * The getFirst/getNext pair of methods is used for iteration over all
+         * discovered objects. null is returned to signal end of iteration.
+         *
+         * @param object the previous ProxyBusObject
+         * @return the next ProxyBusObject or null if iteration is finished
+         */
+        GetNext(
+            [in] IProxyBusObject* current,
+            [out] IProxyBusObject** object);
+    }
+
+
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

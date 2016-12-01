@@ -18,6 +18,7 @@ module
     merge("../../../../car/org/alljoyn/bus/KeyStoreListener.car");
     merge("../../../../car/org/alljoyn/bus/MessageContext.car");
     merge("../../../../car/org/alljoyn/bus/Mutable.car");
+    merge("../../../../car/org/alljoyn/bus/Observer.car");
     merge("../../../../car/org/alljoyn/bus/OnJoinSessionListener.car");
     merge("../../../../car/org/alljoyn/bus/OnPingListener.car");
     merge("../../../../car/org/alljoyn/bus/ProxyBusObject.car");
@@ -26,6 +27,7 @@ module
     merge("../../../../car/org/alljoyn/bus/SessionOpts.car");
     merge("../../../../car/org/alljoyn/bus/SessionPortListener.car");
     merge("../../../../car/org/alljoyn/bus/Translator.car");
+    merge("../../../../car/org/alljoyn/bus/Version.car");
     merge("../../../../car/org/alljoyn/bus/alljoyn/DaemonInit.car");
     merge("../../../../car/org/alljoyn/bus/ifaces/DBusProxyObj.car");
 

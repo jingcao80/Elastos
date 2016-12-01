@@ -1496,21 +1496,23 @@ ECode CBusAttachment::RegisterSignalHandler(
         ifaceName.string(), signalName.string(), obj, handlerMethod, source.string());
     if (status == ER_BUS_NO_SUCH_INTERFACE) {
         assert(0 && "TODO");
-        // try {
-        //     Class<?> iface = Class.forName(ifaceName);
-        //     InterfaceDescription desc = new InterfaceDescription();
-        //     status = desc.create(this, iface);
-        //     if (status == Status.OK) {
-        //         ifaceName = InterfaceDescription.getName(iface);
-        //         try {
-        //             Method signal = iface.getMethod(signalName, handlerMethod.getParameterTypes());
-        //             signalName = InterfaceDescription.getName(signal);
-        //         } catch (NoSuchMethodException ex) {
-        //             // Ignore, use signalName parameter provided
-        //         }
-        //         status = registerNativeSignalHandlerWithSrcPath(ifaceName, signalName, obj, handlerMethod,
-        //                                              source);
+        // AutoPtr<IInterfaceInfo> itfcInfo = Object:
+        // InterfaceDescription desc = new InterfaceDescription();
+
+        // Class<?> iface = Class.forName(ifaceName);
+        // status = desc->Create(this, itfcInfo);
+        // if (status == ER_OK) {
+        //     ifaceName = InterfaceDescription->GetName(iface);
+        //     try {
+        //         Method signal = iface->GetMethod(signalName, handlerMethod.getParameterTypes());
+        //         signalName = InterfaceDescription->GetName(signal);
+        //     } catch (NoSuchMethodException ex) {
+        //         // Ignore, use signalName parameter provided
         //     }
+        //     status = RegisterNativeSignalHandlerWithSrcPath(ifaceName, signalName, obj, handlerMethod,
+        //                                          source);
+        // }
+
         // } catch (ClassNotFoundException ex) {
         //     BusException.log(ex);
         //     status = Status.BUS_NO_SUCH_INTERFACE;
@@ -1587,9 +1589,6 @@ ECode CBusAttachment::RegisterSignalHandlers(
                 String("Org.Alljoyn.Bus.Annotation.BusSignalHandler"),
                 (IAnnotationInfo**)&annotation);
             if (annotation != NULL) {
-
-                AutoPtr< ArrayOf<String> > keys;
-                annotation->GetKeys((ArrayOf<String>**)&keys);
                 String matchRule;
                 annotation->GetValue(String("rule"), &matchRule);
                 if (matchRule.IsNullOrEmpty()) {

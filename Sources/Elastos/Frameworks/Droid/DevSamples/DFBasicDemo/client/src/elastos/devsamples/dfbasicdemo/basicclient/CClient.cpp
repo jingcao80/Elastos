@@ -124,8 +124,9 @@ ECode CClient::EditorListener::OnEditorAction(
 {
     VALIDATE_NOT_NULL(result);
     Int32 action;
-    if (actionId == IEditorInfo::IME_NULL
+    if (actionId == IEditorInfo::IME_ACTION_DONE
         && (event->GetAction(&action), action == IKeyEvent::ACTION_UP)) {
+        Logger::I("CClient", "Call the remote object's cat method.");
         /* Call the remote object's cat method. */
         AutoPtr<ICharSequence> text;
         v->GetText((ICharSequence**)&text);
@@ -311,9 +312,7 @@ ECode CClient::BusHandler::HandleMessage(
              * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
              * "/sample", uses sessionID of CONTACT_PORT, and implements the BasicInterface.
              */
-            //TODO using Object::GetModuleInfo();
-            AutoPtr<IModuleInfo> moduleInfo;
-            _CObject_ReflectModuleInfo((IActivity*)this, (IModuleInfo**)&moduleInfo);
+            AutoPtr<IModuleInfo> moduleInfo = Object::GetModuleInfo((IActivity*)this);
             AutoPtr<IInterfaceInfo> itfcInfo;
             moduleInfo->GetInterfaceInfo(
                 String("Elastos.DevSamples.DFBasicDemo.BasicClient.IBasicInterface"),

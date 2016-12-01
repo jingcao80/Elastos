@@ -19,24 +19,25 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-	<ListView android:id="@+id/ListView" 
-		android:layout_width="fill_parent" 
-		android:layout_height="fill_parent"
-		android:stackFromBottom="true"
-		android:transcriptMode="alwaysScroll"
-		android:layout_weight="1.0" 
-		/>
-	<LinearLayout 
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		>
-		<EditText android:id="@+id/EditText"
-			android:layout_height="wrap_content" 
-			android:layout_width="wrap_content"
-			android:layout_weight="1.0"
-			android:layout_gravity="bottom" 
-			android:hint="@string/enter_message_hint" 
-			/>
-	</LinearLayout>
+    <ListView android:id="@+id/ListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:layout_weight="1.0"
+        />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <EditText android:id="@+id/EditText"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="1.0"
+            android:layout_gravity="bottom"
+            android:hint="@string/enter_message_hint"
+            android:imeOptions="actionDone"
+            />
+    </LinearLayout>
 </LinearLayout>
