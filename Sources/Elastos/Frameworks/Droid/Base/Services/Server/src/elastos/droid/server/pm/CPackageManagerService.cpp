@@ -9085,7 +9085,7 @@ ECode CPackageManagerService::CollectCertificatesLI(
         // Slogger::W(TAG, "PackageSetting for %s is missing signatures. Collecting certs again to recover them.",
         //         ps->mName.string());
     }
-    Slogger::W("xihaoc", "Collecting certs for %s", pkg->mPackageName.string());
+
     // try {
     if (FAILED(pp->CollectCertificates(pkg, parseFlags, readBuffer))) {
         sLastScanError = pp->GetParseError();

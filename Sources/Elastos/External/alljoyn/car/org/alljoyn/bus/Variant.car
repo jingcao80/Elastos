@@ -1,0 +1,14 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    interface IVariant {
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}
