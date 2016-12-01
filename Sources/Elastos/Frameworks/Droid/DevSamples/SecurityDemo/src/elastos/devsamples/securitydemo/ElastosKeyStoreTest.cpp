@@ -69,6 +69,10 @@ using Elastos::Security::Spec::CPKCS8EncodedKeySpec;
 using Elastos::Security::Spec::IECParameterSpec;
 using Elastos::Security::Spec::IX509EncodedKeySpec;
 using Elastos::Security::Spec::CX509EncodedKeySpec;
+using Elastos::Security::IKeyPair;
+using Elastos::Security::IKeyPairGenerator;
+using Elastos::Security::IKeyPairGeneratorHelper;
+using Elastos::Security::CKeyPairGeneratorHelper;
 using Elastos::Utility::IDate;
 using Elastos::Utility::CDate;
 using Elastos::Utility::IList;
@@ -90,6 +94,8 @@ using Org::Conscrypt::INativeCrypto;
 using Org::Conscrypt::IOpenSSLEngine;
 using Org::Conscrypt::IOpenSSLEngineHelper;
 using Org::Conscrypt::COpenSSLEngineHelper;
+using Org::Conscrypt::IOpenSSLX509V3CertificateGeneratorHelper;
+using Org::Conscrypt::COpenSSLX509V3CertificateGeneratorHelper;
 
 namespace Elastos {
 namespace DevSamples {
@@ -3539,7 +3545,7 @@ ERROR:
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    Logger::E("ElastosKeyStoreTest", "=====[snow]=====GenerateCertificate TODO: NEED CX509V3CertificateGenerator");
+
     // AutoPtr<IX509V3CertificateGenerator> certGen;
     // CX509V3CertificateGenerator::New((IX509V3CertificateGenerator**)&certGen);
     // certGen->SetPublicKey(pubKey);
@@ -3550,9 +3556,16 @@ ERROR:
     // certGen->SetNotAfter(notAfter);
     // certGen->SetSignatureAlgorithm(String("sha1WithRSA"));
 
+    // AutoPtr<IX509Certificate> cert;
+    // certGen->Generate(privKey, (IX509Certificate**)&cert);
+
+    Logger::E("ElastosKeyStoreTest", "=====[snow]=====use OpenSSL replace CX509V3CertificateGenerator");
+    AutoPtr<IOpenSSLX509V3CertificateGeneratorHelper> certGenHelper;
+    COpenSSLX509V3CertificateGeneratorHelper::AcquireSingleton((IOpenSSLX509V3CertificateGeneratorHelper**)&certGenHelper);
+    String subjectDNName;
+    IObject::Probe(subjectDN)->ToString(&subjectDNName);
     AutoPtr<IX509Certificate> cert;
-    assert(0);
-    //certGen->Generate(privKey, (IX509Certificate**)&cert);
+    certGenHelper->Generate(pubKey, privKey, serialNumber, notBefore, notAfter, subjectDNName, subjectDNName, (IX509Certificate**)&cert);
 
     *certificate = cert;
     REFCOUNT_ADD(*certificate);

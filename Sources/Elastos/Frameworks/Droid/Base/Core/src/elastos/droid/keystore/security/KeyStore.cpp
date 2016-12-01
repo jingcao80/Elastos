@@ -214,7 +214,6 @@ ECode KeyStore::KeystoreServiceWrapper::Generate(
         android::Vector<android::sp<android::KeystoreArg> > args;
         if (len > 0) {
             for (Int32 i = 0; i < len; i++) {
-                AutoPtr<IInterface> obj;
                 AutoPtr<IArrayOf> item = (*_args)[i];
                 Int32 size = 0;
                 item->GetLength(&size);
