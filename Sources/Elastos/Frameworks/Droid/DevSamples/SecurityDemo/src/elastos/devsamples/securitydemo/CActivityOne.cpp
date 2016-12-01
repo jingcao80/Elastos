@@ -1249,7 +1249,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_RSA_Unencrypted_Success();                 //OK
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Params_Unencrypted_Failure();                         //error
+    return test->TestKeyStore_SetEntry_PrivateKeyEntry_Params_Unencrypted_Failure();                         //OK
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_Overwrites_PrivateKeyEntry_Encrypted_Success(); //OK
 

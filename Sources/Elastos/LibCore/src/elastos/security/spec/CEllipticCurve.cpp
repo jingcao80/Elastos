@@ -71,7 +71,7 @@ ECode CEllipticCurve::Equals(
     }
     AutoPtr<IEllipticCurve> otherEc = IEllipticCurve::Probe(other);
     Boolean equal1, equal2, equal3;
-    IObject::Probe(mField.Get())->Equals(IObject::Probe(((CEllipticCurve*)otherEc.Get())->mField.Get()), &equal1);
+    equal1 = Object::Equals(mField.Get(), ((CEllipticCurve*)otherEc.Get())->mField.Get());
     mA->Equals(((CEllipticCurve*)otherEc.Get())->mA.Get(), &equal2);
     mB->Equals(((CEllipticCurve*)otherEc.Get())->mB.Get(), &equal3);
     *result = equal1 && equal2 && equal3
