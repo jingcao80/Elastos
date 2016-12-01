@@ -11130,9 +11130,12 @@ jobject Util::ToJavaAudioRoutesInfo(
     // Set mBluetoothName
     AutoPtr<ICharSequence> csBluetoothName;
     event->GetBluetoothName((ICharSequence**)&csBluetoothName);
-    String blueToothName;
-    csBluetoothName->ToString(&blueToothName);
-    jstring jbluetoothName = ToJavaString(env, blueToothName);
+    jstring jbluetoothName = NULL;
+    if (csBluetoothName != NULL) {
+        String blueToothName;
+        csBluetoothName->ToString(&blueToothName);
+        jbluetoothName = ToJavaString(env, blueToothName);
+    }
 
     jfieldID f = env->GetFieldID(klass, "mBluetoothName", "Ljava/lang/CharSequence;");
     CheckErrorAndLog(env, "ToJavaAudioRoutesInfo, Fail GetFieldID: CharSequence:mBluetoothName %d", __LINE__);

@@ -1713,16 +1713,16 @@ ECode ActivityStackSupervisor::RealStartActivityLocked(
     CConfiguration::New(mService->mConfiguration, (IConfiguration**)&slaConfig);
 
     if (results) {
-        CArrayList::New((IList**)&resultsList);
+        CParcelableList::New((IList**)&resultsList);
         List< AutoPtr<ActivityResult> >::Iterator iter = results->Begin();
         while (iter != results->End()) {
-            resultsList->Add(TO_IINTERFACE(*iter));
+            resultsList->Add((*iter)->mResultInfo);
             ++iter;
         }
     }
 
     if (newIntents) {
-        CArrayList::New((IList**)&newIntentsList);
+        CParcelableList::New((IList**)&newIntentsList);
         List< AutoPtr<IIntent> >::Iterator iter2 = newIntents->Begin();
         while (iter2 != newIntents->End()) {
             newIntentsList->Add((*iter2).Get());
