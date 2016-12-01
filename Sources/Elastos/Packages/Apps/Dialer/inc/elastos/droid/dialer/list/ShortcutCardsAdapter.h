@@ -4,12 +4,14 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/dialer/calllog/CallLogAdapter.h"
 #include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
+#include "elastos/droid/dialer/list/SwipeHelper.h"
 #include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/widget/BaseAdapter.h"
-#include <elastos/droid/widget/FrameLayout.h>
+#include "elastos/droid/widget/FrameLayout.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ICursor;
@@ -30,6 +32,8 @@ namespace Droid {
 namespace Dialer {
 namespace List {
 
+class ListsFragment;
+
 /**
  * An adapter that displays call shortcuts from {@link com.android.dialer.calllog.CallLogAdapter}
  * in the form of cards.
@@ -38,17 +42,125 @@ class ShortcutCardsAdapter
     : public BaseAdapter
     , public IShortcutCardsAdapter
 {
-public:
+private:
+    class CustomDataSetObserver
+        : public DataSetObserver
+    {
+    public:
+        CustomDataSetObserver(
+            /* [in] */ ShortcutCardsAdapter* host);
+
+        // @Override
+        CARAPI OnChanged();
+
+        TO_STRING_IMPL("ShortcutCardsAdapter::CustomDataSetObserver")
+
+    private:
+        ShortcutCardsAdapter* mHost;
+    };
+
+    class CallLogOnItemSwipeListener
+        : public Object
+        , public ISwipeHelperOnItemGestureListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CallLogOnItemSwipeListener(
+            /* [in] */ ShortcutCardsAdapter* host);
+
+        // @Override
+        CARAPI OnSwipe(
+            /* [in] */ IView* view);
+
+        // @Override
+        CARAPI OnTouch();
+
+        // @Override
+        CARAPI IsSwipeEnabled(
+            /* [out] */ Boolean* result);
+
+    private:
+        ShortcutCardsAdapter* mHost;
+    };
+
+    class CallLogQueryHandlerListener
+        : public Object
+        , public ICallLogQueryHandlerListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CallLogQueryHandlerListener(
+            /* [in] */ ShortcutCardsAdapter* host);
+
+        // @Override
+        CARAPI OnVoicemailStatusFetched(
+            /* [in] */ ICursor* statusCursor);
+
+        // @Override
+        CARAPI OnCallsFetched(
+            /* [in] */ ICursor* combinedCursor,
+            /* [out] */ Boolean* result);
+
+    private:
+        ShortcutCardsAdapter* mHost;
+    };
+
     /**
      * The swipeable call log row.
      */
     class SwipeableShortcutCard
         : public FrameLayout
-        , public ISwipeHelperCallback
     {
-    public:
-        CAR_INTERFACE_DECL();
+    private:
+        class InnerCallback
+            : public Object
+            , public ISwipeHelperCallback
+        {
+        public:
+            CAR_INTERFACE_DECL()
 
+            InnerCallback(
+                /* [in] */ SwipeableShortcutCard* host)
+                : mHost(host)
+            {}
+
+             // @Override
+            CARAPI GetChildAtPosition(
+                /* [in] */ IMotionEvent* ev,
+                /* [out] */ IView** child);
+
+            // @Override
+            CARAPI GetChildContentView(
+                /* [in] */ IView* v,
+                /* [out] */ IView** child);
+
+            // @Override
+            CARAPI OnScroll();
+
+            // @Override
+            CARAPI CanChildBeDismissed(
+                /* [in] */ IView* v,
+                /* [out] */ Boolean* result);
+
+            // @Override
+            CARAPI OnBeginDrag(
+                /* [in] */ IView* v);
+
+            // @Override
+            CARAPI OnChildDismissed(
+                /* [in] */ IView* v);
+
+            // @Override
+            CARAPI OnDragCancelled(
+                /* [in] */ IView* v);
+
+        private:
+            SwipeableShortcutCard* mHost;
+        };
+
+    public:
         SwipeableShortcutCard(
             /* [in] */ ShortcutCardsAdapter* host);
 
@@ -118,84 +230,19 @@ public:
 
     private:
         ShortcutCardsAdapter* mHost;
-        AutoPtr<ISwipeHelper> mSwipeHelper;
+        AutoPtr<SwipeHelper> mSwipeHelper;
         AutoPtr<ISwipeHelperOnItemGestureListener> mOnItemSwipeListener;
 
-        Float mPreviousTranslationZ; // = 0;
-        AutoPtr<IRect> mClipRect; // = new Rect();
-    };
-
-private:
-    class CustomDataSetObserver
-        : public DataSetObserver
-    {
-    public:
-        CustomDataSetObserver(
-            /* [in] */ ShortcutCardsAdapter* host);
-
-        // @Override
-        CARAPI OnChanged();
-
-        TO_STRING_IMPL("ShortcutCardsAdapter::CustomDataSetObserver")
-
-    private:
-        ShortcutCardsAdapter* mHost;
-    };
-
-    class CallLogOnItemSwipeListener
-        : public Object
-        , public ISwipeHelperOnItemGestureListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        CallLogOnItemSwipeListener(
-            /* [in] */ ShortcutCardsAdapter* host);
-
-        // @Override
-        CARAPI OnSwipe(
-            /* [in] */ IView* view);
-
-        // @Override
-        CARAPI OnTouch();
-
-        // @Override
-        CARAPI IsSwipeEnabled(
-            /* [out] */ Boolean* result);
-
-    private:
-        ShortcutCardsAdapter* mHost;
-    };
-
-    class CallLogQueryHandlerListener
-        : public Object
-        , public ICallLogQueryHandlerListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CallLogQueryHandlerListener(
-            /* [in] */ ShortcutCardsAdapter* host);
-
-        // @Override
-        CARAPI OnVoicemailStatusFetched(
-            /* [in] */ ICursor* statusCursor);
-
-        // @Override
-        CARAPI OnCallsFetched(
-            /* [in] */ ICursor* combinedCursor,
-            /* [out] */ Boolean* result);
-
-    private:
-        ShortcutCardsAdapter* mHost;
+        Float mPreviousTranslationZ;
+        AutoPtr<IRect> mClipRect;
     };
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     ShortcutCardsAdapter(
         /* [in] */ IContext* context,
-        /* [in] */ IListsFragment* fragment,
+        /* [in] */ ListsFragment* fragment,
         /* [in] */ CallLogAdapter* callLogAdapter);
 
     /**
@@ -261,7 +308,7 @@ private:
 
     AutoPtr<CallLogAdapter> mCallLogAdapter;
 
-    AutoPtr<IListsFragment> mFragment;
+    AutoPtr<ListsFragment> mFragment;
 
     Int32 mCallLogMarginHorizontal;
     Int32 mCallLogMarginTop;
@@ -276,10 +323,15 @@ private:
 
     AutoPtr<IDataSetObserver> mObserver;
 
-    AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
+    AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
 
     AutoPtr<ISwipeHelperOnItemGestureListener> mCallLogOnItemSwipeListene;
     AutoPtr<ICallLogQueryHandlerListener> mCallLogQueryHandlerListener;
+
+    friend class ListsFragment;
+    friend class CallLogOnItemSwipeListener;
+    friend class CallLogQueryHandlerListener;
+    friend class SwipeableShortcutCard;
 };
 
 } // List
