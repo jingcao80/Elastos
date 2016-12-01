@@ -311,15 +311,23 @@ ECode CClient::BusHandler::HandleMessage(
              * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
              * "/sample", uses sessionID of CONTACT_PORT, and implements the BasicInterface.
              */
-            AutoPtr< ArrayOf<InterfaceID> > busInterfaces = ArrayOf<InterfaceID>::Alloc(1);
-            (*busInterfaces)[0] = EIID_IBasicInterface;
+            //TODO using Object::GetModuleInfo();
+            AutoPtr<IModuleInfo> moduleInfo;
+            _CObject_ReflectModuleInfo((IActivity*)this, (IModuleInfo**)&moduleInfo);
+            AutoPtr<IInterfaceInfo> itfcInfo;
+            moduleInfo->GetInterfaceInfo(
+                String("Elastos.DevSamples.DFBasicDemo.BasicClient.IBasicInterface"),
+                (IInterfaceInfo**)&itfcInfo);
+
+            AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(1);
+            busInterfaces->Set(0, itfcInfo);
             mProxyObj = NULL;
             mBus->GetProxyBusObject(SERVICE_NAME, String("/sample"),
                     value, busInterfaces, (IProxyBusObject**)&mProxyObj);
 
             /* We make calls to the methods of the AllJoyn object through one of its interfaces. */
             mBasicInterface = NULL;
-            mProxyObj->GetInterface(EIID_IBasicInterface, (IInterface**)&mBasicInterface);
+            mProxyObj->GetInterface(itfcInfo, (IInterface**)&mBasicInterface);
 
             mSessionId = value;
             mIsConnected = TRUE;

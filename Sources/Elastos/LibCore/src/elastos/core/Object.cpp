@@ -256,11 +256,18 @@ String Object::GetNamespace(
     return ns;
 }
 
-String Object::GetModulePath(
+AutoPtr<IModuleInfo> Object::GetModuleInfo(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<IModuleInfo> moduleInfo;
     _CObject_ReflectModuleInfo(obj, (IModuleInfo**)&moduleInfo);
+    return moduleInfo;
+}
+
+String Object::GetModulePath(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IModuleInfo> moduleInfo = GetModuleInfo(obj);
     String path;
     if (moduleInfo != NULL) {
         moduleInfo->GetPath(&path);

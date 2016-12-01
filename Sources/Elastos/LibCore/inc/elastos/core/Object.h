@@ -286,6 +286,9 @@ public:
     static CARAPI_(String) GetNamespace(
         /* [in] */ IInterface* obj);
 
+    static CARAPI_(AutoPtr<IModuleInfo>) GetModuleInfo(
+        /* [in] */ IInterface* obj);
+
     static CARAPI_(String) GetModulePath(
         /* [in] */ IInterface* obj);
 
