@@ -241,7 +241,6 @@ DefaultVoicemailNotifier::DefaultVoicemailNotifier(
 AutoPtr<DefaultVoicemailNotifier> DefaultVoicemailNotifier::GetInstance(
     /* [in] */ IContext* context)
 {
-    AutoLock syncLock(sInstance);
     if (sInstance == NULL) {
         AutoPtr<IInterface> service;
         context->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&service);
@@ -254,6 +253,7 @@ AutoPtr<DefaultVoicemailNotifier> DefaultVoicemailNotifier::GetInstance(
                 CreateNameLookupQuery(contentResolver),
                 CreatePhoneNumberHelper(context));
     }
+    AutoLock syncLock(sInstance.Get());
     return sInstance;
 }
 

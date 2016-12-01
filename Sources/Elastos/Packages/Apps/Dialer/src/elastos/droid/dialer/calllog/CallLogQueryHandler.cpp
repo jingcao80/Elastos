@@ -121,8 +121,10 @@ ECode CallLogQueryHandler::constructor(
     /* [in] */ Int32 limit)
 {
     NoNullCursorAsyncQueryHandler::constructor(contentResolver);
-    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(listener);
-    wrs->GetWeakReference((IWeakReference**)&mListener);
+    if (listener != NULL) {
+        AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(listener);
+        wrs->GetWeakReference((IWeakReference**)&mListener);
+    }
     mLogLimit = limit;
     return NOERROR;
 }

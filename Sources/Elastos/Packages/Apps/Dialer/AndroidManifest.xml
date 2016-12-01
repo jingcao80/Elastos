@@ -135,7 +135,7 @@
                   android:exported="false">
         </activity>
 
-        <activity android:name="Elastos.Droid.Dialer.Calllog.CCallLogActivity"
+        <activity android:name="Elastos.Droid.Dialer.CallLog.CCallLogActivity"
             android:label="@string/call_log_activity_title"
             android:theme="@style/DialtactsThemeWithoutActionBarOverlay"
             android:icon="@mipmap/ic_launcher_phone">
@@ -151,7 +151,7 @@
                   android:label="@string/callDetailTitle"
                   android:theme="@style/CallDetailActivityTheme"
                   android:icon="@mipmap/ic_launcher_phone"
-                  android:parentActivityName="Elastos.Droid.Dialer.Calllog.CCallLogActivity"
+                  android:parentActivityName="Elastos.Droid.Dialer.CallLog.CCallLogActivity"
             >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -221,7 +221,7 @@
             android:exported="false"/>
         <!-- end vCard related -->
 
-        <receiver android:name="Elastos.Droid.Dialer.Calllog.CCallLogReceiver"
+        <receiver android:name="Elastos.Droid.Dialer.CallLog.CCallLogReceiver"
             android:enabled="@*android:bool/config_voice_capable">
             <intent-filter>
                 <action android:name="android.intent.action.NEW_VOICEMAIL" />
@@ -243,7 +243,7 @@
         </receiver>
 
         <service
-            android:name="Elastos.Droid.Dialer.Calllog.CCallLogNotificationsService"
+            android:name="Elastos.Droid.Dialer.CallLog.CCallLogNotificationsService"
             android:exported="false"
         />
 

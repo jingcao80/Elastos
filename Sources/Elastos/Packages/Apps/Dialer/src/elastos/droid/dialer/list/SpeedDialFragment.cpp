@@ -302,6 +302,8 @@ CAR_INTERFACE_IMPL(SpeedDialFragment, AnalyticsFragment, ISpeedDialFragment)
 
 SpeedDialFragment::SpeedDialFragment()
 {
+    CHashMap::New((IHashMap**)&mItemIdTopMap);
+    CHashMap::New((IHashMap**)&mItemIdLeftMap);
     mContactTileAdapterListener = (IContactTileViewListener*)new ContactTileAdapterListener(this);
     mContactTileLoaderListener = (ILoaderManagerLoaderCallbacks*)new ContactTileLoaderListener(this);
     mScrollListener = new ScrollListener(this);
@@ -326,9 +328,7 @@ ECode SpeedDialFragment::OnAttach(
     AutoPtr<IOnDataSetChangedForAnimationListener> listener = new InnerOnDataSetChangedListener(this);
     mContactTileAdapter = new PhoneFavoritesTileAdapter(IContext::Probe(activity), mContactTileAdapterListener,
             listener);
-    AutoPtr<IContactPhotoManager> cpm;
-    // TODO:
-    // cpm = ContactPhotoManager::GetInstance(IContext::Probe(activity));
+    AutoPtr<IContactPhotoManager> cpm = ContactPhotoManager::GetInstance(IContext::Probe(activity));
     mContactTileAdapter->SetPhotoLoader(cpm);
     return NOERROR;
 }
@@ -340,12 +340,6 @@ ECode SpeedDialFragment::OnCreate(
         Logger::D(TAG, "onCreate()");
     }
     FAIL_RETURN(AnalyticsFragment::OnCreate(savedState))
-
-    CHashMap::New((IHashMap**)&mItemIdTopMap);
-    CHashMap::New((IHashMap**)&mItemIdLeftMap);
-
-    mContactTileLoaderListener = (ILoaderManagerLoaderCallbacks*)new ContactTileLoaderListener(this);
-    mScrollListener = new ScrollListener(this);
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
