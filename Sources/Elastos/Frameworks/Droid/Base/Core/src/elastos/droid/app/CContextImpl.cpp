@@ -35,7 +35,7 @@
 #include "elastos/droid/hardware/CCmHardwareManager.h"
 #include "elastos/droid/hardware/CSystemSensorManager.h"
 //#include "elastos/droid/hardware/CSerialManager.h"
-//#include "elastos/droid/hardware/usb/CUsbManager.h"
+#include "elastos/droid/hardware/usb/CUsbManager.h"
 #include "elastos/droid/hardware/camera2/CCameraManager.h"
 #include "elastos/droid/hardware/display/CDisplayManager.h"
 #include "elastos/droid/hardware/input/CInputManager.h"
@@ -153,7 +153,7 @@ using Elastos::Droid::Hardware::Input::IInputManager;
 using Elastos::Droid::Hardware::Input::CInputManager;
 using Elastos::Droid::Hardware::Usb::IIUsbManager;
 using Elastos::Droid::Hardware::Usb::IUsbManager;
-// using Elastos::Droid::Hardware::Usb::CUsbManager;
+using Elastos::Droid::Hardware::Usb::CUsbManager;
 using Elastos::Droid::Hardware::Camera2::ICameraManager;
 using Elastos::Droid::Hardware::Camera2::CCameraManager;
 using Elastos::Droid::Internal::App::IIAppOpsService;
@@ -2637,8 +2637,7 @@ ECode CContextImpl::GetSystemService(
         AutoPtr<IInterface> service = ServiceManager::GetService(IContext::USB_SERVICE);
         AutoPtr<IIUsbManager> mgr = IIUsbManager::Probe(service);
         AutoPtr<IUsbManager> usbManager;
-        assert(0 && "TODO");
-        // CUsbManager::New(this, mgr, (IUsbManager**)&usbManager);
+        CUsbManager::New(this, mgr, (IUsbManager**)&usbManager);
         *object = usbManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;

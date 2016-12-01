@@ -32,6 +32,7 @@
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/twilight/CTwilightService.h"
 #include "elastos/droid/server/search/CSearchManagerService.h"
+#include "elastos/droid/server/storage/CDeviceStorageMonitorService.h"
 #include "elastos/droid/server/WiredAccessoryManager.h"
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
 #include "elastos/droid/server/usb/CUsbService.h"
@@ -122,6 +123,7 @@ using Elastos::Droid::Server::Os::CSchedulingPolicyService;
 using Elastos::Droid::Server::Pm::CLauncherAppsService;
 using Elastos::Droid::Server::Power::ShutdownThread;
 using Elastos::Droid::Server::Search::CSearchManagerService;
+using Elastos::Droid::Server::Storage::CDeviceStorageMonitorService;
 using Elastos::Droid::Server::Twilight::CTwilightService;
 using Elastos::Droid::Server::Usb::CUsbService;
 using Elastos::Droid::Server::Webkit::WebViewUpdateService;
@@ -891,7 +893,12 @@ ECode SystemServer::StartOtherServices()
         assert(notification != NULL);
         networkPolicy->BindNotificationManager(notification);
 
-    //     mSystemServiceManager->StartService(DeviceStorageMonitorService.class);
+        systemService = NULL;
+        ec = CDeviceStorageMonitorService::New(context, (ISystemService**)&systemService);
+        if (FAILED(ec)) {
+            ReportWtf("making Device Storage Monitor Service ready %d", ec);
+        }
+        mSystemServiceManager->StartService(systemService.Get());
 
         if (!disableLocation) {
             Slogger::I(TAG, "Location Manager");

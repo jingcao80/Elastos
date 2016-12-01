@@ -104,11 +104,6 @@ module
             [in] Int32 index,
             [out] Int64* value);
 
-        /** @hide */
-        SetValueAt(
-            [in] Int32 index,
-            [in] Int64 value);
-
         /**
          * Returns the index for which {@link #keyAt} would return the
          * specified key, or a negative number if the specified

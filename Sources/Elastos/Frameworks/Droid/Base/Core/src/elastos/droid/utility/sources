@@ -48,6 +48,7 @@ SOURCES += Int64SparseInt64Array.cpp
 SOURCES += SparseArray.cpp
 SOURCES += SparseBooleanArray.cpp
 SOURCES += SparseInt32Array.cpp
+SOURCES += SparseInt64Array.cpp
 SOURCES += Spline.cpp
 SOURCES += CSplineHelper.cpp
 SOURCES += StateSet.cpp

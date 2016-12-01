@@ -31,7 +31,7 @@ using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::EIID_IBinder;
-// using Elastos::Droid::Utility::CSparseInt64Array;
+using Elastos::Droid::Utility::CSparseInt64Array;
 using Elastos::Core::IThread;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
@@ -65,8 +65,7 @@ StorageMeasurement::MeasurementDetails::MeasurementDetails()
     , mMiscSize(0)
 {
     CHashMap::New((IHashMap**)&mMediaSize);
-    assert(0 && "TODO");
-    // CSparseInt64Array::New((ISparseInt64Array**)&mUsersSize);
+    CSparseInt64Array::New((ISparseInt64Array**)&mUsersSize);
 }
 
 //===============================================================================
@@ -497,7 +496,7 @@ void StorageMeasurement::MeasurementHandler::MeasureExactStorage(
             for (Int32 j = 0; j < length; j++) {
                 AutoPtr<IInterface> tmp;
                 apps->Get(j, (IInterface**)&tmp);
-                IApplicationInfo* app = IApplicationInfo::Probe(obj);
+                IApplicationInfo* app = IApplicationInfo::Probe(tmp);
 
                 String packageName;
                 IPackageItemInfo::Probe(app)->GetPackageName(&packageName);

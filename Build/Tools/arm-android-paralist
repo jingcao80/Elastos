@@ -334,6 +334,7 @@
 # Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/remote
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/search
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/statusbar
+  Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/storage
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/trust
 > Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/twilight
   Elastos/Frameworks/Droid/Base/Services/Server/src/elastos/droid/server/tv
