@@ -1,12 +1,347 @@
 
 module
 {
+    using interface Elastos.Utility.IMap;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
     namespace Ifaces {
 
+    /** {@link #RequestName(String, Int32)} return value. */
+    enum RequestNameResult {
+        /** Invalid. */
+        RequestNameResult_Invalid,
+
+        /** Bus name is now owned by this BusAttachment. */
+        RequestNameResult_PrimaryOwner,
+
+        /**
+         * The name is already owned by another bus connection that allows
+         * queing.  The request is queued.
+         */
+        RequestNameResult_InQueue,
+
+        /**
+         * The name is already owned by another bus connection. The request has
+         * failed.
+         */
+        RequestNameResult_AlreadyExists,
+
+        /** This BusAttachment already owns the name. The request has failed. */
+        RequestNameResult_AlreadyOwner,
+    }
+
+    /** {@link #ReleaseName(String)} return value. */
+    enum ReleaseNameResult {
+        /** Invalid. */
+        ReleaseNameResult_Invalid,
+
+        /** The name has been released. */
+        ReleaseNameResult_Released,
+
+        /**
+         * The name is unknown to the AllJoyn router and therefore cannot be
+         * released.
+         */
+        ReleaseNameResult_NonExistent,
+
+        /**
+         * The name is owned by another bus connection and therefore cannot be
+         * released.
+         */
+        ReleaseNameResult_NotOwner,
+    }
+
+    /** {@link #StartServiceByName(String, Int32)} return value. */
+    enum StartServiceByNameResult {
+        /** Invalid. */
+        StartServiceByNameResult_Invalid,
+
+        /** Service is started. */
+        StartServiceByNameResult_Success,
+
+        /** Service is already running. */
+        StartServiceByNameResult_AlreadyRunning,
+    }
+
+    /**
+     * The standard org.freedesktop.DBus interface that is implemented by the local
+     * AllJoyn router.  It is used to control bus operations such as obtaining
+     * well-known names and establishing routing rules.
+     * <p>
+     * The functionality of DBusProxyObj is limited to functions that are available
+     * in the DBus protocols. To use advanced AllJoyn features such as Peer-to-peer
+     * connections, use AllJoynProxyObj.
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.freedesktop.DBus")]
     interface IDBusProxyObj {
+
+        /**
+         * If there is no owner of this name then take ownership.  Otherwise this
+         * request is queued until the current owner releases this name.
+         */
+        const Int32 REQUEST_NAME_NO_FLAGS = 0x00;
+
+        /**
+         * Allow other bus connections to "take" this name away from this
+         * BusAttachment.
+         */
+        const Int32 REQUEST_NAME_ALLOW_REPLACEMENT = 0x01;
+
+        /**
+         * Attempt to take the name away from another bus connection if it is
+         * already owned.
+         */
+        const Int32 REQUEST_NAME_REPLACE_EXISTING = 0x02;
+
+        /**
+         * If the name is already taken, don't wait in a queue for the name to
+         * become available.
+         */
+        const Int32 REQUEST_NAME_DO_NOT_QUEUE = 0x04;
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(replySignature = "s")]
+        Hello(
+            [out] String* str);
+
+        /**
+         * Returns a list of well-known names registered with the bus.
+         *
+         * @return the well-known names
+         * @throws BusException indicating failure when calling ListNames method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(replySignature = "as")]
+        ListNames(
+            [out, callee] ArrayOf<String>* names);
+
+        /**
+         * Returns a list of well-known names that the local AllJoyn router has been
+         * configured to automatically start routers for when the names are
+         * accessed.
+         *
+         * @return the well-known names
+         * @throws BusException indicating failure when calling ListActivatableNames method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(replySignature = "as")]
+        ListActivatableNames(
+            [out, callee] ArrayOf<String>* names);
+
+        /**
+         * Requests a well-known name.
+         *
+         * @param name name being requested
+         * @param flags bitmask of RequestName flags
+         * @return disposition of request name operation
+         * @throws BusException indicating failure when calling RequestName method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "su", replySignature = "u")]
+        RequestName(
+            [in] String name,
+            [in] Int32 flags,
+            [out] RequestNameResult* res);
+
+        /**
+         * Releases a previously registered well-known name.
+         *
+         * @param name name being released
+         * @return disposition of release name operation
+         * @throws BusException indicating failure when calling ReleaseName method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "u")]
+        ReleaseName(
+            [in] String name,
+            [out] ReleaseNameResult* res);
+
+        /**
+         * Returns {@code true} if name has an owner on the bus.
+         *
+         * @param name name to check for ownership
+         * @return {@code true} iff the well-known name is currently registered with the bus
+         * @throws BusException indicating failure when calling NameHasOwner method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "b")]
+        NameHasOwner(
+            [in] String name,
+            [out] Boolean* res);
+
+        /**
+         * Starts the local router process responsible for a given well-known name.
+         * Names for services that can be started in this manner are returned by
+         * {@link #ListActivatableNames()}.
+         *
+         * @param name well-known name whose service process will be started
+         * @param flags not used
+         * @return disposition of start service by name operation
+         * @throws BusException indicating failure when when calling StartServiceByName method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "su", replySignature = "u")]
+        StartServiceByName(
+            [in] String name,
+            [in] Int32 flags,
+            [out] StartServiceByNameResult* res);
+
+        /**
+         * Gets the unique id of the bus connection that owns a given well-known
+         * name.
+         *
+         * @param name well-known name.
+         * @return unique id that owns well-known name
+         * @throws BusException if the well-known name is not owned
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "s")]
+        GetNameOwner(
+            [in] String name,
+            [out] String* owner);
+
+        /**
+         * Gets the uid of the process connected to the local AllJoyn router identified
+         * by the well-known or unique name.
+         *
+         * @param name well-known or unique name whose connection will be examined
+         * @return uid of process connected to local AllJoyn router with given name
+         * @throws BusException if the uid cannot be determined
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "u")]
+        GetConnectionUnixUser(
+            [in] String name,
+            [out] Int32* user);
+
+        /**
+         * Gets the pid of the process connected to the local AllJoyn router identified
+         * by the well-known or unique name.
+         *
+         * @param name well-known or unique name whose connection will be examined
+         * @return pid of process connected to local AllJoyn router with the given name
+         * @throws BusException if the pid cannot be determined
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "u")]
+        GetConnectionUnixProcessID(
+            [in] String name,
+            [out] Int32* pid);
+
+        /**
+         * Adds a DBus routing rule.
+         * See the DBus spec for details and format of DBus routing rules.
+         *
+         * @param rule match rule to add
+         * @throws BusException indicating failure when calling AddMatch method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s")]
+        AddMatch(
+            [in] String rule);
+
+        /**
+         * Removes a DBus routing rule.
+         * See the DBus spec for details on DBus routing.
+         *
+         * @param rule match rule to remove
+         * @throws BusException indicating failure when calling RemoveMatch method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s")]
+        RemoveMatch(
+            [in] String rule);
+
+        /**
+         * Gets the unique id of the bus.
+         *
+         * @return the GUID for the local AllJoyn router in string form
+         * @throws BusException indicating failure when calling GetId method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(replySignature = "s")]
+        GetId(
+            [out] String* id);
+
+        /**
+         * Updates the activation environment.
+         *
+         * @param environment the environment to add or update
+         * @throws BusException indicating failure when calling UpdateActivationEnvironment method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "a{ss}")]
+        UpdateActivationEnvironment(
+            [in] IMap* environment);
+
+        /**
+         * Gets the list of queued owners.
+         *
+         * @param name the well-known bus name to query
+         * @return the unique bus names of connections currently queued for the name
+         * @throws BusException indicating failure when calling ListQueuedOwners method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "as")]
+        ListQueuedOwners(
+            [in] String name,
+            [out, callee] ArrayOf<String>* owners);
+
+        /**
+         * Gets the ADT audit session data.
+         *
+         * @param name the name of the connection to query
+         * @return an array of bytes
+         * @throws BusException indicating failure when calling GetAdtAudidSessionData method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "ay")]
+        GetAdtAuditSessionData(
+            [in] String name,
+            [out, callee] ArrayOf<Byte>* data);
+
+        /**
+         * Gets the SE Linux security context for a connection.
+         *
+         * @param name the name of the connection to query
+         * @return an array of bytes
+         * @throws BusException indicating failure when calling GetConnectionSELinuxSecurityContext method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "ay")]
+        GetConnectionSELinuxSecurityContext(
+            [in] String name,
+            [out, callee] ArrayOf<String>* context);
+
+        /**
+         * Reloads the config file.
+         *
+         * @throws BusException indicating failure when calling ReloadConfig method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        ReloadConfig();
+
+        /**
+         * Signal broadcast whenever a name (well-known or unique) changes
+         * ownership.
+         *
+         * @param name well-known or unique name that has changed owner
+         * @param oldOwner unique name of previous owner or empty string if no
+         *                 previous owner
+         * @param newOwner unique name of new name owner or empty string if no new
+         *                 owner
+         * @throws BusException indicating failure when sending the NameOwnerChanged signal
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusSignal(signature = "sss")]
+        NameOwnerChanged(
+            [in] String name,
+            [in] String oldOwner,
+            [in] String newOwner);
+
+        /**
+         * Signal sent (non-broadcast) to the bus connection that loses a name.
+         *
+         * @param name name that was lost
+         * @throws BusException indicating failure when sending the NameLost signal
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusSignal(signature = "s")]
+        NameLost(
+            [in] String name);
+
+        /**
+         * Signal sent (non-broadcast) to the bus connection that acquires a name.
+         *
+         * @param name name that was acquired from the bus
+         * @throws BusException indicating failure when sending the NameAcquired signal
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusSignal(signature = "s")]
+        NameAcquired(
+            [in] String name);
     }
 
     } // namespace Ifaces

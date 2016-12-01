@@ -1,14 +1,13 @@
 
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/MsgArg.h"
-#include <elastos/core/ClassLoader.h>
+#include "org/alljoyn/bus/alljoyn/DaemonInit.h"
 #include <elastos/utility/etl/Map.h>
 #include <elastos/utility/etl/Pair.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/Init.h>
 #include <qcc/Log.h>
 
-using Elastos::Core::ClassLoader;
 using Elastos::Core::CPathClassLoader;
 using Elastos::Utility::Etl::Map;
 using Elastos::Utility::Etl::Pair;
@@ -383,8 +382,10 @@ static AutoPtr<IClassLoader> sClassLoader;
 AutoPtr<IClassLoader> GetModuleClassLoader()
 {
     if (sClassLoader == NULL) {
-        CPathClassLoader::New(PATH, ClassLoader::GetSystemClassLoader(),
-                (IClassLoader**)&sClassLoader);
+        AutoPtr<IClassLoader> parent;
+        Alljoyn::DaemonInit::GetContext()->GetClassLoader((IClassLoader**)&parent);
+        assert(parent);
+        CPathClassLoader::New(PATH, parent, (IClassLoader**)&sClassLoader);
     }
 
     return sClassLoader;

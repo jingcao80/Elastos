@@ -32,7 +32,7 @@ ECode CECFieldFp::Equals(
         *result = TRUE;
     }
     if (IECFieldFp::Probe(obj)) {
-        return mP->Equals(((CECFieldFp*)(IECFieldFp*)obj)->mP.Get(), result);
+        return mP->Equals(((CECFieldFp*)IECFieldFp::Probe(obj))->mP.Get(), result);
     }
     *result = FALSE;
     return NOERROR;

@@ -254,7 +254,7 @@ ECode ElastosKeyStore::EngineSetKeyEntry(
     }
 
     if (IPrivateKey::Probe(key) != NULL) {
-        SetPrivateKeyEntry(alias, IPrivateKey::Probe(key), chain, NULL);
+        return SetPrivateKeyEntry(alias, IPrivateKey::Probe(key), chain, NULL);
     }
     else {
         //throw new KeyStoreException("Only PrivateKeys are supported");
@@ -768,8 +768,7 @@ ECode ElastosKeyStore::EngineSetEntry(
         prE->GetPrivateKey((IPrivateKey**)&privatekey);
         AutoPtr<ArrayOf<ICertificate*> > cc;
         prE->GetCertificateChain((ArrayOf<ICertificate*>**)&cc);
-        SetPrivateKeyEntry(alias, privatekey, cc, IKeyStoreParameter::Probe(param));
-        return NOERROR;
+        return SetPrivateKeyEntry(alias, privatekey, cc, IKeyStoreParameter::Probe(param));
     }
 
     //throw new KeyStoreException( "Entry must be a PrivateKeyEntry or TrustedCertificateEntry; was " + entry);

@@ -1,0 +1,33 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Ifaces {
+
+    /**
+     * The standard org.freedesktop.DBus.Introspectable interface.  This
+     * interface allows bus objects to be introspected for the interfaces
+     * that they implement and the child objects that they may contain.
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.freedesktop.DBus.Introspectable")]
+    interface IIntrospectable {
+        /**
+         * Gets the XML introspection data for the object.
+         * The schema for the DBus introspection data is described in the
+         * DBus specification.
+         *
+         * @return XML introspection data for the object
+         * @throws BusException indicating failure to make Introspect method call
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        Introspect(
+            [out] String* str);
+    }
+
+    } // namespace Ifaces
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

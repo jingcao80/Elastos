@@ -1,0 +1,41 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Ifaces {
+
+    /**
+     * The org.allseen.Introspectable interface provides introspection xml
+     * that contains description elements that document the object and it's various sub-elements.
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.allseen.Introspectable")]
+    interface IAllSeenIntrospectable {
+       /**
+         * Gets the description languages that are supported for the object.
+         *
+         * @return array of supported language names.
+         * @throws BusException indicating failure when calling GetDescriptionLanguages method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        GetDescriptionLanguages(
+            [out, callee] ArrayOf<String>* languages);
+
+        /**
+         * Gets the introspect with description for the object.
+         * @param language to return in the description.
+         * @return introspect with description.
+         * @throws BusException indicating failure when calling IntrospectWithDescription method
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        IntrospectWithDescription(
+            [in] String language,
+            [out] String* descr);
+    }
+
+    } // namespace Ifaces
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

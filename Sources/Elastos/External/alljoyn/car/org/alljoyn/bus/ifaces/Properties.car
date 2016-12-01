@@ -1,0 +1,79 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+    interface Org.Alljoyn.Bus.IVariant;
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Ifaces {
+
+    /**
+     * The standard org.freedesktop.DBus.Properties interface that can be
+     * implemented by bus objects to expose a generic "setter/getter" inteface for
+     * user-defined properties on DBus.
+     */
+    [deprecated, @Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.freedesktop.DBus.Properties")]
+    interface IProperties {
+
+        /**
+         * Gets a property that exists on a named interface of a bus object.
+         *
+         * @param iface the interface that the property exists on
+         * @param propName the name of the property
+         * @return the value of the property
+         * @throws BusException if the named property doesn't exist
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        Get(
+            [in] String iface,
+            [in] String propName,
+            [out] IVariant** value);
+
+        /**
+         * Sets a property that exists on a named interface of a bus object.
+         *
+         * @param iface the interface that the property exists on
+         * @param propName the name of the property
+         * @param value the value for the property
+         * @throws BusException if the named property doesn't exist or cannot be set
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        Set(
+            [in] String iface,
+            [in] String propName,
+            [in] IVariant* value);
+
+        /**
+         * Gets all properties for a given interface.
+         *
+         * @param iface the interface
+         * @return a Map of name/value associations
+         * @throws BusException if request cannot be honored
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "s", replySignature = "a{sv}")]
+        GetAll(
+            [in] String iface,
+            [out] IMap** all);
+
+        /**
+         * Notifies others about changes to properties.
+         *
+         * @param iface the interface
+         * @param changedProps a map of property names an their new values
+         * @param invalidatedProps a list of property names whose values are invalidated
+         * @throws BusException indicating failure sending PropertiesChanged signal
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusSignal(signature = "sa{sv}as")]
+        PropertiesChanged(
+            [in] String iface,
+            [in] IMap* changedProps,
+            [in] ArrayOf<String>* invalidatedProps);
+    }
+
+    } // namespace Ifaces
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

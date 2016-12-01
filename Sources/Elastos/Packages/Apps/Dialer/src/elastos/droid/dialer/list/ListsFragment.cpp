@@ -4,6 +4,7 @@
 #include "elastos/droid/dialer/list/SpeedDialFragment.h"
 #include "elastos/droid/dialer/list/CAllContactsFragment.h"
 // #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
+#include "elastos/droid/dialer/calllog/CallLogQuery.h"
 #include "elastos/droid/dialer/calllog/CallLogFragment.h"
 #include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
 #include "elastos/droid/dialer/util/DialerUtils.h"
@@ -21,7 +22,7 @@ using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::Widget::IAdapterView;
-// using Elastos::Droid::Dialer::CallLog::ICallLogQuery;
+using Elastos::Droid::Dialer::CallLog::CallLogQuery;
 using Elastos::Droid::Dialer::CallLog::CallLogFragment;
 using Elastos::Droid::Dialer::CallLog::ContactInfoHelper;
 using Elastos::Droid::Dialer::Util::DialerUtils;
@@ -137,7 +138,6 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
             Int64 value;
             sys->GetCurrentTimeMillis(&value);
             AutoPtr<CallLogFragment> fragment = new CallLogFragment();
-            fragment->constructor();
             mHost->mRecentsFragment = (ICallLogFragment*)fragment;
             fragment->constructor(CallLogQueryHandler::CALL_TYPE_ALL,
                     MAX_RECENTS_ENTRIES, value - OLDEST_RECENTS_DATE);
@@ -412,8 +412,7 @@ ECode ListsFragment::OnResume()
     prefs->GetInt64(KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE, 0, &mLastCallShortcutDate);
     activity->GetActionBar((IActionBar**)&mActionBar);
     FetchCalls();
-    // TODO:
-    // mCallLogAdapter->SetLoading(TRUE);
+    mCallLogAdapter->SetLoading(TRUE);
     return NOERROR;
 }
 
@@ -421,15 +420,13 @@ ECode ListsFragment::OnPause()
 {
     // Wipe the cache to refresh the call shortcut item. This is not that expensive because
     // it only contains one item.
-    // TODO:
-    // mCallLogAdapter->InvalidateCache();
+    mCallLogAdapter->InvalidateCache();
     return AnalyticsFragment::OnPause();
 }
 
 ECode ListsFragment::OnDestroy()
 {
-    // TODO:
-    // mCallLogAdapter->StopRequestProcessing();
+    mCallLogAdapter->StopRequestProcessing();
     return AnalyticsFragment::OnDestroy();
 }
 
@@ -505,17 +502,17 @@ ECode ListsFragment::OnCallsFetched(
     /* [in] */ ICursor* cursor,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // mCallLogAdapter->SetLoading(FALSE);
+    VALIDATE_NOT_NULL(result)
+    mCallLogAdapter->SetLoading(FALSE);
 
     // Save the date of the most recent call log item
     Boolean succeeded;
     if (cursor != NULL && (cursor->MoveToFirst(&succeeded), succeeded)) {
-        // cursor->GetInt64(ICallLogQuery::DATE, &mCurrentCallShortcutDate);
+        cursor->GetInt64(CallLogQuery::DATE, &mCurrentCallShortcutDate);
     }
 
-    // mCallLogAdapter->ChangeCursor(cursor);
+    mCallLogAdapter->ChangeCursor(cursor);
+    assert(0 && "TODO");
     // mMergedAdapter->NotifyDataSetChanged();
     // Return true; took ownership of cursor
     *result = TRUE;
@@ -524,9 +521,8 @@ ECode ListsFragment::OnCallsFetched(
 
 ECode ListsFragment::FetchCalls()
 {
-    // TODO:
-    // return mCallLogQueryHandler->FetchCalls(
-    //         ICallLogQueryHandler::CALL_TYPE_ALL, mLastCallShortcutDate);
+    mCallLogQueryHandler->FetchCalls(
+            CallLogQueryHandler::CALL_TYPE_ALL, mLastCallShortcutDate);
     return NOERROR;
 }
 

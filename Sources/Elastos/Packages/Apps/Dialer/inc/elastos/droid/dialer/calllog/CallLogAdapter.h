@@ -48,6 +48,9 @@ class CallLogAdapter
     , public IOnPreDrawListener
     , public ICallLogGroupBuilderGroupCreator
 {
+public:
+    TO_STRING_IMPL("CallLogAdapter")
+
 private:
     /**
      * Stores a phone number of a call with the country code where it originally occurred.
