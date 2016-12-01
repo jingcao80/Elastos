@@ -1135,7 +1135,7 @@ ECode CActivityOne::ButtonElastosKeyPairGenerator()
 
     //return text->TestKeyPairGenerator_GenerateKeyPair_DSA_2048_Unencrypted_Success();                        //OK
 
-    return text->TestKeyPairGenerator_GenerateKeyPair_DSA_SpecifiedParams_Unencrypted_Success();                      //error
+    // return text->TestKeyPairGenerator_GenerateKeyPair_DSA_SpecifiedParams_Unencrypted_Success();            //OK
 
     //return text->TestKeyPairGenerator_GenerateKeyPair_EC_Unencrypted_Success();                              //OK
 
@@ -1143,7 +1143,7 @@ ECode CActivityOne::ButtonElastosKeyPairGenerator()
 
     //return text->TestKeyPairGenerator_GenerateKeyPair_RSA_Unencrypted_Success();                             //OK
 
-    //return text->TestKeyPairGenerator_GenerateKeyPair_RSA_WithParams_Unencrypted_Success();                           //error  siji
+    return text->TestKeyPairGenerator_GenerateKeyPair_RSA_WithParams_Unencrypted_Success();                    //Ok
 
     //return text->TestKeyPairGenerator_GenerateKeyPair_Replaced_Success();                                    //OK
 
@@ -1201,7 +1201,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_GetEntry_DSA_NullParams_Unencrypted_Success();                      //OK
 
-    //return test->TestKeyStore_GetEntry_EC_NullParams_Unencrypted_Success();                                 //error
+    // return test->TestKeyStore_GetEntry_EC_NullParams_Unencrypted_Success();                      //OK
 
     //return test->TestKeyStore_GetEntry_RSA_NullParams_Unencrypted_Success();                      //OK
 
@@ -1245,7 +1245,7 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_DSA_Unencrypted_Success();                 //OK
 
-    //return test->TestKeyStore_SetEntry_PrivateKeyEntry_EC_Unencrypted_Success();                             //error
+    // return test->TestKeyStore_SetEntry_PrivateKeyEntry_EC_Unencrypted_Success();                 //OK
 
     //return test->TestKeyStore_SetEntry_PrivateKeyEntry_RSA_Unencrypted_Success();                 //OK
 
