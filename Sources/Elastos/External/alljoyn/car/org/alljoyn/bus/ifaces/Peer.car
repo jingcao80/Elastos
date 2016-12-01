@@ -1,0 +1,41 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Ifaces {
+
+    /**
+     * The standard org.freedesktop.DBus.Peer interface.
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.freedesktop.DBus.Peer")]
+    interface IPeer {
+
+        /**
+         * Send a ping message to a remote connection and get a method reply in
+         * response.
+         *
+         * @throws BusException indicating failure to make Ping method call
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        Ping();
+
+        /**
+         * Get the DBus machine id.
+         * The machine id corresponds to the AllJoyn router's guid in this
+         * implementation.
+         *
+         * @return guid of local AllJoyn router
+         * @throws BusException indicating failure to make GetMachineId method call
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        GetMachineId(
+            [out] String* machineId);
+    }
+
+    } // namespace Ifaces
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

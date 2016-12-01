@@ -512,14 +512,16 @@ ECode InterfaceDescription::ConfigureDescriptions(
             //We store these so as not to create a separate instance each time it is used.
             //Although this means we'll be holding on to each instance forever this is probably
             //not a problem since most Translators will need to live forever anyway
-            // TODO:
-            // AutoPtr<ITranslator> dt = mTranslatorCache[descriptionTranslator];
-            // if (dt == NULL) {
-            //     Class<?> c = Class.forName(ifcNote.descriptionTranslator());
-            //     dt = (Translator)c.newInstance();
-            //     mTranslatorCache.put(ifcNote.descriptionTranslator(), dt);
-            // }
-            // SetDescriptionTranslator(busAttachment, dt);
+            AutoPtr<ITranslator> dt = mTranslatorCache[descriptionTranslator];
+            if (dt == NULL) {
+                AutoPtr<IClassInfo> klass;
+                GetModuleClassLoader()->LoadClass(descriptionTranslator, (IClassInfo**)&klass);
+                AutoPtr<IInterface> object;
+                klass->CreateObject((IInterface**)&object);
+                dt = ITranslator::Probe(object);
+                mTranslatorCache[descriptionTranslator] = dt;
+            }
+            SetDescriptionTranslator(busAttachment, dt);
         }
     // }catch(Exception e) {
     //     e.printStackTrace();

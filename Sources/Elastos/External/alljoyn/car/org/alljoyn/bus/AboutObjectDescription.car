@@ -1,0 +1,18 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * Descriptions of a BusObject that makes up the service.
+     * Pairing a BusObject with the BusInterfaces that it implements.
+     */
+    interface IAboutObjectDescription {
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

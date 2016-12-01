@@ -1,0 +1,64 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+    namespace Ifaces {
+
+    /**
+     * Definition of the Icon BusInterface
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface (name = "org.alljoyn.Icon", announced="true")]
+    interface IIcon {
+        const String INTERFACE_NAME = "org.alljoyn.Icon";
+        const String OBJ_PATH = "/About/DeviceIcon";
+
+        /**
+         * @return Interface version
+         * @throws BusException indicating failure to retrieve Version property
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(signature="q")]
+        GetVersion(
+            [out] Int16* ver);
+
+        /**
+         * @return Mime type for the icon
+         * @throws BusException indicating failure to retrieve MimeType property
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(signature="s")]
+        GetMimeType(
+            [out] String* mineType);
+
+        /**
+         * @return Size of the icon
+         * @throws BusException indicating failure to retrieve Size property
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(signature="u")]
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * Returns the URL if the icon is hosted on the cloud
+         * @return the URL if the icon is hosted on the cloud
+         * @throws BusException indicating failure to make GetUrl method call
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name="GetUrl", replySignature="s")]
+        GetUrl(
+            [out] String* url);
+
+        /**
+         * Returns binary content for the icon
+         * @return binary content for the icon
+         * @throws BusException indicating failure to make GetContent method call
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name="GetContent", replySignature="ay")]
+        GetContent(
+            [out, callee] ArrayOf<Byte>* content);
+    }
+
+    } // namespace Ifaces
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

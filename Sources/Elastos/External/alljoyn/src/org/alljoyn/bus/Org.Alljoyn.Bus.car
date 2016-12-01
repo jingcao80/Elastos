@@ -7,6 +7,7 @@ module
     merge("../../../../car/org/alljoyn/bus/AboutDataListener.car");
     merge("../../../../car/org/alljoyn/bus/AboutListener.car");
     merge("../../../../car/org/alljoyn/bus/AboutObj.car");
+    merge("../../../../car/org/alljoyn/bus/AboutObjectDescription.car");
     merge("../../../../car/org/alljoyn/bus/AuthListener.car");
     merge("../../../../car/org/alljoyn/bus/BusAttachment.car");
     merge("../../../../car/org/alljoyn/bus/BusListener.car");
@@ -26,8 +27,15 @@ module
     merge("../../../../car/org/alljoyn/bus/SessionOpts.car");
     merge("../../../../car/org/alljoyn/bus/SessionPortListener.car");
     merge("../../../../car/org/alljoyn/bus/Translator.car");
+    merge("../../../../car/org/alljoyn/bus/Variant.car");
     merge("../../../../car/org/alljoyn/bus/alljoyn/DaemonInit.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/About.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/AllSeenIntrospectable.car");
     merge("../../../../car/org/alljoyn/bus/ifaces/DBusProxyObj.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/Icon.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/Introspectable.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/Peer.car");
+    merge("../../../../car/org/alljoyn/bus/ifaces/Properties.car");
 
     namespace Org {
     namespace Alljoyn {
