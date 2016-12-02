@@ -81,6 +81,8 @@ public:
     static CARAPI_(AutoPtr<IClassLoader>) GetClassLoader(
         /* [in] */ IClassInfo* clsInfo);
 
+    CARAPI_(void) RegisterModuleInfos();
+
 protected:
     /**
      * Overridden by subclasses, throws a {@code ClassNotFoundException} by

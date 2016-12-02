@@ -1,4 +1,5 @@
 
+#include "elastos/core/ClassLoader.h"
 #include "elastos/core/reflect/Proxy.h"
 #include "elastos/utility/logging/Logger.h"
 #include <sys/mman.h>
@@ -459,6 +460,8 @@ ECode CObjectProxy::S_CreateObject(
 
     proxyObj = new CObjectProxy();
     assert(proxyObj != NULL);
+
+    ((ClassLoader*)loader)->RegisterModuleInfos();
 
     proxyObj->mInterfaceNum = interfaceInfos->GetLength();
     interfaces = new CInterfaceProxy[proxyObj->mInterfaceNum];

@@ -4,7 +4,6 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <set>
 #include <qcc/String.h>
 
 using Elastos::Core::AutoLock;

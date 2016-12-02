@@ -11,6 +11,9 @@
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
 
+ELAPI RegisterModuleInfo(
+    /* [in] */ const String& moduleName);
+
 namespace Elastos {
 namespace Core {
 
@@ -163,6 +166,7 @@ ECode ClassLoader::LoadClass(
 
         if (clazz == NULL) {
             FAIL_RETURN(FindClass(className, (IClassInfo**)&clazz));
+            if (clazz != NULL) clazz->SetClassLoader((IClassLoader*)this);
         }
     }
 
@@ -227,6 +231,7 @@ ECode ClassLoader::LoadInterface(
 
     if (itfc == NULL) {
         FAIL_RETURN(FindInterface(name, (IInterfaceInfo**)&itfc));
+        if (itfc != NULL) itfc->SetClassLoader((IClassLoader*)this);
     }
 
     *result = itfc;
@@ -272,6 +277,15 @@ ECode ClassLoader::FindInterface(
     }
 
     return E_CLASS_NOT_FOUND_EXCEPTION;
+}
+
+void ClassLoader::RegisterModuleInfos()
+{
+    if (mClassPaths != NULL) {
+        for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
+            RegisterModuleInfo((*mClassPaths)[i]);
+        }
+    }
 }
 
 //-------------------------------------------------------

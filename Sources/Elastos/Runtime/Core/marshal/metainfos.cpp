@@ -259,6 +259,35 @@ void *GetUnalignedPtr(void* ptr)
 #endif
 }
 
+ELAPI ECO_PUBLIC RegisterModuleInfo(
+    /* [in] */ const String& moduleName)
+{
+    typedef ECode (STDCALL *CarDllGetClassObject_t)(
+            REMuid clsid, REIID riid, IInterface** clsObj);
+
+    char path[260];
+    strcpy(path, moduleName.string());
+#ifdef _DEBUG
+    void* module = dlopen(path, RTLD_NOW);
+#else
+    void* module = dlopen(path, RTLD_LAZY);
+#endif
+
+    strcpy(path, "DllGetClassObject");
+    CarDllGetClassObject_t func = (CarDllGetClassObject_t)dlsym(module, path);
+
+    CIModuleInfo* modInfo;
+    func(ECLSID_ClassInfo, EIID_IInterface, (IInterface**)&modInfo);
+
+    ECode ec = RegisterModuleInfo(modInfo);
+    if (FAILED(ec)) {
+#if defined(_DEBUG) || defined(_MARSHAL_DEBUG)
+        ALOGD("Failed to RegisterModuleInfo in %s", moduleName.string());
+#endif
+    }
+    return ec;
+}
+
 ECode AcquireClassInfo(
     /* [in] */ const ClassID& classId,
     /* [out] */ CIClassInfo** clsInfo)

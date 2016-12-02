@@ -1,6 +1,7 @@
 
 #include "org/alljoyn/bus/ProxyBusObject.h"
 
+using Elastos::Core::IClassLoader;
 using Elastos::Core::Reflect::CProxyFactory;
 using Elastos::Core::Reflect::IProxyFactory;
 
@@ -17,9 +18,11 @@ ECode ProxyBusObject::constructor(
     /* [in] */ Int32 sessionId,
     /* [in] */ ArrayOf<IInterfaceInfo*>* busInterfaces)
 {
+    AutoPtr<IInterface> loader;
+    (*busInterfaces)[0]->GetClassLoader((IInterface**)&loader);
     AutoPtr<IProxyFactory> pf;
     CProxyFactory::AcquireSingleton((IProxyFactory**)&pf);
-    pf->NewProxyInstance(NULL, busInterfaces, NULL, (IInterface**)&mProxy);
+    pf->NewProxyInstance(IClassLoader::Probe(loader), busInterfaces, NULL, (IInterface**)&mProxy);
     return NOERROR;
 }
 
