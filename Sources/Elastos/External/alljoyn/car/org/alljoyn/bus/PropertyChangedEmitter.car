@@ -1,0 +1,45 @@
+
+module
+{
+    interface Org.Alljoyn.Bus.IVariant;
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * @Involve
+     * interface ISignalEmitter
+     */
+    [local, deprecated]
+    interface IPropertyChangedEmitter {
+        /**
+         * Sends the PropertyChanged signal.
+         *
+         * @param ifaceName name of the interface the property belongs to
+         * @param propertyName name of the property that is changed
+         * @param newValue Variant containing the new property value
+         * @throws BusException indicating failure to send the PropertyChanged signal
+         */
+        PropertyChanged(
+            [in] String ifaceName, 
+            [in] String propertyName, 
+            [in] IVariant* newValue);
+
+        /**
+         * Sends the PropertiesChanged signal
+         *
+         * @param iface the BusInterface the property belongs to
+         * @param properties list of properties that were changed
+         * @throws BusException indicating failure to send the PropertiesChanged signal
+         */
+        PropertiesChanged(
+            [in] IInterfaceInfo* iface, 
+            [in] ArrayOf<String>* properties);
+    }
+
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}
