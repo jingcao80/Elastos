@@ -286,9 +286,6 @@ module
 //    interface Elastos.Droid.Dialer.List.ISmartDialSearchFragment;
     interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
     interface Elastos.Droid.Dialer.List.ISpeedDialFragmentHostInterface;
-//    interface Elastos.Droid.Dialer.List.ISwipeHelper;
-//    interface Elastos.Droid.Dialer.List.ISwipeHelperCallback;
-//    interface Elastos.Droid.Dialer.List.ISwipeHelperHelper;
 //    interface Elastos.Droid.Dialer.List.IOnDataSetChangedForAnimationListener;
 //    interface Elastos.Droid.Dialer.Settings.IDefaultRingtonePreference;
 //    interface Elastos.Droid.Dialer.Settings.IGeneralSettingsFragment;
@@ -700,23 +697,7 @@ module
 //        interface ISearchFragment;
 //        interface ISmartDialSearchFragment;
 //    }
-//
-//    [local]
-//    class CSwipeHelper {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] Int32 swipeDirection,
-//            [in] ISwipeHelperCallback* swipeCallback,
-//            [in] Float densityScale,
-//            [in] Float pagingTouchSlop);
-//
-//        interface ISwipeHelper;
-//    }
-//
-//    singleton class CSwipeHelperHelper {
-//        interface ISwipeHelperHelper;
-//    }
-//
+
     [local]
     class CTileInteractionTeaserView {
         constructor(

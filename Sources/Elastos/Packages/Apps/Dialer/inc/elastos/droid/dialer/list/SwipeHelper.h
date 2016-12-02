@@ -37,7 +37,9 @@ private:
     {
     public:
         DismissAnimatorListenerAdapter(
-            /* [in] */ SwipeHelper* host);
+            /* [in] */ SwipeHelper* host,
+            /* [in] */ IView* view,
+            /* [in] */ IView* animView);
 
         // @Override
         CARAPI OnAnimationEnd(
@@ -45,6 +47,8 @@ private:
 
     private:
         SwipeHelper* mHost;
+        AutoPtr<IView> mView;
+        AutoPtr<IView> mAnimView;
     };
 
     class DismissAnimatorUpdateListener
@@ -55,13 +59,17 @@ private:
         CAR_INTERFACE_DECL()
 
         DismissAnimatorUpdateListener(
-            /* [in] */ SwipeHelper* host);
+            /* [in] */ SwipeHelper* host,
+            /* [in] */ Boolean canBeDismissed,
+            /* [in] */ IView* animView);
 
         // @Override
         CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
     private:
         SwipeHelper* mHost;
+        Boolean mCanBeDismissed;
+        AutoPtr<IView> mAnimView;
     };
 
     class SnapAnimatorUpdateListener
@@ -72,13 +80,17 @@ private:
         CAR_INTERFACE_DECL();
 
         SnapAnimatorUpdateListener(
-            /* [in] */ SwipeHelper* host);
+            /* [in] */ SwipeHelper* host,
+            /* [in] */ Boolean canBeDismissed,
+            /* [in] */ IView* animView);
 
         // @Override
         CARAPI OnAnimationUpdate(
             /* [in] */ IValueAnimator* animation);
     private:
         SwipeHelper* mHost;
+        Boolean mCanBeDismissed;
+        AutoPtr<IView> mAnimView;
     };
 
     class SnapAnimatorListenerAdapter
@@ -86,7 +98,8 @@ private:
     {
     public:
         SnapAnimatorListenerAdapter(
-            /* [in] */ SwipeHelper* host);
+            /* [in] */ SwipeHelper* host,
+            /* [in] */ IView* animView);
 
         // @Override
         CARAPI OnAnimationEnd(
@@ -94,13 +107,14 @@ private:
 
     private:
         SwipeHelper* mHost;
+        AutoPtr<IView> mAnimView;
     };
 
 public:
     SwipeHelper(
         /* [in] */ IContext* context,
         /* [in] */ Int32 swipeDirection,
-        /* [in] */ ISwipeHelperCallback* callback,;
+        /* [in] */ ISwipeHelperCallback* callback,
         /* [in] */ Float densityScale,
         /* [in] */ Float pagingTouchSlop);
 
@@ -137,8 +151,7 @@ public:
         /* [in] */ Float velocity);
 
     CARAPI_(Boolean) OnTouchEvent(
-        /* [in] */ IMotionEvent* ev,
-        /* [out] */ Boolean* result);
+        /* [in] */ IMotionEvent* ev);
 
     static CARAPI_(void) SetSwipeable(
         /* [in] */ IView* view,
@@ -198,7 +211,7 @@ public:
     static const Int32 X = 0;
     static const Int32 Y = 1;
 
-    static const Float ALPHA_FADE_START = 0f; // fraction of thumbnail width
+    static const Float ALPHA_FADE_START = 0.0f; // fraction of thumbnail width
                                                // where fade starts
 
 private:
@@ -229,7 +242,7 @@ private:
 
     static const Int32 PROTECTION_PADDING = 50;
 
-    Float mMinAlpha; // = 0.3f;
+    Float mMinAlpha;
 
     Float mPagingTouchSlop;
     AutoPtr<ISwipeHelperCallback> mCallback;
