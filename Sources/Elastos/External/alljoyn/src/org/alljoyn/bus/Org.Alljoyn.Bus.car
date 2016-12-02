@@ -32,6 +32,7 @@ module
     merge("../../../../car/org/alljoyn/bus/Translator.car");
     merge("../../../../car/org/alljoyn/bus/Version.car");
     merge("../../../../car/org/alljoyn/bus/Variant.car");
+    merge("../../../../car/org/alljoyn/bus/VariantTypeReference.car");
     merge("../../../../car/org/alljoyn/bus/alljoyn/DaemonInit.car");
     merge("../../../../car/org/alljoyn/bus/ifaces/About.car");
     merge("../../../../car/org/alljoyn/bus/ifaces/AllSeenIntrospectable.car");
@@ -123,6 +124,19 @@ module
             [in] Int32 v);
 
         interface IMutableInteger32Value;
+    }
+
+    class CVariant {
+        constructor();
+
+        constructor(
+            [in] IInterface* value);
+
+        constructor(
+            [in] IInterface* value,
+            [in] String signature);
+
+        interface IVariant;
     }
 
     } // namespace Bus

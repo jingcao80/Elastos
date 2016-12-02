@@ -1,0 +1,21 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * Used when calling {@link Variant#getObject(Class)} where the wrapped
+     * object is a generic type such as {@code Map<K, V>}.  For example, the
+     * proper syntax is {@code getObject(new VariantTypeReference<TreeMap<String,
+     * String>>() {})} when the wrapped object is a {@code TreeMap<String,
+     * String>}.
+     */
+    interface IVariantTypeReference {
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

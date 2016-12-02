@@ -1,11 +1,55 @@
 
 module
 {
+    interface Org.Alljoyn.Bus.IVariantTypeReference;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
     interface IVariant {
+        /**
+         * Gets the DBus type signature of the wrapped object.
+         *
+         * @throws AnnotationBusException This exception will occur if
+         * <ul>
+         * <li>a field of a user-defined type is not annotated with its position,
+         * <li>a Java data type that is not supported is used,
+         * <li>an Enum data type is not annotated with a valid AllJoyn type
+         * </ul>
+         * @return the signature of the wrapped object.
+         */
+        GetSignature(
+            [out] String* signature);
+
+        /**
+         * Gets the object wrapped by this Variant when object is specified by Type.
+         *
+         * @param <T> type returned from the getObject call.
+         * @param type the type of the return value.
+         * @return the value of the Variant.
+         * @throws BusException if Variant data cannot be unmarshalled
+         * @throws ClassCastException if Variant data cannot be converted to requested type
+         */
+        GetObject(
+            [in] CarDataType type,
+            [out] IInterface** obj);
+
+        /**
+         * Gets the object wrapped by this Variant when the wrapped object is a
+         * generic type.
+         *
+         * @param <T> type returned from the getObject call.
+         * @param type the VariantTypeReference of the return value
+         * @return the value of the Variant
+         * @throws BusException if Variant data cannot be unmarshalled
+         * @throws ClassCastException if Variant data cannot be converted to requested type
+         * @see VariantTypeReference
+         */
+        GetObject(
+            [in] IVariantTypeReference* type,
+            [out] IInterface** obj);
+
     }
 
     } // namespace Bus
