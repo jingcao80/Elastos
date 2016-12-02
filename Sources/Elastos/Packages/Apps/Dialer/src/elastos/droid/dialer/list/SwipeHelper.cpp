@@ -1,10 +1,12 @@
 
 #include "elastos/droid/dialer/list/SwipeHelper.h"
-#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::View::IVelocityTrackerHelper;
@@ -34,6 +36,7 @@ ECode SwipeHelper::DismissAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
+
 //=================================================================
 // SwipeHelper::DismissAnimatorUpdateListener
 //=================================================================
@@ -55,27 +58,11 @@ ECode SwipeHelper::DismissAnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-//=================================================================
-// SwipeHelper::SnapAnimatorListenerAdapter
-//=================================================================
-SwipeHelper::SnapAnimatorListenerAdapter::SnapAnimatorListenerAdapter(
-    /* [in] */ SwipeHelper* host)
-    : mHost(host)
-{}
-
-ECode SwipeHelper::SnapAnimatorListenerAdapter::OnAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    animView->SetAlpha(mHost->mStartAlpha);
-    mHost->mCallback->OnDragCancelled(mHost->mCurrView);
-
-    return NOERROR;
-}
 
 //=================================================================
 // SwipeHelper::SnapAnimatorUpdateListener
 //=================================================================
-CAR_INTERFACE_DECL(SwipeHelper::SnapAnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_DECL(SwipeHelper::SnapAnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
 SwipeHelper::SnapAnimatorUpdateListener::SnapAnimatorUpdateListener(
     /* [in] */ SwipeHelper* host)
@@ -93,64 +80,79 @@ ECode SwipeHelper::SnapAnimatorUpdateListener::SnapAnimatorUpdateListener(
     return NOERROR;
 }
 
+
+//=================================================================
+// SwipeHelper::SnapAnimatorListenerAdapter
+//=================================================================
+SwipeHelper::SnapAnimatorListenerAdapter::SnapAnimatorListenerAdapter(
+    /* [in] */ SwipeHelper* host)
+    : mHost(host)
+{}
+
+ECode SwipeHelper::SnapAnimatorListenerAdapter::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    animView->SetAlpha(mHost->mStartAlpha);
+    mHost->mCallback->OnDragCancelled(mHost->mCurrView);
+
+    return NOERROR;
+}
+
+
 //=================================================================
 // SwipeHelper
 //=================================================================
-AutoPtr<ILinearInterpolator> CreateInterpolator()
+const Int32 SwipeHelper::IS_SWIPEABLE_TAG = Elastos::Droid::Dialer::R::id::is_swipeable_tag;
+const AutoPtr<Object> SwipeHelper::IS_SWIPEABLE = new Object();
+const Int32 SwipeHelper::X;
+const Int32 SwipeHelper::Y;
+const Float SwipeHelper::ALPHA_FADE_START;
+const String SwipeHelper::TAG("SwipeHelper");
+const Boolean SwipeHelper::DEBUG_INVALIDATE;
+const Boolean SwipeHelper::CONSTRAIN_SWIPE;
+const Boolean SwipeHelper::FADE_OUT_DURING_SWIPE;
+const Boolean SwipeHelper::DISMISS_IF_SWIPED_FAR_ENOUGH;
+const Boolean SwipeHelper::LOG_SWIPE_DISMISS_VELOCITY;
+
+static AutoPtr<ILinearInterpolator> InitInterpolator()
 {
-    AutoPtr<ILinearInterpolator> obj;
-    CLinearInterpolator::New((ILinearInterpolator**)&obj);
-    return obj;
+    AutoPtr<ILinearInterpolator> interpolator;
+    CLinearInterpolator::New((ILinearInterpolator**)&interpolator);
+    return interpolator;
 }
+AutoPtr<ILinearInterpolator> SwipeHelper::sLinearInterpolator = InitInterpolator();
+Int32 SwipeHelper::SWIPE_ESCAPE_VELOCITY = -1;
+Int32 SwipeHelper::DEFAULT_ESCAPE_ANIMATION_DURATION = 0;
+Int32 SwipeHelper::MAX_ESCAPE_ANIMATION_DURATION = 0;
+Int32 SwipeHelper::MAX_DISMISS_VELOCITY = 0;
+Int32 SwipeHelper::SNAP_ANIM_LEN = 0;
+Int32 SwipeHelper::SWIPE_SCROLL_SLOP = 0;
+Float SwipeHelper::MIN_SWIPE = 0;
+Float SwipeHelper::MIN_VERT = 0;
+Float SwipeHelper::MIN_LOCK = 0;
+const Float SwipeHelper::ALPHA_FADE_END;
+const Float SwipeHelper::FACTOR;
+const Int32 SwipeHelper::PROTECTION_PADDING;
 
-AutoPtr<IInterface> CreateSWIPEABLE()
-{
-    AutoPtr<IInterface> obj;
-    CObject::New((IInterface**)&obj);
-    return obj;
-}
-
-const String TAG("SwipeHelper");
-const AutoPtr<IInterface> IS_SWIPEABLE = CreateSWIPEABLE();
-
-const Float ALPHA_FADE_END = 0.7f;
-
-const Boolean DEBUG_INVALIDATE = FALSE;
-const Boolean CONSTRAIN_SWIPE = TRUE;
-const Boolean FADE_OUT_DURING_SWIPE = TRUE;
-const Boolean DISMISS_IF_SWIPED_FAR_ENOUGH = TRUE;
-const Boolean LOG_SWIPE_DISMISS_VELOCITY = FALSE;
-
-AutoPtr<ILinearInterpolator> sLinearInterpolator = CreateInterpolator();
-
-Int32 SWIPE_ESCAPE_VELOCITY = -1;
-Int32 DEFAULT_ESCAPE_ANIMATION_DURATION;
-Int32 MAX_ESCAPE_ANIMATION_DURATION;
-Int32 MAX_DISMISS_VELOCITY;
-Int32 SNAP_ANIM_LEN;
-Int32 SWIPE_SCROLL_SLOP;
-Float MIN_SWIPE;
-Float MIN_VERT;
-Float MIN_LOCK;
-const Float FACTOR = 1.2;
-
-const Int32 PROTECTION_PADDING = 50;
-
-CAR_INTERFACE_DECL(SwipeHelper, Object, ISwipeHelper)
-
-SwipeHelper::SwipeHelper()
-    : mMinAlpha(0.3)
-    , mProtected(FALSE)
-    , mChildSwipedFarEnoughFactor(0.4)
-    , mChildSwipedFastEnoughFactor(0.05)
-{}
-
-ECode SwipeHelper::constructor(
+SwipeHelper::SwipeHelper(
     /* [in] */ IContext* context,
     /* [in] */ Int32 swipeDirection,
     /* [in] */ ISwipeHelperCallback* callback,;
     /* [in] */ Float densityScale,
     /* [in] */ Float pagingTouchSlop)
+    : mMinAlpha(0.3)
+    , mPagingTouchSlop(0.0)
+    , mSwipeDirection(0)
+    , mInitialTouchPosX(0.0)
+    , mDragging(FALSE)
+    , mCanCurrViewBeDimissed(FALSE)
+    , mDensityScale(0.0)
+    , mLastY(0.0)
+    , mInitialTouchPosY(0.0)
+    , mStartAlpha(0.0)
+    , mProtected(FALSE)
+    , mChildSwipedFarEnoughFactor(0.4)
+    , mChildSwipedFastEnoughFactor(0.05)
 {
     mCallback = callback;
     mSwipeDirection = swipeDirection;
@@ -162,54 +164,47 @@ ECode SwipeHelper::constructor(
     if (SWIPE_ESCAPE_VELOCITY == -1) {
         AutoPtr<IResources> res;
         context->GetResources((IResources**)&res);
-        res->GetInteger(R::integer::swipe_escape_velocity, &SWIPE_ESCAPE_VELOCITY);
-        res->GetInteger(R::integer::escape_animation_duration, &DEFAULT_ESCAPE_ANIMATION_DURATION);
-        res->GetInteger(R::integer::max_escape_animation_duration, &MAX_ESCAPE_ANIMATION_DURATION);
-        res->GetInteger(R::integer::max_dismiss_velocity, &MAX_DISMISS_VELOCITY);
-        res->GetInteger(R::integer::snap_animation_duration, &SNAP_ANIM_LEN);
-        res->GetInteger(R.integer.swipe_scroll_slop, &SWIPE_SCROLL_SLOP);
-        res->GetDimension(R::dimen::min_swipe, &MIN_SWIPE);
-        res->GetDimension(R::dimen::min_vert, &MIN_VERT);
-        res->GetDimension(R::dimen::min_lock, &MIN_LOCK);
+        res->GetInteger(Elastos::Droid::Dialer::R::integer::swipe_escape_velocity, &SWIPE_ESCAPE_VELOCITY);
+        res->GetInteger(Elastos::Droid::Dialer::R::integer::escape_animation_duration, &DEFAULT_ESCAPE_ANIMATION_DURATION);
+        res->GetInteger(Elastos::Droid::Dialer::R::integer::max_escape_animation_duration, &MAX_ESCAPE_ANIMATION_DURATION);
+        res->GetInteger(Elastos::Droid::Dialer::R::integer::max_dismiss_velocity, &MAX_DISMISS_VELOCITY);
+        res->GetInteger(Elastos::Droid::Dialer::R::integer::snap_animation_duration, &SNAP_ANIM_LEN);
+        res->GetInteger(Elastos::Droid::Dialer::R::integer::swipe_scroll_slop, &SWIPE_SCROLL_SLOP);
+        res->GetDimension(Elastos::Droid::Dialer::R::dimen::min_swipe, &MIN_SWIPE);
+        res->GetDimension(Elastos::Droid::Dialer::R::dimen::min_vert, &MIN_VERT);
+        res->GetDimension(Elastos::Droid::Dialer::R::dimen::min_lock, &MIN_LOCK);
     }
-
-    return NOERROR;
 }
 
-ECode SwipeHelper::SetDensityScale(
+void SwipeHelper::SetDensityScale(
     /* [in] */ Float densityScale)
 {
     mDensityScale = densityScale;
-    return NOERROR;
 }
 
-ECode SwipeHelper::SetPagingTouchSlop(
+void SwipeHelper::SetPagingTouchSlop(
     /* [in] */ Float pagingTouchSlop)
 {
     mPagingTouchSlop = pagingTouchSlop;
-    return NOERROR;
 }
 
-ECode SwipeHelper::SetChildSwipedFarEnoughFactor(
+void SwipeHelper::SetChildSwipedFarEnoughFactor(
     /* [in] */ Float factor)
 {
     mChildSwipedFarEnoughFactor = factor;
-    return NOERROR;
 }
 
-ECode SwipeHelper::SetChildSwipedFastEnoughFactor(
+void SwipeHelper::SetChildSwipedFastEnoughFactor(
     /* [in] */ Float factor)
 {
     mChildSwipedFastEnoughFactor = factor;
-    return NOERROR;
 }
 
 Float SwipeHelper::GetVelocity(
     /* [in] */ IVelocityTracker* vt)
 {
     Float velocity;
-    mSwipeDirection == ISwipeHelper::X ? vt->GetXVelocity(&velocity) :
-                vt->GetYVelocity(&velocity);
+    mSwipeDirection == X ? vt->GetXVelocity(&velocity) : vt->GetYVelocity(&velocity);
     return velocity;
 }
 
@@ -221,7 +216,7 @@ AutoPtr<IObjectAnimator> SwipeHelper::CreateTranslationAnimation(
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     AutoPtr<IObjectAnimator> anim;
     helper->OfFloat(v,
-            mSwipeDirection == ISwipeHelper::X ? String("translationX") : String("translationY"),
+            mSwipeDirection == X ? String("translationX") : String("translationY"),
             newPos, (IObjectAnimator**)&anim);
     return anim;
 }
@@ -241,8 +236,7 @@ Float SwipeHelper::GetPerpendicularVelocity(
     /* [in] */ IVelocityTracker* vt)
 {
     Float velocity;
-    mSwipeDirection == ISwipeHelper::X ? vt->GetYVelocity(&velocity) :
-                vt->GetXVelocity(&velocity);
+    mSwipeDirection == X ? vt->GetYVelocity(&velocity) : vt->GetXVelocity(&velocity);
     return velocity;
 }
 
@@ -250,7 +244,7 @@ void SwipeHelper::SetTranslation(
     /* [in] */ IView* v,
     /* [in] */ Float translate)
 {
-    if (mSwipeDirection == ISwipeHelper::X) {
+    if (mSwipeDirection == X) {
         v->SetTranslationX(translate);
     }
     else {
@@ -262,23 +256,21 @@ Float SwipeHelper::GetSize(
     /* [in] */ IView* v)
 {
     Float size;
-    mSwipeDirection == X ? v->GetMeasuredWidth(&size) :
-                v->GetMeasuredHeight(&size);
+    mSwipeDirection == X ? v->GetMeasuredWidth(&size) : v->GetMeasuredHeight(&size);
     return size;
 }
 
-ECode SwipeHelper::SetMinAlpha(
+void SwipeHelper::SetMinAlpha(
     /* [in] */ Float minAlpha)
 {
     mMinAlpha = minAlpha;
-    return NOERROR;
 }
 
 Float SwipeHelper::GetAlphaForOffset(
     /* [in] */ IView* view)
 {
     Float viewSize = GetSize(view);
-    const Float fadeSize = ALPHA_FADE_END * viewSize;
+    Float fadeSize = ALPHA_FADE_END * viewSize;
     Float result = mStartAlpha;
     Float pos;
     view->GetTranslationX(&pos);
@@ -288,7 +280,7 @@ Float SwipeHelper::GetAlphaForOffset(
     else if (pos < viewSize * (mStartAlpha - ALPHA_FADE_START)) {
         result = mStartAlpha + (viewSize * ALPHA_FADE_START + pos) / fadeSize;
     }
-    return Math::Max(mMinAlpha, result);
+    return Elastos::Core::Math::Max(mMinAlpha, result);
 }
 
 void SwipeHelper::InvalidateGlobalRegion(
@@ -325,32 +317,33 @@ void SwipeHelper::InvalidateGlobalRegion(
         childBounds->GetTop(&top);
         childBounds->GetRight(&right);
         childBounds->GetBottom(&bottom);
-        view->Invalidate((Int32) Elastos::Core::Math::Floor(left), (Int32) Elastos::Core::Math::Floor(top),
-                (Int32) Elastos::Core::Math::Ceil(right), (Int32) Elastos::Core::Math::Ceil(bottom));
+        view->Invalidate((Int32)Elastos::Core::Math::Floor(left), (Int32)Elastos::Core::Math::Floor(top),
+                (Int32)Elastos::Core::Math::Ceil(right), (Int32)Elastos::Core::Math::Ceil(bottom));
         if (DEBUG_INVALIDATE) {
-            Logger::V(TAG, "INVALIDATE(%d,%d,%d,%d", (Int32) Elastos::Core::Math::Floor(left),
-                    (Int32) Elastos::Core::Math::Floor(top), (Int32) Elastos::Core::Math::Ceil(right),
-                    (Int32) Elastos::Core::Math::Ceil(bottom));
+            Logger::V(TAG, "INVALIDATE(%d,%d,%d,%d", (Int32)Elastos::Core::Math::Floor(left),
+                    (Int32)Elastos::Core::Math::Floor(top), (Int32)Elastos::Core::Math::Ceil(right),
+                    (Int32)Elastos::Core::Math::Ceil(bottom));
         }
     }
 }
 
-ECode SwipeHelper::OnInterceptTouchEvent(
-    /* [in] */ IMotionEvent* ev,
-    /* [out] */ Boolean* result)
+Boolean SwipeHelper::OnInterceptTouchEvent(
+    /* [in] */ IMotionEvent* ev)
 {
-    VALIDATE_NOT_NULL(result);
-
     Int32 action;
     ev->GetAction(&action);
     switch (action) {
         case IMotionEvent::ACTION_DOWN:
             ev->GetY(&mLastY);
             mDragging = FALSE;
-            mCallback->GetChildAtPosition(ev, &mCurrView);
+            AutoPtr<IView> temp;
+            mCallback->GetChildAtPosition(ev, (IView**)&temp);
+            mCurrView = temp;
             mVelocityTracker->Clear();
             if (mCurrView != NULL) {
-                mCallback->GetChildContentView(mCurrView, &mCurrAnimView);
+                AutoPtr<IView> temp1;
+                mCallback->GetChildContentView(mCurrView, (IView**)&temp1);
+                mCurrAnimView = temp1;
                 mCurrAnimView->GetAlpha(&mStartAlpha);
                 mCallback->CanChildBeDismissed(mCurrView, &mCanCurrViewBeDimissed);
                 mVelocityTracker->AddMovement(ev);
@@ -371,8 +364,7 @@ ECode SwipeHelper::OnInterceptTouchEvent(
                     if (deltaY > SWIPE_SCROLL_SLOP && deltaY > (FACTOR * deltaX)) {
                         ev->GetY(&mLastY);
                         mCallback->OnScroll();
-                        *result = FALSE;
-                        return NOERROR;
+                        return FALSE;
                     }
                 }
                 mVelocityTracker->AddMovement(ev);
@@ -402,8 +394,7 @@ ECode SwipeHelper::OnInterceptTouchEvent(
             mLastY = -1;
             break;
     }
-    *result = mDragging;
-    return NOERROR;
+    return mDragging;
 }
 
 void SwipeHelper::DismissChild(
@@ -417,10 +408,12 @@ void SwipeHelper::DismissChild(
     Float newPos = DeterminePos(animView, velocity);
     Int32 duration = DetermineDuration(animView, newPos, velocity);
 
-    animView->SetLayerType(View.LAYER_TYPE_HARDWARE, NULL);
+    animView->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
     AutoPtr<IObjectAnimator> anim = CreateDismissAnimation(animView, newPos, duration);
-    anim->AddListener((IAnimatorListener*)new DismissAnimatorListenerAdapter(this));
-    anim->AddUpdateListener((IAnimatorUpdateListener*)new DismissAnimatorUpdateListener(this));
+    AutoPtr<IAnimatorListener> listener = (IAnimatorListener*)new DismissAnimatorListenerAdapter(this);
+    anim->AddListener(listener);
+    AutoPtr<IAnimatorUpdateListener> updateListener = (IAnimatorUpdateListener*)new DismissAnimatorUpdateListener(this);
+    anim->AddUpdateListener(updateListener);
     anim->Start();
 }
 
@@ -434,8 +427,7 @@ Int32 SwipeHelper::DetermineDuration(
         Float x;
         animView->GetTranslationX(&x);
         duration = Elastos::Core::Math::Min(duration,
-                    (Int32) (Elastos::Core::Math::Abs(newPos - x) * 1000f
-                    / Elastos::Core::Math::abs(velocity)));
+                (Int32)(Elastos::Core::Math::Abs(newPos - x) * 1000f / Elastos::Core::Math::abs(velocity)));
     }
     else {
         duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
@@ -449,10 +441,9 @@ Float SwipeHelper::DeterminePos(
 {
     Float newPos = 0;
     Float x;
-    if (velocity < 0 || (velocity == 0 && animView->GetTranslationX(&x), x < 0)
+    if (velocity < 0 || (velocity == 0 && (animView->GetTranslationX(&x), x < 0))
             // if we use the Menu to dismiss an item in landscape, animate up
-            || (velocity == 0 && animView.getTranslationX(&x), x == 0
-            && mSwipeDirection == ISwipeHelper::Y)) {
+            || (velocity == 0 && (animView->GetTranslationX(&x), x == 0) && mSwipeDirection == Y)) {
         newPos = -GetSize(animView);
     }
     else {
@@ -461,7 +452,7 @@ Float SwipeHelper::DeterminePos(
     return newPos;
 }
 
-ECode SwipeHelper::SnapChild(
+void SwipeHelper::SnapChild(
     /* [in] */ IView* view,
     /* [in] */ Float velocity)
 {
@@ -473,23 +464,17 @@ ECode SwipeHelper::SnapChild(
     Int32 duration = SNAP_ANIM_LEN;
     anim->SetDuration(duration);
     AutoPtr<IAnimatorUpdateListener> updateListener = new SnapAnimatorUpdateListener(this);
-    AutoPtr<IAnimatorListener> snapListener = new SnapAnimatorListenerAdapter(this);
     anim->AddUpdateListener(updateListener);
+    AutoPtr<IAnimatorListener> snapListener = new SnapAnimatorListenerAdapter(this);
     anim->AddListener(snapListener);
     anim->Start();
-
-    return NOERROR;
 }
 
-ECode SwipeHelper::OnTouchEvent(
-    /* [in] */ IMotionEvent* ev,
-    /* [out] */ Boolean* result)
+Boolean SwipeHelper::OnTouchEvent(
+    /* [in] */ IMotionEvent* ev)
 {
-    VALIDATE_NOT_NULL(reuslt);
-
     if (!mDragging || mProtected) {
-        *result = FALSE;
-        return NOERROR;
+        return FALSE;
     }
     mVelocityTracker->AddMovement(ev);
     Int32 action;
@@ -509,22 +494,19 @@ ECode SwipeHelper::OnTouchEvent(
                 if (!mDragging && deltaY > MIN_VERT && (Elastos::Core::Math::Abs(deltaX)) < MIN_LOCK
                         && deltaY > (FACTOR * Elastos::Core::Math::Abs(deltaX))) {
                     mCallback->OnScroll();
-                    *result = FALSE;
-                    return NOERROR;
+                    return FALSE;
                 }
                 Float minDistance = MIN_SWIPE;
                 if (Elastos::Core::Math::Abs(deltaX) < minDistance) {
                     // Don't start the drag until at least X distance has
                     // occurred.
-                    *result = TRUE;
-                    return NOERROR;
+                    return TRUE;
                 }
                 // don't let items that can't be dismissed be dragged more
                 // than maxScrollDistance
                 Boolean canChildBeDismissed;
                 if (CONSTRAIN_SWIPE &&
-                        mCallback.canChildBeDismissed(mCurrView, &canChildBeDismissed),
-                        !canChildBeDismissed) {
+                        (mCallback->CanChildBeDismissed(mCurrView, &canChildBeDismissed), !canChildBeDismissed)) {
                     Float size = GetSize(mCurrAnimView);
                     Float maxScrollDistance = 0.15f * size;
                     if (Elastos::Core::Math::Abs(deltaX) >= size) {
@@ -566,18 +548,17 @@ ECode SwipeHelper::OnTouchEvent(
                 // Fast swipe = > escapeVelocity and translation of
                 // {@link #mChildSwipedFastEnoughFactor} * width
                 Boolean childSwipedFastEnough = (Elastos::Core::Math::Abs(velocity) > escapeVelocity)
-                        && (Math.abs(velocity) > Elastos::Core::Math::Abs(perpendicularVelocity))
-                        && (velocity > 0) == (x > 0)
-                        && translation > mChildSwipedFastEnoughFactor * currAnimViewSize;
+                            && (Elastos::Core::Math::Abs(velocity) > Elastos::Core::Math::Abs(perpendicularVelocity))
+                            && (velocity > 0) == ((mCurrAnimView->GetTranslationX(&x), x > 0))
+                            && translation > mChildSwipedFastEnoughFactor * currAnimViewSize;
                 if (LOG_SWIPE_DISMISS_VELOCITY) {
                     Logger::V(TAG, "Swipe/Dismiss: %f/%f/%f, x: %f/%f", velocity, escapeVelocity,
                             perpendicularVelocity, translation, currAnimViewSize);
                 }
 
                 Boolean canChildBeDismissed;
-                Boolean dismissChild = mCallback->CanChildBeDismissed(
-                        mCurrView, &canChildBeDismissed), canChildBeDismissed
-                        && (childSwipedFastEnough || childSwipedFarEnough);
+                mCallback->CanChildBeDismissed(mCurrView, &canChildBeDismissed);
+                Boolean dismissChild = canChildBeDismissed && (childSwipedFastEnough || childSwipedFarEnough);
 
                 if (dismissChild) {
                     DismissChild(mCurrView, childSwipedFastEnough ? velocity : 0f);
@@ -588,15 +569,14 @@ ECode SwipeHelper::OnTouchEvent(
             }
             break;
     }
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 void SwipeHelper::SetSwipeable(
     /* [in] */ IView* view,
     /* [in] */ Boolean swipeable)
 {
-    view->SetTag(IS_SWIPEABLE_TAG, swipeable ? IS_SWIPEABLE : null);
+    view->SetTag(IS_SWIPEABLE_TAG, swipeable ? IS_SWIPEABLE : NULL);
 }
 
 Boolean SwipeHelper::IsSwipeable(
@@ -604,7 +584,9 @@ Boolean SwipeHelper::IsSwipeable(
 {
     AutoPtr<IInterface> tag;
     view->GetTag(IS_SWIPEABLE_TAG, (IInterface**)&tag);
-    return IObject::Probe(IS_SWIPEABLE).Equals(tag);
+    Boolean equals;
+    IS_SWIPEABLE->Equals(tag, &equals);
+    return equals;
 }
 
 } // List
