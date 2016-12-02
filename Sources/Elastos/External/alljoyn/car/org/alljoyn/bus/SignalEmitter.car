@@ -1,0 +1,100 @@
+
+module
+{
+    interface Org.Alljoyn.Bus.IMessageContext;
+    
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    enum GlobalBroadcast {
+
+        /**
+         * Broadcast signals will not be forwarded across bus-to-bus
+         * connections.  This is the default.
+         */
+        GlobalBroadcast_Off,
+
+        /**
+         * Broadcast signals will be forwarded across bus-to-bus
+         * connections.
+         */
+        GlobalBroadcast_On
+    }
+
+    interface ISignalEmitter {
+        /**
+         * Sets the time-to-live of future signals sent from this emitter.
+         *
+         * @param timeToLive if non-zero this specifies the useful lifetime for signals sent
+         *                   by this emitter. The units are in milliseconds for
+         *                   non-sessionless signals and seconds for sessionless signals. If
+         *                   delivery of the signal is delayed beyond the timeToLive due to
+         *                   network congestion or other factors the signal may be
+         *                   discarded. There is no guarantee that expired signals will not
+         *                   still be delivered.
+         */
+        SetTimeToLive(
+            [in] Int32 timeToLive);
+
+        /**
+         * Enables header compression of future signals sent from this emitter.
+         *
+         * @param compress if {@code true} compress header for destinations that can handle
+         *                 header compression
+         *
+         * @deprecated March 2015 for 15.04 release
+         */
+        //@Deprecated
+        SetCompressHeader(
+            [in] Boolean compress);
+
+        /**
+         * Sets the signal to be sent out as a sessionless signal
+         *
+         * @param sessionless if {@code true} the signal is set to be sent out as a sessionless
+         *                       signal
+         *
+         */
+        SetSessionlessFlag(
+            [in] Boolean sessionless);
+
+        /**
+         * Get the MessageContext of the last signal sent from this emitter.
+         *
+         * @return  MessageContext of the last signal sent from this emitter.
+         */
+        GetMessageContext(
+            [out] IMessageContext** ctx);
+
+        /**
+         * Cancel a sessionless signal sent from this SignalEmitter
+         *
+         * @param serialNum   Serial number of message to cancel
+         * @return
+         * <ul>
+         * <li>OK if request completed successfully.</li>
+         * <li>BUS_NO_SUCH_MESSAGE if message with given serial number could not be located.</li>
+         * <li>BUS_NOT_ALLOWED if message with serial number was sent by a different sender.</li>
+         * </ul>
+         */
+        CancelSessionlessSignal(
+            [in] Int32 serialNum);
+
+        /**
+         * Gets a proxy to the interface that emits signals.
+         *
+         * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+         * @param intf the interface of the bus object that emits the signals
+         *
+         * @return the proxy implementing the signal emitter
+         */
+        GetInterface(
+            [in] InterfaceID intf,
+            [out] IInterface** obj);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}
