@@ -2,7 +2,6 @@
 #define __ELASTOS_DROID_DIALER_LIST_SWIPEHELPER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
 #include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
@@ -21,7 +20,6 @@ using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::Animation::ILinearInterpolator;
 
-
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
@@ -32,7 +30,6 @@ namespace List {
  */
 class SwipeHelper
     : public Object
-    , public ISwipeHelper
 {
 private:
     class DismissAnimatorListenerAdapter
@@ -55,9 +52,26 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
         DismissAnimatorUpdateListener(
+            /* [in] */ SwipeHelper* host);
+
+        // @Override
+        CARAPI OnAnimationUpdate(
+            /* [in] */ IValueAnimator* animation);
+    private:
+        SwipeHelper* mHost;
+    };
+
+    class SnapAnimatorUpdateListener
+        : public Object
+        , public IAnimatorUpdateListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        SnapAnimatorUpdateListener(
             /* [in] */ SwipeHelper* host);
 
         // @Override
@@ -82,48 +96,27 @@ private:
         SwipeHelper* mHost;
     };
 
-    class SnapAnimatorUpdateListener
-        : public Object
-        , public IAnimatorUpdateListener
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        SnapAnimatorUpdateListener(
-            /* [in] */ SwipeHelper* host);
-
-        // @Override
-        CARAPI OnAnimationUpdate(
-            /* [in] */ IValueAnimator* animation);
-    private:
-        SwipeHelper* mHost;
-    };
-
 public:
-    CAR_INTERFACE_DECL()
-
-    SwipeHelper();
-
-    CARAPI constructor(
+    SwipeHelper(
         /* [in] */ IContext* context,
         /* [in] */ Int32 swipeDirection,
         /* [in] */ ISwipeHelperCallback* callback,;
         /* [in] */ Float densityScale,
         /* [in] */ Float pagingTouchSlop);
 
-    CARAPI SetDensityScale(
+    CARAPI_(void) SetDensityScale(
         /* [in] */ Float densityScale);
 
-    CARAPI SetPagingTouchSlop(
+    CARAPI_(void) SetPagingTouchSlop(
         /* [in] */ Float pagingTouchSlop);
 
-    CARAPI SetChildSwipedFarEnoughFactor(
+    CARAPI_(void) SetChildSwipedFarEnoughFactor(
         /* [in] */ Float factor);
 
-    CARAPI SetChildSwipedFastEnoughFactor(
+    CARAPI_(void) SetChildSwipedFastEnoughFactor(
         /* [in] */ Float factor);
 
-    CARAPI SetMinAlpha(
+    CARAPI_(void) SetMinAlpha(
         /* [in] */ Float minAlpha);
 
     // invalidate the view's own bounds all the way up the view hierarchy
@@ -136,15 +129,14 @@ public:
         /* [in] */ IView* view,
         /* [in] */ IRectF* childBounds);
 
-    CARAPI OnInterceptTouchEvent(
-        /* [in] */ IMotionEvent* ev,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) OnInterceptTouchEvent(
+        /* [in] */ IMotionEvent* ev);
 
-    CARAPI SnapChild(
+    CARAPI_(void) SnapChild(
         /* [in] */ IView* view,
         /* [in] */ Float velocity);
 
-    CARAPI OnTouchEvent(
+    CARAPI_(Boolean) OnTouchEvent(
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
@@ -200,22 +192,27 @@ private:
         /* [in] */ Float velocity);
 
 public:
-    static const String TAG; // = SwipeHelper.class.getSimpleName();
-    static const AutoPtr<IInterface> IS_SWIPEABLE; // = new Object();
+    static const Int32 IS_SWIPEABLE_TAG;// = R.id.is_swipeable_tag;
+    static const AutoPtr<Object> IS_SWIPEABLE;
 
-    static const Float ALPHA_FADE_END; // = 0.7f; // fraction of thumbnail width
-                                              // beyond which alpha->0
+    static const Int32 X = 0;
+    static const Int32 Y = 1;
+
+    static const Float ALPHA_FADE_START = 0f; // fraction of thumbnail width
+                                               // where fade starts
 
 private:
-    static const Boolean DEBUG_INVALIDATE; // = false;
-    static const Boolean CONSTRAIN_SWIPE; // = true;
-    static const Boolean FADE_OUT_DURING_SWIPE; // = true;
-    static const Boolean DISMISS_IF_SWIPED_FAR_ENOUGH; // = true;
-    static const Boolean LOG_SWIPE_DISMISS_VELOCITY; // = false; // STOPSHIP - DEBUG ONLY
+    static const String TAG;
+
+    static const Boolean DEBUG_INVALIDATE = FALSE;
+    static const Boolean CONSTRAIN_SWIPE = TRUE;
+    static const Boolean FADE_OUT_DURING_SWIPE = TRUE;
+    static const Boolean DISMISS_IF_SWIPED_FAR_ENOUGH = TRUE;
+    static const Boolean LOG_SWIPE_DISMISS_VELOCITY = FALSE; // STOPSHIP - DEBUG ONLY
 
     static AutoPtr<ILinearInterpolator> sLinearInterpolator; // = new LinearInterpolator();
 
-    static Int32 SWIPE_ESCAPE_VELOCITY; // = -1;
+    static Int32 SWIPE_ESCAPE_VELOCITY;
     static Int32 DEFAULT_ESCAPE_ANIMATION_DURATION;
     static Int32 MAX_ESCAPE_ANIMATION_DURATION;
     static Int32 MAX_DISMISS_VELOCITY;
@@ -224,16 +221,20 @@ private:
     static Float MIN_SWIPE;
     static Float MIN_VERT;
     static Float MIN_LOCK;
-    static const Float FACTOR; // = 1.2f;
 
-    static const Int32 PROTECTION_PADDING; // = 50;
+    static const Float ALPHA_FADE_END = 0.7f; // fraction of thumbnail width
+                                              // beyond which alpha->0
+
+    static const Float FACTOR = 1.2f;
+
+    static const Int32 PROTECTION_PADDING = 50;
 
     Float mMinAlpha; // = 0.3f;
 
     Float mPagingTouchSlop;
-    const AutoPtr<ISwipeHelperCallback> mCallback;
-    const Int32 mSwipeDirection;
-    const AutoPtr<IVelocityTracker> mVelocityTracker;
+    AutoPtr<ISwipeHelperCallback> mCallback;
+    Int32 mSwipeDirection;
+    AutoPtr<IVelocityTracker> mVelocityTracker;
 
     Float mInitialTouchPosX;
     Boolean mDragging;
@@ -245,10 +246,15 @@ private:
     Float mInitialTouchPosY;
 
     Float mStartAlpha;
-    Boolean mProtected; // = false;
+    Boolean mProtected;
 
-    Float mChildSwipedFarEnoughFactor; // = 0.4f;
-    Float mChildSwipedFastEnoughFactor; // = 0.05f;
+    Float mChildSwipedFarEnoughFactor;
+    Float mChildSwipedFastEnoughFactor;
+
+    friend class DismissAnimatorListenerAdapter;
+    friend class DismissAnimatorUpdateListener;
+    friend class SnapAnimatorUpdateListener;
+    friend class SnapAnimatorListenerAdapter;
 };
 
 } // List
