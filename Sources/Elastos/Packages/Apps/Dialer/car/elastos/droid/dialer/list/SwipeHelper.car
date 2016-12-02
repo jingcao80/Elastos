@@ -10,6 +10,7 @@ module
 
     [local]
     interface ISwipeHelperCallback {
+
         GetChildAtPosition(
             [in] IMotionEvent* ev,
             [out] IView** child);
@@ -32,6 +33,7 @@ module
 
         OnDragCancelled(
             [in] IView* v);
+
     }
 
     [local]

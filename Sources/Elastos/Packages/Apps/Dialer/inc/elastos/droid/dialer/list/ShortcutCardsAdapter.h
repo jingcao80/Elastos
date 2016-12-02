@@ -235,6 +235,8 @@ private:
 
         Float mPreviousTranslationZ;
         AutoPtr<IRect> mClipRect;
+
+        friend class ShortcutCardsAdapter;
     };
 
 public:
@@ -304,7 +306,7 @@ private:
     static const Float CLIP_CARD_BARELY_HIDDEN_RATIO = 0.001f;
     static const Float CLIP_CARD_MOSTLY_HIDDEN_RATIO = 0.9f;
     // Fade out 5x faster than the hidden ratio.
-    static const Float CLIP_CARD_OPACITY_RATIO = 5f;
+    static const Float CLIP_CARD_OPACITY_RATIO = 5.0f;
 
     AutoPtr<CallLogAdapter> mCallLogAdapter;
 
@@ -325,7 +327,7 @@ private:
 
     AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
 
-    AutoPtr<ISwipeHelperOnItemGestureListener> mCallLogOnItemSwipeListene;
+    AutoPtr<ISwipeHelperOnItemGestureListener> mCallLogOnItemSwipeListener;
     AutoPtr<ICallLogQueryHandlerListener> mCallLogQueryHandlerListener;
 
     friend class ListsFragment;

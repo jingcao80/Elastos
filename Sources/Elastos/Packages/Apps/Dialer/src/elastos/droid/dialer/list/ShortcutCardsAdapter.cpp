@@ -1,5 +1,6 @@
 
 #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
+#include "elastos/droid/dialer/list/ListsFragment.h"
 #include "elastos/droid/dialer/calllog/CCallLogListItemView.h"
 #include "elastos/droid/dialer/calllog/CallLogNotificationsHelper.h"
 #include "Elastos.Droid.Utility.h"
@@ -15,6 +16,9 @@ using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CoreUtils;
 using Elastos::Droid::Dialer::CallLog::CCallLogListItemView;
@@ -114,45 +118,45 @@ ECode ShortcutCardsAdapter::CallLogQueryHandlerListener::OnCallsFetched(
 //=================================================================
 CAR_INTERFACE_IMPL(ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback, Object, ISwipeHelperCallback)
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::GetChildAtPosition(
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::GetChildAtPosition(
     /* [in] */ IMotionEvent* ev,
     /* [out] */ IView** child)
 {
     return mHost->GetChildAtPosition(ev, child);
 }
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::GetChildContentView(
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::GetChildContentView(
     /* [in] */ IView* v,
     /* [out] */ IView** child)
 {
     return mHost->GetChildContentView(v, child);
 }
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnScroll()
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::OnScroll()
 {
     return mHost->OnScroll();
 }
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::CanChildBeDismissed(
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::CanChildBeDismissed(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
     return mHost->CanChildBeDismissed(v, result);
 }
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnBeginDrag(
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::OnBeginDrag(
     /* [in] */ IView* v)
 {
     return mHost->OnBeginDrag(v);
 }
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnChildDismissed(
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::OnChildDismissed(
     /* [in] */ IView* v)
 {
     return mHost->OnChildDismissed(v);
 }
 
-ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnDragCancelled(
+ECode ShortcutCardsAdapter::SwipeableShortcutCard::InnerCallback::OnDragCancelled(
     /* [in] */ IView* v)
 {
     return mHost->OnDragCancelled(v);
@@ -185,12 +189,10 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::constructor(
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> config;
     helper->Get(context, (IViewConfiguration**)&config);
-    Float pagingTouchSlop;
+    Int32 pagingTouchSlop;
     config->GetScaledPagingTouchSlop(&pagingTouchSlop);
     AutoPtr<ISwipeHelperCallback> cb = (ISwipeHelperCallback*)new InnerCallback(this);
     mSwipeHelper = new SwipeHelper(context, SwipeHelper::X, cb, densityScale, pagingTouchSlop);
-    CSwipeHelper::New(context, ISwipeHelper::X, this,
-            densityScale, pagingTouchSlop, (SwipeHelper**)&mSwipeHelper);
 
     return NOERROR;
 }
@@ -204,22 +206,22 @@ void ShortcutCardsAdapter::SwipeableShortcutCard::PrepareChildView(
 
     AutoPtr<IFrameLayoutLayoutParams> params;
     CFrameLayoutLayoutParams::New(
-            IFrameLayoutLayoutParams::MATCH_PARENT,
-            iFrameLayoutLayoutParams::WRAP_CONTENT,
+            IViewGroupLayoutParams::MATCH_PARENT,
+            IViewGroupLayoutParams::WRAP_CONTENT,
             (IFrameLayoutLayoutParams**)&params);
-    params->SetMargins(
+    IViewGroupMarginLayoutParams::Probe(params)->SetMargins(
             mHost->mCallLogMarginHorizontal,
             mHost->mCallLogMarginTop,
             mHost->mCallLogMarginHorizontal,
             mHost->mCallLogMarginBottom);
-    view->SetLayoutParams(params);
+    view->SetLayoutParams(IViewGroupLayoutParams::Probe(params));
 
     AutoPtr<IView> actionView;
     view->FindViewById(Elastos::Droid::Dialer::R::id::primary_action_view, (IView**)&actionView);
     Int32 end;
     actionView->GetPaddingEnd(&end);
-    ILinearLayout::Probe(actionView)->SetPaddingRelative(
-            mHost->mCallLogPaddingStart, mHost->mCallLogPaddingTop, nd, mHost->mCallLogPaddingBottom);
+    IView::Probe(actionView)->SetPaddingRelative(
+            mHost->mCallLogPaddingStart, mHost->mCallLogPaddingTop, end, mHost->mCallLogPaddingBottom);
 
     // TODO: Set content description including type/location and time information.
     AutoPtr<IView> nameView;
@@ -229,11 +231,13 @@ void ShortcutCardsAdapter::SwipeableShortcutCard::PrepareChildView(
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     String action;
-    res->GetString(Elastos::Droid::Dialer::R::string::description_call_back_action, text, &action);
+    AutoPtr<ArrayOf<IInterface*> > attrs = ArrayOf<IInterface*>::Alloc(1);
+    attrs->Set(0, text);
+    res->GetString(Elastos::Droid::Dialer::R::string::description_call_back_action, attrs, &action);
     actionView->SetContentDescription(CoreUtils::Convert(action));
 
-    res->FetDimensionPixelSize(
-            Elastos::Droid::Dialer::R::dimen::recent_call_log_item_translation_z, &mPreviousTranslationZ);
+    res->GetDimensionPixelSize(
+            Elastos::Droid::Dialer::R::dimen::recent_call_log_item_translation_z, (Int32*)&mPreviousTranslationZ);
     view->SetTranslationZ(mPreviousTranslationZ);
 
     AutoPtr<IView> callLogItem;
@@ -247,7 +251,7 @@ void ShortcutCardsAdapter::SwipeableShortcutCard::PrepareChildView(
 
     AutoPtr<IView> temp;
     callLogItem->FindViewById(Elastos::Droid::Dialer::R::id::call_log_row, (IView**)&temp);
-    temp->SetBackgroundColor(mShortCardBackgroundColor);
+    temp->SetBackgroundColor(mHost->mShortCardBackgroundColor);
 
     temp = NULL;
     callLogItem->FindViewById(Elastos::Droid::Dialer::R::id::call_indicator_icon, (IView**)&temp);
@@ -315,7 +319,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnDragCancelled(
 }
 
 ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnInterceptTouchEvent(
-    /* [in] */ IMotionEvent ev,
+    /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -331,7 +335,7 @@ ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnInterceptTouchEvent(
 }
 
 ECode ShortcutCardsAdapter::SwipeableShortcutCard::OnTouchEvent(
-    /* [in] */ IMotionEvent ev,
+    /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -365,7 +369,7 @@ void ShortcutCardsAdapter::SwipeableShortcutCard::ClipCard(
     Int32 height;
     viewToClip->GetHeight(&height);
 
-    Int32 z;
+    Float z;
     if (ratioHidden <= CLIP_CARD_BARELY_HIDDEN_RATIO) {
         viewToClip->SetTranslationZ(mPreviousTranslationZ);
     }
@@ -392,7 +396,7 @@ void ShortcutCardsAdapter::SwipeableShortcutCard::ClipCard(
     // If the view has any children, fade them out of view.
     AutoPtr<IViewGroup> viewGroup = IViewGroup::Probe(viewToClip);
     SetChildrenOpacity(
-            viewGroup, Elastos::Core::Math::Max(0, 1 - (CLIP_CARD_OPACITY_RATIO  * ratioHidden)));
+            viewGroup, Elastos::Core::Math::Max(0.0, 1.0 - (CLIP_CARD_OPACITY_RATIO  * ratioHidden)));
 }
 
 void ShortcutCardsAdapter::SwipeableShortcutCard::SetChildrenOpacity(
@@ -419,7 +423,10 @@ const Float ShortcutCardsAdapter::CLIP_CARD_OPACITY_RATIO;
 
 CAR_INTERFACE_IMPL(ShortcutCardsAdapter, BaseAdapter, IShortcutCardsAdapter)
 
-ShortcutCardsAdapter::ShortcutCardsAdapter()
+ShortcutCardsAdapter::ShortcutCardsAdapter(
+    /* [in] */ IContext* context,
+    /* [in] */ ListsFragment* fragment,
+    /* [in] */ CallLogAdapter* callLogAdapter)
     : mCallLogMarginHorizontal(0)
     , mCallLogMarginTop(0)
     , mCallLogMarginBottom(0)
@@ -431,13 +438,7 @@ ShortcutCardsAdapter::ShortcutCardsAdapter()
 {
     mCallLogOnItemSwipeListener = (ISwipeHelperOnItemGestureListener*)new CallLogOnItemSwipeListener(this);
     mCallLogQueryHandlerListener = (ICallLogQueryHandlerListener*)new CallLogQueryHandlerListener(this);
-}
 
-ECode ShortcutCardsAdapter::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IListsFragment* fragment,
-    /* [in] */ ICallLogAdapter* callLogAdapter)
-{
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     mContext = context;
@@ -467,8 +468,6 @@ ECode ShortcutCardsAdapter::constructor(
     mContext->GetContentResolver((IContentResolver**)&resolver);
     mCallLogQueryHandler = new CallLogQueryHandler();
     mCallLogQueryHandler->constructor(resolver, mCallLogQueryHandlerListener);
-
-    return NOERROR;
 }
 
 ECode ShortcutCardsAdapter::GetCount(
@@ -542,7 +541,7 @@ ECode ShortcutCardsAdapter::GetView(
     // the CallLogAdapter.
     AutoPtr<IView> child;
     if (convertView != NULL){
-        wrapper->GetChildAt(0, &child);
+        wrapper->GetChildAt(0, (IView**)&child);
     }
     AutoPtr<IView> tempView;
     mCallLogAdapter->GetView(position, child, parent, (IView**)&tempView);
