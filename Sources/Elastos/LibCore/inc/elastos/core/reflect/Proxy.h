@@ -45,9 +45,9 @@ public:
 //        /* [out] */ CRemoteParcel* parcel,
 //        /* [in] */ UInt32* args);
 //
-//    inline CARAPI_(UInt32) CountMethodArgs(
-//        /* [in] */ UInt32 methodIndex);
-//
+    inline CARAPI_(UInt32) CountMethodArgs(
+        /* [in] */ UInt32 methodIndex);
+
 //    CARAPI_(Boolean) MethodHasOutArgs(
 //        /* [in] */ UInt32 methodIndex);
 //
@@ -64,6 +64,9 @@ public:
     UInt32                  mIndex;       // interface index in object
     CObjectProxy*           mOwner;
     CIInterfaceInfo*        mInfo;
+
+private:
+    static const Boolean DEBUG;
 };
 
 class CObjectProxy

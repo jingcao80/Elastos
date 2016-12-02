@@ -39,7 +39,10 @@ module
          *             of the invoked method or any unchecked exception type. If not
          *             then an {@code UndeclaredThrowableException} is thrown
          */
-        // public Object invoke(Object proxy, Method method, Object[] args);
+        Invoke(
+            [in] IInterface* proxy,
+            [in] IMethodInfo* method,
+            [in] IArgumentList* args);
     }
 
     } // namespace Reflect

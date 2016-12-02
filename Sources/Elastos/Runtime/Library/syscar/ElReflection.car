@@ -325,49 +325,97 @@ library
         GetFunctionInfo(
             [out] IFunctionInfo** functionInfo);
 
+        GetInputArgumentOfInt16(
+            [in] Int32 index,
+            [out] Int16* value);
+
         SetInputArgumentOfInt16(
             [in] Int32 index,
             [in] Int16 value);
+
+        GetInputArgumentOfInt32(
+            [in] Int32 index,
+            [out] Int32* value);
 
         SetInputArgumentOfInt32(
             [in] Int32 index,
             [in] Int32 value);
 
+        GetInputArgumentOfInt64(
+            [in] Int32 index,
+            [out] Int64* value);
+
         SetInputArgumentOfInt64(
             [in] Int32 index,
             [in] Int64 value);
+
+        GetInputArgumentOfByte(
+            [in] Int32 index,
+            [out] Byte* value);
 
         SetInputArgumentOfByte(
             [in] Int32 index,
             [in] Byte value);
 
+        GetInputArgumentOfFloat(
+            [in] Int32 index,
+            [out] Float* value);
+
         SetInputArgumentOfFloat(
             [in] Int32 index,
             [in] Float value);
+
+        GetInputArgumentOfDouble(
+            [in] Int32 index,
+            [out] Double* value);
 
         SetInputArgumentOfDouble(
             [in] Int32 index,
             [in] Double value);
 
+        GetInputArgumentOfChar(
+            [in] Int32 index,
+            [out] Char32* value);
+
         SetInputArgumentOfChar(
             [in] Int32 index,
             [in] Char32 value);
+
+        GetInputArgumentOfString(
+            [in] Int32 index,
+            [out] String* value);
 
         SetInputArgumentOfString(
             [in] Int32 index,
             [in] String value);
 
+        GetInputArgumentOfBoolean(
+            [in] Int32 index,
+            [out] Boolean* value);
+
         SetInputArgumentOfBoolean(
             [in] Int32 index,
             [in] Boolean value);
+
+        GetInputArgumentOfEMuid(
+            [in] Int32 index,
+            [out] EMuid* value);
 
         SetInputArgumentOfEMuid(
             [in] Int32 index,
             [in] EMuid* value);
 
+        GetInputArgumentOfEGuid(
+            [in] Int32 index,
+            [out] EGuid* value);
+
         SetInputArgumentOfEGuid(
             [in] Int32 index,
             [in] EGuid* value);
+
+        GetInputArgumentOfECode(
+            [in] Int32 index,
+            [out] ECode* value);
 
         SetInputArgumentOfECode(
             [in] Int32 index,
@@ -381,9 +429,17 @@ library
             [in] Int32 index,
             [in] PVoid value);
 
+        GetInputArgumentOfEnum(
+            [in] Int32 index,
+            [out] Int32* value);
+
         SetInputArgumentOfEnum(
             [in] Int32 index,
             [in] Int32 value);
+
+        GetInputArgumentOfCarArray(
+            [in] Int32 index,
+            [out] PCarQuintet* value);
 
         SetInputArgumentOfCarArray(
             [in] Int32 index,
@@ -393,53 +449,105 @@ library
             [in] Int32 index,
             [in] PVoid value);
 
+        GetInputArgumentOfObjectPtr(
+            [in] Int32 index,
+            [out] PInterface* value);
+
         SetInputArgumentOfObjectPtr(
             [in] Int32 index,
             [in] PInterface value);
+
+        GetOutputArgumentOfInt16Ptr(
+            [in] Int32 index,
+            [out] PVoid* value);
 
         SetOutputArgumentOfInt16Ptr(
             [in] Int32 index,
             [out] Int16* value);
 
+        GetOutputArgumentOfInt32Ptr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfInt32Ptr(
             [in] Int32 index,
             [out] Int32* value);
+
+        GetOutputArgumentOfInt64Ptr(
+            [in] Int32 index,
+            [out] PVoid* value);
 
         SetOutputArgumentOfInt64Ptr(
             [in] Int32 index,
             [out] Int64* value);
 
+        GetOutputArgumentOfBytePtr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfBytePtr(
             [in] Int32 index,
             [out] Byte* value);
+
+        GetOutputArgumentOfFloatPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
 
         SetOutputArgumentOfFloatPtr(
             [in] Int32 index,
             [out] Float* value);
 
+        GetOutputArgumentOfDoublePtr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfDoublePtr(
             [in] Int32 index,
             [out] Double* value);
+
+        GetOutputArgumentOfCharPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
 
         SetOutputArgumentOfCharPtr(
             [in] Int32 index,
             [out] Char32* value);
 
+        GetOutputArgumentOfStringPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfStringPtr(
             [in] Int32 index,
             [out] String* value);
+
+        GetOutputArgumentOfBooleanPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
 
         SetOutputArgumentOfBooleanPtr(
             [in] Int32 index,
             [out] Boolean* value);
 
+        GetOutputArgumentOfEMuidPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfEMuidPtr(
             [in] Int32 index,
             [out] EMuid* value);
 
+        GetOutputArgumentOfEGuidPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfEGuidPtr(
             [in] Int32 index,
             [out] EGuid* value);
+
+        GetOutputArgumentOfECodePtr(
+            [in] Int32 index,
+            [out] PVoid* value);
 
         SetOutputArgumentOfECodePtr(
             [in] Int32 index,
@@ -453,16 +561,28 @@ library
             [in] Int32 index,
             [out] PVoid value);
 
+        GetOutputArgumentOfEnumPtr(
+            [in] Int32 index,
+            [out] PVoid* value);
+
         SetOutputArgumentOfEnumPtr(
             [in] Int32 index,
             [out] Int32* value);
 
         // Caller allocated
+        GetOutputArgumentOfCarArrayPtr(
+            [in] Int32 index,
+            [out] PCarQuintet* value);
+
         SetOutputArgumentOfCarArrayPtr(
             [in] Int32 index,
             [out] PCarQuintet value);
 
         // Callee allocated
+        GetOutputArgumentOfCarArrayPtrPtr(
+            [in] Int32 index,
+            [out] Handle32* value);
+
         SetOutputArgumentOfCarArrayPtrPtr(
             [in] Int32 index,
             [out] PCarQuintet* value);
@@ -476,6 +596,10 @@ library
         SetOutputArgumentOfStructPtrPtr(
             [in] Int32 index,
             [out] PVoid* value);
+
+        GetOutputArgumentOfObjectPtrPtr(
+            [in] Int32 index,
+            [out] Handle32* value);
 
         SetOutputArgumentOfObjectPtrPtr(
             [in] Int32 index,

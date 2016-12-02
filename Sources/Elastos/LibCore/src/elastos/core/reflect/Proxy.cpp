@@ -30,6 +30,58 @@ Address s_proxyEntryAddress = (Address)NULL;
 #define PROXY_ENTRY_SHIFT   4
 #define PROXY_ENTRY_NUM     0xe0
 
+#define GET_LENGTH(a) ((a) & 0x3f)
+
+#ifdef _x86
+
+inline UInt32 CalcMethodIndex(UInt32 uCallerAddr)
+{
+    return (uCallerAddr - PROXY_ENTRY_BASE) >> PROXY_ENTRY_SHIFT;
+}
+
+#define SYS_PROXY_EXIT(ec, pret, argc)    \
+    do {                                  \
+        UInt32 n;                         \
+        n = *(UInt32 *)(pret);            \
+        n &= PROXY_ENTRY_MASK;            \
+        n += PROXY_ENTRY_BASE + ((argc) << PROXY_ENTRY_SHIFT);  \
+        *(UInt32 *)(pret) = n;            \
+        return (ec);                      \
+    } while (0)
+
+#elif defined(_arm)
+
+#define SYS_PROXY_EXIT(ec, pret, argc)  \
+    do {                                \
+        return (ec);                    \
+    } while (0)
+
+#elif defined(_mips)
+
+inline UInt32 CalcMethodIndex(UInt32 uCallerAddr)
+{
+    return (uCallerAddr - PROXY_ENTRY_BASE) >> PROXY_ENTRY_SHIFT;
+}
+
+#ifdef _GNUC
+
+#define SYS_PROXY_EXIT(ec, pret, argc)  \
+    do {                                \
+            return  (ec);               \
+    } while (0);
+
+#elif defined(_EVC)
+
+#define SYS_PROXY_EXIT(ec, pret, argc)  \
+    do {                                \
+            return  (ec);               \
+    } while (0)
+
+#else
+#error unknown architecture
+#endif
+#endif
+
 EXTERN_C void ProxyEntryFunc(void);
 
 #ifdef _GNUC
@@ -110,6 +162,15 @@ DECL_PROXY_ENTRY();
 
 #endif
 
+static void DUMP_GUID(REIID riid)
+{
+    Logger::D("Proxy", "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X\n",
+        riid.mData1, riid.mData2, riid.mData3,
+        riid.mData4[0], riid.mData4[1], riid.mData4[2],
+        riid.mData4[3], riid.mData4[4], riid.mData4[5],
+        riid.mData4[6], riid.mData4[7]);
+}
+
 __attribute__((constructor))
 void InitProxyEntry()
 {
@@ -159,6 +220,8 @@ void UninitProxyEntry()
     }
 }
 
+const Boolean CInterfaceProxy::DEBUG = FALSE;
+
 PInterface CInterfaceProxy::S_Probe(
     /* [in] */ CInterfaceProxy* thisPtr,
     /* [in] */ REIID riid)
@@ -187,12 +250,80 @@ ECode CInterfaceProxy::S_GetInterfaceID(
     return thisPtr->mOwner->GetInterfaceID(object, iid);
 }
 
+UInt32 CInterfaceProxy::CountMethodArgs(
+    /* [in] */ UInt32 methodIndex)
+{
+    return GET_LENGTH((mInfo->mMethods[methodIndex]).mReserved1);
+}
 
 ECode CInterfaceProxy::ProxyEntry(
     /* [in] */ UInt32* args)
 {
-    assert(0);
-    return NOERROR;
+    CInterfaceProxy* thisPtr;
+    UInt32 methodIndex, inSize, outSize;
+    Int32 size = 0;
+    ECode ec, orgec;
+#ifndef _mips
+    UInt32 argNum __attribute__((__unused__));
+#endif
+
+    args++; // skip ret address
+
+    thisPtr = (CInterfaceProxy *)*args;
+    args++; // skip this
+
+    if (DEBUG) {
+        Logger::D("Proxy", "*args = %x, args = %x, \niid: ", *args, (UInt32)args);
+        DUMP_GUID(thisPtr->mInfo->mIID);
+    }
+
+#ifdef _x86
+    methodIndex = CalcMethodIndex(*(UInt32 *)((UInt32)&args - 4));
+#elif defined(_arm)
+    methodIndex = args[-3];
+#elif defined(_mips)
+    methodIndex = CalcMethodIndex(*(args - 4) - 4);
+#else
+#error unknown architecture
+#endif
+
+#ifndef _mips
+    // Get the stack length, not contain "this"
+    argNum = thisPtr->CountMethodArgs(methodIndex);
+
+    if (DEBUG) {
+        Logger::D("Proxy", "Method index(%d), args size(%d)\n", methodIndex + 4, argNum * 4);
+    }
+#endif
+
+    // Calculate the package size
+    //
+    // NOTE:
+    //  1. Alloc outHeader on the stack with MAX-out-size
+    //  2. Assign inHeader->mOutSize with MAX-out-size
+    //  3. Pass the MIN-out-size to SysInvoke's last parameter
+    //  4. Call Thread::ReallocBuffer in SysReply if necessary to pass back the
+    //      marshaled-out data with error info
+    //
+
+#if defined(_DEBUG)
+    // _DumpObjectProxy(thisPtr->mOwner);
+    // ALOGD(" >>> tid:%d, Current Interface:", gettid());
+    // _DumpInterfaceProxy(thisPtr);
+    // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
+    // ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
+#endif
+
+ProxyExit:
+    if (DEBUG) {
+        Logger::D("Proxy", "Exit proxy: ec(%x)\n", ec);
+    }
+
+#ifndef _mips
+    SYS_PROXY_EXIT(ec, &args - 1, argNum);
+#else
+    SYS_PROXY_EXIT(ec, &args - 1, 0);
+#endif
 }
 
 
