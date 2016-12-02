@@ -745,15 +745,14 @@ ECode ElastosKeyStore::EngineSetEntry(
 
     Boolean b;
     if (EngineContainsAlias(alias, &b), b) {
-        EngineDeleteEntry(alias);
+        FAIL_RETURN(EngineDeleteEntry(alias))
     }
 
     if (IKeyStoreTrustedCertificateEntry::Probe(entry) != NULL) {
         IKeyStoreTrustedCertificateEntry* trE = IKeyStoreTrustedCertificateEntry::Probe(entry);
         AutoPtr<ICertificate> cert;
         trE->GetTrustedCertificate((ICertificate**)&cert);
-        EngineSetCertificateEntry(alias, cert);
-        return NOERROR;
+        return EngineSetCertificateEntry(alias, cert);
     }
 
     if (param != NULL && (IKeyStoreParameter::Probe(param) == NULL)) {

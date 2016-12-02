@@ -1267,23 +1267,23 @@ ECode CActivityOne::ButtonElastosKeyStore()
 
     //return test->TestKeyStore_SetKeyEntry_Replaced_Encrypted_Success();                           //OK
 
-    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_Encrypted_Success();                                 //error need CX509V3CertificateGenerator
+    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_Encrypted_Success();                      //OK ElastosOpenSSL replace CX509V3CertificateGenerator
 
-    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_DifferentPrivateKey_Encrypted_Failure();             //error need CX509V3CertificateGenerator
+    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_DifferentPrivateKey_Encrypted_Failure();  //OK ElastosOpenSSL replace CX509V3CertificateGenerator
 
-    //return test->TestKeyStore_SetKeyEntry_ReplacedChain_UnencryptedToEncrypted_Failure();                    //error need CX509V3CertificateGenerator
+    return test->TestKeyStore_SetKeyEntry_ReplacedChain_UnencryptedToEncrypted_Failure();           //OK ElastosOpenSSL replace CX509V3CertificateGenerator
 
-    //return test->TestKeyStore_Size_Encrypted_Success();                                          //OK
+    //return test->TestKeyStore_Size_Encrypted_Success();                                           //OK
 
-    //return test->TestKeyStore_Store_LoadStoreParam_Encrypted_Failure();                          //OK
+    //return test->TestKeyStore_Store_LoadStoreParam_Encrypted_Failure();                           //OK
 
-    //return test->TestKeyStore_Load_InputStreamSupplied_Encrypted_Failure();                      //OK
+    //return test->TestKeyStore_Load_InputStreamSupplied_Encrypted_Failure();                       //OK
 
-    //return test->TestKeyStore_Load_PasswordSupplied_Encrypted_Failure();                         //OK
+    //return test->TestKeyStore_Load_PasswordSupplied_Encrypted_Failure();                          //OK
 
-    //return test->TestKeyStore_Store_OutputStream_Encrypted_Failure();                            //OK
+    //return test->TestKeyStore_Store_OutputStream_Encrypted_Failure();                             //OK
 
-    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                                        //error need CX509V3CertificateGenerator
+    //return test->TestKeyStore_KeyOperations_Wrap_Encrypted_Success();                             //OK ElastosOpenSSL replace CX509V3CertificateGenerator
 
     return NOERROR;
 }
