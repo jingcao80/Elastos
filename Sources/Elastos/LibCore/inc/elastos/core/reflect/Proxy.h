@@ -35,16 +35,16 @@ public:
 //        /* [out] */ UInt32* inSize,
 //        /* [out] */ UInt32* outSize);
 //
-//    CARAPI MarshalIn(
-//        /* [in] */ UInt32 methodIndex,
-//        /* [in] */ UInt32* args,
-//        /* [in, out] */ CRemoteParcel* parcel);
-//
-//    CARAPI UnmarshalOut(
-//        /* [in] */ UInt32 methodIndex,
-//        /* [out] */ CRemoteParcel* parcel,
-//        /* [in] */ UInt32* args);
-//
+    CARAPI MarshalIn(
+        /* [in] */ UInt32 methodIndex,
+        /* [in] */ UInt32* args,
+        /* [in, out] */ IArgumentList* argList);
+
+    CARAPI UnmarshalOut(
+        /* [in] */ UInt32 methodIndex,
+        /* [in] */ IArgumentList* argList,
+        /* [in, out] */ UInt32* args);
+
     inline CARAPI_(UInt32) CountMethodArgs(
         /* [in] */ UInt32 methodIndex);
 
@@ -64,6 +64,7 @@ public:
     UInt32                  mIndex;       // interface index in object
     CObjectProxy*           mOwner;
     CIInterfaceInfo*        mInfo;
+    IInterfaceInfo*         mInfo2;
 
 private:
     static const Boolean DEBUG;

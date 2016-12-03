@@ -227,6 +227,10 @@ library
             [in] String name,
             [in] String signature,
             [out] IMethodInfo** methodInfo);
+
+        GetMethodInfo(
+            [in] Int32 index,
+            [out] IMethodInfo** methodInfo);
     }
 
     [local]

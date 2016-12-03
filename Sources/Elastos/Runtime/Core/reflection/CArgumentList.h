@@ -320,6 +320,13 @@ public:
         /* [in] */ ParamIOAttribute attrib,
         /* [in] */ Int32 pointer = 0);
 
+    CARAPI GetParamValue(
+        /* [in] */ Int32 index,
+        /* [in] */ CarDataType type,
+        /* [in] */ ParamIOAttribute attrib,
+        /* [in] */ Int32 pointer,
+        /* [in, out] */ PVoid param);
+
 public:
     Byte*           mParamBuf;
 

@@ -146,6 +146,65 @@ ECode CArgumentList::SetParamValue(
     return NOERROR;
 }
 
+ECode CArgumentList::GetParamValue(
+    /* [in] */ Int32 index,
+    /* [in] */ CarDataType type,
+    /* [in] */ ParamIOAttribute attrib,
+    /* [in] */ Int32 pointer,
+    /* [in, out] */ PVoid param)
+{
+    if (type == CarDataType_CarArray
+        && mParamElem[index].mType == CarDataType_ArrayOf) {
+        type = mParamElem[index].mType;
+    }
+
+     if (index < 0 || index >= (Int32)mParamCount
+        || (mParamElem[index].mAttrib != attrib)
+        || (type != mParamElem[index].mType)
+        || (type != CarDataType_LocalPtr
+        && mParamElem[index].mPointer != pointer)) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    if (!mParamBuf || mParamElem[index].mPos
+        + mParamElem[index].mSize > mParamBufSize) {
+        return E_INVALID_OPERATION;
+    }
+
+    if (mParamElem[index].mSize == 1) {
+        assert(0 && "TODO");
+    }
+    else if (mParamElem[index].mSize == 2) {
+        assert(0 && "TODO");
+    }
+    else if (mParamElem[index].mSize == 4) {
+        if (type == CarDataType_String) {
+            if (pointer == 0) {
+                String* ret = reinterpret_cast<String*>(param);
+                *ret = **(String **)(mParamBuf + mParamElem[index].mPos);
+            }
+            else if (pointer == 1) {
+                String** ret = reinterpret_cast<String**>(param);
+                *ret = *(String **)(mParamBuf + mParamElem[index].mPos);
+            }
+            else {
+                assert(0 && "TODO");
+            }
+        }
+        else {
+            assert(0 && "TODO");
+        }
+    }
+    else if (mParamElem[index].mSize == 8) {
+        assert(0 && "TODO");
+    }
+    else {
+        return E_INVALID_OPERATION;
+    }
+
+    return NOERROR;
+}
+
 ECode CArgumentList::GetInputArgumentOfInt16(
     /* [in] */ Int32 index,
     /* [out] */ Int16* value)
@@ -258,8 +317,8 @@ ECode CArgumentList::GetInputArgumentOfString(
     /* [in] */ Int32 index,
     /* [out] */ String* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_String, ParamIOAttribute_In, 0,
+            reinterpret_cast<PVoid>(value));
 }
 
 ECode CArgumentList::SetInputArgumentOfString(
@@ -554,8 +613,8 @@ ECode CArgumentList::GetOutputArgumentOfStringPtr(
     /* [in] */ Int32 index,
     /* [out] */ PVoid* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_String,
+            ParamIOAttribute_CallerAllocOut, 1, value);
 }
 
 ECode CArgumentList::SetOutputArgumentOfStringPtr(

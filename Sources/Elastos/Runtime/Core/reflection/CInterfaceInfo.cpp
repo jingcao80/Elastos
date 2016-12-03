@@ -321,6 +321,20 @@ ECode CInterfaceInfo::GetMethodInfo(
     return mMethodList->AcquireObjByName(strName, (IInterface **)methodInfo);
 }
 
+ECode CInterfaceInfo::GetMethodInfo(
+    /* [in] */ Int32 index,
+    /* [out] */ IMethodInfo** methodInfo)
+{
+    if (!methodInfo) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    ECode ec = AcquireMethodList();
+    if (FAILED(ec)) return ec;
+
+    return mMethodList->AcquireObjByIndex(index, (IInterface **)methodInfo);
+}
+
 ECode CInterfaceInfo::CreateIFList()
 {
     if (mIFList) {

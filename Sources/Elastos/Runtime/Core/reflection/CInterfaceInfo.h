@@ -85,6 +85,10 @@ public:
         /* [in] */ const String& signature,
         /* [out] */ IMethodInfo** methodInfo);
 
+    CARAPI GetMethodInfo(
+        /* [in] */ Int32 index,
+        /* [out] */ IMethodInfo** methodInfo);
+
     CARAPI CreateIFList();
 
     CARAPI AcquireMethodList();

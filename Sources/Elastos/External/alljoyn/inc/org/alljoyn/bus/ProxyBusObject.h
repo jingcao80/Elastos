@@ -4,8 +4,13 @@
 
 #include "_Org.Alljoyn.Bus.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::Reflect::IInvocationHandler;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
 
 namespace Org {
 namespace Alljoyn {
@@ -17,6 +22,48 @@ class ProxyBusObject
     : public Object
     , public IProxyBusObject
 {
+private:
+    class Handler
+        : public Object
+        , public IInvocationHandler
+    {
+    private:
+        class Invocation
+            : public Object
+        {
+        public:
+            Invocation(
+                /* [in] */ IMethodInfo* method);
+
+        public:
+            IMethodInfo* mMethod;
+
+            Boolean mIsMethod;
+            // boolean isGet;
+
+            // String inputSig;
+            // String outSig;
+
+            String mInterfaceName;
+            String mMethodName;
+
+            // Type genericReturnType;
+            // Class<?> returnType;
+        };
+
+    public:
+        CAR_INTERFACE_DECL();
+
+        // @Override
+        CARAPI Invoke(
+            /* [in] */ IInterface* proxy,
+            /* [in] */ IMethodInfo* method,
+            /* [in] */ IArgumentList* args);
+
+    private:
+        HashMap<String, AutoPtr< List< AutoPtr<Invocation> > > > mInvocationCache;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

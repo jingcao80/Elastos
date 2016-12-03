@@ -250,6 +250,50 @@ ECode CInterfaceProxy::S_GetInterfaceID(
     return thisPtr->mOwner->GetInterfaceID(object, iid);
 }
 
+static ECode Proxy_ProcessMsh_In(
+    /* [in] */ const CIMethodInfo* methodInfo,
+    /* [in] */ UInt32* args,
+    /* [in, out] */ IArgumentList* argList);
+
+static ECode Proxy_ProcessUnmsh_Out(
+    /* [in] */ const CIMethodInfo* methodInfo,
+    /* [in] */ IArgumentList* argList,
+    /* [in, out] */ UInt32* args);
+
+ECode CInterfaceProxy::MarshalIn(
+    /* [in] */ UInt32 methodIndex,
+    /* [in] */ UInt32* args,
+    /* [in, out] */ IArgumentList* argList)
+{
+    const CIMethodInfo* methodInfo = &(mInfo->mMethods[methodIndex]);
+
+    ECode ec = Proxy_ProcessMsh_In(
+            methodInfo, args, argList);
+
+    // if (SUCCEEDED(ec)) {
+    //     MarshalHeader* header = parcel->GetMarshalHeader();
+    //     assert(header != NULL);
+    //     header->mMagic = MARSHAL_MAGIC;
+    //     header->mInterfaceIndex = mIndex;
+    //     header->mMethodIndex = methodIndex + 4;
+    // }
+
+    return ec;
+}
+
+ECode CInterfaceProxy::UnmarshalOut(
+    /* [in] */ UInt32 methodIndex,
+    /* [in] */ IArgumentList* argList,
+    /* [in, out] */ UInt32* args)
+{
+    ECode ec = Proxy_ProcessUnmsh_Out(
+            &(mInfo->mMethods[methodIndex]),
+            argList,
+            args);
+
+    return ec;
+}
+
 UInt32 CInterfaceProxy::CountMethodArgs(
     /* [in] */ UInt32 methodIndex)
 {
@@ -313,6 +357,19 @@ ECode CInterfaceProxy::ProxyEntry(
     // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
     // ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
 #endif
+
+    AutoPtr<IMethodInfo> methodInfo;
+    thisPtr->mInfo2->GetMethodInfo(methodIndex, (IMethodInfo**)&methodInfo);
+    AutoPtr<IArgumentList> argList;
+    methodInfo->CreateArgumentList((IArgumentList**)&argList);
+    ec = thisPtr->MarshalIn(methodIndex, args, argList);
+    if (FAILED(ec)) goto ProxyExit;
+
+    ec = thisPtr->mOwner->mHandler->Invoke((IProxy*)thisPtr->mOwner, methodInfo, argList);
+
+    if (SUCCEEDED(ec)) {
+        ec = thisPtr->UnmarshalOut(methodIndex, argList, args);
+    }
 
 ProxyExit:
     if (DEBUG) {
@@ -602,6 +659,7 @@ ECode CObjectProxy::S_CreateObject(
     for (n = 0; n < proxyObj->mInterfaceNum; n++) {
         interfaces[n].mIndex = n;
         interfaces[n].mOwner = proxyObj;
+        interfaces[n].mInfo2 = (*interfaceInfos)[n];
         InterfaceID iid;
         (*interfaceInfos)[n]->GetId(&iid);
         LookupInterfaceInfo(iid, &(interfaces[n].mInfo));
@@ -617,9 +675,268 @@ ECode CObjectProxy::S_CreateObject(
 #error unknown architecture
 #endif
     }
+    proxyObj->mHandler = invocationHandler;
 
     (*proxy) = (IProxy*)proxyObj;
     (*proxy)->AddRef();
+    return NOERROR;
+}
+
+#define ROUND8(n)       (((n)+7)&~7)   // round up to multiple of 8 bytes
+
+static ECode Proxy_ProcessMsh_In(
+    /* [in] */ const CIMethodInfo* methodInfo,
+    /* [in] */ UInt32* args,
+    /* [in, out] */ IArgumentList* argList)
+{
+    Int32 paramNum = methodInfo->mParamNum;
+    const CIBaseType* params = methodInfo->mParams;
+
+    for (Int32 n = 0; n < paramNum; n++) {
+        if (BT_IS_IN(params[n])) { // [in] or [in, out]
+            switch (BT_TYPE(params[n])) {
+                case BT_TYPE_UINT8:
+                    argList->SetInputArgumentOfByte(n, *(Byte*)args);
+                    args++;
+                    break;
+                case BT_TYPE_UINT16:
+                    argList->SetInputArgumentOfInt16(n, *(Int16*)args);
+                    args++;
+                    break;
+                case BT_TYPE_UINT32:
+                    argList->SetInputArgumentOfInt32(n, *(Int32*)args);
+                    args++;
+                    break;
+
+                case BT_TYPE_UINT64:
+#ifdef _mips
+                    // Adjust for 64bits align on mips
+                    if (!(n % 2)) args += 1;
+#endif
+#if defined(_arm) && defined(__GNUC__) && (__GNUC__ >= 4)
+                    args = (UInt32*)ROUND8((Int32)args);
+#endif
+                    argList->SetInputArgumentOfInt64(n, (Int64)(*(UInt64*)args));
+                    args += 2;
+                    break;
+
+                case BT_TYPE_PUINT8:
+                case BT_TYPE_PUINT16:
+                case BT_TYPE_PUINT32:
+                case BT_TYPE_PUINT64:
+                    assert(0);
+                    args++;
+                    break;
+
+                case BT_TYPE_STRUCT:
+                case BT_TYPE_PSTRUCT:
+                    assert(0);
+                    args++;
+                    break;
+
+                case BT_TYPE_EMUID:
+                    argList->SetInputArgumentOfEMuid(n, (EMuid*)args);
+                    args += sizeof(EMuid) / 4;
+                    break;
+
+                case BT_TYPE_EGUID:
+                    argList->SetInputArgumentOfEGuid(n, (EGuid*)args);
+                    args += sizeof(EGuid) / 4;
+                    break;
+
+                case BT_TYPE_PEMUID:
+                case BT_TYPE_PEGUID:
+                case BT_TYPE_STRINGBUF:
+                case BT_TYPE_BUFFEROF:
+                    assert(0);
+                    args++;
+                    break;
+
+                case BT_TYPE_ARRAYOF:
+                    argList->SetInputArgumentOfCarArray(n, (PCarQuintet)*args);
+                    args++;
+                    break;
+
+                case BT_TYPE_STRING:
+                    argList->SetInputArgumentOfString(n, **(String**)args);
+                    args++;
+                    break;
+
+                case BT_TYPE_INTERFACE: {
+                    argList->SetInputArgumentOfObjectPtr(n, (IInterface*)*args);
+                    args++;
+                    break;
+                }
+
+                case BT_TYPE_PINTERFACE:
+                    assert(0);
+                    args++;
+                    break;
+
+                default:
+                    Logger::E("Proxy", "MshProc: Invalid [in, out] type(%08x), param index: %d.\n",
+                            params[n], n);
+                    assert(0);
+                    return E_INVALID_ARGUMENT;
+            }
+        }
+        else {  // [out]
+            switch (BT_TYPE(params[n])) {
+                case BT_TYPE_PSTRING:
+                        argList->SetOutputArgumentOfStringPtr(n, (String*)*args);
+                        break;
+
+                default:
+                    Logger::E("Proxy", "MshProc: Invalid [in, out] type(%08x), param index: %d.\n",
+                            params[n], n);
+                    assert(0);
+                    return E_INVALID_ARGUMENT;
+            }
+            // if (*args) parcel->WriteInt32(MSH_NOT_NULL);
+            // else parcel->WriteInt32(MSH_NULL);
+
+            // if (((BT_TYPE(params[n]) == BT_TYPE_BUFFEROF) ||
+            //     (BT_TYPE(params[n]) == BT_TYPE_ARRAYOF) ||
+            //     (BT_TYPE(params[n]) == BT_TYPE_STRINGBUF)) && !BT_IS_CALLEE(params[n]) && *args) {
+            //         parcel->WriteInt32(((PCARQUINTET)*args)->mSize);
+            // }
+            args++;
+        }
+    }
+
+    return NOERROR;
+}
+
+static ECode Proxy_ProcessUnmsh_Out(
+    /* [in] */ const CIMethodInfo* methodInfo,
+    /* [in] */ IArgumentList* argList,
+    /* [in, out] */ UInt32* args)
+{
+    Int32 paramNum = methodInfo->mParamNum;
+    const CIBaseType* params = methodInfo->mParams;
+
+    for (Int32 n = 0; n < paramNum; n++) {
+        if (BT_IS_OUT(params[n])) {   // [out] or [in, out]
+            if (*args) {
+                // Int32 pointValue;
+                // parcel->ReadInt32(&pointValue);
+                // if (pointValue != (Int32)MSH_NOT_NULL) {
+                //     MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
+                //         "MshProc: param conflict in proxy's unmarshal, param index: %d.\n", n));
+                //     return E_INVALID_ARGUMENT;
+                // }
+
+                switch (BT_TYPE(params[n])) {
+                    case BT_TYPE_PUINT8:
+                        assert(0);
+                        // parcel->ReadByte((Byte*)*args);
+                        break;
+
+                    case BT_TYPE_PUINT16:
+                        assert(0);
+                        // parcel->ReadInt16((Int16*)*args);
+                        break;
+
+                    case BT_TYPE_PUINT32:
+                        assert(0);
+                        // parcel->ReadInt32((Int32*)*args);
+                        break;
+
+                    case BT_TYPE_PUINT64:
+                        assert(0);
+                        // parcel->ReadInt64((Int64*)*args);
+                        break;
+
+                    case BT_TYPE_PSTRUCT:
+                        assert(0);
+                        // parcel->ReadStruct((Handle32*)*args);
+                        break;
+
+                    case BT_TYPE_PEMUID:
+                        assert(0);
+                        // parcel->ReadEMuid((EMuid*)*args);
+                        break;
+
+                    case BT_TYPE_PEGUID:
+                        assert(0);
+                        // parcel->ReadEGuid((EGuid*)*args);
+                        break;
+
+                    case BT_TYPE_PSTRING:
+                        // assert(0);
+                        // parcel->ReadString((String*)*args);
+                        break;
+
+                    case BT_TYPE_STRINGBUF:
+                    case BT_TYPE_BUFFEROF:
+                    case BT_TYPE_ARRAYOF:
+                        assert(0);
+                        if (!BT_IS_CALLEE(params[n])) {
+                            // PCARQUINTET p;
+                            // parcel->ReadArrayOf((Handle32*)&p);
+                            // PCARQUINTET qArg = (PCARQUINTET)*args;
+                            // qArg->mUsed = p->mUsed;
+                            // memcpy(qArg->mBuf, p->mBuf, p->mSize);
+                            // _CarQuintet_Release(p);
+                        }
+                        else {
+                            // parcel->ReadArrayOf((Handle32*)*args);
+                        }
+                        break;
+
+                    case BT_TYPE_PINTERFACE:
+                        assert(0);
+                        // parcel->ReadInterfacePtr((Handle32*)*args);
+                        break;
+
+                    default:
+                        Logger::E("Proxy", "MshProc: Invalid param type(%08x), param index: %d\n", params[n], n);
+                        assert(0);
+                        return E_INVALID_ARGUMENT;
+                }
+            }
+            else {
+                assert(0);
+                // Int32 pointValue;
+                // parcel->ReadInt32(&pointValue);
+                // if (pointValue != MSH_NULL) {
+                //     MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
+                //             "MshProc: param conflict in proxy's unmarshal, param index: %d.\n", n));
+                //     return E_INVALID_ARGUMENT;
+                // }
+            }
+            args++;
+        }
+        else {      // [in]
+            switch (BT_TYPE(params[n])) {
+                case BT_TYPE_UINT64:
+#ifdef _mips
+                    // Adjust for 64bits align on mips
+                    if (!(n % 2)) {
+                        args += 1;
+                    }
+#endif
+#if defined(_arm) && defined(__GNUC__) && (__GNUC__ >= 4)
+                    args = (UInt32*)ROUND8((Int32)args);
+#endif
+                    args += 2;
+                    break;
+
+                case BT_TYPE_EMUID:
+                    args += sizeof(EMuid) / 4;
+                    break;
+
+                case BT_TYPE_EGUID:
+                    args += sizeof(EMuid) / 4 + sizeof(char*) /4;
+                    break;
+
+                default:
+                    args++;
+                    break;
+            }
+        }
+    }
+
     return NOERROR;
 }
 
