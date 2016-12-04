@@ -216,6 +216,7 @@ private:
         /* [in] */ const String& methodName,
         /* [in] */ const String& inputSig,
         // Type outType,
+        /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* args,
         /* [in] */ Int32 replyTimeoutMsecs,
         /* [in] */ Int32 flags);

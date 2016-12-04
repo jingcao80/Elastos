@@ -146,6 +146,7 @@ ECode ProxyBusObject::Handler::Invoke(
                 invocation->mMethodName,
                 invocation->mInputSig,
                 // invocation->mGenericReturnType,
+                method,
                 args,
                 mHost->mReplyTimeoutMsecs,
                 mHost->mFlags);
@@ -300,6 +301,7 @@ ECode ProxyBusObject::MethodCall(
     /* [in] */ const String& methodName,
     /* [in] */ const String& inputSig,
     // Type outType,
+    /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* _args,
     /* [in] */ Int32 replyTimeoutMsecs,
     /* [in] */ Int32 flags)
