@@ -256,17 +256,20 @@ void ProxyBusObject::Destroy()
 ECode ProxyBusObject::AddInterface(
     /* [in] */ const String& name)
 {
-    assert(0 && "TODO");
-    // if (!name.IsNull()) {
-    //     for (Class<?> intf : proxy.getClass().getInterfaces()) {
-    //         if (name.equals(InterfaceDescription.getName(intf))) {
-    //             InterfaceDescription desc = new InterfaceDescription();
-    //             Status status = desc.create(bus, intf);
-    //             return status.getErrorCode();
-    //         }
-    //     }
-    // }
-    // return Status.BUS_NO_SUCH_INTERFACE.getErrorCode();
+    if (!name.IsNull()) {
+        IProxy* prx = IProxy::Probe(mProxy);
+        Int32 N;
+        prx->GetInterfaceCount(&N);
+        AutoPtr< ArrayOf<IInterfaceInfo*> > infos = ArrayOf<IInterfaceInfo*>::Alloc(N);
+        prx->GetAllInterfaceInfos(infos);
+        for (Int32 i = 0; i < N; i++) {
+            IInterfaceInfo* intf = (*infos)[i];
+            if (name.Equals(InterfaceDescription::GetName(intf))) {
+                AutoPtr<InterfaceDescription> desc = new InterfaceDescription();
+                return desc->Create(mBus, intf);
+            }
+        }
+    }
     return E_STATUS_BUS_NO_SUCH_INTERFACE;
 }
 

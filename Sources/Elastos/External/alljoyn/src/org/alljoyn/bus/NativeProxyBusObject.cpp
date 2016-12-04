@@ -13,7 +13,8 @@ NativeProxyBusObject::NativeProxyBusObject(
     /* [in] */ const char* path,
     /* [in] */ ajn::SessionId sessionId,
     /* [in] */ bool secure)
-    : mBusPtr(nba)
+    : ProxyBusObject(*nba, endpoint, path, sessionId, secure)
+    , mBusPtr(nba)
 {
     assert(mBusPtr != NULL);
     mBusPtr->IncRef();

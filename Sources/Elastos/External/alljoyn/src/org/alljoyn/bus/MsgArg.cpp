@@ -1353,6 +1353,7 @@ ECode MsgArg::Marshal(
         assert(0);
         // throw new MarshalBusException("cannot marshal args into '" + sig + "', bad signature");
     }
+    assert(0);
     // SetStruct(msgArg, (args == NULL) ? 0 : args->GetLength());
     // for (Int32 i = 0; i < GetNumMembers(msgArg); ++i) {
     //     Marshal(GetMember(msgArg, i), (*sigs)[i], (PVoid)(*args)[i]);
