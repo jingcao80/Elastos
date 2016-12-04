@@ -91,6 +91,12 @@ public:
 //    CARAPI_(void) OnLastStrongRef(
 //        /* [in] */ const void* id);
 //
+    CARAPI GetInterfaceCount(
+        /* [out] */ Int32* count);
+
+    CARAPI GetAllInterfaceInfos(
+        /* [out] */ ArrayOf<IInterfaceInfo*>* interfaceInfos);
+
     CARAPI GetInterfaceID(
         /* [in] */ IInterface* object,
         /* [out] */ InterfaceID* iid);

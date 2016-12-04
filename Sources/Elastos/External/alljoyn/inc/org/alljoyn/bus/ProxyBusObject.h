@@ -17,6 +17,7 @@ namespace Alljoyn {
 namespace Bus {
 
 class CBusAttachment;
+class NativeBusAttachment;
 
 class ProxyBusObject
     : public Object
@@ -41,8 +42,8 @@ private:
             Boolean mIsMethod;
             // boolean isGet;
 
-            // String inputSig;
-            // String outSig;
+            String mInputSig;
+            String mOutSig;
 
             String mInterfaceName;
             String mMethodName;
@@ -54,6 +55,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        Handler(
+            /* [in] */ ProxyBusObject* host);
+
         // @Override
         CARAPI Invoke(
             /* [in] */ IInterface* proxy,
@@ -62,6 +66,7 @@ private:
 
     private:
         HashMap<String, AutoPtr< List< AutoPtr<Invocation> > > > mInvocationCache;
+        ProxyBusObject* mHost;
     };
 
 public:
@@ -187,8 +192,59 @@ public:
     CARAPI IsSecure(
         /* [out] */ Boolean* isSecure);
 
+protected:
+    /** Called by native code to lazily add an interface when a proxy method is invoked. */
+    virtual CARAPI AddInterface(
+        /* [in] */ const String& name);
+
 private:
+    /** Allocate native resources. */
+    CARAPI_(void) Create(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ const String& busName,
+        /* [in] */ const String& objPath,
+        /* [in] */ Int32 sessionId,
+        /* [in] */ Boolean secure);
+
+    /** Release native resources. */
+    CARAPI_(void) Destroy();
+
+    /** Perform a method call on the remote object. */
+    CARAPI MethodCall(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ const String& interfaceName,
+        /* [in] */ const String& methodName,
+        /* [in] */ const String& inputSig,
+        // Type outType,
+        /* [in] */ IArgumentList* args,
+        /* [in] */ Int32 replyTimeoutMsecs,
+        /* [in] */ Int32 flags);
+
+    CARAPI AddInterface(
+        /* [in] */ NativeBusAttachment* busAttachment,
+        /* [in] */ const String& name);
+
+private:
+    /** The bus the remote object is connected to. */
+    CBusAttachment* mBus;
+
+    /** Well-known or unique name of remote object. */
+    String mBusName;
+
+    /** Object path. */
+    String mObjPath;
+
+    /** Native proxy bus object handle. */
+    Int64 mHandle;
+
+    /** Remote interfaces proxy. */
     AutoPtr<IInterface> mProxy;
+
+    Int32 mReplyTimeoutMsecs;
+
+    Int32 mFlags;
+
+    static const String TAG;
 };
 
 } // namespace Bus

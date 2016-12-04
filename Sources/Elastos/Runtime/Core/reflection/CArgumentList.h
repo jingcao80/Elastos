@@ -169,97 +169,101 @@ public:
         /* [in] */ Int32 index,
         /* [in] */ PInterface value);
 
-    CARAPI GetOutputArgumentOfInt16Ptr(
+    CARAPI IsOutputArgumentNullPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [out] */ Boolean* isNull);
+
+    CARAPI AssignOutputArgumentOfInt16Ptr(
+        /* [in] */ Int32 index,
+        /* [in] */ Int16 value);
 
     CARAPI SetOutputArgumentOfInt16Ptr(
         /* [in] */ Int32 index,
         /* [out] */ Int16* value);
 
-    CARAPI GetOutputArgumentOfInt32Ptr(
+    CARAPI AssignOutputArgumentOfInt32Ptr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Int32 value);
 
     CARAPI SetOutputArgumentOfInt32Ptr(
         /* [in] */ Int32 index,
         /* [out] */ Int32* value);
 
-    CARAPI GetOutputArgumentOfInt64Ptr(
+    CARAPI AssignOutputArgumentOfInt64Ptr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Int64 value);
 
     CARAPI SetOutputArgumentOfInt64Ptr(
         /* [in] */ Int32 index,
         /* [out] */ Int64* value);
 
-    CARAPI GetOutputArgumentOfBytePtr(
+    CARAPI AssignOutputArgumentOfBytePtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Byte value);
 
     CARAPI SetOutputArgumentOfBytePtr(
         /* [in] */ Int32 index,
         /* [out] */ Byte* value);
 
-    CARAPI GetOutputArgumentOfFloatPtr(
+    CARAPI AssignOutputArgumentOfFloatPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Float value);
 
     CARAPI SetOutputArgumentOfFloatPtr(
         /* [in] */ Int32 index,
         /* [out] */ Float* value);
 
-    CARAPI GetOutputArgumentOfDoublePtr(
+    CARAPI AssignOutputArgumentOfDoublePtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Double value);
 
     CARAPI SetOutputArgumentOfDoublePtr(
         /* [in] */ Int32 index,
         /* [out] */ Double* value);
 
-    CARAPI GetOutputArgumentOfCharPtr(
+    CARAPI AssignOutputArgumentOfCharPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Char32 value);
 
     CARAPI SetOutputArgumentOfCharPtr(
         /* [in] */ Int32 index,
         /* [out] */ Char32* value);
 
-    CARAPI GetOutputArgumentOfStringPtr(
+    CARAPI AssignOutputArgumentOfStringPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ const String& value);
 
     CARAPI SetOutputArgumentOfStringPtr(
         /* [in] */ Int32 index,
         /* [out] */ String* value);
 
-    CARAPI GetOutputArgumentOfBooleanPtr(
+    CARAPI AssignOutputArgumentOfBooleanPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Boolean value);
 
     CARAPI SetOutputArgumentOfBooleanPtr(
         /* [in] */ Int32 index,
         /* [out] */ Boolean* value);
 
-    CARAPI GetOutputArgumentOfEMuidPtr(
+    CARAPI AssignOutputArgumentOfEMuidPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ EMuid* value);
 
     CARAPI SetOutputArgumentOfEMuidPtr(
         /* [in] */ Int32 index,
         /* [out] */ EMuid* value);
 
-    CARAPI GetOutputArgumentOfEGuidPtr(
+    CARAPI AssignOutputArgumentOfEGuidPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ EGuid* value);
 
     CARAPI SetOutputArgumentOfEGuidPtr(
         /* [in] */ Int32 index,
         /* [out] */ EGuid* value);
 
-    CARAPI GetOutputArgumentOfECodePtr(
+    CARAPI AssignOutputArgumentOfECodePtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ ECode value);
 
     CARAPI SetOutputArgumentOfECodePtr(
         /* [in] */ Int32 index,
@@ -273,25 +277,25 @@ public:
         /* [in] */ Int32 index,
         /* [out] */ PVoid value);
 
-    CARAPI GetOutputArgumentOfEnumPtr(
+    CARAPI AssignOutputArgumentOfEnumPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PVoid* value);
+        /* [in] */ Int32 value);
 
     CARAPI SetOutputArgumentOfEnumPtr(
         /* [in] */ Int32 index,
         /* [out] */ Int32* value);
 
-    CARAPI GetOutputArgumentOfCarArrayPtr(
+    CARAPI AssignOutputArgumentOfCarArrayPtr(
         /* [in] */ Int32 index,
-        /* [out] */ PCarQuintet* value);
+        /* [in] */ PCarQuintet value);
 
     CARAPI SetOutputArgumentOfCarArrayPtr(
         /* [in] */ Int32 index,
         /* [out] */ PCarQuintet value);
 
-    CARAPI GetOutputArgumentOfCarArrayPtrPtr(
+    CARAPI AssignOutputArgumentOfCarArrayPtrPtr(
         /* [in] */ Int32 index,
-        /* [out] */ Handle32* value);
+        /* [in] */ PCarQuintet value);
 
     CARAPI SetOutputArgumentOfCarArrayPtrPtr(
         /* [in] */ Int32 index,
@@ -305,9 +309,9 @@ public:
         /* [in] */ Int32 index,
         /* [out] */ PVoid* value);
 
-    CARAPI GetOutputArgumentOfObjectPtrPtr(
+    CARAPI AssignOutputArgumentOfObjectPtrPtr(
         /* [in] */ Int32 index,
-        /* [out] */ Handle32* value);
+        /* [in] */ PInterface value);
 
     CARAPI SetOutputArgumentOfObjectPtrPtr(
         /* [in] */ Int32 index,

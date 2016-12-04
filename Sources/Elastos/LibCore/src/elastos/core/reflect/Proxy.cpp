@@ -499,6 +499,31 @@ ECode CObjectProxy::GetInterfaceID(
     return NOERROR;
 }
 
+ECode CObjectProxy::GetInterfaceCount(
+    /* [out] */ Int32* count)
+{
+    if (count == NULL) return E_INVALID_ARGUMENT;
+
+    *count = mInterfaceNum;
+    return NOERROR;
+}
+
+ECode CObjectProxy::GetAllInterfaceInfos(
+    /* [out] */ ArrayOf<IInterfaceInfo*>* interfaceInfos)
+{
+    if (interfaceInfos == NULL || interfaceInfos->GetLength() <= 0) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    Int32 N = mInterfaceNum < interfaceInfos->GetLength() ?
+            mInterfaceNum : interfaceInfos->GetLength();
+
+    for (Int32 i = 0; i < N; i++) {
+        interfaceInfos->Set(i, mInterfaces[i].mInfo2);
+    }
+    return NOERROR;
+}
+
 ECode CObjectProxy::GetInterface(
     /* [in] */ UInt32 index,
     /* [out] */ IInterface** object)

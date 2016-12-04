@@ -944,6 +944,23 @@ ECode CObjectProxy::GetInterfaceID(
     return NOERROR;
 }
 
+ECode CObjectProxy::GetInterfaceCount(
+    /* [out] */ Int32* count)
+{
+    if (count == NULL) return E_INVALID_ARGUMENT;
+
+    *count = mInterfaceNum;
+    return NOERROR;
+}
+
+ECode CObjectProxy::GetAllInterfaceInfos(
+    /* [out] */ ArrayOf<IInterfaceInfo*>* interfaceInfos)
+{
+    if (interfaceInfos == NULL) return E_INVALID_ARGUMENT;
+
+    return NOERROR;
+}
+
 ECode CObjectProxy::GetInterface(
     /* [in] */ UInt32 index,
     /* [out] */ IInterface** object)

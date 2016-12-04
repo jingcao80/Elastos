@@ -74,8 +74,7 @@ IInterface
 CAR_INTERFACE("00000000-0000-0000-C000-000000000068")
 IObject : public IInterface
 {
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ _ELASTOS REIID riid) = 0;
+    using IInterface::Probe;
 
     static CARAPI_(IObject*) Probe(
         /* [in] */ PInterface object)
@@ -110,8 +109,7 @@ struct CCarObject{};
 CAR_INTERFACE("00010002-0000-0000-C000-000000000066")
 IAspect : public IInterface
 {
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ _ELASTOS REIID riid) = 0;
+    using IInterface::Probe;
 
     static CARAPI_(IAspect*) Probe(
         /* [in] */ PInterface object)
@@ -147,10 +145,26 @@ ICallbackConnector : public IInterface
 
 interface IProxyDeathRecipient;
 struct _CIClassInfo;
+interface IInterfaceInfo;
 
 CAR_INTERFACE("00010005-0000-0000-C000-000000000066")
 IProxy : public IInterface
 {
+    using IInterface::Probe;
+
+    static CARAPI_(IProxy*) Probe(
+        /* [in] */ PInterface object)
+    {
+        if (object == NULL) return NULL;
+        return (IProxy*)object->Probe(EIID_IProxy);
+    }
+
+    virtual CARAPI GetInterfaceCount(
+        /* [out] */ _ELASTOS Int32* count) = 0;
+
+    virtual CARAPI GetAllInterfaceInfos(
+        /* [out] */ _ELASTOS ArrayOf<IInterfaceInfo*>* interfaceInfos) = 0;
+
     virtual CARAPI GetInterface(
         /* [in] */ _ELASTOS UInt32 index,
         /* [out] */ IInterface** object) = 0;
@@ -181,8 +195,7 @@ IProxy : public IInterface
 CAR_INTERFACE("0001000D-0000-0000-C000-000000000066")
 IProxyDeathRecipient : public IInterface
 {
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ _ELASTOS REIID riid) = 0;
+    using IInterface::Probe;
 
     static CARAPI_(IProxyDeathRecipient*) Probe(
         /* [in] */ PInterface object)
@@ -197,8 +210,7 @@ IProxyDeathRecipient : public IInterface
 CAR_INTERFACE("00010008-0000-0000-C000-000000000066")
 IWeakReference : public IInterface
 {
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ _ELASTOS REIID riid) = 0;
+    using IInterface::Probe;
 
     static CARAPI_(IWeakReference*) Probe(
         /* [in] */ PInterface object)
@@ -215,8 +227,7 @@ IWeakReference : public IInterface
 CAR_INTERFACE("0001000A-0000-0000-C000-000000000066")
 IWeakReferenceSource : public IInterface
 {
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ _ELASTOS REIID riid) = 0;
+    using IInterface::Probe;
 
     static CARAPI_(IWeakReferenceSource*) Probe(
         /* [in] */ PInterface object)

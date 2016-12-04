@@ -175,6 +175,12 @@ public:
         /* [in] */ IInterface* object,
         /* [out] */ InterfaceID* iid);
 
+    CARAPI GetInterfaceCount(
+        /* [out] */ Int32* count);
+
+    CARAPI GetAllInterfaceInfos(
+        /* [out] */ ArrayOf<IInterfaceInfo*>* interfaceInfos);
+
     CARAPI GetInterface(
         /* [in] */ UInt32 uIndex,
         /* [out] */ IInterface** object);

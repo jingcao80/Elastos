@@ -1345,7 +1345,7 @@ ECode MsgArg::Marshal(
 ECode MsgArg::Marshal(
     /* [in] */ Int64 msgArg,
     /* [in] */ const String& sig,
-    /* [in] */ ArrayOf<Int64>* args)
+    /* [in] */ IArgumentList* args)
 {
     AutoPtr<ArrayOf<String> > sigs = Signature::Split(sig);
     if (sigs == NULL) {
@@ -1353,10 +1353,10 @@ ECode MsgArg::Marshal(
         assert(0);
         // throw new MarshalBusException("cannot marshal args into '" + sig + "', bad signature");
     }
-    SetStruct(msgArg, (args == NULL) ? 0 : args->GetLength());
-    for (Int32 i = 0; i < GetNumMembers(msgArg); ++i) {
-        Marshal(GetMember(msgArg, i), (*sigs)[i], (PVoid)(*args)[i]);
-    }
+    // SetStruct(msgArg, (args == NULL) ? 0 : args->GetLength());
+    // for (Int32 i = 0; i < GetNumMembers(msgArg); ++i) {
+    //     Marshal(GetMember(msgArg, i), (*sigs)[i], (PVoid)(*args)[i]);
+    // }
     return NOERROR;
 }
 

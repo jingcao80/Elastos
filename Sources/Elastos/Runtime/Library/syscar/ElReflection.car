@@ -268,6 +268,9 @@ library
             [in] String fullName,
             [out] IAnnotationInfo** annotationInfo);
 
+        GetDeclaringInterface(
+            [out] IInterfaceInfo** interfaceInfo);
+
         CreateArgumentList(
             [out] IArgumentList** argumentList);
 
@@ -461,97 +464,101 @@ library
             [in] Int32 index,
             [in] PInterface value);
 
-        GetOutputArgumentOfInt16Ptr(
+        IsOutputArgumentNullPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [out] Boolean* isNull);
+
+        AssignOutputArgumentOfInt16Ptr(
+            [in] Int32 index,
+            [in] Int16 value);
 
         SetOutputArgumentOfInt16Ptr(
             [in] Int32 index,
             [out] Int16* value);
 
-        GetOutputArgumentOfInt32Ptr(
+        AssignOutputArgumentOfInt32Ptr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Int32 value);
 
         SetOutputArgumentOfInt32Ptr(
             [in] Int32 index,
             [out] Int32* value);
 
-        GetOutputArgumentOfInt64Ptr(
+        AssignOutputArgumentOfInt64Ptr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Int64 value);
 
         SetOutputArgumentOfInt64Ptr(
             [in] Int32 index,
             [out] Int64* value);
 
-        GetOutputArgumentOfBytePtr(
+        AssignOutputArgumentOfBytePtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Byte value);
 
         SetOutputArgumentOfBytePtr(
             [in] Int32 index,
             [out] Byte* value);
 
-        GetOutputArgumentOfFloatPtr(
+        AssignOutputArgumentOfFloatPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Float value);
 
         SetOutputArgumentOfFloatPtr(
             [in] Int32 index,
             [out] Float* value);
 
-        GetOutputArgumentOfDoublePtr(
+        AssignOutputArgumentOfDoublePtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Double value);
 
         SetOutputArgumentOfDoublePtr(
             [in] Int32 index,
             [out] Double* value);
 
-        GetOutputArgumentOfCharPtr(
+        AssignOutputArgumentOfCharPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Char32 value);
 
         SetOutputArgumentOfCharPtr(
             [in] Int32 index,
             [out] Char32* value);
 
-        GetOutputArgumentOfStringPtr(
+        AssignOutputArgumentOfStringPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] String value);
 
         SetOutputArgumentOfStringPtr(
             [in] Int32 index,
             [out] String* value);
 
-        GetOutputArgumentOfBooleanPtr(
+        AssignOutputArgumentOfBooleanPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Boolean value);
 
         SetOutputArgumentOfBooleanPtr(
             [in] Int32 index,
             [out] Boolean* value);
 
-        GetOutputArgumentOfEMuidPtr(
+        AssignOutputArgumentOfEMuidPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] EMuid* value);
 
         SetOutputArgumentOfEMuidPtr(
             [in] Int32 index,
             [out] EMuid* value);
 
-        GetOutputArgumentOfEGuidPtr(
+        AssignOutputArgumentOfEGuidPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] EGuid* value);
 
         SetOutputArgumentOfEGuidPtr(
             [in] Int32 index,
             [out] EGuid* value);
 
-        GetOutputArgumentOfECodePtr(
+        AssignOutputArgumentOfECodePtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] ECode value);
 
         SetOutputArgumentOfECodePtr(
             [in] Int32 index,
@@ -565,27 +572,27 @@ library
             [in] Int32 index,
             [out] PVoid value);
 
-        GetOutputArgumentOfEnumPtr(
+        AssignOutputArgumentOfEnumPtr(
             [in] Int32 index,
-            [out] PVoid* value);
+            [in] Int32 value);
 
         SetOutputArgumentOfEnumPtr(
             [in] Int32 index,
             [out] Int32* value);
 
         // Caller allocated
-        GetOutputArgumentOfCarArrayPtr(
+        AssignOutputArgumentOfCarArrayPtr(
             [in] Int32 index,
-            [out] PCarQuintet* value);
+            [in] PCarQuintet value);
 
         SetOutputArgumentOfCarArrayPtr(
             [in] Int32 index,
             [out] PCarQuintet value);
 
         // Callee allocated
-        GetOutputArgumentOfCarArrayPtrPtr(
+        AssignOutputArgumentOfCarArrayPtrPtr(
             [in] Int32 index,
-            [out] Handle32* value);
+            [in] PCarQuintet value);
 
         SetOutputArgumentOfCarArrayPtrPtr(
             [in] Int32 index,
@@ -601,9 +608,9 @@ library
             [in] Int32 index,
             [out] PVoid* value);
 
-        GetOutputArgumentOfObjectPtrPtr(
+        AssignOutputArgumentOfObjectPtrPtr(
             [in] Int32 index,
-            [out] Handle32* value);
+            [in] PInterface value);
 
         SetOutputArgumentOfObjectPtrPtr(
             [in] Int32 index,

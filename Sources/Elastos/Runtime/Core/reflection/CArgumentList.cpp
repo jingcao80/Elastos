@@ -497,9 +497,17 @@ ECode CArgumentList::SetInputArgumentOfObjectPtr(
             ParamIOAttribute_In, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfInt16Ptr(
+ECode CArgumentList::IsOutputArgumentNullPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [out] */ Boolean* isNull)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CArgumentList::AssignOutputArgumentOfInt16Ptr(
+    /* [in] */ Int32 index,
+    /* [in] */ Int16 value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -513,9 +521,9 @@ ECode CArgumentList::SetOutputArgumentOfInt16Ptr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfInt32Ptr(
+ECode CArgumentList::AssignOutputArgumentOfInt32Ptr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ Int32 value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -529,9 +537,9 @@ ECode CArgumentList::SetOutputArgumentOfInt32Ptr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfInt64Ptr(
+ECode CArgumentList::AssignOutputArgumentOfInt64Ptr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [out] */ Int64 value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -545,9 +553,9 @@ ECode CArgumentList::SetOutputArgumentOfInt64Ptr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfBytePtr(
+ECode CArgumentList::AssignOutputArgumentOfBytePtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [out] */ Byte value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -561,9 +569,9 @@ ECode CArgumentList::SetOutputArgumentOfBytePtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfFloatPtr(
+ECode CArgumentList::AssignOutputArgumentOfFloatPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ Float value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -577,9 +585,9 @@ ECode CArgumentList::SetOutputArgumentOfFloatPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfDoublePtr(
+ECode CArgumentList::AssignOutputArgumentOfDoublePtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ Double value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -593,9 +601,9 @@ ECode CArgumentList::SetOutputArgumentOfDoublePtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfCharPtr(
+ECode CArgumentList::AssignOutputArgumentOfCharPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ Char32 value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -609,12 +617,12 @@ ECode CArgumentList::SetOutputArgumentOfCharPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfStringPtr(
+ECode CArgumentList::AssignOutputArgumentOfStringPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ const String& value)
 {
-    return GetParamValue(index, CarDataType_String,
-            ParamIOAttribute_CallerAllocOut, 1, value);
+    assert(0 && "TODO");
+    return NOERROR;
 }
 
 ECode CArgumentList::SetOutputArgumentOfStringPtr(
@@ -625,9 +633,9 @@ ECode CArgumentList::SetOutputArgumentOfStringPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfBooleanPtr(
+ECode CArgumentList::AssignOutputArgumentOfBooleanPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ Boolean value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -641,9 +649,9 @@ ECode CArgumentList::SetOutputArgumentOfBooleanPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfEMuidPtr(
+ECode CArgumentList::AssignOutputArgumentOfEMuidPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ EMuid* value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -657,9 +665,9 @@ ECode CArgumentList::SetOutputArgumentOfEMuidPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfEGuidPtr(
+ECode CArgumentList::AssignOutputArgumentOfEGuidPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ EGuid* value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -673,9 +681,9 @@ ECode CArgumentList::SetOutputArgumentOfEGuidPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfECodePtr(
+ECode CArgumentList::AssignOutputArgumentOfECodePtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ ECode value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -705,9 +713,9 @@ ECode CArgumentList::SetOutputArgumentOfLocalTypePtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfEnumPtr(
+ECode CArgumentList::AssignOutputArgumentOfEnumPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PVoid* value)
+    /* [in] */ Int32 value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -721,9 +729,9 @@ ECode CArgumentList::SetOutputArgumentOfEnumPtr(
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
-ECode CArgumentList::GetOutputArgumentOfCarArrayPtr(
+ECode CArgumentList::AssignOutputArgumentOfCarArrayPtr(
     /* [in] */ Int32 index,
-    /* [out] */ PCarQuintet* value)
+    /* [in] */ PCarQuintet value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -737,9 +745,9 @@ ECode CArgumentList::SetOutputArgumentOfCarArrayPtr(
             ParamIOAttribute_CallerAllocOut, 0);
 }
 
-ECode CArgumentList::GetOutputArgumentOfCarArrayPtrPtr(
+ECode CArgumentList::AssignOutputArgumentOfCarArrayPtrPtr(
     /* [in] */ Int32 index,
-    /* [out] */ Handle32* value)
+    /* [out] */ PCarQuintet value)
 {
     assert(0 && "TODO");
     return NOERROR;
@@ -769,9 +777,9 @@ ECode CArgumentList::SetOutputArgumentOfStructPtrPtr(
             ParamIOAttribute_CalleeAllocOut, 2);
 }
 
-ECode CArgumentList::GetOutputArgumentOfObjectPtrPtr(
+ECode CArgumentList::AssignOutputArgumentOfObjectPtrPtr(
     /* [in] */ Int32 index,
-    /* [out] */ Handle32* value)
+    /* [in] */ PInterface value)
 {
     assert(0 && "TODO");
     return NOERROR;

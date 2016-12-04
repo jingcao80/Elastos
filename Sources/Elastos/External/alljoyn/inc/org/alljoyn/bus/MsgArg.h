@@ -305,7 +305,7 @@ public:
     static CARAPI Marshal(
         /* [in] */ Int64 msgArg,
         /* [in] */ const String& sig,
-        /* [in] */ ArrayOf<Int64>* args);
+        /* [in] */ IArgumentList* args);
 
     static CARAPI ReleaseRecord(
         /* [in] */ IArgumentList* args);

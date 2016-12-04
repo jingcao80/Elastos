@@ -4,6 +4,7 @@
 
 #include "CInterfaceInfo.h"
 #include "CAnnotationInfo.h"
+#include "CMethodInfo.h"
 
 CInterfaceInfo::CInterfaceInfo(
     /* [in] */ CClsModule* clsModule,
@@ -300,7 +301,13 @@ ECode CInterfaceInfo::GetAllMethodInfos(
     ECode ec = AcquireMethodList();
     if (FAILED(ec)) return ec;
 
-    return mMethodList->GetAllObjInfos((PTypeInfos)methodInfos);
+    ec = mMethodList->GetAllObjInfos((PTypeInfos)methodInfos);
+    if (FAILED(ec)) return ec;
+
+    for (Int32 i = 0; i < methodInfos->GetLength(); i++) {
+        ((CMethodInfo*)(*methodInfos)[i])->mDeclaringInterface = this;
+    }
+    return ec;
 }
 
 ECode CInterfaceInfo::GetMethodInfo(
@@ -318,7 +325,11 @@ ECode CInterfaceInfo::GetMethodInfo(
     if (FAILED(ec)) return ec;
 
     String strName = name + signature;
-    return mMethodList->AcquireObjByName(strName, (IInterface **)methodInfo);
+    ec = mMethodList->AcquireObjByName(strName, (IInterface **)methodInfo);
+    if (FAILED(ec)) return ec;
+
+    ((CMethodInfo*)(*methodInfo))->mDeclaringInterface = this;
+    return ec;
 }
 
 ECode CInterfaceInfo::GetMethodInfo(
@@ -332,7 +343,11 @@ ECode CInterfaceInfo::GetMethodInfo(
     ECode ec = AcquireMethodList();
     if (FAILED(ec)) return ec;
 
-    return mMethodList->AcquireObjByIndex(index, (IInterface **)methodInfo);
+    ec = mMethodList->AcquireObjByIndex(index, (IInterface **)methodInfo);
+    if (FAILED(ec)) return ec;
+
+    ((CMethodInfo*)(*methodInfo))->mDeclaringInterface = this;
+    return ec;
 }
 
 ECode CInterfaceInfo::CreateIFList()

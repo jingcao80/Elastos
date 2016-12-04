@@ -49,6 +49,9 @@ public:
         /* [in] */ const String& fullName,
         /* [out] */ IAnnotationInfo** annotationInfo);
 
+    CARAPI GetDeclaringInterface(
+        /* [out] */ IInterfaceInfo** interfaceInfo);
+
     CARAPI GetParamCount(
         /* [out] */ Int32* count);
 
@@ -94,6 +97,7 @@ public:
     UInt32              mIndex;
     CLSModule*          mClsMod;
     AutoPtr<CClsModule> mClsModule;
+    IInterfaceInfo*     mDeclaringInterface;
 
 private:
     AutoPtr< ArrayOf<IAnnotationInfo*> > mAnnotationInfos;

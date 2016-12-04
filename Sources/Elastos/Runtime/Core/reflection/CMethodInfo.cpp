@@ -34,6 +34,7 @@ CMethodInfo::CMethodInfo(
     mParamElem = NULL;
     mParameterInfos = NULL;
     mBase = mClsModule->mBase;
+    mDeclaringInterface = NULL;
 }
 
 CMethodInfo::~CMethodInfo()
@@ -181,6 +182,18 @@ ECode CMethodInfo::GetAnnotation(
         }
     }
 
+    return NOERROR;
+}
+
+ECode CMethodInfo::GetDeclaringInterface(
+    /* [out] */ IInterfaceInfo** interfaceInfo)
+{
+    if (!interfaceInfo) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    *interfaceInfo = mDeclaringInterface;
+    REFCOUNT_ADD(*interfaceInfo);
     return NOERROR;
 }
 
