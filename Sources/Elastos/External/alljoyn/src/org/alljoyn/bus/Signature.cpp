@@ -176,13 +176,19 @@ String Signature::TypeSig(
 
 String Signature::TypeSig(
     /* [in] */ ArrayOf<IParamInfo*>* types,
-    /* [in] */ const String& signature)
+    /* [in] */ const String& signature,
+    /* [in] */ Boolean input)
 {
     String sig("");
     AutoPtr<ArrayOf<String> > signatures = Split(signature);
     for (Int32 i = 0; i < types->GetLength(); ++i) {
         if ((*types)[i] == NULL)
             continue;
+        ParamIOAttribute ioAttrib;
+        (*types)[i]->GetIOAttribute(&ioAttrib);
+        if ((input && ioAttrib != ParamIOAttribute_In) || (!input && ioAttrib == ParamIOAttribute_In))
+            continue;
+
         AutoPtr<IDataTypeInfo> type;
         (*types)[i]->GetTypeInfo((IDataTypeInfo**)&type);
         sig += TypeSig(type, (signatures == NULL) ? String(NULL) : (*signatures)[i]);

@@ -809,26 +809,19 @@ String InterfaceDescription::GetInputSig(
     AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
     method->GetAllParamInfos(paramInfos);
 
-    AutoPtr<IParamInfo> paramInfo;
-    ParamIOAttribute ioAttr;
-    (*paramInfos)[count - 1]->GetIOAttribute(&ioAttr);
-    if (ioAttr != ParamIOAttribute_In) {
-        paramInfos->Set(count - 1, NULL);
-    }
-
     AutoPtr<IAnnotationInfo> busMethod;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String signature;
     if (busMethod != NULL && (busMethod->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
-        return Signature::TypeSig(paramInfos, signature);
+        return Signature::TypeSig(paramInfos, signature, TRUE);
     }
     AutoPtr<IAnnotationInfo> busSignal;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
-        return Signature::TypeSig(paramInfos, signature);
+        return Signature::TypeSig(paramInfos, signature, TRUE);
     }
 
-    return Signature::TypeSig(paramInfos, String(NULL));
+    return Signature::TypeSig(paramInfos, String(NULL), TRUE);
 }
 
 String InterfaceDescription::GetOutSig(
@@ -836,28 +829,22 @@ String InterfaceDescription::GetOutSig(
 {
     Int32 count;
     method->GetParamCount(&count);
-    AutoPtr<IParamInfo> paramInfo;
-    method->GetParamInfoByIndex(count - 1, (IParamInfo**)&paramInfo);
-    ParamIOAttribute ioAttr;
-    paramInfo->GetIOAttribute(&ioAttr);
-    AutoPtr<IDataTypeInfo> type;
-    if (ioAttr != ParamIOAttribute_In) {
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&type);;
-    }
+    AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
+    method->GetAllParamInfos(paramInfos);
 
     AutoPtr<IAnnotationInfo> busMethod;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String replySignature;
     if (busMethod != NULL && (busMethod->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
-        return Signature::TypeSig(type, replySignature);
+        return Signature::TypeSig(paramInfos, replySignature, FALSE);
     }
     AutoPtr<IAnnotationInfo> busSignal;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
-        return Signature::TypeSig(type, replySignature);
+        return Signature::TypeSig(paramInfos, replySignature, FALSE);
     }
 
-    return Signature::TypeSig(type, String(NULL));
+    return Signature::TypeSig(paramInfos, String(NULL), FALSE);
 }
 
 String InterfaceDescription::GetPropertySig(

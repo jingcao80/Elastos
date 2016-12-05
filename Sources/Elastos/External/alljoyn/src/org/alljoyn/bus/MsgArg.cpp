@@ -185,6 +185,96 @@ ECode MsgArg::CarValue::SetToArgumentList(
     return NOERROR;
 }
 
+ECode MsgArg::CarValue::GetFromArgumentList(
+    /* [in] */ IArgumentList* args,
+    /* [in] */ Int32 index)
+{
+    if (mIOAttribute == ParamIOAttribute_In) {
+        switch (mType) {
+            case CarDataType_Int16:
+                args->GetInputArgumentOfInt16(index, &mInt16Value);
+                break;
+            case CarDataType_Int32:
+                args->GetInputArgumentOfInt32(index, &mInt32Value);
+                break;
+            case CarDataType_Int64:
+                args->GetInputArgumentOfInt64(index, &mInt64Value);
+                break;
+            case CarDataType_Byte:
+                args->GetInputArgumentOfByte(index, &mByteValue);
+                break;
+            case CarDataType_Double:
+                args->GetInputArgumentOfDouble(index, &mDoubleValue);
+                break;
+            case CarDataType_String:
+                args->GetInputArgumentOfString(index, &mStringValue);
+                break;
+            case CarDataType_Boolean:
+                args->GetInputArgumentOfBoolean(index, &mBooleanValue);
+                break;
+            case CarDataType_Enum:
+                args->GetInputArgumentOfEnum(index, &mEnumValue);
+                break;
+            case CarDataType_ArrayOf: {
+                args->GetInputArgumentOfCarArray(index, &mCarQuintet);
+                break;
+            case CarDataType_Interface:
+                args->GetInputArgumentOfObjectPtr(index, (IInterface**)&mObjectValue);
+                break;
+            default:
+                Logger::E("MsgArg", "CarValue::GetFromArgumentList unimplemented type = %d", mType);
+            }
+        }
+    }
+
+    return NOERROR;
+}
+
+ECode MsgArg::CarValue::AssignArgumentListOutput(
+    /* [in] */ IArgumentList* args,
+    /* [in] */ Int32 index)
+{
+    if (mIOAttribute != ParamIOAttribute_In) {
+        switch (mType) {
+            case CarDataType_Int16:
+                args->AssignOutputArgumentOfInt16Ptr(index, mInt16Value);
+                break;
+            case CarDataType_Int32:
+                args->AssignOutputArgumentOfInt32Ptr(index, mInt32Value);
+                break;
+            case CarDataType_Int64:
+                args->AssignOutputArgumentOfInt64Ptr(index, mInt64Value);
+                break;
+            case CarDataType_Byte:
+                args->AssignOutputArgumentOfBytePtr(index, mByteValue);
+                break;
+            case CarDataType_Double:
+                args->AssignOutputArgumentOfDoublePtr(index, mDoubleValue);
+                break;
+            case CarDataType_String:
+                args->AssignOutputArgumentOfStringPtr(index, mStringValue);
+                break;
+            case CarDataType_Boolean:
+                args->AssignOutputArgumentOfBooleanPtr(index, mBooleanValue);
+                break;
+            case CarDataType_Enum:
+                args->AssignOutputArgumentOfEnumPtr(index, mEnumValue);
+                break;
+            case CarDataType_ArrayOf: {
+                args->AssignOutputArgumentOfCarArrayPtrPtr(index, mCarQuintet);
+                break;
+            case CarDataType_Interface:
+                args->AssignOutputArgumentOfObjectPtrPtr(index, mObjectValue);
+                break;
+            default:
+                Logger::E("MsgArg", "CarValue::AssignArgumentListOutput unimplemented type = %d", mType);
+            }
+        }
+    }
+
+    return NOERROR;
+}
+
 const Int32 MsgArg::ALLJOYN_INVALID          =  0;
 const Int32 MsgArg::ALLJOYN_ARRAY            = 'a';
 const Int32 MsgArg::ALLJOYN_BOOLEAN          = 'b';
@@ -1116,52 +1206,122 @@ ECode MsgArg::Unmarshal(
  * @return the unmarshalled Java objects
  * @throws MarshalBusException if the unmarshalling fails
  */
-ECode MsgArg::Unmarshal(
+ECode MsgArg::UnmarshalIn(
     /* [in] */ IMethodInfo* method,
     /* [in] */ Int64 msgArgs,
     /* [out] */ IArgumentList** args)
 {
-    Int32 count;
+    Int32 count = 0;
     method->GetParamCount(&count);
     AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
     method->GetAllParamInfos(paramInfos);
-    Int32 numArgs = GetNumMembers(msgArgs);
-    if (count != numArgs) {
+    Int32 inCount = 0;
+    for (Int32 i = 0; i < count; i++) {
         ParamIOAttribute ioAttr = ParamIOAttribute_In;
-        if (count - 1 == numArgs) { // count-1 may be out param
-            AutoPtr<IParamInfo> paramInfo;
-            method->GetParamInfoByIndex(count - 1, (IParamInfo**)&paramInfo);
-            paramInfo->GetIOAttribute(&ioAttr);
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr == ParamIOAttribute_In)
+            inCount++;
+    }
+    Int32 numArgs = GetNumMembers(msgArgs);
+    if (inCount != numArgs) {
+        Logger::E("MsgArg", "cannot marshal %d args into %d parameters", numArgs, count);
+        assert(0);
+        // throw new MarshalBusException(
+        //     "cannot marshal " + numArgs + " args into " + types.length + " parameters");
+        return NOERROR;
+    }
+    AutoPtr<ArrayOf<CarValue*> > array = ArrayOf<CarValue*>::Alloc(count);
+    method->CreateArgumentList(args);
+    Int32 inIndex = 0;
+    for (Int32 i = 0; i < count; ++i) {
+        AutoPtr<IDataTypeInfo> typeInfo;
+        (*paramInfos)[i]->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        CarDataType type;
+        typeInfo->GetDataType(&type);
+        ParamIOAttribute ioAttr;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        AutoPtr<CarValue> value = new CarValue(type);
+        value->mIOAttribute = ioAttr;
+        if (type == CarDataType_ArrayOf) {
+            AutoPtr<IDataTypeInfo> elementTypeInfo;
+            ICarArrayInfo::Probe(typeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+            elementTypeInfo->GetDataType(&value->mElementType);
         }
         if (ioAttr == ParamIOAttribute_In) {
-            Logger::E("MsgArg", "cannot marshal %d args into %d parameters", numArgs, count);
+            PVoid arg = value->ToValuePtr();
+            if (FAILED(Unmarshal(GetMember(msgArgs, inIndex++), type, arg)))
+                continue;
+        }
+        array->Set(i, value);
+        value->SetToArgumentList(*args, i);
+    }
+    AutoLock lock(sLock);
+    sRecords[*args] = array;
+    return NOERROR;
+}
+
+ECode MsgArg::UnmarshalOut(
+    /* [in] */ Int64 msgArgs,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* args)
+{
+    Int32 count = 0;
+    method->GetParamCount(&count);
+    AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
+    method->GetAllParamInfos(paramInfos);
+    Int32 typeId = GetTypeId(msgArgs);
+    Int32 outCount = 0;
+    for (Int32 i = 0; i < count; i++) {
+        ParamIOAttribute ioAttr = ParamIOAttribute_In;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr != ParamIOAttribute_In)
+            outCount++;
+    }
+    if (typeId == ALLJOYN_STRUCT) {
+        Int32 numArgs = GetNumMembers(msgArgs);
+        if (outCount != numArgs) {
+            Logger::E("MsgArg", "UnmarshalOut: cannot marshal %d args into %d parameters", numArgs, outCount);
             assert(0);
             // throw new MarshalBusException(
             //     "cannot marshal " + numArgs + " args into " + types.length + " parameters");
             return NOERROR;
         }
     }
-    AutoPtr<ArrayOf<CarValue*> > array = ArrayOf<CarValue*>::Alloc(numArgs);
-    method->CreateArgumentList(args);
-    for (Int32 i = 0; i < numArgs; ++i) {
+    else if (outCount != 1) {
+        assert(0);
+    }
+
+    Int32 outIndex = 0;
+    for (Int32 i = 0; i < count; ++i) {
         AutoPtr<IDataTypeInfo> typeInfo;
         (*paramInfos)[i]->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        ParamIOAttribute ioAttr;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr == ParamIOAttribute_In)
+            continue;
+
+        Boolean isNull = FALSE;
+        args->IsOutputArgumentNullPtr(i, &isNull);
+        if (isNull) {
+            outIndex++;
+            continue;
+        }
+
         CarDataType type;
         typeInfo->GetDataType(&type);
         AutoPtr<CarValue> value = new CarValue(type);
-        PVoid arg = value->ToValuePtr();
+        value->mIOAttribute = ioAttr;
         if (type == CarDataType_ArrayOf) {
             AutoPtr<IDataTypeInfo> elementTypeInfo;
             ICarArrayInfo::Probe(typeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
             elementTypeInfo->GetDataType(&value->mElementType);
         }
-        if (SUCCEEDED(Unmarshal(GetMember(msgArgs, i), type, arg))) {
-            array->Set(i, value);
-            value->SetToArgumentList(*args, i);
-        }
+        PVoid arg = value->ToValuePtr();
+        Int32 msgArg = typeId == ALLJOYN_STRUCT ? GetMember(msgArgs, outIndex) : msgArgs;
+        if (SUCCEEDED(Unmarshal(msgArg, type, arg)))
+            value->AssignArgumentListOutput(args, outIndex);
+        outIndex++;
     }
-    AutoLock lock(sLock);
-    sRecords[*args] = array;
     return NOERROR;
 }
 
@@ -1342,9 +1502,10 @@ ECode MsgArg::Marshal(
  * @param args the Java objects
  * @throws MarshalBusException if the marshalling fails
  */
-ECode MsgArg::Marshal(
+ECode MsgArg::MarshalIn(
     /* [in] */ Int64 msgArg,
     /* [in] */ const String& sig,
+    /* [in] */ IMethodInfo* method,
     /* [in] */ IArgumentList* args)
 {
     AutoPtr<ArrayOf<String> > sigs = Signature::Split(sig);
@@ -1353,17 +1514,103 @@ ECode MsgArg::Marshal(
         assert(0);
         // throw new MarshalBusException("cannot marshal args into '" + sig + "', bad signature");
     }
-    assert(0);
-    // SetStruct(msgArg, (args == NULL) ? 0 : args->GetLength());
-    // for (Int32 i = 0; i < GetNumMembers(msgArg); ++i) {
-    //     Marshal(GetMember(msgArg, i), (*sigs)[i], (PVoid)(*args)[i]);
-    // }
+
+    Int32 count = 0;
+    method->GetParamCount(&count);
+    AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
+    method->GetAllParamInfos(paramInfos);
+    Int32 inCount = 0;
+    for (Int32 i = 0; i < count; i++) {
+        ParamIOAttribute ioAttr = ParamIOAttribute_In;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr == ParamIOAttribute_In)
+            inCount++;
+    }
+    SetStruct(msgArg, inCount);
+    Int32 inIndex = 0;
+    for (Int32 i = 0; i < count; ++i) {
+        AutoPtr<IDataTypeInfo> typeInfo;
+        (*paramInfos)[i]->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        ParamIOAttribute ioAttr;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr != ParamIOAttribute_In)
+            continue;
+        CarDataType type;
+        typeInfo->GetDataType(&type);
+        AutoPtr<CarValue> value = new CarValue(type);
+        if (type == CarDataType_ArrayOf) {
+            AutoPtr<IDataTypeInfo> elementTypeInfo;
+            ICarArrayInfo::Probe(typeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementTypeInfo);
+            elementTypeInfo->GetDataType(&value->mElementType);
+        }
+        value->GetFromArgumentList(args, i);
+        PVoid arg = value->ToValuePtr();
+        Marshal(GetMember(msgArg, inIndex), (*sigs)[inIndex], arg);
+        inIndex++;
+    }
+    return NOERROR;
+}
+
+ECode MsgArg::MarshalOut(
+    /* [in] */ Int64 msgArg,
+    /* [in] */ const String& sig,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* args)
+{
+    AutoPtr<ArrayOf<String> > sigs = Signature::Split(sig);
+    if (sigs == NULL) {
+        Logger::E("MsgArg", "cannot marshal args into '%s', bad signature", sig.string());
+        assert(0);
+        // throw new MarshalBusException("cannot marshal args into '" + sig + "', bad signature");
+        return NOERROR;
+    }
+    Int32 count = 0;
+    method->GetParamCount(&count);
+    AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(count);
+    method->GetAllParamInfos(paramInfos);
+    Int32 outCount = 0;
+    for (Int32 i = 0; i < count; i++) {
+        ParamIOAttribute ioAttr = ParamIOAttribute_In;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr != ParamIOAttribute_In)
+            outCount++;
+    }
+    AutoPtr<ArrayOf<CarValue*> > array;
+    if (outCount > 0) {
+        AutoLock lock(sLock);
+        RecordMap::Iterator it = sRecords.Find(args);
+        if (it == sRecords.End()) {
+            Logger::E("MsgArg", "MarshalOut() cannot find record");
+            assert(0);
+            return NOERROR;
+        }
+        array = it->mSecond;
+    }
+    SetStruct(msgArg, outCount);
+    Int32 outIndex = 0;
+    for (Int32 i = 0; i < count; ++i) {
+        AutoPtr<IDataTypeInfo> typeInfo;
+        (*paramInfos)[i]->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        ParamIOAttribute ioAttr;
+        (*paramInfos)[i]->GetIOAttribute(&ioAttr);
+        if (ioAttr == ParamIOAttribute_In)
+            continue;
+        AutoPtr<CarValue> value = (*array)[i];
+        assert(value);
+        PVoid arg = value->ToValuePtr();
+        Marshal(GetMember(msgArg, outIndex), (*sigs)[outIndex], arg);
+        outIndex++;
+    }
+
     return NOERROR;
 }
 
 ECode MsgArg::ReleaseRecord(
     /* [in] */ IArgumentList* args)
 {
+    if (args == NULL)
+        return NOERROR;
+
     AutoLock lock(sLock);
     sRecords.Erase(args);
     return NOERROR;

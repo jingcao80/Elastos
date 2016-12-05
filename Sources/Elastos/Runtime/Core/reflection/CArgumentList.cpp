@@ -501,7 +501,23 @@ ECode CArgumentList::IsOutputArgumentNullPtr(
     /* [in] */ Int32 index,
     /* [out] */ Boolean* isNull)
 {
-    assert(0 && "TODO");
+    if (isNull == NULL || index < 0 || index >= (Int32)mParamCount
+        || (mParamElem[index].mAttrib == ParamIOAttribute_In)) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    if (mParamElem[index].mSize == 4) {
+        if (mParamElem[index].mType == CarDataType_String) {
+            *isNull = *(String **)(mParamBuf + mParamElem[index].mPos) == NULL;
+        }
+        else {
+            *isNull = *(UInt32 *)(mParamBuf + mParamElem[index].mPos) == 0;
+        }
+    }
+    else {
+        return E_INVALID_OPERATION;
+    }
+
     return NOERROR;
 }
 

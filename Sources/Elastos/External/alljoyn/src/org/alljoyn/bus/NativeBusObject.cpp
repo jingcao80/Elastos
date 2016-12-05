@@ -234,32 +234,28 @@ void NativeBusObject::MethodHandler(
 
     mMapLock.Unlock();
 
-    Int32 count;
-    method->GetParamCount(&count);
-    AutoPtr<IParamInfo> paramInfo;
-    method->GetParamInfoByIndex(count - 1, (IParamInfo**)&paramInfo);
-    ParamIOAttribute ioAttr;
-    paramInfo->GetIOAttribute(&ioAttr);
-    AutoPtr<MsgArg::CarValue> value;
-    PVoid reply = NULL;
-    if (ioAttr != ParamIOAttribute_In) {
-        AutoPtr<IDataTypeInfo> typeInfo;
-        paramInfo->GetTypeInfo((IDataTypeInfo**)&typeInfo);
-        CarDataType type;
-        typeInfo->GetDataType(&type);
-        value = new MsgArg::CarValue(type);
-        value->mIOAttribute = ioAttr;
-        value->SetToArgumentList(args, count - 1);
-        reply = value->ToValuePtr();
-    }
-
     if (FAILED(method->Invoke(busObj, args))) {
         MethodReply(member, msg, ER_FAIL);
         MsgArg::ReleaseRecord(args);
         return;
     }
 
-    MethodReply(member, msg, reply);
+    Boolean hasReply = FALSE;
+    Int32 count = 0;
+    method->GetParamCount(&count);
+    for (Int32 i = 0; i < count; i++) {
+        Boolean isNull = FALSE;
+        if (SUCCEEDED(args->IsOutputArgumentNullPtr(i, &isNull)) && !isNull) {
+            hasReply = TRUE;
+            break;
+        }
+    }
+    if (hasReply) {
+        MethodReply(member, msg, method, args);
+    }
+    else {
+        MethodReply(member, msg, NULL, (IArgumentList*)NULL);
+    }
     MsgArg::ReleaseRecord(args);
 }
 
@@ -299,7 +295,8 @@ QStatus NativeBusObject::MethodReply(
 QStatus NativeBusObject::MethodReply(
     /* [in] */ const ajn::InterfaceDescription::Member* member,
     /* [in] */ ajn::Message& msg,
-    /* [in] */ PVoid reply)
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* reply)
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodReply()");
 
@@ -317,7 +314,6 @@ QStatus NativeBusObject::MethodReply(
     QStatus status;
     uint8_t completeTypes = ajn::SignatureUtils::CountCompleteTypes(member->returnSignature.c_str());
     if (reply) {
-        AutoPtr<ArrayOf<Int64> > args;
         if (completeTypes > 1) {
             assert(0);
             // jmethodID mid = env->GetStaticMethodID(CLS_Signature, "structArgs",
@@ -330,18 +326,13 @@ QStatus NativeBusObject::MethodReply(
             //     return MethodReply(member, msg, ER_FAIL);
             // }
         }
-        else {
+        // else {
             /*
              * Create Object[] out of the invoke() return value to reuse
              * marshalling code in Marshal() for the reply message.
              */
-            args = ArrayOf<Int64>::Alloc(1);
-            if (!args) {
-                return MethodReply(member, msg, ER_FAIL);
-            }
-            args->Set(0, (Int64)reply);
-        }
-        if (!Marshal(member->returnSignature.c_str(), args, &replyArgs)) {
+        // }
+        if (!Marshal(member->returnSignature.c_str(), method, reply, &replyArgs)) {
             return MethodReply(member, msg, ER_FAIL);
         }
         status = BusObject::MethodReply(msg, replyArgs.v_struct.members, replyArgs.v_struct.numMembers);

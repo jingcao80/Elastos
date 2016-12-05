@@ -349,7 +349,7 @@ ECode ProxyBusObject::MethodCall(
     const ajn::MsgArg* replyArgs;
     size_t numReplyArgs;
 
-    ec = MsgArg::Marshal((Int64)&args, inputSig, _args);
+    ec = MsgArg::MarshalIn((Int64)&args, inputSig, method, _args);
     if (FAILED(ec)) {
         Logger::E(TAG, "MethodCall(): Marshal failure");
         return E_STATUS_FAIL;
@@ -417,12 +417,10 @@ ECode ProxyBusObject::MethodCall(
                     structArg.v_struct.members[i] = replyArgs[i];
                 }
                 structArg.SetOwnershipFlags(ajn::MsgArg::OwnsArgs);
-                assert(0 && "TODO");
-                // jreplyArg = Unmarshal(&structArg, joutType);
+                MsgArg::UnmarshalOut((Int64)&structArg, method, _args);
             }
             else if (numReplyArgs > 0) {
-                assert(0 && "TODO");
-                // jreplyArg = Unmarshal(&replyArgs[0], joutType);
+                MsgArg::UnmarshalOut((Int64)&replyArgs[0], method, _args);
             }
         }
         else if (ER_BUS_REPLY_IS_ERROR_MESSAGE == status) {

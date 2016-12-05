@@ -37,7 +37,8 @@ public:
      */
     static CARAPI_(String) TypeSig(
         /* [in] */ ArrayOf<IParamInfo*>* types,
-        /* [in] */ const String& signature);
+        /* [in] */ const String& signature,
+        /* [in] */ Boolean input);
 
 private:
     Signature();

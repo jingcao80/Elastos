@@ -142,7 +142,8 @@ ajn::MsgArg* Marshal(
  */
 ajn::MsgArg* Marshal(
     /* [in] */ const char* signature,
-    /* [in] */ ArrayOf<Int64>* objs,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* objs,
     /* [in] */ ajn::MsgArg* arg);
 
 /**

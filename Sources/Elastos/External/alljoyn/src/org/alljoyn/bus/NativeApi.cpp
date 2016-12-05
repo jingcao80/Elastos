@@ -308,13 +308,14 @@ ajn::MsgArg* Marshal(
  */
 ajn::MsgArg* Marshal(
     /* [in] */ const char* signature,
-    /* [in] */ ArrayOf<Int64>* objs,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* objs,
     /* [in] */ ajn::MsgArg* arg)
 {
     if (!signature) {
         return NULL;
     }
-    if (FAILED(MsgArg::Marshal((Int64)arg, String(signature), objs))) {
+    if (FAILED(MsgArg::MarshalOut((Int64)arg, String(signature), method, objs))) {
         return NULL;
     }
     return arg;
@@ -352,7 +353,7 @@ QStatus Unmarshal(
     ajn::MsgArg arg(ajn::ALLJOYN_STRUCT);
     arg.v_struct.members = (ajn::MsgArg*)args;
     arg.v_struct.numMembers = numArgs;
-    if (FAILED(MsgArg::Unmarshal(method, (Int64)&arg, unmarshalled))) {
+    if (FAILED(MsgArg::UnmarshalIn(method, (Int64)&arg, unmarshalled))) {
         return ER_FAIL;
     }
     return ER_OK;

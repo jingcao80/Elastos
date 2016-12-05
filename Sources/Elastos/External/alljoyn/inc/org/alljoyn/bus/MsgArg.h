@@ -37,6 +37,14 @@ public:
             /* [in] */ IArgumentList* args,
             /* [in] */ Int32 index);
 
+        CARAPI GetFromArgumentList(
+            /* [in] */ IArgumentList* args,
+            /* [in] */ Int32 index);
+
+        CARAPI AssignArgumentListOutput(
+            /* [in] */ IArgumentList* args,
+            /* [in] */ Int32 index);
+
     public:
         ParamIOAttribute mIOAttribute;
         CarDataType mType;
@@ -275,10 +283,15 @@ public:
      * @return the unmarshalled Java objects
      * @throws MarshalBusException if the unmarshalling fails
      */
-    static CARAPI Unmarshal(
+    static CARAPI UnmarshalIn(
         /* [in] */ IMethodInfo* method,
         /* [in] */ Int64 msgArgs,
         /* [out] */ IArgumentList** args);
+
+    static CARAPI UnmarshalOut(
+        /* [in] */ Int64 msgArgs,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args);
 
     /**
      * Marshals a Java object into a native MsgArg.
@@ -302,9 +315,16 @@ public:
      * @param args the Java objects
      * @throws MarshalBusException if the marshalling fails
      */
-    static CARAPI Marshal(
+    static CARAPI MarshalIn(
         /* [in] */ Int64 msgArg,
         /* [in] */ const String& sig,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args);
+
+    static CARAPI MarshalOut(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& sig,
+        /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* args);
 
     static CARAPI ReleaseRecord(
@@ -350,7 +370,8 @@ private:
     static const Int32 ALLJOYN_INT64_ARRAY;
     static const Int32 ALLJOYN_BYTE_ARRAY;
 
-    static Map<AutoPtr<IArgumentList>, AutoPtr<ArrayOf<CarValue*> > > sRecords;
+    typedef Map<AutoPtr<IArgumentList>, AutoPtr<ArrayOf<CarValue*> > > RecordMap;
+    static RecordMap sRecords;
     static Object sLock;
 };
 
