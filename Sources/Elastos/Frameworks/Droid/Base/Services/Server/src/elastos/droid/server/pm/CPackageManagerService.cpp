@@ -7253,16 +7253,12 @@ ECode CPackageManagerService::ChooseBestActivity(
             AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(value);
             if ((flags & IPackageManager::PERFORM_PRE_LAUNCH_CHECK) ==
                     IPackageManager::PERFORM_PRE_LAUNCH_CHECK) {
-                AutoPtr<IResolveInfo> result = FindPreLaunchCheckResolve(intent, ri, userId);
-                *resolveInfo = result;
-                REFCOUNT_ADD(*resolveInfo)
-                return NOERROR;
+                ri = FindPreLaunchCheckResolve(intent, ri, userId);
             }
-            else {
-                *resolveInfo = ri;
-                REFCOUNT_ADD(*resolveInfo)
-                return NOERROR;
-            }
+
+            *resolveInfo = ri;
+            REFCOUNT_ADD(*resolveInfo)
+            return NOERROR;
         }
         else if (size > 1) {
             Int32 flags;
