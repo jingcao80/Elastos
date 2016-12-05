@@ -977,8 +977,7 @@ Float TextLine::HandleRun(
                 if (((*mCharacterStyleSpanSet->mSpanStarts)[k] >= mStart + jnext) ||
                         ((*mCharacterStyleSpanSet->mSpanEnds)[k] <= mStart + j)) continue;
 
-                AutoPtr<ICharacterStyle> span = (*mCharacterStyleSpanSet->mSpans)[k];
-                span->UpdateDrawState(wp);
+                (*mCharacterStyleSpanSet->mSpans)[k]->UpdateDrawState(wp);
             }
 
             x += HandleText(wp, j, jnext, i, inext, runIsRtl, c, x,

@@ -85,11 +85,11 @@ ProgressDialog::ProgressDialog()
     , mIndeterminate(FALSE)
     , mHasStarted(FALSE)
 {
-    InitFormats();
 }
 
 ProgressDialog::~ProgressDialog()
-{}
+{
+}
 
 ECode ProgressDialog::constructor(
     /* [in] */ IContext* context)
@@ -193,11 +193,11 @@ ECode ProgressDialog::OnCreate(
         mProgress = IProgressBar::Probe(tmp);
 
         tmp = NULL;
-        view->FindViewById(R::id::progress, (IView**)&tmp);
+        view->FindViewById(R::id::progress_number, (IView**)&tmp);
         mProgressNumber = ITextView::Probe(tmp);
 
         tmp = NULL;
-        view->FindViewById(R::id::progress, (IView**)&tmp);
+        view->FindViewById(R::id::progress_percent, (IView**)&tmp);
         mProgressPercent = ITextView::Probe(tmp);
 
         SetView(view);

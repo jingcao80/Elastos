@@ -340,7 +340,7 @@ ECode SpannableStringInternal::GetSpans(
         }
 
         if (count == 0) {
-            ret1 = (*mSpans)[i];
+            ret1 = (*mSpans)[i]->Probe(kind);
             count++;
         }
         else {
@@ -364,10 +364,10 @@ ECode SpannableStringInternal::GetSpans(
                 }
 
                 ret->Copy(j + 1, ret, j, count - j);
-                ret->Set(j, (*mSpans)[i]);
+                ret->Set(j, (*mSpans)[i]->Probe(kind));
                 count++;
             } else {
-                ret->Set(count++, (*mSpans)[i]);
+                ret->Set(count++, (*mSpans)[i]->Probe(kind));
             }
         }
     }

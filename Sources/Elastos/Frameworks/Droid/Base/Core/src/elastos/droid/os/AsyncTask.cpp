@@ -8,6 +8,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
 #include <unistd.h>
 
@@ -28,6 +29,7 @@ using Elastos::Utility::Concurrent::ITimeUnitHelper;
 using Elastos::Utility::Concurrent::CTimeUnitHelper;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
 
@@ -327,13 +329,11 @@ ECode AsyncTask::ExecuteOnExecutor(
     if (mStatus != PENDING) {
         switch (mStatus) {
             case RUNNING:
-                // throw new IllegalStateException("Cannot execute task:"
-                //         + " the task is already running.");
+                Logger::E(TAG, "Cannot execute task: the task is already running.");
                 return E_ILLEGAL_STATE_EXCEPTION;
             case FINISHED:
-                // throw new IllegalStateException("Cannot execute task:"
-                //         + " the task has already been executed "
-                //         + "(a task can be executed only once)");
+                Logger::E(TAG, "Cannot execute task: the task has already been executed "
+                    "(a task can be executed only once)");
                 return E_ILLEGAL_STATE_EXCEPTION;
             case PENDING:
                 break;
