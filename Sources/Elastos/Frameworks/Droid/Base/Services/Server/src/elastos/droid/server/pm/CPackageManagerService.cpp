@@ -7253,12 +7253,16 @@ ECode CPackageManagerService::ChooseBestActivity(
             AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(value);
             if ((flags & IPackageManager::PERFORM_PRE_LAUNCH_CHECK) ==
                     IPackageManager::PERFORM_PRE_LAUNCH_CHECK) {
-                ri = FindPreLaunchCheckResolve(intent, ri, userId);
+                AutoPtr<IResolveInfo> result = FindPreLaunchCheckResolve(intent, ri, userId);
+                *resolveInfo = result;
+                REFCOUNT_ADD(*resolveInfo)
+                return NOERROR;
             }
-
-            *resolveInfo = ri;
-            REFCOUNT_ADD(*resolveInfo)
-            return NOERROR;
+            else {
+                *resolveInfo = ri;
+                REFCOUNT_ADD(*resolveInfo)
+                return NOERROR;
+            }
         }
         else if (size > 1) {
             Int32 flags;
@@ -7271,14 +7275,14 @@ ECode CPackageManagerService::ChooseBestActivity(
             query->Get(1, (IInterface**)&value1);
             AutoPtr<IResolveInfo> r0 = IResolveInfo::Probe(value0);
             AutoPtr<IResolveInfo> r1 = IResolveInfo::Probe(value1);
+            Int32 p0, p1;
+            r0->GetPriority(&p0);
+            r1->GetPriority(&p1);
             if (DEBUG_INTENT_MATCHING || debug) {
                 AutoPtr<IActivityInfo> ai;
                 r0->GetActivityInfo((IActivityInfo**)&ai);
                 String name;
                 IPackageItemInfo::Probe(ai)->GetName(&name);
-                Int32 p0, p1;
-                r0->GetPriority(&p0);
-                r1->GetPriority(&p1);
                 ai = NULL;
                 r1->GetActivityInfo((IActivityInfo**)&ai);
                 String name1;
@@ -7289,7 +7293,7 @@ ECode CPackageManagerService::ChooseBestActivity(
             // default, then it is always desireable to pick it.
             Int32 r0Value, r1Value;
             Boolean r0Result, r1Result;
-            if ((r0->GetPriority(&r0Value), r1->GetPriority(&r1Value), r0Value != r1Value)
+            if (p0 != p1
                     || (r0->GetPreferredOrder(&r0Value), r1->GetPreferredOrder(&r1Value), r0Value != r1Value)
                     || (r0->GetIsDefault(&r0Result), r1->GetIsDefault(&r1Result), r0Result != r1Result)) {
                 *resolveInfo = r0;
@@ -7298,9 +7302,8 @@ ECode CPackageManagerService::ChooseBestActivity(
             }
             // If we have saved a preference for a preferred activity for
             // this Intent, use that.
-            r0->GetPriority(&r0Value);
             AutoPtr<IResolveInfo> ri = FindPreferredActivity(intent, resolvedType,
-                    flags, query, r0Value, TRUE, FALSE, debug, userId);
+                    flags, query, p0, TRUE, FALSE, debug, userId);
             if (ri != NULL) {
                 *resolveInfo = ri;
                 REFCOUNT_ADD(*resolveInfo)

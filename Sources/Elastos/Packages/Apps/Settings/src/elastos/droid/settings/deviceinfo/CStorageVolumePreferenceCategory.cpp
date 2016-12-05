@@ -642,21 +642,21 @@ AutoPtr<IIntent> CStorageVolumePreferenceCategory::IntentForClick(
         intent->SetClass(context, Elastos::Droid::Settings::ECLSID_CMediaFormat);
         intent->PutExtra(IStorageVolume::EXTRA_STORAGE_VOLUME, IParcelable::Probe(mVolume));
     }
-    else if (pref == IPreference::Probe(mItemApps)) {
+    else if (pref == mItemApps.Get()) {
         CIntent::New(IIntent::ACTION_MANAGE_PACKAGE_STORAGE, (IIntent**)&intent);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         intent->SetClass(context, ECLSID_CSettingsManageApplicationsActivity);
     }
-    else if (pref == IPreference::Probe(mItemDownloads)) {
+    else if (pref == mItemDownloads.Get()) {
         CIntent::New(IDownloadManager::ACTION_VIEW_DOWNLOADS, (IIntent**)&intent);
         intent->PutBooleanExtra(IDownloadManager::INTENT_EXTRAS_SORT_BY_SIZE, TRUE);
     }
-    else if (pref == IPreference::Probe(mItemMusic)) {
+    else if (pref == mItemMusic.Get()) {
         CIntent::New(IIntent::ACTION_GET_CONTENT, (IIntent**)&intent);
         intent->SetType(String("audio/mp3"));
     }
-    else if (pref == IPreference::Probe(mItemDcim)) {
+    else if (pref == mItemDcim.Get()) {
         CIntent::New(IIntent::ACTION_VIEW, (IIntent**)&intent);
         intent->PutBooleanExtra(IIntent::EXTRA_LOCAL_ONLY, TRUE);
         // TODO Create a Videos category, MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -666,7 +666,7 @@ AutoPtr<IIntent> CStorageVolumePreferenceCategory::IntentForClick(
         media->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
         intent->SetData(uri);
     }
-    else if (pref == IPreference::Probe(mItemMisc)) {
+    else if (pref == mItemMisc.Get()) {
         AutoPtr<IContext> tmp;
         GetContext((IContext**)&tmp);
         AutoPtr<IContext> context;

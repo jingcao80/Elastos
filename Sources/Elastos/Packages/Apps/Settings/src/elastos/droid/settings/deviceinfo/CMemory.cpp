@@ -665,7 +665,7 @@ ECode CMemory::OnPreferenceTreeClick(
                 Mount();
             }
             *result = TRUE;
-            return TRUE;
+            return NOERROR;
         }
     }
 

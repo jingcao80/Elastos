@@ -6663,7 +6663,7 @@ ECode MediaProvider::GetType(
        case IMAGES_MEDIA:
        case IMAGES_THUMBNAILS:
            {
-               *result = IMediaStoreAudioMedia::CONTENT_TYPE;
+               *result = IMediaStoreImagesMedia::CONTENT_TYPE;
                return NOERROR;
            }
        case AUDIO_ALBUMART_ID:
