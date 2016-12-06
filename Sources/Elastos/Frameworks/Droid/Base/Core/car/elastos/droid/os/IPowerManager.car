@@ -9,7 +9,7 @@ module
     [deprecated]
     interface IIPowerManager
     {
-        // WARNING: The first two methods must remain the first two methods because their
+        // WARNING: The first five methods must remain the first five methods because their
         // transaction numbers must not change unless IPowerManager.cpp is also updated.
         AcquireWakeLock(
             [in] IBinder* lock,

@@ -13,8 +13,6 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IApplication;
 using Elastos::Droid::Content::CContentValues;
@@ -52,6 +50,7 @@ using Elastos::Droid::Graphics::IColorMatrixColorFilter;
 using Elastos::Droid::Graphics::CColorMatrixColorFilter;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Process;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::IO::CFile;
@@ -161,7 +160,6 @@ WidgetPreviewLoader::CacheDb::CacheDb(
 ECode WidgetPreviewLoader::CacheDb::OnCreate(
     /* [in] */ ISQLiteDatabase* database)
 {
-Slogger::E("WidgetPreviewLoader::CacheDb", "============================CacheDb::OnCreate 1");
     StringBuilder sb;
     sb += "CREATE TABLE IF NOT EXISTS ";
     sb += TABLE_NAME;
@@ -178,7 +176,6 @@ Slogger::E("WidgetPreviewLoader::CacheDb", "============================CacheDb:
     sb += COLUMN_SIZE;
     sb += ") ";
     sb += ");";
-Slogger::E("WidgetPreviewLoader::CacheDb", "============================CacheDb::OnCreate return");
     return database->ExecSQL(sb.ToString());
 }
 
@@ -629,7 +626,6 @@ ECode WidgetPreviewLoader::WriteToDb(
 
     //try {
     Int64 num;
-Slogger::E("WidgetPreviewLoader","==============WriteToDb name=%s",name.string());
     ECode ec = db->Insert(CacheDb::TABLE_NAME, String(NULL), values, &num);
     //} catch (SQLiteDiskIOException e) {
     if (ec == (ECode)E_SQLITE_DISK_IO_EXCEPTION) {
@@ -1100,7 +1096,6 @@ ECode WidgetPreviewLoader::GenerateShortcutPreview(
     }
     c->DrawBitmap(tempBitmap, 0.0f, 0.0f, p);
     c->SetBitmap(NULL);
-Slogger::E("WidgetPreviewLoader", "==========GenerateShortcutPreview (icon hight&width) mAppIconSize=%d",mAppIconSize);
     RenderDrawableToBitmap(icon, preview, 0, 0, mAppIconSize, mAppIconSize);
 
     *bitmap = preview;

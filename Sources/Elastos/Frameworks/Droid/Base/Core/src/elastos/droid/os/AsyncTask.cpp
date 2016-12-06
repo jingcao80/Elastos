@@ -393,10 +393,10 @@ AutoPtr<IExecutor> AsyncTask::InitThreadPoolExecutor()
     CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&tuHelper);
     AutoPtr<ITimeUnit> seconds;
     tuHelper->GetSECONDS((ITimeUnit**)&seconds);
-    AutoPtr<IThreadPoolExecutor> executor;
+    AutoPtr<IExecutor> executor;
     CThreadPoolExecutor::New(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
-        seconds, sPoolWorkQueue, sThreadFactory, (IThreadPoolExecutor**)&executor);
-    return IExecutor::Probe(executor);
+        seconds, sPoolWorkQueue, sThreadFactory, (IExecutor**)&executor);
+    return executor;
 }
 
 } // namespace Os

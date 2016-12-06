@@ -1,0 +1,98 @@
+
+#ifndef __ELASTOS_DEVSAMPLES_DFCHATDEMO_CHOSTACTIVITY_H__
+#define __ELASTOS_DEVSAMPLES_DFCHATDEMO_CHOSTACTIVITY_H__
+
+#include "_Elastos_DevSamples_DFChatDemo_CHostActivity.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/app/Activity.h>
+
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IButton;
+
+namespace Elastos {
+namespace DevSamples {
+namespace DFChatDemo {
+
+class CChatApplication;
+
+CarClass(CHostActivity)
+    , public Activity
+{
+private:
+    class MyHandler
+        : public Handler
+    {
+    public:
+        MyHandler();
+
+        CARAPI constructor(
+            /* [in] */ CHostActivity* host);
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
+        CHostActivity* mHost;
+    };
+
+public:
+    CHostActivity();
+
+    ~CHostActivity();
+
+    CARAPI constructor();
+
+    CARAPI OnCreate(
+        /* [in] */ IBundle* savedInstanceState);
+
+    CARAPI OnDestroy();
+
+public:
+    CARAPI Update(
+        /* [in] */ IObservable* o,
+        /* [in] */ IInterface* arg);
+
+protected:
+    virtual CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
+        /* [in] */ Int32 id);
+
+private:
+    void UpdateChannelState();
+
+    void AlljoynError();
+
+public:
+    static const Int32 DIALOG_ALLJOYN_ERROR_ID;
+
+private:
+
+    static const Int32 DIALOG_SET_NAME_ID;
+    static const Int32 DIALOG_START_ID;
+    static const Int32 DIALOG_STOP_ID;
+
+    static const Int32 HANDLE_APPLICATION_QUIT_EVENT;
+    static const Int32 HANDLE_CHANNEL_STATE_CHANGED_EVENT;
+    static const Int32 HANDLE_ALLJOYN_ERROR_EVENT;
+
+    CChatApplication* mChatApplication;
+
+    AutoPtr<ITextView> mChannelName;
+    AutoPtr<ITextView> mChannelStatus;
+    AutoPtr<IButton> mSetNameButton;
+    AutoPtr<IButton> mStartButton;
+    AutoPtr<IButton> mStopButton;
+    AutoPtr<IButton> mQuitButton;
+
+    AutoPtr<IHandler> mHandler;
+};
+
+} // namespace DFChatDemo
+} // namespace DevSamples
+} // namespace Elastos
+
+#endif // __ELASTOS_DEVSAMPLES_DFCHATDEMO_CHOSTACTIVITY_H__

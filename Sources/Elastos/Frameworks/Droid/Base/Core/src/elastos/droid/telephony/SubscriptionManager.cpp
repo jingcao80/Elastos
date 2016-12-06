@@ -22,9 +22,9 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-const String SubscriptionManager::TAG("SUB");
-const Boolean SubscriptionManager::DBG = TRUE;
-const Boolean SubscriptionManager::VDBG = TRUE;
+const String SubscriptionManager::TAG("SubscriptionManager");
+const Boolean SubscriptionManager::DBG = FALSE;
+const Boolean SubscriptionManager::VDBG = FALSE;
 const Int32 SubscriptionManager::RES_TYPE_BACKGROUND_DARK = 0;
 const Int32 SubscriptionManager::RES_TYPE_BACKGROUND_LIGHT = 1;
 

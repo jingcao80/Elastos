@@ -1,0 +1,19 @@
+
+module
+{
+    interface Elastos.DevSamples.DFChatDemo.IObservable;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFChatDemo {
+
+    interface IObserver {
+        Update(
+            [in] IObservable* o, 
+            [in] IInterface* arg);
+    }
+
+    } // namespace DFChatDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}
