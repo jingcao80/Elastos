@@ -9,7 +9,7 @@ module
     [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.Bus.sample")]
     interface IBasicInterface {
 
-        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "cat")]
         Cat(
             [in] String inStr1,
             [in] String inStr2,

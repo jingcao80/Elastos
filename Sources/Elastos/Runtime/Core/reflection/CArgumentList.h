@@ -331,6 +331,13 @@ public:
         /* [in] */ Int32 pointer,
         /* [in, out] */ PVoid param);
 
+    CARAPI AssignOutputParamValue(
+        /* [in] */ Int32 index,
+        /* [in] */ PVoid param,
+        /* [in] */ CarDataType type,
+        /* [in] */ ParamIOAttribute attrib,
+        /* [in] */ Int32 pointer = 0);
+
 public:
     Byte*           mParamBuf;
 

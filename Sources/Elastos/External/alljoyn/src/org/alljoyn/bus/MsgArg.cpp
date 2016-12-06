@@ -1319,7 +1319,7 @@ ECode MsgArg::UnmarshalOut(
         PVoid arg = value->ToValuePtr();
         Int32 msgArg = typeId == ALLJOYN_STRUCT ? GetMember(msgArgs, outIndex) : msgArgs;
         if (SUCCEEDED(Unmarshal(msgArg, type, arg)))
-            value->AssignArgumentListOutput(args, outIndex);
+            value->AssignArgumentListOutput(args, i);
         outIndex++;
     }
     return NOERROR;

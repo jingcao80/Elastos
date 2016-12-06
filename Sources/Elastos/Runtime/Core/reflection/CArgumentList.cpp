@@ -172,31 +172,133 @@ ECode CArgumentList::GetParamValue(
     }
 
     if (mParamElem[index].mSize == 1) {
-        assert(0 && "TODO");
+        *(Byte*)param = *(Byte*)(mParamBuf + mParamElem[index].mPos);
     }
     else if (mParamElem[index].mSize == 2) {
-        assert(0 && "TODO");
+        *(UInt16*)param = *(UInt16*)(mParamBuf + mParamElem[index].mPos);
     }
     else if (mParamElem[index].mSize == 4) {
         if (type == CarDataType_String) {
             if (pointer == 0) {
-                String* ret = reinterpret_cast<String*>(param);
-                *ret = **(String **)(mParamBuf + mParamElem[index].mPos);
+                *(String*)param = **(String **)(mParamBuf + mParamElem[index].mPos);
             }
             else if (pointer == 1) {
-                String** ret = reinterpret_cast<String**>(param);
-                *ret = *(String **)(mParamBuf + mParamElem[index].mPos);
+                *(String**)param = *(String **)(mParamBuf + mParamElem[index].mPos);
             }
             else {
-                assert(0 && "TODO");
+                return E_INVALID_OPERATION;
             }
         }
         else {
-            assert(0 && "TODO");
+            *(UInt32*)param = *(UInt32*)(mParamBuf + mParamElem[index].mPos);
+        }
+        if (param != 0 && pointer == 1) {
+            if (type == CarDataType_Interface) {
+                ((IInterface*)param)->AddRef();
+            }
+            else if (type == CarDataType_ArrayOf) {
+                _CarQuintet_AddRef((PCarQuintet)param);
+            }
         }
     }
     else if (mParamElem[index].mSize == 8) {
-        assert(0 && "TODO");
+        *(Int64*)param = *(Int64*)(mParamBuf + mParamElem[index].mPos);
+    }
+    else {
+        return E_INVALID_OPERATION;
+    }
+
+    return NOERROR;
+}
+
+ECode CArgumentList::AssignOutputParamValue(
+    /* [in] */ Int32 index,
+    /* [in] */ PVoid param,
+    /* [in] */ CarDataType type,
+    /* [in] */ ParamIOAttribute attrib,
+    /* [in] */ Int32 pointer)
+{
+    if (type == CarDataType_CarArray
+        && mParamElem[index].mType == CarDataType_ArrayOf) {
+        type = mParamElem[index].mType;
+    }
+
+    if (index < 0 || index >= (Int32)mParamCount
+        || (mParamElem[index].mAttrib != attrib)
+        || (type != mParamElem[index].mType)
+        || (type != CarDataType_LocalPtr
+        && mParamElem[index].mPointer != pointer)) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    if (!mParamBuf || mParamElem[index].mPos
+        + mParamElem[index].mSize > mParamBufSize) {
+        return E_INVALID_OPERATION;
+    }
+
+    if (mParamElem[index].mSize == 4) {
+        switch (type) {
+            case CarDataType_Int16:
+                *(Int16*)(mParamBuf + mParamElem[index].mPos) = *(Int16*)param;
+                break;
+            case CarDataType_Int32:
+                *(Int32*)(mParamBuf + mParamElem[index].mPos) = *(Int32*)param;
+                break;
+            case CarDataType_Int64:
+                *(Int64*)(mParamBuf + mParamElem[index].mPos) = *(Int64*)param;
+                break;
+            case CarDataType_Byte:
+                *(Byte*)(mParamBuf + mParamElem[index].mPos) = *(Byte*)param;
+                break;
+            case CarDataType_Float:
+                *(Float*)(mParamBuf + mParamElem[index].mPos) = *(Float*)param;
+                break;
+            case CarDataType_Double:
+                *(Double*)(mParamBuf + mParamElem[index].mPos) = *(Double*)param;
+                break;
+            case CarDataType_Char32:
+                *(Char32*)(mParamBuf + mParamElem[index].mPos) = *(Char32*)param;
+                break;
+            case CarDataType_String:
+                **(String**)(mParamBuf + mParamElem[index].mPos) = *(String*)param;
+                break;
+            case CarDataType_Boolean:
+                *(Boolean*)(mParamBuf + mParamElem[index].mPos) = *(Boolean*)param;
+                break;
+            case CarDataType_Enum:
+                *(Int32*)(mParamBuf + mParamElem[index].mPos) = *(Int32*)param;
+                break;
+            case CarDataType_Interface: {
+                PInterface ptr = *(PInterface*)param;
+                if (ptr != NULL)
+                    ptr->AddRef();
+                *(PInterface*)(mParamBuf + mParamElem[index].mPos) = ptr;
+                break;
+            }
+            case CarDataType_EMuid:
+                *(EMuid**)(mParamBuf + mParamElem[index].mPos) = *(EMuid**)param;
+                break;
+            case CarDataType_EGuid:
+                *(EGuid**)(mParamBuf + mParamElem[index].mPos) = *(EGuid**)param;
+                break;
+            case CarDataType_ECode:
+                *(ECode*)(mParamBuf + mParamElem[index].mPos) = *(ECode*)param;
+                break;
+            case CarDataType_ArrayOf: {
+                PCarQuintet ptr = *(PCarQuintet*)param;
+                if (pointer == 2) {
+                    _CarQuintet_AddRef(ptr);
+                    *(PCarQuintet*)(mParamBuf + mParamElem[index].mPos) = ptr;
+                }
+                else {
+                    assert(0 && "TODO");
+                }
+                break;
+            }
+            default:
+                assert(0 && "TODO");
+                break;
+        }
     }
     else {
         return E_INVALID_OPERATION;
@@ -209,8 +311,7 @@ ECode CArgumentList::GetInputArgumentOfInt16(
     /* [in] */ Int32 index,
     /* [out] */ Int16* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Int16, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfInt16(
@@ -225,8 +326,7 @@ ECode CArgumentList::GetInputArgumentOfInt32(
     /* [in] */ Int32 index,
     /* [in] */ Int32* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Int32, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfInt32(
@@ -240,8 +340,7 @@ ECode CArgumentList::GetInputArgumentOfInt64(
     /* [in] */ Int32 index,
     /* [out] */ Int64* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Int64, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfInt64(
@@ -255,8 +354,7 @@ ECode CArgumentList::GetInputArgumentOfByte(
     /* [in] */ Int32 index,
     /* [out] */ Byte* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Byte, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfByte(
@@ -271,8 +369,7 @@ ECode CArgumentList::GetInputArgumentOfFloat(
     /* [in] */ Int32 index,
     /* [out] */ Float* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Float, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfFloat(
@@ -286,8 +383,7 @@ ECode CArgumentList::GetInputArgumentOfDouble(
     /* [in] */ Int32 index,
     /* [out] */ Double* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Double, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfDouble(
@@ -301,8 +397,7 @@ ECode CArgumentList::GetInputArgumentOfChar(
     /* [in] */ Int32 index,
     /* [out] */ Char32* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Char32, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfChar(
@@ -317,24 +412,22 @@ ECode CArgumentList::GetInputArgumentOfString(
     /* [in] */ Int32 index,
     /* [out] */ String* value)
 {
-    return GetParamValue(index, CarDataType_String, ParamIOAttribute_In, 0,
-            reinterpret_cast<PVoid>(value));
+    return GetParamValue(index, CarDataType_String, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfString(
     /* [in] */ Int32 index,
     /* [in] */ const String& value)
 {
-    return SetParamValue(index, reinterpret_cast<PVoid>(const_cast<String*>(&value)),
-            CarDataType_String, ParamIOAttribute_In);
+    return SetParamValue(index, const_cast<String*>(&value),
+        CarDataType_String, ParamIOAttribute_In);
 }
 
 ECode CArgumentList::GetInputArgumentOfBoolean(
     /* [in] */ Int32 index,
     /* [out] */ Boolean* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Boolean, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfBoolean(
@@ -349,8 +442,7 @@ ECode CArgumentList::GetInputArgumentOfEMuid(
     /* [in] */ Int32 index,
     /* [out] */ EMuid* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_EMuid, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfEMuid(
@@ -364,8 +456,7 @@ ECode CArgumentList::GetInputArgumentOfEGuid(
     /* [in] */ Int32 index,
     /* [out] */ EGuid* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_EGuid, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfEGuid(
@@ -379,8 +470,7 @@ ECode CArgumentList::GetInputArgumentOfECode(
     /* [in] */ Int32 index,
     /* [out] */ ECode* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_ECode, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfECode(
@@ -410,8 +500,7 @@ ECode CArgumentList::GetInputArgumentOfEnum(
     /* [in] */ Int32 index,
     /* [out] */ Int32* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Enum, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfEnum(
@@ -425,8 +514,7 @@ ECode CArgumentList::GetInputArgumentOfCarArray(
     /* [in] */ Int32 index,
     /* [out] */ PCarQuintet* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_CarArray, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfCarArray(
@@ -448,8 +536,7 @@ ECode CArgumentList::GetInputArgumentOfObjectPtr(
     /* [in] */ Int32 index,
     /* [out] */ PInterface* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return GetParamValue(index, CarDataType_Interface, ParamIOAttribute_In, 0, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfObjectPtr(
@@ -525,8 +612,8 @@ ECode CArgumentList::AssignOutputArgumentOfInt16Ptr(
     /* [in] */ Int32 index,
     /* [in] */ Int16 value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Int16,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfInt16Ptr(
@@ -541,8 +628,8 @@ ECode CArgumentList::AssignOutputArgumentOfInt32Ptr(
     /* [in] */ Int32 index,
     /* [in] */ Int32 value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Int32,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfInt32Ptr(
@@ -557,8 +644,8 @@ ECode CArgumentList::AssignOutputArgumentOfInt64Ptr(
     /* [in] */ Int32 index,
     /* [out] */ Int64 value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Int64,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfInt64Ptr(
@@ -573,8 +660,8 @@ ECode CArgumentList::AssignOutputArgumentOfBytePtr(
     /* [in] */ Int32 index,
     /* [out] */ Byte value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Byte,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfBytePtr(
@@ -589,8 +676,8 @@ ECode CArgumentList::AssignOutputArgumentOfFloatPtr(
     /* [in] */ Int32 index,
     /* [in] */ Float value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Float,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfFloatPtr(
@@ -605,8 +692,8 @@ ECode CArgumentList::AssignOutputArgumentOfDoublePtr(
     /* [in] */ Int32 index,
     /* [in] */ Double value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Double,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfDoublePtr(
@@ -621,8 +708,8 @@ ECode CArgumentList::AssignOutputArgumentOfCharPtr(
     /* [in] */ Int32 index,
     /* [in] */ Char32 value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Char32,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfCharPtr(
@@ -637,8 +724,8 @@ ECode CArgumentList::AssignOutputArgumentOfStringPtr(
     /* [in] */ Int32 index,
     /* [in] */ const String& value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, const_cast<String*>(&value), CarDataType_String,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfStringPtr(
@@ -653,8 +740,8 @@ ECode CArgumentList::AssignOutputArgumentOfBooleanPtr(
     /* [in] */ Int32 index,
     /* [in] */ Boolean value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Boolean,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfBooleanPtr(
@@ -669,8 +756,8 @@ ECode CArgumentList::AssignOutputArgumentOfEMuidPtr(
     /* [in] */ Int32 index,
     /* [in] */ EMuid* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_EMuid,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfEMuidPtr(
@@ -685,8 +772,8 @@ ECode CArgumentList::AssignOutputArgumentOfEGuidPtr(
     /* [in] */ Int32 index,
     /* [in] */ EGuid* value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_EGuid,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfEGuidPtr(
@@ -701,8 +788,8 @@ ECode CArgumentList::AssignOutputArgumentOfECodePtr(
     /* [in] */ Int32 index,
     /* [in] */ ECode value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_ECode,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfECodePtr(
@@ -733,8 +820,8 @@ ECode CArgumentList::AssignOutputArgumentOfEnumPtr(
     /* [in] */ Int32 index,
     /* [in] */ Int32 value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Enum,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfEnumPtr(
@@ -749,8 +836,8 @@ ECode CArgumentList::AssignOutputArgumentOfCarArrayPtr(
     /* [in] */ Int32 index,
     /* [in] */ PCarQuintet value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_CarArray,
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::SetOutputArgumentOfCarArrayPtr(
@@ -758,15 +845,15 @@ ECode CArgumentList::SetOutputArgumentOfCarArrayPtr(
     /* [out] */ PCarQuintet value)
 {
     return SetParamValue(index, &value, CarDataType_CarArray,
-            ParamIOAttribute_CallerAllocOut, 0);
+            ParamIOAttribute_CallerAllocOut, 1);
 }
 
 ECode CArgumentList::AssignOutputArgumentOfCarArrayPtrPtr(
     /* [in] */ Int32 index,
     /* [out] */ PCarQuintet value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_CarArray,
+            ParamIOAttribute_CalleeAllocOut, 2);
 }
 
 ECode CArgumentList::SetOutputArgumentOfCarArrayPtrPtr(
@@ -797,8 +884,8 @@ ECode CArgumentList::AssignOutputArgumentOfObjectPtrPtr(
     /* [in] */ Int32 index,
     /* [in] */ PInterface value)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    return AssignOutputParamValue(index, &value, CarDataType_Interface,
+            ParamIOAttribute_CallerAllocOut, 2);
 }
 
 ECode CArgumentList::SetOutputArgumentOfObjectPtrPtr(
