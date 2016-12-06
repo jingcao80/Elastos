@@ -240,8 +240,9 @@ ECode LocalActivityManager::StartActivity(
     // Already have information about the new activity id?
     AutoPtr<IInterface> obj;
     mActivities->Get(obj, (IInterface**)&obj);
-    LocalActivityRecord* r = (LocalActivityRecord*)ILocalActivityRecord::Probe(obj);
-    if (r == NULL) {
+    ILocalActivityRecord* lar = ILocalActivityRecord::Probe(obj);
+    AutoPtr<LocalActivityRecord> r = (LocalActivityRecord*)lar;
+    if (lar == NULL) {
         // Need to create it...
         AutoPtr<ILocalActivityRecord> record;
         CLocalActivityRecord::New(id, intent, (ILocalActivityRecord**)&record);

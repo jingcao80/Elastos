@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFChatDemo {
+
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.Bus.chat")]
+    interface IChatInterface {
+
+        /*
+         * The BusSignal annotation signifies that this function should be used as
+         * part of the AllJoyn interface.  The runtime is smart enough to figure
+         * out that this is a used as a signal emitter and is only called to send
+         * signals and not to receive signals.
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "chat")]
+        Chat(
+            [in] String str);
+    }
+
+    } // namespace DFChatDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}
