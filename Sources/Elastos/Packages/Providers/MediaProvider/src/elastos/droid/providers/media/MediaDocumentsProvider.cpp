@@ -1096,6 +1096,7 @@ void MediaDocumentsProvider::IncludeAudioRootDocument(
     result->NewRow((IRowBuilder**)&row);
     row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_AUDIO_ROOT));
     AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
     String str;
     context->GetString(R::string::root_audio, &str);
     row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
