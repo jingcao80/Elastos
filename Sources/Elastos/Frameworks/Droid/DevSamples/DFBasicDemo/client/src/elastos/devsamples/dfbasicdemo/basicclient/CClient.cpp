@@ -365,6 +365,48 @@ ECode CClient::BusHandler::HandleMessage(
             String reply;
             mBasicInterface->Cat(str, str, &reply);
             SendUiMessage(MESSAGE_PING_REPLY, reply);
+            Byte ip1 = 1, op1;
+            Boolean ip2 = TRUE, op2;
+            Int16 ip3 = 2, op3;
+            Int32 ip4 = 3, op4;
+            Int64 ip5 = 4, op5;
+            Double ip6 = 5.5, op6;
+            String ip7("Elastos"), op7;
+            AutoPtr<ArrayOf<String> > ip8 = ArrayOf<String>::Alloc(2);
+            (*ip8)[0] = "test0";
+            (*ip8)[1] = "test1";
+            AutoPtr<ArrayOf<String> > op8;
+            mBasicInterface->Test(ip1, ip2, ip3, ip4, ip5, ip6, ip7, /*ip8, */&op1, &op2,
+                &op3, &op4, &op5, &op6, &op7, (ArrayOf<String>**)&op8);
+            Boolean equals = TRUE;
+            if (ip1 != op1 || ip2 != op2 || ip3 != op3 ||
+                ip4 != op4 || ip5 != op5 || ip6 != op6 ||
+                ip7 != op7 || op8 == NULL ||
+                ip8->GetLength() != op8->GetLength()) {
+                equals = FALSE;
+            }
+            else {
+                for (Int32 i = 0; i < ip8->GetLength(); i++) {
+                    if ((*ip8)[i] != (*op8)[i]) {
+                        equals = FALSE;
+                        break;
+                    }
+                }
+            }
+            if (equals) {
+                Logger::D(TAG, "Test succeeded!");
+            }
+            else {
+                Logger::E(TAG, "Test failed!");
+                Logger::D(TAG, "Test reply Byte: %d, Boolean: %s Int16: %d Int32: %d, Int64: %lld Double: %f, String: %s",
+                    op1, (op2 ? "TURE" : "FALSE"), op3, op4, op5, op6, op7.string());
+                Int32 len = ip8 ? ip8->GetLength() : 0;
+                Logger::D(TAG, "ArrayOf len = %d", len);
+                for (Int32 i = 0; i < len; i++) {
+                    Logger::D(TAG, "ArrayOf[%d] = %s", i, (*ip8)[i].string());
+                }
+                assert(0);
+            }
         }
 //        } catch (BusException ex) {
 //            logException("BasicInterface.cat()", ex);

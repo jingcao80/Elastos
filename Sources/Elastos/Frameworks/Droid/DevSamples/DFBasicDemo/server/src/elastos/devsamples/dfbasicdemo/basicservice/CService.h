@@ -58,6 +58,24 @@ public:
             /* [in] */ const String& inStr2,
             /* [out] */ String* result);
 
+        CARAPI Test(
+            /* [in] */ Byte ip1,
+            /* [in] */ Boolean ip2,
+            /* [in] */ Int16 ip3,
+            /* [in] */ Int32 ip4,
+            /* [in] */ Int64 ip5,
+            /* [in] */ Double ip6,
+            /* [in] */ const String& ip7,
+            // /* [in] */ ArrayOf<String>* ip8,
+            /* [out] */ Byte* op1,
+            /* [out] */ Boolean* op2,
+            /* [out] */ Int16* op3,
+            /* [out] */ Int32* op4,
+            /* [out] */ Int64* op5,
+            /* [out] */ Double* op6,
+            /* [out] */ String* op7,
+            /* [out, callee] */ ArrayOf<String>** op8);
+
     private:
         /* Helper function to send a message to the UI thread. */
         CARAPI_(void) SendUiMessage(

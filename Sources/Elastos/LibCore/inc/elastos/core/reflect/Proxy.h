@@ -36,14 +36,9 @@ public:
 //        /* [out] */ UInt32* outSize);
 //
     CARAPI MarshalIn(
-        /* [in] */ UInt32 methodIndex,
+        /* [in] */ IMethodInfo* methodInfo,
         /* [in] */ UInt32* args,
         /* [in, out] */ IArgumentList* argList);
-
-    CARAPI UnmarshalOut(
-        /* [in] */ UInt32 methodIndex,
-        /* [in] */ IArgumentList* argList,
-        /* [in, out] */ UInt32* args);
 
     inline CARAPI_(UInt32) CountMethodArgs(
         /* [in] */ UInt32 methodIndex);

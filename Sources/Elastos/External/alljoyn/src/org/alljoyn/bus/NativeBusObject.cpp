@@ -315,7 +315,6 @@ QStatus NativeBusObject::MethodReply(
     uint8_t completeTypes = ajn::SignatureUtils::CountCompleteTypes(member->returnSignature.c_str());
     if (reply) {
         if (completeTypes > 1) {
-            assert(0);
             // jmethodID mid = env->GetStaticMethodID(CLS_Signature, "structArgs",
             //                                        "(Ljava/lang/Object;)[Ljava/lang/Object;");
             // if (!mid) {
