@@ -310,7 +310,7 @@ private:
 
     AutoPtr<CallLogAdapter> mCallLogAdapter;
 
-    AutoPtr<ListsFragment> mFragment;
+    ListsFragment* mFragment;
 
     Int32 mCallLogMarginHorizontal;
     Int32 mCallLogMarginTop;

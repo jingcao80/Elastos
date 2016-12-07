@@ -11,6 +11,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/dialer/calllog/CallLogQueryHandler.h"
 #include "elastos/droid/dialer/calllog/CallLogAdapter.h"
+#include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
 #include "elastos/droid/dialerbind/analytics/AnalyticsFragment.h"
 #include "elastos/droid/support/v4/view/CViewPager.h"
 #include "elastos/droid/support/v13/app/FragmentPagerAdapter.h"
@@ -297,7 +298,7 @@ private:
 
     AutoPtr<ArrayOf<String> > mTabTitles;
 
-    // AutoPtr<ShortcutCardsAdapter> mMergedAdapter;
+    AutoPtr<ShortcutCardsAdapter> mMergedAdapter;
     AutoPtr<CallLogAdapter> mCallLogAdapter;
     AutoPtr<CallLogQueryHandler> mCallLogQueryHandler;
 

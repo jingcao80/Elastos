@@ -3,7 +3,6 @@
 #include "elastos/droid/dialer/list/ListsFragment.h"
 #include "elastos/droid/dialer/list/SpeedDialFragment.h"
 #include "elastos/droid/dialer/list/CAllContactsFragment.h"
-// #include "elastos/droid/dialer/list/ShortcutCardsAdapter.h"
 #include "elastos/droid/dialer/calllog/CallLogQuery.h"
 #include "elastos/droid/dialer/calllog/CallLogFragment.h"
 #include "elastos/droid/dialer/calllog/ContactInfoHelper.h"
@@ -26,13 +25,13 @@ using Elastos::Droid::Dialer::CallLog::CallLogQuery;
 using Elastos::Droid::Dialer::CallLog::CallLogFragment;
 using Elastos::Droid::Dialer::CallLog::ContactInfoHelper;
 using Elastos::Droid::Dialer::Util::DialerUtils;
-// using Elastos::Droid::Dialer::IDialtactsActivity;
 using Elastos::Droid::DialerBind::ObjectFactory;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallFetcher;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::Widget::EIID_IPanelSlideCallbacks;
 using Elastos::Droid::Support::V4::View::IViewPager;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CoreUtils;
@@ -228,8 +227,7 @@ ECode ListsFragment::PanelSlideCallbacks::OnPanelSlide(
     if (IViewGroup::Probe(mHost->mShortcutCardsListView)->GetChildCount(&count), count > 0) {
         AutoPtr<IView> v;
         IViewGroup::Probe(mHost->mShortcutCardsListView)->GetChildAt(0, (IView**)&v);
-        assert(0 && "TODO");
-        // ((ShortcutCardsAdapter::SwipeableShortcutCard*)v.Get())->ClipCard(ratioCardHidden);
+        ((ShortcutCardsAdapter::SwipeableShortcutCard*)v.Get())->ClipCard(ratioCardHidden);
     }
 
     if (mHost->mActionBar != NULL) {
@@ -392,7 +390,7 @@ ECode ListsFragment::OnCreate(
     mCallLogAdapter = ObjectFactory::NewCallLogAdapter(ctx, this,
             helper, NULL, NULL, FALSE);
 
-    // mMergedAdapter = new ShortcutCardsAdapter(getActivity(), this, mCallLogAdapter);
+    mMergedAdapter = new ShortcutCardsAdapter(ctx, this, mCallLogAdapter);
     return NOERROR;
 }
 
@@ -477,7 +475,7 @@ ECode ListsFragment::OnCreateView(
     temp = NULL;
     parentView->FindViewById(R::id::shortcut_card_list, (IView**)&temp);
     mShortcutCardsListView = IListView::Probe(temp);
-    // IAdapterView::Probe(mShortcutCardsListView)->SetAdapter(mMergedAdapter);
+    IAdapterView::Probe(mShortcutCardsListView)->SetAdapter(IAdapter::Probe(mMergedAdapter));
 
     temp = NULL;
     parentView->FindViewById(R::id::remove_view, (IView**)&temp);
@@ -512,8 +510,7 @@ ECode ListsFragment::OnCallsFetched(
     }
 
     mCallLogAdapter->ChangeCursor(cursor);
-    assert(0 && "TODO");
-    // mMergedAdapter->NotifyDataSetChanged();
+    mMergedAdapter->NotifyDataSetChanged();
     // Return true; took ownership of cursor
     *result = TRUE;
     return NOERROR;
