@@ -13,6 +13,8 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
+static const String TAG("MsgArg");
+
 MsgArg::CarValue::CarValue(
     /* [in] */ CarDataType type)
     : mIOAttribute(ParamIOAttribute_In)
@@ -48,13 +50,13 @@ MsgArg::CarValue::~CarValue()
             mCarQuintet = NULL;
             break;
         case CarDataType_String: {
-            ArrayOf<String>* strArray = reinterpret_cast< ArrayOf<String>* >(mCarQuintet);
+            ArrayOf<String>* strArray = (ArrayOf<String>*)mCarQuintet;
             strArray->Release();
             mCarQuintet = NULL;
             break;
         }
         case CarDataType_Interface: {
-            ArrayOf<IInterface*>* itfArray = reinterpret_cast< ArrayOf<IInterface*>* >(mCarQuintet);
+            ArrayOf<IInterface*>* itfArray = (ArrayOf<IInterface*>*)mCarQuintet;
             itfArray->Release();
             mCarQuintet = NULL;
             break;
@@ -99,7 +101,7 @@ PVoid MsgArg::CarValue::ToValuePtr()
             arg = &mObjectValue;
             break;
         default:
-            Logger::E("MsgArg", "CarValue::ToValuePtr unimplemented type = %d", mType);
+            Logger::E(TAG, "CarValue::ToValuePtr unimplemented type = %d", mType);
     }
     return arg;
 }
@@ -141,7 +143,7 @@ ECode MsgArg::CarValue::SetToArgumentList(
                 args->SetInputArgumentOfObjectPtr(index, mObjectValue);
                 break;
             default:
-                Logger::E("MsgArg", "CarValue::SetToArgumentList unimplemented type = %d", mType);
+                Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
             }
         }
     }
@@ -178,7 +180,7 @@ ECode MsgArg::CarValue::SetToArgumentList(
                 args->SetOutputArgumentOfObjectPtrPtr(index, (IInterface**)&mObjectValue);
                 break;
             default:
-                Logger::E("MsgArg", "CarValue::SetToArgumentList unimplemented type = %d", mType);
+                Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
             }
         }
     }
@@ -222,7 +224,7 @@ ECode MsgArg::CarValue::GetFromArgumentList(
                 args->GetInputArgumentOfObjectPtr(index, (IInterface**)&mObjectValue);
                 break;
             default:
-                Logger::E("MsgArg", "CarValue::GetFromArgumentList unimplemented type = %d", mType);
+                Logger::E(TAG, "CarValue::GetFromArgumentList unimplemented index = %d, type = %d", index, mType);
             }
         }
     }
@@ -267,7 +269,7 @@ ECode MsgArg::CarValue::AssignArgumentListOutput(
                 args->AssignOutputArgumentOfObjectPtrPtr(index, mObjectValue);
                 break;
             default:
-                Logger::E("MsgArg", "CarValue::AssignArgumentListOutput unimplemented type = %d", mType);
+                Logger::E(TAG, "CarValue::AssignArgumentListOutput unimplemented index = %d, type = %d", index, mType);
             }
         }
     }
@@ -1007,15 +1009,28 @@ ECode MsgArg::Unmarshal(
             //     return object;
             // }
             {
-                Int32 size = GetNumElements(msgArg);
-                AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(size);
-                for (Int32 i = 0; i < size; ++i) {
-                    AutoPtr<IInterface> component;
-                    Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&component);
-                    array->Set(i, component);
+                if (GetElemSig(msgArg).GetChar(0) == ALLJOYN_STRING) {
+                    Int32 size = GetNumElements(msgArg);
+                    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
+                    for (Int32 i = 0; i < size; ++i) {
+                        Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&(*array)[i]);
+                    }
+                    *(PCarQuintet*)object = array;
+                    array->AddRef();
                 }
-                *(PCarQuintet*)object = array;
-                array->AddRef();
+                else {
+                    Logger::E(TAG, "Unmarshal unimplemented ALLJOYN_ARRAY item is %s", GetElemSig(msgArg).string());
+                    assert(0);
+                    // Int32 size = GetNumElements(msgArg);
+                    // AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(size);
+                    // for (Int32 i = 0; i < size; ++i) {
+                    //     AutoPtr<IInterface> component;
+                    //     Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&component);
+                    //     array->Set(i, component);
+                    // }
+                    // *(PCarQuintet*)object = array;
+                    // array->AddRef();
+                }
             }
             break;
         case ALLJOYN_BOOLEAN:
@@ -1052,7 +1067,7 @@ ECode MsgArg::Unmarshal(
             }
             break;
         case ALLJOYN_DOUBLE:
-            *(Double*)object = GetBool(msgArg);
+            *(Double*)object = GetDouble(msgArg);
             break;
         case ALLJOYN_DOUBLE_ARRAY:
             {
@@ -1182,7 +1197,7 @@ ECode MsgArg::Unmarshal(
             // variant.setMsgArg(msgArg);
             // return variant;
         default:
-            Logger::E("MsgArg", "unimplemented '%s'", GetSignature(msgArg).string());
+            Logger::E(TAG, "unimplemented '%s'", GetSignature(msgArg).string());
             assert(0);
             // throw new MarshalBusException("unimplemented '"
             //                               + getSignature(new Int64[] { msgArg }) + "'");
@@ -1224,7 +1239,7 @@ ECode MsgArg::UnmarshalIn(
     }
     Int32 numArgs = GetNumMembers(msgArgs);
     if (inCount != numArgs) {
-        Logger::E("MsgArg", "cannot marshal %d args into %d parameters", numArgs, count);
+        Logger::E(TAG, "cannot marshal %d args into %d parameters", numArgs, count);
         assert(0);
         // throw new MarshalBusException(
         //     "cannot marshal " + numArgs + " args into " + types.length + " parameters");
@@ -1280,7 +1295,7 @@ ECode MsgArg::UnmarshalOut(
     if (typeId == ALLJOYN_STRUCT) {
         Int32 numArgs = GetNumMembers(msgArgs);
         if (outCount != numArgs) {
-            Logger::E("MsgArg", "UnmarshalOut: cannot marshal %d args into %d parameters", numArgs, outCount);
+            Logger::E(TAG, "UnmarshalOut: cannot marshal %d args into %d parameters", numArgs, outCount);
             assert(0);
             // throw new MarshalBusException(
             //     "cannot marshal " + numArgs + " args into " + types.length + " parameters");
@@ -1392,7 +1407,7 @@ ECode MsgArg::Marshal(
         case ALLJOYN_SIGNATURE:
         case ALLJOYN_OBJECT_PATH:
             if (arg == NULL) {
-                Logger::E("MsgArg", "cannot marshal NULL into '%s'", sig.string());
+                Logger::E(TAG, "cannot marshal NULL into '%s'", sig.string());
                 assert(0);
                 // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
             }
@@ -1401,7 +1416,7 @@ ECode MsgArg::Marshal(
         case ALLJOYN_ARRAY:
             {
                 if (arg == NULL) {
-                    Logger::E("MsgArg", "cannot marshal NULL into '%s'", sig.string());
+                    Logger::E(TAG, "cannot marshal NULL into '%s'", sig.string());
                     assert(0);
                     // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
                 }
@@ -1435,14 +1450,26 @@ ECode MsgArg::Marshal(
                 case ALLJOYN_DOUBLE:
                     Set(msgArg, sig, (ArrayOf<Double>*)arg);
                     break;
-                default:
+                case ALLJOYN_STRING:
                     {
                         String elemSig = sig.Substring(1);
-                        AutoPtr<ArrayOf<IInterface*> > args = (ArrayOf<IInterface*>*)arg;
+                        AutoPtr<ArrayOf<String> > args = *(ArrayOf<String>**)arg;
                         SetArray(msgArg, elemSig, args->GetLength());
                         for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
-                            Marshal(GetElement(msgArg, i), elemSig, (PVoid)(*args)[i]);
+                            Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*args)[i]);
                         }
+                    }
+                    break;
+                default:
+                    {
+                        Logger::D(TAG,"unimplemented ALLJOYN_ARRAY %s", sig.string());
+                        assert(0);
+                        // String elemSig = sig.Substring(1);
+                        // AutoPtr<ArrayOf<IInterface*> > args = *(ArrayOf<IInterface*>**)arg;
+                        // SetArray(msgArg, elemSig, args->GetLength());
+                        // for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
+                        //     Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*args)[i]);
+                        // }
                     }
                     break;
                 }
@@ -1481,7 +1508,7 @@ ECode MsgArg::Marshal(
             // marshal(getVal(msgArg), sigs[1], entry.getValue());
             // break;
         default:
-            Logger::D("MsgArg", "unimplemented '%s'", sig.string());
+            Logger::D(TAG, "unimplemented '%s'", sig.string());
             assert(0);
             // throw new MarshalBusException("unimplemented '" + sig + "'");
         }
@@ -1510,7 +1537,7 @@ ECode MsgArg::MarshalIn(
 {
     AutoPtr<ArrayOf<String> > sigs = Signature::Split(sig);
     if (sigs == NULL) {
-        Logger::E("MsgArg", "cannot marshal args into '%s', bad signature", sig.string());
+        Logger::E(TAG, "cannot marshal args into '%s', bad signature", sig.string());
         assert(0);
         // throw new MarshalBusException("cannot marshal args into '" + sig + "', bad signature");
     }
@@ -1559,7 +1586,7 @@ ECode MsgArg::MarshalOut(
 {
     AutoPtr<ArrayOf<String> > sigs = Signature::Split(sig);
     if (sigs == NULL) {
-        Logger::E("MsgArg", "cannot marshal args into '%s', bad signature", sig.string());
+        Logger::E(TAG, "cannot marshal args into '%s', bad signature", sig.string());
         assert(0);
         // throw new MarshalBusException("cannot marshal args into '" + sig + "', bad signature");
         return NOERROR;
@@ -1580,7 +1607,7 @@ ECode MsgArg::MarshalOut(
         AutoLock lock(sLock);
         RecordMap::Iterator it = sRecords.Find(args);
         if (it == sRecords.End()) {
-            Logger::E("MsgArg", "MarshalOut() cannot find record");
+            Logger::E(TAG, "MarshalOut() cannot find record");
             assert(0);
             return NOERROR;
         }

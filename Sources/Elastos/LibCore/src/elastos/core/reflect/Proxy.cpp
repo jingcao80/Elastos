@@ -251,22 +251,15 @@ ECode CInterfaceProxy::S_GetInterfaceID(
 }
 
 static ECode Proxy_ProcessMsh_In(
-    /* [in] */ const CIMethodInfo* methodInfo,
+    /* [in] */ IMethodInfo* methodInfo,
     /* [in] */ UInt32* args,
     /* [in, out] */ IArgumentList* argList);
 
-static ECode Proxy_ProcessUnmsh_Out(
-    /* [in] */ const CIMethodInfo* methodInfo,
-    /* [in] */ IArgumentList* argList,
-    /* [in, out] */ UInt32* args);
-
 ECode CInterfaceProxy::MarshalIn(
-    /* [in] */ UInt32 methodIndex,
+    /* [in] */ IMethodInfo* methodInfo,
     /* [in] */ UInt32* args,
     /* [in, out] */ IArgumentList* argList)
 {
-    const CIMethodInfo* methodInfo = &(mInfo->mMethods[methodIndex]);
-
     ECode ec = Proxy_ProcessMsh_In(
             methodInfo, args, argList);
 
@@ -277,19 +270,6 @@ ECode CInterfaceProxy::MarshalIn(
     //     header->mInterfaceIndex = mIndex;
     //     header->mMethodIndex = methodIndex + 4;
     // }
-
-    return ec;
-}
-
-ECode CInterfaceProxy::UnmarshalOut(
-    /* [in] */ UInt32 methodIndex,
-    /* [in] */ IArgumentList* argList,
-    /* [in, out] */ UInt32* args)
-{
-    ECode ec = Proxy_ProcessUnmsh_Out(
-            &(mInfo->mMethods[methodIndex]),
-            argList,
-            args);
 
     return ec;
 }
@@ -362,14 +342,10 @@ ECode CInterfaceProxy::ProxyEntry(
     thisPtr->mInfo2->GetMethodInfo(methodIndex, (IMethodInfo**)&methodInfo);
     AutoPtr<IArgumentList> argList;
     methodInfo->CreateArgumentList((IArgumentList**)&argList);
-    ec = thisPtr->MarshalIn(methodIndex, args, argList);
+    ec = thisPtr->MarshalIn(methodInfo, args, argList);
     if (FAILED(ec)) goto ProxyExit;
 
     ec = thisPtr->mOwner->mHandler->Invoke((IProxy*)thisPtr->mOwner, methodInfo, argList);
-
-    if (SUCCEEDED(ec)) {
-        ec = thisPtr->UnmarshalOut(methodIndex, argList, args);
-    }
 
 ProxyExit:
     if (DEBUG) {
@@ -710,30 +686,32 @@ ECode CObjectProxy::S_CreateObject(
 #define ROUND8(n)       (((n)+7)&~7)   // round up to multiple of 8 bytes
 
 static ECode Proxy_ProcessMsh_In(
-    /* [in] */ const CIMethodInfo* methodInfo,
+    /* [in] */ IMethodInfo* methodInfo,
     /* [in] */ UInt32* args,
     /* [in, out] */ IArgumentList* argList)
 {
-    Int32 paramNum = methodInfo->mParamNum;
-    const CIBaseType* params = methodInfo->mParams;
-
+    Int32 paramNum;
+    methodInfo->GetParamCount(&paramNum);
+    AutoPtr<ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(paramNum);
+    methodInfo->GetAllParamInfos(paramInfos);
     for (Int32 n = 0; n < paramNum; n++) {
-        if (BT_IS_IN(params[n])) { // [in] or [in, out]
-            switch (BT_TYPE(params[n])) {
-                case BT_TYPE_UINT8:
-                    argList->SetInputArgumentOfByte(n, *(Byte*)args);
+        ParamIOAttribute ioAttr = ParamIOAttribute_In;
+        (*paramInfos)[n]->GetIOAttribute(&ioAttr);
+        AutoPtr<IDataTypeInfo> typeInfo;
+        (*paramInfos)[n]->GetTypeInfo((IDataTypeInfo**)&typeInfo);
+        CarDataType type;
+        typeInfo->GetDataType(&type);
+        if (ioAttr == ParamIOAttribute_In) { // [in]
+            switch (type) {
+                case CarDataType_Int16:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfInt16(n, *(Int16*)args))
                     args++;
                     break;
-                case BT_TYPE_UINT16:
-                    argList->SetInputArgumentOfInt16(n, *(Int16*)args);
+                case CarDataType_Int32:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfInt32(n, *(Int32*)args))
                     args++;
                     break;
-                case BT_TYPE_UINT32:
-                    argList->SetInputArgumentOfInt32(n, *(Int32*)args);
-                    args++;
-                    break;
-
-                case BT_TYPE_UINT64:
+                case CarDataType_Int64:
 #ifdef _mips
                     // Adjust for 64bits align on mips
                     if (!(n % 2)) args += 1;
@@ -741,224 +719,133 @@ static ECode Proxy_ProcessMsh_In(
 #if defined(_arm) && defined(__GNUC__) && (__GNUC__ >= 4)
                     args = (UInt32*)ROUND8((Int32)args);
 #endif
-                    argList->SetInputArgumentOfInt64(n, (Int64)(*(UInt64*)args));
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfInt64(n, (Int64)(*(UInt64*)args)))
                     args += 2;
                     break;
-
-                case BT_TYPE_PUINT8:
-                case BT_TYPE_PUINT16:
-                case BT_TYPE_PUINT32:
-                case BT_TYPE_PUINT64:
-                    assert(0);
+                case CarDataType_Byte:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfByte(n, *(Byte*)args))
                     args++;
                     break;
-
-                case BT_TYPE_STRUCT:
-                case BT_TYPE_PSTRUCT:
-                    assert(0);
+                case CarDataType_Float:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfFloat(n, *(Float*)args))
                     args++;
                     break;
-
-                case BT_TYPE_EMUID:
-                    argList->SetInputArgumentOfEMuid(n, (EMuid*)args);
+                case CarDataType_Double:
+#ifdef _mips
+                    // Adjust for 64bits align on mips
+                    if (!(n % 2)) args += 1;
+#endif
+#if defined(_arm) && defined(__GNUC__) && (__GNUC__ >= 4)
+                    args = (UInt32*)ROUND8((Int32)args);
+#endif
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfDouble(n, *(Double*)args))
+                    args += 2;
+                    break;
+                case CarDataType_Char32:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfChar(n, *(Char32*)args))
+                    args++;
+                    break;
+                case CarDataType_String:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfString(n, **(String**)args))
+                    args++;
+                    break;
+                case CarDataType_Boolean:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfBoolean(n, *(Boolean*)args))
+                    args++;
+                    break;
+                case CarDataType_EMuid:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfEMuid(n, (EMuid*)args))
                     args += sizeof(EMuid) / 4;
                     break;
-
-                case BT_TYPE_EGUID:
-                    argList->SetInputArgumentOfEGuid(n, (EGuid*)args);
+                case CarDataType_EGuid:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfEGuid(n, (EGuid*)args))
                     args += sizeof(EGuid) / 4;
                     break;
-
-                case BT_TYPE_PEMUID:
-                case BT_TYPE_PEGUID:
-                case BT_TYPE_STRINGBUF:
-                case BT_TYPE_BUFFEROF:
+                case CarDataType_ECode:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfECode(n, *(ECode*)args))
+                    args++;
+                    break;
+                case CarDataType_LocalPtr:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfLocalPtr(n, *(LocalPtr*)args))
+                    args++;
+                    break;
+                case CarDataType_LocalType:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfLocalType(n, *(PVoid*)args))
+                    args++;
+                    break;
+                case CarDataType_Enum:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfEnum(n, *(Int32*)args))
+                    args++;
+                    break;
+                case CarDataType_ArrayOf:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfCarArray(n, (PCarQuintet)*args))
+                    args++;
+                    break;
+                case CarDataType_CppVector:
+                case CarDataType_Struct:
                     assert(0);
                     args++;
                     break;
-
-                case BT_TYPE_ARRAYOF:
-                    argList->SetInputArgumentOfCarArray(n, (PCarQuintet)*args);
+                case CarDataType_Interface:
+                    ASSERT_SUCCEEDED(argList->SetInputArgumentOfObjectPtr(n, (IInterface*)*args))
                     args++;
                     break;
-
-                case BT_TYPE_STRING:
-                    argList->SetInputArgumentOfString(n, **(String**)args);
-                    args++;
-                    break;
-
-                case BT_TYPE_INTERFACE: {
-                    argList->SetInputArgumentOfObjectPtr(n, (IInterface*)*args);
-                    args++;
-                    break;
-                }
-
-                case BT_TYPE_PINTERFACE:
-                    assert(0);
-                    args++;
-                    break;
-
                 default:
-                    Logger::E("Proxy", "MshProc: Invalid [in, out] type(%08x), param index: %d.\n",
-                            params[n], n);
+                    Logger::E("Proxy", "MshProc: Invalid [in] type(%d), param index: %d.\n", type, n);
                     assert(0);
                     return E_INVALID_ARGUMENT;
             }
         }
         else {  // [out]
-            switch (BT_TYPE(params[n])) {
-                case BT_TYPE_PSTRING:
-                        argList->SetOutputArgumentOfStringPtr(n, (String*)*args);
-                        break;
-
+            switch (type) {
+                case CarDataType_Int16:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfInt16Ptr(n, (Int16*)*args))
+                    break;
+                case CarDataType_Int32:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfInt32Ptr(n, (Int32*)*args))
+                    break;
+                case CarDataType_Int64:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfInt64Ptr(n, (Int64*)*args))
+                    break;
+                case CarDataType_Byte:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfBytePtr(n, (Byte*)*args))
+                    break;
+                case CarDataType_Float:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfFloatPtr(n, (Float*)*args))
+                    break;
+                case CarDataType_Double:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfDoublePtr(n, (Double*)*args))
+                    break;
+                case CarDataType_Char32:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfCharPtr(n, (Char32*)*args))
+                    break;
+                case CarDataType_String:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfStringPtr(n, (String*)*args))
+                    break;
+                case CarDataType_Boolean:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfBooleanPtr(n, (Boolean*)*args))
+                    break;
+                case CarDataType_ArrayOf:
+                    if (ioAttr == ParamIOAttribute_CalleeAllocOut)
+                        ASSERT_SUCCEEDED(argList->SetOutputArgumentOfCarArrayPtrPtr(n, (PCarQuintet*)*args))
+                    else
+                        ASSERT_SUCCEEDED(argList->SetOutputArgumentOfCarArrayPtr(n, (PCarQuintet)*args))
+                    break;
+                // CarDataType_EMuid       = 10,
+                // CarDataType_EGuid       = 11,
+                // CarDataType_ECode       = 12,
+                // CarDataType_LocalPtr    = 13,
+                // CarDataType_LocalType   = 14,
+                // CarDataType_Enum        = 15,
+                // CarDataType_CppVector   = 17,
+                // CarDataType_Struct      = 18,
+                // CarDataType_Interface   = 19
                 default:
-                    Logger::E("Proxy", "MshProc: Invalid [in, out] type(%08x), param index: %d.\n",
-                            params[n], n);
+                    Logger::E("Proxy", "MshProc: Invalid [out] type(%d), param index: %d.\n", type, n);
                     assert(0);
                     return E_INVALID_ARGUMENT;
             }
-            // if (*args) parcel->WriteInt32(MSH_NOT_NULL);
-            // else parcel->WriteInt32(MSH_NULL);
-
-            // if (((BT_TYPE(params[n]) == BT_TYPE_BUFFEROF) ||
-            //     (BT_TYPE(params[n]) == BT_TYPE_ARRAYOF) ||
-            //     (BT_TYPE(params[n]) == BT_TYPE_STRINGBUF)) && !BT_IS_CALLEE(params[n]) && *args) {
-            //         parcel->WriteInt32(((PCARQUINTET)*args)->mSize);
-            // }
             args++;
-        }
-    }
-
-    return NOERROR;
-}
-
-static ECode Proxy_ProcessUnmsh_Out(
-    /* [in] */ const CIMethodInfo* methodInfo,
-    /* [in] */ IArgumentList* argList,
-    /* [in, out] */ UInt32* args)
-{
-    Int32 paramNum = methodInfo->mParamNum;
-    const CIBaseType* params = methodInfo->mParams;
-
-    for (Int32 n = 0; n < paramNum; n++) {
-        if (BT_IS_OUT(params[n])) {   // [out] or [in, out]
-            if (*args) {
-                // Int32 pointValue;
-                // parcel->ReadInt32(&pointValue);
-                // if (pointValue != (Int32)MSH_NOT_NULL) {
-                //     MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
-                //         "MshProc: param conflict in proxy's unmarshal, param index: %d.\n", n));
-                //     return E_INVALID_ARGUMENT;
-                // }
-
-                switch (BT_TYPE(params[n])) {
-                    case BT_TYPE_PUINT8:
-                        assert(0);
-                        // parcel->ReadByte((Byte*)*args);
-                        break;
-
-                    case BT_TYPE_PUINT16:
-                        assert(0);
-                        // parcel->ReadInt16((Int16*)*args);
-                        break;
-
-                    case BT_TYPE_PUINT32:
-                        assert(0);
-                        // parcel->ReadInt32((Int32*)*args);
-                        break;
-
-                    case BT_TYPE_PUINT64:
-                        assert(0);
-                        // parcel->ReadInt64((Int64*)*args);
-                        break;
-
-                    case BT_TYPE_PSTRUCT:
-                        assert(0);
-                        // parcel->ReadStruct((Handle32*)*args);
-                        break;
-
-                    case BT_TYPE_PEMUID:
-                        assert(0);
-                        // parcel->ReadEMuid((EMuid*)*args);
-                        break;
-
-                    case BT_TYPE_PEGUID:
-                        assert(0);
-                        // parcel->ReadEGuid((EGuid*)*args);
-                        break;
-
-                    case BT_TYPE_PSTRING:
-                        // assert(0);
-                        // parcel->ReadString((String*)*args);
-                        break;
-
-                    case BT_TYPE_STRINGBUF:
-                    case BT_TYPE_BUFFEROF:
-                    case BT_TYPE_ARRAYOF:
-                        assert(0);
-                        if (!BT_IS_CALLEE(params[n])) {
-                            // PCARQUINTET p;
-                            // parcel->ReadArrayOf((Handle32*)&p);
-                            // PCARQUINTET qArg = (PCARQUINTET)*args;
-                            // qArg->mUsed = p->mUsed;
-                            // memcpy(qArg->mBuf, p->mBuf, p->mSize);
-                            // _CarQuintet_Release(p);
-                        }
-                        else {
-                            // parcel->ReadArrayOf((Handle32*)*args);
-                        }
-                        break;
-
-                    case BT_TYPE_PINTERFACE:
-                        assert(0);
-                        // parcel->ReadInterfacePtr((Handle32*)*args);
-                        break;
-
-                    default:
-                        Logger::E("Proxy", "MshProc: Invalid param type(%08x), param index: %d\n", params[n], n);
-                        assert(0);
-                        return E_INVALID_ARGUMENT;
-                }
-            }
-            else {
-                assert(0);
-                // Int32 pointValue;
-                // parcel->ReadInt32(&pointValue);
-                // if (pointValue != MSH_NULL) {
-                //     MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
-                //             "MshProc: param conflict in proxy's unmarshal, param index: %d.\n", n));
-                //     return E_INVALID_ARGUMENT;
-                // }
-            }
-            args++;
-        }
-        else {      // [in]
-            switch (BT_TYPE(params[n])) {
-                case BT_TYPE_UINT64:
-#ifdef _mips
-                    // Adjust for 64bits align on mips
-                    if (!(n % 2)) {
-                        args += 1;
-                    }
-#endif
-#if defined(_arm) && defined(__GNUC__) && (__GNUC__ >= 4)
-                    args = (UInt32*)ROUND8((Int32)args);
-#endif
-                    args += 2;
-                    break;
-
-                case BT_TYPE_EMUID:
-                    args += sizeof(EMuid) / 4;
-                    break;
-
-                case BT_TYPE_EGUID:
-                    args += sizeof(EMuid) / 4 + sizeof(char*) /4;
-                    break;
-
-                default:
-                    args++;
-                    break;
-            }
         }
     }
 

@@ -239,56 +239,56 @@ ECode CArgumentList::AssignOutputParamValue(
     if (mParamElem[index].mSize == 4) {
         switch (type) {
             case CarDataType_Int16:
-                *(Int16*)(mParamBuf + mParamElem[index].mPos) = *(Int16*)param;
+                **(Int16**)(mParamBuf + mParamElem[index].mPos) = *(Int16*)param;
                 break;
             case CarDataType_Int32:
-                *(Int32*)(mParamBuf + mParamElem[index].mPos) = *(Int32*)param;
+                **(Int32**)(mParamBuf + mParamElem[index].mPos) = *(Int32*)param;
                 break;
             case CarDataType_Int64:
-                *(Int64*)(mParamBuf + mParamElem[index].mPos) = *(Int64*)param;
+                **(Int64**)(mParamBuf + mParamElem[index].mPos) = *(Int64*)param;
                 break;
             case CarDataType_Byte:
-                *(Byte*)(mParamBuf + mParamElem[index].mPos) = *(Byte*)param;
+                **(Byte**)(mParamBuf + mParamElem[index].mPos) = *(Byte*)param;
                 break;
             case CarDataType_Float:
-                *(Float*)(mParamBuf + mParamElem[index].mPos) = *(Float*)param;
+                **(Float**)(mParamBuf + mParamElem[index].mPos) = *(Float*)param;
                 break;
             case CarDataType_Double:
-                *(Double*)(mParamBuf + mParamElem[index].mPos) = *(Double*)param;
+                **(Double**)(mParamBuf + mParamElem[index].mPos) = *(Double*)param;
                 break;
             case CarDataType_Char32:
-                *(Char32*)(mParamBuf + mParamElem[index].mPos) = *(Char32*)param;
+                **(Char32**)(mParamBuf + mParamElem[index].mPos) = *(Char32*)param;
                 break;
             case CarDataType_String:
                 **(String**)(mParamBuf + mParamElem[index].mPos) = *(String*)param;
                 break;
             case CarDataType_Boolean:
-                *(Boolean*)(mParamBuf + mParamElem[index].mPos) = *(Boolean*)param;
+                **(Boolean**)(mParamBuf + mParamElem[index].mPos) = *(Boolean*)param;
                 break;
             case CarDataType_Enum:
-                *(Int32*)(mParamBuf + mParamElem[index].mPos) = *(Int32*)param;
+                **(Int32**)(mParamBuf + mParamElem[index].mPos) = *(Int32*)param;
                 break;
             case CarDataType_Interface: {
                 PInterface ptr = *(PInterface*)param;
                 if (ptr != NULL)
                     ptr->AddRef();
-                *(PInterface*)(mParamBuf + mParamElem[index].mPos) = ptr;
+                **(PInterface**)(mParamBuf + mParamElem[index].mPos) = ptr;
                 break;
             }
             case CarDataType_EMuid:
-                *(EMuid**)(mParamBuf + mParamElem[index].mPos) = *(EMuid**)param;
+                **(EMuid**)(mParamBuf + mParamElem[index].mPos) = *(EMuid*)param;
                 break;
             case CarDataType_EGuid:
-                *(EGuid**)(mParamBuf + mParamElem[index].mPos) = *(EGuid**)param;
+                **(EGuid**)(mParamBuf + mParamElem[index].mPos) = *(EGuid*)param;
                 break;
             case CarDataType_ECode:
-                *(ECode*)(mParamBuf + mParamElem[index].mPos) = *(ECode*)param;
+                **(ECode**)(mParamBuf + mParamElem[index].mPos) = *(ECode*)param;
                 break;
             case CarDataType_ArrayOf: {
                 PCarQuintet ptr = *(PCarQuintet*)param;
                 if (pointer == 2) {
                     _CarQuintet_AddRef(ptr);
-                    *(PCarQuintet*)(mParamBuf + mParamElem[index].mPos) = ptr;
+                    **(PCarQuintet**)(mParamBuf + mParamElem[index].mPos) = ptr;
                 }
                 else {
                     assert(0 && "TODO");
@@ -756,7 +756,7 @@ ECode CArgumentList::AssignOutputArgumentOfEMuidPtr(
     /* [in] */ Int32 index,
     /* [in] */ EMuid* value)
 {
-    return AssignOutputParamValue(index, &value, CarDataType_EMuid,
+    return AssignOutputParamValue(index, value, CarDataType_EMuid,
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
@@ -772,7 +772,7 @@ ECode CArgumentList::AssignOutputArgumentOfEGuidPtr(
     /* [in] */ Int32 index,
     /* [in] */ EGuid* value)
 {
-    return AssignOutputParamValue(index, &value, CarDataType_EGuid,
+    return AssignOutputParamValue(index, value, CarDataType_EGuid,
             ParamIOAttribute_CallerAllocOut, 1);
 }
 
