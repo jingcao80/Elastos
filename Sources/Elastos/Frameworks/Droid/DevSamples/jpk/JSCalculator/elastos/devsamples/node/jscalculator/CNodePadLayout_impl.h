@@ -66,7 +66,7 @@ ECode JSActName::constructor(
     }
 
     ALOGD("CCalculatorPadLayout::constructor========end========");
-    return ec;
+    return NOERROR;
 }
 
 //----------------------------------------------
@@ -92,7 +92,7 @@ ECode JSActName::ShouldDelayChildPressedState(
         ec = ViewGroup::ShouldDelayChildPressedState(result);
     }
 
-    return ec;
+    return NOERROR;
 }
 
 ECode JSActName::_GenerateLayoutParams(
@@ -118,7 +118,7 @@ ECode JSActName::GenerateLayoutParams(
         ec = ViewGroup::GenerateLayoutParams(attrs, result);
     }
 
-    return ec;
+    return NOERROR;
 }
 
 ECode JSActName::_GenerateDefaultLayoutParams(
@@ -142,7 +142,33 @@ ECode JSActName::GenerateDefaultLayoutParams(
         ec = ViewGroup::GenerateDefaultLayoutParams(result);
     }
 
-    return ec;
+    return NOERROR;
+}
+
+ECode JSActName::_OnMeasure(
+        /* [in] */ Int32 widthMeasureSpec,
+        /* [in] */ Int32 heightMeasureSpec)
+{
+    return ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+}
+ECode JSActName::OnMeasure(
+        /* [in] */ Int32 widthMeasureSpec,
+        /* [in] */ Int32 heightMeasureSpec)
+{
+    ALOGD("CCalculatorPadLayout::OnMeasure========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->OnMeasure(_this, widthMeasureSpec, heightMeasureSpec);
+    }
+    else {
+        ec = ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    return NOERROR;
 }
 
 ECode JSActName::_OnLayout(
@@ -153,6 +179,8 @@ ECode JSActName::_OnLayout(
         /* [in] */ Int32 bottom)
 {
     //return ViewGroup::OnLayout(changed, left, top, right, bottom);
+    ALOGD("CCalculatorPadLayout::_OnLayout====error:ViewGroup::_OnLayout is pure virtual!====");
+    //assert(0);
     return NOERROR;
 }
 ECode JSActName::OnLayout(
@@ -173,36 +201,58 @@ ECode JSActName::OnLayout(
     }
     else {
         //ec = ViewGroup::OnLayout(changed, left, top, right, bottom);
+        ALOGD("CCalculatorPadLayout::OnLayout====error:ViewGroup::OnLayout is pure virtual!====");
+        //Add C++ Code for OnLayout here
+        assert(0);
     }
 
-    return ec;
+    return NOERROR;
 }
 
 ECode JSActName::_GenerateLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p,
         /* [out] */ IViewGroupLayoutParams** result)
 {
-    //return ViewGroup::GenerateLayoutParams(p, result);
+    *result =  ViewGroup::GenerateLayoutParams(p);
     return NOERROR;
 }
-ECode JSActName::GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** result)
+// ECode JSActName::GenerateLayoutParams(
+//         /* [in] */ IViewGroupLayoutParams* p,
+//         /* [out] */ IViewGroupLayoutParams** result)
+// {
+//     ALOGD("CCalculatorPadLayout::GenerateLayoutParams========begin========");
+
+//     ECode ec = NOERROR;
+
+//     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+//     if (mListener) {
+//         ec = mListener->GenerateLayoutParams_0(_this, p, result);
+//     }
+//     else {
+//         *result = ViewGroup::GenerateLayoutParams(p);
+//     }
+
+//     return ec;
+// }
+AutoPtr<IViewGroupLayoutParams> JSActName::GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p)
 {
-    ALOGD("CCalculatorPadLayout::GenerateLayoutParams========begin========");
+    ALOGD("CCalculatorPadLayout::GenerateLayoutParams====begin====group");
 
     ECode ec = NOERROR;
 
     AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
 
+    AutoPtr<IViewGroupLayoutParams> params;
     if (mListener) {
-        ec = mListener->GenerateLayoutParams_0(_this, p, result);
+        ec = mListener->GenerateLayoutParams(_this, p, (IViewGroupLayoutParams**)&params);
     }
     else {
-        //ec = ViewGroup::GenerateLayoutParams(p, result);
+        params = ViewGroup::GenerateLayoutParams(p);
     }
 
-    return ec;
+    return params;
 }
 
 ECode JSActName::_CheckLayoutParams(
@@ -229,7 +279,8 @@ ECode  JSActName::CheckLayoutParams(
         *result = ViewGroup::CheckLayoutParams(p);
     }
 
-    return ec;
+    ALOGD("CCalculatorPadLayout::CheckLayoutParams========begin========");
+    return NOERROR;
 }
 
 ECode JSActName::_SetChildrenDrawingOrderEnabled(
@@ -239,7 +290,115 @@ ECode JSActName::_SetChildrenDrawingOrderEnabled(
     return NOERROR;
 }
 
+ECode JSActName::_DrawChild(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ IView* child,
+        /* [in] */ Int64 drawingTime,
+        /* [out] */ Boolean* result)
+{
+    *result = ViewGroup::DrawChild(canvas, child, drawingTime);
+    return NOERROR;
+}
+Boolean JSActName::DrawChild(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ IView* child,
+        /* [in] */ Int64 drawingTime)
+{
+    ALOGD("CCalculatorPadLayout::DrawChild========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    Boolean result;
+    if (mListener) {
+        ec = mListener->DrawChild(_this, canvas, child, drawingTime, &result);
+    }
+    else {
+        result = ViewGroup::DrawChild(canvas, child, drawingTime);
+    }
+
+    return result;
+}
+
 //----------------------------------------------
+
+ECode JSActName::_Draw(
+        /* [in] */ ICanvas* canvas)
+{
+    return ViewGroup::Draw(canvas);
+}
+ECode JSActName::Draw(
+        /* [in] */ ICanvas* canvas)
+{
+    ALOGD("CCalculatorPadLayout::Draw========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->Draw(_this, canvas);
+    }
+    else {
+        ec = ViewGroup::Draw(canvas);
+    }
+
+    ALOGD("CCalculatorPadLayout::Draw========end========");
+    return NOERROR;
+}
+
+
+ECode JSActName::_DispatchDraw(
+        /* [in] */ ICanvas* canvas)
+{
+    return ViewGroup::DispatchDraw(canvas);
+}
+ECode JSActName::DispatchDraw(
+        /* [in] */ ICanvas* canvas)
+{
+    ALOGD("CCalculatorPadLayout::Draw========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->DispatchDraw(_this, canvas);
+    }
+    else {
+        ec = ViewGroup::DispatchDraw(canvas);
+    }
+
+    ALOGD("CCalculatorPadLayout::Draw========end========");
+    return NOERROR;
+}
+
+ECode JSActName::_OnDraw(
+        /* [in] */ ICanvas* canvas)
+{
+    ViewGroup::OnDraw(canvas);
+    return NOERROR;
+}
+//ECode JSActName::OnDraw(
+void JSActName::OnDraw(
+        /* [in] */ ICanvas* canvas)
+{
+    ALOGD("CCalculatorPadLayout::OnDraw========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->OnDraw(_this, canvas);
+    }
+    else {
+        ViewGroup::OnDraw(canvas);
+    }
+
+    return;
+}
 
 ECode JSActName::GetSuperObject(
     /* [out] */ ICalculatorPadLayoutSuperObject ** ppSuperObject)

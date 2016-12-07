@@ -286,6 +286,8 @@ ECode JSActName::AddView(
         ec = ViewGroup::AddView(child, index, params);
     }
 
+    ALOGD("CCalculatorPadViewPager::AddView========end========");
+
     return ec;
 }
 
@@ -521,6 +523,30 @@ ECode JSActName::Draw(
     }
     else {
         ec = ViewGroup::Draw(canvas);
+    }
+
+    return ec;
+}
+
+ECode JSActName::_DispatchDraw(
+        /* [in] */ ICanvas* canvas)
+{
+    return ViewGroup::DispatchDraw(canvas);
+}
+ECode JSActName::DispatchDraw(
+        /* [in] */ ICanvas* canvas)
+{
+    ALOGD("CCalculatorPadViewPager::Draw========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    if (mListener) {
+        ec = mListener->DispatchDraw(_this, canvas);
+    }
+    else {
+        ec = ViewGroup::DispatchDraw(canvas);
     }
 
     return ec;
@@ -808,6 +834,38 @@ ECode JSActName::_SetChildrenDrawingOrderEnabled(
     return NOERROR;
 }
 
+
+ECode JSActName::_DrawChild(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ IView* child,
+        /* [in] */ Int64 drawingTime,
+        /* [out] */ Boolean* result)
+{
+    *result = ViewGroup::DrawChild(canvas, child, drawingTime);
+    return NOERROR;
+}
+Boolean JSActName::DrawChild(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ IView* child,
+        /* [in] */ Int64 drawingTime)
+{
+    ALOGD("CCalculatorPadViewPager::DrawChild========begin========");
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
+
+    Boolean result;
+    if (mListener) {
+        ec = mListener->DrawChild(_this, canvas, child, drawingTime, &result);
+    }
+    else {
+        result = ViewGroup::DrawChild(canvas, child, drawingTime);
+    }
+
+    return result;
+}
+
 //------------------------------------------
 
 ECode JSActName::GetSuperObject(
@@ -836,12 +894,16 @@ ECode JSActName::_MeasureSpec::GetMODE_SHIFT(
             /* [out] */ Int32* result)
 {
     //*result = View::MeasureSpec::MODE_SHIFT;
+    ALOGD("CCalculatorPadViewPager::_MeasureSpec::GetMODE_SHIFT====error:private data====");
+    assert(0);
     return NOERROR;
 }
 ECode JSActName::_MeasureSpec::GetMODE_MASK(
             /* [out] */ Int32* result)
 {
     //*result = View::MeasureSpec::MODE_MASK;
+    ALOGD("CCalculatorPadViewPager::_MeasureSpec::GetMODE_MASK====error:private data====");
+    assert(0);
     return NOERROR;
 }
 
@@ -915,6 +977,20 @@ ECode JSActName::GetMeasureSpec(
     *measureSpec = mMeasureSpec;
 
     REFCOUNT_ADD(*measureSpec);
+    return NOERROR;
+}
+
+ECode JSActName::_GetGroupFlags(
+        /* [out] */ Int32* result)
+{
+    *result = mGroupFlags;
+    return NOERROR;
+}
+
+ECode JSActName::_GetViewFlags(
+        /* [out] */ Int32* result)
+{
+    *result = mViewFlags;
     return NOERROR;
 }
 

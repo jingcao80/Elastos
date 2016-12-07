@@ -169,6 +169,7 @@ private:
 JSCarClass(JSEvtName)
     , public Object
     , public INodeListener
+    , public IDroidPatch
 {
 
 public:
@@ -248,6 +249,17 @@ public:
         }
         else {
             ALOGD("RegisterCalculatorEditText================mNodeBridgeListener is null================");
+        }
+    }
+
+    static void RegisterNodeLinearLayout(IContext* context, IInterface* control, INodeLinearLayoutListener** listener) {
+        Boolean result = false;
+        if(JSEvtName::mNodeBridgeListener) {
+            JSEvtName::mNodeBridgeListener->OnRegisterNodeLinearLayout(
+                context, control, (Int32)listener, &result);
+        }
+        else {
+            ALOGD("RegisterNodeLinearLayout================mNodeBridgeListener is null================");
         }
     }
 
@@ -345,6 +357,10 @@ public:
         /* [in] */ Int32 ppCalculatorPadViewPagerListener,    //ICalculatorPadViewPagerListener**
         /* [in] */ ICalculatorPadViewPagerListener* pJsCalculatorPadViewPagerListener);
 
+    CARAPI SetNodeLinearLayoutListener(
+        /* [in] */ Int32 ppNodeLinearLayoutListener,    //ICalculatorPadLayoutListener**
+        /* [in] */ INodeLinearLayoutListener* pJsNodeLineareLayoutListener);
+
     CARAPI SetCalculatorPadLayoutListener(
         /* [in] */ Int32 ppCalculatorPadLayoutListener,    //ICalculatorPadLayoutListener**
         /* [in] */ ICalculatorPadLayoutListener* pJsCalculatorPadLayoutListener);
@@ -355,6 +371,13 @@ public:
     CARAPI SetNodeBridge(
         /* [in] */ Int32 from,
         /* [in] */ Int32 threadIndex);
+
+
+    //--------DroidPatch begin--------
+    CARAPI Get__Bundle__EMPTY(
+        /* [out] */ IInterface** result);
+
+    //--------DroidPatch end--------
 
 private:
     void (*cbFunction)(void*);

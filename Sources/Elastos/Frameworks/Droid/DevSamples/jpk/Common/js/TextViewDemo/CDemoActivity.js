@@ -9,6 +9,13 @@ module.exports = function(aoElastos, aoActivity){
     var oActivity = aoActivity.ActivityInstance;
     var oHandler = aoActivity.ActivityHandler;
 
+//================SetContentView Test====begin================
+
+var STC = require("/data/temp/node/Common/js/elastos_layout.js")(aoElastos, aoActivity);
+var ST = new STC();
+
+//================SetContentView Test====begin================
+
     function _showInfo(s) {
         s = "    Info: " + s;
         var oInfo = oActivity.FindViewById(R.id.myTextView);
@@ -32,7 +39,9 @@ module.exports = function(aoElastos, aoActivity){
         //OnCreate:function(aoContext){
         OnCreate:function(aoContext, aoSavedInstanceState){
             //----------------SetContentView begin----------------
-            oActivity.SetContentView(R.layout.main);
+            //oActivity.SetContentView(R.layout.main);
+
+            ST.SetContentView(aoContext, R.layout.main);
             //----------------SetContentView end----------------
 
             //----------------myTextView begin----------------

@@ -1,15 +1,14 @@
 #include "CNodeListener.h"
 
+#define JSActName CNodeLinearLayout
+
 #define JSActCarClassHead EE(JSPkgName,JSActName)
 
 #include JSActCarClassHead
 
-#include <elastos/droid/view/ViewGroup.h>
+#include <elastos/droid/widget/LinearLayout.h>
 
-//#include "elastos/droid/support/v4/view/ViewPager.h"
-//#include "elastos/droid/support/v4/view/PagerAdapter.h"
-
-using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::Widget::LinearLayout;
 
 using Elastos::Droid::View::IViewGroupLayoutParams;
 
@@ -19,37 +18,17 @@ namespace Node {
 namespace JSPkgName {
 
 JSCarClass(JSActName)
-    , public ViewGroup
-    //: public ViewPager
-    , public ICalculatorPadLayout
+    , public LinearLayout
+    , public INodeLinearLayout
 {
 public:
     CAR_INTERFACE_DECL()
     CAR_OBJECT_DECL()
 
-private:
-    class SuperObject
-        : public Object
-        , public ICalculatorPadLayoutSuperObject
-    {
-    public:
-        SuperObject(
-            /* [in] */ JSActName* host)
-            : mHost(host)
-        {};
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI Test();
-
-    private:
-        AutoPtr<JSActName> mHost;
-    };
-
 public:
-    CCalculatorPadLayout();
+    CNodeLinearLayout();
 
-    virtual ~CCalculatorPadLayout();
+    virtual ~CNodeLinearLayout();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -85,6 +64,10 @@ public:
         /* [out] */ IViewGroupLayoutParams** result);
 
 protected:
+
+    CARAPI MeasureVertical(
+        /* [in] */ Int32 widthMeasureSpec,
+        /* [in] */ Int32 heightMeasureSpec);
 
     CARAPI _OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
@@ -153,12 +136,8 @@ public:
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
-    CARAPI GetSuperObject(
-        /* [out] */ ICalculatorPadLayoutSuperObject** ppSuperObject);
-
 private:
-        AutoPtr<ICalculatorPadLayoutListener> mListener;
-        AutoPtr<ICalculatorPadLayoutSuperObject> mSuperObject;
+    AutoPtr<INodeLinearLayoutListener> mListener;
 };
 
 } // namespace JSPkgName

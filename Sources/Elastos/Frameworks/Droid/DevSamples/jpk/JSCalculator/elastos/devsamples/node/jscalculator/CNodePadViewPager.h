@@ -97,7 +97,7 @@ private:
         CARAPI Test();
 
     private:
-        JSActName* mHost;
+        AutoPtr<JSActName> mHost;
     };
 
 public:
@@ -237,6 +237,11 @@ public:
     CARAPI Draw(
         /* [in] */ ICanvas* canvas);
 
+    CARAPI _DispatchDraw(
+        /* [in] */ ICanvas* canvas);
+    CARAPI DispatchDraw(
+        /* [in] */ ICanvas* canvas);
+
     CARAPI _OnDraw(
         /* [in] */ ICanvas* canvas);
     //CARAPI OnDraw(
@@ -302,6 +307,16 @@ protected:
     CARAPI_(Boolean) CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p);
 
+    CARAPI _DrawChild(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ IView* child,
+        /* [in] */ Int64 drawingTime,
+        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) DrawChild(
+        /* [in] */ ICanvas* canvas,
+        /* [in] */ IView* child,
+        /* [in] */ Int64 drawingTime);
+
 public:
     CARAPI _GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
@@ -318,6 +333,12 @@ public:
 public:
     CARAPI GetSuperObject(
         /* [out] */ ICalculatorPadViewPagerSuperObject** ppSuperObject);
+
+    CARAPI _GetGroupFlags(
+        /* [out] */ Int32* result);
+
+    CARAPI _GetViewFlags(
+        /* [out] */ Int32* result);
 
 private:
     AutoPtr<ICalculatorPadViewPagerListener> mListener;

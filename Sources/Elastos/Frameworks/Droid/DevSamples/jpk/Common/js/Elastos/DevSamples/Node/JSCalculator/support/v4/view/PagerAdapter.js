@@ -45,6 +45,20 @@ module.exports = function(aoElastos, aoActivity){
             //Assert(0);
             return oRet;
         }
+
+        // GetCallbackInterfaceInfo(result) {
+        //     elog("====DataSetObservable::GetCallbackInterfaceInfo====begin====");
+        //     var oMuduleInfo = aoElastos.Droid.Get();
+        //     elog("====DataSetObservable::GetCallbackInterfaceInfo====0====");
+        //     var oInterfaceInfo = oMuduleInfo.GetInterfaceInfo("Elastos.Droid.Database.IDataSetObserver");
+        //     elog("====DataSetObservable::GetCallbackInterfaceInfo====1====");
+        //     var oRet = oInterfaceInfo.GetInternalObject();
+        //     elog("====DataSetObservable::GetCallbackInterfaceInfo====2====");
+        //     result.data = oRet;
+        //     elog("====DataSetObservable::GetCallbackInterfaceInfo====end====");
+        // }
+
+
     }
 // import android.database.DataSetObserver;
     //class DataSetObserver {}
@@ -116,8 +130,7 @@ class PagerAdapter {
 
 //     private DataSetObservable mObservable = new DataSetObservable();
     get mObservable() {
-        if (this._mObservable_) return this._mObservable;
-        this._mObservable_ = true;
+        if (this._mObservable) return this._mObservable;
         this._mObservable = new DataSetObservable();
         return this._mObservable;
     }
@@ -134,7 +147,7 @@ class PagerAdapter {
 //     public abstract int getCount();
     GetCount(){
         elog("====PagerAdapter::GetCount====TODO====");
-        Assert(0);
+        ss.tt();Assert(0);
         return 0;
     };
 
@@ -372,9 +385,9 @@ class PagerAdapter {
 //         mObservable.notifyChanged();
 //     }
     NotifyDataSetChanged() {
-        elog("====PagerAdapter::NotifyChanged====begin====");
+        elog("====PagerAdapter::NotifyDataSetChanged====begin====");
         this.mObservable.NotifyChanged();
-        elog("====PagerAdapter::NotifyChanged====end====");
+        elog("====PagerAdapter::NotifyDataSetChanged====end====");
     }
 
 //     /**

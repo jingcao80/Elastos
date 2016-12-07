@@ -13,11 +13,36 @@ module.exports = function(aoElastos, aoActivity){
     var oActivity = aoActivity.ActivityInstance;
     var oHandler = aoActivity.ActivityHandler;
 
-    var IView__VISIBLE = 0x00000000;
 
 //--------common definition----end----
 
-    var GONE = 0x00000008;  //IVew::GONE
+    //visible mask:0x0000000C====0/4/8/C
+    var IView__VISIBILITY_MASK = 0x0000000C;
+    var IView__VISIBLE = 0x00000000;
+    var IView__INVISIBLE = 0x00000004;
+    var IView__GONE = 0x00000008;
+
+    var IView__FOCUS_FORWARD = 0x00000002;
+    var IView__FOCUS_LEFT = 0x00000011;
+    var IView__FOCUS_RIGHT = 0x00000042;
+
+    var LayoutParams__FILL_PARENT = -1;
+    var LayoutParams__MATCH_PARENT = -1;
+    var LayoutParams__WRAP_CONTENT = -2;
+
+    var ViewGroup__FLAG_CLIP_CHILDREN = 0x1;
+    var ViewGroup__FLAG_INVALIDATE_REQUIRED  = 0x4;
+    var ViewGroup__FLAG_ANIMATION_DONE = 0x10;
+    var ViewGroup__FLAG_OPTIMIZE_INVALIDATE = 0x80;
+    var ViewGroup__FLAG_CLEAR_TRANSFORMATION = 0x100;
+    var ViewGroup__FLAG_ALWAYS_DRAWN_WITH_CACHE = 0x4000;
+    var ViewGroup__FLAG_CHILDREN_DRAWN_WITH_CACHE = 0x8000;
+
+    var IView__SOUND_EFFECTS_ENABLED = 0x08000000;
+    var IView__HAPTIC_FEEDBACK_ENABLED = 0x10000000;
+
+    var _mViewFlags = IView__SOUND_EFFECTS_ENABLED | IView__HAPTIC_FEEDBACK_ENABLED;
+
 
 //--------.java----begin----
 
@@ -52,10 +77,15 @@ module.exports = function(aoElastos, aoActivity){
         }
 
         GetCallbackInterfaceInfo(result) {
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====begin====");
             var oMuduleInfo = aoElastos.Droid.Get();
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====0====");
             var oInterfaceInfo = oMuduleInfo.GetInterfaceInfo("Elastos.Droid.Database.IDataSetObserver");
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====1====");
             var oRet = oInterfaceInfo.GetInternalObject();
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====2====");
             result.data = oRet;
+            elog("====DataSetObserver::GetCallbackInterfaceInfo====end====");
         }
         GetCallbackInterfaceName(result) {
             result.data = "Elastos.Droid.Database.IDataSetObserver";
@@ -135,87 +165,300 @@ module.exports = function(aoElastos, aoActivity){
         }
     );
 
+    var gggg = {};
+
 // import android.view.ViewGroup;
-    class ViewGroup {
-        constructor() {
-            elog("====ViewGroup::constructor====begin==9999==");
-        }
+class ViewGroup {
+    constructor() {
+        elog("====ViewGroup::constructor====begin==8888==");
+        this.TAG = "instance of ViewGroup";
+        ViewGroup.TAG = "class of ViewGroup";
+    }
 
-        OnCreate(_this, context, attrs) {
-            _this._constructor(context, attrs);
-        }
+    OnCreate(_this, context, attrs) {
+        elog("====ViewGroup::OnCreate====begin==9999==");
+        _this._constructor(context, attrs);
+    }
 
-        static get LayoutParams() {
-            if (this._LayoutParams_) return this._LayoutParams;
-            this._LayoutParams_ = true;
-            this._LayoutParams = class {
-                constructor(_this, context, attrs) {
-                    var oRet;
+    static get LayoutParams() {
+        elog("====ViewGroup::LayoutParams====begin====");
+        if (this._LayoutParams) return this._LayoutParams;
+        this._LayoutParams = class LayoutParams {
 
-                    var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
+            // get _obj(){
+            //     elog("====ViewGroup::LayoutParams::_obj====get====");
+            //     return this.__obj;
+            // }
+            // set _obj(v){
+            //     elog("====ViewGroup::LayoutParams::_obj====set====");
+            //     CObject.showMethods(v);
+            //     this.__obj = v;
+            //     return v;
+            // }
 
-                    if (typeName == "number") {
-                        oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
-                    }
-                    else if (typeName == "IAttributeSet") {
-                        //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
-                        //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
-                        oRet = _this._GenerateLayoutParams(attrs);
-                    }
-                    else {
-                        oRet = _this._GenerateLayoutParams(attrs);
-                    }
+            constructor(_this, context, attrs) {
+                elog("====ViewGroup::LayoutParams::constructor====begin====this:"+typeof this);
 
-                    this._obj = oRet;
 
-//TODO:wrapped with proxy
-if(false) {
-    return oRet;
-} else {
-        return new Proxy(this._obj, {
-            set : function(target, property, value) {
-                elog("====ViewGroup::LayoutParams::Proxy::set====" + property);
-                //if (property == "view") target.view = value;
-                //target[property] = value;
-                return Reflect.set(target, property, value);
-            },
-            get : function(target, property){
-                elog("====ViewGroup::LayoutParams::Proxy::get====" + property);
+                var _obj;
 
-                if (target.hasOwnProperty(property)) {
-                    return target[property];
+                var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
+                //if (typeName == "function") typeName = typeName.name;
+
+                elog("====ViewGroup::LayoutParams::constructor====0====typeName:"+typeName);
+
+                if (typeName == "number") {
+elog("====ssss1====");
+                    //_obj = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
+                    _obj = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", context, attrs);
+elog("====ssss2====");
+
+                    //Assert(0);
+                }
+                else if (typeName == "IAttributeSet") {
+elog("====ssss3====");
+
+                    //_obj = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
+                    _obj = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", context, attrs);
+                    //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
+                    //_obj = _this._GenerateLayoutParams(attrs);
+
+elog("====ssss4====");
+
+    // VALIDATE_NOT_NULL(params);
+    // AutoPtr<IViewGroupLayoutParams> temp;
+    // AutoPtr<IContext> ctx;
+    // GetContext((IContext**)&ctx);
+    // CViewGroupLayoutParams::New(ctx, attrs, (IViewGroupLayoutParams**)&temp);
+    // *params = temp;
+    // REFCOUNT_ADD(*params);
+    // return NOERROR;
+
+
+
+                }
+                else if (typeName == "CViewGroupLayoutParams") {
+elog("====ssss5====");
+
+                    //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams", context, attrs);
+                    //oRet = Droid_New("Elastos.Droid.View.CViewGroupLayoutParams");
+                    _obj = _this._GenerateLayoutParams(attrs);
+
+elog("====ssss6====");
                 }
                 else {
-                    var ret = function() {
-                        //elog("========Proxy get====begin====");
-                        //elog("====typeof:" + property + " " + typeof target[property]);
-                        //var args = [...arguments];
-                        //var _this = args.shift();
-                        var _this = this._obj;
-                        //var r = target[property].apply(target, arguments);
-                        //elog("========typeof========");
-                        //elog("========typeof0:"+typeof _this.getClass);
-                        //elog("========typeof1:"+typeof _this[property]);
-                        //try {
-                        //    var r = _this[property].apply(_this, args);
-                        //} catch(e) {
-                        //    elog("====proxy error!====");
-                        //}
-                        elog("====proxy ok ok!====");
-                        Assert(0);
-                        //return r;
-                    }
-                    return ret;
+                    ss.tt();Assert(0);
+                    _obj = _this._GenerateLayoutParams(attrs);
                 }
-            }
-        });
-}   //true
 
-                }
-            }
-            return this._LayoutParams;
-        }
+                elog("====ViewGroup::LayoutParams::constructor====1====");
+
+
+                //CObject.showMethods(_obj);
+
+                //this._obj = _obj;
+                //oRet._obj = _obj;
+
+                var oRet;
+
+
+    //elog("====ViewGroup::LayoutParams::constructor====fail====typeName:"+typeName);
+    //CObject.showMethods(attrs);
+
+    var im = attrs.GetAttributeCount();
+    elog("========cnt:"+im);
+
+    var aa = [];
+    for (var i=0;i<im;i++) {
+        var nn = attrs.GetAttributeName(i);
+        var vv = attrs.GetAttributeValue(i);
+        aa.push("==cnt:"+i+"==name:"+nn+"==value:"+vv+"==");
     }
+    elog("====ViewGroup::LayoutParams::constructor====fail====typeName:"+typeName);
+    for (var i=0;i<im;i++) {
+        elog(aa[i]);
+    }
+    //ss.tt();Assert(0);
+
+if (!_obj) {
+    elog("====ViewGroup::LayoutParams::constructor====kuang====");
+    s.t();
+    Assert(0);
+}
+
+
+if(_obj._obj) {
+    elog("====have been proxy!====");
+    //Assert(0);
+    oRet = oRet;
+}
+else {
+
+                var _prop = {
+                    isDecor:false,
+                    gravity:0,
+                    widthFactor:0,
+                    needsMeasure:0,
+                    position:0,
+                    childIndex:0,
+                };
+
+                //TODO:wrapped with proxy
+                //oRet = new Proxy(this, {
+                //oRet = new Proxy({_obj:_obj,}, {
+                oRet = new Proxy({}, {
+                    set : function(target, key, value) {
+                        elog("====ViewGroup::LayoutParams::Proxy::set====" + key);
+                        //if (key == "view") target.view = value;
+                        //target[key] = value;
+                        //return Reflect.set(target, key, value);
+                        //if (typeof _prop[key] != "undefined") {
+                            _prop[key] = value;
+                            return true;
+                        //}
+                    },
+                    get : function(target, key){
+                        elog("====ViewGroup::LayoutParams::Proxy::get====begin====" + key);
+
+                        //CObject.showMethods(target);
+
+                        var bTargetProp;
+                        // = target.hasOwnProperty(key);
+                        var aProp = ["_obj","isDecor","gravity","widthFactor","needsMeasure","position","childIndex"];
+
+                        bTargetProp = aProp.find(n=>n==key);
+
+                        var oGetFn;
+                        if (bTargetProp) {
+                            elog("====ViewGroup::LayoutParams::Proxy::get====use target===="+key +"==type:" + typeof _prop[key]);
+                            //oRet = target[property];
+                            //if (property == "widthFactor") return 0.3;
+                            //return Reflect.get(target, property);
+                            return _prop[key];
+                        }
+                        else {
+                            elog("====ViewGroup::LayoutParams::Proxy::get==0==use proxy====");
+
+                            //var _this = target._obj;
+                            //var _this = _obj;
+                            //oRet = _this[property];
+                            //elog("====ViewGroup::LayoutParams::Proxy::get==1==use proxy====" + typeof _this );
+                            //elog("====ViewGroup::LayoutParams::Proxy::get==2==use proxy====" + _this );
+
+                            elog("====ViewGroup::LayoutParams::Proxy::get==1==use proxy====_this type:"+typeof _this);
+                            elog("====ViewGroup::LayoutParams::Proxy::get==2==use proxy====_this type:"+typeof _this[key]);
+
+                            //CObject.showMethods(target);
+                            //CObject.showMethods(_this);
+
+                            //var oRet_bak;
+                            oGetFn = function() {
+                                elog("========Proxy get====begin===="+key);
+                                //elog("====typeof:" + property + " " + typeof target[property]);
+                                var args = [...arguments];
+                                var len = args.length;
+
+// if(property=="GetWidth"){
+//     elog("====Proxy get====GetWidth===="+args.length);
+//     //ss.tt();Assert(0);
+// }
+
+                                //CObject.showMethods(this);
+
+                                //var _this = this._obj;
+                                //var _this = target._obj;
+                                elog("========Proxy get==0==args.length===="+len);
+
+                                elog("========Proxy get==1==type:===="+typeof _this);
+
+                                //elog("========Proxy get==2==name:===="+typeof _this[property]);
+
+                                //elog("========Proxy get==2==name:===="+typeof gggg._obj);
+
+                                elog("====ToString:"+_this.ToString()+"====");
+
+                                //CObject.showMethods(_this);
+                                elog("========Proxy get==3==name:====");
+
+                                var args_in = [];
+                                var args_out = [];
+                                for (var i=0;i<len;i++){
+                                    var arg = args[i];
+                                    if (arg.data) {
+                                        args_out.push(arg);
+                                    }
+                                    else {
+                                        args_in.push(arg);
+                                    }
+                                }
+
+
+                                //var r = _this[key].apply(_this, args);
+                                var r = _obj[key].apply(_obj, args_in);
+
+                                var outlen = args_out.length;
+                                if (outlen == 0) {
+                                    return r;
+                                }
+                                else if(outlen == 1) {
+                                    args_out[0].data = r;
+                                }
+                                else {
+                                    var i = 0;
+                                    for (var p in r) {
+                                        args_out[i].data = r[p];
+                                        i++;
+                                    }
+                                }
+
+                                return;
+
+                                // var r;
+                                // switch (len) {
+                                //     case 0:
+                                //         r = _this[property]();
+                                //         break;
+                                //     case 1:
+                                //         r = _this[property](args[0]);
+                                //         break;
+                                //     case 2:
+                                //         r = _this[property](args[0], args[1]);
+                                //         break;
+                                //     default:
+                                //         r = _this[property].apply(_this, args);
+                                //         break;
+                                // }   //switch (len)
+
+                                elog("====proxy ok ok!====");
+                                elog("====proxy ok ok!===="+_this.getClass().GetName()+"::"+key);
+                                //Assert(0);
+                                return r;
+                            }
+                        }
+                        elog("====ViewGroup::LayoutParams::Proxy::get====end====" + key);
+                        return oGetFn;
+                    }
+                });
+
+}   //if(_obj._obj)
+
+                //gggg._obj = _obj;
+
+                //elog("====ViewGroup::LayoutParams::constructor====_obj type:" + typeof gggg._obj);
+                //elog("====ToString:"+gggg._obj.ToString()+"====");
+
+                //CObject.showMethods(gggg._obj);
+
+
+                //oRet._obj = _obj;
+
+                return oRet;
+
+            }
+        }
+        return this._LayoutParams;
+    }   //get LayoutParams
+}   //class ViewGroup
 
 // import android.view.ViewParent;
 // import android.view.accessibility.AccessibilityEvent;
@@ -322,7 +565,7 @@ if(false) {
                         var _this = args.shift();
                         //var r = target[property].apply(target, arguments);
                         var r = _this[property].apply(_this, args);
-                        elog("====proxy ok!====");
+                        elog("====proxy ok!===="+_this[property]);
                         return r;
                     }
                     return ret;
@@ -333,8 +576,16 @@ if(false) {
 
     var tempData = {};
 
+// View::MeasureSpec
+// MeasureSpec.AT_MOST;
+// MeasureSpec.EXACTLY;
+// MeasureSpec.makeMeasureSpec
+// MeasureSpec.GetEXACTLY()
+// MeasureSpec.GetSize
+
     var MeasureSpec = new Proxy(
         {
+
             _obj:null,
         },
         {
@@ -355,7 +606,7 @@ if(false) {
                 }
                 else {
                     var ret = function() {
-                        elog("====MeasureSpec::Proxy::get====typeof:" + property + " " + typeof target[property]);
+                        elog("====MeasureSpec::Proxy::get====typeof:" + property + " " + typeof target._obj[property]);
                         var args = [...arguments];
                         //var _this = args.shift();
                         //var r = target[property].apply(target, arguments);
@@ -441,10 +692,21 @@ class ViewPager extends ViewGroup {
      */
 //     private int mExpectedAdapterCount;
     get mExpectedAdapterCount() {
+        elog("====ViewPager::mExpectedAdapterCount::get====v:"+this._mExpectedAdapterCount);
         return this._mExpectedAdapterCount || 0;
     }
-    set mExpectedAdapterCount(value) {
-        return this._mExpectedAdapterCount = value;
+    set mExpectedAdapterCount(v) {
+        this._mExpectedAdapterCount = v;
+
+        this._mTmpCnt = this._mTmpCnt || 0;
+        this._mTmpCnt++;
+
+        // if (this._mTmpCnt==1) {
+        //     ss.tt();Assert(0);
+        // }
+
+        elog("====ViewPager::mExpectedAdapterCount::set====v:"+this._mExpectedAdapterCount+"====cnt:"+this._mTmpCnt);
+        return v;
     }
 
 //     static class ItemInfo {
@@ -455,23 +717,45 @@ class ViewPager extends ViewGroup {
 //         float offset;
 //     }
     static get ItemInfo() {
-        if (ViewPager._ItemInfo_) return ViewPager._ItemInfo;
-        ViewPager._ItemInfo_ = true;
-        ViewPager._ItemInfo = class {
-            get object() {return this._object};
-            set object(v) {this._object = v;};
+        if (ViewPager._ItemInfo) return ViewPager._ItemInfo;
+        ViewPager._ItemInfo = class ItemInfo {
+            // constructor() {
+            //     return {
+            //         object : null,
+            //         position : 0,
+            //         scrolling : false,
+            //         offset : 0.0,
+            //     };
+            // }
 
-            get position() {return this._position};
-            set position(v) {this._position = v;};
+            //object为PagerAdapter的instantiateItem函数返回的对象
+            get object() {return this._object || null;};
+            set object(v) {this._object = v; return v;};
 
-            get scrolling() {return this._scrolling};
-            set scrolling(v) {this._scrolling = v;};
+            //position为页面的序号，即第几个页面
+            get position() {
+                elog("====ItemInfo::get position====");
+                return this._position || 0;
+            };
+            set position(v) {
+                elog("====ItemInfo::set position====");
+                this._position = v; return v;
+            };
 
-            get widthFactor() {return this._widthFactor};
-            set widthFactor(v) {this._widthFactor = v;};
+            //是否正在滚动
+            get scrolling() {return this._scrolling || false;};
+            set scrolling(v) {this._scrolling = v; return v;};
 
-            get offset() {return this._offset};
-            set offset(v) {this._offset = v;};
+            //页面宽度，取值为0到1，表示为页面宽度与ViewPager显示区域宽度比例，默认为1
+            get widthFactor() {return this._widthFactor || 1;};
+            set widthFactor(v) {
+                elog("====ItemInfo::widthFactor::set====");
+                this._widthFactor = v; return v;
+            };
+
+            //偏移量，页面移动的偏移量，默认为0
+            get offset() {return this._offset || 0;};
+            set offset(v) {this._offset = v; return v;};
         }
         return ViewPager._ItemInfo;
     }
@@ -500,6 +784,7 @@ class ViewPager extends ViewGroup {
 //             return t * t * t * t * t + 1.0f;
 //         }
 //     };
+    //Scroller使用的动画插值器，根据不同的时间控制滑动的速度
     static get sInterpolator() {
         if (ViewPager._sInterpolator_) return ViewPager._sInterpolator;
         ViewPager._sInterpolator_ = true;
@@ -514,32 +799,31 @@ class ViewPager extends ViewGroup {
 
 //     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
     get mItems() {
-        if (this._mItems_) return this._mItems;
-        this._mItems_ = true;
+        if (this._mItems) return this._mItems;
         this._mItems = new ArrayList();
         return this._mItems;
     }
 //     private final ItemInfo mTempItem = new ItemInfo();
     get mTempItem() {
-        if (this._mTempItem_) return this._mTempItem;
-        this._mTempItem_ = true;
+        if (this._mTempItem) return this._mTempItem;
         this._mTempItem = new ViewPager.ItemInfo();
         return this._mTempItem;
     }
 
 //     private final Rect mTempRect = new Rect();
     get mTempRect() {
-        if (this._mTempRect_) return this._mTempRect;
-        this._mTempRect_ = true;
+        if (this._mTempRect) return this._mTempRect;
         this._mTempRect = new Rect();
         return this._mTempRect;
     }
 
 //     private PagerAdapter mAdapter;
     get mAdapter() {return this._mAdapter || null;}
-    set mAdapter(v) {this._mAdapter = v;}
+    set mAdapter(v) {this._mAdapter = v;return v;}
 
 //     private int mCurItem;   // Index of currently displayed page.
+    get mCurItem() {return this._mCurItem || 0;}
+    set mCurItem(v) {this._mCurItem = v;return v;}
 //     private int mRestoredCurItem = -1;
 //     private Parcelable mRestoredAdapterState = null;
 //     private ClassLoader mRestoredClassLoader = null;
@@ -576,6 +860,15 @@ class ViewPager extends ViewGroup {
 //     private int mChildWidthMeasureSpec;
 //     private int mChildHeightMeasureSpec;
 //     private boolean mInLayout;
+    get mInLayout() {
+        elog("====ViewPager::mInLayout====get====");
+        return this._mInLayout;
+    }
+    set mInLayout(v) {
+        elog("====ViewPager::mInLayout====set====");
+        this._mInLayout = v;
+        return v;
+    }
 
 //     private boolean mScrollingCacheEnabled;
 
@@ -824,7 +1117,9 @@ class ViewPager extends ViewGroup {
      */
 //     interface Decor {}
     get Decor() {
-        return class _ {};
+        if(this._Decor)return this._Decor;
+        this._Decor = class Decor {};
+        return this._Decor;
     }
 
 //     public ViewPager(Context context) {
@@ -840,6 +1135,12 @@ class ViewPager extends ViewGroup {
         elog("====ViewPager::ViewPager====");
 
         attrs = attrs || null;
+
+        MeasureSpec._obj = _this.GetMeasureSpec();
+        global.MeasureSpec = MeasureSpec;
+
+//CObject.showMethods(MeasureSpec._obj);
+        //ss.tt();Assert(0);
 
         super.OnCreate(_this, context, attrs);
         this.InitViewPager();
@@ -996,56 +1297,108 @@ class ViewPager extends ViewGroup {
 //             mAdapterChangeListener.onAdapterChanged(oldAdapter, adapter);
 //         }
 //     }
+    //ViewPager与数据源之间需要通过适配器来适配。
+    //调用ViewPager的setAdapter函数即可将ViewPager与PagerAdapter关联交互。
+    //如果数据源发生变化，需要在代码里调用PagerAdapter的notifyDataSetChanged函数，
+    //即通知ViewPager数据源发生变化，
+    //ViewPager就是一个观察者，通过观察者类PagerObserver做相关应对操作。
     SetAdapter(adapter) {
+        elog("====ViewPager::SetAdapter====begin====");
+
         var _this = this._obj;
 
+        elog("====ViewPager::SetAdapter====mAdapter===="+typeof this.mAdapter);
+
+        //1.如果已经设置过PagerAdapter，即mAdapter != null，
+        // 则做一些清理工作
         if (this.mAdapter != null) {
+            elog("====ViewPager::SetAdapter====0====");
+
+            //2.清除观察者
             this.UnregisterDataSetObserver(this.mObserver);
+            //3.回调startUpdate函数，告诉PagerAdapter开始更新要显示的页面
             this.mAdapter.startUpdate(this);
+            //4.如果之前保存有页面，则将之前所有的页面destroy掉
             for (var i = 0; i < this.mItems.GetSize(); i++) {
                 var ii = this.mItems.Get(i);
                 this.mAdapter.destroyItem(this, ii.position, ii.object);
             }
+            //5.回调finishUpdate，告诉PagerAdapter结束更新
             this.mAdapter.FinishUpdate(this);
+            //6.将所有的页面清除
             this.mItems.Clear();
+            //7.将所有的非Decor View移除，即将页面移除
             removeNonDecorViews();
+            //8.当前的显示页面重置到第一个
             this.mCurItem = 0;
+            //9.滑动重置到(0,0)位置
             _this.ScrollTo(0, 0);
         }
 
+        //10.保存上一次的PagerAdapter
         var oldAdapter = this.mAdapter;
+        //11.设置mAdapter为新的PagerAdapter
         this.mAdapter = adapter;
+        //12.设置期望的适配器中的页面数量为0个
         this.mExpectedAdapterCount = 0;
 
+        //13.如果设置的PagerAdapter不为null
         if (this.mAdapter != null) {
+            elog("====ViewPager::SetAdapter====1====");
+
+            //14.确保观察者不为null，观察者主要是用于监视数据源的内容发生变化
             if (this.mObserver == null) {
+                elog("====ViewPager::SetAdapter====2====");
                 this.mObserver = new this.PagerObserver();
             }
 
+            //15.将观察者设置到PagerAdapter中
             this.mAdapter.RegisterDataSetObserver(this.mObserver);
 
             this.mPopulatePending = false;
+            //16.保存上一次是否是第一次Layout
             var wasFirstLayout = this.mFirstLayout;
+            //17.设定当前为第一次Layout
             this.mFirstLayout = true;
+            //18.更新期望的数据源中页面个数
             this.mExpectedAdapterCount = this.mAdapter.GetCount();
+            elog("====ViewPager::SetAdapter====2.1===="+this.mAdapter.GetCount());
+
+            // ss.tt();Assert(0);
 
             if (this.mRestoredCurItem >= 0) {
+                //19.如果有数据需要恢复
+                elog("====ViewPager::SetAdapter====3.0====");
+                //20.回调PagerAdapter的restoreState函数
                 this.mAdapter.RestoreState(this.mRestoredAdapterState, this.mRestoredClassLoader);
                 SetCurrentItemInternal(this.mRestoredCurItem, false, true);
+                //21.标记无需再恢复
                 this.mRestoredCurItem = -1;
                 this.mRestoredAdapterState = null;
                 this.mRestoredClassLoader = null;
             } else if (!wasFirstLayout) {
+                //如果在此之前不是第一次Layout
+                elog("====ViewPager::SetAdapter====3.1====");
                 elog("====ViewPager::SetAdapter====Populate====call====1====");
+                //22.由于ViewPager并不是将所有页面作为子View，
+                // 而是最多缓存用户指定缓存个数*2（左右两边，可能左边或右边没有那么多页面）
+                //因此需要创建和销毁页面，populate主要工作就是这些
                 this.Populate();
             } else {
+                //23.重新布局（Layout）
+                elog("====ViewPager::SetAdapter====3.2====");
                 _this.RequestLayout();
             }
         }
 
+        //24.如果PagerAdapter发生变化，并且设置了OnAdapterChangeListener监听器
         if (this.mAdapterChangeListener != null && oldAdapter != adapter) {
+            elog("====ViewPager::SetAdapter====4.0====");
+            // 则回调OnAdapterChangeListener的onAdapterChanged函数
             this.mAdapterChangeListener.OnAdapterChanged(oldAdapter, adapter);
         }
+
+        elog("====ViewPager::SetAdapter====end====");
     }   //SetAdapter
 
 //     private void removeNonDecorViews() {
@@ -1405,10 +1758,9 @@ class ViewPager extends ViewGroup {
 //         final int result = ((LayoutParams) mDrawingOrderedChildren.get(index).getLayoutParams()).childIndex;
 //         return result;
 //     }
-    GetChildDrawingOrder(childCount, i) {
-        var index = mDrawingOrder == DRAW_ORDER_REVERSE ? childCount - 1 - i : i;
-        var result = mDrawingOrderedChildren.get(index).getLayoutParams().childIndex;
-        return result;
+    GetChildDrawingOrder(_this, childCount, i, result) {
+        var index = this.mDrawingOrder == DRAW_ORDER_REVERSE ? childCount - 1 - i : i;
+        result.data = this.mDrawingOrderedChildren.Get(index).GetLayoutParams().childIndex;
     }
 
     /**
@@ -1470,6 +1822,9 @@ class ViewPager extends ViewGroup {
 //             populate();
 //         }
 //     }
+    //ViewPager缓存当前显示的页面左右两边的页面，
+    //这个页面个数默认为左右两边各1个（如果左右都有至少1个的话），
+    //设定当前显示的页面左右两边保持的页面个数。
     SetOffscreenPageLimit(limit) {
         if (limit < DEFAULT_OFFSCREEN_PAGES) {
             Log.w(TAG, "Requested offscreen page limit " + limit + " too small; defaulting to " +
@@ -1478,6 +1833,7 @@ class ViewPager extends ViewGroup {
         }
         if (limit != this.mOffscreenPageLimit) {
             this.mOffscreenPageLimit = limit;
+            //每次改变缓存数量后也会调用populate函数。
             populate();
         }
     }
@@ -1555,8 +1911,13 @@ class ViewPager extends ViewGroup {
 //     protected boolean verifyDrawable(Drawable who) {
 //         return super.verifyDrawable(who) || who == mMarginDrawable;
 //    }
-    VerifyDrawable(who, result) {
-        return this._obj.VerifyDrawable(who) || who == this.mMarginDrawable;
+    VerifyDrawable(_this, who, result) {
+
+        elog("====ViewPager::VerifyDrawable====begin====");
+
+        result.data = _this._VerifyDrawable(who) || who == this.mMarginDrawable;
+
+        elog("====ViewPager::VerifyDrawable====end====");
     }
 
 //     @Override
@@ -1706,15 +2067,44 @@ class ViewPager extends ViewGroup {
 //         return ii;
 //     }
     AddNewItem(position, index) {
+        elog("====ViewPager::AddNewItem====begin====position:"+position+"==index:"+index);
+
+        var _this = this.obj;
+
+        elog("====ViewPager::AddNewItem====0====");
         var ii = new ViewPager.ItemInfo();
+        elog("====ViewPager::AddNewItem====1====");
+
+ii.tttt=1234;
         ii.position = position;
-        ii.object = this.mAdapter.InstantiateItem(this, position);
+        ii.object = this.mAdapter.InstantiateItem(_this, position);
         ii.widthFactor = this.mAdapter.GetPageWidth(position);
+        elog("====ViewPager::AddNewItem====1.0====widthFactor:"+ii.widthFactor);
+
         if (index < 0 || index >= this.mItems.GetSize()) {
+elog("====ViewPager::AddNewItem====2.1====ii:"+ii.tttt);
             this.mItems.Add(ii);
         } else {
+elog("====ViewPager::AddNewItem====2.2====ii:"+ii.tttt);
             this.mItems.Add(index, ii);
         }
+
+elog("====ViewPager::AddNewItem====3.1====ii:"+ii.tttt);
+elog("====ViewPager::AddNewItem====3.2====index:"+index);
+elog("====ViewPager::AddNewItem====3.3====size:"+this.mItems.GetSize());
+
+var jj =  this.mItems.Get(index);
+
+elog("====ii class:"+CObject.getClassName(ii) );
+elog("====jj class:"+CObject.getClassName(jj) );
+
+elog("====ViewPager::AddNewItem====4====jj:"+jj.tttt);
+//ss.tt();Assert(0);
+
+
+        elog("====ViewPager::AddNewItem====item class name:" + CObject.getClassName(ii.object) );
+
+        elog("====ViewPager::AddNewItem====end====");
         return ii;
     }
 
@@ -2061,138 +2451,205 @@ class ViewPager extends ViewGroup {
     Populate(newCurrentItem) {
         elog("====ViewPager::Populate====begin====");
 
-        newCurrentItem = newCurrentItem || this.mCurItem;
-
-elog("====ViewPager::Populate====newCurrentItem:===="+newCurrentItem);
-
         var _this = this._obj;
 
         newCurrentItem = newCurrentItem || this.mCurItem;
 
-        var View__FOCUS_FORWARD = 0x00000002;
-        var View__FOCUS_LEFT = 0x00000011;
-        var View__FOCUS_RIGHT = 0x00000042;
-
         var oldCurInfo = null;
-        var focusDirection = View__FOCUS_FORWARD;
+        var focusDirection = IView__FOCUS_FORWARD;
         if (this.mCurItem != newCurrentItem) {
-            focusDirection = this.mCurItem < newCurrentItem ? View__FOCUS_RIGHT : View__FOCUS_LEFT;
+            focusDirection = this.mCurItem < newCurrentItem ? IView__FOCUS_RIGHT : IView__FOCUS_LEFT;
             oldCurInfo = this.InfoForPosition(this.mCurItem);
             this.mCurItem = newCurrentItem;
         }
-        elog("====ViewPager::Populate====begin====1====");
+        elog("====ViewPager::Populate====1====");
 
         if (this.mAdapter == null) {
+            //对子View的绘制顺序进行排序，优先绘制Decor View
+            //再按照position从小到大排序
             this.SortChildDrawingOrder();
+            elog("====ViewPager::Populate====end====0====");
             return;
         }
-        elog("====ViewPager::Populate====begin====2====");
+        elog("====ViewPager::Populate====2====");
 
+        //如果我们正在等待populate,那么在用户手指抬起切换到新的位置期间应该推迟创建子View，
+        // 直到滚动到最终位置再去创建，以免在这个期间出现差错
         if (this.mPopulatePending) {
             if (ViewPager.DEBUG) Log.i(TAG, "populate is pending, skipping for now...");
+            //对子View的绘制顺序进行排序，优先绘制Decor View
+            //再按照position从小到大排序
             this.SortChildDrawingOrder();
+            elog("====ViewPager::Populate====end====1====");
             return;
         }
-        elog("====ViewPager::Populate====begin====3====");
+        elog("====ViewPager::Populate====3====");
 
+        //同样，在ViewPager没有attached到window之前，不要populate.
+        // 这是因为如果我们在恢复View的层次结构之前进行populate，可能会与要恢复的内容有冲突
         if (_this.GetWindowToken() == null) {
+            elog("====ViewPager::Populate====end====2====");
             return;
         }
-        elog("====ViewPager::Populate====begin====4====");
+        elog("====ViewPager::Populate====4====");
 
+        //回调PagerAdapter的startUpdate函数，
+        // 告诉PagerAdapter开始更新要显示的页面
         this.mAdapter.StartUpdate(_this);
 
         var pageLimit = this.mOffscreenPageLimit;
+        //确保起始位置大于等于0，如果用户设置了缓存页面数量，第一个页面为当前页面减去缓存页面数量
         var startPos = Math.max(0, this.mCurItem - pageLimit);
+        //保存数据源中的数据个数
         var N = this.mAdapter.GetCount();
+        //确保最后的位置小于等于数据源中数据个数-1，
+        // 如果用户设置了缓存页面数量，第一个页面为当前页面加缓存页面数量
         var endPos = Math.min(N-1, this.mCurItem + pageLimit);
-        elog("====ViewPager::Populate====begin====5====");
+        elog("====ViewPager::Populate====5====");
 
-        elog(`====ViewPager::Populate====begin====5.0====N:${N}====Cnt:${this.mExpectedAdapterCount}`);
+        elog(`====ViewPager::Populate====5.0====N:${N}====Cnt:${this.mExpectedAdapterCount}`);
         //Assert(0);
 
+        //判断用户是否增减了数据源的元素，如果增减了且没有调用notifyDataSetChanged，则抛出异常
         if (N != this.mExpectedAdapterCount) {
+            //resName用于抛异常显示
             var resName;
             try {
                 resName = _this.GetResources().GetResourceName(_this.GetId());
             } catch (e) {
                 resName = Integer.toHexString(_this.GetId());
             }
-            throw new IllegalStateException("The application's PagerAdapter changed the adapter's" +
+            elog("The application's PagerAdapter changed the adapter's" +
                     " contents without calling PagerAdapter#notifyDataSetChanged!" +
                     " Expected adapter item count: " + this.mExpectedAdapterCount + ", found: " + N +
                     " Pager id: " + resName +
-                    " Pager class: " + getClass() +
-                    " Problematic adapter: " + this.mAdapter.getClass());
+                    " Pager class: " + _this.getClass().GetName() +
+                    " Problematic adapter: " + this.mAdapter.name);
+            elog("====ViewPager::Populate====end====3====");
+            ss.tt();Assert(0);
+            return;
+            //this.mExpectedAdapterCount = N;
         }
-        elog("====ViewPager::Populate====begin====6====");
+        elog("====ViewPager::Populate====6====");
 
-CObject.showMethods(this.mItems);
-elog("====ViewPager::Populate====begin====6.1===="+this.mItems.GetSize());
-elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
+// CObject.showMethods(this.mItems);
+// elog("====ViewPager::Populate====6.1====GetSize:"+this.mItems.GetSize());
+// if(this.mItems.GetSize()>0){
+// elog("====ViewPager::Populate====6.1====Get:"+this.mItems.Get(0));
+// }
 
+        var maxIndex = this.mItems.GetSize();
+        elog("====ViewPager::Populate====6.1====GetSize:"+maxIndex);
+
+        //定位到当前获焦的页面，如果没有的话，则添加一个
         var curIndex = -1;
         var curItem = null;
-        for (curIndex = 0; curIndex < this.mItems.GetSize(); curIndex++) {
+        //遍历每个页面对应的ItemInfo，找出获焦页面
+        for (curIndex = 0; curIndex < maxIndex; curIndex++) {
             var ii = this.mItems.Get(curIndex);
+
+//CObject.showMethods(ii);
+elog("====ViewPager::Populate====6.2====ii.position:"+ii.position);
+//ii.position = 2;
+//elog("====ViewPager::Populate====6.3====ii.position:"+ii.position);
+
+            //找到当前页面对应的ItemInfo后，跳出循环
             if (ii.position >= this.mCurItem) {
                 if (ii.position == this.mCurItem) curItem = ii;
                 break;
             }
         }
-        elog("====ViewPager::Populate====begin====7====");
+        elog("====ViewPager::Populate====7====");
 
+        //如果没有找到获焦的页面，说明mItems列表里面没有保存获焦页面，
+        // 需要将获焦页面加入到mItems里面
         if (curItem == null && N > 0) {
+            elog("====ViewPager::Populate====7.1====");
             curItem = this.AddNewItem(this.mCurItem, curIndex);
         }
-        elog("====ViewPager::Populate====begin====8====");
+        elog("====ViewPager::Populate====8====");
 
+        //默认缓存当前页面的左右两边的页面，如果用户设定了缓存页面数量，
+        // 则将当前页面两边都缓存用户指定的数量的页面
+        //如果当前没有页面，则我们啥也不需要做
         if (curItem != null) {
+            elog("====ViewPager::Populate====8.1====curItem className:"+CObject.getClassName(curItem.object) );
+            elog("====ViewPager::Populate====8.2====curItem JSON:"+JSON.stringify(curItem) );
+            CObject.showMethods(curItem);
+
             var extraWidthLeft = 0;
+            //左边的页面
             var itemIndex = curIndex - 1;
+            elog("====ViewPager::Populate====8.3====itemIndex:"+itemIndex);
+            //如果当前页面左边有页面，则将左边页面对应的ItemInfo取出，否则左边页面的ItemInfo为null
             var ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
+            //保存显示区域的宽度
             var clientWidth = this.GetClientWidth();
+            elog("====ViewPager::Populate====8.4====clientWidth:"+clientWidth);
+            //算出左边页面需要的宽度，注意，这里的宽度是指实际宽度与可视区域宽度比例，
+            // 即实际宽度=leftWidthNeeded*clientWidth
             var leftWidthNeeded = clientWidth <= 0 ? 0 :
                     2 - curItem.widthFactor + _this.GetPaddingLeft() / clientWidth;
-            elog("====ViewPager::Populate====begin====9====");
+            elog("====ViewPager::Populate====8.5====leftWidthNeeded:"+leftWidthNeeded);
 
+            elog("====ViewPager::Populate====9====mCurItem:"+this.mCurItem);
+            //从当前页面左边第一个页面开始，左边的页面进行遍历
             for (var pos = this.mCurItem - 1; pos >= 0; pos--) {
+                elog("====ViewPager::Populate====9.1====");
+                //如果左边的宽度超过了所需的宽度，并且当前当前页面位置比第一个缓存页面位置小
+                //这说明这个页面需要Destroy掉
                 if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
+                    //如果左边已经没有页面了，跳出循环
                     if (ii == null) {
                         break;
                     }
+                    //将当前页面destroy掉
                     if (pos == ii.position && !ii.scrolling) {
                         this.mItems.Remove(itemIndex);
+                        //回调PagerAdapter的destroyItem
                         this.mAdapter.DestroyItem(this, pos, ii.object);
                         if (ViewPager.DEBUG) {
                             elog(TAG + "populate() - destroyItem() with pos: " + pos +
                                     " view: " + ii.object);
                         }
+                        //由于mItems删除了一个元素, 需要将索引减一
                         itemIndex--;
                         curIndex--;
                         ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
                     }
                 } else if (ii != null && pos == ii.position) {
+                    //如果当前位置是需要缓存的位置，并且这个位置上的页面已经存在
+                    //则将左边宽度加上当前位置的页面
                     extraWidthLeft += ii.widthFactor;
+                    //mItems往左遍历
                     itemIndex--;
+                    //ii设置为当前遍历的页面的左边一个页面
                     ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
                 } else {
+                    //如果当前位置是需要缓存，并且这个位置没有页面
+                    //需要添加一个ItemInfo,而addNewItem是通过PagerAdapter的instantiateItem获取对象
                     ii = this.AddNewItem(pos, itemIndex + 1);
+                    //将左边宽度加上当前位置的页面
                     extraWidthLeft += ii.widthFactor;
+                    //由于新加了一个元素，当前的索引号需要加1
                     curIndex++;
+                    //ii设置为当前遍历的页面的左边一个页面
                     ii = itemIndex >= 0 ? this.mItems.Get(itemIndex) : null;
                 }
             }
-            elog("====ViewPager::Populate====begin====10====");
+            elog("====ViewPager::Populate====10====");
 
             var extraWidthRight = curItem.widthFactor;
             itemIndex = curIndex + 1;
 
+            //同理，右边需要添加缓存的页面
             if (extraWidthRight < 2) {
+                elog("====ViewPager::Populate====10.1====");
                 ii = itemIndex < this.mItems.GetSize() ? this.mItems.Get(itemIndex) : null;
                 var rightWidthNeeded = clientWidth <= 0 ? 0 :
                         _this.GetPaddingRight() / clientWidth + 2.0;
                 for (var pos = this.mCurItem + 1; pos < N; pos++) {
+                    elog("====ViewPager::Populate====10.2====");
                     if (extraWidthRight >= rightWidthNeeded && pos > endPos) {
                         if (ii == null) {
                             break;
@@ -2218,12 +2675,11 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
                     }
                 }
             }
-            elog("====ViewPager::Populate====begin====11====");
+            elog("====ViewPager::Populate====11====");
 
             this.CalculatePageOffsets(curItem, curIndex, oldCurInfo);
-//         }
         }
-        elog("====ViewPager::Populate====begin====12====");
+        elog("====ViewPager::Populate====12====");
 
         if (ViewPager.DEBUG) {
             elog(TAG + "Current page list:");
@@ -2232,29 +2688,41 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
             }
         }
 
+        //回调PagerAdapter的setPrimaryItem，告诉PagerAdapter当前显示的页面
         this.mAdapter.SetPrimaryItem(this, this.mCurItem, curItem != null ? curItem.object : null);
-
+        //回调PagerAdapter的finishUpdate，告诉PagerAdapter页面更新结束
         this.mAdapter.FinishUpdate(this);
-        elog("====ViewPager::Populate====begin====13====");
 
+        //检查页面的宽度是否测量，如果页面的LayoutParams数据没有设定，则去重新设定好
         var childCount = _this.GetChildCount();
-        for (var i = 0; i < _this.ChildCount; i++) {
+        elog("====ViewPager::Populate====13====childCount:"+childCount);
+
+        for (var i = 0; i < childCount; i++) {
+            elog("====ViewPager::Populate====13.1===="+i+"/"+childCount);
             var child = _this.GetChildAt(i);
-            var lp = child.getLayoutParams();
+            var lp = child.GetLayoutParams();
             lp.childIndex = i;
+
+            elog("====ViewPager::Populate====13.2====isDecor:"+lp.isDecor+"====widthFacor:"+lp.widthFactor);
             if (!lp.isDecor && lp.widthFactor == 0) {
+                elog("====ViewPager::Populate====13.3====");
                 // 0 means requery the adapter for this, it doesn't have a valid width.
                 var ii = this.InfoForChild(child);
                 if (ii != null) {
+                    elog("====ViewPager::Populate====13.4====");
                     lp.widthFactor = ii.widthFactor;
                     lp.position = ii.position;
+                    elog("====ViewPager::Populate====13.5====widthFactor:"+lp.widthFactor+"==lp.position:"+lp.position);
                 }
             }
         }
+        //重新对页面排序
         this.SortChildDrawingOrder();
-        elog("====ViewPager::Populate====begin====14====");
+        elog("====ViewPager::Populate====14====");
 
+        //如果ViewPager被设定为可获焦的，则将当前显示的页面设定为获焦
         if (_this.HasFocus()) {
+            elog("====ViewPager::Populate====14.1====");
             var currentFocused = _this.FindFocus();
             var ii = currentFocused != null ? this.InfoForAnyChild(currentFocused) : null;
             if (ii == null || ii.position != this.mCurItem) {
@@ -2476,12 +2944,12 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
         pos = curItem.position + 1;
         // Next pages
         for (var i = curIndex + 1; i < itemCount; i++, pos++) {
-            var ii = mItems.get(i);
+            var ii = this.mItems.Get(i);
             while (pos < ii.position) {
                 offset += this.mAdapter.GetPageWidth(pos++) + marginOffset;
             }
             if (ii.position == N - 1) {
-                mLastOffset = offset + ii.widthFactor - 1;
+                this.mLastOffset = offset + ii.widthFactor - 1;
             }
             ii.offset = offset;
             offset += ii.widthFactor + marginOffset;
@@ -2605,8 +3073,8 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
 //         }
 //         return ss;
 //     }
-    OnSaveInstanceState() {
-        var superState = _super.onSaveInstanceState();
+    OnSaveInstanceState(_this) {
+        var superState = _this.OnSaveInstanceState();
         var ss = new SavedState(superState);
         ss.position = this.mCurItem;
         if (this.mAdapter != null) {
@@ -2634,14 +3102,14 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
 //             mRestoredClassLoader = ss.loader;
 //         }
 //     }
-    OnRestoreInstanceState(state) {
+    OnRestoreInstanceState(_this, state) {
         if (!(state instanceof SavedState)) {
-            _super.onRestoreInstanceState(state);
+            _this._OnRestoreInstanceState(state);
             return;
         }
 
         var ss = state;
-        super.onRestoreInstanceState(ss.getSuperState());
+        _this._OnRestoreInstanceState(ss.getSuperState());
 
         if (this.mAdapter != null) {
             this.mAdapter.restoreState(ss.adapterState, ss.loader);
@@ -2681,41 +3149,472 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
     AddView(_this, child, index, params) {
         elog("====ViewPager::AddView====begin====");
 
+elog("====ViewPager::AddView====_this className====" + _this.getClass().GetName());
+elog("====ViewPager::AddView====child className====" + child.getClass().GetName());
+CObject.showMethods(params);
+elog("====ViewPager::AddView====0.1====");
+if(params._obj){
+    elog("====ViewPager::AddView====0.2====");
+    CObject.showMethods(params._obj);
+}
+elog("====ViewPager::AddView====0.3====");
+var lm = params.GetWidth();
+elog("====ViewPager::AddView====0.4====width:"+lm);
+
         if (!this.CheckLayoutParams(params)) {
+elog("====ViewPager::AddView====0====");
             var o = {};
             this.GenerateLayoutParams(_this, params, o);
             params = o.data;
+elog("====ViewPager::AddView====1====");
         }
 
-        elog("====ViewPager::AddView====1====");
+elog("====ViewPager::AddView====2====");
+
+CObject.showMethods(params);
+
+elog("====ViewPager::AddView====2.1====");
+
+var oo = params._obj;
+
+elog("====ViewPager::AddView====2.2====");
+
+CObject.showMethods(oo);
+
+elog("====ViewPager::AddView====2.3====");
 
         var lp = params;
-        lp.isDecor |= child instanceof this.Decor;
+        //lp.isDecor |= child instanceof this.Decor;
+        //lp.isDecor = !!this.Decor;
+        lp.isDecor = false;
 
-        elog("====ViewPager::AddView====2====");
+elog("====ViewPager::AddView====3====lp.isDecor:"+lp.isDecor);
 
         if (this.mInLayout) {
+elog("====ViewPager::AddView====4====");
             if (lp != null && lp.isDecor) {
                 throw new IllegalStateException("Cannot add pager decor view during layout");
             }
+elog("====ViewPager::AddView====5====");
             lp.needsMeasure = true;
+
             _this.AddViewInLayout(child, index, params);
+elog("====ViewPager::AddView====6====");
         } else {
+elog("====ViewPager::AddView====7====");
+elog("====ViewPager::AddView====child ClassName====" + child.getClass().GetName());
+elog("====ViewPager::AddView====8.0====");
+
+
+
+var ooo = params._obj;
+
+elog("====ViewPager::AddView====8.1====");
+
+CObject.showMethods(ooo);
+
+elog("====ViewPager::AddView====8.2====");
+
+
+//s.t();
+//Assert(0);
+
+
             _this._AddView(child, index, params);
+            //this.Test_AddView(child, index, params);
+elog("====ViewPager::AddView====8.1====");
         }
 
-        elog("====ViewPager::AddView====3====");
+elog("====ViewPager::AddView====9====");
 
         if (ViewPager.USE_CACHE) {
-            if (child.GetVisibility() != GONE) {
+elog("====ViewPager::AddView====10====");
+            if (child.GetVisibility() != IView__GONE) {
+elog("====ViewPager::AddView====11====");
                 child.SetDrawingCacheEnabled(this.mScrollingCacheEnabled);
+elog("====ViewPager::AddView====12====");
             } else {
+elog("====ViewPager::AddView====13====");
                 child.SetDrawingCacheEnabled(false);
+elog("====ViewPager::AddView====14====");
             }
         }
 
         elog("====ViewPager::AddView====end====");
     }
+
+//-----------test begin-----------
+// ECode ViewGroup::AddView(
+//     /* [in] */ IView* child,
+//     /* [in] */ Int32 index,
+//     /* [in] */ IViewGroupLayoutParams* params)
+// {
+//     //if (DBG) {
+//     //    System.out.println(this + " addView");
+//     //}
+
+//     // addViewInner() will call child.requestLayout() when setting the new LayoutParams
+//     // therefore, we call requestLayout() on ourselves before, so that the child's request
+//     // will be blocked at our level
+//     RequestLayout();
+//     Invalidate(TRUE);
+//     return AddViewInner(child, index, params, FALSE);
+// }
+
+Test_AddView(child, index, params){
+    elog("====Test_AddView====begin====");
+
+    var _this = this._obj;
+
+
+
+
+var ooo = params._obj;
+
+elog("====ViewPager::Test_AddView====0.1====");
+
+CObject.showMethods(ooo);
+
+elog("====ViewPager::Test_AddView====0.2====");
+
+
+    _this.RequestLayout();
+    elog("====Test_AddView====0====");
+
+
+var ooo = params._obj;
+
+elog("====ViewPager::Test_AddView====0.3====");
+
+CObject.showMethods(ooo);
+
+elog("====ViewPager::Test_AddView====0.4====");
+
+
+
+    //CObject.showMethods(_this,"nvalidate");
+
+    _this.Invalidate();
+
+    elog("====Test_AddView====1====");
+
+
+CObject.showMethods(ooo);
+
+elog("====ViewPager::Test_AddView====1.1====");
+
+var oooo = params._obj;
+
+elog("====ViewPager::Test_AddView====1.2====");
+
+CObject.showMethods(oooo);
+
+elog("====ViewPager::Test_AddView====1.3====");
+
+//s.t();
+//Assert(0);
+
+
+    var oRet = this.AddViewInner(child, index, params, false);
+
+    elog("====Test_AddView====end====");
+}
+
+// ECode ViewGroup::AddViewInner(
+//     /* [in] */ IView* child,
+//     /* [in] */ Int32 index,
+//     /* [in] */ IViewGroupLayoutParams* _params,
+//     /* [in] */ Boolean preventRequestLayout)
+// {
+//     assert(child != NULL && "Child view cannot be NULL.");
+
+//     if (mTransition != NULL) {
+//         // Don't prevent other add transitions from completing, but cancel remove
+//         // transitions to let them complete the process before we add to the container
+//         mTransition->Cancel(ILayoutTransition::DISAPPEARING);
+//     }
+
+//     AutoPtr<IViewGroupLayoutParams> params = _params;
+//     View* v = ((View*)child);
+//     AutoPtr<IViewParent> parent;
+//     v->GetParent((IViewParent**)&parent);
+//     if (parent != NULL) {
+// //        throw new IllegalStateException("The specified child already has a parent. " +
+// //                "You must call removeView() on the child's parent first.");
+//         Slogger::E("ViewGroup", "The specified child already has a parent. " \
+//             "You must call removeView() on the child's parent first.");
+//         return E_ILLEGAL_STATE_EXCEPTION;
+//     }
+
+//     if (mTransition != NULL) {
+//         mTransition->AddChild(this, child);
+//     }
+
+//     if (!CheckLayoutParams(params)) {
+//         params = GenerateLayoutParams(params);
+//     }
+
+//     if (preventRequestLayout) {
+//         v->mLayoutParams = params;
+//     }
+//     else {
+//         v->SetLayoutParams(params);
+//     }
+
+//     if (index < 0) {
+//         index = mChildrenCount;
+//     }
+
+//     AddInArray(child, index);
+
+//     // tell our children
+//     if (preventRequestLayout) {
+//         v->AssignParent(this);
+//     }
+//     else {
+//         v->mParent = this;
+//     }
+//     Boolean hasFocus;
+//     if (v->HasFocus(&hasFocus), hasFocus) {
+//         AutoPtr<IView> focus;
+//         v->FindFocus((IView**)&focus);
+//         RequestChildFocus(child, focus);
+//     }
+
+//     AttachInfo* ai = mAttachInfo;
+//     if (ai != NULL && (mGroupFlags & FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW) == 0) {
+//         Boolean lastKeepOn = ai->mKeepScreenOn;
+//         ai->mKeepScreenOn = FALSE;
+//         v->DispatchAttachedToWindow(mAttachInfo, (mViewFlags & VISIBILITY_MASK));
+//         if (ai->mKeepScreenOn) {
+//             NeedGlobalAttributesUpdate(TRUE);
+//         }
+//         ai->mKeepScreenOn = lastKeepOn;
+//     }
+//     Boolean isLayoutDirectionInherited;
+//     v->IsLayoutDirectionInherited(&isLayoutDirectionInherited);
+//     if (isLayoutDirectionInherited) {
+//         child->ResetRtlProperties();
+//     }
+
+//     OnViewAdded(child);
+
+//     if ((v->mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE) {
+//         mGroupFlags |= FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE;
+//     }
+//     Boolean hasTransientState;
+//     v->HasTransientState(&hasTransientState);
+//     if (hasTransientState) {
+//         ChildHasTransientStateChanged(child, TRUE);
+//     }
+
+//     Int32 lastVisibility;
+//     child->GetVisibility(&lastVisibility);
+//     if (lastVisibility != IView::GONE) {
+//         NotifySubtreeAccessibilityStateChangedIfNeeded();
+//     }
+
+//     return NOERROR;
+// }
+
+AddViewInner(child, index, _params, preventRequestLayout) {
+//     /* [in] */ IView* child,
+//     /* [in] */ Int32 index,
+//     /* [in] */ IViewGroupLayoutParams* _params,
+//     /* [in] */ Boolean preventRequestLayout)
+// {
+    elog("====AddViewInner====begin====");
+
+    CObject.showMethods(_params);
+    elog("====AddViewInner====000====");
+    var oo = _params._obj;
+    elog("====AddViewInner====001====");
+    CObject.showMethods(oo);
+    elog("====AddViewInner====002====");
+
+//s.t();
+//Assert(0);
+
+
+//     assert(child != NULL && "Child view cannot be NULL.");
+    if (!child) {
+        elog("====ViewPager::AddViewInner====error: Child view cannot be NULL.");
+        return;
+    }
+
+    var _this = this._obj;
+
+//     if (mTransition != NULL) {
+//         // Don't prevent other add transitions from completing, but cancel remove
+//         // transitions to let them complete the process before we add to the container
+//         mTransition->Cancel(ILayoutTransition::DISAPPEARING);
+//     }
+    var mTransition = _this.GetLayoutTransition();
+    var ILayoutTransition__DISAPPEARING = 3;
+    elog("====AddViewInner====00====");
+    if (mTransition) {
+    elog("====AddViewInner====01====");
+        // Don't prevent other add transitions from completing, but cancel remove
+        // transitions to let them complete the process before we add to the container
+        mTransition.Cancel(ILayoutTransition__DISAPPEARING);
+    elog("====AddViewInner====02====");
+    }
+    elog("====AddViewInner====03====");
+
+//     AutoPtr<IViewGroupLayoutParams> params = _params;
+//     View* v = ((View*)child);
+//     AutoPtr<IViewParent> parent;
+//     v->GetParent((IViewParent**)&parent);
+//     if (parent != NULL) {
+// //        throw new IllegalStateException("The specified child already has a parent. " +
+// //                "You must call removeView() on the child's parent first.");
+//         Slogger::E("ViewGroup", "The specified child already has a parent. " \
+//             "You must call removeView() on the child's parent first.");
+//         return E_ILLEGAL_STATE_EXCEPTION;
+//     }
+    var params = _params;
+    var v = child;
+    var parent;
+    elog("====AddViewInner====04====");
+    parent = v.GetParent();
+    elog("====AddViewInner====05====");
+    if (parent) {
+        elog("====parent className:"+parent.getClass().GetName());
+        CObject.showMethods(parent);
+
+//        throw new IllegalStateException("The specified child already has a parent. " +
+//                "You must call removeView() on the child's parent first.");
+        elog("ViewGroup==The specified child already has a parent. " +
+            "You must call removeView() on the child's parent first.");
+        //Assert(0);
+        //return false;
+
+//------------test begin-----------
+
+//var info = parent.getClass();
+var info = v.Probe();
+CObject.showMethods(info);
+
+var module = info.GetModuleInfo();
+CObject.showMethods(module);
+
+var obj = v.GetObject();
+CObject.showMethods(obj);
+
+var className = obj.ToString();
+elog("====className:" + className);
+
+Assert(0);
+
+//------------test end-----------
+
+    }
+    elog("====AddViewInner====06====");
+
+//     if (mTransition != NULL) {
+//         mTransition->AddChild(this, child);
+//     }
+    if (mTransition) {
+        elog("====AddViewInner====07====");
+        mTransition.AddChild(_this, child);
+        elog("====AddViewInner====08====");
+    }
+
+//     if (!CheckLayoutParams(params)) {
+//         params = GenerateLayoutParams(params);
+//     }
+    if (!this.CheckLayoutParams(params)) {
+        elog("====AddViewInner====09====");
+        params = this.GenerateLayoutParams(params);
+        elog("====AddViewInner====10====");
+    }
+
+//     if (preventRequestLayout) {
+//         v->mLayoutParams = params;
+//     }
+//     else {
+//         v->SetLayoutParams(params);
+//     }
+    elog("====AddViewInner====11====preventRequestLayout:"+preventRequestLayout);
+    if (preventRequestLayout) {
+        //TODO
+        v.mLayoutParams = params;
+    }
+    else {
+        elog("====AddViewInner====12===="+v.getClass().GetName());
+
+        var oo = params._obj;
+        CObject.showMethods(oo);
+        elog("====AddViewInner====13====");
+
+        v.SetLayoutParams(params);
+        elog("====AddViewInner====14====");
+    }
+    elog("====AddViewInner====15====");
+
+//     if (index < 0) {
+//         index = mChildrenCount;
+//     }
+    if (index < 0) {
+        index = _this.GetChildCount();
+    }
+
+//     AddInArray(child, index);
+    _this.AddInArray(child, index);
+
+    Assert(0);
+
+//     // tell our children
+//     if (preventRequestLayout) {
+//         v->AssignParent(this);
+//     }
+//     else {
+//         v->mParent = this;
+//     }
+//     Boolean hasFocus;
+//     if (v->HasFocus(&hasFocus), hasFocus) {
+//         AutoPtr<IView> focus;
+//         v->FindFocus((IView**)&focus);
+//         RequestChildFocus(child, focus);
+//     }
+
+//     AttachInfo* ai = mAttachInfo;
+//     if (ai != NULL && (mGroupFlags & FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW) == 0) {
+//         Boolean lastKeepOn = ai->mKeepScreenOn;
+//         ai->mKeepScreenOn = FALSE;
+//         v->DispatchAttachedToWindow(mAttachInfo, (mViewFlags & VISIBILITY_MASK));
+//         if (ai->mKeepScreenOn) {
+//             NeedGlobalAttributesUpdate(TRUE);
+//         }
+//         ai->mKeepScreenOn = lastKeepOn;
+//     }
+//     Boolean isLayoutDirectionInherited;
+//     v->IsLayoutDirectionInherited(&isLayoutDirectionInherited);
+//     if (isLayoutDirectionInherited) {
+//         child->ResetRtlProperties();
+//     }
+
+//     OnViewAdded(child);
+
+//     if ((v->mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE) {
+//         mGroupFlags |= FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE;
+//     }
+//     Boolean hasTransientState;
+//     v->HasTransientState(&hasTransientState);
+//     if (hasTransientState) {
+//         ChildHasTransientStateChanged(child, TRUE);
+//     }
+
+//     Int32 lastVisibility;
+//     child->GetVisibility(&lastVisibility);
+//     if (lastVisibility != IView::GONE) {
+//         NotifySubtreeAccessibilityStateChangedIfNeeded();
+//     }
+
+//     return NOERROR;
+}
+
+//-----------test end-------------
 
 //     @Override
 //     public void removeView(View view) {
@@ -2725,11 +3624,11 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
 //             super.removeView(view);
 //         }
 //     }
-    RemoveView(view) {
-        if (mInLayout) {
+    RemoveView(_this, view) {
+        if (this.mInLayout) {
             removeViewInLayout(view);
         } else {
-            super.removeView(view);
+            _this._RemoveView(view);
         }
     }
 
@@ -2745,8 +3644,19 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
     InfoForChild(child) {
         elog("====ViewPager::InfoForChild====begin====");
 
-        for (var i=0; i<this.mItems.GetSize(); i++) {
+        var im = this.mItems.GetSize();
+        elog("====ViewPager::InfoForChild====0====im:"+im);
+        for (var i=0; i<im; i++) {
             var ii = this.mItems.Get(i);
+
+            var n1 = ii.object.getClass().GetName();
+            var n2 = child.getClass().GetName();
+            var b1 = (child==ii.object);
+            var b2 = this.mAdapter.IsViewFromObject(child, ii.object);
+            elog("====ViewPager::InfoForChild====1====n1:"+n1);
+            elog("====ViewPager::InfoForChild====2====n2:"+n2);
+            elog("====ViewPager::InfoForChild====3====equal:"+b1);
+            elog("====ViewPager::InfoForChild====4====equal:"+b2);
 
             //CObject.showMethods(ii);
 
@@ -2805,8 +3715,12 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
 //         mFirstLayout = true;
 //     }
     OnAttachedToWindow(_this) {
+        elog("====ViewPager::OnAttachedToWindow====begin====");
+
         _this._OnAttachedToWindow();
         this.mFirstLayout = true;
+
+        elog("====ViewPager::OnAttachedToWindow====end====");
     }
 
 //     @Override
@@ -2908,20 +3822,36 @@ elog("====ViewPager::Populate====begin====6.1===="+this.mItems.Get(0));
 //             }
 //         }
 //     }
+    //ViewPager将子View分为两种，
+    //一种是Decor View 用于装饰ViewPager，它可能需要占用一些空间；
+    //另一种是普通的子View，也就是我们横滑时显示的各个View。
+    //onMeasure首先是对Decor View进行测量，然后再对普通的子View进行测量。
     OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
 
         elog("====ViewPager::OnMeasure====begin====");
 
+var www = widthMeasureSpec & 0x3FFFFFFF;
+var hhh = heightMeasureSpec & 0x3FFFFFFF;
+elog(`====ViewPager::OnMeasure====www:${www}===hhh:${hhh}==`);
+
+        //根据布局文件，设置尺寸信息，默认大小为0
         _this._SetMeasuredDimension(_this._GetDefaultSize(0, widthMeasureSpec),
                 _this._GetDefaultSize(0, heightMeasureSpec));
 
         var measuredWidth = _this.GetMeasuredWidth();
         var maxGutterSize = measuredWidth / 10;
+        //设置mGutterSize的值，后面再讲mGutterSize
         this.mGutterSize = Math.min(maxGutterSize, this.mDefaultGutterSize);
 
+        // ViewPager的显示区域只能显示对于一个View
+        //childWidthSize和childHeightSize为一个View的可用宽高大小
+        //即去除了ViewPager内边距后的宽高
         var childWidthSize = measuredWidth - _this.GetPaddingLeft() - _this.GetPaddingRight();
         var childHeightSize = _this.GetMeasuredHeight() - _this.GetPaddingTop() - _this.GetPaddingBottom();
+elog(`====ViewPager::OnMeasure====childWidthSize:${childWidthSize}==childHeightSize:${childHeightSize}==`);
 
+        //1.先对Decor View进行测量
+        //下面这个循环是只针对Decor View的，即用于装饰ViewPager的View
 elog("====ViewPager::OnMeasure====_this.name:"+_this.getClass().GetName());
         var size = _this.GetChildCount();
 elog("====ViewPager::OnMeasure====size:"+size);
@@ -2929,77 +3859,107 @@ elog("====ViewPager::OnMeasure====size:"+size);
 elog("====ViewPager::OnMeasure====i:"+i);
             var child = _this.GetChildAt(i);
 elog("====ViewPager::OnMeasure====child.GetVisibility():"+child.GetVisibility());
-            if (child.GetVisibility() != GONE) {
+            if (child.GetVisibility() != IView__GONE) {
                 var lp = child.GetLayoutParams();
 elog("====ViewPager::OnMeasure====child.name:"+child.getClass().GetName());
-CObject.showMethods(lp);
+//CObject.showMethods(lp);
 elog("====ViewPager::OnMeasure====lp.name:"+lp.getClass().GetName());
 elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
-
+                //1.1 如果该View是Decor View,即用于装饰ViewPager的View
                 if (lp != null && lp.isDecor) {
-                    elog("====crash====::OnMeasure====");
-                    Assert(0);
+                    elog("====ViewPager::OnMeasure====isDecor====");
+                    //Assert(0);
+                    //1.2 获取Decor View的在水平方向和竖直方向上的Gravity
                     var hgrav = lp.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
                     var vgrav = lp.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+                    //1.3 默认Dedor View模式对应的宽高是wrap_content
                     var widthMode = MeasureSpec.AT_MOST;
                     var heightMode = MeasureSpec.AT_MOST;
+                    //1.4 记录Decor View是在垂直方向上还是在水平方向上占用空间
                     var consumeVertical = vgrav == Gravity.TOP || vgrav == Gravity.BOTTOM;
                     var consumeHorizontal = hgrav == Gravity.LEFT || hgrav == Gravity.RIGHT;
-
+                    //1.5 consumeHorizontal：如果是在垂直方向上占用空间，
                     if (consumeVertical) {
-                        widthMode = MeasureSpec.EXACTLY;
+                        // 那么水平方向就是match_parent，即EXACTLY
+                        //而垂直方向上具体占用多少空间，还得由Decor View决定
+                        widthMode = MeasureSpec.GetEXACTLY();
                     } else if (consumeHorizontal) {
-                        heightMode = MeasureSpec.EXACTLY;
+                        //垂直方向也是同理
+                        heightMode = MeasureSpec.GetEXACTLY();
                     }
-
+                    //1.6 宽高大小，初始化为ViewPager可视区域中子View可用空间
                     var widthSize = childWidthSize;
                     var heightSize = childHeightSize;
-                    if (lp.width != LayoutParams.WRAP_CONTENT) {
-                        widthMode = MeasureSpec.EXACTLY;
-                        if (lp.width != LayoutParams.FILL_PARENT) {
+                    //1.7 如果宽度不是wrap_content
+                    if (lp.width != LayoutParams__WRAP_CONTENT) {
+                        //，那么width的测量模式就是EXACTLY
+                        widthMode = MeasureSpec.GetEXACTLY();
+                        //如果宽度既不是wrap_content又不是match_parent，
+                        if (lp.width != LayoutParams__FILL_PARENT) {
+                            //那么说明是用户在布局文件写的具体的尺寸，直接将widthSize设置为这个具体尺寸
                             widthSize = lp.width;
                         }
                     }
-                    if (lp.height != LayoutParams.WRAP_CONTENT) {
-                        heightMode = MeasureSpec.EXACTLY;
-                        if (lp.height != LayoutParams.FILL_PARENT) {
+                    //1.8 高度, 同1.7
+                    if (lp.height != LayoutParams__WRAP_CONTENT) {
+                        heightMode = MeasureSpec.GetEXACTLY();
+                        if (lp.height != LayoutParams__FILL_PARENT) {
                             heightSize = lp.height;
                         }
                     }
-                    var widthSpec = MeasureSpec.makeMeasureSpec(widthSize, widthMode);
-                    var heightSpec = MeasureSpec.makeMeasureSpec(heightSize, heightMode);
-                    child.measure(widthSpec, heightSpec);
-
+                    //1.9 合成Decor View的宽高specification（包含尺寸和模式的整数）
+                    var widthSpec = MeasureSpec.MakeMeasureSpec(widthSize, widthMode);
+                    var heightSpec = MeasureSpec.MakeMeasureSpec(heightSize, heightMode);
+                    //1.10 对DecorView进行测量
+                    child.Measure(widthSpec, heightSpec);
+                    //1.11 如果Decor View占用了ViewPager的垂直方向的空间
                     if (consumeVertical) {
-                        childHeightSize -= child.getMeasuredHeight();
+                        //需要将子View的竖直方向可用的空间减去DecorView的高度，
+                        childHeightSize -= child.GetMeasuredHeight();
+                    //同理，水平方向上也做同样的处理
                     } else if (consumeHorizontal) {
-                        childWidthSize -= child.getMeasuredWidth();
+                        childWidthSize -= child.GetMeasuredWidth();
                     }
                 }
             }
         }
-
-        MeasureSpec._obj = _this.GetMeasureSpec();
-
+        //2.子View默认宽高的specification（包含尺寸和模式的整数）
+        //（PS：mChildWidthMeasureSpec并没有再次用到，个人感觉有点多余）
         this.mChildWidthMeasureSpec = MeasureSpec.MakeMeasureSpec(childWidthSize, MeasureSpec.GetEXACTLY());
         this.mChildHeightMeasureSpec = MeasureSpec.MakeMeasureSpec(childHeightSize, MeasureSpec.GetEXACTLY());
 
+        //3.确保我们需要显示的fragment已经被我们创建好了
         this.mInLayout = true;
         elog("====ViewPager::OnMeasure====Populate====call====3===");
+        //populate()比较复杂，后面再详细介绍
         this.Populate();
         this.mInLayout = false;
 
+        // 4.再对子View进行测量
         size = _this.GetChildCount();
         for (var i = 0; i < size; ++i) {
+            elog("====ViewPager::OnMeasure====Populate====child===="+i+"/"+size);
             var child = _this.GetChildAt(i);
-            if (child.GetVisibility() != GONE) {
-                if (ViewPager.DEBUG) elog(ViewPager.TAG + "Measuring #" + i + " " + child
+            //4.1 visibility为GONE的无需测量
+            if (child.GetVisibility() != IView__GONE) {
+                elog("====ViewPager::OnMeasure====Populate====call====4===");
+                elog("====ViewPager::OnMeasure====Measuring #" + i + " " + child
                         + ": " + this.mChildWidthMeasureSpec);
-
+                //4.2 获取子View的LayoutParams
                 var lp = child.GetLayoutParams();
+                //4.3 只针对子View而不对Decor View测量
                 if (lp == null || !lp.isDecor) {
+                    elog("====ViewPager::OnMeasure====Populate====call====5===childWidthSize:"+childWidthSize+"====widthFactor:"+lp.widthFactor);
+
+CObject.showMethods(lp);
+CObject.showMethods(lp._obj);
+
+                    //4.4 LayoutParams的widthFactor是取值为[0,1]的浮点数，
+                    // 用于表示子View占ViewPager显示区域中子View可用宽度的比例，
+                    // 即(childWidthSize * lp.widthFactor)表示当前子View的实际宽度
                     var widthSpec = MeasureSpec.MakeMeasureSpec(
                             childWidthSize * lp.widthFactor, MeasureSpec.GetEXACTLY());
+                    //4.5 对当前子View进行测量
                     child.Measure(widthSpec, this.mChildHeightMeasureSpec);
                 }
             }
@@ -3198,9 +4158,15 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //         }
 //         mFirstLayout = false;
 //     }
+    //ViewPager的子View是水平摆放的，
+    //所以在onLayout中，大部分工作的就是计算childLeft，
+    //即子View的左边位置，而顶部位置基本上是一样的，
     OnLayout(_this, changed, l, t, r, b) {
         elog("====ViewPager::OnLayout====begin====");
 
+        elog(`====ViewPager::OnLayout====0.0====l:${l}==t:${t}==r:${r}==b:${b}==`);
+
+        //1.简单局部变量
         var count = _this.GetChildCount();
         var width = r - l;
         var height = b - t;
@@ -3210,82 +4176,119 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
         var paddingBottom = _this.GetPaddingBottom();
         var scrollX = _this.GetScrollX();
 
+        //2.Decor View 数量
         var decorCount = 0;
 
 //         // First pass - decor views. We need to do this in two passes so that
 //         // we have the proper offsets for non-decor views later.
+        //3.首先对Decor View进行layout，再对普通子View进行layout，
+        // 之所以先对Decor View布局，是为了让普通子View能有合适的偏移
+        //下面循环主要是针对Decor View
         for (var i = 0; i < count; i++) {
             var child = _this.GetChildAt(i);
-            if (child.GetVisibility() != GONE) {
+            //3.1 visibility不为GONE才layout
+            if (child.GetVisibility() != IView__GONE) {
                 var lp = child.GetLayoutParams();
+                //3.2 左边和顶部的边距初始化为0
                 var childLeft = 0;
                 var childTop = 0;
+                //3.3 只针对Decor View
                 if (lp.isDecor) {
+                    //3.4 获取水平或垂直方向上的Gravity
                     var hgrav = lp.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
                     var vgrav = lp.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+                    //3.5 根据水平方向上的Gravity，确定childLeft以及paddingLeft/Right
                     switch (hgrav) {
                         default:
+                            //没有设置水平方向Gravity时（左中右），childLeft就取paddingLeft
                             childLeft = paddingLeft;
                             break;
                         case Gravity.LEFT:
+                            //水平方向Gravity为left，Decor View往最左边靠
                             childLeft = paddingLeft;
-                            paddingLeft += child.getMeasuredWidth();
+                            paddingLeft += child.GetMeasuredWidth();
                             break;
                         case Gravity.CENTER_HORIZONTAL:
-                            childLeft = Math.max((width - child.getMeasuredWidth()) / 2,
+                            //将Decor View居中摆放
+                            childLeft = Math.max((width - child.GetMeasuredWidth()) / 2,
                                     paddingLeft);
                             break;
                         case Gravity.RIGHT:
-                            childLeft = width - paddingRight - child.getMeasuredWidth();
-                            paddingRight += child.getMeasuredWidth();
+                            //将Decor View往最右边靠
+                            childLeft = width - paddingRight - child.GetMeasuredWidth();
+                            paddingRight += child.GetMeasuredWidth();
                             break;
                     }
+                    //3.6 根据垂直方向上的Gravity，确定childTop以及paddingTop/Bottom
                     switch (vgrav) {
                         default:
                             childTop = paddingTop;
                             break;
                         case Gravity.TOP:
                             childTop = paddingTop;
-                            paddingTop += child.getMeasuredHeight();
+                            paddingTop += child.GetMeasuredHeight();
                             break;
                         case Gravity.CENTER_VERTICAL:
-                            childTop = Math.max((height - child.getMeasuredHeight()) / 2,
+                            childTop = Math.max((height - child.GetMeasuredHeight()) / 2,
                                     paddingTop);
                             break;
                         case Gravity.BOTTOM:
-                            childTop = height - paddingBottom - child.getMeasuredHeight();
-                            paddingBottom += child.getMeasuredHeight();
+                            childTop = height - paddingBottom - child.GetMeasuredHeight();
+                            paddingBottom += child.GetMeasuredHeight();
                             break;
                     }
+                    //3.7 上面计算的childLeft是相对ViewPager的左边计算的，
+                    //还需要加上x方向已经滑动的距离scrollX
                     childLeft += scrollX;
-                    child.layout(childLeft, childTop,
-                            childLeft + child.getMeasuredWidth(),
-                            childTop + child.getMeasuredHeight());
+                    //3.8 对Decor View布局
+                    child.Layout(childLeft, childTop,
+                            childLeft + child.GetMeasuredWidth(),
+                            childTop + child.GetMeasuredHeight());
+                    //3.9 将Decor View数量+1
                     decorCount++;
                 }
             }
         }
 
+        //4.普通子View的宽度
         var childWidth = width - paddingLeft - paddingRight;
 
-//         // Page views. Do this once we have the right padding offsets from above.
+        elog("====ViewPager::OnLayout====1====");
+
+        // Page views. Do this once we have the right padding offsets from above.
+        //5.下面针对普通子View布局，在此之前我们已经得到正确的偏移量了
         for (var i = 0; i < count; i++) {
+            elog(`====ViewPager::OnLayout====1====${i}/${count}`);
+
             var child = _this.GetChildAt(i);
-            if (child.GetVisibility() != GONE) {
+            if (child.GetVisibility() != IView__GONE) {
+                elog("====ViewPager::OnLayout====2====");
+
                 var lp = child.GetLayoutParams();
+                //5.1 ItemInfo 是ViewPager静态内部类，
+                // 它保存了普通子View的position、offset等信息，是对普通子View的一个抽象描述
                 var ii;
+                //5.2 infoForChild通过传入View查询对应的ItemInfo对象
                 if (!lp.isDecor && (ii = this.InfoForChild(child)) != null) {
+                    elog("====ViewPager::OnLayout====3====");
+                    //计算当前子View的左边偏移量
                     var loff = childWidth * ii.offset;
+                    //将左边距+左边偏移量得到最终子View左边位置
                     var childLeft = paddingLeft + loff;
                     var childTop = paddingTop;
+                    //5.3 如果当前子View需要进行测量（measure），当这个子View是在Layout期间新添加新的，
+                    // 那么这个子View需要进行测量，即needsMeasure为true
                     if (lp.needsMeasure) {
+                        elog("====ViewPager::OnLayout====4====");
                         // This was added during layout and needs measurement.
                         // Do it now that we know what we're working with.
+                        //5.4 标记已经测量过了
                         lp.needsMeasure = false;
-                        var widthSpec = MeasureSpec.makeMeasureSpec(
+                        //5.5 下面过程跟onMeasure类似
+                        var widthSpec = MeasureSpec.MakeMeasureSpec(
                                 childWidth * lp.widthFactor,
                                 MeasureSpec.GetEXACTLY());
-                        var heightSpec = MeasureSpec.makeMeasureSpec(
+                        var heightSpec = MeasureSpec.MakeMeasureSpec(
                                 height - paddingTop - paddingBottom,
                                 MeasureSpec.GetEXACTLY());
                         child.Measure(widthSpec, heightSpec);
@@ -3293,20 +4296,29 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
                     if (ViewPager.DEBUG) elog(TAG + "Positioning #" + i + " " + child + " f=" + ii.object
                             + ":" + childLeft + "," + childTop + " " + child.GetMeasuredWidth()
                             + "x" + child.GetMeasuredHeight());
+                    elog("====ViewPager::OnLayout====5====");
+                    //5.6 对普通子View进行layout
                     child.Layout(childLeft, childTop,
                             childLeft + child.GetMeasuredWidth(),
                             childTop + child.GetMeasuredHeight());
+                    elog("====ViewPager::OnLayout====6====");
                 }
             }
         }
 
+        elog("====ViewPager::OnLayout====7====");
+        //6. 将部分局部变量保存到实例变量中
         this.mTopPageBounds = paddingTop;
         this.mBottomPageBounds = height - paddingBottom;
         this.mDecorChildCount = decorCount;
 
+        elog("====ViewPager::OnLayout====8====");
+        //7. 如果是第一次layout，则将ViewPager滑动到第一个子View的位置
         if (this.mFirstLayout) {
+            elog("====ViewPager::OnLayout====9====");
             this.ScrollToItem(this.mCurItem, false, 0, false);
         }
+        //8. 标记已经布局过了，即不再是第一次布局了
         this.mFirstLayout = false;
 
         elog("====ViewPager::OnLayout====end====");
@@ -3810,14 +4822,20 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //          */
 //         return mIsBeingDragged;
 //     }
-    OnInterceptTouchEvent(ev) {
+    OnInterceptTouchEvent(_this, ev, result) {
         /*
          * This method JUST determines whether we want to intercept the motion.
          * If we return true, onMotionEvent will be called and we do the actual
          * scrolling there.
          */
 
-        var action = ev.getAction() & MotionEventCompat.ACTION_MASK;
+        elog("====ViewPager::OnInterceptTouchEvent====begin====");
+
+        CObject.showMethods(ev);
+        elog("====ViewPager::OnInterceptTouchEvent====0====");
+        elog("====ViewPager::OnInterceptTouchEvent====1====ev name:"+ev.getClass().GetName());
+
+        var action = ev.GetAction() & MotionEventCompat.ACTION_MASK;
 
         // Always take care of the touch gesture being complete.
         if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
@@ -3950,7 +4968,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
          * The only time we want to intercept motion events is if we are in the
          * drag mode.
          */
-        return mIsBeingDragged;
+        result.data = mIsBeingDragged;
     }
 
 //     @Override
@@ -4078,23 +5096,26 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //         }
 //         return true;
 //     }
-    OnTouchEvent(ev) {
+    OnTouchEvent(_this, ev, result) {
         if (mFakeDragging) {
             // A fake drag is in progress already, ignore this real one
             // but still eat the touch events.
             // (It is likely that the user is multi-touching the screen.)
-            return true;
+            result.data = true;
+            return;
         }
 
         if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
             // Don't handle edge touches immediately -- they may actually belong to one of our
             // descendants.
-            return false;
+            result.data = false;
+            return;
         }
 
         if (mAdapter == null || mAdapter.getCount() == 0) {
             // Nothing to present or scroll; nothing to touch.
-            return false;
+            result.data = false;
+            return;
         }
 
         if (mVelocityTracker == null) {
@@ -4200,7 +5221,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
         if (needsInvalidate) {
             ViewCompat.postInvalidateOnAnimation(this);
         }
-        return true;
+        result.data = true;
     }
 
 //     private void requestParentDisallowInterceptTouchEvent(boolean disallowIntercept) {
@@ -4487,11 +5508,20 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
         _this._Draw(canvas);
         var needsInvalidate = false;
 
+        elog("====ViewPager::Draw====0====");
         var overScrollMode = ViewCompat.GetOverScrollMode(_this);
+        elog("====ViewPager::Draw====1====");
+        elog("====ViewPager::Draw====1.1====overScrollMode:"+overScrollMode);
+        elog("====ViewPager::Draw====1.2====OVER_SCROLL_ALWAYS:"+ViewCompat.OVER_SCROLL_ALWAYS);
+        elog("====ViewPager::Draw====1.3====OVER_SCROLL_IF_CONTENT_SCROLLS:"+ViewCompat.OVER_SCROLL_IF_CONTENT_SCROLLS);
+        elog("====ViewPager::Draw====1.4====mAdapter:"+(this.mAdapter != null));
+        elog("====ViewPager::Draw====1.5====count:"+this.mAdapter.GetCount());
         if (overScrollMode == ViewCompat.OVER_SCROLL_ALWAYS ||
                 (overScrollMode == ViewCompat.OVER_SCROLL_IF_CONTENT_SCROLLS &&
                         this.mAdapter != null && this.mAdapter.GetCount() > 1)) {
+            elog("====ViewPager::Draw====2====");
             if (!this.mLeftEdge.IsFinished()) {
+                elog("====ViewPager::Draw====3====");
                 var restoreCount = canvas.Save();
                 var height = this.GetHeight() - this.GetPaddingTop() - this.GetPaddingBottom();
                 var width = this.GetWidth();
@@ -4501,8 +5531,10 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
                 this.mLeftEdge.SetSize(height, width);
                 needsInvalidate |= this.mLeftEdge.Draw(canvas);
                 canvas.RestoreToCount(restoreCount);
+                elog("====ViewPager::Draw====4====");
             }
             if (!this.mRightEdge.IsFinished()) {
+                elog("====ViewPager::Draw====5====");
                 var restoreCount = canvas.Save();
                 var width = this.GetWidth();
                 var height = this.GetHeight() - this.GetPaddingTop() - this.GetPaddingBottom();
@@ -4512,18 +5544,536 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
                 this.mRightEdge.SetSize(height, width);
                 needsInvalidate |= this.mRightEdge.Draw(canvas);
                 canvas.RestoreToCount(restoreCount);
+                elog("====ViewPager::Draw====6====");
             }
         } else {
+            elog("====ViewPager::Draw====7====");
             this.mLeftEdge.Finish();
+            elog("====ViewPager::Draw====8====");
             this.mRightEdge.Finish();
+            elog("====ViewPager::Draw====9====");
         }
 
         if (needsInvalidate) {
             // Keep animating
+            elog("====ViewPager::Draw====10====");
             ViewCompat.PostInvalidateOnAnimation(_this);
+            elog("====ViewPager::Draw====11====");
         }
 
         elog("====ViewPager::Draw====end====");
+
+elog("====ViewPager::Draw====end==0==");
+
+var p = _this;  //CCalculatorPadViewPager->[CLinearLayout, CCalculatorPadLayout]
+
+//p = p.GetParent();  //CLinearLayout->[CRelativeLayout, CCalculatorPadViewPager]
+//p = p.GetParent();  //CFrameLayout->[CLinearLayout]
+//p = p.GetParent();  //CLinearLayout->[CViewStub, CFrameLayout]
+//p = p.GetParent();  //IViewParent->CLinearLayout
+
+//p = p.GetChildAt(0);    //CLinearLayout->[CCalculatorPadLayout, CCalculatorPadLayout]
+//p = p.GetChildAt(0);
+
+//p.SetVisibility(IView__VISIBLE);
+
+var name = p.getClass().GetName();
+elog(`====name:${name}====`);
+
+var cnt = p.GetChildCount();
+
+//CObject.showMethods(p,"Parent");
+
+p.SetBackgroundColor(1234567);
+
+var a=[];
+for(var i=0;i<cnt;i++){
+    var o = p.GetChildAt(i);
+    var n = o.getClass().GetName();
+    var w = o.GetWidth();
+    var h = o.GetHeight();
+    var l = o.GetLeft();
+    var t = o.GetTop();
+    var v = o.GetVisibility();
+    a.push(`[${n}]l:${l},t:${t},w:${w},h:${h},v:${v}`);
+}
+elog("====ViewPager::Draw====end==1==");
+
+elog(`====cnt:${cnt}====name:${name}====`);
+
+elog("===="+a.join("==")+"====");
+
+elog("====ViewPager::Draw====end==2==");
+
+    }
+
+//----------------test begin-------------------
+
+// ECode ViewGroup::DispatchDraw(
+//     /* [in] */ ICanvas* canvas)
+// {
+//     Boolean usingRenderNodeProperties;
+//     canvas->IsRecordingFor(mRenderNode, &usingRenderNodeProperties);
+//     Int32 childrenCount = mChildrenCount;
+//     AutoPtr<ArrayOf<IView*> > children = mChildren;
+//     Int32 flags = mGroupFlags;
+
+//     Boolean bval;
+//     if ((flags & FLAG_RUN_ANIMATION) != 0 && CanAnimate()) {
+//         Boolean cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
+//         IsHardwareAccelerated(&bval);
+//         Boolean buildCache = !bval;
+
+//         for (Int32 i = 0; i < childrenCount; i++) {
+//             View* child = (View*)(*children)[i];
+//             if ((child->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE) {
+//                 AutoPtr<IViewGroupLayoutParams> params;
+//                 child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+//                 AttachLayoutAnimationParameters((*children)[i], params, i, childrenCount);
+//                 BindLayoutAnimation((*children)[i]);
+//                 if (cache) {
+//                     child->SetDrawingCacheEnabled(TRUE);
+//                     if (buildCache) {
+//                         child->BuildDrawingCache(TRUE);
+//                     }
+//                 }
+//             }
+//         }
+
+//         mLayoutAnimationController->WillOverlap(&bval);
+//         if (bval) {
+//             mGroupFlags |= FLAG_OPTIMIZE_INVALIDATE;
+//         }
+
+//         mLayoutAnimationController->Start();
+
+//         mGroupFlags &= ~FLAG_RUN_ANIMATION;
+//         mGroupFlags &= ~FLAG_ANIMATION_DONE;
+
+//         if (cache) {
+//             mGroupFlags |= FLAG_CHILDREN_DRAWN_WITH_CACHE;
+//         }
+
+//         if (mAnimationListener != NULL) {
+//             AutoPtr<IAnimation> animation;
+//             mLayoutAnimationController->GetAnimation((IAnimation**)&animation);
+//             mAnimationListener->OnAnimationStart(animation);
+//         }
+//     }
+
+//     Int32 clipSaveCount = 0;
+//     const Boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
+//     if (clipToPadding) {
+//         canvas->Save(&clipSaveCount);
+//         canvas->ClipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
+//                 mScrollX + mRight - mLeft - mPaddingRight,
+//                 mScrollY + mBottom - mTop - mPaddingBottom, &bval);
+//     }
+
+//     // We will draw our child's animation, let's reset the flag
+//     mPrivateFlags &= ~PFLAG_DRAW_ANIMATION;
+//     mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
+
+//     Boolean more = FALSE;
+//     Int64 drawingTime = 0;
+//     GetDrawingTime(&drawingTime);
+
+//     if (usingRenderNodeProperties) canvas->InsertReorderBarrier();
+//     // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
+//     // draw reordering internally
+//     AutoPtr<IList> preorderedList = usingRenderNodeProperties ? NULL : BuildOrderedChildList();
+//     Boolean customOrder = preorderedList == NULL && IsChildrenDrawingOrderEnabled();
+//     for (Int32 i = 0; i < childrenCount; i++) {
+//         Int32 childIndex = customOrder ? GetChildDrawingOrder(childrenCount, i) : i;
+//         AutoPtr<IView> child;
+//         if (preorderedList == NULL) {
+//             child = (*children)[childIndex];
+//         }
+//         else {
+//             AutoPtr<IInterface> temp;
+//             preorderedList->Get(childIndex, (IInterface**)&temp);
+//             child = IView::Probe(temp);
+//         }
+//         AutoPtr<IAnimation> animation;
+//         if ((((View*)child.Get())->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
+//             || (child->GetAnimation((IAnimation**)&animation), animation) != NULL) {
+//             more |= DrawChild(canvas, child, drawingTime);
+//         }
+//     }
+//     if (preorderedList != NULL) preorderedList->Clear();
+
+//     // Draw any disappearing views that have animations
+//     if (mDisappearingChildren != NULL) {
+//         Int32 disappearingCount;
+//         mDisappearingChildren->GetSize(&disappearingCount);
+//         // Go backwards -- we may delete as animations finish
+//         for (Int32 i = disappearingCount - 1; i >= 0; i--) {
+//             AutoPtr<IInterface> temp;
+//             mDisappearingChildren->Get(i, (IInterface**)&temp);
+//             AutoPtr<IView> child = IView::Probe(temp);
+//             more |= DrawChild(canvas, child, drawingTime);
+//         }
+//     }
+//     if (usingRenderNodeProperties) canvas->InsertInorderBarrier();
+
+//     if (DebugDraw()) {
+//         OnDebugDraw(canvas);
+//     }
+
+//     if (clipToPadding) {
+//         canvas->RestoreToCount(clipSaveCount);
+//     }
+
+//     // mGroupFlags might have been updated by drawChild()
+//     flags = mGroupFlags;
+
+//     if ((flags & FLAG_INVALIDATE_REQUIRED) == FLAG_INVALIDATE_REQUIRED) {
+//         Invalidate(TRUE);
+//     }
+
+//     Boolean isDone = FALSE;
+//     if (mLayoutAnimationController) {
+//         mLayoutAnimationController->IsDone(&isDone);
+//     }
+//     if ((flags & FLAG_ANIMATION_DONE) == 0 &&
+//         (flags & FLAG_NOTIFY_ANIMATION_LISTENER) == 0 && isDone && !more) {
+//         // We want to erase the drawing cache and notify the listener after the
+//         // next frame is drawn because one extra invalidate() is caused by
+//         // drawChild() after the animation is over
+//         mGroupFlags |= FLAG_NOTIFY_ANIMATION_LISTENER;
+//         AutoPtr<DispatchDrawRunnable> end = new DispatchDrawRunnable(this);
+//         Post(end, &bval);
+//     }
+
+//     return NOERROR;
+// }
+
+// Boolean ViewGroup::DrawChild(
+//     /* [in] */ ICanvas* canvas,
+//     /* [in] */ IView* child,
+//     /* [in] */ Int64 drawingTime)
+// {
+//     return ((View*)child)->Draw(canvas, this, drawingTime);
+// }
+DrawChild(_this, canvas, child, drawingTime, result)
+{
+    elog("====ViewPager::DrawChild====begin====");
+    var name = child.getClass().GetName();
+    elog(`====ViewPager::_DrawChild====name:${name}====`);
+
+    //var _this = this._obj;
+
+    //return child.Draw(canvas, _this, drawingTime);
+    var bRet = child.Draw(canvas, _this, drawingTime);
+    //child.Draw(canvas);
+
+    //var bRet = _this._DrawChild(canvas, child, drawingTime);
+    //var bRet = true;
+    if(result){
+        result.data = bRet;
+        elog("====ViewPager::DrawChild====end====0====");
+        return;
+    }
+    else {
+        elog("====ViewPager::DrawChild====end====1====");
+        return bRet;
+    }
+}
+
+_DispatchDraw(_this, canvas)
+{
+    elog("====ViewPager::_DispatchDraw====begin====");
+
+    // Boolean usingRenderNodeProperties;
+    // canvas->IsRecordingFor(mRenderNode, &usingRenderNodeProperties);
+    // Int32 childrenCount = mChildrenCount;
+    // AutoPtr<ArrayOf<IView*> > children = mChildren;
+    // Int32 flags = mGroupFlags;
+    var usingRenderNodeProperties;
+    //usingRenderNodeProperties = canvas.IsRecordingFor(mRenderNode);
+    usingRenderNodeProperties = false;
+    var childrenCount = _this.GetChildCount();
+    var children = [];
+    for(var i=0;i<childrenCount;i++)children.push(_this.GetChildAt(i));
+    var flags = _this._GetGroupFlags();
+
+    // Boolean bval;
+    // if ((flags & FLAG_RUN_ANIMATION) != 0 && CanAnimate()) {
+    var bval;
+    var FLAG_RUN_ANIMATION = 0x8;
+    if ((flags & FLAG_RUN_ANIMATION) != 0 && _this.CanAnimate()) {
+    //     Boolean cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
+    //     IsHardwareAccelerated(&bval);
+    //     Boolean buildCache = !bval;
+        var cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
+        bval = IsHardwareAccelerated();
+        var buildCache = !bval;
+
+    //     for (Int32 i = 0; i < childrenCount; i++) {
+    //         View* child = (View*)(*children)[i];
+    //         if ((child->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE) {
+    //             AutoPtr<IViewGroupLayoutParams> params;
+    //             child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+    //             AttachLayoutAnimationParameters((*children)[i], params, i, childrenCount);
+    //             BindLayoutAnimation((*children)[i]);
+    //             if (cache) {
+    //                 child->SetDrawingCacheEnabled(TRUE);
+    //                 if (buildCache) {
+    //                     child->BuildDrawingCache(TRUE);
+    //                 }
+    //             }
+    //         }
+    //     }
+        for (var i = 0; i < childrenCount; i++) {
+            var child = children[i];
+            if ((child.mViewFlags & IView__VISIBILITY_MASK) == IView__VISIBLE) {
+                var params;
+                params = child.GetLayoutParams();   //IViewGroupLayoutParams
+                AttachLayoutAnimationParameters(children[i], params, i, childrenCount);
+                BindLayoutAnimation(children[i]);
+                if (cache) {
+                    child.SetDrawingCacheEnabled(true);
+                    if (buildCache) {
+                        child.BuildDrawingCache(true);
+                    }
+                }
+            }
+        }
+
+    //     mLayoutAnimationController->WillOverlap(&bval);
+    //     if (bval) {
+    //         mGroupFlags |= FLAG_OPTIMIZE_INVALIDATE;
+    //     }
+        bval = mLayoutAnimationController.WillOverlap();
+        if (bval) {
+            mGroupFlags |= FLAG_OPTIMIZE_INVALIDATE;
+        }
+
+    //     mLayoutAnimationController->Start();
+
+    //     mGroupFlags &= ~FLAG_RUN_ANIMATION;
+    //     mGroupFlags &= ~FLAG_ANIMATION_DONE;
+
+    //     if (cache) {
+    //         mGroupFlags |= FLAG_CHILDREN_DRAWN_WITH_CACHE;
+    //     }
+
+    //     if (mAnimationListener != NULL) {
+    //         AutoPtr<IAnimation> animation;
+    //         mLayoutAnimationController->GetAnimation((IAnimation**)&animation);
+    //         mAnimationListener->OnAnimationStart(animation);
+    //     }
+        mLayoutAnimationController.Start();
+
+        mGroupFlags &= ~FLAG_RUN_ANIMATION;
+        mGroupFlags &= ~FLAG_ANIMATION_DONE;
+
+        if (cache) {
+            mGroupFlags |= FLAG_CHILDREN_DRAWN_WITH_CACHE;
+        }
+
+        if (mAnimationListener != NULL) {
+            var animation;
+            animation = mLayoutAnimationController.GetAnimation();
+            mAnimationListener.OnAnimationStart(animation);
+        }
+    }
+
+    // Int32 clipSaveCount = 0;
+    // const Boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
+    // if (clipToPadding) {
+    //     canvas->Save(&clipSaveCount);
+    //     canvas->ClipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
+    //             mScrollX + mRight - mLeft - mPaddingRight,
+    //             mScrollY + mBottom - mTop - mPaddingBottom, &bval);
+    // }
+
+    var FLAG_CLIP_TO_PADDING = 0x2;
+    var FLAG_RUN_ANIMATION = 0x8;
+    var FLAG_PADDING_NOT_NULL = 0x20;
+    var CLIP_TO_PADDING_MASK = FLAG_CLIP_TO_PADDING | FLAG_PADDING_NOT_NULL;
+
+    var clipSaveCount = 0;
+    var clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
+    if (clipToPadding) {
+        clipSaveCount = canvas.Save();
+        bval = canvas.ClipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
+                mScrollX + mRight - mLeft - mPaddingRight,
+                mScrollY + mBottom - mTop - mPaddingBottom);
+    }
+
+    // // We will draw our child's animation, let's reset the flag
+    // mPrivateFlags &= ~PFLAG_DRAW_ANIMATION;
+    // mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
+
+    // Boolean more = FALSE;
+    // Int64 drawingTime = 0;
+    // GetDrawingTime(&drawingTime);
+
+    // We will draw our child's animation, let's reset the flag
+//    mPrivateFlags &= ~PFLAG_DRAW_ANIMATION;
+//    mGroupFlags &= ~FLAG_INVALIDATE_REQUIRED;
+
+    var more = false;
+    var drawingTime = 0;
+    drawingTime = _this.GetDrawingTime();
+
+    // if (usingRenderNodeProperties) canvas->InsertReorderBarrier();
+    // // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
+    // // draw reordering internally
+    // AutoPtr<IList> preorderedList = usingRenderNodeProperties ? NULL : BuildOrderedChildList();
+    // Boolean customOrder = preorderedList == NULL && IsChildrenDrawingOrderEnabled();
+    // for (Int32 i = 0; i < childrenCount; i++) {
+    //     Int32 childIndex = customOrder ? GetChildDrawingOrder(childrenCount, i) : i;
+    //     AutoPtr<IView> child;
+    //     if (preorderedList == NULL) {
+    //         child = (*children)[childIndex];
+    //     }
+    //     else {
+    //         AutoPtr<IInterface> temp;
+    //         preorderedList->Get(childIndex, (IInterface**)&temp);
+    //         child = IView::Probe(temp);
+    //     }
+    //     AutoPtr<IAnimation> animation;
+    //     if ((((View*)child.Get())->mViewFlags & VISIBILITY_MASK) == IView::VISIBLE
+    //         || (child->GetAnimation((IAnimation**)&animation), animation) != NULL) {
+    //         more |= DrawChild(canvas, child, drawingTime);
+    //     }
+    // }
+    // if (preorderedList != NULL) preorderedList->Clear();
+
+    if (usingRenderNodeProperties) canvas.InsertReorderBarrier();
+    // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
+    // draw reordering internally
+    //var preorderedList = usingRenderNodeProperties ? null : _this.BuildOrderedChildList();
+    var preorderedList = null;
+    //var customOrder = preorderedList == null && IsChildrenDrawingOrderEnabled();
+    var customOrder = false;
+    for (var i = 0; i < childrenCount; i++) {
+        //var childIndex = customOrder ? GetChildDrawingOrder(childrenCount, i) : i;
+        var childIndex = i;
+        var child;
+        if (preorderedList == null) {
+            child = children[childIndex];
+        }
+        else {
+            var temp;
+            temp = preorderedList.Get(childIndex);
+            child = IView.Probe(temp);
+        }
+        var animation;
+var name=child.getClass().GetName();
+elog(`====ViewPager::_DispatchDraw====name:${name}====`);
+        //if ((child._GetViewFlags() & IView__VISIBILITY_MASK) == IView__VISIBLE
+        //    || (animation = child.GetAnimation()) != NULL) {
+            //more |= _this._DrawChild(canvas, child, drawingTime);
+            more |= this.DrawChild(_this, canvas, child, drawingTime);
+        //}
+    }
+    if (preorderedList != null) preorderedList.Clear();
+
+    // // Draw any disappearing views that have animations
+    // if (mDisappearingChildren != NULL) {
+    //     Int32 disappearingCount;
+    //     mDisappearingChildren->GetSize(&disappearingCount);
+    //     // Go backwards -- we may delete as animations finish
+    //     for (Int32 i = disappearingCount - 1; i >= 0; i--) {
+    //         AutoPtr<IInterface> temp;
+    //         mDisappearingChildren->Get(i, (IInterface**)&temp);
+    //         AutoPtr<IView> child = IView::Probe(temp);
+    //         more |= DrawChild(canvas, child, drawingTime);
+    //     }
+    // }
+    // if (usingRenderNodeProperties) canvas->InsertInorderBarrier();
+
+    // Draw any disappearing views that have animations
+    //if (mDisappearingChildren != null) {
+    if (false) {
+        var disappearingCount;
+        disappearingCount = mDisappearingChildren.GetSize();
+        // Go backwards -- we may delete as animations finish
+        for (var i = disappearingCount - 1; i >= 0; i--) {
+            var temp;
+            temp = mDisappearingChildren.Get(i);
+            var child = IView.Probe(temp);
+            more |= DrawChild(canvas, child, drawingTime);
+        }
+    }
+    if (usingRenderNodeProperties) canvas.InsertInorderBarrier();
+
+    // if (DebugDraw()) {
+    //     OnDebugDraw(canvas);
+    // }
+
+    // if (clipToPadding) {
+    //     canvas->RestoreToCount(clipSaveCount);
+    // }
+
+    // // mGroupFlags might have been updated by drawChild()
+    // flags = mGroupFlags;
+
+    // if ((flags & FLAG_INVALIDATE_REQUIRED) == FLAG_INVALIDATE_REQUIRED) {
+    //     Invalidate(TRUE);
+    // }
+
+    //if (DebugDraw()) {
+    if (false) {
+        OnDebugDraw(canvas);
+    }
+
+    if (clipToPadding) {
+        canvas.RestoreToCount(clipSaveCount);
+    }
+
+    // mGroupFlags might have been updated by drawChild()
+    flags = _this._GetGroupFlags();
+
+    if ((flags & ViewGroup__FLAG_INVALIDATE_REQUIRED) == ViewGroup__FLAG_INVALIDATE_REQUIRED) {
+        _this.Invalidate(true);
+    }
+
+    // Boolean isDone = FALSE;
+    // if (mLayoutAnimationController) {
+    //     mLayoutAnimationController->IsDone(&isDone);
+    // }
+    // if ((flags & FLAG_ANIMATION_DONE) == 0 &&
+    //     (flags & FLAG_NOTIFY_ANIMATION_LISTENER) == 0 && isDone && !more) {
+    //     // We want to erase the drawing cache and notify the listener after the
+    //     // next frame is drawn because one extra invalidate() is caused by
+    //     // drawChild() after the animation is over
+    //     mGroupFlags |= FLAG_NOTIFY_ANIMATION_LISTENER;
+    //     AutoPtr<DispatchDrawRunnable> end = new DispatchDrawRunnable(this);
+    //     Post(end, &bval);
+    // }
+    var isDone = false;
+    //if (mLayoutAnimationController) {
+    if (false) {
+        isDone = mLayoutAnimationController.IsDone();
+    }
+    if ((flags & ViewGroup__FLAG_ANIMATION_DONE) == 0 &&
+        (flags & ViewGroup__FLAG_NOTIFY_ANIMATION_LISTENER) == 0 && isDone && !more) {
+        // We want to erase the drawing cache and notify the listener after the
+        // next frame is drawn because one extra invalidate() is caused by
+        // drawChild() after the animation is over
+        mGroupFlags |= ViewGroup__FLAG_NOTIFY_ANIMATION_LISTENER;
+        var end = new DispatchDrawRunnable(this);
+        bval = Post(end);
+    }
+
+    elog("====ViewPager::_DispatchDraw====end====");
+
+    // return NOERROR;
+    return;
+}
+
+//----------------test end---------------------
+
+//     @Override
+    DispatchDraw(_this, canvas) {
+        elog("====ViewPager::DispatchDraw====begin====");
+        //_this._DispatchDraw(canvas);
+        this._DispatchDraw(_this, canvas);
+        elog("====ViewPager::DispatchDraw====end====");
     }
 
 //     @Override
@@ -4574,8 +6124,15 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 
         _this._OnDraw(canvas);
 
+        elog("====ViewPager::OnDraw====mPageMargin:"+this.mPageMargin);
+        elog("====ViewPager::OnDraw====mMarginDrawable:"+this.mMarginDrawable);
+        elog("====ViewPager::OnDraw====this.mItems.GetSize:"+this.mItems.GetSize());
+        elog("====ViewPager::OnDraw====mAdapter:"+this.mAdapter);
+
         // Draw the margin drawable between pages if needed.
         if (this.mPageMargin > 0 && this.mMarginDrawable != null && this.mItems.GetSize() > 0 && this.mAdapter != null) {
+            elog("====ViewPager::OnDraw====0====");
+
             var scrollX = getScrollX();
             var width = getWidth();
 
@@ -4586,6 +6143,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
             var itemCount = this.mItems.GetSize();
             var firstPos = ii.position;
             var lastPos = this.mItems.Get(itemCount - 1).position;
+            elog("====ViewPager::OnDraw====1===="+pos+"/"+lastPos);
             for (var pos = firstPos; pos < lastPos; pos++) {
                 while (pos > ii.position && itemIndex < itemCount) {
                     ii = this.mItems.Get(++itemIndex);
@@ -4902,7 +6460,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
                 var size = _this.GetChildCount();
                 for (var i = 0; i < size; ++i) {
                     var child = _this.GetChildAt(i);
-                    if (child.GetVisibility() != GONE) {
+                    if (child.GetVisibility() != IView__GONE) {
                         child.SetDrawingCacheEnabled(enabled);
                     }
                 }
@@ -5004,9 +6562,9 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //         // Let the focused view and/or our descendants get the key first
 //         return super.dispatchKeyEvent(event) || executeKeyEvent(event);
 //     }
-    DispatchKeyEvent(event) {
+    DispatchKeyEvent(_this, event, result) {
         // Let the focused view and/or our descendants get the key first
-        return super.dispatchKeyEvent(event) || executeKeyEvent(event);
+        result.data = super.dispatchKeyEvent(event) || executeKeyEvent(event);
     }
 
     /**
@@ -5323,7 +6881,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //             }
 //         }
 //     }
-    AddFocusables(views, direction, focusableMode) {
+    AddFocusables(_this, views, direction, focusableMode) {
         var focusableCount = views.size();
 
         var descendantFocusability = getDescendantFocusability();
@@ -5381,7 +6939,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //             }
 //         }
 //     }
-    AddTouchables(views) {
+    AddTouchables(_this, views) {
         // Note that we don't call super.addTouchables(), which means that
         // we don't call View.addTouchables().  This is okay because a ViewPager
         // is itself not touchable.
@@ -5428,8 +6986,8 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //         }
 //         return false;
 //     }
-    OnRequestFocusInDescendants(direction,
-            previouslyFocusedRect) {
+    OnRequestFocusInDescendants(_this, direction,
+            previouslyFocusedRect, result) {
         var index;
         var increment;
         var end;
@@ -5454,7 +7012,7 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
                 }
             }
         }
-        return false;
+        result.data = false;
     }
 
 //     @Override
@@ -5479,10 +7037,11 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 
 //         return false;
 //     }
-    DispatchPopulateAccessibilityEvent(event) {
+    DispatchPopulateAccessibilityEvent(_this, event, result) {
         // Dispatch scroll events from this ViewPager.
         if (event.getEventType() == AccessibilityEventCompat.TYPE_VIEW_SCROLLED) {
-            return _super.dispatchPopulateAccessibilityEvent(event);
+            result.data = _super.dispatchPopulateAccessibilityEvent(event);
+            return;
         }
 
         // Dispatch all other accessibility events from the current page.
@@ -5493,12 +7052,14 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
                 var ii = this.InfoForChild(child);
                 if (ii != null && ii.position == this.mCurItem &&
                         child.dispatchPopulateAccessibilityEvent(event)) {
-                    return true;
+                    result.data = true;
+                    return;
                 }
             }
         }
 
-        return false;
+        result.data = false;
+        return;
     }
 
 //     @Override
@@ -5521,8 +7082,73 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //         return p instanceof LayoutParams && super.checkLayoutParams(p);
 //     }
     CheckLayoutParams(_this, p, result) {
-        elog("====ViewPager::CheckLayoutParams====TODO====");
-        return p instanceof ViewPager.LayoutParams && super.CheckLayoutParams(p);
+        elog("====ViewPager::CheckLayoutParams====begin====");
+
+        if (arguments.length == 1) {
+            elog("====ViewPager::CheckLayoutParams====0====");
+            p = _this;
+            _this = this._obj;
+            result = null;
+        }
+
+        var bRet = false;
+
+function getClassName(o){
+    var r = (o&&o.getClass&&o.getClass().GetName()) || typeof o;
+    if(r == "function")r = o.name;
+    return r;
+}
+var n1 = getClassName(p);
+elog("====ssss==0=="+n1);
+// if(n1=="object"){
+//     CObject.showMethods(p);
+// }
+var n2 = getClassName(ViewPager.LayoutParams);
+elog("====ssss==1=="+n1+"===="+n2);
+
+// elog("====ssss====hasInterface:"+typeof ViewPager.LayoutParams.hasInterface);
+
+//         var bRet = p instanceof ViewPager.LayoutParams
+//         elog("====ViewPager::CheckLayoutParams====0===="+bRet);
+//         bRet = bRet && super.CheckLayoutParams(p);
+
+        // elog("====ViewPager::CheckLayoutParams==== p0 className===="+(p instanceof ViewPager.LayoutParams));
+        // elog("====ViewPager::CheckLayoutParams==== p className===="+n1);
+        // elog("====ViewPager::CheckLayoutParams==== _this className===="+getClassName(_this));
+
+
+        // //if (n1 == "IViewGroupLayoutParams"){
+        // if (n1 == "CViewGroupLayoutParams"){
+        //     bRet = true;
+        // }
+// elog("====sssspppp===="+n1+"===="+(n1 == "IViewGroupLayoutParams")+"===="+bRet);
+
+CObject.showMethods(p);
+
+        bRet = p instanceof ViewPager.LayoutParams;
+
+//if(n1 == "CViewGroupLayoutParams" || n1 == "CViewGroupMarginLayoutParams") {
+if(n1.indexOf("LayoutParams")>-1) {
+    elog("====ViewPager::CheckLayoutParams====0====result:"+bRet);
+    bRet = true;
+}
+else {
+    elog("====ViewPager::CheckLayoutParams====0====n1:"+n1);
+    ss.tt();Assert(0);
+}
+        bRet = bRet && _this._CheckLayoutParams(p);
+
+        elog("====ViewPager::CheckLayoutParams====end====result:"+bRet);
+
+        if (result) {
+            elog("====ViewPager::CheckLayoutParams====end====callback====");
+            result.data = bRet;
+            return bRet;
+        }
+        else {
+            elog("====ViewPager::CheckLayoutParams====end====call====");
+            return bRet;
+        }
     }
 
 //     @Override
@@ -5533,9 +7159,13 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
         elog("====ViewPager::GenerateLayoutParams====begin====");
         result.data = new ViewPager.LayoutParams(_this, _this.GetContext(), attrs);
 
-        CObject.showMethods(result.data);
+        // elog("====ViewPager::GenerateLayoutParams====0====");
+        // CObject.showMethods(result.data._obj);
+        // elog("====ViewPager::GenerateLayoutParams====1====");
 
-        result.data.isDecor = true;
+        // result.data.isDecor = true;
+        // CObject.showMethods(result.data);
+        // elog("====ViewPager::GenerateLayoutParams====2====");
 
         //elog("====ViewPager::GenerateLayoutParams====name:"+result.data.getClass().GetName());
 
@@ -5652,10 +7282,14 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
      */
 //     public static class LayoutParams extends ViewGroup.LayoutParams {
     static get LayoutParams() {
-        elog("====ViewPager::LayoutParams====TODO====");
-        if (ViewPager._LayoutParams_) return ViewPager._LayoutParams;
-        ViewPager._LayoutParams_ = true;
-        ViewPager._LayoutParams = class _ extends ViewGroup.LayoutParams {
+        elog("====ViewPager::LayoutParams====begin====");
+        if (ViewPager._LayoutParams) {
+            elog("====ViewPager::LayoutParams====end====0====");
+            return ViewPager._LayoutParams;
+        }
+
+        elog("====ViewPager::LayoutParams====0===="+ViewPager._LayoutParams_);
+        ViewPager._LayoutParams = class LayoutParams extends ViewGroup.LayoutParams {
 
 //         /**
 //          * true if this view is a decoration on the pager itself and not
@@ -5680,34 +7314,70 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //         public int gravity;
             get gravity() {
                 elog("====get ViewPager::LayoutParams::gravity====");
-                return this._gravity;
+                return this._gravity || 0;
             }
             set gravity(v) {
                 elog("====set ViewPager::LayoutParams::gravity====");
                 this._gravity = v;
-                //return v;
+                return v;
             }
 
 //         /**
 //          * Width as a 0-1 multiplier of the measured pager width
 //          */
 //         float widthFactor = 0.f;
+            get widthFactor() {
+                elog("====get ViewPager::LayoutParams::widthFactor====");
+                return this._widthFactor || 0;
+            }
+            set widthFactor(v) {
+                elog("====set ViewPager::LayoutParams::widthFactor====");
+                this._widthFactor = v;
+                return v;
+            }
 
 //         /**
 //          * true if this view was added during layout and needs to be measured
 //          * before being positioned.
 //          */
 //         boolean needsMeasure;
+            get needsMeasure() {
+                elog("====get ViewPager::LayoutParams::needsMeasure====");
+                return this._needsMeasure || false;
+            }
+            set needsMeasure(v) {
+                elog("====set ViewPager::LayoutParams::needsMeasure====");
+                this._needsMeasure = v;
+                return v;
+            }
 
 //         /**
 //          * Adapter position this view is for if !isDecor
 //          */
 //         int position;
+            get position() {
+                elog("====get ViewPager::LayoutParams::position====");
+                return this._position || 0;
+            }
+            set position(v) {
+                elog("====set ViewPager::LayoutParams::position====");
+                this._position = v;
+                return v;
+            }
 
 //         /**
 //          * Current child index within the ViewPager that this view occupies
 //          */
 //         int childIndex;
+            get childIndex() {
+                elog("====get ViewPager::LayoutParams::childIndex====");
+                return this._childIndex || 0;
+            }
+            set childIndex(v) {
+                elog("====set ViewPager::LayoutParams::childIndex====");
+                this._childIndex = v;
+                return v;
+            }
 
 //         public LayoutParams() {
 //             super(FILL_PARENT, FILL_PARENT);
@@ -5721,32 +7391,29 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
 //             a.recycle();
 //         }
             constructor(_this, context, attrs) {
-                elog("====ViewPager::LayoutParams::constructor====begin====");
-
-                var FILL_PARENT = -1;
-                var MATCH_PARENT = -1;
-                var WRAP_CONTENT = -2;
+                elog("====ViewPager::LayoutParams::constructor====");
 
                 if (arguments.length == 1) {
-                    super(_this, FILL_PARENT, FILL_PARENT);
+                    super(_this, LayoutParams__FILL_PARENT, LayoutParams__FILL_PARENT);
                 }
                 else {
                     var typeName = attrs.getClass?attrs.getClass().GetName():typeof attrs;
+
                     if (typeName == "IAttributeSet") {
                         super(_this, context, attrs);
 
-                        elog("====ViewPager::LayoutParams::constructor====begin====0====" + typeName);
+                        elog("====ViewPager::LayoutParams::constructor====0====" + typeName);
                         var a = context.ObtainStyledAttributes(attrs, ViewPager.LAYOUT_ATTRS);
-                        elog("====ViewPager::LayoutParams::constructor====begin====1====");
+                        elog("====ViewPager::LayoutParams::constructor====1====");
                         this.gravity = a.GetInteger(0, Gravity.TOP);
-                        elog("====ViewPager::LayoutParams::constructor====begin====2====");
+                        elog("====ViewPager::LayoutParams::constructor====2====");
                         a.Recycle();
-                        elog("====ViewPager::LayoutParams::constructor====begin====3====");
+                        elog("====ViewPager::LayoutParams::constructor====3====");
                     }
                     else {
-                        elog("====ViewPager::LayoutParams::constructor====begin====4====" + typeName);
+                        elog("====ViewPager::LayoutParams::constructor====4====" + typeName);
                         super(_this, context, attrs);
-                        elog("====ViewPager::LayoutParams::constructor====begin====5====");
+                        elog("====ViewPager::LayoutParams::constructor====5====");
                     }
                 }   //else
 
@@ -5758,6 +7425,8 @@ elog("====ViewPager::OnMeasure====lp.isDecor:"+lp.isDecor);
             }
 
         };
+
+        elog("====ViewPager::LayoutParams====end====1====");
         return this._LayoutParams;
     }
 

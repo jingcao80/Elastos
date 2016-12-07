@@ -7,7 +7,11 @@ var root = global||window;
 
 root.Elastos = ( function () {
     var _Elastos = {
-        CObject: {},
+        CObject: {
+            New : function () {
+                return Elastos.Runtime.createObject.apply(null,arguments);
+            },
+        },
 
         CReflection: {},
 
@@ -324,6 +328,37 @@ Application.NodeBridgeListener = {
         out_abResult.data = true;
 
         elog("OnRegisterCalculatorPadLayout======end======");
+    },
+
+    OnRegisterNodeLinearLayout : function(aoContext, aoControl, aoListener, out_abResult) {
+        elog("OnRegisterNodeLinearLayout======begin======");
+
+        var sPkgName = aoContext.GetPackageName();
+        var sClsName = Elastos.CObject.getClassInfo(aoControl).GetName();
+        sClsName = sClsName.slice(-sClsName.length+1);
+
+        var sFileName = sPkgName.split(".").join("/");
+        sFileName = "/data/temp/node/Common/js/" + sFileName + "/" + sClsName + ".js";
+
+        elog("OnRegisterNodeLinearLayout======filename======"+sFileName);
+
+        var aPath = sPkgName.split(".");
+        var sPath;
+        var oPath = root;
+        for (var i=0,im=aPath.length; i<im; i++) {
+            sPath = aPath[i];
+            oPath = oPath[sPath] || (oPath[sPath] = {});
+        }
+
+        //var oListener = require(sFileName)(Elastos, oActivity);
+        var oListener = require(sFileName)(Elastos, aoContext);
+        oPath[sClsName] = oListener;
+
+        Elastos.Test.SetNodeLinearLayoutListener(aoListener, oListener);
+
+        out_abResult.data = true;
+
+        elog("OnRegisterNodeLinearLayout======end======");
     },
 };
 

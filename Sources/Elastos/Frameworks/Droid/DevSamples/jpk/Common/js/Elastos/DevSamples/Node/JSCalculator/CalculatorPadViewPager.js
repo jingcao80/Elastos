@@ -107,7 +107,12 @@ class _CalculatorPadViewPager extends ViewPager {
 
             // @Override
             IsViewFromObject(view, object) {
-                return (view == object);
+                //return (view == object);
+                //TODO:common method JSWrapper.equal/has/commonInterface/valid/getClass
+                var n1 = view.getClass().GetName();
+                var n2 = object.getClass().GetName();
+                elog("====CalculatorPadViewPager::mStaticPagerAdapter::IsViewFromObject====n1:"+n1+"====n2:"+n2+"====equal:"+(n1==n2));
+                return n1==n2;
             }
 
             // @Override

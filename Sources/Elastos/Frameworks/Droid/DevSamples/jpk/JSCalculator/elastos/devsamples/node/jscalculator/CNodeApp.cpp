@@ -9,3 +9,6 @@
 
 #define JSActName CCalculatorPadLayout
 #include "CNodePadLayout_impl.h"
+
+#define JSActName CNodeLinearLayout
+#include "CNodeLinearLayout_impl.h"

@@ -125,8 +125,10 @@ class _CalculatorExpressionTokenizer {
 //         return expr;
 //     }
     GetLocalizedExpression(expr) {
+        expr = expr || "";
+        elog("====typeof expr:"+typeof expr);
+        //s.t();Assert(0);
         for (let [key, value] of this.mReplacementMap.entries()) {
-elog("====typeof expr:"+typeof expr);
             expr = expr.replace(key, value);
         }
         return expr;

@@ -117,7 +117,7 @@ function getDataTypeJavascriptString(ai_datatype){
 }
 
 function getCreateOnUIThread(as_ClassName) {
-    elog("====getCreateOnUIThread====" + as_ClassName);
+    elog("====getCreateOnUIThread====begin====" + as_ClassName);
     var bRet = false;
 
     if (as_ClassName == "Elastos.Droid.Widget.CPopupWindow") {
@@ -128,10 +128,21 @@ function getCreateOnUIThread(as_ClassName) {
         bRet = true;
     }
 
+    //if (as_ClassName == "Elastos.Droid.Widget.CLinearLayout") {
+    if (as_ClassName == "CLinearLayout") {
+        bRet = true;
+    }
+
+    if (as_ClassName == "CNodeLinearLayout") {
+        bRet = true;
+    }
+
     //if (as_ClassName == "Elastos.Droid.Widget.CEdgeEffect") {
     // if (as_ClassName == "CEdgeEffect") {
     //     bRet = true;
     // }
+
+    elog("====getCreateOnUIThread====end====result:" + bRet);
 
     return bRet;
 }
@@ -376,6 +387,11 @@ CObject.test = function() {
     Assert(0);
 }
 
+CObject.getClassName = function(o) {
+    var r = (o&&o.getClass&&o.getClass().GetName()) || typeof o;
+    if(r == "function")r = o.name;
+    return r;
+}
 
 //--------proto info end--------
 
@@ -482,7 +498,17 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         sFullClassName = oClassInfo;
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
         if (!oClassInfo) {
-            elog("classinfo__createObject======can't find class: " + sFullClassName);
+            var path = oModuleInfo.GetPath();
+
+            var classInfos = oModuleInfo.GetAllClassInfos();
+            var classNames = [];
+            for(var i=0,im=classInfos.length;i<im;i++) {
+                classNames.push(classInfos[i].GetName());
+            }
+
+            elog("classinfo__createObject======can't find class: " + sFullClassName +" in "+path+ " All:["+classNames.join("][")+"]");
+
+            ss.tt();Assert(0);
             return;
         }
     }
@@ -511,7 +537,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             var s = CObject.getConstructorProtos(oModuleInfo, oClassInfo);
             elog("====PROTO: " + s);
 
-            Assert(0);
+            ss.tt();Assert(0);
             return null;
         }
 

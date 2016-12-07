@@ -196,14 +196,14 @@ class _CalculatorEditText extends EditText {
             elog(FullClassName + "========OnTouchEvent begin========");
 
 //         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (event.GetActionMasked() == IMotionEvent__ACTION_UP) {
 //             // Hack to prevent keyboard and insertion handle from showing.
 //             cancelLongPress();
-                this.cancelLongPress();
+                _this.CancelLongPress();
 //         }
             }
 //         return super.onTouchEvent(event);
-            result.data = _super.OnTouchEvent(event);
+            result.data = _this._OnTouchEvent(event);
 
             elog(FullClassName + "========OnTouchEvent end========");
     }
@@ -219,7 +219,7 @@ class _CalculatorEditText extends EditText {
 //         mWidthConstraint =
 //                 MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
             this.mWidthConstraint =
-                    MeasureSpec.getSize(widthMeasureSpec) - this.getPaddingLeft() - this.getPaddingRight();
+                    MeasureSpec.GetSize(widthMeasureSpec) - this.getPaddingLeft() - this.getPaddingRight();
 //         setTextSize(TypedValue.COMPLEX_UNIT_PX, getVariableTextSize(getText().toString()));
             var TypedValue__COMPLEX_UNIT_PX = 0;
             this.SetTextSize(_this, TypedValue__COMPLEX_UNIT_PX, this.GetVariableTextSize(_this, getText().toString()));

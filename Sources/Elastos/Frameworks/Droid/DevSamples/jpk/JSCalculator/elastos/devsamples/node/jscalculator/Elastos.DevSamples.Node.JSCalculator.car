@@ -34,6 +34,7 @@ module
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.Widget.IEditText;
+    using interface Elastos.Droid.Widget.ILinearLayout;
 
     using interface Elastos.Droid.View.IMotionEvent;
     using interface Elastos.Core.ICharSequence;
@@ -57,6 +58,12 @@ module
     namespace JSCalculator {
 
     [deprecated]
+    interface IDroidPatch {
+        Get__Bundle__EMPTY(
+            [out] IInterface** result);
+    }
+
+    [deprecated]
     interface IMessageListener {
         OnHandleMessage(
             [in] IContext* ctx,
@@ -66,6 +73,7 @@ module
     interface IActivityListener;
     interface ICalculatorListener;
     interface ICalculatorEditTextListener;
+    interface INodeLinearLayoutListener;
     interface ICalculatorPadLayoutListener;
     interface ICalculatorPadViewPagerListener;
 
@@ -91,6 +99,12 @@ module
             [in] IContext* context,
             [in] IInterface* control,
             [in] Int32 listener, //ICalculatorEditTextListener**
+            [out] Boolean* result);
+
+        OnRegisterNodeLinearLayout(
+            [in] IContext* context,
+            [in] IInterface* control,
+            [in] Int32 listener, //INodeLinearLayoutListener**
             [out] Boolean* result);
 
         OnRegisterCalculatorPadLayout(
@@ -126,19 +140,23 @@ module
             [in] IActivityListener* jsActivityListener);
 
         SetCalculatorListener(
-            [in] Int32 calculatorListener,    //ICalculatorListener**
+            [in] Int32 calculatorListener,  //ICalculatorListener**
             [in] ICalculatorListener* jsCalculatorListener);
 
         SetCalculatorEditTextListener(
-            [in] Int32 calculatorEditTextListener,    //ICalculatorEditTextListener**
+            [in] Int32 calculatorEditTextListener,  //ICalculatorEditTextListener**
             [in] ICalculatorEditTextListener* jsCalculatorEditTextListener);
 
+        SetNodeLinearLayoutListener(
+            [in] Int32 nodeLinearLayoutListener,    //INodeLinearLayoutListener**
+            [in] INodeLinearLayoutListener* jsNodeLinearLayoutListener);
+
         SetCalculatorPadLayoutListener(
-            [in] Int32 calculatorPadLayoutListener,    //ICalculatorPadLayoutListener**
+            [in] Int32 calculatorPadLayoutListener, //ICalculatorPadLayoutListener**
             [in] ICalculatorPadLayoutListener* jsCalculatorPadLayoutListener);
 
         SetCalculatorPadViewPagerListener(
-            [in] Int32 calculatorPadViewPagerListener,    //ICalculatorPadViewPagerListener**
+            [in] Int32 calculatorPadViewPagerListener,  //ICalculatorPadViewPagerListener**
             [in] ICalculatorPadViewPagerListener* jsCalculatorPadViewPagerListener);
 
         SetNodeBridgeListener(
@@ -294,6 +312,120 @@ module
     }
 
     [local]
+    interface INodeLinearLayout
+    {
+        _constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        //public
+        _ShouldDelayChildPressedState(
+            [out] Boolean* result);
+        //protected
+        _OnMeasure(
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+        _OnLayout(
+            [in] Boolean changed,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+        //public
+        _Draw(
+            [in] ICanvas* canvas);
+        _DispatchDraw(
+            [in] ICanvas* canvas);
+        _OnDraw(
+            [in] ICanvas* canvas);
+        _DrawChild(
+            [in] ICanvas* canvas,
+            [in] IView* child,
+            [in] Int64 drawingTime,
+            [out] Boolean* result);
+        _GenerateLayoutParams(
+            [in] IAttributeSet* attrs,
+            [out] IViewGroupLayoutParams** result);
+        //public
+        _GenerateDefaultLayoutParams(
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        _GenerateLayoutParams(
+            [in] IViewGroupLayoutParams* p,
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        _CheckLayoutParams(
+            [in] IViewGroupLayoutParams* p,
+            [out] Boolean* result);
+
+        _SetChildrenDrawingOrderEnabled(
+            [in] Boolean enabled);
+    }
+
+    [local]
+    interface INodeLinearLayoutListener
+    {
+        OnCreate(   //constructor
+            [in] IInterface* _this,
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        //public
+        ShouldDelayChildPressedState(
+            [in] IInterface* _this,
+            [out] Boolean* result);
+        //protected
+        OnMeasure(
+            [in] IInterface* _this,
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
+        OnLayout(
+            [in] IInterface* _this,
+            [in] Boolean changed,
+            [in] Int32 left,
+            [in] Int32 top,
+            [in] Int32 right,
+            [in] Int32 bottom);
+        Draw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        DispatchDraw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        OnDraw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        DrawChild(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas,
+            [in] IView* child,
+            [in] Int64 drawingTime,
+            [out] Boolean* result);
+        //public
+        GenerateLayoutParams(
+            [in] IInterface* _this,
+            [in] IAttributeSet* attrs,
+            [out] IViewGroupLayoutParams** result);
+        //public
+        GenerateDefaultLayoutParams(
+            [in] IInterface* _this,
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        GenerateLayoutParams(
+            [in] IInterface* _this,
+            [in] IViewGroupLayoutParams* p,
+            [out] IViewGroupLayoutParams** result);
+        //protected
+        CheckLayoutParams(
+            [in] IInterface* _this,
+            [in] IViewGroupLayoutParams* p,
+            [out] Boolean* result);
+    }
+
+
+    [local]
     interface ICalculatorPadLayoutSuperObject
     {
         Test();
@@ -314,6 +446,9 @@ module
         _ShouldDelayChildPressedState(
             [out] Boolean* result);
         //protected
+        _OnMeasure(
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
         _OnLayout(
             [in] Boolean changed,
             [in] Int32 left,
@@ -321,6 +456,17 @@ module
             [in] Int32 right,
             [in] Int32 bottom);
         //public
+        _Draw(
+            [in] ICanvas* canvas);
+        _DispatchDraw(
+            [in] ICanvas* canvas);
+        _OnDraw(
+            [in] ICanvas* canvas);
+        _DrawChild(
+            [in] ICanvas* canvas,
+            [in] IView* child,
+            [in] Int64 drawingTime,
+            [out] Boolean* result);
         _GenerateLayoutParams(
             [in] IAttributeSet* attrs,
             [out] IViewGroupLayoutParams** result);
@@ -354,6 +500,10 @@ module
             [in] IInterface* _this,
             [out] Boolean* result);
         //protected
+        OnMeasure(
+            [in] IInterface* _this,
+            [in] Int32 widthMeasureSpec,
+            [in] Int32 heightMeasureSpec);
         OnLayout(
             [in] IInterface* _this,
             [in] Boolean changed,
@@ -361,6 +511,21 @@ module
             [in] Int32 top,
             [in] Int32 right,
             [in] Int32 bottom);
+        Draw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        DispatchDraw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        OnDraw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
+        DrawChild(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas,
+            [in] IView* child,
+            [in] Int64 drawingTime,
+            [out] Boolean* result);
         //public
         GenerateLayoutParams(
             [in] IInterface* _this,
@@ -371,7 +536,7 @@ module
             [in] IInterface* _this,
             [out] IViewGroupLayoutParams** result);
         //protected
-        GenerateLayoutParams_0(
+        GenerateLayoutParams(
             [in] IInterface* _this,
             [in] IViewGroupLayoutParams* p,
             [out] IViewGroupLayoutParams** result);
@@ -405,6 +570,8 @@ module
 
         //protected:
         _OnFinishInflate();
+
+        OnFinishInflate();
 
         _SetMeasuredDimension(
             [in] Int32 measuredWidth,
@@ -469,8 +636,15 @@ module
             [out] Boolean* res);
         _Draw(
             [in] ICanvas* canvas);
+        _DispatchDraw(
+            [in] ICanvas* canvas);
         _OnDraw(
             [in] ICanvas* canvas);
+        _DrawChild(
+            [in] ICanvas* canvas,
+            [in] IView* child,
+            [in] Int64 drawingTime,
+            [out] Boolean* result);
         _DispatchKeyEvent(
             [in] IKeyEvent* event,
             [out] Boolean* res);
@@ -509,6 +683,12 @@ module
 
         _SetChildrenDrawingOrderEnabled(
             [in] Boolean enabled);
+
+        _GetGroupFlags(
+            [out] Int32* result);
+
+        _GetViewFlags(
+            [out] Int32* result);
     }
 
     [local]
@@ -589,9 +769,18 @@ module
         Draw(
             [in] IInterface* _this,
             [in] ICanvas* canvas);
+        DispatchDraw(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas);
         OnDraw(
             [in] IInterface* _this,
             [in] ICanvas* canvas);
+        DrawChild(
+            [in] IInterface* _this,
+            [in] ICanvas* canvas,
+            [in] IView* child,
+            [in] Int64 drawingTime,
+            [out] Boolean* result);
         DispatchKeyEvent(
             [in] IInterface* _this,
             [in] IKeyEvent* event,
@@ -717,6 +906,34 @@ module
         interface IAccessibilityEventSource;
     }
 
+    [local]
+    class CNodeLinearLayout
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface INodeLinearLayout;
+
+        interface ILinearLayout;
+
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
     [local]
     class CCalculatorPadLayout
@@ -773,6 +990,7 @@ module
         constructor();
 
         interface INodeListener;
+        interface IDroidPatch;
     }
 
     } // namespace JSCalculator

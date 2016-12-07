@@ -4,6 +4,9 @@
 
 using Elastos::Utility::Logging::Logger;
 
+
+using Elastos::Droid::Os::CBundle;
+
 # define NODE_EXTERN /* nothing */
 
 namespace node {
@@ -190,6 +193,14 @@ ECode JSEvtName::SetCalculatorPadLayoutListener(
     return NOERROR;
 }
 
+ECode JSEvtName::SetNodeLinearLayoutListener(
+    /* [in] */ Int32 ppNodeLinearLayoutListener,    //ICalculatorPadLayoutListener**
+    /* [in] */ INodeLinearLayoutListener* pJsNodeLinearLayoutListener)
+{
+    *(INodeLinearLayoutListener**)ppNodeLinearLayoutListener = pJsNodeLinearLayoutListener;
+    return NOERROR;
+}
+
 ECode JSEvtName::SetNodeBridgeListener(
     /* [in] */ INodeBridgeListener* pNodeBridgeListener)
 {
@@ -205,6 +216,17 @@ ECode JSEvtName::SetNodeBridge(
     g_pNodeBridge = (NodeBridge*)from;
     return NOERROR;
 }
+
+//--------DroidPatch begin--------
+ECode JSEvtName::Get__Bundle__EMPTY(
+    /* [out] */ IInterface** result)
+{
+    ALOGD("====CNodeListener::Get__Bundle__EMPTY====begin====");
+    //*result = CBundle->EMPTY;
+    return NOERROR;
+}
+
+    //--------DroidPatch end--------
 
 }   //namespace JSPkgName
 }   //namespace Node

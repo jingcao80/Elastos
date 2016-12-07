@@ -16,10 +16,20 @@ module.exports = function(aoElastos, aoActivity){
     var IView__VISIBLE = 0x00000000;
     var IView__INVISIBLE = 0x00000004;
     var IView__GONE = 0x00000008;
+    var IView__NO_ID = -1;
     var IMotionEvent__ACTION_DOWN = 0;
     var IMotionEvent__ACTION_UP = 1;
 
 //--------common definition----end----
+
+
+//================SetContentView Test====begin================
+
+var STC = require("/data/temp/node/Common/js/elastos_layout.js")(aoElastos, aoActivity);
+var ST = new STC();
+
+//================SetContentView Test====begin================
+
 
 //--------.java----begin----
 
@@ -65,9 +75,18 @@ class Activity {
 // import android.text.Editable;
 // import android.text.TextUtils;
 // import android.text.TextWatcher;
+class TextWatcher {
+    // constructor(text) {
+    //     var _obj = Droid_New("Elastos.Droid.Text.ITextWatcher");
+    //     return _obj;
+    // }
+}
+
 // import android.view.KeyEvent;
 // import android.view.View;
 // import android.view.View.OnKeyListener;
+class OnKeyListener {}
+
 // import android.view.View.OnLongClickListener;
 // import android.view.ViewAnimationUtils;
 // import android.view.ViewGroupOverlay;
@@ -201,12 +220,16 @@ class Calculator extends Activity {
 //     };
     get mFormulaEditableFactory() {
         if (this._mFormulaEditableFactory) return this._mFormulaEditableFactory;
-        this._mFormulaEditableFactory = new class _ extends Editable.Factory {
+        //this._mFormulaEditableFactory = new class _ extends Editable.Factory {
+        this._mFormulaEditableFactory = new class Editable__Factory {
             // @Override
-            NewEditable(source) {
+            NewEditable(source, result) {
+                elog("====ViewPager::mFormulaEditableFactory::NewEditable====begin====");
                 var isEdited = this.mCurrentState == Calculator.CalculatorState.INPUT
                         || this.mCurrentState == Calculator.CalculatorState.ERROR;
-                return new CalculatorExpressionBuilder(source, mTokenizer, isEdited);
+                //return new CalculatorExpressionBuilder(source, this.mTokenizer, isEdited);
+                result.data = new CalculatorExpressionBuilder(source, this.mTokenizer, isEdited);
+                elog("====ViewPager::mFormulaEditableFactory::NewEditable====end====");
             }
         }();
         return this._mFormulaEditableFactory;
@@ -265,9 +288,15 @@ class Calculator extends Activity {
 elog("====Calculator::OnCreate====0====");
 
         super.OnCreate(_this, savedInstanceState);
-        _this.SetContentView(R.layout.activity_calculator);
+        //_this.SetContentView(R.layout.activity_calculator);
 
-return;
+elog("====Calculator::OnCreate====0.1====");
+
+        ST.SetContentView(_this, R.layout.activity_calculator);
+
+elog("====Calculator::OnCreate====0.2====");
+
+//return;
 
         this.mDisplayView = _this.FindViewById(R.id.display);
         this.mFormulaEditText = _this.FindViewById(R.id.formula);
@@ -282,12 +311,41 @@ return;
         }
 elog("====Calculator::OnCreate====1====");
 
+//----test begin----
+var w1 = this.mPadViewPager.GetWidth();
+var h1 = this.mPadViewPager.GetHeight();
+var w2 = this.mFormulaEditText.GetWidth();
+var h2 = this.mFormulaEditText.GetHeight();
+elog("====Calculator::OnCreate====1.1===="+w1+"==="+h1);
+elog("====Calculator::OnCreate====1.2===="+w2+"==="+h2);
+//ss.tt();Assert(0);
+
+//----test end----
+
+
         this.mTokenizer = new CalculatorExpressionTokenizer(_this);
 elog("====Calculator::OnCreate====2====");
         this.mEvaluator = new CalculatorExpressionEvaluator(this.mTokenizer);
 elog("====Calculator::OnCreate====3====");
 
-        savedInstanceState = savedInstanceState == null ? Bundle.EMPTY : savedInstanceState;
+// static AutoPtr<IBundle> EMPTY;
+// static AutoPtr<IBundle> InitEMPTY()
+// {
+//     AutoPtr<CBundle> empty;
+//     CBundle::NewByFriend((CBundle**)&empty);
+//     empty->mMap = CArrayMap::EMPTY;
+//     return empty;
+// }
+// AutoPtr<IBundle> CBundle::EMPTY = InitEMPTY();
+
+    // AutoPtr<IBundleHelper> bhl;
+    // CBundleHelper::AcquireSingleton((IBundleHelper**)&bhl);
+    // AutoPtr<IBundle> empty;
+    // bhl->GetEMPTY((IBundle**)&empty);
+
+    var Bundle__EMPTY = Droid_New("Elastos.Droid.Os.CBundleHelper").GetEMPTY();
+
+        savedInstanceState = savedInstanceState == null ? Bundle__EMPTY : savedInstanceState;
 
 //CObject.showMethods(savedInstanceState);
 //elog("====interface/class name:"+savedInstanceState.getClass().GetName());
@@ -300,18 +358,47 @@ elog("====Calculator::OnCreate====4====state:"+Calculator.KEY_CURRENT_STATE+"===
                 savedInstanceState.GetInt32(Calculator.KEY_CURRENT_STATE, Calculator.CalculatorState.INPUT)]);
 elog("====Calculator::OnCreate====5====");
 
-        this.mFormulaEditText.SetText(this.mTokenizer.GetLocalizedExpression(
-                savedInstanceState.GetString(Calculator.KEY_CURRENT_EXPRESSION, "")));
+// var s0 = Calculator.KEY_CURRENT_EXPRESSION;
+// elog("====Calculator::OnCreate====5.0===="+s0);
+// var s1 = savedInstanceState.GetString(s0, "");
+// elog("====Calculator::OnCreate====5.1====["+s1+"]");
+// var s2 = this.mTokenizer.GetLocalizedExpression(s1);
+// elog("====Calculator::OnCreate====5.2===="+s2);
+
+// CObject.showMethods(this.mFormulaEditText);
+
+        //this.mFormulaEditText.SetText(this.mTokenizer.GetLocalizedExpression(
+        //        savedInstanceState.GetString(Calculator.KEY_CURRENT_EXPRESSION, "")));
+        //this.mFormulaEditText.SetText(CString(this.mTokenizer.GetLocalizedExpression(
+        //        savedInstanceState.GetString(Calculator.KEY_CURRENT_EXPRESSION, ""))));
+        this.mFormulaEditText.SetText(CString("先定个能达到的小目标，比方说我先挣它:"));
+
 elog("====Calculator::OnCreate====6====");
-        this.mEvaluator.Evaluate(this.mFormulaEditText.GetText(), _this);
+        this.mEvaluator.Evaluate(this.mFormulaEditText.GetText(), this);
 elog("====Calculator::OnCreate====7====");
 
         this.mFormulaEditText.SetEditableFactory(this.mFormulaEditableFactory);
-        this.mFormulaEditText.AddTextChangedListener(this.mFormulaTextWatcher);
-        this.mFormulaEditText.SetOnKeyListener(this.mFormulaOnKeyListener);
-        this.mFormulaEditText.SetOnTextSizeChangeListener(_this);
-        this.mDeleteButton.SetOnLongClickListener(_this);
 elog("====Calculator::OnCreate====8====");
+        this.mFormulaEditText.AddTextChangedListener(this.mFormulaTextWatcher);
+elog("====Calculator::OnCreate====9====");
+        this.mFormulaEditText.SetOnKeyListener(this.mFormulaOnKeyListener);
+elog("====Calculator::OnCreate====10====");
+
+CObject.showMethods(this.mFormulaEditText, "Listener");
+
+        //this.mFormulaEditText.SetOnTextSizeChangeListener(_this);
+elog("====Calculator::OnCreate====11====");
+        this.mDeleteButton.SetOnLongClickListener(this);
+
+    // textView->SetEditableFactory(mFormulaEditableFactory);
+    // textView->AddTextChangedListener(mFormulaTextWatcher);
+    // IView::Probe(mFormulaEditText)->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
+    // mFormulaEditText->SetOnTextSizeChangeListener(IOnTextSizeChangeListener::Probe(this));
+    // return mDeleteButton->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));
+
+
+
+        elog("====Calculator::OnCreate====end====");
     }
 
 //     @Override
@@ -329,8 +416,8 @@ elog("====Calculator::OnCreate====8====");
 //     }
     OnSaveInstanceState(_this, outState) {
         // If there's an animation in progress, cancel it first to ensure our state is up-to-date.
-        if (mCurrentAnimator != null) {
-            mCurrentAnimator.cancel();
+        if (this.mCurrentAnimator != null) {
+            this.mCurrentAnimator.cancel();
         }
 
         super.onSaveInstanceState(outState);
@@ -436,12 +523,12 @@ elog("====Calculator::OnCreate====8====");
 //         }
 //     }
     OnUserInteraction(_this) {
-        super.onUserInteraction();
+        _this._OnUserInteraction();
 
         // If there's an animation in progress, cancel it so the user interaction can be handled
         // immediately.
-        if (mCurrentAnimator != null) {
-            mCurrentAnimator.cancel();
+        if (this.mCurrentAnimator != null) {
+            this.mCurrentAnimator.Cancel();
         }
     }
 
@@ -535,7 +622,8 @@ elog("====Calculator::OnCreate====8====");
 //     }
     OnEvaluate(_this, expr, result, errorResourceId) {
         if (this.mCurrentState == Calculator.CalculatorState.INPUT) {
-            mResultEditText.setText(result);
+            //this.mResultEditText.SetText(result);
+            this.mResultEditText.SetText(CString("$:1,00,000,000.00"));
         } else if (errorResourceId != Calculator.INVALID_RES_ID) {
             onError(errorResourceId);
         } else if (!TextUtils.isEmpty(result)) {
@@ -545,7 +633,7 @@ elog("====Calculator::OnCreate====8====");
             setState(Calculator.CalculatorState.INPUT);
         }
 
-        mFormulaEditText.requestFocus();
+        this.mFormulaEditText.RequestFocus();
     }
 
 //     @Override

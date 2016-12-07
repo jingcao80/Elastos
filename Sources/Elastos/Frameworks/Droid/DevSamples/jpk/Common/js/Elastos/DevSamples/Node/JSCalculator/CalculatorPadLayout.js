@@ -19,6 +19,9 @@ module.exports = function(aoElastos, aoActivity){
 
 //--------common definition----end----
 
+    var IView__LAYOUT_DIRECTION_RTL = 1;
+    var IView__GONE = 0x00000008;  //IVew::GONE
+
 //--------.java----begin----
 
 // /*
@@ -81,6 +84,8 @@ class CalculatorPadLayout extends ViewGroup {
     OnCreate(_this, context, attrs, defStyle) {
         elog("====CalculatorPadLayout::OnCreate====begin=======");
 
+        this._obj = _this;
+
         attrs = attrs || null;
         defStyle = defStyle || 0;
 
@@ -92,6 +97,8 @@ class CalculatorPadLayout extends ViewGroup {
         this.mRowCount = a.GetInt32(0, 1);
         this.mColumnCount = a.GetInt32(1, 1);
 
+        elog(`====CalculatorPadLayout::OnCreate====mRowCount:${this.mRowCount};mColumnCount:${this.mColumnCount}===`);
+
         a.Recycle();
 
         elog("====CalculatorPadLayout::OnCreate====end=======");
@@ -101,8 +108,59 @@ class CalculatorPadLayout extends ViewGroup {
 //     public boolean shouldDelayChildPressedState() {
 //         return false;
 //     }
-    ShouldDelayChildPressedState(result) {
+    ShouldDelayChildPressedState(_this, result) {
         result.data = false;
+    }
+
+//     @Override
+    OnMeasure(_this, widthMeasureSpec, heightMeasureSpec) {
+
+        elog("====CalculatorPadLayout::OnMeasure====begin====");
+        _this._OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+//     @Override
+    Draw(_this, canvas) {
+        elog("====CalculatorPadLayout::Draw====begin====");
+        _this._Draw(canvas);
+        elog("====CalculatorPadLayout::Draw====end====");
+    }
+
+//     @Override
+    DrawChild(_this, canvas, child, drawingTime, result)
+    {
+        elog("====CalculatorPadLayout::DrawChild====begin====");
+        var bRet = _this._DrawChild(canvas, child, drawingTime);
+        if (result) {
+            result.data = bRet;
+            elog("====CalculatorPadLayout::DrawChild====end====0====");
+            return; //ECode should be return
+        }
+        else {
+            elog("====CalculatorPadLayout::DrawChild====end====1====");
+            return bRet;
+        }
+    }
+
+//     @Override
+    DispatchDraw(_this, canvas) {
+        elog("====CalculatorPadLayout::DispatchDraw====begin====");
+        //ss.tt();Assert(0);
+
+        var cnt = _this.GetChildCount();
+        var pName = _this.GetParent().getClass().GetName();
+        elog(`====CalculatorPadLayout::DispatchDraw====par:${pName},cnt:${cnt}====`);
+
+        _this._DispatchDraw(canvas);
+        elog("====CalculatorPadLayout::DispatchDraw====end====");
+    }
+
+//     @Override
+    OnDraw(_this, canvas) {
+        elog("====CalculatorPadLayout::OnDraw====begin====");
+        //ss.tt();Assert(0);
+        _this._OnDraw(canvas);
+        elog("====CalculatorPadLayout::OnDraw====end====");
     }
 
 //     @Override
@@ -147,45 +205,87 @@ class CalculatorPadLayout extends ViewGroup {
 //             columnIndex = (columnIndex + 1) % mColumnCount;
 //         }
 //     }
-    OnLayout(changed, left, top, right, bottom) {
+    OnLayout(_this, changed, left, top, right, bottom) {
         elog("====CalculatorPadLayout::OnLayout====begin=======");
+
+        elog(`====CalculatorPadLayout::OnLayout====0.0===left:${left}==top:${top}==right:${right}==bottom:${bottom}==`);
+
+        //var _this = this._obj;
+
+        //CObject.showMethods(_this,"GetPadding");
+        //ss.tt();Assert(0);
 
         var paddingLeft = _this.GetPaddingLeft();
         var paddingRight = _this.GetPaddingRight();
         var paddingTop = _this.GetPaddingTop();
         var paddingBottom = _this.GetPaddingBottom();
 
-        var isRTL = _this.GetLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        var columnWidth = Math.round(right - left - paddingLeft - paddingRight) / mColumnCount;
-        var rowHeight = Math.round(bottom - top - paddingTop - paddingBottom) / mRowCount;
+        elog(`====CalculatorPadLayout::OnLayout====0.1===padding:${paddingLeft}:${paddingRight}:${paddingTop}:${paddingBottom}==`);
+
+        var isRTL = _this.GetLayoutDirection() == IView__LAYOUT_DIRECTION_RTL;
+        var columnWidth = Math.round(right - left - paddingLeft - paddingRight) / this.mColumnCount;
+        var rowHeight = Math.round(bottom - top - paddingTop - paddingBottom) / this.mRowCount;
+
+        elog(`====CalculatorPadLayout::OnLayout====0.2===columnWidth:${columnWidth}==rowHeight:${rowHeight}==`);
 
         var rowIndex = 0, columnIndex = 0;
-        for (var childIndex = 0; childIndex < _this.GetChildCount(); ++childIndex) {
+        var childCount = _this.GetChildCount();
+
+        elog(`====CalculatorPadLayout::OnLayout====0.3===childCount:${childCount}==`);
+        for (var childIndex = 0; childIndex < childCount; ++childIndex) {
+
+            elog(`====CalculatorPadLayout::OnLayout====1====${childIndex}/${childCount}`);
+
             var childView = _this.GetChildAt(childIndex);
-            if (childView.GetVisibility() == View.GONE) {
+            if (childView.GetVisibility() == IView__GONE) {
                 continue;
             }
 
-            var lp = childView.GetLayoutParams();
+            elog("====CalculatorPadLayout::OnLayout====2====");
 
-            var childTop = paddingTop + lp.topMargin + rowIndex * rowHeight;
-            var childBottom = childTop - lp.topMargin - lp.bottomMargin + rowHeight;
-            childLeft = paddingLeft + lp.leftMargin +
-                    (isRTL ? (mColumnCount - 1) - columnIndex : columnIndex) * columnWidth;
-            var childRight = childLeft - lp.leftMargin - lp.rightMargin + columnWidth;
+            //var lp = childView.GetLayoutParams();
+            var lp = childView.GetLayoutParams().Probe("Elastos.Droid.View.IViewGroupMarginLayoutParams");
+
+var oo = childView.GetObject();
+var ss = oo.ToString();
+elog("====childView.ToString:===="+ss);
+var oo = lp.GetObject();
+var ss = oo.ToString();
+elog("====lp.ToString:===="+ss);
+
+CObject.showMethods(lp);
+
+            var _lp = {
+                leftMargin:0,
+                topMargin:0,
+                rightMargin:0,
+                bottomMargin:0,
+            }
+
+            var childTop = paddingTop + _lp.topMargin + rowIndex * rowHeight;
+            elog(`====CalculatorPadLayout::OnLayout====2.1====childTop:${childTop}==paddingTop:${paddingTop}==lp.topMargin:${_lp.topMargin}==rowIndex:${rowIndex}==rowHeight:${rowHeight}==`);
+
+            var childBottom = childTop - _lp.topMargin - _lp.bottomMargin + rowHeight;
+            var childLeft = paddingLeft + _lp.leftMargin +
+                    (isRTL ? (this.mColumnCount - 1) - columnIndex : columnIndex) * columnWidth;
+            var childRight = childLeft - _lp.leftMargin - _lp.rightMargin + columnWidth;
 
             var childWidth = childRight - childLeft;
             var childHeight = childBottom - childTop;
             if (childWidth != childView.GetMeasuredWidth() ||
                     childHeight != childView.GetMeasuredHeight()) {
+                elog("====CalculatorPadLayout::OnLayout====3====");
                 childView.Measure(
-                        MeasureSpec.MakeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
-                        MeasureSpec.MakeMeasureSpec(childHeight, MeasureSpec.EXACTLY));
+                        MeasureSpec.MakeMeasureSpec(childWidth, MeasureSpec.GetEXACTLY()),
+                        MeasureSpec.MakeMeasureSpec(childHeight, MeasureSpec.GetEXACTLY()));
+                elog("====CalculatorPadLayout::OnLayout====4====childWidth:"+childWidth+"===="+"childHeight:"+childHeight);
             }
+            elog(`====CalculatorPadLayout::OnLayout====5====childLeft:${childLeft}==childTop:${childTop}==childRight:${childRight}==childBottom:${childBottom}==`);
             childView.Layout(childLeft, childTop, childRight, childBottom);
+            elog("====CalculatorPadLayout::OnLayout====6====");
 
-            rowIndex = (rowIndex + (columnIndex + 1) / mColumnCount) % mRowCount;
-            columnIndex = (columnIndex + 1) % mColumnCount;
+            rowIndex = (rowIndex + (columnIndex + 1) / this.mColumnCount) % this.mRowCount;
+            columnIndex = (columnIndex + 1) % this.mColumnCount;
         }
         elog("====CalculatorPadLayout::OnLayout====end=======");
     }
@@ -197,12 +297,25 @@ class CalculatorPadLayout extends ViewGroup {
     GenerateLayoutParams(_this, attrs, result) {
         elog("====CalculatorPadLayout::GenerateLayoutParams====begin=======");
 
+        //var c1 = attrs.GetAttributeName()
+        //CObject.showMethods(c1);
+        //elog("====CalculatorPadLayout::GenerateLayoutParams====attrs name:"+);
+
         var attrsClassName = attrs.getClass().GetName();
 
         elog("====attrs.name:"+attrsClassName);
 
         if (attrsClassName == "IAttributeSet") {
             result.data = Droid_New("Elastos.Droid.View.CViewGroupMarginLayoutParams", _this.GetContext(), attrs);
+            //result.data = _this._GenerateLayoutParams(attrs);
+
+            // CObject.showMethods(result.data);
+
+            // var ww = result.data.GetWidth();
+            // var hh = result.data.GetHeight();
+            // elog(`====CalculatorPadLayout::GenerateLayoutParams==ww:${ww}====hh${hh}====`);
+
+            //ss.tt();Assert(0);
         }
         else {
             Assert(0);
@@ -218,7 +331,9 @@ class CalculatorPadLayout extends ViewGroup {
 //         return new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 //     }
     GenerateDefaultLayoutParams(_this, result) {
+        elog("====CalculatorPadLayout::GenerateDefaultLayoutParams====begin=======");
         result.data = new MarginLayoutParams(_this.LayoutParams.WRAP_CONTENT, _this.LayoutParams.WRAP_CONTENT);
+        elog("====CalculatorPadLayout::GenerateDefaultLayoutParams====end=======");
     }
 
 //     @Override
@@ -236,8 +351,10 @@ class CalculatorPadLayout extends ViewGroup {
 //     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
 //         return p instanceof MarginLayoutParams;
 //     }
-    CheckLayoutParams(p, result) {
+    CheckLayoutParams(_this, p, result) {
+        elog("====CalculatorPadLayout::CheckLayoutParams====begin=======");
         result.data = p instanceof MarginLayoutParams;
+        elog("====CalculatorPadLayout::CheckLayoutParams====end=======");
     }
 
 }   //class _CalculatorPadLayout

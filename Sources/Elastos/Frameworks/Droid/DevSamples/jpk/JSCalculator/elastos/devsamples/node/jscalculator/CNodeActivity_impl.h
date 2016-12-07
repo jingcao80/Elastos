@@ -137,6 +137,8 @@ ECode JSActName::OnResume()
     Logger::I(DBG_TAG, " >> OnResume()");
     ECode ec = Activity::OnResume();
     //mListener->OnResume(this);
+
+    ALOGD("====OnResume====end====ECode:%d", ec);
     return ec;
 }
 

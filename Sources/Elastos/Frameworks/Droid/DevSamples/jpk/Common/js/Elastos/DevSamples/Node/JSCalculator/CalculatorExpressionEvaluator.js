@@ -110,12 +110,12 @@ class CalculatorExpressionEvaluator {
         expr = this.mTokenizer.GetNormalizedExpression(expr);
 
         // remove any trailing operators
-        while (expr.length() > 0 && "+-/*".indexOf(expr.charAt(expr.length() - 1)) != -1) {
+        while (expr.length > 0 && "+-/*".indexOf(expr.charAt(expr.length - 1)) != -1) {
             expr = expr.substring(0, expr.length() - 1);
         }
 
         try {
-            if (expr.length() == 0 || Double.valueOf(expr) != null) {
+            if (expr.length == 0 || Double.valueOf(expr) != null) {
                 callback.onEvaluate(expr, null, Calculator.INVALID_RES_ID);
                 return;
             }
@@ -136,7 +136,8 @@ class CalculatorExpressionEvaluator {
                 callback.onEvaluate(expr, resultString, Calculator.INVALID_RES_ID);
             }
         } catch (e) {
-            callback.onEvaluate(expr, null, R.string.error_syntax);
+            //s.t();Assert(0);
+            callback.OnEvaluate(expr, null, R.string.error_syntax);
         }
     }
 
