@@ -145,6 +145,7 @@ void CChatApplication::UseSetChannelName(
 
 String CChatApplication::UseGetChannelName()
 {
+    return String(NULL);
 }
 
 void CChatApplication::UseJoinChannel()

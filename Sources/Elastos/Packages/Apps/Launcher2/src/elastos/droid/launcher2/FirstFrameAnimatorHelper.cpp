@@ -50,7 +50,10 @@ FirstFrameAnimatorHelper::MyRunnable::MyRunnable(
 
 ECode FirstFrameAnimatorHelper::MyRunnable::Run()
 {
-    return mAnimation->RemoveUpdateListener(mHost);
+    // hold and release host
+    AutoPtr<FirstFrameAnimatorHelper> host = mHost;
+    mHost = NULL;
+    return mAnimation->RemoveUpdateListener(host);
 }
 
 const Boolean FirstFrameAnimatorHelper::DEBUG = FALSE ;
@@ -85,6 +88,10 @@ FirstFrameAnimatorHelper::FirstFrameAnimatorHelper(
     , mAdjustedSecondFrameTime(FALSE)
 {
     vpa->SetListener(this);
+}
+
+FirstFrameAnimatorHelper::~FirstFrameAnimatorHelper()
+{
 }
 
 ECode FirstFrameAnimatorHelper::OnAnimationStart(

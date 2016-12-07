@@ -5,22 +5,30 @@
 #include "_Elastos_DevSamples_DFChatDemo_CAllJoynService.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include <_Org.Alljoyn.Bus.h>
+#include <elastos/droid/os/Handler.h>
 #include <elastos/droid/app/Service.h>
 #include <org/alljoyn/bus/BusListener.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Utility::Etl::List;
 using Org::Alljoyn::Bus::BusListener;
+using Org::Alljoyn::Bus::IBusAttachment;
+using Org::Alljoyn::Bus::IBusObject;
 
 namespace Elastos {
 namespace DevSamples {
 namespace DFChatDemo {
 
+class CChatApplication;
+
 CarClass(CAllJoynService)
     , public Service
     , public IAllJoynService
+    , public IObserver
 {
 private:
 
@@ -120,6 +128,8 @@ private:
          */
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+    private:
+        CAllJoynService* mHost;
     };
 
     /**
@@ -184,7 +194,7 @@ private:
      */
     class ChatService
         : public Object
-        , public IChatInterface,
+        , public IChatInterface
         , public IBusObject
     {
     public:
@@ -205,9 +215,11 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     CAllJoynService();
 
-    ~CAllJoynService();
+    virtual ~CAllJoynService();
 
     CARAPI constructor();
 
@@ -295,8 +307,7 @@ public:
      * handler names.
      */
     CARAPI Chat(
-        /* [in] */ const String string)
-
+        /* [in] */ const String& str);
 
 private:
 
@@ -506,7 +517,7 @@ private:
      * clients.  Pretty much all communiation with AllJoyn is going to go through
      * this obejct.
      */
-    BusAttachment mBus;//  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
+    AutoPtr<IBusAttachment> mBus;//  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
 
     /**
      * The well-known name prefix which all bus attachments hosting a channel

@@ -1,6 +1,7 @@
 
 module
 {
+    importlib("Org.Alljoyn.Bus.eco");
     importlib("Elastos.Droid.Core.eco");
 
     merge("car/elastos/devsamples/dfchatdemo/AllJoynService.car");
@@ -12,6 +13,7 @@ module
     using interface Elastos.Droid.App.ITabActivity;
     using interface Elastos.Droid.App.IActivityGroup;
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
@@ -38,6 +40,17 @@ module
         interface IComponentCallbacks;
     }
 
+    class CAllJoynService {
+        constructor();
+
+        interface IAllJoynService;
+        interface IObserver;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
 
     class CTabWidget {
         constructor();
@@ -71,6 +84,8 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
+
+        interface IObserver;
     }
 
     class CUseActivity {
@@ -87,6 +102,8 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
+        
+        interface IObserver;
     }
 
 

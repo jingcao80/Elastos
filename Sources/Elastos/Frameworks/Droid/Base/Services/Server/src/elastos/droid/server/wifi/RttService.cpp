@@ -140,7 +140,7 @@ ECode RttService::RttServiceImpl::RttStateMachine::EnabledState::ProcessMessage(
                 if (val == arg2) {
                     if (DBG) Logger::D(TAG, "Cancelling not-yet-scheduled RTT");
                     Boolean b = FALSE;
-                    mHost->mHost->mRequestQueue->Remove((IInterface*)(IObject*)request.Get(), &b);
+                    mHost->mHost->mRequestQueue->Remove(p, &b);
                     request->mCi->ReportAborted(val);
                     break;
                 }

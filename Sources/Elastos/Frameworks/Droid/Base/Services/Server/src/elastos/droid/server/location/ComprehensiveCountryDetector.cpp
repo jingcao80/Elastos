@@ -384,11 +384,10 @@ ECode ComprehensiveCountryDetector::CreateLocationBasedCountryDetector(
     /* [out] */ CountryDetectorBase** db)
 {
     VALIDATE_NOT_NULL(db)
-    {
-        AutoLock syncLock(this);
-        *db = new LocationBasedCountryDetector(mContext);
-        REFCOUNT_ADD(*db)
-    }
+
+    AutoLock syncLock(this);
+    *db = new LocationBasedCountryDetector(mContext);
+    REFCOUNT_ADD(*db)
     return NOERROR;
 }
 

@@ -63,7 +63,7 @@ private:
 
     private:
         AutoPtr<IValueAnimator> mAnimation;
-        FirstFrameAnimatorHelper* mHost;
+        AutoPtr<FirstFrameAnimatorHelper> mHost;    // hold host
     };
 
 public:
@@ -76,6 +76,8 @@ public:
     FirstFrameAnimatorHelper(
         /* [in] */ IViewPropertyAnimator* vpa,
         /* [in] */ IView* target);
+
+    ~FirstFrameAnimatorHelper();
 
     // only used for ViewPropertyAnimators
     CARAPI OnAnimationStart(

@@ -24,6 +24,8 @@ namespace Droid {
 namespace Server {
 namespace Location {
 
+static const String TAG("LocationBasedCountryDetector");
+
 //=============================
 //LocationBasedCountryDetector::MyTimerTask
 //=============================
@@ -35,13 +37,10 @@ LocationBasedCountryDetector::MyTimerTask::MyTimerTask(
 
 ECode LocationBasedCountryDetector::MyTimerTask::Run()
 {
-    mHost->mTimer = NULL;
-    mHost->Stop();
-    // Looks like no provider could provide the location, let's try the last
-    // known location.
-    AutoPtr<ILocation> location = mHost->GetLastKnownLocation();
-    mHost->QueryCountryCode(location);
-    return NOERROR;
+    // prevent mHost be released when calling host->NotifyListener;
+    AutoPtr<LocationBasedCountryDetector> host = mHost;
+    mHost = NULL;
+    return host->TimerTaskRun();;
 }
 
 //=============================
@@ -58,11 +57,9 @@ LocationBasedCountryDetector::MyLocationListener::MyLocationListener(
 ECode LocationBasedCountryDetector::MyLocationListener::OnLocationChanged(
     /* [in] */ ILocation* location)
 {
-    if (location != NULL) {
-        mHost->Stop();
-        mHost->QueryCountryCode(location);
-    }
-    return NOERROR;
+    Slogger::D(TAG, " >> MyLocationListener::OnLocationChanged()");
+    AutoPtr<LocationBasedCountryDetector> host = mHost;
+    return host->OnLocationChanged(location);
 }
 
 ECode LocationBasedCountryDetector::MyLocationListener::OnStatusChanged(
@@ -99,32 +96,23 @@ LocationBasedCountryDetector::MyRunnable::MyRunnable(
 
 ECode LocationBasedCountryDetector::MyRunnable::Run()
 {
+    Slogger::D(TAG, " >> MyRunnable::Run()");
     // prevent mHost be released when calling host->NotifyListener;
     AutoPtr<LocationBasedCountryDetector> host = mHost;
+    mHost = NULL;
 
     String countryIso;
     if (mLocation != NULL) {
         countryIso = host->GetCountryFromLocation(mLocation);
     }
-    if (countryIso.IsNull()) {
-        AutoPtr<ICountry> country;
-        CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_LOCATION, (ICountry**)&country);
-        host->mDetectedCountry = country;
-    }
-    else {
-        host->mDetectedCountry = NULL;
-    }
-    host->NotifyListener(host->mDetectedCountry);
 
-    host->mQueryThread = NULL;
-    return NOERROR;
+    return host->QueryCountryCodeRun(countryIso);
 }
 
 //=============================
 //LocationBasedCountryDetector
 //=============================
 
-const String LocationBasedCountryDetector::TAG("LocationBasedCountryDetector");
 const Int64 LocationBasedCountryDetector::QUERY_LOCATION_TIMEOUT = 1000 * 60 * 5; // 5 mins
 
 LocationBasedCountryDetector::LocationBasedCountryDetector(
@@ -134,6 +122,10 @@ LocationBasedCountryDetector::LocationBasedCountryDetector(
     AutoPtr<IInterface> svTemp;
     ctx->GetSystemService(IContext::LOCATION_SERVICE, (IInterface**)&svTemp);
     mLocationManager = ILocationManager::Probe(svTemp);
+}
+
+LocationBasedCountryDetector::~LocationBasedCountryDetector()
+{
 }
 
 String LocationBasedCountryDetector::GetCountryFromLocation(
@@ -252,9 +244,11 @@ ECode LocationBasedCountryDetector::DetectCountry(
                 }
             }
 
+            mTimer = NULL;
             CTimer::New((ITimer**)&mTimer);
 
-            mTimer->Schedule((ITimerTask*)(new MyTimerTask(this)), GetQueryLocationTimeout());
+            AutoPtr<ITimerTask> task = new MyTimerTask(this);
+            mTimer->Schedule(task, GetQueryLocationTimeout());
         }
         else {
             // There is no provider enabled.
@@ -269,22 +263,20 @@ ECode LocationBasedCountryDetector::DetectCountry(
 
 ECode LocationBasedCountryDetector::Stop()
 {
-    {
-        AutoLock syncLock(this);
-        if (mLocationListeners != NULL) {
-            Int32 size;
-            mLocationListeners->GetSize(&size);
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<IInterface> obj;
-                mLocationListeners->Get(i, (IInterface**)&obj);
-                UnregisterListener(ILocationListener::Probe(obj));
-            }
-            mLocationListeners = NULL;
+    AutoLock syncLock(this);
+    if (mLocationListeners != NULL) {
+        Int32 size;
+        mLocationListeners->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            mLocationListeners->Get(i, (IInterface**)&obj);
+            UnregisterListener(ILocationListener::Probe(obj));
         }
-        if (mTimer != NULL) {
-            mTimer->Cancel();
-            mTimer = NULL;
-        }
+        mLocationListeners = NULL;
+    }
+    if (mTimer != NULL) {
+        mTimer->Cancel();
+        mTimer = NULL;
     }
     return NOERROR;
 }
@@ -292,17 +284,52 @@ ECode LocationBasedCountryDetector::Stop()
 void LocationBasedCountryDetector::QueryCountryCode(
     /* [in] */ ILocation* location)
 {
-    {
-        AutoLock syncLock(this);
-        if (location == NULL) {
-            NotifyListener(NULL);
-            return;
-        }
-        if (mQueryThread != NULL) return;
-        AutoPtr<IRunnable> r = new MyRunnable(this, location);
-        CThread::New(r, (IThread**)&mQueryThread);
-        mQueryThread->Start();
+    AutoLock syncLock(this);
+    if (location == NULL) {
+        NotifyListener(NULL);
+        return;
     }
+    if (mQueryThread != NULL) return;
+    AutoPtr<IRunnable> r = new MyRunnable(this, location);
+    CThread::New(r, (IThread**)&mQueryThread);
+    mQueryThread->Start();
+}
+
+ECode LocationBasedCountryDetector::QueryCountryCodeRun(
+    /* [in] */ const String& countryIso)
+{
+    if (countryIso.IsNull()) {
+        AutoPtr<ICountry> country;
+        CCountry::New(countryIso, ICountry::COUNTRY_SOURCE_LOCATION, (ICountry**)&country);
+        mDetectedCountry = country;
+    }
+    else {
+        mDetectedCountry = NULL;
+    }
+    NotifyListener(mDetectedCountry);
+
+    mQueryThread = NULL;
+}
+
+ECode LocationBasedCountryDetector::TimerTaskRun()
+{
+    mTimer = NULL;
+    Stop();
+
+    // Looks like no provider could provide the location, let's try the last
+    // known location.
+    AutoPtr<ILocation> location = GetLastKnownLocation();
+    QueryCountryCode(location);
+}
+
+ECode LocationBasedCountryDetector::OnLocationChanged(
+    /* [in] */ ILocation* location)
+{
+    if (location != NULL) {
+        Stop();
+        QueryCountryCode(location);
+    }
+    return NOERROR;
 }
 
 } // namespace Location

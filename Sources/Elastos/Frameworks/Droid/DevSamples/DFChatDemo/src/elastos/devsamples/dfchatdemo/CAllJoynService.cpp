@@ -1,5 +1,13 @@
 #include "CAllJoynService.h"
 #include "CChatApplication.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Org::Alljoyn::Bus::CBusAttachment;
+using Org::Alljoyn::Bus::EIID_IBusObject;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace DevSamples {
@@ -18,7 +26,8 @@ ECode CAllJoynService::BackgroundHandler::constructor(
     /* [in] */ CAllJoynService* service,
     /* [in] */ ILooper* looper)
 {
-    return NOERROR;
+    mHost = service;
+    return Handler::constructor(looper);
 }
 
 void CAllJoynService::CAllJoynService::BackgroundHandler::Exit()
@@ -102,7 +111,9 @@ ECode CAllJoynService::BackgroundHandler::HandleMessage(
 //===================================================================
 
 CAllJoynService::ChatBusListener::ChatBusListener(
-    /* [in] */ CAllJoynService* host);
+    /* [in] */ CAllJoynService* host)
+    : mHost(host)
+{}
 
 ECode CAllJoynService::ChatBusListener::FoundAdvertisedName(
     /* [in] */ const String& name,
@@ -129,8 +140,8 @@ CAR_INTERFACE_IMPL(CAllJoynService::ChatService, IChatInterface, IBusObject)
 
 CAllJoynService::ChatService::ChatService(
     /* [in] */ CAllJoynService* host)
+    : mHost(host)
 {
-    return NOERROR;
 }
 
 ECode CAllJoynService::ChatService::Chat(
@@ -168,9 +179,11 @@ const Int32 CAllJoynService::JOIN_SESSION = 12;
 const Int32 CAllJoynService::LEAVE_SESSION = 13;
 const Int32 CAllJoynService::SEND_MESSAGES = 14;
 
-const String CAllJoynService::NAME_PREFIX;// = "org.alljoyn.bus.samples.chat";
-const Int16 CAllJoynService::CONTACT_PORT;// = 27;
-const String CAllJoynService::OBJECT_PATH;// = "/chatService";
+const String CAllJoynService::NAME_PREFIX("org.alljoyn.bus.samples.chat");
+const Int16 CAllJoynService::CONTACT_PORT = 27;
+const String CAllJoynService::OBJECT_PATH("/chatService");
+
+CAR_INTERFACE_IMPL_2(CAllJoynService, Service, IAllJoynService, IObserver)
 
 CAllJoynService::CAllJoynService()
 {
@@ -189,11 +202,42 @@ ECode CAllJoynService::OnBind(
     /* [in] */ IIntent* intent,
     /* [out] */ IBinder** binder)
 {
+    VALIDATE_NOT_NULL(binder)
+    *binder = NULL;
+    Logger::I(TAG, "onBind()");
     return NOERROR;
 }
 
 ECode CAllJoynService::OnCreate()
 {
+    Logger::I(TAG, "onCreate()");
+    // StartBusThread();
+    // AutoPtr<IApplication> app;
+    // GetApplication((IApplication**)&app);
+    // mChatApplication = (CChatApplication*)app.Get();
+    // mChatApplication->AddObserver(this);
+
+    // AutoPtr<ICharSequence> title = CoreUtils::Convert("AllJoyn");
+    // AutoPtr<ICharSequence> message = CoreUtils::Convert("Chat Channel Hosting Service.");
+    // AutoPtr<IIntent> intent;
+    // CIntent::New(this, ECLSID_CTabWidget, (IIntent**)&intent);
+
+    // PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+    // Notification notification = new Notification(R.drawable.icon, null, System.currentTimeMillis());
+    // notification.setLatestEventInfo(this, title, message, pendingIntent);
+    // notification.flags |= Notification.DEFAULT_SOUND | Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR;
+
+    // Logger::I(TAG, "onCreate(): startForeground()");
+    // startForeground(NOTIFICATION_ID, notification);
+
+    // /*
+    //  * We have an AllJoyn handler thread running at this time, so take
+    //  * advantage of the fact to get connected to the bus and start finding
+    //  * remote channel instances in the background while the rest of the app
+    //  * is starting up.
+    //  */
+    // mBackgroundHandler.connect();
+    // mBackgroundHandler.startDiscovery();
     return NOERROR;
 }
 
@@ -219,7 +263,7 @@ ECode CAllJoynService::Update(
 }
 
 ECode CAllJoynService::Chat(
-    /* [in] */ const String string)
+    /* [in] */ const String& string)
 {
     return NOERROR;
 }

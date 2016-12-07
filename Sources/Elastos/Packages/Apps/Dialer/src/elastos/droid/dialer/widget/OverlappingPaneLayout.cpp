@@ -1155,18 +1155,18 @@ ECode OverlappingPaneLayout::OnTouchEvent(
     event->GetAction(&action);
     Boolean wantTouchEvents = TRUE;
 
-    assert(0 && "TODO");
-    // switch (action & MotionEventCompat.ACTION_MASK) {
-    //     case IMotionEvent::ACTION_DOWN: {
-    //         Float x;
-    //         ev->GetX(&x);
-    //         Float y;
-    //         ev->GetY(&y);
-    //         mInitialMotionX = x;
-    //         mInitialMotionY = y;
-    //         break;
-    //     }
-    // }
+    // TODO MotionEventCompat.ACTION_MASK
+    const Int32 ACTION_MASK = 0xff;
+    switch (action & ACTION_MASK) {
+        case IMotionEvent::ACTION_DOWN: {
+            Float x, y;
+            event->GetX(&x);
+            event->GetY(&y);
+            mInitialMotionX = x;
+            mInitialMotionY = y;
+            break;
+        }
+    }
 
     *res = wantTouchEvents;
     return NOERROR;

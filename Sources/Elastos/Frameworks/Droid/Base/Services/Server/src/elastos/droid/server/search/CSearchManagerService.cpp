@@ -55,13 +55,14 @@ CAR_OBJECT_IMPL(CSearchManagerService);
 
 CSearchManagerService::CSearchManagerService()
 {
-    CSparseArray::New((ISparseArray**)&mSearchables);
 }
 
 ECode CSearchManagerService::constructor(
         /* [in] */ IContext* context)
 {
     mContext = context;
+
+    CSparseArray::New((ISparseArray**)&mSearchables);
     AutoPtr<BootCompletedReceiver> bootReceiver = new BootCompletedReceiver(this);
     AutoPtr<IIntentFilter> bootFilter;
     CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&bootFilter);
@@ -102,7 +103,6 @@ AutoPtr<Searchables> CSearchManagerService::GetSearchables(
     mSearchables->Get(userId, (IInterface**)&item);
     AutoPtr<Searchables> searchables = (Searchables*)IObject::Probe(item);
     if (searchables == NULL) {
-        Logger::I(TAG, "Building list of searchable activities for userId=%d", userId);
         searchables = new Searchables(mContext, userId);
         searchables->BuildSearchableList();
         mSearchables->Append(userId, (IObject*)searchables);
@@ -260,8 +260,9 @@ ECode CSearchManagerService::LaunchAssistAction(
 }
 
 ECode CSearchManagerService::ToString(
-        /* [in] */ String* str)
+    /* [in] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
     *str = String("CSearchManagerService");
     return NOERROR;
 }
@@ -275,9 +276,11 @@ CSearchManagerService::BootCompletedReceiver::MyThread::MyThread(
 
 ECode CSearchManagerService::BootCompletedReceiver::MyThread::Run()
 {
+    // hold service here because receive was unregistered and released later.
+    CSearchManagerService* service = mHost->mHost;
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
-    mHost->mHost->mContext->UnregisterReceiver(mHost);
-    mHost->mHost->GetSearchables(0);
+    service->mContext->UnregisterReceiver(mHost);   // mHost was released here!
+    service->GetSearchables(0);
     return NOERROR;
 }
 

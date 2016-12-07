@@ -59,12 +59,12 @@ private:
         CARAPI Run();
 
     private:
-        LocationBasedCountryDetector* mHost;
+        AutoPtr<LocationBasedCountryDetector> mHost;    // hold host
     };
 
     class MyLocationListener
-            : public Object
-            , public ILocationListener
+        : public Object
+        , public ILocationListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -101,13 +101,17 @@ private:
         CARAPI Run();
 
     private:
-        LocationBasedCountryDetector* mHost;
+        AutoPtr<LocationBasedCountryDetector> mHost;    // hold host
         AutoPtr<ILocation> mLocation;
     };
 
 public:
     LocationBasedCountryDetector(
         /* [in] */ IContext* ctx);
+
+    ~LocationBasedCountryDetector();
+
+    TO_STRING_IMPL("LocationBasedCountryDetector")
 
     /**
      * Start detecting the country.
@@ -171,6 +175,14 @@ private:
     CARAPI_(void) QueryCountryCode(
         /* [in] */ ILocation* location);
 
+    CARAPI TimerTaskRun();
+
+    CARAPI QueryCountryCodeRun(
+        /* [in] */ const String& countryIso);
+
+    CARAPI OnLocationChanged(
+        /* [in] */ ILocation* location);
+
 protected:
     /**
      * Used for canceling location query
@@ -184,7 +196,6 @@ protected:
     AutoPtr<IList> mLocationListeners;
 
 private:
-    const static String TAG;
     const static Int64 QUERY_LOCATION_TIMEOUT;
     AutoPtr<ILocationManager> mLocationManager;
     AutoPtr<IList> mEnabledProviders;

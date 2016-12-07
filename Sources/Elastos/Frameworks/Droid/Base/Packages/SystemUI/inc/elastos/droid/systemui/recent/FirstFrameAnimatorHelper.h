@@ -62,7 +62,7 @@ private:
 
     private:
         AutoPtr<IValueAnimator> mAnimation;
-        FirstFrameAnimatorHelper* mHost;
+        AutoPtr<FirstFrameAnimatorHelper> mHost;    // hold host
     };
 
 public:

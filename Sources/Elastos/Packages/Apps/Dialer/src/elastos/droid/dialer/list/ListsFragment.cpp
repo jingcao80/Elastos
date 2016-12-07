@@ -352,6 +352,7 @@ ECode ListsFragment::GetCurrentListView(
             return NOERROR;
         case TAB_INDEX_RECENTS:
             if (mRecentsFragment != NULL) {
+                Logger::I(TAG, " >> GetCurrentListView: %s", TO_CSTR(mRecentsFragment));
                 AutoPtr<IListView> lv;
                 IListFragment::Probe(mRecentsFragment)->GetListView((IListView**)&lv);
                 *listView = IAbsListView::Probe(lv);

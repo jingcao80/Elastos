@@ -54,7 +54,10 @@ FirstFrameAnimatorHelper::MyRunnable::MyRunnable(
 
 ECode FirstFrameAnimatorHelper::MyRunnable::Run()
 {
-    return mAnimation->RemoveUpdateListener((IAnimatorUpdateListener*)this);
+    // hold and release host
+    AutoPtr<FirstFrameAnimatorHelper> host = mHost;
+    mHost = NULL;
+    return mAnimation->RemoveUpdateListener(host);
 }
 
 //-------------------------------------------------------------------------------------------------

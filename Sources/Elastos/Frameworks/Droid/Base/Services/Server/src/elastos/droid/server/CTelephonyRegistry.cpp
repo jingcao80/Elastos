@@ -571,7 +571,8 @@ ECode CTelephonyRegistry::NotifyCallState(
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
             if (((r->mEvents & IPhoneStateListener::LISTEN_CALL_STATE) != 0)
-                && (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID)) {
+                && (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID)
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnCallStateChanged(state, incomingNumber);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -607,9 +608,9 @@ ECode CTelephonyRegistry::NotifyCallStateForSubscriber(
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
             for (; it != mRecords.End(); ++it) {
                 Record* r = *it;
-                if (((r->mEvents & IPhoneStateListener::LISTEN_CALL_STATE) != 0) &&
-                        (r->mSubId == subId) &&
-                        (r->mSubId != ISubscriptionManager::DEFAULT_SUB_ID)) {
+                if (((r->mEvents & IPhoneStateListener::LISTEN_CALL_STATE) != 0)
+                    && (r->mSubId == subId) && (r->mSubId != ISubscriptionManager::DEFAULT_SUB_ID)
+                    && r->mCallback != NULL) {
                     ECode ec = r->mCallback->OnCallStateChanged(state, incomingNumber);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         mRemoveList.PushBack(r->mBinder);
@@ -650,8 +651,8 @@ ECode CTelephonyRegistry::NotifyServiceStateForPhoneId(
                         TO_CSTR(r), subId, phoneId, TO_CSTR(state));
                 }
                 if (((r->mEvents & IPhoneStateListener::LISTEN_SERVICE_STATE) != 0) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                        ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     if (DBG) {
                         Slogger::D(TAG, "notifyServiceStateForSubscriber: callback.onSSC r=%s subId=%lld phoneId=%d, state=%s",
                                 TO_CSTR(r), subId, phoneId, TO_CSTR(state));
@@ -707,9 +708,9 @@ ECode CTelephonyRegistry::NotifySignalStrengthForSubscriber(
                     Slogger::D(TAG, "notifySignalStrengthForSubscriber: r=%s subId=%lld, phoneId=%d, ss=%s",
                             TO_CSTR(r), subId, phoneId, TO_CSTR(signalStrength));
                 }
-                if (((r->mEvents & IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS) != 0) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (((r->mEvents & IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS) != 0)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     if (DBG) {
                         Slogger::D(TAG, "notifySignalStrengthForSubscriber: callback.onSsS r=%s subId=%lld, phoneId=%d, ss=%s",
                                 TO_CSTR(r), subId, phoneId, TO_CSTR(signalStrength));
@@ -722,9 +723,9 @@ ECode CTelephonyRegistry::NotifySignalStrengthForSubscriber(
                         mRemoveList.PushBack(r->mBinder);
                     }
                 }
-                if (((r->mEvents & IPhoneStateListener::LISTEN_SIGNAL_STRENGTH) != 0) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (((r->mEvents & IPhoneStateListener::LISTEN_SIGNAL_STRENGTH) != 0)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     Int32 gsmSignalStrength;
                     signalStrength->GetGsmSignalStrength(&gsmSignalStrength);
                     Int32 ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
@@ -776,9 +777,9 @@ ECode CTelephonyRegistry::NotifyCellInfoForSubscriber(
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
             for (; it != mRecords.End(); ++it) {
                 Record* r = *it;
-                if (ValidateEventsAndUserLocked(r, IPhoneStateListener::LISTEN_CELL_INFO) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (ValidateEventsAndUserLocked(r, IPhoneStateListener::LISTEN_CELL_INFO)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     if (DBG_LOC) {
                         Slogger::D(TAG, "notifyCellInfo: mCellInfo=%s r=%s",
                                 TO_CSTR(cellInfo), TO_CSTR(r));
@@ -809,7 +810,8 @@ ECode CTelephonyRegistry::NotifyDataConnectionRealTimeInfo(
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
             if (ValidateEventsAndUserLocked(r,
-                    IPhoneStateListener::LISTEN_DATA_CONNECTION_REAL_TIME_INFO)) {
+                    IPhoneStateListener::LISTEN_DATA_CONNECTION_REAL_TIME_INFO)
+                && r->mCallback != NULL) {
                 if (DBG_LOC) {
                     Slogger::D(TAG, "notifyDataConnectionRealTimeInfo: mDcRtInfo=%s, r=%s",
                             TO_CSTR(mDcRtInfo), TO_CSTR(mDcRtInfo));
@@ -844,9 +846,9 @@ ECode CTelephonyRegistry::NotifyMessageWaitingChangedForPhoneId(
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
             for (; it != mRecords.End(); ++it) {
                 Record* r = *it;
-                if (((r->mEvents & IPhoneStateListener::LISTEN_MESSAGE_WAITING_INDICATOR) != 0) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (((r->mEvents & IPhoneStateListener::LISTEN_MESSAGE_WAITING_INDICATOR) != 0)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     ECode ec = r->mCallback->OnMessageWaitingIndicatorChanged(mwi);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         mRemoveList.PushBack(r->mBinder);
@@ -887,9 +889,9 @@ ECode CTelephonyRegistry::NotifyCallForwardingChangedForSubscriber(
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
             for (; it != mRecords.End(); ++it) {
                 Record* r = *it;
-                if (((r->mEvents & IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR) != 0) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (((r->mEvents & IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR) != 0)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     ECode ec = r->mCallback->OnCallForwardingIndicatorChanged(cfi);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         mRemoveList.PushBack(r->mBinder);
@@ -921,17 +923,21 @@ ECode CTelephonyRegistry::NotifyDataActivityForSubscriber(
         CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
-        (*mDataActivity)[phoneId] = state;
-        List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
-        for (; it != mRecords.End(); ++it) {
-            Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_DATA_ACTIVITY) != 0) {
-                ECode ec = r->mCallback->OnDataActivity(state);
-                if (ec == (ECode)E_REMOTE_EXCEPTION) {
-                    mRemoveList.PushBack(r->mBinder);
+        if (ValidatePhoneId(phoneId)) {
+            (*mDataActivity)[phoneId] = state;
+            List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
+            for (; it != mRecords.End(); ++it) {
+                Record* r = *it;
+                if ((r->mEvents & IPhoneStateListener::LISTEN_DATA_ACTIVITY) != 0
+                    && r->mCallback != NULL) {
+                    ECode ec = r->mCallback->OnDataActivity(state);
+                    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                        mRemoveList.PushBack(r->mBinder);
+                    }
                 }
             }
         }
+
         HandleRemoveListLocked();
     }
     return NOERROR;
@@ -980,7 +986,10 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
         CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
-        Slogger::D(TAG, "NotifyDataConnectionForSubscriber phoneId: %d", phoneId);
+        if (!ValidatePhoneId(phoneId)) {
+            return NOERROR;
+        }
+
         Boolean modified = FALSE;
         if (state == ITelephonyManager::DATA_CONNECTED) {
             AutoPtr<IArrayList> p = (*mConnectedApns)[phoneId];
@@ -1026,9 +1035,9 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
             for (; it != mRecords.End(); ++it) {
                 Record* r = *it;
-                if (((r->mEvents & IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE) != 0) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (((r->mEvents & IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE) != 0)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     Slogger::D(TAG, "Notify data connection state changed on sub: %lld", subId);
                     ECode ec = r->mCallback->OnDataConnectionStateChanged(
                         (*mDataConnectionState)[phoneId], (*mDataConnectionNetworkType)[phoneId]);
@@ -1045,7 +1054,8 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnPreciseDataConnectionStateChanged(mPreciseDataConnectionState);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -1091,7 +1101,8 @@ ECode CTelephonyRegistry::NotifyDataConnectionFailedForSubscriber(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnPreciseDataConnectionStateChanged(mPreciseDataConnectionState);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -1135,9 +1146,9 @@ ECode CTelephonyRegistry::NotifyCellLocationForSubscriber(
             List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
             for (; it != mRecords.End(); ++it) {
                 Record* r = *it;
-                if (ValidateEventsAndUserLocked(r, IPhoneStateListener::LISTEN_CELL_LOCATION) &&
-                        ((r->mSubId == subId) ||
-                        (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                if (ValidateEventsAndUserLocked(r, IPhoneStateListener::LISTEN_CELL_LOCATION)
+                    && ((r->mSubId == subId) || (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                    && r->mCallback != NULL) {
                     if (DBG_LOC) {
                         Slogger::D(TAG, "notifyCellLocation: cellLocation=%s r=%s",
                                 TO_CSTR(cellLocation), TO_CSTR(r));
@@ -1168,7 +1179,8 @@ ECode CTelephonyRegistry::NotifyOtaspChanged(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_OTASP_CHANGED) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_OTASP_CHANGED) != 0
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnOtaspChanged(otaspMode);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -1202,7 +1214,8 @@ ECode CTelephonyRegistry::NotifyPreciseCallState(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_CALL_STATE) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_CALL_STATE) != 0
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnPreciseCallStateChanged(mPreciseCallState);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -1232,7 +1245,8 @@ ECode CTelephonyRegistry::NotifyDisconnectCause(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_CALL_STATE) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_CALL_STATE) != 0
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnPreciseCallStateChanged(mPreciseCallState);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -1264,7 +1278,8 @@ ECode CTelephonyRegistry::NotifyPreciseDataConnectionFailed(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnPreciseDataConnectionStateChanged(mPreciseDataConnectionState);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
@@ -1289,7 +1304,8 @@ ECode CTelephonyRegistry::NotifyVoLteServiceStateChanged(
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
-            if ((r->mEvents & IPhoneStateListener::LISTEN_VOLTE_STATE) != 0) {
+            if ((r->mEvents & IPhoneStateListener::LISTEN_VOLTE_STATE) != 0
+                && r->mCallback != NULL) {
                 AutoPtr<IVoLteServiceState> vss;
                 CVoLteServiceState::New(mVoLteServiceState, (IVoLteServiceState**)&vss);
                 ECode ec = r->mCallback->OnVoLteServiceStateChanged(vss);
@@ -1322,7 +1338,8 @@ ECode CTelephonyRegistry::NotifyOemHookRawEventForSubscriber(
             }
             if (((r->mEvents & IPhoneStateListener::LISTEN_OEM_HOOK_RAW_EVENT) != 0) &&
                     ((r->mSubId == subId) ||
-                    (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))) {
+                    (r->mSubId == ISubscriptionManager::DEFAULT_SUB_ID))
+                && r->mCallback != NULL) {
                 ECode ec = r->mCallback->OnOemHookRawEvent(rawData);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);
