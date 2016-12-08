@@ -139,6 +139,28 @@ module
         interface IVariant;
     }
 
+    class CSignalEmitter {
+        constructor(
+            [in] IBusObject* source,
+            [in] String destination,
+            [in] Int32 sessionId,
+            [in] GlobalBroadcast globalBroadcast);
+
+        constructor(
+            [in] IBusObject* source,
+            [in] Int32 sessionId,
+            [in] GlobalBroadcast globalBroadcast);
+
+        constructor(
+            [in] IBusObject* source,
+            [in] GlobalBroadcast globalBroadcast);
+
+        constructor(
+            [in] IBusObject* source);
+
+        interface ISignalEmitter;
+    }
+
     } // namespace Bus
     } // namespace Alljoyn
     } // namespace Org

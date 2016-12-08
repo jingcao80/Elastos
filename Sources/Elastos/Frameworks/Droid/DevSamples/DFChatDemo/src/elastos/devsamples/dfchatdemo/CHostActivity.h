@@ -11,6 +11,7 @@
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IDialog;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IButton;
 
@@ -22,12 +23,15 @@ class CChatApplication;
 
 CarClass(CHostActivity)
     , public Activity
+    , public IObserver
 {
 private:
     class MyHandler
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CHostActivity::MyHandler")
+
         MyHandler();
 
         CARAPI constructor(
@@ -40,7 +44,45 @@ private:
         CHostActivity* mHost;
     };
 
+    class ShowDialogListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ShowDialogListener(
+            /* [in] */ CHostActivity* host,
+            /* [in] */ Int32 dialogId);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CHostActivity* mHost;
+        Int32 mDialogId;
+    };
+
+    class QuitListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        QuitListener(
+            /* [in] */ CHostActivity* host);
+
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CHostActivity* mHost;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     CHostActivity();
 
     ~CHostActivity();
@@ -66,18 +108,21 @@ private:
 
     void AlljoynError();
 
+    void SendMessage(
+        /* [in] */ Int32 id);
+
 public:
-    static const Int32 DIALOG_ALLJOYN_ERROR_ID;
+    static const Int32 DIALOG_ALLJOYN_ERROR_ID = 3;
 
 private:
 
-    static const Int32 DIALOG_SET_NAME_ID;
-    static const Int32 DIALOG_START_ID;
-    static const Int32 DIALOG_STOP_ID;
+    static const Int32 DIALOG_SET_NAME_ID = 0;
+    static const Int32 DIALOG_START_ID = 1;
+    static const Int32 DIALOG_STOP_ID = 2;
 
-    static const Int32 HANDLE_APPLICATION_QUIT_EVENT;
-    static const Int32 HANDLE_CHANNEL_STATE_CHANGED_EVENT;
-    static const Int32 HANDLE_ALLJOYN_ERROR_EVENT;
+    static const Int32 HANDLE_APPLICATION_QUIT_EVENT = 0;
+    static const Int32 HANDLE_CHANNEL_STATE_CHANGED_EVENT = 1;
+    static const Int32 HANDLE_ALLJOYN_ERROR_EVENT = 2;
 
     CChatApplication* mChatApplication;
 
@@ -88,7 +133,7 @@ private:
     AutoPtr<IButton> mStopButton;
     AutoPtr<IButton> mQuitButton;
 
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 };
 
 } // namespace DFChatDemo

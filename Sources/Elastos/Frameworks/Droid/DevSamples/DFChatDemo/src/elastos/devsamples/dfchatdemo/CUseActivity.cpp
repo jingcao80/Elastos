@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::R;
@@ -22,6 +23,7 @@ using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
 
@@ -240,6 +242,7 @@ ECode CUseActivity::Update(
     /* [in] */ IObservable* o,
     /* [in] */ IInterface* arg)
 {
+    AutoLock lock(this);
     String qualifier = Object::ToString(arg);
     Logger::I(TAG, "update(%s)", qualifier.string());
 

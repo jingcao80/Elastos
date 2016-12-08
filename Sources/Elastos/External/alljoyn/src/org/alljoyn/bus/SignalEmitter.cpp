@@ -132,7 +132,7 @@ ECode SignalEmitter::CancelSessionlessSignal(
 }
 
 ECode SignalEmitter::GetInterface(
-    /* [in] */ InterfaceID intf,
+    /* [in] */ const InterfaceID& intf,
     /* [out] */ IInterface** obj)
 {
     VALIDATE_NOT_NULL(obj)

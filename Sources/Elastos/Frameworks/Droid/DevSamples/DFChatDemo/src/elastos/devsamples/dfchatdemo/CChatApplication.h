@@ -59,8 +59,11 @@ namespace DFChatDemo {
  */
 CarClass(CChatApplication)
     , public Application
+    , public IObservable
 {
 public:
+    CAR_INTERFACE_DECL()
+
     CChatApplication();
 
     ~CChatApplication();
@@ -373,7 +376,7 @@ private:
      * to act or not based on the content of the string.
      */
     void NotifyObservers(
-        /* [in] */ IInterface* arg);
+        /* [in] */ const String& arg);
 
 public:
     static String PACKAGE_NAME;

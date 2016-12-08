@@ -9,6 +9,8 @@
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/app/Service.h>
 #include <org/alljoyn/bus/BusListener.h>
+#include <org/alljoyn/bus/SessionListener.h>
+#include <org/alljoyn/bus/SessionPortListener.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::Handler;
@@ -16,8 +18,11 @@ using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Utility::Etl::List;
 using Org::Alljoyn::Bus::BusListener;
+using Org::Alljoyn::Bus::SessionListener;
+using Org::Alljoyn::Bus::SessionPortListener;
 using Org::Alljoyn::Bus::IBusAttachment;
 using Org::Alljoyn::Bus::IBusObject;
+using Org::Alljoyn::Bus::ISessionOpts;
 
 namespace Elastos {
 namespace DevSamples {
@@ -30,7 +35,65 @@ CarClass(CAllJoynService)
     , public IAllJoynService
     , public IObserver
 {
+public:
+    /**
+     * Our chat messages are going to be Bus Signals multicast out onto an
+     * associated session.  In order to send signals, we need to define an
+     * AllJoyn bus object that will allow us to instantiate a signal emmiter.
+     */
+    class ChatService
+        : public Object
+        , public IChatInterface
+        , public IBusObject
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IAllJoynService* host);
+
+        /**
+         * Intentionally empty implementation of Chat method.  Since this
+         * method is only used as a signal emitter, it will never be called
+         * directly.
+         */
+        CARAPI Chat(
+            /* [in] */ const String& str);
+    private:
+        CAllJoynService* mHost;
+    };
+
 private:
+    /**
+     * This is the Android Service message handler.  It runs in the context of the
+     * main Android Service thread, which is also shared with Activities since
+     * Android is a fundamentally single-threaded system.
+     *
+     * The important thing for us is to note that this thread cannot be blocked for
+     * a significant amount of time or we risk the dreaded "force close" message.
+     * We can run relatively short-lived operations here, but we need to run our
+     * distributed system calls in a background thread.
+     *
+     * This handler serves translates from UI-related events into AllJoyn events
+     * and decides whether functions can be handled in the context of the
+     * Android main thread or if they must be dispatched to a background thread
+     * which can take as much time as needed to accomplish a task.
+     */
+    class MyHandler
+        : public Handler
+    {
+    public:
+        TO_STRING_IMPL("CAllJoynService::MyHandler")
+
+        MyHandler(
+            /* [in] */ CAllJoynService* host);
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
+        CAllJoynService* mHost;
+    };
 
     /**
      * This is the AllJoyn background thread handler class.  AllJoyn is a
@@ -60,6 +123,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAllJoynService::BackgroundHandler")
+
         BackgroundHandler();
 
         CARAPI constructor(
@@ -128,7 +193,13 @@ private:
          */
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
+        void SendMessageInner(
+            /* [in] */ Int32 id);
+
+    private:
+        friend class MyHandler;
         CAllJoynService* mHost;
     };
 
@@ -186,34 +257,45 @@ private:
         CAllJoynService* mHost;
     };
 
-
-    /**
-     * Our chat messages are going to be Bus Signals multicast out onto an
-     * associated session.  In order to send signals, we need to define an
-     * AllJoyn bus object that will allow us to instantiate a signal emmiter.
-     */
-    class ChatService
-        : public Object
-        , public IChatInterface
-        , public IBusObject
+    class InnerSessionListener : public SessionListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        InnerSessionListener(
+            /* [in] */ CAllJoynService* host)
+            : mHost(host)
+        {}
 
-        ChatService(
-            /* [in] */ CAllJoynService* host);
+        // @Override
+        CARAPI SessionLost(
+            /* [in] */ Int32 sessionId,
+            /* [in] */ Int32 reason);
 
-        /**
-         * Intentionally empty implementation of Chat method.  Since this
-         * method is only used as a signal emitter, it will never be called
-         * directly.
-         */
-        CARAPI Chat(
-            /* [in] */ const String& str);
     private:
         CAllJoynService* mHost;
     };
 
+    class InnerSessionPortListener : public SessionPortListener
+    {
+    public:
+        InnerSessionPortListener(
+            /* [in] */ CAllJoynService* host)
+            : mHost(host)
+        {}
+
+        CARAPI AcceptSessionJoiner(
+            /* [in] */ Int16 sessionPort,
+            /* [in] */ const String& joiner,
+            /* [in] */ ISessionOpts* opts,
+            /* [out] */ Boolean* accepted);
+
+        CARAPI SessionJoined(
+            /* [in] */ Int16 sessionPort,
+            /* [in] */ Int32 id,
+            /* [in] */ const String& joiner);
+
+    private:
+        CAllJoynService* mHost;
+    };
 public:
     CAR_INTERFACE_DECL()
 
@@ -412,59 +494,64 @@ private:
      */
     void DoSendMessages();
 
-private:
+    void SendMessage(
+        /* [in] */ Int32 id);
 
-    static const Int32 NOTIFICATION_ID; //  = 0xdefaced;
+private:
+    friend class BackgroundHandler;
+    friend class InnerSessionPortListener;
+
+    static const Int32 NOTIFICATION_ID = 0xdefaced;
 
     /**
      * Value for the HANDLE_APPLICATION_QUIT_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_APPLICATION_QUIT_EVENT; //  = 0;
+    static const Int32 HANDLE_APPLICATION_QUIT_EVENT = 0;
 
     /**
      * Value for the HANDLE_USE_JOIN_CHANNEL_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_USE_JOIN_CHANNEL_EVENT; //  = 1;
+    static const Int32 HANDLE_USE_JOIN_CHANNEL_EVENT = 1;
 
     /**
      * Value for the HANDLE_USE_LEAVE_CHANNEL_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_USE_LEAVE_CHANNEL_EVENT; //  = 2;
+    static const Int32 HANDLE_USE_LEAVE_CHANNEL_EVENT = 2;
 
     /**
      * Value for the HANDLE_HOST_INIT_CHANNEL_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_HOST_INIT_CHANNEL_EVENT; //  = 3;
+    static const Int32 HANDLE_HOST_INIT_CHANNEL_EVENT = 3;
 
     /**
      * Value for the HANDLE_HOST_START_CHANNEL_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_HOST_START_CHANNEL_EVENT; //  = 4;
+    static const Int32 HANDLE_HOST_START_CHANNEL_EVENT = 4;
 
     /**
      * Value for the HANDLE_HOST_STOP_CHANNEL_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_HOST_STOP_CHANNEL_EVENT; //  = 5;
+    static const Int32 HANDLE_HOST_STOP_CHANNEL_EVENT = 5;
 
     /**
      * Value for the HANDLE_OUTBOUND_CHANGED_EVENT case observer notification handler.
      */
-    static const Int32 HANDLE_OUTBOUND_CHANGED_EVENT; //  = 6;
+    static const Int32 HANDLE_OUTBOUND_CHANGED_EVENT = 6;
 
-    static const Int32 EXIT; //  = 1;
-    static const Int32 CONNECT; //  = 2;
-    static const Int32 DISCONNECT; //  = 3;
-    static const Int32 START_DISCOVERY; //  = 4;
-    static const Int32 CANCEL_DISCOVERY; //  = 5;
-    static const Int32 REQUEST_NAME; //  = 6;
-    static const Int32 RELEASE_NAME; //  = 7;
-    static const Int32 BIND_SESSION; //  = 8;
-    static const Int32 UNBIND_SESSION; //  = 9;
-    static const Int32 ADVERTISE; //  = 10;
-    static const Int32 CANCEL_ADVERTISE; //  = 11;
-    static const Int32 JOIN_SESSION; //  = 12;
-    static const Int32 LEAVE_SESSION; //  = 13;
-    static const Int32 SEND_MESSAGES; //  = 14;
+    static const Int32 EXIT = 1;
+    static const Int32 CONNECT = 2;
+    static const Int32 DISCONNECT = 3;
+    static const Int32 START_DISCOVERY = 4;
+    static const Int32 CANCEL_DISCOVERY = 5;
+    static const Int32 REQUEST_NAME = 6;
+    static const Int32 RELEASE_NAME = 7;
+    static const Int32 BIND_SESSION = 8;
+    static const Int32 UNBIND_SESSION = 9;
+    static const Int32 ADVERTISE = 10;
+    static const Int32 CANCEL_ADVERTISE = 11;
+    static const Int32 JOIN_SESSION = 12;
+    static const Int32 LEAVE_SESSION = 13;
+    static const Int32 SEND_MESSAGES = 14;
 
     /**
      * A reference to a descendent of the Android Application class that is
@@ -487,7 +574,7 @@ private:
      * Android main thread or if they must be dispatched to a background thread
      * which can take as much time as needed to accomplish a task.
      */
-    AutoPtr<IHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 
     /**
      * The state of the AllJoyn bus attachment.

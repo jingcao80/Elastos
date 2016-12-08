@@ -50,6 +50,66 @@ public:
     virtual ~MessageContext()
     {}
 
+    CARAPI IsUnreliable(
+        /* [out] */ Boolean* value);
+
+    CARAPI SetUnreliable(
+        /* [in] */ Boolean value);
+
+    CARAPI SetObjectPath(
+        /* [in] */ const String& value);
+
+    CARAPI GetObjectPath(
+        /* [out] */ String* value);
+
+    CARAPI SetInterfaceName(
+        /* [in] */ const String& value);
+
+    CARAPI GetInterfaceName(
+        /* [out] */ String* value);
+
+    CARAPI SetMemberName(
+        /* [in] */ const String& value);
+
+    CARAPI GetMemberName(
+        /* [out] */ String* value);
+
+    CARAPI SetDestination(
+        /* [in] */ const String& value);
+
+    CARAPI GetDestination(
+        /* [out] */ String* value);
+
+    CARAPI SetSender(
+        /* [in] */ const String& value);
+
+    CARAPI GetSender(
+        /* [out] */ String* value);
+
+    CARAPI SetSessionId(
+        /* [in] */ Int32 value);
+
+    CARAPI GetSessionId(
+        /* [out] */ Int32* value);
+
+    CARAPI SetSerial(
+        /* [in] */ Int32 value);
+
+    CARAPI GetSerial(
+        /* [out] */ Int32* value);
+
+    CARAPI SetSignature(
+        /* [in] */ const String& value);
+
+    CARAPI GetSignature(
+        /* [out] */ String* value);
+
+    CARAPI SetAuthMechanism(
+        /* [in] */ const String& value);
+
+    CARAPI GetAuthMechanism(
+        /* [out] */ String* value);
+
 public:
     /**
      * {@code true} if the message is unreliable.  Unreliable messages have a non-zero

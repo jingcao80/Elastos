@@ -7,6 +7,65 @@ module
 
     interface IMessageContext {
 
+        IsUnreliable(
+            [out] Boolean* value);
+
+        SetUnreliable(
+            [in] Boolean value);
+
+        SetObjectPath(
+            [in] String value);
+
+        GetObjectPath(
+            [out] String* value);
+
+        SetInterfaceName(
+            [in] String value);
+
+        GetInterfaceName(
+            [out] String* value);
+
+        SetMemberName(
+            [in] String value);
+
+        GetMemberName(
+            [out] String* value);
+
+        SetDestination(
+            [in] String value);
+
+        GetDestination(
+            [out] String* value);
+
+        SetSender(
+            [in] String value);
+
+        GetSender(
+            [out] String* value);
+
+        SetSessionId(
+            [in] Int32 value);
+
+        GetSessionId(
+            [out] Int32* value);
+
+        SetSerial(
+            [in] Int32 value);
+
+        GetSerial(
+            [out] Int32* value);
+
+        SetSignature(
+            [in] String value);
+
+        GetSignature(
+            [out] String* value);
+
+        SetAuthMechanism(
+            [in] String value);
+
+        GetAuthMechanism(
+            [out] String* value);
     }
 
     } // namespace Bus

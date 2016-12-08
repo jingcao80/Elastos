@@ -21,6 +21,7 @@ SOURCES += CUseActivity.cpp
 SOURCES += CChatApplication.cpp
 SOURCES += CAllJoynService.cpp
 SOURCES += DialogBuilder.cpp
+SOURCES += CChatService.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

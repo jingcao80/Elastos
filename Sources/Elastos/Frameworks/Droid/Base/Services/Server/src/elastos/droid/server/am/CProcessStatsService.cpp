@@ -11,8 +11,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Internal::App::CProcessStats;
 using Elastos::Droid::Internal::App::CProcessStatsHelper;
@@ -38,6 +36,7 @@ using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::TimeUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringToIntegral;

@@ -25,6 +25,7 @@ module
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Org.Alljoyn.Bus.IBusObject;
 
     namespace Elastos {
     namespace DevSamples {
@@ -38,6 +39,8 @@ module
         interface IContext;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
+
+        interface IObservable;
     }
 
     class CAllJoynService {
@@ -106,6 +109,13 @@ module
         interface IObserver;
     }
 
+    class CChatService {
+        constructor(
+            [in] IAllJoynService* service);
+
+        interface IChatInterface;
+        interface IBusObject;
+    }
 
     } // namespace DFChatDemo
     } // namespace DevSamples

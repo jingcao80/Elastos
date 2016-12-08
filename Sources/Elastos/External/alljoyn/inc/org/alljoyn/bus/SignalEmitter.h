@@ -153,7 +153,7 @@ public:
      * @return the proxy implementing the signal emitter
      */
     CARAPI GetInterface(
-        /* [in] */ InterfaceID intf,
+        /* [in] */ const InterfaceID& intf,
         /* [out] */ IInterface** obj);
 
 private:
