@@ -376,7 +376,7 @@ ECode CClient::BusHandler::HandleMessage(
             (*ip8)[0] = "test0";
             (*ip8)[1] = "test1";
             AutoPtr<ArrayOf<String> > op8;
-            mBasicInterface->Test(ip1, ip2, ip3, ip4, ip5, ip6, ip7, /*ip8, */&op1, &op2,
+            mBasicInterface->Test(ip1, ip2, ip3, ip4, ip5, ip6, ip7, ip8, &op1, &op2,
                 &op3, &op4, &op5, &op6, &op7, (ArrayOf<String>**)&op8);
             Boolean equals = TRUE;
             if (ip1 != op1 || ip2 != op2 || ip3 != op3 ||

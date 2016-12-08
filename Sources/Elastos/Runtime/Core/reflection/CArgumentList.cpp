@@ -113,6 +113,7 @@ ECode CArgumentList::SetParamValue(
         || (mParamElem[index].mAttrib != attrib)
         || (type != mParamElem[index].mType)
         || (type != CarDataType_LocalPtr
+        && (type != CarDataType_ArrayOf || mParamElem[index].mPointer > 1)
         && mParamElem[index].mPointer != pointer)) {
         return E_INVALID_ARGUMENT;
     }
@@ -162,6 +163,7 @@ ECode CArgumentList::GetParamValue(
         || (mParamElem[index].mAttrib != attrib)
         || (type != mParamElem[index].mType)
         || (type != CarDataType_LocalPtr
+        && (type != CarDataType_ArrayOf || mParamElem[index].mPointer > 1)
         && mParamElem[index].mPointer != pointer)) {
         return E_INVALID_ARGUMENT;
     }

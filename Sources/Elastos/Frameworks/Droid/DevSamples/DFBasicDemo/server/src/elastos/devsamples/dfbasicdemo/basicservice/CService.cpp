@@ -118,7 +118,7 @@ ECode CService::BasicService::Test(
     /* [in] */ Int64 ip5,
     /* [in] */ Double ip6,
     /* [in] */ const String& ip7,
-    // /* [in] */ ArrayOf<String>* ip8,
+    /* [in] */ ArrayOf<String>* ip8,
     /* [out] */ Byte* op1,
     /* [out] */ Boolean* op2,
     /* [out] */ Int16* op3,
@@ -128,7 +128,7 @@ ECode CService::BasicService::Test(
     /* [out] */ String* op7,
     /* [out, callee] */ ArrayOf<String>** op8)
 {
-    assert(op1 && op2 && op3 && op4 && op5 && op6 && op7 && op8);
+    assert(op1 && op2 && op3 && op4 && op5 && op6 && op7 && ip8 && op8);
     *op1 = ip1;
     *op2 = ip2;
     *op3 = ip3;
@@ -136,10 +136,7 @@ ECode CService::BasicService::Test(
     *op5 = ip5;
     *op6 = ip6;
     *op7 = ip7;
-    *op8 = ArrayOf<String>::Alloc(2);
-    (**op8)[0] = "test0";
-    (**op8)[1] = "test1";
-    // *op8 = ip8->Clone();
+    *op8 = ip8->Clone();
     REFCOUNT_ADD(*op8)
     return NOERROR;
 }

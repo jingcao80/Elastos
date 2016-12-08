@@ -96,7 +96,7 @@ ECode CZygoteInit::MethodAndArgsCaller::Run()
         return ec;
     }
 
-    ec = argumentList->SetInputArgumentOfCarArray(0, *mArgs);
+    ec = argumentList->SetInputArgumentOfCarArray(0, mArgs);
     if (FAILED(ec)) {
         Logger::E("CZygoteInit", "Set Input Argument of Car array in \"Main\" method failed!\n");
         return ec;

@@ -286,7 +286,8 @@ ECode CMethodInfo::SetParamElem(
             }
         }
         else if (parmElement->mPointer > 0) {
-            type = CarDataType_LocalPtr;
+            if (type != CarDataType_ArrayOf || parmElement->mPointer > 1)
+                type = CarDataType_LocalPtr;
         }
         parmElement->mAttrib = ParamIOAttribute_In;
     }

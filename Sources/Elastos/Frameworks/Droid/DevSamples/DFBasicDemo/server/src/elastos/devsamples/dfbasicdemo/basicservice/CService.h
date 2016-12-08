@@ -66,7 +66,7 @@ public:
             /* [in] */ Int64 ip5,
             /* [in] */ Double ip6,
             /* [in] */ const String& ip7,
-            // /* [in] */ ArrayOf<String>* ip8,
+            /* [in] */ ArrayOf<String>* ip8,
             /* [out] */ Byte* op1,
             /* [out] */ Boolean* op2,
             /* [out] */ Int16* op3,

@@ -949,7 +949,8 @@ ECode CObjInfoList::AcquireDataTypeInfo(
             }
         }
         else if (pointer > 0) {
-            type = CarDataType_LocalPtr;
+            if (type != CarDataType_ArrayOf || pointer > 1)
+                type = CarDataType_LocalPtr;
         }
     }
 

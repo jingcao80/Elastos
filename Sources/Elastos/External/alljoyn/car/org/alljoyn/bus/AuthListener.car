@@ -28,7 +28,144 @@ module
     }
 
     interface IAuthRequest {
+    }
 
+    /** Authentication request for a password, pincode, or passphrase. */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    [deprecated]
+    interface IPasswordRequest {
+        /**
+         * Indicates request is for a newly created password.
+         *
+         * @return {@code true} if request is for a newly created password
+         */
+        IsNewPassword(
+            [out] Boolean* res);
+
+        /**
+         * Indicates a request is for a one time use password.
+         *
+         * @return {@code true} if request is for a one time use password
+         */
+        IsOneTimePassword(
+            [out] Boolean* res);
+
+        /**
+         * Sets a requested password, pincode, or passphrase.
+         *
+         * @param password the password to set
+         */
+        SetPassword(
+            [in] ArrayOf<Char32>* password);
+    }
+
+    /** Authentication request for a user name. */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    interface IUserNameRequest {
+        /**
+         * Sets a requested user name.
+         *
+         * @param userName the user name to set
+         */
+        SetUserName(
+            [in] String userName);
+    }
+
+    /** Authentication request for a chain of PEM-encoded X509 certificates. */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    interface ICertificateRequest {
+        /**
+         * Sets a requested public key certificate chain. The certificate must
+         * be PEM encoded.
+         *
+         * @param certificateChain the certificate to chain to set
+         */
+        SetCertificateChain(
+            [in] String certificateChain);
+    }
+
+    /** Authentication request for a PEM encoded private key. */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    interface IPrivateKeyRequest {
+        /**
+         * Sets a requested private key. The private key must be PEM encoded and
+         * may be encrypted.
+         *
+         * @param privateKey the private key to set
+         */
+        SetPrivateKey(
+            [in] String privateKey);
+    }
+
+    /** Authentication request for a logon entry. */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    [deprecated]
+    interface ILogonEntryRequest {
+        /**
+         * Sets a logon entry. For example for the Secure Remote
+         * Password protocol in RFC 5054, a logon entry encodes the
+         * N,g, s and v parameters. An SRP logon entry has the form
+         * N:g:s:v where N,g,s, and v are ASCII encoded hexadecimal
+         * strings and are seperated by colons.
+         *
+         * @param logonEntry the logon entry to set
+         */
+        SetLogonEntry(
+            [in] ArrayOf<Char32>* logonEntry);
+    }
+
+    /** Authentication request to set an expiration time for the credentials. */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    interface IExpirationRequest {
+        /**
+         * Sets an expiration time in seconds relative to the current time for
+         * the credentials. This value is optional and can be set on any
+         * response to a credentials request. After the specified expiration
+         * time has elapsed any secret keys based on the provided credentials
+         * are invalidated and a new authentication exchange will be
+         * required. If an expiration is not set the default expiration time for
+         * the requested authentication mechanism is used.
+         *
+         * @param expiration the expiration time in seconds
+         */
+        SetExpiration(
+            [in] Int32 expiration);
+    }
+
+    /**
+     * Authentication request for verification of a certificate chain from a
+     * remote peer.
+     */
+    /*
+     * @Involve
+     * interface IAuthRequest
+     */
+    interface IVerifyRequest {
+        /**
+         * Gets the PEM encoded X509 certificate chain to verify.
+         *
+         * @return an X509 certificate chain
+         */
+        GetCertificateChain(
+            [out] String* chain);
     }
 
     [deprecated]
