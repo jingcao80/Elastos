@@ -106,6 +106,8 @@ SOURCES += BinderProxy.cpp
 #SOURCES += CBinderDeathRecipient.cpp
 SOURCES += NativeBinder.cpp
 #SOURCES += CZigbeeManager.cpp
+SOURCES += CBatteryManager.cpp
 SOURCES += CBatteryProperties.cpp
+SOURCES += CBatteryProperty.cpp
 
 ELASTOS_LIBS += storage/storage.lib

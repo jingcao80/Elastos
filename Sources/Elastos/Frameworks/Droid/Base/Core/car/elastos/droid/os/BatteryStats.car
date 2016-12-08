@@ -143,6 +143,24 @@ module
     interface IBatteryStatsUidProcExcessivePower {
         const Int32 TYPE_WAKE = 1;
         const Int32 TYPE_CPU = 2;
+
+        GetType(
+            [out] Int32* type);
+
+        SetType(
+            [in] Int32 type);
+
+        GetOverTime(
+            [out] Int64* overTime);
+
+        SetOverTime(
+            [in] Int64 overTime);
+
+        GetUsedTime(
+            [out] Int64* usedTime);
+
+        SetUsedTime(
+            [in] Int64 usedTime);
     }
 
     /**

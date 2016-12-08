@@ -1,5 +1,7 @@
 module
 {
+    interface Elastos.Droid.Os.IBatteryStatsUid;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -26,7 +28,7 @@ module
      * @Involve
      * interface IComparable;
      */
-    [local]
+    [local, deprecated]
     interface IBatterySipper {
         GetValues(
             [out, callee] ArrayOf<Double>* values);
@@ -41,6 +43,156 @@ module
 
         GetUid(
             [out] Int32* uid);
+
+        GetUserId(
+            [out] Int32* userId);
+
+        SetUserId(
+            [in] Int32 userId);
+
+        GetUidObj(
+            [out] IBatteryStatsUid** uidObj);
+
+        SetUidObj(
+            [in] IBatteryStatsUid* uidObj);
+
+        GetValue(
+            [out] Double* value);
+
+        SetValue(
+            [in] Double value);
+
+        SetValues(
+            [in] ArrayOf<Double>* values);
+
+        GetDrainType(
+            [out] BatterySipperDrainType* drainType);
+
+        SetDrainType(
+            [in] BatterySipperDrainType drainType);
+
+        GetUsageTime(
+            [out] Int64* usageTime);
+
+        SetUsageTime(
+            [in] Int64 usageTime);
+
+        GetCpuTime(
+            [out] Int64* cpuTime);
+
+        SetCpuTime(
+            [in] Int64 cpuTime);
+
+        GetGpsTime(
+            [out] Int64* gpsTime);
+
+        SetGpsTime(
+            [in] Int64 gpsTime);
+
+        GetWifiRunningTime(
+            [out] Int64* wifiRunningTime);
+
+        SetWifiRunningTime(
+            [in] Int64 wifiRunningTime);
+
+        GetCpuFgTime(
+            [out] Int64* cpuFgTime);
+
+        SetCpuFgTime(
+            [in] Int64 cpuFgTime);
+
+        GetWakeLockTime(
+            [out] Int64* wakeLockTime);
+
+        SetWakeLockTime(
+            [in] Int64 wakeLockTime);
+
+        GetMobileRxPackets(
+            [out] Int64* mobileRxPackets);
+
+        SetMobileRxPackets(
+            [in] Int64 mobileRxPackets);
+
+        GetMobileTxPackets(
+            [out] Int64* mobileTxPackets);
+
+        SetMobileTxPackets(
+            [in] Int64 mobileTxPackets);
+
+        GetMobileActive(
+            [out] Int64* mobileActive);
+
+        SetMobileActive(
+            [in] Int64 mobileActive);
+
+        GetMobileActiveCount(
+            [out] Int32* mobileActiveCount);
+
+        SetMobileActiveCount(
+            [in] Int32 mobileActiveCount);
+
+        GetMobilemspp(
+            [out] Double* mobilemspp);
+
+        SetMobilemspp(
+            [in] Double mobilemspp);
+
+        GetWifiRxPackets(
+            [out] Int64* wifiRxPackets);
+
+        SetWifiRxPackets(
+            [in] Int64 wifiRxPackets);
+
+        GetWifiTxPackets(
+            [out] Int64* wifiTxPackets);
+
+        SetWifiTxPackets(
+            [in] Int64 wifiTxPackets);
+
+        GetMobileRxBytes(
+            [out] Int64* mobileRxBytes);
+
+        SetMobileRxBytes(
+            [in] Int64 mobileRxBytes);
+
+        GetMobileTxBytes(
+            [out] Int64* mobileTxBytes);
+
+        SetMobileTxBytes(
+            [in] Int64 mobileTxBytes);
+
+        GetWifiRxBytes(
+            [out] Int64* wifiRxBytes);
+
+        SetWifiRxBytes(
+            [in] Int64 wifiRxBytes);
+
+        GetWifiTxBytes(
+            [out] Int64* wifiTxBytes);
+
+        SetWifiTxBytes(
+            [in] Int64 wifiTxBytes);
+
+        GetPercent(
+            [out] Double* percent);
+
+        SetPercent(
+            [in] Double percent);
+
+        GetNoCoveragePercent(
+            [out] Double* noCoveragePercent);
+
+        SetNoCoveragePercent(
+            [in] Double noCoveragePercent);
+
+        SetPackages(
+            [in] ArrayOf<String>* packages);
+
+        GetPackageWithHighestDrain(
+            [out] String* packageWithHighestDrain);
+
+        SetPackageWithHighestDrain(
+            [in] String packageWithHighestDrain);
     }
 
     } // namespace Os

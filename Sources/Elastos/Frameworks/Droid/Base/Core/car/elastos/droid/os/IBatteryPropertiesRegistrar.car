@@ -1,5 +1,6 @@
 module
 {
+    interface Elastos.Droid.Os.IBatteryProperty;
     interface Elastos.Droid.Os.IIBatteryPropertiesListener;
 
     namespace Elastos {
@@ -16,7 +17,8 @@ module
 
         GetProperty(
             [in] Int32 id,
-            [out] IBatteryProperties** prop);
+            [in] IBatteryProperty* prop,
+            [out] Int32* result);
     }
 
     } // namespace Os

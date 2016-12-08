@@ -14,6 +14,91 @@ module
     namespace Internal {
     namespace Os {
 
+    interface IBatteryStatsHelper {
+        StoreStatsHistoryInFile(
+            [in] String fname);
+
+        /** Clears the current stats and forces recreating for future use. */
+        ClearStats();
+
+        GetStats(
+            [out] IBatteryStats** stats);
+
+        GetBatteryBroadcast(
+            [out] IIntent** batteryBroadcast);
+
+        GetPowerProfile(
+            [out] IPowerProfile** powerProfile);
+
+        Create(
+            [in] IBatteryStats* stats);
+
+        Create(
+            [in] IBundle* icicle);
+
+        StoreState();
+
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] Int32 asUser);
+
+        /**
+         * Refreshes the power usage list.
+         */
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] IList* asUsers);
+
+        /**
+         * Refreshes the power usage list.
+         */
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] ISparseArray* asUsers);
+
+        RefreshStats(
+            [in] Int32 statsType,
+            [in] ISparseArray* asUsers,
+            [in] Int64 rawRealtimeUs,
+            [in] Int64 rawUptimeUs);
+
+        GetUsageList(
+            [out] IList** usageList);
+
+        GetMobilemsppList(
+            [out] IList** mobilemsppList);
+
+        GetStatsPeriod(
+            [out] Int64* statsPeriod);
+
+        GetStatsType(
+            [out] Int32* statsType);
+
+        GetMaxPower(
+            [out] Double* maxPower);
+
+        GetMaxRealPower(
+            [out] Double* maxRealPower);
+
+        GetTotalPower(
+            [out] Double* totalPower);
+
+        GetComputedPower(
+            [out] Double* computedPower);
+
+        GetMinDrainedPower(
+            [out] Double* minDrainedPower);
+
+        GetMaxDrainedPower(
+            [out] Double* maxDrainedPower);
+
+        GetBatteryTimeRemaining(
+            [out] Int64* batteryTimeRemaining);
+
+        GetChargeTimeRemaining(
+            [out] Int64* chargeTimeRemaining);
+    }
+
     [local]
     interface IBatteryStatsHelperHelper {
         CheckWifiOnly(

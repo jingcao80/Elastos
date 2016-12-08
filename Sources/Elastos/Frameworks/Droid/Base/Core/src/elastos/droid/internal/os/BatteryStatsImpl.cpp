@@ -3,7 +3,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/os/BatteryStatsImpl.h"
-#include "elastos/droid/internal/os/BatteryStatsHelper.h"
+#include "elastos/droid/internal/os/CBatteryStatsHelper.h"
 #include "elastos/droid/internal/os/CBackgroundThreadHelper.h"
 #include "elastos/droid/internal/net/CNetworkStatsFactory.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
@@ -9463,7 +9463,7 @@ ECode BatteryStatsImpl::ReadLocked()
     AutoPtr<IFileInputStream> stream;
     CFileInputStream::New(file, (IFileInputStream**)&stream);
 
-    AutoPtr<ArrayOf<byte> > raw = BatteryStatsHelper::ReadFully(stream);
+    AutoPtr<ArrayOf<byte> > raw = CBatteryStatsHelper::ReadFully(stream);
     AutoPtr<IParcel> in;// = Parcel.obtain();
     CParcel::New((IParcel**)&in);
     in->Unmarshall(raw, 0, raw->GetLength());

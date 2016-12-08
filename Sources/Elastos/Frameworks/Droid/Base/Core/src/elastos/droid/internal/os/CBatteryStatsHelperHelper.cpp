@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/internal/os/CBatteryStatsHelperHelper.h"
-#include "elastos/droid/internal/os/BatteryStatsHelper.h"
+#include "elastos/droid/internal/os/CBatteryStatsHelper.h"
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +17,7 @@ ECode CBatteryStatsHelperHelper::CheckWifiOnly(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = BatteryStatsHelper::CheckWifiOnly(context);
+    *result = CBatteryStatsHelper::CheckWifiOnly(context);
     return NOERROR;
 }
 
@@ -27,7 +27,7 @@ ECode CBatteryStatsHelperHelper::StatsFromFile(
     /* [out] */ IBatteryStats** stats)
 {
     VALIDATE_NOT_NULL(stats)
-    AutoPtr<IBatteryStats> bs = BatteryStatsHelper::StatsFromFile(context, fname);
+    AutoPtr<IBatteryStats> bs = CBatteryStatsHelper::StatsFromFile(context, fname);
     *stats = bs;
     REFCOUNT_ADD(*stats)
     return NOERROR;
@@ -37,7 +37,7 @@ ECode CBatteryStatsHelperHelper::DropFile(
     /* [in] */ IContext* context,
     /* [in] */ const String& fname)
 {
-    BatteryStatsHelper::DropFile(context, fname);
+    CBatteryStatsHelper::DropFile(context, fname);
     return NOERROR;
 }
 
@@ -46,7 +46,7 @@ ECode CBatteryStatsHelperHelper::MakemAh(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = BatteryStatsHelper::MakemAh(power);
+    *result = CBatteryStatsHelper::MakemAh(power);
     return NOERROR;
 }
 
@@ -55,7 +55,7 @@ ECode CBatteryStatsHelperHelper::ReadFully(
     /* [out, callee] */ ArrayOf<Byte>** bytes)
 {
     VALIDATE_NOT_NULL(bytes)
-    *bytes = BatteryStatsHelper::ReadFully(stream);
+    *bytes = CBatteryStatsHelper::ReadFully(stream);
     REFCOUNT_ADD(*bytes)
     return NOERROR;
 }
@@ -66,7 +66,7 @@ ECode CBatteryStatsHelperHelper::ReadFully(
     /* [out, callee] */ ArrayOf<Byte>** bytes)
 {
     VALIDATE_NOT_NULL(bytes)
-    *bytes = BatteryStatsHelper::ReadFully(stream, avail);
+    *bytes = CBatteryStatsHelper::ReadFully(stream, avail);
     REFCOUNT_ADD(*bytes)
     return NOERROR;
 }

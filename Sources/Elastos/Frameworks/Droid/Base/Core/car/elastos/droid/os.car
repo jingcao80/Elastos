@@ -2,6 +2,7 @@ module
 {
     merge("os/AsyncResult.car");
     merge("os/BaseBundle.car");
+    merge("os/BatteryProperty.car");
     merge("os/BatteryProperties.car");
     merge("os/BatteryManager.car");
     merge("os/BatteryManagerInternal.car");
@@ -613,10 +614,23 @@ module
         interface IRecoverySystem;
     }
 
+    class CBatteryManager {
+        constructor();
+
+        interface IBatteryManager;
+    }
+
     class CBatteryProperties {
         constructor();
 
         interface IBatteryProperties;
+        interface IParcelable;
+    }
+
+    class CBatteryProperty {
+        constructor();
+
+        interface IBatteryProperty;
         interface IParcelable;
     }
 

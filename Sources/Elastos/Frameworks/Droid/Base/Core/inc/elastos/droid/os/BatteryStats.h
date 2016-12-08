@@ -6,14 +6,19 @@
 #include "Elastos.Droid.Os.h"
 #include <elastos/core/StringBuilder.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Internal::Os::BatterySipperDrainType;
+using Elastos::Droid::Os::IBatteryStatsHistoryItem;
+using Elastos::Droid::Os::IBatteryStatsUid;
+using Elastos::Droid::Os::IBatteryStatsUidProcExcessivePower;
+using Elastos::Droid::Utility::IPrinter;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::IComparator;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IList;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IFormatter;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
-using Elastos::Droid::Utility::IPrinter;
 
 namespace Elastos {
 namespace Droid {
@@ -30,7 +35,6 @@ class BatteryStats
     , public IBatteryStats
 {
 public:
-
     /**
      * The statistics associated with a particular uid.
      */
@@ -39,14 +43,34 @@ public:
         , public IBatteryStatsUid
     {
     public:
-        class Pid : public Object
+        class Pid
+            : public Object
+            , public IBatteryStatsUidPid
         {
         public:
-            Pid()
-                : mWakeNesting(0)
-                , mWakeSumMs(0)
-                , mWakeStartMs(0)
-            {}
+            TO_STRING_IMPL("BatteryStats::BatteryStatsUid::Pid");
+
+            CAR_INTERFACE_DECL()
+
+            Pid();
+
+            CARAPI GetWakeNesting(
+                /* [out] */ Int32* wakeNesting);
+
+            CARAPI SetWakeNesting(
+                /* [in] */ Int32 wakeNesting);
+
+            CARAPI GetWakeSumMs(
+                /* [out] */ Int64* wakeSumMs);
+
+            CARAPI SetWakeSumMs(
+                /* [in] */ Int64 wakeSumMs);
+
+            CARAPI GetWakeStartMs(
+                /* [out] */ Int64* wakeStartMs);
+
+            CARAPI SetWakeStartMs(
+                /* [in] */ Int64 wakeStartMs);
 
         public:
             Int32 mWakeNesting;
@@ -62,13 +86,29 @@ public:
             , public IBatteryStatsUidProcExcessivePower
         {
         public:
-            ExcessivePower()
-                : mType(0)
-                , mOverTime(0)
-                , mUsedTime(0)
-            {}
+            TO_STRING_IMPL("BatteryStats::BatteryStatsUid::ExcessivePower");
 
             CAR_INTERFACE_DECL()
+
+            ExcessivePower();
+
+            CARAPI GetType(
+                /* [out] */ Int32* type);
+
+            CARAPI SetType(
+                /* [in] */ Int32 type);
+
+            CARAPI GetOverTime(
+                /* [out] */ Int64* overTime);
+
+            CARAPI SetOverTime(
+                /* [in] */ Int64 overTime);
+
+            CARAPI GetUsedTime(
+                /* [out] */ Int64* usedTime);
+
+            CARAPI SetUsedTime(
+                /* [in] */ Int64 usedTime);
 
         public:
             Int32 mType;
@@ -77,6 +117,8 @@ public:
         };
 
     public:
+        TO_STRING_IMPL("BatteryStats::BatteryStatsUid");
+
         CAR_INTERFACE_DECL()
 
     public:
@@ -93,10 +135,9 @@ public:
     class HistoryTag : public Object
     {
     public:
-        HistoryTag()
-            : mUid(0)
-            , mPoolIdx(0)
-        {}
+        TO_STRING_IMPL("BatteryStats::HistoryTag")
+
+        HistoryTag();
 
         CARAPI_(void) SetTo(
             /* [in] */ HistoryTag* o);
@@ -132,6 +173,8 @@ public:
         , public IParcelable
     {
     public:
+        TO_STRING_IMPL("BatteryStats::HistoryItem")
+
         CAR_INTERFACE_DECL()
 
         HistoryItem();
@@ -214,6 +257,8 @@ public:
     class HistoryEventTracker : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStats::HistoryEventTracker")
+
         HistoryEventTracker();
 
         CARAPI_(Boolean) UpdateState(
@@ -235,6 +280,8 @@ public:
     class BitDescription : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStats::BitDescription")
+
         BitDescription(
             /* [in] */ Int32 mask,
             /* [in] */ const String& name,
@@ -272,6 +319,8 @@ public:
     class TimerEntry : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStats::TimerEntry")
+
         TimerEntry(
             /* [in] */ const String& name,
             /* [in] */ Int32 id,
@@ -290,9 +339,12 @@ public:
         Int64 mTime;
     };
 
-    class HistoryPrinter : public Object
+    class HistoryPrinter
+        : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStats::HistoryPrinter")
+
         HistoryPrinter()
             : mOldState(0)
             , mOldState2(0)
@@ -302,12 +354,15 @@ public:
             , mOldPlug(-1)
             , mOldTemp(-1)
             , mOldVolt(-1)
+            , mLastTime(-1)
         {}
 
         CARAPI_(void) PrintNextItem(
             /* [in] */ IPrintWriter* pw,
             /* [in] */ HistoryItem* rec,
-            /* [in] */ Int64 now);
+            /* [in] */ Int64 baseTime,
+            /* [in] */ Boolean checkin,
+            /* [in] */ Boolean verbose);
 
     private:
         CARAPI_(void) Reset();
@@ -321,6 +376,23 @@ public:
         Int32 mOldPlug;
         Int32 mOldTemp;
         Int32 mOldVolt;
+        Int64 mLastTime;
+    };
+
+    class DumpLockedComparator
+        : public Object
+        , public IComparator
+    {
+    public:
+        TO_STRING_IMPL("BatteryStats::DumpLockedComparator")
+
+        CAR_INTERFACE_DECL()
+
+        // @Override
+        CARAPI Compare(
+            /* [in] */ IInterface* _lhs,
+            /* [in] */ IInterface* _rhs,
+            /* [out] */ Int32* result);
     };
 
 public:
@@ -474,7 +546,7 @@ private:
         /* [in] */ Int32 oldval,
         /* [in] */ Int32 newval,
         /* [in] */ HistoryTag* wakelockTag,
-        /* [in] */ ArrayOf<BitDescription*> descriptions,
+        /* [in] */ ArrayOf<BitDescription*>* descriptions,
         /* [in] */ Boolean longNames);
 
     CARAPI_(void) PrintSizeValue(

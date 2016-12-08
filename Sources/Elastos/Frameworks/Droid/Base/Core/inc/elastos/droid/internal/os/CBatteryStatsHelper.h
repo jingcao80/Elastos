@@ -1,12 +1,13 @@
-#ifndef __ELASTOS_DROID_INTERNAL_OS_BATTERYSTATSHELPER_H__
-#define __ELASTOS_DROID_INTERNAL_OS_BATTERYSTATSHELPER_H__
+#ifndef __ELASTOS_DROID_INTERNAL_OS_CBATTERYSTATSHELPER_H__
+#define __ELASTOS_DROID_INTERNAL_OS_CBATTERYSTATSHELPER_H__
 
 #include "Elastos.Droid.Content.h"
-#include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Internal.h"
-#include "elastos/droid/internal/os/BatterySipper.h"
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/utility/etl/List.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include "_Elastos_Droid_Internal_Os_CBatteryStatsHelper.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
@@ -15,13 +16,12 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Core::Object;
 using Elastos::Core::IComparator;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileOutputStream;
 using Elastos::IO::IFileInputStream;
 using Elastos::Utility::IList;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
@@ -34,7 +34,9 @@ namespace Os {
  * The caller must initialize this class as soon as activity object is ready to use (for example, in
  * onAttach() for Fragment), call create() in onCreate() and call destroy() in onDestroy().
  */
-class BatteryStatsHelper : public Object
+CarClass(CBatteryStatsHelper)
+    , public Object
+    , public IBatteryStatsHelper
 {
 private:
     class BatterySipperComparator
@@ -42,6 +44,8 @@ private:
         , public IComparator
     {
     public:
+        TO_STRING_IMPL("CBatteryStatsHelper::BatterySipperComparator")
+
         CAR_INTERFACE_DECL()
 
         CARAPI Compare(
@@ -51,14 +55,22 @@ private:
     };
 
 public:
-    BatteryStatsHelper(
+    TO_STRING_IMPL("CBatteryStatsHelper")
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CBatteryStatsHelper();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    BatteryStatsHelper(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Boolean collectBatteryBroadcast);
 
-    BatteryStatsHelper(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Boolean collectBatteryBroadcast,
         /* [in] */ Boolean wifiOnly);
@@ -66,7 +78,7 @@ public:
     static CARAPI_(Boolean) CheckWifiOnly(
         /* [in] */ IContext* context);
 
-    CARAPI_(void) StoreStatsHistoryInFile(
+    CARAPI StoreStatsHistoryInFile(
         /* [in] */ const String& fname);
 
     static CARAPI_(AutoPtr<IBatteryStats>) StatsFromFile(
@@ -78,21 +90,24 @@ public:
         /* [in] */ const String& fname);
 
     /** Clears the current stats and forces recreating for future use. */
-    CARAPI_(void) ClearStats();
+    CARAPI ClearStats();
 
-    CARAPI_(AutoPtr<IBatteryStats>) GetStats();
+    CARAPI GetStats(
+        /* [out] */ IBatteryStats** stats);
 
-    CARAPI_(AutoPtr<IIntent>) GetBatteryBroadcast();
+    CARAPI GetBatteryBroadcast(
+        /* [out] */ IIntent** batteryBroadcast);
 
-    CARAPI_(AutoPtr<IPowerProfile>) GetPowerProfile();
+    CARAPI GetPowerProfile(
+        /* [out] */ IPowerProfile** powerProfile);
 
-    CARAPI_(void) Create(
+    CARAPI Create(
         /* [in] */ IBatteryStats* stats);
 
-    CARAPI_(void) Create(
+    CARAPI Create(
         /* [in] */ IBundle* icicle);
 
-    CARAPI_(void) StoreState();
+    CARAPI StoreState();
 
     static CARAPI_(String) MakemAh(
         /* [in] */ Double power);
@@ -100,53 +115,65 @@ public:
     /**
      * Refreshes the power usage list.
      */
-    CARAPI_(void) RefreshStats(
+    CARAPI RefreshStats(
         /* [in] */ Int32 statsType,
         /* [in] */ Int32 asUser);
 
     /**
      * Refreshes the power usage list.
      */
-    CARAPI_(void) RefreshStats(
+    CARAPI RefreshStats(
         /* [in] */ Int32 statsType,
         /* [in] */ IList* asUsers);
 
     /**
      * Refreshes the power usage list.
      */
-    CARAPI_(void) RefreshStats(
+    CARAPI RefreshStats(
         /* [in] */ Int32 statsType,
         /* [in] */ ISparseArray* asUsers);
 
-    CARAPI_(void) RefreshStats(
+    CARAPI RefreshStats(
         /* [in] */ Int32 statsType,
         /* [in] */ ISparseArray* asUsers,
         /* [in] */ Int64 rawRealtimeUs,
         /* [in] */ Int64 rawUptimeUs);
 
-    CARAPI_(AutoPtr<IList>) GetUsageList();
+    CARAPI GetUsageList(
+        /* [out] */ IList** usageList);
 
-    CARAPI_(AutoPtr<IList>) GetMobilemsppList();
+    CARAPI GetMobilemsppList(
+        /* [out] */ IList** mobilemsppList);
 
-    CARAPI_(Int64) GetStatsPeriod();
+    CARAPI GetStatsPeriod(
+        /* [out] */ Int64* statsPeriod);
 
-    CARAPI_(Int32) GetStatsType();
+    CARAPI GetStatsType(
+        /* [out] */ Int32* statsType);
 
-    CARAPI_(Double) GetMaxPower();
+    CARAPI GetMaxPower(
+        /* [out] */ Double* maxPower);
 
-    CARAPI_(Double) GetMaxRealPower();
+    CARAPI GetMaxRealPower(
+        /* [out] */ Double* maxRealPower);
 
-    CARAPI_(Double) GetTotalPower();
+    CARAPI GetTotalPower(
+        /* [out] */ Double* totalPower);
 
-    CARAPI_(Double) GetComputedPower();
+    CARAPI GetComputedPower(
+        /* [out] */ Double* computedPower);
 
-    CARAPI_(Double) GetMinDrainedPower();
+    CARAPI GetMinDrainedPower(
+        /* [out] */ Double* minDrainedPower);
 
-    CARAPI_(Double) GetMaxDrainedPower();
+    CARAPI GetMaxDrainedPower(
+        /* [out] */ Double* maxDrainedPower);
 
-    CARAPI_(Int64) GetBatteryTimeRemaining();
+    CARAPI GetBatteryTimeRemaining(
+        /* [out] */ Int64* batteryTimeRemaining);
 
-    CARAPI_(Int64) GetChargeTimeRemaining();
+    CARAPI GetChargeTimeRemaining(
+        /* [out] */ Int64* chargeTimeRemaining);
 
     static CARAPI_(AutoPtr<ArrayOf<Byte> >) ReadFully(
         /* [in] */ IFileInputStream* stream);
@@ -163,7 +190,6 @@ private:
     static CARAPI_(AutoPtr<IBatteryStatsImpl>) GetStats(
         /* [in] */ IIBatteryStats* service);
 
-
     CARAPI_(void) ProcessAppUsage(
         /* [in] */ ISparseArray* asUsers);
 
@@ -174,8 +200,8 @@ private:
     CARAPI_(void) AddRadioUsage();
 
     CARAPI_(void) AggregateSippers(
-        /* [in] */ BatterySipper* bs,
-        /* [in] */ List<AutoPtr<BatterySipper> >* from,
+        /* [in] */ IBatterySipper* bs,
+        /* [in] */ IList* from, // List<BatterySipper>
         /* [in] */ const String& tag);
 
     CARAPI_(void) AddWiFiUsage();
@@ -205,13 +231,13 @@ private:
 
     CARAPI_(void) ProcessMiscUsage();
 
-    CARAPI_(AutoPtr<BatterySipper>) AddEntry(
-        /* [in] */ BatterySipper::DrainType drainType,
+    CARAPI_(AutoPtr<IBatterySipper>) AddEntry(
+        /* [in] */ BatterySipperDrainType drainType,
         /* [in] */ Int64 time,
         /* [in] */ Double power);
 
-    CARAPI_(AutoPtr<BatterySipper>) AddEntryNoTotal(
-        /* [in] */ BatterySipper::DrainType drainType,
+    CARAPI_(AutoPtr<IBatterySipper>) AddEntryNoTotal(
+        /* [in] */ BatterySipperDrainType drainType,
         /* [in] */ Int64 time,
         /* [in] */ Double power);
 
@@ -245,13 +271,13 @@ private:
     AutoPtr<IIntent> mBatteryBroadcast;
     AutoPtr<IPowerProfile> mPowerProfile;
 
-    AutoPtr<IList> mUsageList;
-    List<AutoPtr<BatterySipper> > mWifiSippers;
-    List<AutoPtr<BatterySipper> > mBluetoothSippers;
-    HashMap<Int32, AutoPtr<List<AutoPtr<BatterySipper> > > > mUserSippers;
-    HashMap<Int32, Double> mUserPower;
+    AutoPtr<IList> mUsageList; // List<BatterySipper>
+    AutoPtr<IList> mWifiSippers; // List<BatterySipper>
+    AutoPtr<IList> mBluetoothSippers; // List<BatterySipper>
+    AutoPtr<ISparseArray> mUserSippers; //SparseArray<List<BatterySipper>>
+    AutoPtr<ISparseArray> mUserPower; // SparseArray<Double>
 
-    AutoPtr<IList> mMobilemsppList;
+    AutoPtr<IList> mMobilemsppList; // List<BatterySipper>
 
     Int32 mStatsType;
 
@@ -277,4 +303,4 @@ private:
 } // Droid
 } // Elastos
 
-#endif // __ELASTOS_DROID_INTERNAL_OS_BATTERYSTATSHELPER_H__
+#endif // __ELASTOS_DROID_INTERNAL_OS_CBATTERYSTATSHELPER_H__

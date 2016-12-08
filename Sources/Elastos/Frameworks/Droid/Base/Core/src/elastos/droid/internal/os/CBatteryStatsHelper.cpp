@@ -2,7 +2,8 @@
 #include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Telephony.h"
-#include "elastos/droid/internal/os/BatteryStatsHelper.h"
+#include "elastos/droid/internal/os/CBatterySipper.h"
+#include "elastos/droid/internal/os/CBatteryStatsHelper.h"
 #include "elastos/droid/internal/os/CPowerProfile.h"
 #include "elastos/droid/internal/os/CBatteryStatsImpl.h"
 #include "elastos/droid/content/CIntentFilter.h"
@@ -15,10 +16,9 @@
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Hardware::ISensor;
@@ -43,7 +43,9 @@ using Elastos::Droid::Telephony::ISignalStrength;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IComparator;
+using Elastos::Core::IDouble;
 using Elastos::IO::CFile;
 using Elastos::IO::CFileOutputStream;
 using Elastos::IO::CFileInputStream;
@@ -61,20 +63,20 @@ namespace Internal {
 namespace Os {
 
 //==============================================================================
-// BatteryStatsHelper::BatterySipperComparator
+// CBatteryStatsHelper::BatterySipperComparator
 //==============================================================================
 
-CAR_INTERFACE_IMPL(BatteryStatsHelper::BatterySipperComparator, Object, IComparator)
+CAR_INTERFACE_IMPL(CBatteryStatsHelper::BatterySipperComparator, Object, IComparator)
 
-ECode BatteryStatsHelper::BatterySipperComparator::Compare(
+ECode CBatteryStatsHelper::BatterySipperComparator::Compare(
     /* [in] */ IInterface* _lhs,
     /* [in] */ IInterface* _rhs,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
-    AutoPtr<BatterySipper> lhs = (BatterySipper*)(IObject*)_lhs;
-    AutoPtr<BatterySipper> rhs = (BatterySipper*)(IObject*)_rhs;
+    AutoPtr<CBatterySipper> lhs = (CBatterySipper*)IBatterySipper::Probe(_lhs);
+    AutoPtr<CBatterySipper> rhs = (CBatterySipper*)IBatterySipper::Probe(_rhs);
     if (lhs->mMobilemspp < rhs->mMobilemspp) {
         *result = 1;
     }
@@ -86,13 +88,13 @@ ECode BatteryStatsHelper::BatterySipperComparator::Compare(
 
 
 //==============================================================================
-// BatteryStatsHelper
+// CBatteryStatsHelper
 //==============================================================================
 
-const Boolean BatteryStatsHelper::DEBUG;
-const String BatteryStatsHelper::TAG("BatteryStatsHelper");
-AutoPtr<IBatteryStats> BatteryStatsHelper::sStatsXfer;
-AutoPtr<IIntent> BatteryStatsHelper::sBatteryBroadcastXfer;
+const Boolean CBatteryStatsHelper::DEBUG;
+const String CBatteryStatsHelper::TAG("CBatteryStatsHelper");
+AutoPtr<IBatteryStats> CBatteryStatsHelper::sStatsXfer;
+AutoPtr<IIntent> CBatteryStatsHelper::sBatteryBroadcastXfer;
 
 static AutoPtr<IArrayMap> InitFileXfer()
 {
@@ -100,10 +102,13 @@ static AutoPtr<IArrayMap> InitFileXfer()
     CArrayMap::New((IArrayMap**)&arrayMap);
     return arrayMap;
 }
-AutoPtr<IArrayMap> BatteryStatsHelper::sFileXfer = InitFileXfer();
+AutoPtr<IArrayMap> CBatteryStatsHelper::sFileXfer = InitFileXfer();
 
-BatteryStatsHelper::BatteryStatsHelper(
-    /* [in] */ IContext* context)
+CAR_INTERFACE_IMPL(CBatteryStatsHelper, Object, IBatteryStatsHelper)
+
+CAR_OBJECT_IMPL(CBatteryStatsHelper)
+
+CBatteryStatsHelper::CBatteryStatsHelper()
     : mRawRealtime(0)
     , mRawUptime(0)
     , mBatteryRealtime(0)
@@ -126,85 +131,57 @@ BatteryStatsHelper::BatteryStatsHelper(
     , mMaxDrainedPower(0)
     , mAppMobileActive(0)
     , mAppWifiRunning(0)
+{}
+
+ECode CBatteryStatsHelper::constructor(
+    /* [in] */ IContext* context)
 {
     CArrayList::New((IList**)&mUsageList);
+    CArrayList::New((IList**)&mWifiSippers);
+    CArrayList::New((IList**)&mBluetoothSippers);
+    CSparseArray::New((ISparseArray**)&mUserSippers);
+    CSparseArray::New((ISparseArray**)&mUserPower);
     CArrayList::New((IList**)&mMobilemsppList);
 
-    mContext = context;
-    mCollectBatteryBroadcast = TRUE;
-    mWifiOnly = CheckWifiOnly(context);
+    return constructor(context, TRUE);
 }
 
-BatteryStatsHelper::BatteryStatsHelper(
+ECode CBatteryStatsHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Boolean collectBatteryBroadcast)
-    : mRawRealtime(0)
-    , mRawUptime(0)
-    , mBatteryRealtime(0)
-    , mBatteryUptime(0)
-    , mTypeBatteryRealtime(0)
-    , mTypeBatteryUptime(0)
-    , mBatteryTimeRemaining(0)
-    , mChargeTimeRemaining(0)
-    , mCollectBatteryBroadcast(FALSE)
-    , mWifiOnly(FALSE)
-    , mStatsType(IBatteryStats::STATS_SINCE_CHARGED)
-    , mStatsPeriod(0)
-    , mMaxPower(1)
-    , mMaxRealPower(1)
-    , mComputedPower(0)
-    , mTotalPower(0)
-    , mWifiPower(0)
-    , mBluetoothPower(0)
-    , mMinDrainedPower(0)
-    , mMaxDrainedPower(0)
-    , mAppMobileActive(0)
-    , mAppWifiRunning(0)
 {
     CArrayList::New((IList**)&mUsageList);
+    CArrayList::New((IList**)&mWifiSippers);
+    CArrayList::New((IList**)&mBluetoothSippers);
+    CSparseArray::New((ISparseArray**)&mUserSippers);
+    CSparseArray::New((ISparseArray**)&mUserPower);
     CArrayList::New((IList**)&mMobilemsppList);
 
     mContext = context;
     mCollectBatteryBroadcast = collectBatteryBroadcast;
     mWifiOnly = CheckWifiOnly(context);
+    return NOERROR;
 }
 
-BatteryStatsHelper::BatteryStatsHelper(
+ECode CBatteryStatsHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Boolean collectBatteryBroadcast,
     /* [in] */ Boolean wifiOnly)
-    : mRawRealtime(0)
-    , mRawUptime(0)
-    , mBatteryRealtime(0)
-    , mBatteryUptime(0)
-    , mTypeBatteryRealtime(0)
-    , mTypeBatteryUptime(0)
-    , mBatteryTimeRemaining(0)
-    , mChargeTimeRemaining(0)
-    , mCollectBatteryBroadcast(FALSE)
-    , mWifiOnly(FALSE)
-    , mStatsType(IBatteryStats::STATS_SINCE_CHARGED)
-    , mStatsPeriod(0)
-    , mMaxPower(1)
-    , mMaxRealPower(1)
-    , mComputedPower(0)
-    , mTotalPower(0)
-    , mWifiPower(0)
-    , mBluetoothPower(0)
-    , mMinDrainedPower(0)
-    , mMaxDrainedPower(0)
-    , mAppMobileActive(0)
-    , mAppWifiRunning(0)
 {
     CArrayList::New((IList**)&mUsageList);
+    CArrayList::New((IList**)&mWifiSippers);
+    CArrayList::New((IList**)&mBluetoothSippers);
+    CSparseArray::New((ISparseArray**)&mUserSippers);
+    CSparseArray::New((ISparseArray**)&mUserPower);
     CArrayList::New((IList**)&mMobilemsppList);
 
     mContext = context;
     mCollectBatteryBroadcast = collectBatteryBroadcast;
     mWifiOnly = wifiOnly;
+    return NOERROR;
 }
 
-Boolean BatteryStatsHelper::CheckWifiOnly(
+Boolean CBatteryStatsHelper::CheckWifiOnly(
     /* [in] */ IContext* context)
 {
     AutoPtr<IInterface> service;
@@ -215,18 +192,20 @@ Boolean BatteryStatsHelper::CheckWifiOnly(
     return !res;
 }
 
-void BatteryStatsHelper::StoreStatsHistoryInFile(
+ECode CBatteryStatsHelper::StoreStatsHistoryInFile(
     /* [in] */ const String& fname)
 {
     AutoLock lock(sFileXfer);
     AutoPtr<IFile> path = MakeFilePath(mContext, fname);
-    IMap::Probe(sFileXfer)->Put(path, GetStats());
+    AutoPtr<IBatteryStats> stats;
+    GetStats((IBatteryStats**)&stats);
+    IMap::Probe(sFileXfer)->Put(path, stats);
     AutoPtr<IFileOutputStream> fout;
     // try {
     CFileOutputStream::New(path, (IFileOutputStream**)&fout);
     AutoPtr<IParcel> hist;
     CParcel::New((IParcel**)&hist);// CParcel.obtain();
-    GetStats()->WriteToParcelWithoutUids(hist);
+    stats->WriteToParcelWithoutUids(hist);
     AutoPtr<ArrayOf<Byte> > histData;
     hist->Marshall((ArrayOf<Byte>**)&histData);
     IOutputStream::Probe(fout)->Write(histData);
@@ -243,9 +222,10 @@ void BatteryStatsHelper::StoreStatsHistoryInFile(
     if (fout != NULL) {
         ICloseable::Probe(fout)->Close();
     }
+    return NOERROR;
 }
 
-AutoPtr<IBatteryStats> BatteryStatsHelper::StatsFromFile(
+AutoPtr<IBatteryStats> CBatteryStatsHelper::StatsFromFile(
     /* [in] */ IContext* context,
     /* [in] */ const String& fname)
 {
@@ -286,7 +266,7 @@ AutoPtr<IBatteryStats> BatteryStatsHelper::StatsFromFile(
     return IBatteryStats::Probe(GetStats(IIBatteryStats::Probe(service)));
 }
 
-void BatteryStatsHelper::DropFile(
+void CBatteryStatsHelper::DropFile(
     /* [in] */ IContext* context,
     /* [in] */ const String& fname)
 {
@@ -294,7 +274,7 @@ void BatteryStatsHelper::DropFile(
     file->Delete();
 }
 
-AutoPtr<IFile> BatteryStatsHelper::MakeFilePath(
+AutoPtr<IFile> CBatteryStatsHelper::MakeFilePath(
     /* [in] */ IContext* context,
     /* [in] */ const String& fname)
 {
@@ -305,40 +285,55 @@ AutoPtr<IFile> BatteryStatsHelper::MakeFilePath(
     return file;
 }
 
-void BatteryStatsHelper::ClearStats()
+ECode CBatteryStatsHelper::ClearStats()
 {
     mStats = NULL;
+    return NOERROR;
 }
 
-AutoPtr<IBatteryStats> BatteryStatsHelper::GetStats()
+ECode CBatteryStatsHelper::GetStats(
+    /* [out] */ IBatteryStats** stats)
 {
+    VALIDATE_NOT_NULL(stats);
+
     if (mStats == NULL) {
         Load();
     }
-    return mStats;
+    *stats = mStats;
+    REFCOUNT_ADD(*stats)
+    return NOERROR;
 }
 
-AutoPtr<IIntent> BatteryStatsHelper::GetBatteryBroadcast()
+ECode CBatteryStatsHelper::GetBatteryBroadcast(
+    /* [out] */ IIntent** batteryBroadcast)
 {
+    VALIDATE_NOT_NULL(batteryBroadcast)
     if (mBatteryBroadcast == NULL && mCollectBatteryBroadcast) {
         Load();
     }
-    return mBatteryBroadcast;
+    *batteryBroadcast = mBatteryBroadcast;
+    REFCOUNT_ADD(*batteryBroadcast)
+    return NOERROR;
 }
 
-AutoPtr<IPowerProfile> BatteryStatsHelper::GetPowerProfile()
+ECode CBatteryStatsHelper::GetPowerProfile(
+    /* [out] */ IPowerProfile** powerProfile)
 {
-    return mPowerProfile;
+    VALIDATE_NOT_NULL(powerProfile)
+    *powerProfile = mPowerProfile;
+    REFCOUNT_ADD(*powerProfile)
+    return NOERROR;
 }
 
-void BatteryStatsHelper::Create(
+ECode CBatteryStatsHelper::Create(
     /* [in] */ IBatteryStats* stats)
 {
     CPowerProfile::New(mContext, (IPowerProfile**)&mPowerProfile);
     mStats = stats;
+    return NOERROR;
 }
 
-void BatteryStatsHelper::Create(
+ECode CBatteryStatsHelper::Create(
     /* [in] */ IBundle* icicle)
 {
     if (icicle != NULL) {
@@ -348,15 +343,17 @@ void BatteryStatsHelper::Create(
     AutoPtr<IInterface> service = ServiceManager::GetService(IBatteryStats::SERVICE_NAME);
     mBatteryInfo = IIBatteryStats::Probe(service);
     CPowerProfile::New(mContext, (IPowerProfile**)&mPowerProfile);
+    return NOERROR;
 }
 
-void BatteryStatsHelper::StoreState()
+ECode CBatteryStatsHelper::StoreState()
 {
     sStatsXfer = mStats;
     sBatteryBroadcastXfer = mBatteryBroadcast;
+    return NOERROR;
 }
 
-String BatteryStatsHelper::MakemAh(
+String CBatteryStatsHelper::MakemAh(
     /* [in] */ Double power)
 {
     String str;
@@ -382,7 +379,7 @@ String BatteryStatsHelper::MakemAh(
     return str;
 }
 
-void BatteryStatsHelper::RefreshStats(
+ECode CBatteryStatsHelper::RefreshStats(
     /* [in] */ Int32 statsType,
     /* [in] */ Int32 asUser)
 {
@@ -391,10 +388,10 @@ void BatteryStatsHelper::RefreshStats(
     AutoPtr<IUserHandle> user;
     CUserHandle::New(asUser, (IUserHandle**)&user);
     users->Put(asUser, user);
-    RefreshStats(statsType, users);
+    return RefreshStats(statsType, users);
 }
 
-void BatteryStatsHelper::RefreshStats(
+ECode CBatteryStatsHelper::RefreshStats(
     /* [in] */ Int32 statsType,
     /* [in] */ IList* asUsers)
 {
@@ -413,7 +410,7 @@ void BatteryStatsHelper::RefreshStats(
     return RefreshStats(statsType, users);
 }
 
-void BatteryStatsHelper::RefreshStats(
+ECode CBatteryStatsHelper::RefreshStats(
     /* [in] */ Int32 statsType,
     /* [in] */ ISparseArray* asUsers)
 {
@@ -421,14 +418,15 @@ void BatteryStatsHelper::RefreshStats(
             SystemClock::GetUptimeMillis() * 1000);
 }
 
-void BatteryStatsHelper::RefreshStats(
+ECode CBatteryStatsHelper::RefreshStats(
     /* [in] */ Int32 statsType,
     /* [in] */ ISparseArray* asUsers,
     /* [in] */ Int64 rawRealtimeUs,
     /* [in] */ Int64 rawUptimeUs)
 {
     // Initialize mStats if necessary.
-    GetStats();
+    AutoPtr<IBatteryStats> stats;
+    GetStats((IBatteryStats**)&stats);
 
     mMaxPower = 0;
     mMaxRealPower = 0;
@@ -440,14 +438,14 @@ void BatteryStatsHelper::RefreshStats(
     mAppWifiRunning = 0;
 
     mUsageList->Clear();
-    mWifiSippers.Clear();
-    mBluetoothSippers.Clear();
-    mUserSippers.Clear();
-    mUserPower.Clear();
+    mWifiSippers->Clear();
+    mBluetoothSippers->Clear();
+    mUserSippers->Clear();
+    mUserPower->Clear();
     mMobilemsppList->Clear();
 
     if (mStats == NULL) {
-        return;
+        return NOERROR;
     }
 
     mStatsType = statsType;
@@ -484,22 +482,32 @@ void BatteryStatsHelper::RefreshStats(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> item;
         mUsageList->Get(i, (IInterface**)&item);
-        AutoPtr<BatterySipper> bs = (BatterySipper*)(IObject*)item.Get();
+        IBatterySipper* bs = IBatterySipper::Probe(item);
         bs->ComputeMobilemspp();
-        if (bs->mMobilemspp != 0) {
-            mMobilemsppList->Add(item);
+        Double mobilemspp;
+        bs->GetMobilemspp(&mobilemspp);
+        if (mobilemspp != 0) {
+            mMobilemsppList->Add(bs);
         }
     }
 
-    HashMap<Int32, AutoPtr<List<AutoPtr<BatterySipper> > > >::Iterator iter = mUserSippers.Begin();
-    for (; iter != mUserSippers.End(); ++iter) {
-        AutoPtr<List<AutoPtr<BatterySipper> > > user = iter->mSecond;
-        List<AutoPtr<BatterySipper> >::Iterator bsit = user->Begin();
-        for (; bsit != user->End(); ++bsit) {
-            AutoPtr<BatterySipper> bs = *bsit;
+    mUserSippers->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> item;
+        mUserSippers->ValueAt(i, (IInterface**)&item);
+        IList* user = IList::Probe(item);
+        Int32 count;
+        user->GetSize(&count);
+        for (Int32 j = 0; j < count; j++) {
+            AutoPtr<IInterface> obj;
+            user->Get(j, (IInterface**)&obj);
+            IBatterySipper* bs = IBatterySipper::Probe(obj);
+
             bs->ComputeMobilemspp();
-            if (bs->mMobilemspp != 0) {
-                mMobilemsppList->Add((IObject*)bs);
+            Double mobilemspp;
+            bs->GetMobilemspp(&mobilemspp);
+            if (mobilemspp != 0) {
+                mMobilemsppList->Add(bs);
             }
         }
     }
@@ -522,18 +530,18 @@ void BatteryStatsHelper::RefreshStats(
         if (mMinDrainedPower > mComputedPower) {
             Double amount = mMinDrainedPower - mComputedPower;
             mTotalPower = mMinDrainedPower;
-            AddEntryNoTotal(BatterySipper::UNACCOUNTED, 0, amount);
+            AddEntryNoTotal(BatterySipperDrainType_UNACCOUNTED, 0, amount);
         }
         else if (mMaxDrainedPower < mComputedPower) {
             Double amount = mComputedPower - mMaxDrainedPower;
-            AddEntryNoTotal(BatterySipper::OVERCOUNTED, 0, amount);
+            AddEntryNoTotal(BatterySipperDrainType_OVERCOUNTED, 0, amount);
         }
     }
 
-    collections->Sort(mUsageList);
+    return collections->Sort(mUsageList);
 }
 
-void BatteryStatsHelper::ProcessAppUsage(
+void CBatteryStatsHelper::ProcessAppUsage(
     /* [in] */ ISparseArray* asUsers)
 {
     AutoPtr<IInterface> userAll;
@@ -554,7 +562,7 @@ void BatteryStatsHelper::ProcessAppUsage(
     Double mobilePowerPerMs = GetMobilePowerPerMs();
     Double wifiPowerPerPacket = GetWifiPowerPerPacket();
     Int64 appWakelockTimeUs = 0;
-    AutoPtr<BatterySipper> osApp;
+    AutoPtr<CBatterySipper> osApp;
     mStatsPeriod = mTypeBatteryRealtime;
     AutoPtr<ISparseArray> uidStats;
     mStats->GetUidStats((ISparseArray**)&uidStats);
@@ -835,66 +843,71 @@ void BatteryStatsHelper::ProcessAppUsage(
         if (power != 0 || uid == 0) {
             AutoPtr<ArrayOf<Double> > array = ArrayOf<Double>::Alloc(1);
             (*array)[0] = power;
-            AutoPtr<BatterySipper> app = new BatterySipper(BatterySipper::APP, u, array);
-            app->mCpuTime = cpuTime;
-            app->mGpsTime = gpsTime;
-            app->mWifiRunningTime = wifiRunningTimeMs;
-            app->mCpuFgTime = cpuFgTime;
-            app->mWakeLockTime = wakelockTime;
-            app->mMobileRxPackets = mobileRx;
-            app->mMobileTxPackets = mobileTx;
-            app->mMobileActive = mobileActive / 1000;
-            u->GetMobileRadioActiveCount(mStatsType, &app->mMobileActiveCount);
-            app->mWifiRxPackets = wifiRx;
-            app->mWifiTxPackets = wifiTx;
-            app->mMobileRxBytes = mobileRxB;
-            app->mMobileTxBytes = mobileTxB;
-            app->mWifiRxBytes = wifiRxB;
-            app->mWifiTxBytes = wifiTxB;
-            app->mPackageWithHighestDrain = packageWithHighestDrain;
+            AutoPtr<IBatterySipper> app;
+            CBatterySipper::New(BatterySipperDrainType_APP, u, array, (IBatterySipper**)&app);
+            app->SetCpuTime(cpuTime);
+            app->SetGpsTime(gpsTime);
+            app->SetWifiRunningTime(wifiRunningTimeMs);
+            app->SetCpuFgTime(cpuFgTime);
+            app->SetWakeLockTime(wakelockTime);
+            app->SetMobileRxPackets(mobileRx);
+            app->SetMobileTxPackets(mobileTx);
+            app->SetMobileActive(mobileActive / 1000);
+            Int32 data;
+            u->GetMobileRadioActiveCount(mStatsType, &data);
+            app->SetMobileActiveCount(data);
+            app->SetWifiRxPackets(wifiRx);
+            app->SetWifiTxPackets(wifiTx);
+            app->SetMobileRxBytes(mobileRxB);
+            app->SetMobileTxBytes(mobileTxB);
+            app->SetWifiRxBytes(wifiRxB);
+            app->SetWifiTxBytes(wifiTxB);
+            app->SetPackageWithHighestDrain(packageWithHighestDrain);
 
             AutoPtr<IInterface> user;
             if (uid == IProcess::WIFI_UID) {
-                mWifiSippers.PushBack(app);
+                mWifiSippers->Add(app);
                 mWifiPower += power;
             }
             else if (uid == IProcess::BLUETOOTH_UID) {
-                mBluetoothSippers.PushBack(app);;
+                mBluetoothSippers->Add(app);;
                 mBluetoothPower += power;
             }
             else if (!forAllUsers && (asUsers->Get(userId, (IInterface**)&user), user) == NULL
-                && UserHandle::GetAppId(uid) >= IProcess::FIRST_APPLICATION_UID) {
-                AutoPtr<List<AutoPtr<BatterySipper> > > list;
-                HashMap<Int32, AutoPtr<List<AutoPtr<BatterySipper> > > >::Iterator sipperIt = mUserSippers.Find(userId);
-                if (sipperIt != mUserSippers.End()) {
-                    list = sipperIt->mSecond;
-                }
+                    && UserHandle::GetAppId(uid) >= IProcess::FIRST_APPLICATION_UID) {
+                AutoPtr<IInterface> obj;
+                mUserSippers->Get(userId, (IInterface**)&obj);
+                AutoPtr<IList> list = IList::Probe(obj); // List<BatterySipper>
+
                 if (list == NULL) {
-                    list = new List<AutoPtr<BatterySipper> >();
-                    mUserSippers[userId] = list;
+                    CArrayList::New((IList**)&list);
+                    mUserSippers->Put(userId, list);
                 }
-                list->PushBack(app);
+                list->Add(app);
                 if (power != 0) {
-                    Double userPower;
-                    HashMap<Int32, Double>::Iterator find = mUserPower.Find(userId);
-                    if (find == mUserPower.End()) {
-                        userPower = power;
+                    AutoPtr<IInterface> userPowerObj;
+                    mUserPower->Get(userId, (IInterface**)&userPowerObj);
+                    IDouble* userPower = IDouble::Probe(userPowerObj);
+                    if (userPower == NULL) {
+                        userPower = CoreUtils::Convert(power);
                     }
                     else {
-                        userPower = find->mSecond;
-                        userPower += power;
+                        Double data;
+                        userPower->GetValue(&data);
+                        userPower = NULL;
+                        userPower = CoreUtils::Convert(data + power);
                     }
-                    mUserPower[userId] = userPower;
+                    mUserPower->Put(userId, userPower);
                 }
             }
             else {
-                mUsageList->Add((IObject*)app);
+                mUsageList->Add(app);
                 if (power > mMaxPower) mMaxPower = power;
                 if (power > mMaxRealPower) mMaxRealPower = power;
                 mComputedPower += power;
             }
             if (uid == 0) {
-                osApp = app;
+                osApp = (CBatterySipper*)app.Get();
             }
         }
     }
@@ -911,8 +924,9 @@ void BatteryStatsHelper::ProcessAppUsage(
             Double averagePower;
             mPowerProfile->GetAveragePower(IPowerProfile::POWER_CPU_AWAKE, &averagePower);
             Double power = (wakeTimeMillis * averagePower) /  (60*60*1000);
-            if (DEBUG)
+            if (DEBUG) {
                 Logger::D(TAG, "OS wakeLockTime %lld power %s", wakeTimeMillis, MakemAh(power).string());
+            }
             osApp->mWakeLockTime += wakeTimeMillis;
             osApp->mValue += power;
             (*osApp->mValues)[0] += power;
@@ -923,7 +937,7 @@ void BatteryStatsHelper::ProcessAppUsage(
     }
 }
 
-void BatteryStatsHelper::AddPhoneUsage()
+void CBatteryStatsHelper::AddPhoneUsage()
 {
     Int64 phoneOnTime;
     mStats->GetPhoneOnTime(mRawRealtime, mStatsType, &phoneOnTime);
@@ -932,11 +946,11 @@ void BatteryStatsHelper::AddPhoneUsage()
     mPowerProfile->GetAveragePower(IPowerProfile::POWER_RADIO_ACTIVE, &averagePower);
     Double phoneOnPower = averagePower * phoneOnTimeMs / (60*60*1000);
     if (phoneOnPower != 0) {
-        AutoPtr<BatterySipper> bs = AddEntry(BatterySipper::PHONE, phoneOnTimeMs, phoneOnPower);
+        AutoPtr<IBatterySipper> bs = AddEntry(BatterySipperDrainType_PHONE, phoneOnTimeMs, phoneOnPower);
     }
 }
 
-void BatteryStatsHelper::AddScreenUsage()
+void CBatteryStatsHelper::AddScreenUsage()
 {
     Double power = 0;
     Int64 screenOnTime;
@@ -962,11 +976,11 @@ void BatteryStatsHelper::AddScreenUsage()
     }
     power /= (60*60*1000); // To hours
     if (power != 0) {
-        AddEntry(BatterySipper::SCREEN, screenOnTimeMs, power);
+        AddEntry(BatterySipperDrainType_SCREEN, screenOnTimeMs, power);
     }
 }
 
-void BatteryStatsHelper::AddRadioUsage()
+void CBatteryStatsHelper::AddRadioUsage()
 {
     Double power = 0;
     Int32 BINS = ISignalStrength::NUM_SIGNAL_STRENGTH_BINS;
@@ -1006,27 +1020,32 @@ void BatteryStatsHelper::AddRadioUsage()
         power += GetMobilePowerPerMs() * remainingActiveTime;
     }
     if (power != 0) {
-        AutoPtr<BatterySipper> bs = AddEntry(BatterySipper::CELL, signalTimeMs, power);
+        AutoPtr<IBatterySipper> bs = AddEntry(BatterySipperDrainType_CELL, signalTimeMs, power);
         if (signalTimeMs != 0) {
-            bs->mNoCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
+            bs->SetNoCoveragePercent(noCoverageTimeMs * 100.0 / signalTimeMs);
         }
-        bs->mMobileActive = remainingActiveTime;
-        mStats->GetMobileRadioActiveUnknownCount(mStatsType, &bs->mMobileActiveCount);
+        bs->SetMobileActive(remainingActiveTime);
+        Int32 data;
+        mStats->GetMobileRadioActiveUnknownCount(mStatsType, &data);
+        bs->SetMobileActiveCount(data);
     }
 }
 
-void BatteryStatsHelper::AggregateSippers(
-    /* [in] */ BatterySipper* bs,
-    /* [in] */ List<AutoPtr<BatterySipper> >* from,
+void CBatteryStatsHelper::AggregateSippers(
+    /* [in] */ IBatterySipper* _bs,
+    /* [in] */ IList* from,
     /* [in] */ const String& tag)
 {
-    List<AutoPtr<BatterySipper> >::Iterator it = from->Begin();
-    for (; it != from->End(); ++it) {
-        AutoPtr<BatterySipper> wbs = *it;
+    CBatterySipper* bs = (CBatterySipper*)_bs;
+    Int32 size;
+    from->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        from->Get(i, (IInterface**)&obj);
+        CBatterySipper* wbs = (CBatterySipper*)IBatterySipper::Probe(obj);
+
         if (DEBUG) {
-            String strWbs;
-            wbs->ToString(&strWbs);
-            Logger::D(TAG, "%s adding sipper %s: cpu=%lld", tag.string(), strWbs.string(), wbs->mCpuTime);
+            Logger::D(TAG, "%s adding sipper %s: cpu=%lld", tag.string(), TO_CSTR(wbs), wbs->mCpuTime);
         }
         bs->mCpuTime += wbs->mCpuTime;
         bs->mGpsTime += wbs->mGpsTime;
@@ -1047,7 +1066,7 @@ void BatteryStatsHelper::AggregateSippers(
     bs->ComputeMobilemspp();
 }
 
-void BatteryStatsHelper::AddWiFiUsage()
+void CBatteryStatsHelper::AddWiFiUsage()
 {
     Int64 onTime;
     mStats->GetWifiOnTime(mRawRealtime, mStatsType, &onTime);
@@ -1065,12 +1084,12 @@ void BatteryStatsHelper::AddWiFiUsage()
         Logger::D(TAG, "Wifi: time=%lld power=%s", runningTimeMs, MakemAh(wifiPower).string());
     }
     if ((wifiPower+mWifiPower) != 0) {
-        AutoPtr<BatterySipper> bs = AddEntry(BatterySipper::WIFI, runningTimeMs, wifiPower + mWifiPower);
-        AggregateSippers(bs, &mWifiSippers, String("WIFI"));
+        AutoPtr<IBatterySipper> bs = AddEntry(BatterySipperDrainType_WIFI, runningTimeMs, wifiPower + mWifiPower);
+        AggregateSippers(bs, mWifiSippers, String("WIFI"));
     }
 }
 
-void BatteryStatsHelper::AddIdleUsage()
+void CBatteryStatsHelper::AddIdleUsage()
 {
     Int64 onTime;
     mStats->GetScreenOnTime(mRawRealtime, mStatsType, &onTime);
@@ -1082,11 +1101,11 @@ void BatteryStatsHelper::AddIdleUsage()
         Logger::D(TAG, "Idle: time=%lld power=%s", idleTimeMs, MakemAh(idlePower).string());
     }
     if (idlePower != 0) {
-        AddEntry(BatterySipper::IDLE, idleTimeMs, idlePower);
+        AddEntry(BatterySipperDrainType_IDLE, idleTimeMs, idlePower);
     }
 }
 
-void BatteryStatsHelper::AddBluetoothUsage()
+void CBatteryStatsHelper::AddBluetoothUsage()
 {
     Int64 onTime;
     mStats->GetBluetoothOnTime(mRawRealtime, mStatsType, &onTime);
@@ -1106,13 +1125,13 @@ void BatteryStatsHelper::AddBluetoothUsage()
     }
     btPower += pingPower;
     if ((btPower+mBluetoothPower) != 0) {
-        AutoPtr<BatterySipper> bs = AddEntry(BatterySipper::BLUETOOTH, btOnTimeMs,
+        AutoPtr<IBatterySipper> bs = AddEntry(BatterySipperDrainType_BLUETOOTH, btOnTimeMs,
                 btPower + mBluetoothPower);
-        AggregateSippers(bs, &mBluetoothSippers, String("Bluetooth"));
+        AggregateSippers(bs, mBluetoothSippers, String("Bluetooth"));
     }
 }
 
-void BatteryStatsHelper::AddFlashlightUsage()
+void CBatteryStatsHelper::AddFlashlightUsage()
 {
     Int64 flashlightOnTime;
     mStats->GetFlashlightOnTime(mRawRealtime, mStatsType, &flashlightOnTime);
@@ -1121,25 +1140,38 @@ void BatteryStatsHelper::AddFlashlightUsage()
     mPowerProfile->GetAveragePower(IPowerProfile::POWER_FLASHLIGHT, &averagePower);
     Double flashlightPower = flashlightOnTimeMs * averagePower / (60*60*1000);
     if (flashlightPower != 0) {
-        AddEntry(BatterySipper::FLASHLIGHT, flashlightOnTimeMs, flashlightPower);
+        AddEntry(BatterySipperDrainType_FLASHLIGHT, flashlightOnTimeMs, flashlightPower);
     }
 }
 
-void BatteryStatsHelper::AddUserUsage()
+void CBatteryStatsHelper::AddUserUsage()
 {
-    HashMap<Int32, AutoPtr<List<AutoPtr<BatterySipper> > > >::Iterator iter = mUserSippers.Begin();
-    for (; iter != mUserSippers.End(); ++iter) {
-        Int32 userId = iter->mFirst;
-        AutoPtr<List<AutoPtr<BatterySipper> > > sippers = iter->mSecond;
-        HashMap<Int32, Double>::Iterator find = mUserPower.Find(userId);
-        Double power = (find != mUserPower.End()) ? find->mSecond : 0.0;
-        AutoPtr<BatterySipper> bs = AddEntry(BatterySipper::USER, 0, power);
-        bs->mUserId = userId;
+    Int32 size;
+    mUserSippers->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        Int32 userId;
+        mUserSippers->KeyAt(i, &userId);
+
+        AutoPtr<IInterface> item;
+        mUserSippers->ValueAt(i, (IInterface**)&item);
+        IList* sippers = IList::Probe(item);
+
+        AutoPtr<IInterface> userPowerObj;
+        mUserPower->Get(userId, (IInterface**)&userPowerObj);
+        IDouble* userPower = IDouble::Probe(userPowerObj);
+
+        Double power = 0.0;
+        if (userPower != NULL) {
+            userPower->GetValue(&power);
+        }
+
+        AutoPtr<IBatterySipper> bs = AddEntry(BatterySipperDrainType_USER, 0, power);
+        bs->SetUserId(userId);
         AggregateSippers(bs, sippers, String("User"));
     }
 }
 
-Double BatteryStatsHelper::GetMobilePowerPerPacket()
+Double CBatteryStatsHelper::GetMobilePowerPerPacket()
 {
     Int64 MOBILE_BPS = 200000; // TODO: Extract average bit rates from system
     Double averagePower;
@@ -1162,14 +1194,14 @@ Double BatteryStatsHelper::GetMobilePowerPerPacket()
     return (MOBILE_POWER / mobilePps) / (60*60);
 }
 
-Double BatteryStatsHelper::GetMobilePowerPerMs()
+Double CBatteryStatsHelper::GetMobilePowerPerMs()
 {
     Double averagePower;
     mPowerProfile->GetAveragePower(IPowerProfile::POWER_RADIO_ACTIVE, &averagePower);
     return averagePower / (60*60*1000);
 }
 
-Double BatteryStatsHelper::GetWifiPowerPerPacket()
+Double CBatteryStatsHelper::GetWifiPowerPerPacket()
 {
     Double averagePower;
     mPowerProfile->GetAveragePower(IPowerProfile::POWER_WIFI_ACTIVE, &averagePower);
@@ -1178,7 +1210,7 @@ Double BatteryStatsHelper::GetWifiPowerPerPacket()
     return (WIFI_POWER / (((Double)WIFI_BPS) / 8 / 2048)) / (60*60);
 }
 
-void BatteryStatsHelper::ProcessMiscUsage()
+void CBatteryStatsHelper::ProcessMiscUsage()
 {
     AddUserUsage();
     AddPhoneUsage();
@@ -1193,8 +1225,8 @@ void BatteryStatsHelper::ProcessMiscUsage()
     }
 }
 
-AutoPtr<BatterySipper> BatteryStatsHelper::AddEntry(
-    /* [in] */ BatterySipper::DrainType drainType,
+AutoPtr<IBatterySipper> CBatteryStatsHelper::AddEntry(
+    /* [in] */ BatterySipperDrainType drainType,
     /* [in] */ Int64 time,
     /* [in] */ Double power)
 {
@@ -1203,81 +1235,120 @@ AutoPtr<BatterySipper> BatteryStatsHelper::AddEntry(
     return AddEntryNoTotal(drainType, time, power);
 }
 
-AutoPtr<BatterySipper> BatteryStatsHelper::AddEntryNoTotal(
-    /* [in] */ BatterySipper::DrainType drainType,
+AutoPtr<IBatterySipper> CBatteryStatsHelper::AddEntryNoTotal(
+    /* [in] */ BatterySipperDrainType drainType,
     /* [in] */ Int64 time,
     /* [in] */ Double power)
 {
     if (power > mMaxPower) mMaxPower = power;
     AutoPtr<ArrayOf<Double> > array = ArrayOf<Double>::Alloc(1);
     (*array)[0] = power;
-    AutoPtr<BatterySipper> bs = new BatterySipper(drainType, NULL, array);
-    bs->mUsageTime = time;
-    mUsageList->Add((IObject*)bs);
+    AutoPtr<IBatterySipper> bs;
+    CBatterySipper::New(drainType, NULL, array, (IBatterySipper**)&bs);
+    bs->SetUsageTime(time);
+    mUsageList->Add(bs);
     return bs;
 }
 
-AutoPtr<IList> BatteryStatsHelper::GetUsageList()
+ECode CBatteryStatsHelper::GetUsageList(
+    /* [out] */ IList** usageList)
 {
-    return mUsageList;
+    VALIDATE_NOT_NULL(usageList)
+    *usageList = mUsageList;
+    REFCOUNT_ADD(*usageList)
+    return NOERROR;
 }
 
-AutoPtr<IList> BatteryStatsHelper::GetMobilemsppList()
+ECode CBatteryStatsHelper::GetMobilemsppList(
+    /* [out] */ IList** mobilemsppList)
 {
-    return mMobilemsppList;
+    VALIDATE_NOT_NULL(mobilemsppList)
+    *mobilemsppList = mMobilemsppList;
+    REFCOUNT_ADD(*mobilemsppList)
+    return NOERROR;
 }
 
-Int64 BatteryStatsHelper::GetStatsPeriod()
+ECode CBatteryStatsHelper::GetStatsPeriod(
+    /* [out] */ Int64* statsPeriod)
 {
-    return mStatsPeriod;
+    VALIDATE_NOT_NULL(statsPeriod)
+    *statsPeriod = mStatsPeriod;
+    return NOERROR;
 }
 
-Int32 BatteryStatsHelper::GetStatsType()
+ECode CBatteryStatsHelper::GetStatsType(
+    /* [out] */ Int32* statsType)
 {
-    return mStatsType;
+    VALIDATE_NOT_NULL(statsType)
+    *statsType = mStatsType;
+    return NOERROR;
 };
 
-Double BatteryStatsHelper::GetMaxPower()
+ECode CBatteryStatsHelper::GetMaxPower(
+    /* [out] */ Double* maxPower)
 {
-    return mMaxPower;
+    VALIDATE_NOT_NULL(maxPower)
+    *maxPower = mMaxPower;
+    return NOERROR;
 }
 
-Double BatteryStatsHelper::GetMaxRealPower()
+ECode CBatteryStatsHelper::GetMaxRealPower(
+    /* [out] */ Double* maxRealPower)
 {
-    return mMaxRealPower;
+    VALIDATE_NOT_NULL(maxRealPower)
+    *maxRealPower = mMaxRealPower;
+    return NOERROR;
 }
 
-Double BatteryStatsHelper::GetTotalPower()
+ECode CBatteryStatsHelper::GetTotalPower(
+    /* [out] */ Double* totalPower)
 {
-    return mTotalPower;
+    VALIDATE_NOT_NULL(totalPower)
+    *totalPower = mTotalPower;
+    return NOERROR;
 }
 
-Double BatteryStatsHelper::GetComputedPower()
+ECode CBatteryStatsHelper::GetComputedPower(
+    /* [out] */ Double* computedPower)
 {
-    return mComputedPower;
+    VALIDATE_NOT_NULL(computedPower)
+    *computedPower = mComputedPower;
+    return NOERROR;
 }
 
-Double BatteryStatsHelper::GetMinDrainedPower()
+ECode CBatteryStatsHelper::GetMinDrainedPower(
+    /* [out] */ Double* minDrainedPower)
 {
-    return mMinDrainedPower;
+    VALIDATE_NOT_NULL(minDrainedPower)
+    *minDrainedPower = mMinDrainedPower;
+    return NOERROR;
 }
 
-Double BatteryStatsHelper::GetMaxDrainedPower()
+ECode CBatteryStatsHelper::GetMaxDrainedPower(
+    /* [out] */ Double* maxDrainedPower)
 {
-    return mMaxDrainedPower;
+    VALIDATE_NOT_NULL(maxDrainedPower)
+    *maxDrainedPower = mMaxDrainedPower;
+    return NOERROR;
 }
 
-Int64 BatteryStatsHelper::GetBatteryTimeRemaining()
+ECode CBatteryStatsHelper::GetBatteryTimeRemaining(
+    /* [out] */ Int64* batteryTimeRemaining)
 {
-    return mBatteryTimeRemaining;
+    VALIDATE_NOT_NULL(batteryTimeRemaining)
+    *batteryTimeRemaining = mBatteryTimeRemaining;
+    return NOERROR;
 }
 
-Int64 BatteryStatsHelper::GetChargeTimeRemaining()
+ECode CBatteryStatsHelper::GetChargeTimeRemaining(
+    /* [out] */ Int64* chargeTimeRemaining)
 {
-    return mChargeTimeRemaining;
+    VALIDATE_NOT_NULL(chargeTimeRemaining)
+    *chargeTimeRemaining = mChargeTimeRemaining;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<Byte> > BatteryStatsHelper::ReadFully(
+AutoPtr<ArrayOf<Byte> > CBatteryStatsHelper::ReadFully(
     /* [in] */ IFileInputStream* stream)
 {
     Int32 avail;
@@ -1285,7 +1356,7 @@ AutoPtr<ArrayOf<Byte> > BatteryStatsHelper::ReadFully(
     return ReadFully(stream, avail);
 }
 
-AutoPtr<ArrayOf<Byte> > BatteryStatsHelper::ReadFully(
+AutoPtr<ArrayOf<Byte> > CBatteryStatsHelper::ReadFully(
     /* [in] */ IFileInputStream* stream,
     /* [in] */ Int32 avail)
 {
@@ -1311,7 +1382,7 @@ AutoPtr<ArrayOf<Byte> > BatteryStatsHelper::ReadFully(
     }
 }
 
-void BatteryStatsHelper::Load()
+void CBatteryStatsHelper::Load()
 {
     if (mBatteryInfo == NULL) {
         return;
@@ -1325,7 +1396,7 @@ void BatteryStatsHelper::Load()
     }
 }
 
-AutoPtr<IBatteryStatsImpl> BatteryStatsHelper::GetStats(
+AutoPtr<IBatteryStatsImpl> CBatteryStatsHelper::GetStats(
     /* [in] */ IIBatteryStats* service)
 {
     // try {

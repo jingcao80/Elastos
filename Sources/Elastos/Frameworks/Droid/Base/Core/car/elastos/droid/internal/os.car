@@ -2,6 +2,7 @@ module
 {
     merge("os/BackgroundThread.car");
     merge("os/BaseCommand.car");
+    merge("os/BatterySipper.car");
     merge("os/BatteryStatsHelper.car");
     merge("os/BatteryStatsImpl.car");
     merge("os/HandlerCaller.car");
@@ -28,6 +29,7 @@ module
     interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IBatteryStats;
+    interface Elastos.Droid.Os.IBatteryStatsUid;
 
     namespace Elastos {
     namespace Droid {
@@ -36,6 +38,34 @@ module
 
     singleton class CBackgroundThreadHelper {
         interface IBackgroundThreadHelper;
+    }
+
+    [local, deprecated]
+    class CBatterySipper {
+        constructor(
+            [in] BatterySipperDrainType drainType,
+            [in] IBatteryStatsUid* uid,
+            [in] ArrayOf<Double>* values);
+
+        interface IBatterySipper;
+        interface IComparable;
+    }
+
+    [local]
+    class CBatteryStatsHelper {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Boolean collectBatteryBroadcast);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] Boolean collectBatteryBroadcast,
+            [in] Boolean wifiOnly);
+
+        interface IBatteryStatsHelper;
     }
 
     singleton class CBatteryStatsHelperHelper {
