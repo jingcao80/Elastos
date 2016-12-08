@@ -35,7 +35,7 @@ public:
 //        /* [out] */ UInt32* inSize,
 //        /* [out] */ UInt32* outSize);
 //
-    CARAPI MarshalIn(
+    CARAPI PackingArguments(
         /* [in] */ IMethodInfo* methodInfo,
         /* [in] */ UInt32* args,
         /* [in, out] */ IArgumentList* argList);
