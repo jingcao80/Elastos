@@ -348,7 +348,8 @@ LauncherModel::MyRunnable4::MyRunnable4(
 
 ECode LauncherModel::MyRunnable4::Run()
 {
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(this);
         NotifyAll();
         mHost->mFlushingWorkerThread = FALSE;
     }
@@ -2870,20 +2871,21 @@ ECode LauncherModel::UpdateItemInDatabaseHelper(
 ECode LauncherModel::FlushWorkerThread()
 {
     mFlushingWorkerThread = TRUE;
-    AutoPtr<IRunnable> waiter = new MyRunnable4(this);
+    AutoPtr<MyRunnable4> waiter = new MyRunnable4(this);
 
-    {    AutoLock syncLock(waiter);
+    {
+        AutoLock syncLock(waiter);
         RunOnWorkerThread(waiter);
         if (mLoaderTask != NULL) {
-            {    AutoLock syncLock(mLoaderTask);
+            {
+                AutoLock syncLock(mLoaderTask);
                 mLoaderTask->Notify();
             }
         }
         Boolean success = FALSE;
         while (!success) {
             //try {
-            ECode ec = ((Object*)IObject::Probe(waiter))->Wait();
-            if (SUCCEEDED(ec)) {
+            if (SUCCEEDED(waiter->Wait())) {
                 success = TRUE;
             }
             //} catch (InterruptedException e) {
