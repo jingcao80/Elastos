@@ -363,7 +363,7 @@ protected:
 private:
     CARAPI_(void) SendUiMessage(
         /* [in] */ Int32 what,
-        /* [in] */ const String& str);
+        /* [in] */ IInterface* obj);
 
     CARAPI_(void) LogStatus(
         /* [in] */ const String& msg,

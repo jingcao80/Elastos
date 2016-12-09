@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFSecureDemo {
+    namespace ECDHEClient {
+
+    [deprecated, @Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.bus.samples.secure.SecureInterface")]
+    interface ISecureInterface {
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        Ping(
+            [in] String inStr,
+            [out] String* result);
+    }
+
+    } // namespace ECDHEClient
+    } // namespace DFSecureDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}

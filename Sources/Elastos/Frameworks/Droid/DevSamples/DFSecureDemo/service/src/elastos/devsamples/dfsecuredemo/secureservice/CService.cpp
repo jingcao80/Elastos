@@ -221,7 +221,7 @@ ECode CService::AuthListeners::Completed(
     if (it != mAuthListeners.End()) {
         it->mSecond->Completed(mechanism, authPeer, authenticated);
     }
-    mHost->SendUiMessage(MESSAGE_AUTH_COMPLETE, String(authenticated ? "TRUE" : "FALSE"));
+    mHost->SendUiMessage(MESSAGE_AUTH_COMPLETE, CoreUtils::Convert(authenticated));
     return NOERROR;
 }
 
@@ -250,7 +250,7 @@ ECode CService::SrpKeyXListener::Requested(
         mPasswordGenerator->NextInt32(1000000, &i);
         mHost->mPassword = NULL;
         mHost->mPassword.AppendFormat("%06d", i);
-        mHost->SendUiMessage(MESSAGE_SHOW_ONE_TIME_PASSWORD_DIALOG, String(NULL));
+        mHost->SendUiMessage(MESSAGE_SHOW_ONE_TIME_PASSWORD_DIALOG, NULL);
     }
     Int32 len = requests ? requests->GetLength() : 0;
     for (Int32 i = 0; i < len; i++) {
@@ -438,7 +438,7 @@ ECode CService::ECDHEKeyXListener::Completed(
     /* [in] */ const String& authPeer,
     /* [in] */ Boolean authenticated)
 {
-    mHost->SendUiMessage(MESSAGE_AUTH_COMPLETE, String(authenticated ? "TRUE" : "FALSE"));
+    mHost->SendUiMessage(MESSAGE_AUTH_COMPLETE, CoreUtils::Convert(authenticated));
     return NOERROR;
 }
 
@@ -460,8 +460,8 @@ ECode CService::SecureService::Ping(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    mHost->SendUiMessage(MESSAGE_PING, inStr);
-    mHost->SendUiMessage(MESSAGE_PING_REPLY, inStr);
+    mHost->SendUiMessage(MESSAGE_PING, CoreUtils::Convert(inStr));
+    mHost->SendUiMessage(MESSAGE_PING_REPLY, CoreUtils::Convert(inStr));
     *result = inStr;
     return NOERROR;
 }
@@ -789,10 +789,10 @@ void CService::OnPrepareDialog(
 
 void CService::SendUiMessage(
     /* [in] */ Int32 what,
-    /* [in] */ const String& str)
+    /* [in] */ IInterface* obj)
 {
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(what, CoreUtils::Convert(str), (IMessage**)&msg);
+    mHandler->ObtainMessage(what, obj, (IMessage**)&msg);
     Boolean result;
     mHandler->SendMessage(msg, &result);
 }

@@ -4,7 +4,7 @@ module
     importlib("Org.Alljoyn.Bus.eco");
     importlib("Elastos.Droid.Core.eco");
 
-    merge("car/elastos/devsamples/dfbasicdemo/basicservice/BasicInterface.car");
+    merge("car/elastos/devsamples/dfsecuredemo/ecdheclient/SecureInterface.car");
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.Content.IContext;
@@ -18,14 +18,13 @@ module
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
-    using interface Org.Alljoyn.Bus.IBusObject;
 
     namespace Elastos {
     namespace DevSamples {
-    namespace DFBasicDemo {
-    namespace BasicService {
+    namespace DFSecureDemo {
+    namespace ECDHEClient {
 
-    class CService {
+    class CClient {
         constructor();
 
         interface IActivity;
@@ -41,16 +40,8 @@ module
         interface IOnWindowDismissedCallback;
     }
 
-    class CBasicService {
-        constructor(
-            [in] IObject* host);
-
-        interface IBasicInterface;
-        interface IBusObject;
-    }
-
-    } // namespace BasicService
-    } // namespace DFBasicDemo
+    } // namespace ECDHEClient
+    } // namespace DFSecureDemo
     } // namespace DevSamples
     } // namespace Elastos
 }
