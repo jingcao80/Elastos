@@ -2698,8 +2698,7 @@ void CAppOpsService::RecordOperationLocked(
                 }
                 op->mNesting = op->mNesting + op->mStartOpCount;
                 Int32 tokSize = 0;
-                op->mClientTokens->GetSize(&tokSize);
-                while(tokSize != 0) {
+                while((op->mClientTokens->GetSize(&tokSize), tokSize) != 0) {
                     AutoPtr<IInterface> clientToken;
                     op->mClientTokens->Get(0, (IInterface**)&clientToken);
                     AutoPtr<IInterface> pC;
