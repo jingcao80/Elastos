@@ -74,7 +74,8 @@ InstallShortcutReceiver::MyThread::MyThread(
 
 ECode InstallShortcutReceiver::MyThread::Run()
 {
-    {    AutoLock syncLock(sLock);
+    {
+        AutoLock syncLock(sLock);
         // If the new app is going to fall into the same page as before,
         // then just continue adding to the current page
         Int32 newAppsScreen;
@@ -495,25 +496,21 @@ Boolean InstallShortcutReceiver::InstallShortcut(
             if (action.IsNull()) {
                 intent->SetAction(IIntent::ACTION_VIEW);
             }
-            else {
-                String action;
-                intent->GetAction(&action);
-                if (action.Equals(IIntent::ACTION_MAIN)) {
-                    AutoPtr<ArrayOf<String> > categories;
-                    intent->GetCategories((ArrayOf<String>**)&categories);
-                    if (categories != NULL) {
-                        Boolean res2 = FALSE;
-                        for (Int32 i = 0; i < categories->GetLength(); i++){
-                            if((*categories)[i].Equals(IIntent::CATEGORY_LAUNCHER)) {
-                                res2 = TRUE;
-                                break;
-                            }
+            else if (action.Equals(IIntent::ACTION_MAIN)){
+                AutoPtr<ArrayOf<String> > categories;
+                intent->GetCategories((ArrayOf<String>**)&categories);
+                if (categories != NULL) {
+                    Boolean res2 = FALSE;
+                    for (Int32 i = 0; i < categories->GetLength(); i++){
+                        if((*categories)[i].Equals(IIntent::CATEGORY_LAUNCHER)) {
+                            res2 = TRUE;
+                            break;
                         }
-                        if (res2) {
-                            intent->AddFlags(
-                                    IIntent::FLAG_ACTIVITY_NEW_TASK |
-                                    IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                        }
+                    }
+                    if (res2) {
+                        intent->AddFlags(
+                                IIntent::FLAG_ACTIVITY_NEW_TASK |
+                                IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     }
                 }
             }
