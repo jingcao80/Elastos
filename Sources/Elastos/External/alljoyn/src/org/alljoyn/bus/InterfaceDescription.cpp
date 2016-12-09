@@ -660,7 +660,7 @@ ECode InterfaceDescription::AddMembers(
         AutoPtr<IAnnotationInfo> m;
         member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&m);
         AutoPtr<IAnnotationInfo> s;
-        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&s);
+        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&s);
         AutoPtr<IAnnotationInfo> ap;
         member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.AccessPermission"), (IAnnotationInfo**)&ap);
 
@@ -744,7 +744,7 @@ String InterfaceDescription::GetName(
     AutoPtr<IAnnotationInfo> busIntf;
     intf->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&busIntf);
     String name;
-    if (busIntf != NULL && (busIntf->GetValue(String("name"), &name), name.GetLength() > 0)) {
+    if (busIntf != NULL && (busIntf->GetValue(String("name"), &name), !name.IsNullOrEmpty())) {
         return name;
     }
     else {
@@ -775,19 +775,19 @@ String InterfaceDescription::GetName(
     AutoPtr<IAnnotationInfo> busMethod;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
     String name;
-    if (busMethod != NULL && (busMethod->GetValue(String("name"), &name), name.GetLength() > 0)) {
+    if (busMethod != NULL && (busMethod->GetValue(String("name"), &name), !name.IsNullOrEmpty())) {
         return name;
     }
     AutoPtr<IAnnotationInfo> busSignal;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
-    if (busSignal != NULL && (busSignal->GetValue(String("name"), &name), name.GetLength() > 0)) {
+    if (busSignal != NULL && (busSignal->GetValue(String("name"), &name), !name.IsNullOrEmpty())) {
         return name;
     }
     AutoPtr<IAnnotationInfo> busProperty;
     method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&busProperty);
     if (busProperty != NULL) {
         busProperty->GetValue(String("name"), &name);
-        if (name.GetLength() > 0) {
+        if (!name.IsNullOrEmpty()) {
             return name;
         }
         else {

@@ -44,6 +44,8 @@ const Int32 CChatApplication::HISTORY_MAX = 20;
 
 CAR_INTERFACE_IMPL(CChatApplication, Application, IObservable)
 
+CAR_OBJECT_IMPL(CChatApplication)
+
 CChatApplication::CChatApplication()
     : mModule(Module_NONE)
     , mErrorString("ER_OK")
@@ -104,6 +106,7 @@ void CChatApplication::AlljoynError(
     /* [in] */ Module m,
     /* [in] */ const String& s)
 {
+    Logger::E(TAG, " >> AlljoynError: %s", s.string());
     AutoLock lock(this);
     mModule = m;
     mErrorString = s;
@@ -368,7 +371,7 @@ void CChatApplication::NotifyObservers(
     Logger::I(TAG, "NotifyObservers(%s)", arg.string());
     List< AutoPtr<IObserver> >::Iterator it;
     for (it = mObservers.Begin(); it != mObservers.End(); ++it) {
-        Logger::I(TAG, "notify observer = %s", TO_CSTR(*it));
+        // Logger::I(TAG, "notify observer = %s", TO_CSTR(*it));
         (*it)->Update(this, CoreUtils::Convert(arg));
     }
 }

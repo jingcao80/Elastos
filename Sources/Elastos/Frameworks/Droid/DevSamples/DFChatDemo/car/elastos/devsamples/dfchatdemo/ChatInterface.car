@@ -5,7 +5,7 @@ module
     namespace DevSamples {
     namespace DFChatDemo {
 
-    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.Bus.chat")]
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.bus.samples.chat")]
     interface IChatInterface {
 
         /*
@@ -14,7 +14,7 @@ module
          * out that this is a used as a signal emitter and is only called to send
          * signals and not to receive signals.
          */
-        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "chat")]
+        [@Org.Alljoyn.Bus.Annotation.BusSignal]
         Chat(
             [in] String str);
     }

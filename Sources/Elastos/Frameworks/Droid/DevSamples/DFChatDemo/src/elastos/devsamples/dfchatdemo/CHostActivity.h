@@ -32,9 +32,7 @@ private:
     public:
         TO_STRING_IMPL("CHostActivity::MyHandler")
 
-        MyHandler();
-
-        CARAPI constructor(
+        MyHandler(
             /* [in] */ CHostActivity* host);
 
         CARAPI HandleMessage(
@@ -82,6 +80,10 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    TO_STRING_IMPL("CHostActivity")
 
     CHostActivity();
 

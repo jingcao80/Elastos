@@ -216,6 +216,7 @@ private:
 
 private:
     friend class NativeBusObject;
+    friend class NativeBusAttachment;
 
     static const Int32 INVALID     = 0; /**< An invalid member type. */
     static const Int32 METHOD_CALL = 1; /**< A method call member. */

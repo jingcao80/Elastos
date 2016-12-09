@@ -569,7 +569,7 @@ AutoPtr<ActivityRecord> ActivityRecord::ForToken(
         return ((CActivityRecordToken*)at)->GetActivityRecord();
     }
     else if (token != NULL) {
-        Slogger::W(TAG, "Bad activity token: 0x%08x", token);
+        Slogger::W(TAG, "Bad activity token: 0x%08x, %s", token, TO_CSTR(token));
     }
     return NULL;
 }

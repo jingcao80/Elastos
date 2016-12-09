@@ -70,6 +70,10 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
+    TO_STRING_IMPL("CUseActivity")
+
     CUseActivity();
 
     ~CUseActivity();

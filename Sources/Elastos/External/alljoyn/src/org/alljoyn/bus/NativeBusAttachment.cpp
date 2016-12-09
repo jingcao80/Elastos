@@ -4,6 +4,8 @@
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
 #include "org/alljoyn/bus/NativeBusObject.h"
+#include "org/alljoyn/bus/MsgArg.h"
+#include "org/alljoyn/bus/InterfaceDescription.h"
 #include <alljoyn/MsgArg.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
@@ -452,7 +454,7 @@ QStatus NativeBusAttachment::EmitChangedSignal(
     /* [in] */ IBusObject* busObject,
     /* [in] */ const char* ifaceName,
     /* [in] */ const char* propName,
-    /* [in] */ IInterface* val,
+    /* [in] */ IInterface* propValue,
     /* [in] */ Int32 sessionId)
 {
     AutoLock lock1(gBusObjectMapLock);
@@ -465,23 +467,25 @@ QStatus NativeBusAttachment::EmitChangedSignal(
 
     QStatus status = ER_OK;
 
-    ajn::MsgArg* arg = NULL;
     ajn::MsgArg value;
 
-    if (propName) {
+    if (propValue) {
         const ajn::BusAttachment& bus = cppObject->GetBusAttachment();
         const ajn::InterfaceDescription* iface = bus.GetInterface(ifaceName);
         assert(iface);
         const ajn::InterfaceDescription::Property* prop = iface->GetProperty(propName);
         assert(prop);
-        // arg = MsgArg::::Marshal(prop->signature.c_str(), propName, &value);
+
+        String signalName(prop->signature.c_str());
         assert(0 && "TODO");
+        // if (FAILED(MsgArg::Marshal((Int64)&value, signature, propValue))) {
+        //     Logger::E(TAG, "EmitChangedSignal(): Marshal() error: ifaceName:%s, signalName:%s, inputSig:%s",
+        //         ifaceName, signalName.string(), inputSig.string());
+        //     return ER_FAIL;
+        // }
     }
 
-    if (cppObject) {
-        cppObject->EmitPropChanged(ifaceName, propName, (arg ? *arg : value), sessionId);
-    }
-
+    cppObject->EmitPropChanged(ifaceName, propName, value, sessionId);
     return status;
 }
 

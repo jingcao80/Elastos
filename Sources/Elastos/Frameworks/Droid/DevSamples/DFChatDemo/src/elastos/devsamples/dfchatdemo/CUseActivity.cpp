@@ -144,6 +144,8 @@ const Int32 CUseActivity::HANDLE_ALLJOYN_ERROR_EVENT;
 
 CAR_INTERFACE_IMPL(CUseActivity, Activity, IObserver)
 
+CAR_OBJECT_IMPL(CUseActivity)
+
 CUseActivity::CUseActivity()
     : mChatApplication(NULL)
 {}

@@ -28,26 +28,16 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        // @Override
-        // public Object invoke(Object proxy, Method method, Object[] args) throws BusException {
-        //     for (Class<?> i : proxy.getClass().getInterfaces()) {
-        //         for (Method m : i.getMethods()) {
-        //             if (method.getName().equals(m.getName())) {
-        //                 signal(source,
-        //                        destination,
-        //                        sessionId,
-        //                        InterfaceDescription.getName(i),
-        //                        InterfaceDescription.getName(m),
-        //                        InterfaceDescription.getInputSig(m),
-        //                        args,
-        //                        timeToLive,
-        //                        flags,
-        //                        msgContext);
-        //             }
-        //         }
-        //     }
-        //     return null;
-        // }
+        Emitter(
+            /* [in] */ SignalEmitter* emitter);
+
+        CARAPI Invoke(
+            /* [in] */ IInterface* proxy,
+            /* [in] */ IMethodInfo* method,
+            /* [in] */ IArgumentList* args);
+
+    private:
+        SignalEmitter* mHost;
     };
 
 public:
@@ -165,7 +155,7 @@ private:
         /* [in] */ const String& ifaceName,
         /* [in] */ const String& signalName,
         /* [in] */ const String& inputSig,
-        /* [in] */ ArrayOf<IInterface*>* args,
+        /* [in] */ IArgumentList* args,
         /* [in] */ Int32 timeToLive,
         /* [in] */ Int32 flags,
         /* [in] */ IMessageContext* ctx);
@@ -178,6 +168,8 @@ protected:
     AutoPtr<IBusObject> mSource;
 
 private:
+    friend class Emitter;
+
     static Int32 GLOBAL_BROADCAST;
     static Int32 SESSIONLESS;
 

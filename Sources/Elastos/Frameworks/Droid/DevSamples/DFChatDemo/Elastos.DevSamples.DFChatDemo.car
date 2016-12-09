@@ -110,8 +110,7 @@ module
     }
 
     class CChatService {
-        constructor(
-            [in] IAllJoynService* service);
+        constructor();
 
         interface IChatInterface;
         interface IBusObject;

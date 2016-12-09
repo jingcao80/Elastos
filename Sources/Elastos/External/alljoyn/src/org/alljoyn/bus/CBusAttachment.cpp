@@ -1077,14 +1077,16 @@ ECode CBusAttachment::SetDaemonDebug(
     /* [in] */ const String& moduleName,
     /* [in] */ Int32 level)
 {
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
+    Logger::I(TAG, " >> SetDaemonDebug TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::SetLogLevels(
     /* [in] */ const String& logEnv)
 {
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
+    Logger::I(TAG, " >> SetLogLevels TODO");
     return NOERROR;
 }
 
@@ -1092,14 +1094,16 @@ ECode CBusAttachment::SetDebugLevel(
     /* [in] */ const String& moduleName,
     /* [in] */ Int32 level)
 {
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
+    Logger::I(TAG, " >> SetDebugLevel TODO");
     return NOERROR;
 }
 
 ECode CBusAttachment::UseOSLogging(
     /* [in] */ Boolean useOSLog)
 {
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
+    Logger::I(TAG, " >> UseOSLogging TODO");
     return NOERROR;
 }
 
@@ -1461,14 +1465,14 @@ ECode CBusAttachment::RegisterBusObject(
     // try {
     AutoPtr<IList> descs;
     CArrayList::New((IList**)&descs);
-    AutoPtr<IClassInfo> clsInfo;
-    CObject::ReflectClassInfo(busObj, (IClassInfo**)&clsInfo);
+    AutoPtr<IClassInfo> clsInfo = Object::GetClassInfo(busObj);
     Int32 count;
     clsInfo->GetInterfaceCount(&count);
     AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(count);
     clsInfo->GetAllInterfaceInfos(busInterfaces);
     ECode ec = InterfaceDescription::Create(this, busInterfaces, descs);
     if (ec != E_STATUS_OK) {
+        Logger::E(TAG, "%s(): InterfaceDescription::Create failed.", __FUNCTION__);
         return ec;
     }
     AutoPtr< ArrayOf<IInterfaceDescription*> > busInterfaceArray;
@@ -1588,8 +1592,8 @@ ECode CBusAttachment::RegisterSignalHandler(
 }
 
 ECode CBusAttachment::RegisterSignalHandler(
-    /* [in] */ const String& ifaceName,
-    /* [in] */ const String& signalName,
+    /* [in] */ const String& _ifaceName,
+    /* [in] */ const String& _signalName,
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod,
     /* [in] */ const String& source)
@@ -1600,41 +1604,41 @@ ECode CBusAttachment::RegisterSignalHandler(
         return ER_FAIL;
     }
 
+    String ifaceName(_ifaceName);
+    String signalName(_signalName);
     QStatus status = busPtr->RegisterNativeSignalHandlerWithSrcPath(
         ifaceName.string(), signalName.string(), obj, handlerMethod, source.string());
     if (status == ER_BUS_NO_SUCH_INTERFACE) {
-        assert(0 && "TODO");
-        // AutoPtr<IInterfaceInfo> itfcInfo = Object:
-        // InterfaceDescription desc = new InterfaceDescription();
+        AutoPtr<IModuleInfo> moduleInfo = Object::GetModuleInfo(obj);
+        AutoPtr<IInterfaceInfo> iface;
+        moduleInfo->GetInterfaceInfo(ifaceName, (IInterfaceInfo**)&iface);
+        if (iface == NULL) {
+            status = ER_BUS_NO_SUCH_INTERFACE;
+        }
+        else {
+            AutoPtr<InterfaceDescription> desc = new InterfaceDescription();
+            status = (QStatus)desc->Create(this, iface);
+            if (status == ER_OK) {
+                ifaceName = InterfaceDescription::GetName(iface);
+                String signature;
+                handlerMethod->GetSignature(&signature);
+                AutoPtr<IMethodInfo> sig;
+                iface->GetMethodInfo(signalName, signature, (IMethodInfo**)&sig);
+                if (sig) {
+                    signalName = InterfaceDescription::GetName(sig);
+                }
 
-        // Class<?> iface = Class.forName(ifaceName);
-        // status = desc->Create(this, itfcInfo);
-        // if (status == ER_OK) {
-        //     ifaceName = InterfaceDescription->GetName(iface);
-        //     try {
-        //         Method signal = iface->GetMethod(signalName, handlerMethod.getParameterTypes());
-        //         signalName = InterfaceDescription->GetName(signal);
-        //     } catch (NoSuchMethodException ex) {
-        //         // Ignore, use signalName parameter provided
-        //     }
-        //     status = RegisterNativeSignalHandlerWithSrcPath(ifaceName, signalName, obj, handlerMethod,
-        //                                          source);
-        // }
-
-        // } catch (ClassNotFoundException ex) {
-        //     BusException.log(ex);
-        //     status = Status.BUS_NO_SUCH_INTERFACE;
-        // } catch (AnnotationBusException ex) {
-        //     BusException.log(ex);
-        //     status = Status.BAD_ANNOTATION;
-        // }
+                status = busPtr->RegisterNativeSignalHandlerWithSrcPath(
+                    ifaceName, signalName, obj, handlerMethod, source);
+            }
+        }
     }
     return status;
 }
 
 ECode CBusAttachment::RegisterSignalHandlerWithRule(
-    /* [in] */ const String& ifaceName,
-    /* [in] */ const String& signalName,
+    /* [in] */ const String& _ifaceName,
+    /* [in] */ const String& _signalName,
     /* [in] */ IInterface* obj,
     /* [in] */ IMethodInfo* handlerMethod,
     /* [in] */ const String& matchRule)
@@ -1645,34 +1649,34 @@ ECode CBusAttachment::RegisterSignalHandlerWithRule(
         return ER_FAIL;
     }
 
+    String ifaceName(_ifaceName);
+    String signalName(_signalName);
     QStatus status = busPtr->RegisterNativeSignalHandlerWithRule(
         ifaceName.string(), signalName.string(), obj, handlerMethod, matchRule.string());
     if (status == ER_BUS_NO_SUCH_INTERFACE) {
-        assert(0 && "TODO");
-        // try {
-        //     Class<?> iface = Class.forName(ifaceName);
-        //     ajn::InterfaceDescription desc = new ajn::InterfaceDescription();
-        //     status = desc.create(this, iface);
-        //     if (status == ER_OK) {
-        //         ifaceName = InterfaceDescription.getName(iface);
-        //         // try {
-        //             Method signal = iface.getMethod(signalName, handlerMethod.getParameterTypes());
-        //             signalName = InterfaceDescription.getName(signal);
-        //         // }
-        //         // catch (NoSuchMethodException ex) {
-        //         //     // Ignore, use signalName parameter provided
-        //         // }
-        //         status = busPtr->RegisterNativeSignalHandlerWithRule(ifaceName, signalName, obj, handlerMethod, matchRule);
-        //     }
-        // }
-        // catch (ClassNotFoundException ex) {
-        //     BusException.log(ex);
-        //     status = ER_BUS_NO_SUCH_INTERFACE;
-        // }
-        // catch (AnnotationBusException ex) {
-        //     BusException.log(ex);
-        //     status = ER_BAD_ANNOTATION;
-        // }
+        AutoPtr<IModuleInfo> moduleInfo = Object::GetModuleInfo(obj);
+        AutoPtr<IInterfaceInfo> iface;
+        moduleInfo->GetInterfaceInfo(ifaceName, (IInterfaceInfo**)&iface);
+        if (iface == NULL) {
+            status = ER_BUS_NO_SUCH_INTERFACE;
+        }
+        else {
+            AutoPtr<InterfaceDescription> desc = new InterfaceDescription();
+            status = (QStatus)desc->Create(this, iface);
+            if (status == ER_OK) {
+                ifaceName = InterfaceDescription::GetName(iface);
+                String signature;
+                handlerMethod->GetSignature(&signature);
+                AutoPtr<IMethodInfo> sig;
+                iface->GetMethodInfo(signalName, signature, (IMethodInfo**)&sig);
+                if (sig) {
+                    signalName = InterfaceDescription::GetName(sig);
+                }
+
+                status = busPtr->RegisterNativeSignalHandlerWithRule(
+                    ifaceName, signalName, obj, handlerMethod, matchRule);
+            }
+        }
     }
     return status;
 }
@@ -1690,7 +1694,8 @@ ECode CBusAttachment::RegisterSignalHandlers(
     if (count > 0) {
         IMethodInfo* method;
         AutoPtr< ArrayOf<IMethodInfo *> > methodInfos = ArrayOf<IMethodInfo *>::Alloc(count);
-        for (Int32 i = 0; i < count; ++count) {
+        classInfo->GetAllMethodInfos(methodInfos.Get());
+        for (Int32 i = 0; i < count; ++i) {
             method = (*methodInfos)[i];
             AutoPtr<IAnnotationInfo> annotation;
             method->GetAnnotation(

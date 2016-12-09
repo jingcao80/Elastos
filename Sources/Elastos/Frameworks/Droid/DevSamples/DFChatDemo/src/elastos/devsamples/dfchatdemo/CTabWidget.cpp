@@ -21,6 +21,8 @@ namespace DFChatDemo {
 
 static const String TAG("DFChatDemo.CTabWidget");
 
+CAR_OBJECT_IMPL(CTabWidget)
+
 ECode CTabWidget::constructor()
 {
     return TabActivity::constructor();

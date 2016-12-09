@@ -1,12 +1,16 @@
 
 #include "org/alljoyn/bus/NativeSignalHandler.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
+
+static const String TAG("NativeSignalHandler");
 
 //=============================================================
 // NativeSignalHandler
@@ -18,7 +22,6 @@ NativeSignalHandler::NativeSignalHandler(
     , mMember(NULL)
 {
     IWeakReferenceSource::Probe(obj)->GetWeakReference((IWeakReference**)&mSignalHandler);
-
 }
 
 NativeSignalHandler::~NativeSignalHandler()
@@ -49,12 +52,18 @@ QStatus NativeSignalHandler::Register(
     }
     const ajn::InterfaceDescription* intf = bus.GetInterface(ifaceName);
     if (!intf) {
+        Logger::E(TAG, "Register(): failed to GetInterface ifaceName:[%s], signalName:[%s], ancillary:[%s]",
+            ifaceName, signalName, ancillary);
         return ER_BUS_NO_SUCH_INTERFACE;
     }
+
     mMember = intf->GetMember(signalName);
     if (!mMember) {
+        Logger::E(TAG, "Register(): failed to GetMember ifaceName:[%s], signalName:[%s], ancillary:[%s]",
+            ifaceName, signalName, ancillary);
         return ER_BUS_INTERFACE_NO_SUCH_MEMBER;
     }
+
     mAncillaryData = ancillary;
     return ER_OK;
 }

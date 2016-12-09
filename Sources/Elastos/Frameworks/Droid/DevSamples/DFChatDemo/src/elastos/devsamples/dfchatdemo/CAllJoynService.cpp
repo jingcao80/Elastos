@@ -126,7 +126,6 @@ ECode CAllJoynService::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-
 //===================================================================
 // CAllJoynService::BackgroundHandler
 //===================================================================
@@ -184,7 +183,7 @@ void CAllJoynService::CAllJoynService::BackgroundHandler::CancelDiscovery()
 void CAllJoynService::CAllJoynService::BackgroundHandler::RequestName()
 {
     Logger::I(TAG, "mBackgroundHandler.RequestName()");
-    SendMessageInner(CAllJoynService::RELEASE_NAME);
+    SendMessageInner(CAllJoynService::REQUEST_NAME);
 }
 
 void CAllJoynService::CAllJoynService::BackgroundHandler::ReleaseName()
@@ -337,10 +336,8 @@ ECode CAllJoynService::ChatBusListener::LostAdvertisedName(
 
 CAR_INTERFACE_IMPL_2(CAllJoynService::ChatService, Object, IChatInterface, IBusObject)
 
-ECode CAllJoynService::ChatService::constructor(
-    /* [in] */ IAllJoynService* host)
+ECode CAllJoynService::ChatService::constructor()
 {
-    mHost = (CAllJoynService*)host;
     return NOERROR;
 }
 
@@ -385,6 +382,8 @@ const String CAllJoynService::OBJECT_PATH("/chatService");
 
 CAR_INTERFACE_IMPL_2(CAllJoynService, Service, IAllJoynService, IObserver)
 
+CAR_OBJECT_IMPL(CAllJoynService)
+
 CAllJoynService::CAllJoynService()
     : mChatApplication(NULL)
     , mBusAttachmentState(BusAttachmentState_DISCONNECTED)
@@ -402,15 +401,7 @@ CAllJoynService::~CAllJoynService()
 
 ECode CAllJoynService::constructor()
 {
-    mHandler = new MyHandler(this);
-    mHandler->constructor();
-
-    CBusAttachment::New(CChatApplication::PACKAGE_NAME, RemoteMessage_Receive,
-        (IBusAttachment**)&mBus);
-
-    mBusListener = new ChatBusListener(this);
-    CChatService::New(this, (IChatInterface**)&mChatService);
-    return NOERROR;
+    return Service::constructor();
 }
 
 ECode CAllJoynService::OnBind(
@@ -426,6 +417,24 @@ ECode CAllJoynService::OnBind(
 ECode CAllJoynService::OnCreate()
 {
     Logger::I(TAG, "onCreate()");
+
+    AutoPtr<IContext> context;
+    GetApplicationContext((IContext**)&context);
+    AutoPtr<IDaemonInit> di;
+    CDaemonInit::AcquireSingleton((IDaemonInit**)&di);
+    Boolean result;
+    di->PrepareDaemon(context, &result);
+
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
+
+    mBusListener = new ChatBusListener(this);
+    CChatService::New((IChatInterface**)&mChatService);
+    Logger::I(TAG, " >> mChatService: %s", TO_CSTR(mChatService));
+
+    CBusAttachment::New(CChatApplication::PACKAGE_NAME, RemoteMessage_Receive,
+        (IBusAttachment**)&mBus);
+
     StartBusThread();
     AutoPtr<IApplication> app;
     GetApplication((IApplication**)&app);
@@ -610,13 +619,6 @@ void CAllJoynService::DoConnect()
 {
     Logger::I(TAG, "doConnect()");
 
-    AutoPtr<IContext> context;
-    GetApplicationContext((IContext**)&context);
-    AutoPtr<IDaemonInit> di;
-    CDaemonInit::AcquireSingleton((IDaemonInit**)&di);
-    Boolean result;
-    di->PrepareDaemon(context, &result);
-
     assert(mBusAttachmentState == BusAttachmentState_DISCONNECTED);
     mBus->UseOSLogging(TRUE);
     mBus->SetDebugLevel(String("ALLJOYN_JAVA"), 7);
@@ -628,7 +630,7 @@ void CAllJoynService::DoConnect()
      * object path.  Our service is implemented by the ChatService
      * BusObject found at the "/chatService" object path.
      */
-    ECode ec = mBus->RegisterBusObject(mChatService, OBJECT_PATH);
+    ECode ec = mBus->RegisterBusObject(IBusObject::Probe(mChatService), OBJECT_PATH);
     if (ec != (ECode)E_STATUS_OK) {
         StringBuilder sb("Unable to register the chat bus object: (");
         sb += ec; sb += ")";
@@ -648,6 +650,7 @@ void CAllJoynService::DoConnect()
     if (ec != (ECode)E_STATUS_OK) {
         StringBuilder sb("Unable to register signal handlers: (");
         sb += ec; sb += ")";
+        Logger::E(TAG, sb.ToString());
         mChatApplication->AlljoynError(Module_GENERAL, sb.ToString());
         return;
     }
@@ -715,7 +718,8 @@ void CAllJoynService::DoRequestName()
         mChatApplication->HostSetChannelState(mHostChannelState);
     }
     else {
-        StringBuilder sb("Unable to acquire well-known name: (");
+        StringBuilder sb("Unable to acquire well-known name: [");
+        sb += wellKnownName; sb += "], (";
         sb += status; sb += ")";
         mChatApplication->AlljoynError(Module_USE, sb.ToString());
     }
@@ -809,7 +813,7 @@ ECode CAllJoynService::InnerSessionPortListener::SessionJoined(
     Logger::I(TAG, "SessionPortListener.sessionJoined(%d, %d, %s)", sessionPort, id, joiner.string());
     mHost->mHostSessionId = id;
     AutoPtr<ISignalEmitter> emitter;
-    CSignalEmitter::New(mHost->mChatService, id, GlobalBroadcast_Off, (ISignalEmitter**)&emitter);
+    CSignalEmitter::New(IBusObject::Probe(mHost->mChatService), id, GlobalBroadcast_Off, (ISignalEmitter**)&emitter);
     AutoPtr<IInterface> obj;
     emitter->GetInterface(EIID_IChatInterface, (IInterface**)&obj);
     mHost->mHostChatInterface = IChatInterface::Probe(obj);
@@ -872,8 +876,10 @@ void CAllJoynService::DoAdvertise()
     if (status == (ECode)E_STATUS_OK) {
         mHostChannelState = HostChannelState_ADVERTISED;
         mChatApplication->HostSetChannelState(mHostChannelState);
-    } else {
-        StringBuilder sb("Unable to advertise well-known name: (");
+    }
+    else {
+        StringBuilder sb("Unable to advertise well-known name: [");
+        sb += wellKnownName; sb += "], status:(";
         sb += status; sb += ")";
         mChatApplication->AlljoynError(Module_HOST, sb.ToString());
         return;
@@ -895,7 +901,8 @@ void CAllJoynService::DoCancelAdvertise()
     ECode status = mBus->CancelAdvertiseName(wellKnownName, ISessionOpts::TRANSPORT_ANY);
 
     if (status != (ECode)E_STATUS_OK) {
-        StringBuilder sb("Unable to cancel advertisement of well-known name: (");
+        StringBuilder sb("Unable to cancel advertisement of well-known name: [");
+        sb += wellKnownName; sb += "], status:(";
         sb += status; sb += ")";
         mChatApplication->AlljoynError(Module_HOST, sb.ToString());
         return;
@@ -1020,7 +1027,7 @@ void CAllJoynService::DoJoinSession()
     }
 
     AutoPtr<ISignalEmitter> emitter;
-    CSignalEmitter::New(mChatService, mUseSessionId, GlobalBroadcast_Off, (ISignalEmitter**)&emitter);
+    CSignalEmitter::New(IBusObject::Probe(mChatService), mUseSessionId, GlobalBroadcast_Off, (ISignalEmitter**)&emitter);
     AutoPtr<IInterface> obj;
     emitter->GetInterface(EIID_IChatInterface, (IInterface**)&obj);
     mChatInterface = IChatInterface::Probe(obj);

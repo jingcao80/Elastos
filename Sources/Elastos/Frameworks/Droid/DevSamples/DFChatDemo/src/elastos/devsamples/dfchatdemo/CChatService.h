@@ -14,6 +14,8 @@ CarClass(CChatService)
 {
 public:
     CAR_OBJECT_DECL()
+
+    TO_STRING_IMPL("CChatService")
 };
 
 } // namespace DFChatDemo

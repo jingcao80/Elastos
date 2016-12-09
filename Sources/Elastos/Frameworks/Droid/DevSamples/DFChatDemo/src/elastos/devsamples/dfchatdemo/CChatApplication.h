@@ -62,7 +62,11 @@ CarClass(CChatApplication)
     , public IObservable
 {
 public:
+    TO_STRING_IMPL("CChatApplication")
+
     CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CChatApplication();
 

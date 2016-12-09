@@ -49,8 +49,7 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        CARAPI constructor(
-            /* [in] */ IAllJoynService* host);
+        CARAPI constructor();
 
         /**
          * Intentionally empty implementation of Chat method.  Since this
@@ -59,8 +58,6 @@ public:
          */
         CARAPI Chat(
             /* [in] */ const String& str);
-    private:
-        CAllJoynService* mHost;
     };
 
 private:
@@ -296,8 +293,13 @@ private:
     private:
         CAllJoynService* mHost;
     };
+
 public:
+    TO_STRING_IMPL("CAllJoynService")
+
     CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CAllJoynService();
 
@@ -670,7 +672,7 @@ private:
      * The ChatService is the instance of an AllJoyn interface that is exported
      * on the bus and allows us to send signals implementing messages
      */
-    AutoPtr<ChatService> mChatService;// = new ChatService();
+    AutoPtr<IChatInterface> mChatService;// = new ChatService();
 };
 
 } // namespace DFChatDemo

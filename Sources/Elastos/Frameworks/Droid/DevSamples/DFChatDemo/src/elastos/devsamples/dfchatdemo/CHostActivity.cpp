@@ -27,22 +27,18 @@ static const String TAG("DFChatDemo.CHostActivity");
 //========================================================
 // CHostActivity::MyHandler
 //========================================================
-CHostActivity::MyHandler::MyHandler()
-    : mHost(NULL)
-{}
-
-ECode CHostActivity::MyHandler::constructor(
+CHostActivity::MyHandler::MyHandler(
     /* [in] */ CHostActivity* host)
-{
-    mHost = host;
-    return NOERROR;
-}
+    : mHost(host)
+{}
 
 ECode CHostActivity::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     Int32 what;
     msg->GetWhat(&what);
+    Logger::I(TAG, " >> MyHandler::HandleMessage: %d", what);
+
     switch (what) {
     case CHostActivity::HANDLE_APPLICATION_QUIT_EVENT:
         {
@@ -84,10 +80,10 @@ CHostActivity::ShowDialogListener::ShowDialogListener(
 ECode CHostActivity::ShowDialogListener::OnClick(
     /* [in] */ IView* v)
 {
+    Logger::I(TAG, " >> ShowDialogListener::OnClick: ShowDialog: %d", mDialogId);
     mHost->ShowDialog(mDialogId);
     return NOERROR;
 }
-
 
 //========================================================
 // CHostActivity::QuitListener
@@ -102,6 +98,7 @@ CHostActivity::QuitListener::QuitListener(
 ECode CHostActivity::QuitListener::OnClick(
     /* [in] */ IView* v)
 {
+    Logger::I(TAG, " >> QuitListener::OnClick: Quit application");
     mHost->mChatApplication->Quit();
     return NOERROR;
 }
@@ -120,6 +117,8 @@ const Int32 CHostActivity::HANDLE_ALLJOYN_ERROR_EVENT;
 
 CAR_INTERFACE_IMPL(CHostActivity, Activity, IObserver)
 
+CAR_OBJECT_IMPL(CHostActivity)
+
 CHostActivity::CHostActivity()
     : mChatApplication(NULL)
 {}
@@ -129,8 +128,8 @@ CHostActivity::~CHostActivity()
 
 ECode CHostActivity::constructor()
 {
-    mHandler = new MyHandler();
-    mHandler->constructor(this);
+    mHandler = new MyHandler(this);
+    mHandler->constructor();
     return Activity::constructor();
 }
 
@@ -244,7 +243,7 @@ ECode CHostActivity::Update(
 AutoPtr<IDialog> CHostActivity::OnCreateDialog(
     /* [in] */ Int32 id)
 {
-    Logger::I(TAG, "onCreateDialog()");
+    Logger::I(TAG, "onCreateDialog() : %d", id);
     AutoPtr<IDialog> result;
     switch(id) {
     case DIALOG_SET_NAME_ID:
