@@ -1490,6 +1490,20 @@ public:
      */
     CARAPI EnableConcurrentCallbacks();
 
+    /**
+     * Convert to UTF-8 for native code.  This is intended for sensitive string
+     * data (i.e. passwords).  The native code must take care of scrubbing the
+     * buffer when done.
+     *
+     * This method can be called from a listener object and must therefore be
+     * MT-Safe.
+     *
+     * @param charArray the sensitive string
+     * @return the UTF-8 encoded version of the string
+     */
+    static CARAPI_(AutoPtr<ArrayOf<Byte> >) Encode(
+        /* [in] */ ArrayOf<Char32>* charArray);
+
 private:
     /** Allocate native resources. */
     CARAPI_(void) Create(

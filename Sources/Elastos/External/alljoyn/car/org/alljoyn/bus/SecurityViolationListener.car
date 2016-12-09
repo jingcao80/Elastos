@@ -6,7 +6,19 @@ module
     namespace Bus {
 
     interface ISecurityViolationListener {
-
+        /**
+         * Called when an attempt to decrypt an encrypted messages failed or when an
+         * unencrypted message was received on an interface that requires
+         * encryption.
+         *
+         * Any implementation of this function must be multithread safe.  See the
+         * class documentation for details.
+         *
+         * @param status a status code indicating the type of security violation
+         * @see BusAttachment#getMessageContext()
+         */
+        Violated(
+            [in] ECode status);
     }
 
     } // namespace Bus

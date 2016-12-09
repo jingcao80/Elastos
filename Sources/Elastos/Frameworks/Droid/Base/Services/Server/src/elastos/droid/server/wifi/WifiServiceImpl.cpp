@@ -765,6 +765,7 @@ CAR_INTERFACE_IMPL_2(WifiServiceImpl, Object, IIWifiManager, IBinder);
 
 WifiServiceImpl::WifiServiceImpl()
 {
+    CArrayList::New((IList**)&mMulticasters);
     CArrayList::New((IList**)&mBatchedScanners);
     mLocks = new LockList(this);
 }

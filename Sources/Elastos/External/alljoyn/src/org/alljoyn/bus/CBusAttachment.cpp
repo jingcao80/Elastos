@@ -1,6 +1,7 @@
 
 #include "org/alljoyn/bus/BusListener.h"
 #include "org/alljoyn/bus/CBusAttachment.h"
+#include "org/alljoyn/bus/AuthListener.h"
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
@@ -20,6 +21,7 @@
 #include "org/alljoyn/bus/OnJoinSessionListener.h"
 #include "org/alljoyn/bus/OnPingListener.h"
 #include "org/alljoyn/bus/MessageContext.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -27,6 +29,15 @@ using Org::Alljoyn::Bus::Ifaces::EIID_IDBusProxyObj;
 using Elastos::Core::AutoLock;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::IO::IBuffer;
+using Elastos::IO::IByteBuffer;
+using Elastos::IO::CCharBufferHelper;
+using Elastos::IO::ICharBufferHelper;
+using Elastos::IO::ICharBuffer;
+using Elastos::IO::Charset::CCharsetHelper;
+using Elastos::IO::Charset::ICharsetHelper;
+using Elastos::IO::Charset::ICharset;
+using Elastos::IO::Charset::ICharsetEncoder;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
@@ -60,18 +71,22 @@ CAR_INTERFACE_IMPL(CBusAttachment::AuthListenerInternal, Object, IAuthListenerIn
 ECode CBusAttachment::AuthListenerInternal::SetAuthListener(
     /* [in] */ IAuthListener* authListener)
 {
+    mAuthListener = authListener;
     return NOERROR;
 }
 
 ECode CBusAttachment::AuthListenerInternal::AuthListenerSet(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = mAuthListener != NULL;
     return NOERROR;
 }
 
 ECode CBusAttachment::AuthListenerInternal::SetSecurityViolationListener(
     /* [in] */ ISecurityViolationListener* violationListener)
 {
+    mViolationListener = violationListener;
     return NOERROR;
 }
 
@@ -81,8 +96,57 @@ ECode CBusAttachment::AuthListenerInternal::RequestCredentials(
     /* [in] */ Int32 authCount,
     /* [in] */ const String& userName,
     /* [in] */ Int32 credMask,
-    /* [out] */ ICredentials** credentials)
+    /* [out] */ ICredentials** retCredentials)
 {
+    VALIDATE_NOT_NULL(retCredentials)
+    *retCredentials = NULL;
+    if (mAuthListener == NULL) {
+        // throw new BusException("No registered application AuthListener");
+        Logger::E(TAG, "No registered application AuthListener");
+        assert(0);
+        return NOERROR;
+    }
+
+    AutoPtr<Credentials> credentials = new Credentials();
+    AutoPtr<IList> requests;
+    CArrayList::New((IList**)&requests);
+    AutoPtr<IAuthRequest> request;
+    if ((credMask & PASSWORD) == PASSWORD) {
+        Boolean isNew = (credMask & NEW_PASSWORD) == NEW_PASSWORD;
+        Boolean isOneTime = (credMask & ONE_TIME_PWD) == ONE_TIME_PWD;
+        request = new PasswordRequest(credentials, isNew, isOneTime);
+        requests->Add(request);
+    }
+    if ((credMask & USER_NAME) == USER_NAME) {
+        request = new UserNameRequest(credentials);
+        requests->Add(request);
+    }
+    if ((credMask & CERT_CHAIN) == CERT_CHAIN) {
+        request = new CertificateRequest(credentials);
+        requests->Add(request);
+    }
+    if ((credMask & PRIVATE_KEY) == PRIVATE_KEY) {
+        request = new PrivateKeyRequest(credentials);
+        requests->Add(request);
+    }
+    if ((credMask & LOGON_ENTRY) == LOGON_ENTRY) {
+        request = new LogonEntryRequest(credentials);
+        requests->Add(request);
+    }
+    /*
+     * Always add this as it doesn't show up in credMask, but can be set by the application.
+     */
+    request = new ExpirationRequest(credentials);
+    requests->Add(request);
+
+    AutoPtr<ArrayOf<IAuthRequest*> > array;
+    requests->ToArray((ArrayOf<IInterface*>**)&array);
+    Boolean res;
+    mAuthListener->Requested(authMechanism, authPeer, authCount, userName, array, &res);
+    if (res) {
+        *retCredentials = credentials;
+        REFCOUNT_ADD(*retCredentials)
+    }
     return NOERROR;
 }
 
@@ -93,12 +157,31 @@ ECode CBusAttachment::AuthListenerInternal::VerifyCredentials(
     /* [in] */ const String& cert,
     /* [out] */ Boolean* result)
 {
-    return NOERROR;
+    VALIDATE_NOT_NULL(result)
+    if (mAuthListener == NULL) {
+        // throw new BusException("No registered application AuthListener");
+        Logger::E(TAG, "No registered application AuthListener");
+        assert(0);
+        return NOERROR;
+    }
+    /*
+     * authCount is set to 0 here since it can't be cached from
+     * requestCredentials, and it's assumed that the application will
+     * not immediately reject a request with an authCount of 0.
+     */
+    AutoPtr<ArrayOf<IAuthRequest*> > array = ArrayOf<IAuthRequest*>::Alloc(1);
+    AutoPtr<IAuthRequest> request = new VerifyRequest(cert);
+    array->Set(0, request);
+    return mAuthListener->Requested(authMechanism, peerName, 0,
+        userName == NULL ? String("") : userName, array, result);
 }
 
 ECode CBusAttachment::AuthListenerInternal::SecurityViolation(
     /* [in] */ ECode status)
 {
+    if (mViolationListener != NULL) {
+        mViolationListener->Violated(status);
+    }
     return NOERROR;
 }
 
@@ -107,9 +190,11 @@ ECode CBusAttachment::AuthListenerInternal::AuthenticationComplete(
     /* [in] */ const String& peerName,
     /* [in] */ Boolean success)
 {
+    if (mAuthListener != NULL) {
+        mAuthListener->Completed(authMechanism, peerName, success);
+    }
     return NOERROR;
 }
-
 
 //============================================================================
 // CBusAttachment
@@ -1253,6 +1338,29 @@ void CBusAttachment::Destroy()
 
     busPtr->Destroy();
     mHandle = 0;
+}
+
+AutoPtr<ArrayOf<Byte> > CBusAttachment::Encode(
+    /* [in] */ ArrayOf<Char32>* charArray)
+{
+    AutoPtr<ICharsetHelper> helper;
+    CCharsetHelper::AcquireSingleton((ICharsetHelper**)&helper);
+    AutoPtr<ICharset> charset;
+    helper->ForName(String("UTF-8"), (ICharset**)&charset);
+    AutoPtr<ICharsetEncoder> encoder;
+    charset->NewEncoder((ICharsetEncoder**)&encoder);
+    AutoPtr<ICharBufferHelper> cbHelper;
+    CCharBufferHelper::AcquireSingleton((ICharBufferHelper**)&cbHelper);
+    AutoPtr<ICharBuffer> charBuffer;
+    cbHelper->Wrap(charArray, (ICharBuffer**)&charBuffer);
+    AutoPtr<IByteBuffer> bb;
+    if (FAILED(encoder->Encode(charBuffer, (IByteBuffer**)&bb)))
+        return NULL;
+    Int32 limit;
+    IBuffer::Probe(bb)->GetLimit(&limit);
+    AutoPtr<ArrayOf<Byte> > ba = ArrayOf<Byte>::Alloc(limit);
+    bb->Get(ba);
+    return ba;
 }
 
 ECode CBusAttachment::Connect()
