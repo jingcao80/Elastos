@@ -1,0 +1,47 @@
+
+module
+{
+    importlib("Org.Alljoyn.Bus.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/devsamples/dfsecuredemo/logonclient/SecureInterface.car");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFSecureDemo {
+    namespace LogonClient {
+
+    class CClient {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    } // namespace LogonClient
+    } // namespace DFSecureDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}

@@ -261,7 +261,7 @@ public:
         Int32 mRefCount;
         Boolean mRefCounted;
         Boolean mHeld;
-        CWifiManager* mOwner;
+        AutoPtr<CWifiManager> mOwner;
     };
 
 private:

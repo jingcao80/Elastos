@@ -4,7 +4,7 @@ module
     namespace Elastos {
     namespace DevSamples {
     namespace DFSecureDemo {
-    namespace SecureService {
+    namespace LogonClient {
 
     [deprecated, @Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.bus.samples.secure.SecureInterface")
         , @Org.Alljoyn.Bus.Annotation.Secure(value = "required")]
@@ -16,7 +16,7 @@ module
             [out] String* result);
     }
 
-    } // namespace SecureService
+    } // namespace LogonClient
     } // namespace DFSecureDemo
     } // namespace DevSamples
     } // namespace Elastos

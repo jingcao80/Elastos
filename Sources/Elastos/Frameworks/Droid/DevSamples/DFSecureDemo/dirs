@@ -1,3 +1,4 @@
 
 DIRS += service
 DIRS += ECDHEClient
+DIRS += logonclient
