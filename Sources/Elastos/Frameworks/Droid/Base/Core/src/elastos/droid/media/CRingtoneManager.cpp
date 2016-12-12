@@ -427,11 +427,14 @@ ECode CRingtoneManager::SetActualDefaultRingtoneUri(
     }
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
-    String tempText, tempNull;
-    IObject::Probe(ringtoneUri)->ToString(&tempText);
+    String tempText;
+    if (ringtoneUri != NULL) {
+        IObject::Probe(ringtoneUri)->ToString(&tempText);
+    }
+
     Boolean restlt;
     return Settings::System::PutString(contentResolver, setting,
-            ringtoneUri != NULL ? tempText : tempNull, &restlt);
+            tempText, &restlt);
 }
 
 /*static*/

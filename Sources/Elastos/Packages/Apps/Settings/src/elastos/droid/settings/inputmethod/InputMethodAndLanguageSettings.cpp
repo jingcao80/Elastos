@@ -785,9 +785,11 @@ ECode InputMethodAndLanguageSettings::OnResume()
         if (tsm->IsSpellCheckerEnabled(&res), res) {
             AutoPtr<ISpellCheckerInfo> sci;
             tsm->GetCurrentSpellChecker((ISpellCheckerInfo**)&sci);
-            AutoPtr<ICharSequence> seq;
-            sci->LoadLabel(GetPackageManager(), (ICharSequence**)&seq);
-            spellChecker->SetSummary(seq);
+            if (sci != NULL) {
+                AutoPtr<ICharSequence> seq;
+                sci->LoadLabel(GetPackageManager(), (ICharSequence**)&seq);
+                spellChecker->SetSummary(seq);
+            }
         }
         else {
             spellChecker->SetSummary(R::string::switch_off_text);
