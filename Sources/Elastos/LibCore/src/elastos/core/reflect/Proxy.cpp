@@ -490,6 +490,8 @@ ECode CInterfaceProxy::ProxyEntry(
     ec = thisPtr->PackingArguments(methodInfo, args, argList);
     if (FAILED(ec)) goto ProxyExit;
 
+    assert(thisPtr->mOwner);
+    assert(thisPtr->mOwner->mHandler);
     ec = thisPtr->mOwner->mHandler->Invoke((IProxy*)thisPtr->mOwner, methodInfo, argList);
 
 ProxyExit:
@@ -532,8 +534,6 @@ CObjectProxy::~CObjectProxy()
 
 PInterface CObjectProxy::Probe(REIID riid)
 {
-    int n;
-
     if (riid == EIID_IInterface) {
         return (IInterface*)(IProxy*)this;
     }
@@ -573,20 +573,18 @@ PInterface CObjectProxy::Probe(REIID riid)
     //     return (IInterface*)mCallbackConnector;
     // }
 
-    for (n = 0; n < mInterfaceNum; n++) {
+    for (Int32 n = 0; n < mInterfaceNum; n++) {
         if (riid == mInterfaces[n].mInfo->mIID) {
-            break;
+            return (IInterface *)&(mInterfaces[n].mVTPtr);
         }
     }
-    if (n == mInterfaceNum) {
-        // MARSHAL_DBGOUT(MSHDBG_WARNING, ALOGW(
-        //         "Proxy: QI failed, iid: "));
-        // MARSHAL_DBGOUT(MSHDBG_WARNING, DUMP_GUID(riid));
 
-        return NULL;
+    if (TRUE) {
+        Logger::D("CObjectProxy", "Probe: QI failed, iid: \n");
+        DUMP_GUID(riid);
     }
 
-    return (IInterface *)&(mInterfaces[n].mVTPtr);
+    return NULL;
 }
 
 UInt32 CObjectProxy::AddRef()
@@ -783,6 +781,9 @@ ECode CObjectProxy::S_CreateObject(
     /* [in] */ IInvocationHandler* invocationHandler,
     /* [out] */ IInterface** proxy)
 {
+    VALIDATE_NOT_NULL(proxy)
+    *proxy = NULL;
+
     CObjectProxy* proxyObj;
     CInterfaceProxy* interfaces;
     Int32 n;
@@ -808,7 +809,12 @@ ECode CObjectProxy::S_CreateObject(
         interfaces[n].mInfo2 = (*interfaceInfos)[n];
         InterfaceID iid;
         (*interfaceInfos)[n]->GetId(&iid);
-        LookupInterfaceInfo(iid, &(interfaces[n].mInfo));
+        ec = LookupInterfaceInfo(iid, &(interfaces[n].mInfo));
+        if (FAILED(ec)) {
+            Logger::E("CObjectProxy::S_CreateObject", "Failed to LookupInterfaceInfo ec=%08x for:");
+            DUMP_GUID(iid);
+            return ec;
+        }
         interfaces[n].mVTPtr = g_marshalVtbl;
 
 #ifdef _x86

@@ -281,6 +281,10 @@ ECode ClassLoader::FindInterface(
 
 void ClassLoader::RegisterModuleInfos()
 {
+    if (mParent != NULL) {
+        ((ClassLoader*)mParent.Get())->RegisterModuleInfos();
+    }
+
     if (mClassPaths != NULL) {
         for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
             RegisterModuleInfo((*mClassPaths)[i]);

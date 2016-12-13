@@ -44,6 +44,13 @@ NativeBusAttachment::~NativeBusAttachment()
 
 void NativeBusAttachment::Destroy()
 {
+    Vector<Pair<AutoPtr<IInterface>, NativeSignalHandler*> >::Iterator i;
+    for (i = mSignalHandlers.Begin(); i != mSignalHandlers.End(); ++i) {
+        (*i).mSecond->Unregister(*this);
+        delete ((*i).mSecond);
+    }
+    mSignalHandlers.Clear();
+
     /*
      * We want to allow users to forget the BusAttachent in Java by setting a
      * reference to null.  We want to reclaim all of our resources, including

@@ -468,7 +468,7 @@ TypefaceImpl* GraphicsNative::GetNativeTypeface(
 {
     SkASSERT(paint);
     // SkASSERT(env->IsInstanceOf(paint, gPaint_class));
-    Int64 typefaceHandle = ((Paint*)paint)->mNativeTypeface;
+    Int64 typefaceHandle = ((Paint*)paint)->GetNativeTypeface();
     TypefaceImpl* p = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
     return p;
 }

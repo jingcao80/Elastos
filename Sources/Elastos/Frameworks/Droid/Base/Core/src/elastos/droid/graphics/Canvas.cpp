@@ -1426,7 +1426,7 @@ ECode Canvas::DrawText(
     }
 
     NativeDrawText(mNativeCanvas, text, index, count, x, y,
-            TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint, TO_PAINT(paint)->mNativeTypeface);
+            TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint, TO_PAINT(paint)->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1444,7 +1444,7 @@ ECode Canvas::DrawText(
 
     assert(paint != NULL && "Paint cannot be null.");
     NativeDrawText(mNativeCanvas, text, 0, text.GetLength(), x, y,
-            TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint, TO_PAINT(paint)->mNativeTypeface);
+            TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint, TO_PAINT(paint)->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1469,7 +1469,7 @@ ECode Canvas::DrawText(
 
     NativeDrawText(mNativeCanvas, text, start, end, x, y,
             TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint,
-            TO_PAINT(paint)->mNativeTypeface);
+            TO_PAINT(paint)->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1485,7 +1485,7 @@ ECode Canvas::DrawText(
         ISpannableString::Probe(text) != NULL) {
         NativeDrawText(mNativeCanvas, CoreUtils::Unbox(text), start, end, x, y,
                 TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint,
-                TO_PAINT(paint)->mNativeTypeface);
+                TO_PAINT(paint)->GetNativeTypeface());
     }
     else if (IGraphicsOperations::Probe(text) != NULL) {
         IGraphicsOperations::Probe(text)->DrawText(this, start, end, x, y, paint);
@@ -1495,7 +1495,7 @@ ECode Canvas::DrawText(
         TextUtils::GetChars(text, start, end, buf, 0);
         NativeDrawText(mNativeCanvas, buf, 0, end - start, x, y,
                 TO_PAINT(paint)->mBidiFlags, TO_PAINT(paint)->mNativePaint,
-                TO_PAINT(paint)->mNativeTypeface);
+                TO_PAINT(paint)->GetNativeTypeface());
         TemporaryBuffer::Recycle(buf);
     }
 
@@ -1529,7 +1529,7 @@ ECode Canvas::DrawTextRun(
 
     NativeDrawTextRun(mNativeCanvas, text, index, count,
             contextIndex, contextCount, x, y, isRtl, TO_PAINT(paint)->mNativePaint,
-            TO_PAINT(paint)->mNativeTypeface);
+            TO_PAINT(paint)->GetNativeTypeface());
      return NOERROR;
 }
 
@@ -1562,7 +1562,7 @@ ECode Canvas::DrawTextRun(
             ISpannableString::Probe(text) != NULL) {
         NativeDrawTextRun(mNativeCanvas, CoreUtils::Unbox(text), start, end,
                 contextStart, contextEnd, x, y, isRtl, TO_PAINT(paint)->mNativePaint,
-                TO_PAINT(paint)->mNativeTypeface);
+                TO_PAINT(paint)->GetNativeTypeface());
     }
     else if (IGraphicsOperations::Probe(text) != NULL) {
         IGraphicsOperations::Probe(text)->DrawTextRun(this, start, end,
@@ -1575,7 +1575,7 @@ ECode Canvas::DrawTextRun(
         TextUtils::GetChars(text, contextStart, contextEnd, buf, 0);
         NativeDrawTextRun(mNativeCanvas, buf, start - contextStart, len,
                 0, contextLen, x, y, isRtl, TO_PAINT(paint)->mNativePaint,
-                TO_PAINT(paint)->mNativeTypeface);
+                TO_PAINT(paint)->GetNativeTypeface());
         TemporaryBuffer::Recycle(buf);
     }
 
@@ -1631,7 +1631,7 @@ ECode Canvas::DrawTextOnPath(
     Int64 nativePath = ((CPath*)path)->mNativePath;
     Int64 nativePaint = TO_PAINT(paint)->mNativePaint;
     NativeDrawTextOnPath(mNativeCanvas, text, index, count,
-            nativePath, hOffset, vOffset, TO_PAINT(paint)->mBidiFlags, nativePaint, TO_PAINT(paint)->mNativeTypeface);
+            nativePath, hOffset, vOffset, TO_PAINT(paint)->mBidiFlags, nativePaint, TO_PAINT(paint)->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1649,7 +1649,7 @@ ECode Canvas::DrawTextOnPath(
         Int64 nativePath = ((CPath*)path)->mNativePath;
         Int64 nativePaint = TO_PAINT(paint)->mNativePaint;
         NativeDrawTextOnPath(mNativeCanvas, text, nativePath,
-                hOffset, vOffset, TO_PAINT(paint)->mBidiFlags, nativePaint, TO_PAINT(paint)->mNativeTypeface);
+                hOffset, vOffset, TO_PAINT(paint)->mBidiFlags, nativePaint, TO_PAINT(paint)->GetNativeTypeface());
     }
     return NOERROR;
 }

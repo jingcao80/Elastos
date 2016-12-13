@@ -1,10 +1,11 @@
 
 #include "org/alljoyn/bus/SignalEmitter.h"
+#include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/MessageContext.h"
+#include "org/alljoyn/bus/MsgArg.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusObject.h"
-#include "org/alljoyn/bus/MsgArg.h"
-#include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/NativeApi.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -26,7 +27,7 @@ CAR_INTERFACE_IMPL(SignalEmitter::Emitter, Object, IInvocationHandler)
 
 SignalEmitter::Emitter::Emitter(
     /* [in] */ SignalEmitter* emitter)
-    : mHost(emitter)
+    : mSignalEmitter(emitter)
 {}
 
 ECode SignalEmitter::Emitter::Invoke(
@@ -37,29 +38,28 @@ ECode SignalEmitter::Emitter::Invoke(
     String name, signature;
     method->GetName(&name);
     method->GetSignature(&signature);
-    Logger::I(TAG, " >> [%s] Invoke [%s] - [%s].", TO_CSTR(proxy), name.string(), signature.string());
 
-    AutoPtr<IClassInfo> classInfo = Object::GetClassInfo(proxy);
+    IProxy* prx = IProxy::Probe(proxy);
     Int32 count;
-    classInfo->GetInterfaceCount(&count);
-    AutoPtr<ArrayOf<IInterfaceInfo*> > ifceInfos = ArrayOf<IInterfaceInfo*>::Alloc(count);
-    classInfo->GetAllInterfaceInfos(ifceInfos.Get());
+    prx->GetInterfaceCount(&count);
+    AutoPtr< ArrayOf<IInterfaceInfo*> > ifceInfos = ArrayOf<IInterfaceInfo*>::Alloc(count);
+    prx->GetAllInterfaceInfos(ifceInfos);
     IInterfaceInfo* ifceInfo;
     for (Int32 i = 0; i < count; ++i) {
         ifceInfo = (*ifceInfos)[i];
+
         AutoPtr<IMethodInfo> methodInfo;
         ifceInfo->GetMethodInfo(name, signature, (IMethodInfo**)&methodInfo);
         if (methodInfo) {
-            mHost->Signal(mHost->mSource,
-                   mHost->mDestination,
-                   mHost->mSessionId,
-                   InterfaceDescription::GetName(ifceInfo),
-                   InterfaceDescription::GetName(methodInfo),
-                   InterfaceDescription::GetInputSig(methodInfo),
-                   args,
-                   mHost->mTimeToLive,
-                   mHost->mFlags,
-                   mHost->mMsgContext);
+            mSignalEmitter->Signal(mSignalEmitter->mSource,
+               mSignalEmitter->mDestination,
+               mSignalEmitter->mSessionId,
+               InterfaceDescription::GetName(ifceInfo),
+               methodInfo,
+               args,
+               mSignalEmitter->mTimeToLive,
+               mSignalEmitter->mFlags,
+               mSignalEmitter->mMsgContext);
         }
     }
     return NOERROR;
@@ -77,7 +77,8 @@ SignalEmitter::SignalEmitter()
 {}
 
 SignalEmitter::~SignalEmitter()
-{}
+{
+}
 
 ECode SignalEmitter::constructor(
     /* [in] */ IBusObject* source,
@@ -92,39 +93,25 @@ ECode SignalEmitter::constructor(
             ? mFlags | GLOBAL_BROADCAST
             : mFlags & ~GLOBAL_BROADCAST;
 
-    AutoPtr<IModuleInfo> moduleInfo;
-    ECode ec = CReflector::AcquireModuleInfo(String("/system/lib/Org.Alljoyn.Bus.eco"),
-        (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "Failed to load module /system/lib/Org.Alljoyn.Bus.eco");
-        return ec;
-    }
-    AutoPtr<IInterfaceInfo> propertiesInfo;
-    ec = moduleInfo->GetInterfaceInfo(String("Org.Alljoyn.Bus.Ifaces.IProperties"),
-        (IInterfaceInfo**)&propertiesInfo);
-    if (FAILED(ec)) {
-        Logger::E(TAG, "Failed to load interface info Org.Alljoyn.Bus.Ifaces.IProperties.");
-        return ec;
-    }
-
     AutoPtr<IClassInfo> classInfo = Object::GetClassInfo(source);
     Int32 count;
     classInfo->GetInterfaceCount(&count);
-    AutoPtr<ArrayOf<IInterfaceInfo*> > interfaces = ArrayOf<IInterfaceInfo*>::Alloc(count);
+    AutoPtr<ArrayOf<IInterfaceInfo*> > interfaces = ArrayOf<IInterfaceInfo*>::Alloc(count + 1);
     classInfo->GetAllInterfaceInfos(interfaces.Get());
 
-    AutoPtr<ArrayOf<IInterfaceInfo*> > interfacesNew = ArrayOf<IInterfaceInfo*>::Alloc(count + 1);
-    interfacesNew->Copy(interfaces);
-    interfacesNew->Set(count, propertiesInfo);
-
-    AutoPtr<IInterface> loader;
-    (*interfacesNew)[0]->GetClassLoader((IInterface**)&loader);
-    IClassLoader* cl = IClassLoader::Probe(loader);
+    AutoPtr<IClassLoader> moduleClassLoader = GetModuleClassLoader();
+    AutoPtr<IInterfaceInfo> propertiesInfo;
+    moduleClassLoader->LoadInterface(String("Org.Alljoyn.Bus.Ifaces.IProperties"),
+        (IInterfaceInfo**)&propertiesInfo);
+    interfaces->Set(count, propertiesInfo);
 
     AutoPtr<IInvocationHandler> handler = new Emitter(this);
     AutoPtr<IProxyFactory> pf;
     CProxyFactory::AcquireSingleton((IProxyFactory**)&pf);
-    pf->NewProxyInstance(cl, interfacesNew, handler, (IInterface**)&mProxy);
+    AutoPtr<IInterface> obj;
+    pf->NewProxyInstance(moduleClassLoader, interfaces, handler, (IInterface**)&obj);
+    mProxy = IProxy::Probe(obj);
+
     mMsgContext = new MessageContext();
     return NOERROR;
 }
@@ -203,18 +190,17 @@ ECode SignalEmitter::Signal(
     /* [in] */ const String& destination,
     /* [in] */ Int32 sessionId,
     /* [in] */ const String& ifaceName,
-    /* [in] */ const String& signalName,
-    /* [in] */ const String& inputSig,
+    /* [in] */ IMethodInfo* methodInfo,
     /* [in] */ IArgumentList* inArgs,
     /* [in] */ Int32 timeToLive,
     /* [in] */ Int32 flags,
     /* [in] */ IMessageContext* ctx)
 {
-    Logger::I(TAG, " >> Signal: %s, destination:%s, sessionId:%d, ifaceName:%s, signalName:%s, inputSig:%s",
-        TO_CSTR(busObj), destination.string(), sessionId, ifaceName.string(), signalName.string(), inputSig.string());
+    String signalName = InterfaceDescription::GetName(methodInfo);
+    String inputSig = InterfaceDescription::GetInputSig(methodInfo);
 
     ajn::MsgArg args;
-    if (FAILED(MsgArg::Marshal((Int64)&args, inputSig, inArgs))) {
+    if (FAILED(MsgArg::MarshalIn((Int64)&args, inputSig, methodInfo, inArgs))) {
         Logger::E(TAG, "Signal(): Marshal() error: ifaceName:%s, signalName:%s, inputSig:%s",
             ifaceName.string(), signalName.string(), inputSig.string());
         return E_FAIL;
@@ -236,8 +222,8 @@ ECode SignalEmitter::Signal(
     AutoLock lock(gBusObjectMapLock);
     NativeBusObject* busObject = GetBackingObject(busObj);
     if (!busObject) {
-        Logger::E(TAG, "Signal(): Exception");
-        return E_FAIL;
+        Logger::E(TAG, "Signal(): GetBackingObject Exception");
+        return ER_BUS_NO_SUCH_OBJECT;
     }
 
     QStatus status = ER_OK;
@@ -263,7 +249,8 @@ ECode SignalEmitter::Signal(
         msgContext->mAuthMechanism = msg->GetAuthMechanism().c_str();
     }
     else {
-        Logger::E(TAG, "Signal(): Exception");
+        Logger::E(TAG, "%s Signal(): Signal Exception, ifaceName:%s, signalName:%s, inputSig:%s, status=%08x",
+            TO_CSTR(busObj), ifaceName.string(), signalName.string(), inputSig.string(), status);
         return status;
     }
 

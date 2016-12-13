@@ -1111,7 +1111,7 @@ ECode GLES20Canvas::DrawText(
 
     Paint* p = (Paint*)paint;
     nDrawText(mRenderer, text, index, count, x, y,
-            p->mBidiFlags, p->mNativePaint, p->mNativeTypeface);
+            p->mBidiFlags, p->mNativePaint, p->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1129,7 +1129,7 @@ ECode GLES20Canvas::DrawText(
         text->ToString(&str);
         Paint* p = (Paint*)paint;
         nDrawText(mRenderer, str, start, end, x, y, p->mBidiFlags,
-                p->mNativePaint, p->mNativeTypeface);
+                p->mNativePaint, p->GetNativeTypeface());
     } else if (IGraphicsOperations::Probe(text) != NULL) {
         AutoPtr<IGraphicsOperations> gop = IGraphicsOperations::Probe(text);
         return gop->DrawText(this, start, end, x, y, paint);
@@ -1138,7 +1138,7 @@ ECode GLES20Canvas::DrawText(
         TextUtils::GetChars(text, start, end, buf, 0);
         Paint* p = (Paint*)paint;
         nDrawText(mRenderer, buf, 0, end - start, x, y,
-                p->mBidiFlags, p->mNativePaint, p->mNativeTypeface);
+                p->mBidiFlags, p->mNativePaint, p->GetNativeTypeface());
         TemporaryBuffer::Recycle(buf);
     }
     return NOERROR;
@@ -1158,7 +1158,7 @@ ECode GLES20Canvas::DrawText(
 
     Paint* p = (Paint*)paint;
     nDrawText(mRenderer, text, start, end, x, y,
-            p->mBidiFlags, p->mNativePaint, p->mNativeTypeface);
+            p->mBidiFlags, p->mNativePaint, p->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1170,7 +1170,7 @@ ECode GLES20Canvas::DrawText(
 {
     Paint* p = (Paint*)paint;
     nDrawText(mRenderer, text, 0, text.GetLength(), x, y,
-        p->mBidiFlags, p->mNativePaint, p->mNativeTypeface);
+        p->mBidiFlags, p->mNativePaint, p->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1190,7 +1190,7 @@ ECode GLES20Canvas::DrawTextOnPath(
     Paint* p = (Paint*)paint;
     CPath* pathImpl = (CPath*)path;
     nDrawTextOnPath(mRenderer, text, index, count, pathImpl->mNativePath, hOffset, vOffset,
-            p->mBidiFlags, p->mNativePaint, p->mNativeTypeface);
+            p->mBidiFlags, p->mNativePaint, p->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1206,7 +1206,7 @@ ECode GLES20Canvas::DrawTextOnPath(
     Paint* p = (Paint*)paint;
     CPath* pathImpl = (CPath*)path;
     nDrawTextOnPath(mRenderer, text, 0, text.GetLength(), pathImpl->mNativePath, hOffset, vOffset,
-            p->mBidiFlags, p->mNativePaint, p->mNativeTypeface);
+            p->mBidiFlags, p->mNativePaint, p->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1227,7 +1227,7 @@ ECode GLES20Canvas::DrawTextRun(
 
     Paint* p = (Paint*)paint;
     nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, isRtl,
-            p->mNativePaint, p->mNativeTypeface);
+            p->mNativePaint, p->GetNativeTypeface());
     return NOERROR;
 }
 
@@ -1254,7 +1254,7 @@ ECode GLES20Canvas::DrawTextRun(
         text->ToString(&str);
         Paint* p = (Paint*)paint;
         nDrawTextRun(mRenderer, str, start, end, contextStart,
-                contextEnd, x, y, isRtl, p->mNativePaint, p->mNativeTypeface);
+                contextEnd, x, y, isRtl, p->mNativePaint, p->GetNativeTypeface());
     } else if (IGraphicsOperations::Probe(text) != NULL) {
         AutoPtr<IGraphicsOperations> gop = IGraphicsOperations::Probe(text);
         return gop->DrawTextRun(this, start, end,
@@ -1266,7 +1266,7 @@ ECode GLES20Canvas::DrawTextRun(
         TextUtils::GetChars(text, contextStart, contextEnd, buf, 0);
         Paint* p = (Paint*)paint;
         nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
-                x, y, isRtl, p->mNativePaint, p->mNativeTypeface);
+                x, y, isRtl, p->mNativePaint, p->GetNativeTypeface());
         TemporaryBuffer::Recycle(buf);
     }
 

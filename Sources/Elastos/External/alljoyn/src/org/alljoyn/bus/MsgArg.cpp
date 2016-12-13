@@ -1237,7 +1237,8 @@ ECode MsgArg::UnmarshalIn(
         if (ioAttr == ParamIOAttribute_In)
             inCount++;
     }
-    Int32 numArgs = GetNumMembers(msgArgs);
+    Boolean isStruct = ((ajn::MsgArg*)msgArgs)->typeId == ajn::ALLJOYN_STRUCT;
+    Int32 numArgs = isStruct ? GetNumMembers(msgArgs) : 1;
     if (inCount != numArgs) {
         Logger::E(TAG, "cannot marshal %d args into %d parameters", numArgs, count);
         assert(0);
@@ -1264,7 +1265,7 @@ ECode MsgArg::UnmarshalIn(
         }
         if (ioAttr == ParamIOAttribute_In) {
             PVoid arg = value->ToValuePtr();
-            if (FAILED(Unmarshal(GetMember(msgArgs, inIndex++), type, arg)))
+            if (FAILED(Unmarshal(isStruct ? GetMember(msgArgs, inIndex++) : msgArgs, type, arg)))
                 continue;
         }
         array->Set(i, value);

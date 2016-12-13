@@ -1528,7 +1528,7 @@ public:
     /**
      * @hide
      */
-    Int64 mNativeTypeface;
+    Int64 GetNativeTypeface();
 
     Int32 mBidiFlags;
 

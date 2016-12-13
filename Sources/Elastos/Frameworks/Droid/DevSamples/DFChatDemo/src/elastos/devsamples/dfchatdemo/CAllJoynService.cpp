@@ -810,7 +810,7 @@ ECode CAllJoynService::InnerSessionPortListener::SessionJoined(
     /* [in] */ Int32 id,
     /* [in] */ const String& joiner)
 {
-    Logger::I(TAG, "SessionPortListener.sessionJoined(%d, %d, %s)", sessionPort, id, joiner.string());
+    Logger::I(TAG, "SessionPortListener.sessionJoined(%d, %08x, %s)", sessionPort, id, joiner.string());
     mHost->mHostSessionId = id;
     AutoPtr<ISignalEmitter> emitter;
     CSignalEmitter::New(IBusObject::Probe(mHost->mChatService), id, GlobalBroadcast_Off, (ISignalEmitter**)&emitter);
@@ -1016,8 +1016,8 @@ void CAllJoynService::DoJoinSession()
     ECode status = mBus->JoinSession(wellKnownName, contactPort, sessionId, sessionOpts, sessionListener);
 
     if (status == (ECode)E_STATUS_OK) {
-        Logger::I(TAG, "doJoinSession(): use sessionId is %d", mUseSessionId);
         sessionId->GetValue(&mUseSessionId);
+        Logger::I(TAG, "doJoinSession(): use sessionId is %d", mUseSessionId);
     }
     else {
         StringBuilder sb("Unable to join chat session: (");
@@ -1029,7 +1029,7 @@ void CAllJoynService::DoJoinSession()
     AutoPtr<ISignalEmitter> emitter;
     CSignalEmitter::New(IBusObject::Probe(mChatService), mUseSessionId, GlobalBroadcast_Off, (ISignalEmitter**)&emitter);
     AutoPtr<IInterface> obj;
-    emitter->GetInterface(EIID_IChatInterface, (IInterface**)&obj);
+    emitter->GetInterface(EIID_IInterface, (IInterface**)&obj);
     mChatInterface = IChatInterface::Probe(obj);
 
     mUseChannelState = UseChannelState_JOINED;
@@ -1062,7 +1062,6 @@ void CAllJoynService::DoLeaveSession()
     mChatApplication->UseSetChannelState(mUseChannelState);
 }
 
-
 void CAllJoynService::DoSendMessages()
 {
     Logger::I(TAG, "doSendMessages()");
@@ -1081,10 +1080,14 @@ void CAllJoynService::DoSendMessages()
          */
         if (mJoinedToSelf) {
             if (mHostChatInterface != NULL) {
+                Logger::I(TAG, " >> mHostChatInterface %s: chat: %s",
+                    TO_CSTR(mHostChatInterface), message.string());
                 status = mHostChatInterface->Chat(message);
             }
         }
         else {
+            Logger::I(TAG, " >> mChatInterface %s: chat: %s",
+                TO_CSTR(mChatInterface), message.string());
             status = mChatInterface->Chat(message);
         }
 

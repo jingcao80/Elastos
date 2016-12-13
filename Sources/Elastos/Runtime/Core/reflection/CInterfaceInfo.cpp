@@ -268,11 +268,7 @@ ECode CInterfaceInfo::GetMethodCount(
         if (FAILED(ec)) return ec;
     }
 
-    *count = 0;
-    for (UInt32 i = 0; i < mIFCount; i++) {
-        *count += mIFList[i].mDesc->mMethodCount;
-    }
-
+    *count = mMethodCount;
     return NOERROR;
 }
 
@@ -282,6 +278,11 @@ ECode CInterfaceInfo::AcquireMethodList()
     if (!mMethodList) {
         g_objInfoList.LockHashTable(EntryType_Method);
         if (!mMethodList) {
+            if (!mIFList) {
+                ECode ec = CreateIFList();
+                if (FAILED(ec)) return ec;
+            }
+
             mMethodList = new CEntryList(EntryType_Method,
                 mDesc, mMethodCount, mClsModule, mIFList, mIFCount);
             if (!mMethodList) {
@@ -318,8 +319,6 @@ ECode CInterfaceInfo::GetMethodInfo(
     if (name.IsNull() || signature.IsNull() || !methodInfo) {
         return E_INVALID_ARGUMENT;
     }
-
-    assert(mMethodCount);
 
     ECode ec = AcquireMethodList();
     if (FAILED(ec)) return ec;

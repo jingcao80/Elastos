@@ -59,7 +59,7 @@ public:
     UInt32                  mIndex;       // interface index in object
     CObjectProxy*           mOwner;
     CIInterfaceInfo*        mInfo;
-    IInterfaceInfo*         mInfo2;
+    AutoPtr<IInterfaceInfo> mInfo2;
 
 private:
     static const Boolean DEBUG;

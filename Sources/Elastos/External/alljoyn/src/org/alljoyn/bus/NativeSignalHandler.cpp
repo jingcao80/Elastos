@@ -1,5 +1,7 @@
 
 #include "org/alljoyn/bus/NativeSignalHandler.h"
+#include "org/alljoyn/bus/NativeMessageContext.h"
+#include "org/alljoyn/bus/MsgArg.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -73,38 +75,32 @@ void NativeSignalHandler::SignalHandler(
     /* [in] */ const char* sourcePath,
     /* [in] */ ajn::Message& msg)
 {
-    assert(0 && "TODO");
-    // /*
-    //  * JScopedEnv will automagically attach the JVM to the current native
-    //  * thread.
-    //  */
-    // JScopedEnv env;
+    AutoPtr<IInterface> handler;
+    mSignalHandler->Resolve(EIID_IInterface, (IInterface**)&handler);
+    if (!handler) {
+        return;
+    }
 
-    // MessageContext context(msg);
+    NativeMessageContext context(msg);
 
-    // JLocalRef<jobjectArray> jargs;
-    // QStatus status = Unmarshal(msg, jmethod, jargs);
-    // if (ER_OK != status) {
-    //     return;
-    // }
+    const ajn::MsgArg* ajnArgs;
+    size_t numArgs;
+    msg->GetArgs(numArgs, ajnArgs);
+    AutoPtr<IArgumentList> args;
+    ECode ec = MsgArg::UnmarshalIn(mMethod, (Int64)ajnArgs, (IArgumentList**)&args);
+    if (FAILED(ec)) {
+		String methodName;
+		mMethod->GetName(&methodName);
+        Logger::E(TAG, "Failed to Unmarshal for method %s", methodName.string());
+        return;
+    }
 
-    // JLocalRef<jclass> clazz = env->GetObjectClass(jmethod);
-    // jmethodID mid = env->GetMethodID(clazz, "invoke",
-    //                                  "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;");
-    // if (!mid) {
-    //     return;
-    // }
-
-    // /*
-    //  * The weak global reference jsignalHandler cannot be directly used.  We
-    //  * have to get a "hard" reference to it and then use that.  If you try to
-    //  * use a weak reference directly you will crash and burn.
-    //  */
-    // jobject jo = env->NewLocalRef(jsignalHandler);
-    // if (!jo) {
-    //     return;
-    // }
-    // CallObjectMethod(env, jmethod, mid, jo, (jobjectArray)jargs);
+    ec = mMethod->Invoke(handler, args);
+    if (FAILED(ec)) {
+		String methodName;
+		mMethod->GetName(&methodName);
+        Logger::E(TAG, "%s failed to Invoke method %s", TO_CSTR(handler), methodName.string());
+    }
 }
 
 //=============================================================

@@ -125,7 +125,6 @@ CAR_INTERFACE_IMPL(Paint, Object, IPaint);
 
 Paint::Paint()
     : mNativePaint(0)
-    , mNativeTypeface(0)
     , mBidiFlags(IPaint::BIDI_DEFAULT_LTR)
     , mHasCompatScaling(FALSE)
     , mCompatScaling(0)
@@ -183,7 +182,6 @@ ECode Paint::Reset()
     mRasterizer = NULL;
     mShader = NULL;
     mTypeface = NULL;
-    mNativeTypeface = 0;
     mXfermode = NULL;
 
     mHasCompatScaling = FALSE;
@@ -227,7 +225,6 @@ void Paint::SetClassVariablesFrom(
     }
 
     mTypeface = paint->mTypeface;
-    mNativeTypeface = paint->mNativeTypeface;
     mXfermode = paint->mXfermode;
 
     mHasCompatScaling = paint->mHasCompatScaling;
@@ -707,16 +704,20 @@ ECode Paint::GetTypeface(
     return NOERROR;
 }
 
+Int64 Paint::GetNativeTypeface()
+{
+    if (mTypeface != NULL) {
+        return ((Typeface*)mTypeface.Get())->mNativeInstance;
+    }
+    return 0;
+}
+
 ECode Paint::SetTypeface(
     /* [in] */ ITypeface* typeface)
 {
-    Int64 typefaceNative = 0;
-    if (typeface != NULL) {
-        typefaceNative = ((Typeface*)typeface)->mNativeInstance;
-    }
-    NativeSetTypeface(mNativePaint, typefaceNative);
     mTypeface = typeface;
-    mNativeTypeface = typefaceNative;
+    Int64 typefaceNative = GetNativeTypeface();
+    NativeSetTypeface(mNativePaint, typefaceNative);
     return NOERROR;
 }
 
@@ -940,7 +941,7 @@ static SkScalar getMetricsInternal(
     const int kElegantDescent = -500;
     const int kElegantLeading = 0;
     NativePaint* paint = reinterpret_cast<NativePaint*>(epaint->mNativePaint);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(epaint->mNativeTypeface);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(epaint->GetNativeTypeface());
     typeface = TypefaceImpl_resolveDefault(typeface);
     android::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
     float saveSkewX = paint->getTextSkewX();
@@ -1182,14 +1183,14 @@ ECode Paint::BreakText(
         return NOERROR;
     }
     if (!mHasCompatScaling) {
-        *number = NativeBreakText(mNativePaint, mNativeTypeface, text, index, count, maxWidth, mBidiFlags, measuredWidth);
+        *number = NativeBreakText(mNativePaint, GetNativeTypeface(), text, index, count, maxWidth, mBidiFlags, measuredWidth);
         return NOERROR;
     }
 
     Float oldSize;
     GetTextSize(&oldSize);
     SetTextSize(oldSize * mCompatScaling);
-    Int32 res = NativeBreakText(mNativePaint, mNativeTypeface, text, index, count, maxWidth * mCompatScaling, mBidiFlags,
+    Int32 res = NativeBreakText(mNativePaint, GetNativeTypeface(), text, index, count, maxWidth * mCompatScaling, mBidiFlags,
             measuredWidth);
     SetTextSize(oldSize);
     if (measuredWidth != NULL) (*measuredWidth)[0] *= mInvCompatScaling;
@@ -1262,14 +1263,14 @@ ECode Paint::BreakText(
         return NOERROR;
     }
     if (!mHasCompatScaling) {
-        *number = NativeBreakText(mNativePaint, mNativeTypeface, text, measureForwards, maxWidth, mBidiFlags, measuredWidth);
+        *number = NativeBreakText(mNativePaint, GetNativeTypeface(), text, measureForwards, maxWidth, mBidiFlags, measuredWidth);
         return NOERROR;
     }
 
     Float oldSize;
     GetTextSize(&oldSize);
     SetTextSize(oldSize * mCompatScaling);
-    Int32 res = NativeBreakText(mNativePaint, mNativeTypeface, text, measureForwards, maxWidth * mCompatScaling,
+    Int32 res = NativeBreakText(mNativePaint, GetNativeTypeface(), text, measureForwards, maxWidth * mCompatScaling,
             mBidiFlags, measuredWidth);
     SetTextSize(oldSize);
     if (measuredWidth != NULL) (*measuredWidth)[0] *= mInvCompatScaling;
@@ -1296,14 +1297,14 @@ ECode Paint::GetTextWidths(
         return NOERROR;
     }
     if (!mHasCompatScaling) {
-        *number = NativeGetTextWidths(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, widths);
+        *number = NativeGetTextWidths(mNativePaint, GetNativeTypeface(), text, index, count, mBidiFlags, widths);
         return NOERROR;
     }
 
     Float oldSize;
     GetTextSize(&oldSize);
     SetTextSize(oldSize * mCompatScaling);
-    Int32 res = NativeGetTextWidths(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, widths);
+    Int32 res = NativeGetTextWidths(mNativePaint, GetNativeTypeface(), text, index, count, mBidiFlags, widths);
     SetTextSize(oldSize);
     for (Int32 i = 0; i < res; i++) {
         (*widths)[i] *= mInvCompatScaling;
@@ -1382,13 +1383,13 @@ ECode Paint::GetTextWidths(
         return NOERROR;
     }
     if (!mHasCompatScaling) {
-        *number = NativeGetTextWidths(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, widths);
+        *number = NativeGetTextWidths(mNativePaint, GetNativeTypeface(), text, start, end, mBidiFlags, widths);
         return NOERROR;
     }
     Float oldSize;
     GetTextSize(&oldSize);
     SetTextSize(oldSize * mCompatScaling);
-    Int32 res = NativeGetTextWidths(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, widths);
+    Int32 res = NativeGetTextWidths(mNativePaint, GetNativeTypeface(), text, start, end, mBidiFlags, widths);
     SetTextSize(oldSize);
     for (Int32 i = 0; i < res; i++) {
         (*widths)[i] *= mInvCompatScaling;
@@ -1431,7 +1432,7 @@ ECode Paint::GetTextRunAdvances(
         return NOERROR;
     }
     if (!mHasCompatScaling) {
-        *advance = NativeGetTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
+        *advance = NativeGetTextRunAdvances(mNativePaint, GetNativeTypeface(), chars, index, count,
                 contextIndex, contextCount, isRtl, advances, advancesIndex);
         return NOERROR;
     }
@@ -1439,7 +1440,7 @@ ECode Paint::GetTextRunAdvances(
     Float oldSize;
     GetTextSize(&oldSize);
     SetTextSize(oldSize * mCompatScaling);
-    Float res = NativeGetTextRunAdvances(mNativePaint, mNativeTypeface, chars, index, count,
+    Float res = NativeGetTextRunAdvances(mNativePaint, GetNativeTypeface(), chars, index, count,
                 contextIndex, contextCount, isRtl, advances, advancesIndex);
     SetTextSize(oldSize);
 
@@ -1538,7 +1539,7 @@ ECode Paint::GetTextRunAdvances(
     }
 
     if (!mHasCompatScaling) {
-        *advance = NativeGetTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
+        *advance = NativeGetTextRunAdvances(mNativePaint, GetNativeTypeface(), text, start, end,
                 contextStart, contextEnd, isRtl, advances, advancesIndex);
         return NOERROR;
     }
@@ -1546,7 +1547,7 @@ ECode Paint::GetTextRunAdvances(
     float oldSize;
     GetTextSize(&oldSize);
     SetTextSize(oldSize * mCompatScaling);
-    Float totalAdvance = NativeGetTextRunAdvances(mNativePaint, mNativeTypeface, text, start, end,
+    Float totalAdvance = NativeGetTextRunAdvances(mNativePaint, GetNativeTypeface(), text, start, end,
                 contextStart, contextEnd, isRtl, advances, advancesIndex);
     SetTextSize(oldSize);
 
@@ -1648,7 +1649,7 @@ ECode Paint::GetTextPath(
     if ((index | count) < 0 || index + count > text->GetLength()) {
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    NativeGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, index, count, x, y, ((CPath*)path)->mNativePath);
+    NativeGetTextPath(mNativePaint, GetNativeTypeface(), mBidiFlags, text, index, count, x, y, ((CPath*)path)->mNativePath);
     return NOERROR;
 }
 
@@ -1663,7 +1664,7 @@ ECode Paint::GetTextPath(
     if ((start | end | (end - start) | (text.GetLength() - end)) < 0) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    NativeGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, start, end, x, y, ((CPath*)path)->mNativePath);
+    NativeGetTextPath(mNativePaint, GetNativeTypeface(), mBidiFlags, text, start, end, x, y, ((CPath*)path)->mNativePath);
     return NOERROR;
 }
 
@@ -1680,7 +1681,7 @@ ECode Paint::GetTextBounds(
 //        throw new NullPointerException("need bounds Rect");
         return E_NULL_POINTER_EXCEPTION;
     }
-    NativeGetStringBounds(mNativePaint, mNativeTypeface, text, start, end, mBidiFlags, bounds);
+    NativeGetStringBounds(mNativePaint, GetNativeTypeface(), text, start, end, mBidiFlags, bounds);
     return NOERROR;
 }
 
@@ -1697,7 +1698,7 @@ ECode Paint::GetTextBounds(
 //        throw new NullPointerException("need bounds Rect");
         return E_NULL_POINTER_EXCEPTION;
     }
-    NativeGetCharArrayBounds(mNativePaint, mNativeTypeface, text, index, count, mBidiFlags, bounds);
+    NativeGetCharArrayBounds(mNativePaint, GetNativeTypeface(), text, index, count, mBidiFlags, bounds);
     return NOERROR;
 }
 

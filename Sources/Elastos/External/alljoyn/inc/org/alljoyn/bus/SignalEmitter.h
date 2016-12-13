@@ -37,7 +37,7 @@ private:
             /* [in] */ IArgumentList* args);
 
     private:
-        SignalEmitter* mHost;
+        AutoPtr<SignalEmitter> mSignalEmitter;   // hold host
     };
 
 public:
@@ -153,8 +153,7 @@ private:
         /* [in] */ const String& destination,
         /* [in] */ Int32 sessionId,
         /* [in] */ const String& ifaceName,
-        /* [in] */ const String& signalName,
-        /* [in] */ const String& inputSig,
+        /* [in] */ IMethodInfo* methodInfo,
         /* [in] */ IArgumentList* args,
         /* [in] */ Int32 timeToLive,
         /* [in] */ Int32 flags,
@@ -177,7 +176,7 @@ private:
     Int32 mSessionId;
     Int32 mTimeToLive;
     Int32 mFlags;
-    AutoPtr<IInterface> mProxy;
+    AutoPtr<IProxy> mProxy;
     AutoPtr<IMessageContext> mMsgContext;
 };
 
