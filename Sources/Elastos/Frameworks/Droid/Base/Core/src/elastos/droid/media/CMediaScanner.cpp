@@ -1558,7 +1558,7 @@ ECode CMediaScanner::ExtractAlbumArt(
     Int32 len = data->size();
     AutoPtr< ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(len);
     if (array != NULL) {
-        memcpy(array, data->data(), len);
+        memcpy(array->GetPayload(), data->data(), len);
     }
 
     free(data);
