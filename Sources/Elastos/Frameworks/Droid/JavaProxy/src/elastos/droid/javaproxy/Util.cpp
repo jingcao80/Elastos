@@ -1862,6 +1862,7 @@ Boolean Util::SetJavaBaseBundle(
                         Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
 
                         env->CallVoidMethod(jbundle, m, jKey, jparcelable);
+                        env->DeleteLocalRef(jparcelable);
                         Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelable %d", __LINE__);
                     }
                     else {
@@ -1875,16 +1876,26 @@ Boolean Util::SetJavaBaseBundle(
                         Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
 
                         env->CallVoidMethod(jbundle, m, jKey, jparcelable);
+                        env->DeleteLocalRef(jparcelable);
                         Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelable %d", __LINE__);
                     }
                     else {
                         LOGGERE("ToJavaBundle", "ToJavaParcelable fail!");
                     }
                 }
-                else {
-                    LOGGERE("ToJavaBundle", "ToJavaBundle() Unknown IParcelable type not implemented! key is:%s\n", keyStr.string());
-                    DUMP_CLSID(clsid, "ToJavaBundle");
-                    assert(0 && "TODO");
+                else if (ECLSID_CHierarchicalUri == clsid) {
+                    jobject jparcelable = Util::ToJavaUri(env, IUri::Probe(value));
+                    if (jparcelable != NULL) {
+                        jmethodID m = env->GetMethodID(bundleKlass, "putParcelable", "(Ljava/lang/String;Landroid/os/Parcelable;)V");
+                        Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putParcelable %d", __LINE__);
+
+                        env->CallVoidMethod(jbundle, m, jKey, jparcelable);
+                        env->DeleteLocalRef(jparcelable);
+                        Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelable %d", __LINE__);
+                    }
+                    else {
+                        LOGGERE("ToJavaBundle", "ToJavaParcelable fail!");
+                    }
                 }
             }
             else{
