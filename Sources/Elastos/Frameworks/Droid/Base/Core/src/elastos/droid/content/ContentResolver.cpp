@@ -305,7 +305,10 @@ ECode ContentResolver::GetType(
 
 //    try {
     AutoPtr<IUri> newUri;
-    ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
+    if (FAILED(ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri))) {
+        Logger::W(TAG, "Failed to get type for: %s", TO_CSTR(uri));
+        return NOERROR;
+    }
     Int32 userId;
     ResolveUserId(uri, &userId);
     AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();

@@ -1446,15 +1446,18 @@ AutoPtr<IClassInfo> CNotificationBuilder::GetNotificationStyleClass(
     /* [in] */ const String& templateClass)
 {
     AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+    Int32 pos = String("Elastos.Droid.App.CNotification").GetLength();
     AutoPtr<ArrayOf<String> > classes = ArrayOf<String>::Alloc(4);
     (*classes)[0] = String("Elastos.Droid.App.CNotificationBigTextStyle");
     (*classes)[1] = String("Elastos.Droid.App.CNotificationBigPictureStyle");
     (*classes)[2] = String("Elastos.Droid.App.CNotificationInboxStyle");
     (*classes)[3] = String("Elastos.Droid.App.CNotificationMediaStyle");
+    String key;
     for (Int32 i = 0; i < classes->GetLength(); ++i) {
-        if (templateClass.Equals((*classes)[i])) {
+        key = (*classes)[i].Substring(pos);
+        if (templateClass.Contains(key)) {
             AutoPtr<IClassInfo> ci;
-            cl->LoadClass(templateClass, (IClassInfo**)&ci);
+            cl->LoadClass((*classes)[i], (IClassInfo**)&ci);
             return ci;
         }
     }

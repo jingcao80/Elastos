@@ -208,8 +208,7 @@ AutoPtr<IIntent> MediaProjectionPermissionActivity::GetMediaProjectionIntent(
         (IIMediaProjection**)&projection);
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    //TODO
-    // intent->PutExtra(IMediaProjectionManager::EXTRA_MEDIA_PROJECTION, projection.asBinder());
+    intent->PutExtra(IMediaProjectionManager::EXTRA_MEDIA_PROJECTION, IBinder::Probe(projection));
     return intent;
 }
 

@@ -3071,57 +3071,57 @@ ECode CPhoneStatusBar::FindAndUpdateMediaNotifications()
             // one of our notifications. This will catch apps that aren't (yet!) using media
             // notifications.
             if (mMediaSessionManager != NULL) {
-                Logger::D(TAG, "TODO :[Need MediaSessionService.]");
-                // AutoPtr<IList> sessions;  /*<MediaController*/
-                // mMediaSessionManager->GetActiveSessionsForUser(
-                //         NULL, IUserHandle::USER_ALL, (IList**)&sessions);
+                AutoPtr<IList> sessions;  /*<MediaController*/
+                mMediaSessionManager->GetActiveSessionsForUser(
+                        NULL, IUserHandle::USER_ALL, (IList**)&sessions);
 
-                // AutoPtr<IIterator> ator;
-                // sessions->GetIterator((IIterator**)&ator);
-                // Boolean has = FALSE;
-                // while (ator->HasNext(&has), has) {
-                //     AutoPtr<IInterface> obj;
-                //     ator->GetNext((IInterface**)&obj);
-                //     AutoPtr<IMediaController> aController = IMediaController::Probe(obj);
+                AutoPtr<IIterator> ator;
+                sessions->GetIterator((IIterator**)&ator);
+                Boolean has = FALSE;
+                while (ator->HasNext(&has), has) {
+                    AutoPtr<IInterface> obj;
+                    ator->GetNext((IInterface**)&obj);
+                    AutoPtr<IMediaController> aController = IMediaController::Probe(obj);
 
-                //     if (aController == NULL) continue;
-                //     AutoPtr<IPlaybackState> state;
-                //     aController->GetPlaybackState((IPlaybackState**)&state);
-                //     if (state == NULL) continue;
+                    if (aController == NULL) continue;
+                    AutoPtr<IPlaybackState> state;
+                    aController->GetPlaybackState((IPlaybackState**)&state);
 
-                //     Int32 s = 0;
-                //     switch (state->GetState(&s), s) {
-                //         case IPlaybackState::STATE_STOPPED:
-                //         case IPlaybackState::STATE_ERROR:
-                //             continue;
-                //         default: {
-                //             // now to see if we have one like this
-                //             String pkg;
-                //             aController->GetPackageName(&pkg);
+                    if (state == NULL) continue;
 
-                //             for (Int32 i = 0; i < N; i++) {
-                //                 AutoPtr<IInterface> o;
-                //                 activeNotifications->Get(i, (IInterface**)&o);
-                //                 AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(o);
-                //                 AutoPtr<IStatusBarNotification> notification;
-                //                 entry->GetNotification((IStatusBarNotification**)&notification);
+                    Int32 s = 0;
+                    switch (state->GetState(&s), s) {
+                        case IPlaybackState::STATE_STOPPED:
+                        case IPlaybackState::STATE_ERROR:
+                            continue;
+                        default: {
+                            // now to see if we have one like this
+                            String pkg;
+                            aController->GetPackageName(&pkg);
 
-                //                 String v;
-                //                 notification->GetPackageName(&v);
-                //                 if (v.Equals(pkg)) {
-                //                     notification->GetKey(&v);
-                //                     if (DEBUG_MEDIA) {
-                //                         Logger::V(TAG, "DEBUG_MEDIA: found controller matching %s"
-                //                             , v.string());
-                //                     }
-                //                     controller = aController;
-                //                     mediaNotification = entry;
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
+                            for (Int32 i = 0; i < N; i++) {
+                                AutoPtr<IInterface> o;
+                                activeNotifications->Get(i, (IInterface**)&o);
+                                AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(o);
+                                AutoPtr<IStatusBarNotification> notification;
+                                entry->GetNotification((IStatusBarNotification**)&notification);
+
+                                String v;
+                                notification->GetPackageName(&v);
+                                if (v.Equals(pkg)) {
+                                    notification->GetKey(&v);
+                                    if (DEBUG_MEDIA) {
+                                        Logger::V(TAG, "DEBUG_MEDIA: found controller matching %s"
+                                            , v.string());
+                                    }
+                                    controller = aController;
+                                    mediaNotification = entry;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

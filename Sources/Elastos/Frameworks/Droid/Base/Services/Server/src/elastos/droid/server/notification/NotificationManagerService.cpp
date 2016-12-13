@@ -3655,12 +3655,11 @@ ECode NotificationManagerService::BuzzBeepBlinkLocked(
 
     String pakName;
     mContext->GetPackageName(&pakName);
-    Slogger::I(TAG, "TODO: Profile Service");
-    // AutoPtr<IProfileGroup> group;
-    // profileManager->GetActiveProfileGroup(pakName, (IProfileGroup**)&group);
-    // if (group != NULL) {
-    //     group->ApplyOverridesToNotification(notification);
-    // }
+    AutoPtr<IProfileGroup> group;
+    profileManager->GetActiveProfileGroup(pakName, (IProfileGroup**)&group);
+    if (group != NULL) {
+        group->ApplyOverridesToNotification(notification);
+    }
 
     // If we're not supposed to beep, vibrate, etc. then don't.
     String disableEffects = DisableNotificationEffects(record);
