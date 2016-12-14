@@ -1,0 +1,46 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFObserver {
+
+    /**
+     * The Door interface describing how a door looks on the AllJoyn bus.
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "com.elastos.Door", announced = "true")]
+    interface IDoor {
+
+        const String DOOR_INTF_NAME = "com.elastos.Door";
+        const String PERSON_PASSED_THROUGH = "PersonPassedThrough";
+
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "1")]
+        GetIsOpen(
+            [out] Boolean* value);
+
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "1")]
+        GetLocation(
+            [out] String* value);
+
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "2", signature = "u")]
+        GetKeyCode(
+            [out] Int32* value);
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "Open")]
+        Open();
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "Close")]
+        Close();
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "KnockAndRun", annotation = "1")]
+        KnockAndRun();
+
+        [@Org.Alljoyn.Bus.Annotation.BusSignal(name = "PersonPassedThrough")]
+        PersonPassedThrough(
+            [in] String person);
+    }
+
+    } // namespace DFObserver
+    } // namespace DevSamples
+    } // namespace Elastos
+}

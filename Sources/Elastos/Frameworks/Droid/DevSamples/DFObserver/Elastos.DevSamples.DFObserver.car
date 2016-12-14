@@ -1,0 +1,60 @@
+
+module
+{
+    importlib("Org.Alljoyn.Bus.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/devsamples/dfobserver/Door.car");
+    merge("car/elastos/devsamples/dfobserver/DoorService.car");
+    merge("car/elastos/devsamples/dfobserver/DoorAdapterItem.car");
+    merge("car/elastos/devsamples/dfobserver/DoorEventListener.car");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Org.Alljoyn.Bus.IBusObject;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFObserver {
+
+    class CClient {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CDoorService {
+        constructor(
+            [in] String location,
+            [in] IHandler* handler);
+
+        interface IDoorService;
+        interface IDoor;
+        interface IBusObject;
+    }
+
+    } // namespace DFObserver
+    } // namespace DevSamples
+    } // namespace Elastos
+}

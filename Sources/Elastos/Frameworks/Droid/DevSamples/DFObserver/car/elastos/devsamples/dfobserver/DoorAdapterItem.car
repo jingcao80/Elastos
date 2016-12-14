@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFObserver {
+
+    /**
+     * A helper class for exchanging data between UI and Bus logic.
+     */
+    interface IDoorAdapterItem {
+        IsOpen(
+            [out] Boolean* value);
+
+        SetIsOpen(
+            [in] Boolean value);
+
+        GetName(
+            [out] String* value);
+    }
+
+    } // namespace DFObserver
+    } // namespace DevSamples
+    } // namespace Elastos
+}
