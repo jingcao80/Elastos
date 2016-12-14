@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/os/BatteryStats.h"
 #include "elastos/droid/internal/os/CBatteryStatsHelper.h"
@@ -8,12 +9,14 @@
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/text/format/DateFormat.h"
 #include "elastos/droid/utility/TimeUtils.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/utility/CSparseInt32Array.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Internal::Os::IBatterySipper;
 using Elastos::Droid::Internal::Os::CBatteryStatsHelper;
 using Elastos::Droid::Internal::Os::IBatteryStatsHelper;
@@ -39,8 +42,10 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Telephony::CSignalStrength;
 using Elastos::Droid::Text::Format::DateFormat;
 using Elastos::Droid::Utility::TimeUtils;
-using Elastos::Droid::Utility::ISparseInt32Array;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::CSparseInt32Array;
+using Elastos::Droid::Utility::ISparseInt32Array;
+using Elastos::Droid::View::IDisplay;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IFloat;
@@ -308,37 +313,32 @@ BatteryStats::HistoryItem::HistoryItem()
     , mEventCode(0)
     , mCurrentTime(0)
     , mNumReadInts(0)
+{}
+
+ECode BatteryStats::HistoryItem::constructor()
 {
     mLocalWakelockTag = new HistoryTag();
     mLocalWakeReasonTag = new HistoryTag();
     mLocalEventTag = new HistoryTag();
+    return NOERROR;
 }
 
-BatteryStats::HistoryItem::HistoryItem(
+ECode BatteryStats::HistoryItem::constructor(
     /* [in] */ Int64 time,
     /* [in] */ IParcel* src)
-    : mTime(time)
-    , mCmd(CMD_NULL)
-    , mBatteryLevel(0)
-    , mBatteryStatus(0)
-    , mBatteryHealth(0)
-    , mBatteryPlugType(0)
-    , mBatteryTemperature(0)
-    , mStates(0)
-    , mStates2(0)
-    , mEventCode(0)
-    , mCurrentTime(0)
-    , mNumReadInts(2)
 {
     mLocalWakelockTag = new HistoryTag();
     mLocalWakeReasonTag = new HistoryTag();
     mLocalEventTag = new HistoryTag();
-    ReadFromParcel(src);
+    return ReadFromParcel(src);
 }
 
-Boolean BatteryStats::HistoryItem::IsDeltaData()
+ECode BatteryStats::HistoryItem::IsDeltaData(
+    /* [out] */ Boolean* result)
 {
-    return mCmd == CMD_UPDATE;
+    VALIDATE_NOT_NULL(result)
+    *result = mCmd == CMD_UPDATE;
+    return NOERROR;
 }
 
 ECode BatteryStats::HistoryItem::WriteToParcel(
@@ -428,7 +428,7 @@ ECode BatteryStats::HistoryItem::ReadFromParcel(
     return NOERROR;
 }
 
-void BatteryStats::HistoryItem::Clear()
+ECode BatteryStats::HistoryItem::Clear()
 {
     mTime = 0;
     mCmd = CMD_NULL;
@@ -444,24 +444,28 @@ void BatteryStats::HistoryItem::Clear()
     mWakeReasonTag = NULL;
     mEventCode = EVENT_NONE;
     mEventTag = NULL;
+    return NOERROR;
 }
 
-void BatteryStats::HistoryItem::SetTo(
-    /* [in] */ HistoryItem* o)
+ECode BatteryStats::HistoryItem::SetTo(
+    /* [in] */ IBatteryStatsHistoryItem* o)
 {
-    mTime = o->mTime;
-    mCmd = o->mCmd;
-    SetToCommon(o);
+    HistoryItem* obj = (HistoryItem*)o;
+    mTime = obj->mTime;
+    mCmd = obj->mCmd;
+    SetToCommon(obj);
+    return NOERROR;
 }
 
-void BatteryStats::HistoryItem::SetTo(
+ECode BatteryStats::HistoryItem::SetTo(
     /* [in] */ Int64 time,
     /* [in] */ Byte cmd,
-    /* [in] */ HistoryItem* o)
+    /* [in] */ IBatteryStatsHistoryItem* o)
 {
     mTime = time;
     mCmd = cmd;
-    SetToCommon(o);
+    SetToCommon((HistoryItem*)o);
+    return NOERROR;
 }
 
 void BatteryStats::HistoryItem::SetToCommon(
@@ -500,56 +504,264 @@ void BatteryStats::HistoryItem::SetToCommon(
     mCurrentTime = o->mCurrentTime;
 }
 
-Boolean BatteryStats::HistoryItem::SameNonEvent(
-    /* [in] */ HistoryItem* o)
+ECode BatteryStats::HistoryItem::SameNonEvent(
+    /* [in] */ IBatteryStatsHistoryItem* o,
+    /* [out] */ Boolean* result)
 {
-    return mBatteryLevel == o->mBatteryLevel
-            && mBatteryStatus == o->mBatteryStatus
-            && mBatteryHealth == o->mBatteryHealth
-            && mBatteryPlugType == o->mBatteryPlugType
-            && mBatteryTemperature == o->mBatteryTemperature
-            && mBatteryVoltage == o->mBatteryVoltage
-            && mStates == o->mStates
-            && mStates2 == o->mStates2
-            && mCurrentTime == o->mCurrentTime;
+    VALIDATE_NOT_NULL(result)
+
+    HistoryItem* obj = (HistoryItem*)o;
+
+    *result = mBatteryLevel == obj->mBatteryLevel
+            && mBatteryStatus == obj->mBatteryStatus
+            && mBatteryHealth == obj->mBatteryHealth
+            && mBatteryPlugType == obj->mBatteryPlugType
+            && mBatteryTemperature == obj->mBatteryTemperature
+            && mBatteryVoltage == obj->mBatteryVoltage
+            && mStates == obj->mStates
+            && mStates2 == obj->mStates2
+            && mCurrentTime == obj->mCurrentTime;
+    return NOERROR;
 }
 
-Boolean BatteryStats::HistoryItem::Same(
-    /* [in] */ HistoryItem* o)
+ECode BatteryStats::HistoryItem::Same(
+    /* [in] */ IBatteryStatsHistoryItem* o,
+    /* [out] */ Boolean* result)
 {
-    if (!SameNonEvent(o) || mEventCode != o->mEventCode) {
-        return FALSE;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    HistoryItem* obj = (HistoryItem*)o;
+    Boolean res;
+    if ((SameNonEvent(o, &res), !res) || mEventCode != obj->mEventCode) {
+        return NOERROR;
     }
-    if (mWakelockTag != o->mWakelockTag) {
-        if (mWakelockTag == NULL || o->mWakelockTag == NULL) {
-            return FALSE;
+    if (mWakelockTag != obj->mWakelockTag) {
+        if (mWakelockTag == NULL || obj->mWakelockTag == NULL) {
+            return NOERROR;
         }
         Boolean equals;
-        if (mWakelockTag->Equals((IObject*)o->mWakelockTag.Get(), &equals), !equals) {
-            return FALSE;
+        if (mWakelockTag->Equals((IObject*)obj->mWakelockTag.Get(), &equals), !equals) {
+            return NOERROR;
         }
     }
-    if (mWakeReasonTag != o->mWakeReasonTag) {
-        if (mWakeReasonTag == NULL || o->mWakeReasonTag == NULL) {
-            return FALSE;
+    if (mWakeReasonTag != obj->mWakeReasonTag) {
+        if (mWakeReasonTag == NULL || obj->mWakeReasonTag == NULL) {
+            return NOERROR;
         }
         Boolean equals;
-        if (mWakeReasonTag->Equals((IObject*)o->mWakeReasonTag.Get(), &equals), !equals) {
-            return FALSE;
+        if (mWakeReasonTag->Equals((IObject*)obj->mWakeReasonTag.Get(), &equals), !equals) {
+            return NOERROR;
         }
     }
-    if (mEventTag != o->mEventTag) {
-        if (mEventTag == NULL || o->mEventTag == NULL) {
-            return FALSE;
+    if (mEventTag != obj->mEventTag) {
+        if (mEventTag == NULL || obj->mEventTag == NULL) {
+            return NOERROR;
         }
         Boolean equals;
-        if (mEventTag->Equals((IObject*)o->mWakeReasonTag.Get(), &equals), !equals) {
-            return FALSE;
+        if (mEventTag->Equals((IObject*)obj->mWakeReasonTag.Get(), &equals), !equals) {
+            return NOERROR;
         }
     }
-    return TRUE;
+
+    *result = TRUE;
+    return NOERROR;
 }
 
+ECode BatteryStats::HistoryItem::SetTime(
+    /* [in] */ Int64 time)
+{
+    mTime = time;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetTime(
+    /* [out] */ Int64* time)
+{
+    VALIDATE_NOT_NULL(time)
+    *time = mTime;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetCmd(
+    /* [in] */ Byte cmd)
+{
+    mCmd = cmd;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetCmd(
+    /* [out] */ Byte* cmd)
+{
+    VALIDATE_NOT_NULL(cmd)
+    *cmd = mCmd;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetBatteryLevel(
+    /* [in] */ Byte batteryLevel)
+{
+    mBatteryLevel = batteryLevel;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetBatteryLevel(
+    /* [out] */ Byte* batteryLevel)
+{
+    VALIDATE_NOT_NULL(batteryLevel)
+    *batteryLevel = mBatteryLevel;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetBatteryStatus(
+    /* [in] */ Byte batteryStatus)
+{
+    mBatteryStatus = batteryStatus;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetBatteryStatus(
+    /* [out] */ Byte* batteryStatus)
+{
+    VALIDATE_NOT_NULL(batteryStatus)
+    *batteryStatus = mBatteryStatus;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetBatteryHealth(
+    /* [in] */ Byte batteryHealth)
+{
+    mBatteryHealth = batteryHealth;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetBatteryHealth(
+    /* [out] */ Byte* batteryHealth)
+{
+    VALIDATE_NOT_NULL(batteryHealth)
+    *batteryHealth = mBatteryHealth;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetBatteryPlugType(
+    /* [in] */ Byte batteryPlugType)
+{
+    mBatteryPlugType = batteryPlugType;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetBatteryPlugType(
+    /* [out] */ Byte* batteryPlugType)
+{
+    VALIDATE_NOT_NULL(batteryPlugType)
+    *batteryPlugType = mBatteryPlugType;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetBatteryTemperature(
+    /* [in] */ Int16 batteryTemperature)
+{
+    mBatteryTemperature = batteryTemperature;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetBatteryTemperature(
+    /* [out] */ Int16* batteryTemperature)
+{
+    VALIDATE_NOT_NULL(batteryTemperature)
+    *batteryTemperature = mBatteryTemperature;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetBatteryVoltage(
+    /* [in] */ Char32 batteryVoltage)
+{
+    mBatteryVoltage = batteryVoltage;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetBatteryVoltage(
+    /* [out] */ Char32* batteryVoltage)
+{
+    VALIDATE_NOT_NULL(batteryVoltage)
+    *batteryVoltage = mBatteryVoltage;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetStates(
+    /* [in] */ Int32 states)
+{
+    mStates = states;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetStates(
+    /* [out] */ Int32* states)
+{
+    VALIDATE_NOT_NULL(states)
+    *states = mStates;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetStates2(
+    /* [in] */ Int32 states2)
+{
+    mStates2 = states2;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetStates2(
+    /* [out] */ Int32* states2)
+{
+    VALIDATE_NOT_NULL(states2)
+    *states2 = mStates2;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetEventCode(
+    /* [in] */ Int32 eventCode)
+{
+    mEventCode = eventCode;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetEventCode(
+    /* [out] */ Int32* eventCode)
+{
+    VALIDATE_NOT_NULL(eventCode)
+    *eventCode = mEventCode;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetCurrentTime(
+    /* [in] */ Int64 currentTime)
+{
+    mCurrentTime = currentTime;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetCurrentTime(
+    /* [out] */ Int64* currentTime)
+{
+    VALIDATE_NOT_NULL(currentTime)
+    *currentTime = mCurrentTime;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::SetNumReadInts(
+    /* [in] */ Int32 numReadInts)
+{
+    mNumReadInts = numReadInts;
+    return NOERROR;
+}
+
+ECode BatteryStats::HistoryItem::GetNumReadInts(
+    /* [out] */ Int32* numReadInts)
+{
+    VALIDATE_NOT_NULL(numReadInts)
+    *numReadInts = mNumReadInts;
+    return NOERROR;
+}
 
 //==============================================================================
 // BatteryStats::HistoryEventTracker
@@ -719,7 +931,7 @@ void BatteryStats::HistoryPrinter::PrintNextItem(
                 else if (rec->mStates < 0x100000) pw->Print(String("000"));
                 else if (rec->mStates < 0x1000000) pw->Print(String("00"));
                 else if (rec->mStates < 0x10000000) pw->Print(String("0"));
-                pw->Print(StringUtils::ToString(rec->mStates));
+                pw->Print(StringUtils::ToHexString(rec->mStates));
             }
         }
         else {
@@ -1443,13 +1655,14 @@ void BatteryStats::DumpLine(
     pw->Println();
 }
 
-void BatteryStats::DumpCheckinLocked(
+ECode BatteryStats::DumpCheckinLocked(
     /* [in]*/ IContext* context,
     /* [in]*/ IPrintWriter* pw,
     /* [in]*/ Int32 which,
     /* [in]*/ Int32 reqUid)
 {
     DumpCheckinLocked(context, pw, which, reqUid, CBatteryStatsHelper::CheckWifiOnly(context));
+    return NOERROR;
 }
 
 void BatteryStats::DumpCheckinLocked(
@@ -2278,7 +2491,7 @@ void BatteryStats::PrintmAh(
     printer->Print(CBatteryStatsHelper::MakemAh(power));
 }
 
-void BatteryStats::DumpLocked(
+ECode BatteryStats::DumpLocked(
     /* [in]*/ IContext* context,
     /* [in]*/ IPrintWriter* pw,
     /* [in] */ const String& prefix,
@@ -2286,6 +2499,7 @@ void BatteryStats::DumpLocked(
     /* [in]*/ Int32 reqUid)
 {
     DumpLocked(context, pw, prefix, which, reqUid, CBatteryStatsHelper::CheckWifiOnly(context));
+    return NOERROR;
 }
 
 void BatteryStats::DumpLocked(
@@ -3755,52 +3969,55 @@ void BatteryStats::PrintBitDescriptions(
     /* [in] */ ArrayOf<BitDescription*>* descriptions,
     /* [in] */ Boolean longNames)
 {
-    assert(0 && "TODO");
-    // int diff = oldval ^ newval;
-    // if (diff == 0) return;
-    // boolean didWake = false;
-    // for (int i=0; i<descriptions.length; i++) {
-    //     BitDescription bd = descriptions[i];
-    //     if ((diff&bd.mask) != 0) {
-    //         pw.print(longNames ? " " : ",");
-    //         if (bd.shift < 0) {
-    //             pw.print((newval&bd.mask) != 0 ? "+" : "-");
-    //             pw.print(longNames ? bd.name : bd.shortName);
-    //             if (bd.mask == HistoryItem.STATE_WAKE_LOCK_FLAG && wakelockTag != null) {
-    //                 didWake = true;
-    //                 pw.print("=");
-    //                 if (longNames) {
-    //                     UserHandle.formatUid(pw, wakelockTag.uid);
-    //                     pw.print(":\"");
-    //                     pw.print(wakelockTag.string);
-    //                     pw.print("\"");
-    //                 } else {
-    //                     pw.print(wakelockTag.poolIdx);
-    //                 }
-    //             }
-    //         } else {
-    //             pw.print(longNames ? bd.name : bd.shortName);
-    //             pw.print("=");
-    //             int val = (newval&bd.mask)>>bd.shift;
-    //             if (bd.values != null && val >= 0 && val < bd.values.length) {
-    //                 pw.print(longNames? bd.values[val] : bd.shortValues[val]);
-    //             } else {
-    //                 pw.print(val);
-    //             }
-    //         }
-    //     }
-    // }
-    // if (!didWake && wakelockTag != null) {
-    //     pw.print(longNames ? " wake_lock=" : ",w=");
-    //     if (longNames) {
-    //         UserHandle.formatUid(pw, wakelockTag.uid);
-    //         pw.print(":\"");
-    //         pw.print(wakelockTag.string);
-    //         pw.print("\"");
-    //     } else {
-    //         pw.print(wakelockTag.poolIdx);
-    //     }
-    // }
+    Int32 diff = oldval ^ newval;
+    if (diff == 0) return;
+    Boolean didWake = FALSE;
+    for (Int32 i = 0; i < descriptions->GetLength(); i++) {
+        AutoPtr<BitDescription> bd = (*descriptions)[i];
+        if ((diff&bd->mMask) != 0) {
+            pw->Print(longNames ? String(" ") : String(","));
+            if (bd->mShift < 0) {
+                pw->Print((newval&bd->mMask) != 0 ? String("+") : String("-"));
+                pw->Print(longNames ? bd->mName : bd->mShortName);
+                if (bd->mMask == IBatteryStatsHistoryItem::STATE_WAKE_LOCK_FLAG && wakelockTag != NULL) {
+                    didWake = TRUE;
+                    pw->Print(String("="));
+                    if (longNames) {
+                        UserHandle::FormatUid(pw, wakelockTag->mUid);
+                        pw->Print(String(":\""));
+                        pw->Print(wakelockTag->mString);
+                        pw->Print(String("\""));
+                    }
+                    else {
+                        pw->Print(wakelockTag->mPoolIdx);
+                    }
+                }
+            }
+            else {
+                pw->Print(longNames ? bd->mName : bd->mShortName);
+                pw->Print(String("="));
+                Int32 val = (newval&bd->mMask)>>bd->mShift;
+                if (bd->mValues != NULL && val >= 0 && val < bd->mValues->GetLength()) {
+                    pw->Print(longNames? (*bd->mValues)[val] : (*bd->mShortValues)[val]);
+                }
+                else {
+                    pw->Print(val);
+                }
+            }
+        }
+    }
+    if (!didWake && wakelockTag != NULL) {
+        pw->Print(longNames ? String(" wake_lock=") : String(",w="));
+        if (longNames) {
+            UserHandle::FormatUid(pw, wakelockTag->mUid);
+            pw->Print(String(":\""));
+            pw->Print(wakelockTag->mString);
+            pw->Print(String("\""));
+        }
+        else {
+            pw->Print(wakelockTag->mPoolIdx);
+        }
+    }
 }
 
 void BatteryStats::PrepareForDumpLocked()
@@ -3843,71 +4060,81 @@ Boolean BatteryStats::DumpDurationSteps(
     /* [in] */ Int32 count,
     /* [in] */ Boolean checkin)
 {
-    assert(0 && "TODO");
-    // if (count <= 0) {
-    //     return false;
-    // }
-    // if (!checkin) {
-    //     pw->Println(header);
-    // }
-    // String[] lineArgs = new String[4];
-    // for (Int32 i=0; i<count; i++) {
-    //     Int64 duration = steps[i] & STEP_LEVEL_TIME_MASK;
-    //     Int32 level = (Int32)((steps[i] & STEP_LEVEL_LEVEL_MASK)
-    //             >> STEP_LEVEL_LEVEL_SHIFT);
-    //     Int64 initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
-    //             >> STEP_LEVEL_INITIAL_MODE_SHIFT;
-    //     Int64 modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
-    //             >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
-    //     if (checkin) {
-    //         lineArgs[0] = Long.toString(duration);
-    //         lineArgs[1] = Integer.toString(level);
-    //         if ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) == 0) {
-    //             switch ((Int32)(initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
-    //                 case Display.STATE_OFF: lineArgs[2] = "s-"; break;
-    //                 case Display.STATE_ON: lineArgs[2] = "s+"; break;
-    //                 case Display.STATE_DOZE: lineArgs[2] = "sd"; break;
-    //                 case Display.STATE_DOZE_SUSPEND: lineArgs[2] = "sds"; break;
-    //                 default: lineArgs[1] = "?"; break;
-    //             }
-    //         } else {
-    //             lineArgs[2] = "";
-    //         }
-    //         if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) == 0) {
-    //             lineArgs[3] = (initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0 ? "p+" : "p-";
-    //         } else {
-    //             lineArgs[3] = "";
-    //         }
-    //         DumpLine(pw, 0 /* uid */, "i" /* category */, header, (Object[])lineArgs);
-    //     } else {
-    //         pw->Print(String("  #")); pw->Print(i); pw->Print(String(": "));
-    //         TimeUtils.formatDuration(duration, pw);
-    //         pw->Print(String(" to ")); pw->Print(level);
-    //         Boolean haveModes = false;
-    //         if ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) == 0) {
-    //             pw->Print(String(" ("));
-    //             switch ((Int32)(initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
-    //                 case Display.STATE_OFF: pw->Print(String("screen-off")); break;
-    //                 case Display.STATE_ON: pw->Print(String("screen-on")); break;
-    //                 case Display.STATE_DOZE: pw->Print(String("screen-doze")); break;
-    //                 case Display.STATE_DOZE_SUSPEND: pw->Print(String("screen-doze-suspend")); break;
-    //                 default: lineArgs[1] = "screen-?"; break;
-    //             }
-    //             haveModes = TRUE;
-    //         }
-    //         if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) == 0) {
-    //             pw->Print(haveModes ? String(", ") : String(" ("));
-    //             pw->Print((initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0
-    //                     ? String("power-save-on") : String("power-save-off"));
-    //             haveModes = TRUE;
-    //         }
-    //         if (haveModes) {
-    //             pw->Print(String(")"));
-    //         }
-    //         pw->Println();
-    //     }
-    // }
-    // return TRUE;
+    if (count <= 0) {
+        return FALSE;
+    }
+    if (!checkin) {
+        pw->Println(header);
+    }
+    AutoPtr< ArrayOf<String> > lineArgs = ArrayOf<String>::Alloc(4);
+    for (Int32 i = 0; i < count; i++) {
+        Int64 duration = (*steps)[i] & STEP_LEVEL_TIME_MASK;
+        Int32 level = (Int32)(((*steps)[i] & STEP_LEVEL_LEVEL_MASK)
+                >> STEP_LEVEL_LEVEL_SHIFT);
+        Int64 initMode = ((*steps)[i] & STEP_LEVEL_INITIAL_MODE_MASK)
+                >> STEP_LEVEL_INITIAL_MODE_SHIFT;
+        Int64 modMode = ((*steps)[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
+                >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
+        if (checkin) {
+            (*lineArgs)[0] = StringUtils::ToString(duration);
+            (*lineArgs)[1] = StringUtils::ToString(level);
+            if ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) == 0) {
+                switch ((Int32)(initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
+                    case IDisplay::STATE_OFF: (*lineArgs)[2] = "s-"; break;
+                    case IDisplay::STATE_ON: (*lineArgs)[2] = "s+"; break;
+                    case IDisplay::STATE_DOZE: (*lineArgs)[2] = "sd"; break;
+                    case IDisplay::STATE_DOZE_SUSPEND: (*lineArgs)[2] = "sds"; break;
+                    default: (*lineArgs)[1] = "?"; break;
+                }
+            }
+            else {
+                (*lineArgs)[2] = "";
+            }
+            if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) == 0) {
+                (*lineArgs)[3] = (initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0 ? "p+" : "p-";
+            }
+            else {
+                (*lineArgs)[3] = "";
+            }
+            AutoPtr< ArrayOf<IInterface*> > dumpLineArgs = ArrayOf<IInterface*>::Alloc(4);
+            dumpLineArgs->Set(0, CoreUtils::Convert((*lineArgs)[0]));
+            dumpLineArgs->Set(1, CoreUtils::Convert((*lineArgs)[1]));
+            dumpLineArgs->Set(2, CoreUtils::Convert((*lineArgs)[2]));
+            dumpLineArgs->Set(3, CoreUtils::Convert((*lineArgs)[3]));
+            DumpLine(pw, 0 /* uid */, String("i") /* category */, header, dumpLineArgs);
+        }
+        else {
+            pw->Print(String("  #"));
+            pw->Print(i);
+            pw->Print(String(": "));
+            TimeUtils::FormatDuration(duration, pw);
+            pw->Print(String(" to "));
+            pw->Print(level);
+            Boolean haveModes = FALSE;
+            if ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) == 0) {
+                pw->Print(String(" ("));
+                switch ((Int32)(initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
+                    case IDisplay::STATE_OFF: pw->Print(String("screen-off")); break;
+                    case IDisplay::STATE_ON: pw->Print(String("screen-on")); break;
+                    case IDisplay::STATE_DOZE: pw->Print(String("screen-doze")); break;
+                    case IDisplay::STATE_DOZE_SUSPEND: pw->Print(String("screen-doze-suspend")); break;
+                    default: (*lineArgs)[1] = "screen-?"; break;
+                }
+                haveModes = TRUE;
+            }
+            if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) == 0) {
+                pw->Print(haveModes ? String(", ") : String(" ("));
+                pw->Print((initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0
+                        ? String("power-save-on") : String("power-save-off"));
+                haveModes = TRUE;
+            }
+            if (haveModes) {
+                pw->Print(String(")"));
+            }
+            pw->Println();
+        }
+    }
+    return TRUE;
 }
 
 void BatteryStats::DumpHistoryLocked(
@@ -3916,87 +4143,105 @@ void BatteryStats::DumpHistoryLocked(
     /* [in] */ Int64 histStart,
     /* [in] */ Boolean checkin)
 {
-    assert(0 && "TODO");
-    // final HistoryPrinter hprinter = new HistoryPrinter();
-    // final HistoryItem rec = new HistoryItem();
-    // Int64 lastTime = -1;
-    // Int64 baseTime = -1;
-    // Boolean printed = false;
-    // HistoryEventTracker tracker = null;
-    // while (getNextHistoryLocked(rec)) {
-    //     lastTime = rec.time;
-    //     if (baseTime < 0) {
-    //         baseTime = lastTime;
-    //     }
-    //     if (rec.time >= histStart) {
-    //         if (histStart >= 0 && !printed) {
-    //             if (rec.cmd == IBatteryStatsHistoryItem::CMD_CURRENT_TIME
-    //                     || rec.cmd == IBatteryStatsHistoryItem::CMD_RESET
-    //                     || rec.cmd == IBatteryStatsHistoryItem::CMD_START) {
-    //                 printed = TRUE;
-    //                 hprinter.printNextItem(pw, rec, baseTime, checkin,
-    //                         (flags&DUMP_VERBOSE) != 0);
-    //                 rec.cmd = IBatteryStatsHistoryItem::CMD_UPDATE;
-    //             } else if (rec.currentTime != 0) {
-    //                 printed = TRUE;
-    //                 byte cmd = rec.cmd;
-    //                 rec.cmd = IBatteryStatsHistoryItem::CMD_CURRENT_TIME;
-    //                 hprinter.printNextItem(pw, rec, baseTime, checkin,
-    //                         (flags&DUMP_VERBOSE) != 0);
-    //                 rec.cmd = cmd;
-    //             }
-    //             if (tracker != null) {
-    //                 if (rec.cmd != IBatteryStatsHistoryItem::CMD_UPDATE) {
-    //                     hprinter.printNextItem(pw, rec, baseTime, checkin,
-    //                             (flags&DUMP_VERBOSE) != 0);
-    //                     rec.cmd = IBatteryStatsHistoryItem::CMD_UPDATE;
-    //                 }
-    //                 Int32 oldEventCode = rec.eventCode;
-    //                 HistoryTag oldEventTag = rec.eventTag;
-    //                 rec.eventTag = new HistoryTag();
-    //                 for (Int32 i=0; i<IBatteryStatsHistoryItem::EVENT_COUNT; i++) {
-    //                     HashMap<String, SparseIntArray> active
-    //                             = tracker.getStateForEvent(i);
-    //                     if (active == null) {
-    //                         continue;
-    //                     }
-    //                     for (HashMap.Entry<String, SparseIntArray> ent
-    //                             : active.entrySet()) {
-    //                         SparseIntArray uids = ent.getValue();
-    //                         for (Int32 j=0; j<uids->GetSize(); j++) {
-    //                             rec.eventCode = i;
-    //                             rec.eventTag.string = ent.getKey();
-    //                             rec.eventTag.uid = uids.keyAt(j);
-    //                             rec.eventTag.poolIdx = uids.valueAt(j);
-    //                             hprinter.printNextItem(pw, rec, baseTime, checkin,
-    //                                     (flags&DUMP_VERBOSE) != 0);
-    //                             rec.wakeReasonTag = null;
-    //                             rec.wakelockTag = null;
-    //                         }
-    //                     }
-    //                 }
-    //                 rec.eventCode = oldEventCode;
-    //                 rec.eventTag = oldEventTag;
-    //                 tracker = null;
-    //             }
-    //         }
-    //         hprinter.printNextItem(pw, rec, baseTime, checkin,
-    //                 (flags&DUMP_VERBOSE) != 0);
-    //     } else if (false && rec.eventCode != IBatteryStatsHistoryItem::EVENT_NONE) {
-    //         // This is an attempt to aggregate the previous state and generate
-    //         // fake events to reflect that state at the point where we start
-    //         // printing real events.  It doesn't really work right, so is turned off.
-    //         if (tracker == null) {
-    //             tracker = new HistoryEventTracker();
-    //         }
-    //         tracker.updateState(rec.eventCode, rec.eventTag.string,
-    //                 rec.eventTag.uid, rec.eventTag.poolIdx);
-    //     }
-    // }
-    // if (histStart >= 0) {
-    //     commitCurrentHistoryBatchLocked();
-    //     pw->Print(checkin ? String("NEXT: ") : String("  NEXT: ")); pw->Println(lastTime+1);
-    // }
+    AutoPtr<HistoryPrinter> hprinter = new HistoryPrinter();
+    AutoPtr<HistoryItem> rec = new HistoryItem();
+    rec->constructor();
+    Int64 lastTime = -1;
+    Int64 baseTime = -1;
+    Boolean printed = FALSE;
+    AutoPtr<HistoryEventTracker> tracker;
+    Boolean res;
+    while (GetNextHistoryLocked(rec, &res), res) {
+        lastTime = rec->mTime;
+        if (baseTime < 0) {
+            baseTime = lastTime;
+        }
+        if (rec->mTime >= histStart) {
+            if (histStart >= 0 && !printed) {
+                if (rec->mCmd == IBatteryStatsHistoryItem::CMD_CURRENT_TIME
+                        || rec->mCmd == IBatteryStatsHistoryItem::CMD_RESET
+                        || rec->mCmd == IBatteryStatsHistoryItem::CMD_START) {
+                    printed = TRUE;
+                    hprinter->PrintNextItem(pw, rec, baseTime, checkin,
+                            (flags&DUMP_VERBOSE) != 0);
+                    rec->mCmd = IBatteryStatsHistoryItem::CMD_UPDATE;
+                }
+                else if (rec->mCurrentTime != 0) {
+                    printed = TRUE;
+                    byte cmd = rec->mCmd;
+                    rec->mCmd = IBatteryStatsHistoryItem::CMD_CURRENT_TIME;
+                    hprinter->PrintNextItem(pw, rec, baseTime, checkin,
+                            (flags&DUMP_VERBOSE) != 0);
+                    rec->mCmd = cmd;
+                }
+                if (tracker != NULL) {
+                    if (rec->mCmd != IBatteryStatsHistoryItem::CMD_UPDATE) {
+                        hprinter->PrintNextItem(pw, rec, baseTime, checkin,
+                                (flags&DUMP_VERBOSE) != 0);
+                        rec->mCmd = IBatteryStatsHistoryItem::CMD_UPDATE;
+                    }
+                    Int32 oldEventCode = rec->mEventCode;
+                    AutoPtr<HistoryTag> oldEventTag = rec->mEventTag;
+                    rec->mEventTag = new HistoryTag();
+                    for (Int32 i = 0; i < IBatteryStatsHistoryItem::EVENT_COUNT; i++) {
+                        AutoPtr<IHashMap> active = tracker->GetStateForEvent(i); //HashMap<String, SparseIntArray>
+                        if (active == NULL) {
+                            continue;
+                        }
+
+                        AutoPtr<ISet> set;
+                        active->GetEntrySet((ISet**)&set);
+                        AutoPtr<IIterator> it;
+                        set->GetIterator((IIterator**)&it);
+                        Boolean hasNext;
+                        while (it->HasNext(&hasNext), hasNext) {
+                            AutoPtr<IInterface> entObj;
+                            it->GetNext((IInterface**)&entObj);
+                            IMapEntry* ent = IMapEntry::Probe(entObj);
+
+                            AutoPtr<IInterface> value;
+                            ent->GetValue((IInterface**)&value);
+                            ISparseInt32Array* uids = ISparseInt32Array::Probe(value);
+                            Int32 size;
+                            uids->GetSize(&size);
+                            for (Int32 j = 0; j < size; j++) {
+                                rec->mEventCode = i;
+                                AutoPtr<IInterface> key;
+                                ent->GetKey((IInterface**)&key);
+                                rec->mEventTag->mString = Object::ToString(key);
+                                uids->KeyAt(j, &(rec->mEventTag->mUid));
+                                uids->ValueAt(j, &(rec->mEventTag->mPoolIdx));
+                                hprinter->PrintNextItem(pw, rec, baseTime, checkin,
+                                        (flags&DUMP_VERBOSE) != 0);
+                                rec->mWakeReasonTag = NULL;
+                                rec->mWakelockTag = NULL;
+                            }
+                        }
+                    }
+                    rec->mEventCode = oldEventCode;
+                    rec->mEventTag = oldEventTag;
+                    tracker = NULL;
+                }
+            }
+            hprinter->PrintNextItem(pw, rec, baseTime, checkin,
+                    (flags&DUMP_VERBOSE) != 0);
+        }
+        else if (FALSE && rec->mEventCode != IBatteryStatsHistoryItem::EVENT_NONE) {
+            // This is an attempt to aggregate the previous state and generate
+            // fake events to reflect that state at the point where we start
+            // printing real events.  It doesn't really work right, so is turned off.
+            if (tracker == NULL) {
+                tracker = new HistoryEventTracker();
+            }
+            tracker->UpdateState(rec->mEventCode, rec->mEventTag->mString,
+                    rec->mEventTag->mUid, rec->mEventTag->mPoolIdx);
+        }
+    }
+    if (histStart >= 0) {
+        CommitCurrentHistoryBatchLocked();
+        pw->Print(checkin ? String("NEXT: ") : String("  NEXT: "));
+        pw->Println(lastTime+1);
+    }
 }
 
 void BatteryStats::DumpLocked(
@@ -4006,120 +4251,147 @@ void BatteryStats::DumpLocked(
     /* [in] */ Int32 reqUid,
     /* [in] */ Int64 histStart)
 {
-    assert(0 && "TODO");
-    // prepareForDumpLocked();
+    PrepareForDumpLocked();
 
-    // final Boolean filtering =
-    //         (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
+    const Boolean filtering =
+            (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
 
-    // if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
-    //     final Int64 historyTotalSize = getHistoryTotalSize();
-    //     final Int64 historyUsedSize = getHistoryUsedSize();
-    //     if (startIteratingHistoryLocked()) {
-    //         try {
-    //             pw->Print(String("Battery History ("));
-    //             pw->Print((100*historyUsedSize)/historyTotalSize);
-    //             pw->Print(String("% used, "));
-    //             printSizeValue(pw, historyUsedSize);
-    //             pw->Print(String(" used of "));
-    //             printSizeValue(pw, historyTotalSize);
-    //             pw->Print(String(", "));
-    //             pw->Print(getHistoryStringPoolSize());
-    //             pw->Print(String(" strings using "));
-    //             printSizeValue(pw, getHistoryStringPoolBytes());
-    //             pw->Println(String("):"));
-    //             DumpHistoryLocked(pw, flags, histStart, false);
-    //             pw->Println();
-    //         } finally {
-    //             FinishIteratingHistoryLocked();
-    //         }
-    //     }
+    Int32 tmp32;
+    Boolean res;
+    if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
+        const Int64 historyTotalSize = (Int64)(GetHistoryTotalSize(&tmp32), tmp32);
+        const Int64 historyUsedSize = (Int64)(GetHistoryUsedSize(&tmp32), tmp32);
+        if (StartIteratingHistoryLocked(&res), res) {
+            // try {
+                pw->Print(String("Battery History ("));
+                pw->Print((100*historyUsedSize)/historyTotalSize);
+                pw->Print(String("% used, "));
+                PrintSizeValue(pw, historyUsedSize);
+                pw->Print(String(" used of "));
+                PrintSizeValue(pw, historyTotalSize);
+                pw->Print(String(", "));
+                pw->Print((GetHistoryStringPoolSize(&tmp32), tmp32));
+                pw->Print(String(" strings using "));
+                PrintSizeValue(pw, (GetHistoryStringPoolBytes(&tmp32), tmp32));
+                pw->Println(String("):"));
+                DumpHistoryLocked(pw, flags, histStart, FALSE);
+                pw->Println();
+            // } finally {
+                FinishIteratingHistoryLocked();
+            // }
+        }
 
-    //     if (startIteratingOldHistoryLocked()) {
-    //         try {
-    //             final HistoryItem rec = new HistoryItem();
-    //             pw->Println(String("Old battery History:"));
-    //             HistoryPrinter hprinter = new HistoryPrinter();
-    //             Int64 baseTime = -1;
-    //             while (getNextOldHistoryLocked(rec)) {
-    //                 if (baseTime < 0) {
-    //                     baseTime = rec.time;
-    //                 }
-    //                 hprinter.printNextItem(pw, rec, baseTime, false, (flags&DUMP_VERBOSE) != 0);
-    //             }
-    //             pw->Println();
-    //         } finally {
-    //             finishIteratingOldHistoryLocked();
-    //         }
-    //     }
-    // }
+        if (StartIteratingOldHistoryLocked(&res), res) {
+            // try {
+                AutoPtr<HistoryItem> rec = new HistoryItem();
+                rec->constructor();
+                pw->Println(String("Old battery History:"));
+                AutoPtr<HistoryPrinter> hprinter = new HistoryPrinter();
+                Int64 baseTime = -1;
+                while (GetNextOldHistoryLocked(rec, &res), res) {
+                    if (baseTime < 0) {
+                        baseTime = rec->mTime;
+                    }
+                    hprinter->PrintNextItem(pw, rec, baseTime, FALSE, (flags&DUMP_VERBOSE) != 0);
+                }
+                pw->Println();
+            // } finally {
+                FinishIteratingOldHistoryLocked();
+            // }
+        }
+    }
 
-    // if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
-    //     return;
-    // }
+    if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
+        return;
+    }
 
-    // if (!filtering) {
-    //     SparseArray<? extends Uid> uidStats = getUidStats();
-    //     final Int32 NU = uidStats->GetSize();
-    //     Boolean didPid = false;
-    //     Int64 nowRealtime = SystemClock::GetElapsedRealtime();
-    //     for (Int32 i=0; i<NU; i++) {
-    //         Uid uid = uidStats.valueAt(i);
-    //         SparseArray<? extends Uid.Pid> pids = uid.getPidStats();
-    //         if (pids != null) {
-    //             for (Int32 j=0; j<pids->GetSize(); j++) {
-    //                 Uid.Pid pid = pids.valueAt(j);
-    //                 if (!didPid) {
-    //                     pw->Println(String("Per-PID Stats:"));
-    //                     didPid = TRUE;
-    //                 }
-    //                 Int64 time = pid.mWakeSumMs + (pid.mWakeNesting > 0
-    //                         ? (nowRealtime - pid.mWakeStartMs) : 0);
-    //                 pw->Print(String("  PID ")); pw->Print(pids.keyAt(j));
-    //                         pw->Print(String(" wake time: "));
-    //                         TimeUtils.formatDuration(time, pw);
-    //                         pw->Println(String(""));
-    //             }
-    //         }
-    //     }
-    //     if (didPid) {
-    //         pw->Println();
-    //     }
-    // }
+    if (!filtering) {
+        AutoPtr<ISparseArray> uidStats;// SparseArray<? extends Uid>
+        GetUidStats((ISparseArray**)&uidStats);
+        Int32 NU;
+        uidStats->GetSize(&NU);
+        Boolean didPid = FALSE;
+        Int64 nowRealtime = SystemClock::GetElapsedRealtime();
+        for (Int32 i = 0; i < NU; i++) {
+            AutoPtr<IInterface> obj;
+            uidStats->ValueAt(i, (IInterface**)&obj);
+            IBatteryStatsUid* uid = IBatteryStatsUid::Probe(obj);
+            AutoPtr<ISparseArray> pids; // SparseArray<? extends Uid.Pid>
+            uid->GetPidStats((ISparseArray**)&pids);
+            if (pids != NULL) {
+                Int32 size;
+                for (Int32 j = 0; j < (pids->GetSize(&size), size); j++) {
+                    AutoPtr<IInterface> tmp;
+                    pids->ValueAt(j, (IInterface**)&tmp);
+                    IBatteryStatsUidPid* pid = IBatteryStatsUidPid::Probe(tmp);
+                    if (!didPid) {
+                        pw->Println(String("Per-PID Stats:"));
+                        didPid = TRUE;
+                    }
+                    Int64 wakeSumMs, wakeStartMs;
+                    Int32 wakeNesting;
+                    pid->GetWakeSumMs(&wakeSumMs);
+                    pid->GetWakeStartMs(&wakeStartMs);
+                    pid->GetWakeNesting(&wakeNesting);
+                    Int64 time = wakeSumMs + (wakeNesting > 0
+                            ? (nowRealtime - wakeStartMs) : 0);
+                    pw->Print(String("  PID "));
+                    pids->KeyAt(j, &tmp32);
+                    pw->Print(tmp32);
+                    pw->Print(String(" wake time: "));
+                    TimeUtils::FormatDuration(time, pw);
+                    pw->Println(String(""));
+                }
+            }
+        }
+        if (didPid) {
+            pw->Println();
+        }
+    }
 
-    // if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
-    //     if (DumpDurationSteps(pw, "Discharge step durations:", getDischargeStepDurationsArray(),
-    //             getNumDischargeStepDurations(), false)) {
-    //         Int64 timeRemaining = computeBatteryTimeRemaining(SystemClock::GetElapsedRealtime());
-    //         if (timeRemaining >= 0) {
-    //             pw->Print(String("  Estimated discharge time remaining: "));
-    //             TimeUtils.formatDuration(timeRemaining / 1000, pw);
-    //             pw->Println();
-    //         }
-    //         pw->Println();
-    //     }
-    //     if (DumpDurationSteps(pw, "Charge step durations:", getChargeStepDurationsArray(),
-    //             getNumChargeStepDurations(), false)) {
-    //         Int64 timeRemaining = computeChargeTimeRemaining(SystemClock::GetElapsedRealtime());
-    //         if (timeRemaining >= 0) {
-    //             pw->Print(String("  Estimated charge time remaining: "));
-    //             TimeUtils.formatDuration(timeRemaining / 1000, pw);
-    //             pw->Println();
-    //         }
-    //         pw->Println();
-    //     }
-    //     pw->Println(String("Statistics since last charge:"));
-    //     pw->Println(String("  System starts: ") + getStartCount()
-    //             + String(", currently on battery: ") + getIsOnBattery());
-    //     dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid,
-    //             (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
-    //     pw->Println();
-    // }
-    // if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
-    //     pw->Println(String("Statistics since last unplugged:"));
-    //     dumpLocked(context, pw, "", STATS_SINCE_UNPLUGGED, reqUid,
-    //             (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
-    // }
+    if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
+        AutoPtr< ArrayOf<Int64> > args;
+        GetDischargeStepDurationsArray((ArrayOf<Int64>**)&args);
+        if (DumpDurationSteps(pw, String("Discharge step durations:"), args,
+                (GetNumDischargeStepDurations(&tmp32), tmp32), FALSE)) {
+            Int64 timeRemaining;
+            ComputeBatteryTimeRemaining(SystemClock::GetElapsedRealtime(), &timeRemaining);
+            if (timeRemaining >= 0) {
+                pw->Print(String("  Estimated discharge time remaining: "));
+                TimeUtils::FormatDuration(timeRemaining / 1000, pw);
+                pw->Println();
+            }
+            pw->Println();
+        }
+        args = NULL;
+        GetChargeStepDurationsArray((ArrayOf<Int64>**)&args);
+        if (DumpDurationSteps(pw, String("Charge step durations:"), args,
+                (GetNumChargeStepDurations(&tmp32), tmp32), FALSE)) {
+            Int64 timeRemaining;
+            ComputeChargeTimeRemaining(SystemClock::GetElapsedRealtime(), &timeRemaining);
+            if (timeRemaining >= 0) {
+                pw->Print(String("  Estimated charge time remaining: "));
+                TimeUtils::FormatDuration(timeRemaining / 1000, pw);
+                pw->Println();
+            }
+            pw->Println();
+        }
+        pw->Println(String("Statistics since last charge:"));
+        StringBuilder sb("");
+        sb += "  System starts: ";
+        sb += (GetStartCount(&tmp32), tmp32);
+        sb += ", currently on battery: ";
+        sb += (GetIsOnBattery(&res), res);
+        pw->Println(sb.ToString());
+        DumpLocked(context, pw, String(""), STATS_SINCE_CHARGED, reqUid,
+                (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
+        pw->Println();
+    }
+    if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
+        pw->Println(String("Statistics since last unplugged:"));
+        DumpLocked(context, pw, String(""), STATS_SINCE_UNPLUGGED, reqUid,
+                (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
+    }
 }
 
 void BatteryStats::DumpCheckinLocked(
@@ -4129,99 +4401,137 @@ void BatteryStats::DumpCheckinLocked(
     /* [in] */ Int32 flags,
     /* [in] */ Int64 histStart)
 {
-    assert(0 && "TODO");
-    // PrepareForDumpLocked();
+    PrepareForDumpLocked();
 
-    // DumpLine(pw, 0 /* uid */, String("i") /* category */, VERSION_DATA,
-    //         String("11"), GetParcelVersion(), GetStartPlatformVersion(), GetEndPlatformVersion());
+    Int32 tmp32, size;
+    Int64 tmp64;
+    String str;
+    Boolean res;
 
-    // Int64 now = GetHistoryBaseTime() + SystemClock::GetElapsedRealtime();
+    AutoPtr< ArrayOf<IInterface*> > dumpLineArgs = ArrayOf<IInterface*>::Alloc(4);
+    dumpLineArgs->Set(0, CoreUtils::Convert("11"));
+    dumpLineArgs->Set(1, CoreUtils::Convert((GetParcelVersion(&tmp32), tmp32)));
+    dumpLineArgs->Set(2, CoreUtils::Convert((GetStartPlatformVersion(&str), str)));
+    dumpLineArgs->Set(3, CoreUtils::Convert((GetEndPlatformVersion(&str), str)));
 
-    // const Boolean filtering =
-    //         (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
+    DumpLine(pw, 0 /* uid */, String("i") /* category */, VERSION_DATA, dumpLineArgs);
 
-    // if ((flags&DUMP_INCLUDE_HISTORY) != 0 || (flags&DUMP_HISTORY_ONLY) != 0) {
-    //     if (StartIteratingHistoryLocked()) {
-    //         // try {
-    //             for (Int32 i = 0; i < GetHistoryStringPoolSize(); i++) {
-    //                 pw->Print(BATTERY_STATS_CHECKIN_VERSION);
-    //                 pw->PrintChar(',');
-    //                 pw->Print(HISTORY_STRING_POOL);
-    //                 pw->PrintChar(',');
-    //                 pw->Print(i);
-    //                 pw->Print(String(","));
-    //                 pw->Print(GetHistoryTagPoolUid(i));
-    //                 pw->Print(",\"");
-    //                 String str = GetHistoryTagPoolString(i);
-    //                 str = str.Replace("\\", "\\\\");
-    //                 str = str.Replace("\"", "\\\"");
-    //                 pw->Print(str);
-    //                 pw->Print("\"");
-    //                 pw->Println();
-    //             }
-    //             DumpHistoryLocked(pw, flags, histStart, TRUE);
-    //         // } finally {
-    //             FinishIteratingHistoryLocked();
-    //         // }
-    //     }
-    // }
+    Int64 now = (GetHistoryBaseTime(&tmp64), tmp64) + SystemClock::GetElapsedRealtime();
 
-    // if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
-    //     return;
-    // }
+    const Boolean filtering =
+            (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
 
-    // if (apps != NULL) {
-    //     SparseArray<ArrayList<String>> uids = new SparseArray<ArrayList<String>>();
-    //     for (Int32 i=0; i<apps->GetSize(); i++) {
-    //         ApplicationInfo ai = apps.get(i);
-    //         ArrayList<String> pkgs = uids.get(ai.uid);
-    //         if (pkgs == null) {
-    //             pkgs = new ArrayList<String>();
-    //             uids.put(ai.uid, pkgs);
-    //         }
-    //         pkgs.add(ai.packageName);
-    //     }
-    //     SparseArray<? extends Uid> uidStats = getUidStats();
-    //     final Int32 NU = uidStats->GetSize();
-    //     String[] lineArgs = new String[2];
-    //     for (Int32 i = 0; i < NU; i++) {
-    //         Int32 uid = uidStats.keyAt(i);
-    //         ArrayList<String> pkgs = uids.get(uid);
-    //         if (pkgs != null) {
-    //             for (Int32 j=0; j<pkgs->GetSize(); j++) {
-    //                 lineArgs[0] = Integer.toString(uid);
-    //                 lineArgs[1] = pkgs.get(j);
-    //                 DumpLine(pw, 0 /* uid */, String("i") /* category */, UID_DATA,
-    //                         (Object[])lineArgs);
-    //             }
-    //         }
-    //     }
-    // }
-    // if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
-    //     DumpDurationSteps(pw, DISCHARGE_STEP_DATA, GetDischargeStepDurationsArray(),
-    //             GetNumDischargeStepDurations(), TRUE);
-    //     String[] lineArgs = new String[1];
-    //     Int64 timeRemaining = ComputeBatteryTimeRemaining(SystemClock::GetElapsedRealtime());
-    //     if (timeRemaining >= 0) {
-    //         lineArgs[0] = Long.toString(timeRemaining);
-    //         DumpLine(pw, 0 /* uid */, String("i") /* category */, DISCHARGE_TIME_REMAIN_DATA,
-    //                 (Object[])lineArgs);
-    //     }
-    //     DumpDurationSteps(pw, CHARGE_STEP_DATA, GetChargeStepDurationsArray(),
-    //             GetNumChargeStepDurations(), TRUE);
-    //     timeRemaining = ComputeChargeTimeRemaining(SystemClock::GetElapsedRealtime());
-    //     if (timeRemaining >= 0) {
-    //         lineArgs[0] = Long.toString(timeRemaining);
-    //         DumpLine(pw, 0 /* uid */, String("i") /* category */, CHARGE_TIME_REMAIN_DATA,
-    //                 (Object[])lineArgs);
-    //     }
-    //     DumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1,
-    //             (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
-    // }
-    // if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
-    //     DumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1,
-    //             (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
-    // }
+    if ((flags&DUMP_INCLUDE_HISTORY) != 0 || (flags&DUMP_HISTORY_ONLY) != 0) {
+        if (StartIteratingHistoryLocked(&res), res) {
+            // try {
+                for (Int32 i = 0; i < (GetHistoryStringPoolSize(&size), size); i++) {
+                    pw->Print(BATTERY_STATS_CHECKIN_VERSION);
+                    pw->PrintChar(',');
+                    pw->Print(HISTORY_STRING_POOL);
+                    pw->PrintChar(',');
+                    pw->Print(i);
+                    pw->Print(String(","));
+                    pw->Print((GetHistoryTagPoolUid(i, &tmp32), tmp32));
+                    pw->Print(String(",\""));
+                    String str, strOther;
+                    GetHistoryTagPoolString(i, &str);
+                    StringUtils::Replace(str, "\\", "\\\\", &strOther);
+                    StringUtils::Replace(strOther, "\"", "\\\"", &str);
+                    pw->Print(str);
+                    pw->Print(String("\""));
+                    pw->Println();
+                }
+                DumpHistoryLocked(pw, flags, histStart, TRUE);
+            // } finally {
+                FinishIteratingHistoryLocked();
+            // }
+        }
+    }
+
+    if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
+        return;
+    }
+
+    if (apps != NULL) {
+        AutoPtr<ISparseArray> uids; //SparseArray<ArrayList<String>>
+        CSparseArray::New((ISparseArray**)&uids);
+        for (Int32 i = 0; i< (apps->GetSize(&size), size); i++) {
+            AutoPtr<IInterface> aiObj;
+            apps->Get(i, (IInterface**)&aiObj);
+            IApplicationInfo* ai = IApplicationInfo::Probe(aiObj);
+            Int32 uid;
+            ai->GetUid(&uid);
+            AutoPtr<IInterface> pkgsObj;
+            uids->Get(uid, (IInterface**)&pkgsObj);
+            AutoPtr<IArrayList> pkgs = IArrayList::Probe(pkgsObj); // ArrayList<String>
+            if (pkgs == NULL) {
+                CArrayList::New((IArrayList**)&pkgs);
+                uids->Put(uid, pkgs);
+            }
+            String packageName;
+            IPackageItemInfo::Probe(ai)->GetPackageName(&packageName);
+            pkgs->Add(CoreUtils::Convert(packageName));
+        }
+        AutoPtr<ISparseArray> uidStats;//SparseArray<? extends Uid>
+        GetUidStats((ISparseArray**)&uidStats);
+        Int32 NU;
+        uidStats->GetSize(&NU);
+        AutoPtr< ArrayOf<String> > lineArgs = ArrayOf<String>::Alloc(2);
+        for (Int32 i = 0; i < NU; i++) {
+            Int32 uid;
+            uidStats->KeyAt(i, &uid);
+            AutoPtr<IInterface> pkgsObj;
+            uids->Get(uid, (IInterface**)&pkgsObj);
+            IArrayList* pkgs = IArrayList::Probe(pkgsObj); //ArrayList<String>
+            if (pkgs != NULL) {
+                for (Int32 j = 0; j < (pkgs->GetSize(&size), size); j++) {
+                    (*lineArgs)[0] = StringUtils::ToString(uid);
+                    AutoPtr<IInterface> obj;
+                    pkgs->Get(j, (IInterface**)&obj);
+                    (*lineArgs)[1] = Object::ToString(obj);
+
+                    dumpLineArgs = ArrayOf<IInterface*>::Alloc(2);
+                    dumpLineArgs->Set(0, CoreUtils::Convert((*lineArgs)[0]));
+                    dumpLineArgs->Set(1, CoreUtils::Convert((*lineArgs)[1]));
+                    DumpLine(pw, 0 /* uid */, String("i") /* category */, UID_DATA, dumpLineArgs);
+                }
+            }
+        }
+    }
+    if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
+        AutoPtr< ArrayOf<Int64> > args;
+        GetDischargeStepDurationsArray((ArrayOf<Int64>**)&args);
+        DumpDurationSteps(pw, DISCHARGE_STEP_DATA, args,
+                (GetNumDischargeStepDurations(&tmp32), tmp32), TRUE);
+        AutoPtr< ArrayOf<String> > lineArgs = ArrayOf<String>::Alloc(1);
+        Int64 timeRemaining;
+        ComputeBatteryTimeRemaining(SystemClock::GetElapsedRealtime(), &timeRemaining);
+        if (timeRemaining >= 0) {
+            (*lineArgs)[0] = StringUtils::ToString(timeRemaining);
+            dumpLineArgs = ArrayOf<IInterface*>::Alloc(1);
+            dumpLineArgs->Set(0, CoreUtils::Convert((*lineArgs)[0]));
+            DumpLine(pw, 0 /* uid */, String("i") /* category */, DISCHARGE_TIME_REMAIN_DATA,
+                    dumpLineArgs);
+        }
+        args = NULL;
+        GetChargeStepDurationsArray((ArrayOf<Int64>**)&args);
+        DumpDurationSteps(pw, CHARGE_STEP_DATA, args,
+                (GetNumChargeStepDurations(&tmp32), tmp32), TRUE);
+        ComputeChargeTimeRemaining(SystemClock::GetElapsedRealtime(), &timeRemaining);
+        if (timeRemaining >= 0) {
+            (*lineArgs)[0] = StringUtils::ToString(timeRemaining);
+            dumpLineArgs = ArrayOf<IInterface*>::Alloc(1);
+            dumpLineArgs->Set(0, CoreUtils::Convert((*lineArgs)[0]));
+            DumpLine(pw, 0 /* uid */, String("i") /* category */, CHARGE_TIME_REMAIN_DATA,
+                    dumpLineArgs);
+        }
+        DumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1,
+                (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
+    }
+    if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
+        DumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1,
+                (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
+    }
 }
 
 } // namespace Os

@@ -722,6 +722,19 @@ module
 
 
         /**
+         * Set the current power save mode.
+         *
+         * @return True if the set was allowed.
+         *
+         * @see #isPowerSaveMode()
+         *
+         * @hide
+         */
+        SetPowerSaveMode(
+            [in] Boolean mode,
+            [out] Boolean* result);
+
+        /**
          * Boost the CPU. Boosts the cpu for the given duration in microseconds.
          * Requires the {@link android.Manifest.permission#CPU_BOOST} permission.
          *

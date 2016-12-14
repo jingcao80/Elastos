@@ -9,8 +9,55 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-CAR_SINGLETON_IMPL(CTypefaceHelper);
-CAR_INTERFACE_IMPL(CTypefaceHelper, Singleton, ITypefaceHelper);
+CAR_SINGLETON_IMPL(CTypefaceHelper)
+
+CAR_INTERFACE_IMPL(CTypefaceHelper, Singleton, ITypefaceHelper)
+
+ECode CTypefaceHelper::GetDEFAULT(
+    /* [out] */ ITypeface** typeface)
+{
+    VALIDATE_NOT_NULL(typeface)
+    *typeface = Typeface::DEFAULT;
+    REFCOUNT_ADD(*typeface)
+    return NOERROR;
+}
+
+ECode CTypefaceHelper::GetDEFAULT_BOLD(
+    /* [out] */ ITypeface** typeface)
+{
+    VALIDATE_NOT_NULL(typeface)
+    *typeface = Typeface::DEFAULT_BOLD;
+    REFCOUNT_ADD(*typeface)
+    return NOERROR;
+}
+
+ECode CTypefaceHelper::GetSANS_SERIF(
+    /* [out] */ ITypeface** typeface)
+{
+    VALIDATE_NOT_NULL(typeface)
+    *typeface = Typeface::SANS_SERIF;
+    REFCOUNT_ADD(*typeface)
+    return NOERROR;
+}
+
+ECode CTypefaceHelper::GetSERIF(
+    /* [out] */ ITypeface** typeface)
+{
+    VALIDATE_NOT_NULL(typeface)
+    *typeface = Typeface::SERIF;
+    REFCOUNT_ADD(*typeface)
+    return NOERROR;
+}
+
+ECode CTypefaceHelper::GetMONOSPACE(
+    /* [out] */ ITypeface** typeface)
+{
+    VALIDATE_NOT_NULL(typeface)
+    *typeface = Typeface::MONOSPACE;
+    REFCOUNT_ADD(*typeface)
+    return NOERROR;
+}
+
 ECode CTypefaceHelper::Create(
     /* [in] */ const String& familyName,
     /* [in] */ Int32 style,

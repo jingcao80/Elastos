@@ -145,7 +145,6 @@ ECode BatteryStatsImpl::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::TimeBase
 //==============================================================================
@@ -359,7 +358,6 @@ void BatteryStatsImpl::TimeBase::WriteToParcel(
     out->WriteInt64(mUnpluggedRealtime);
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Counter
 //==============================================================================
@@ -514,7 +512,6 @@ void BatteryStatsImpl::Counter::ReadSummaryFromParcelLocked(
     mUnpluggedCount = mPluggedCount = mLoadedCount;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::SamplingCounter
 //==============================================================================
@@ -536,7 +533,6 @@ void BatteryStatsImpl::SamplingCounter::AddCountAtomic(
     Int32 result;
     mCount->AddAndGet((Int32)count, &result);
 }
-
 
 //==============================================================================
 // BatteryStatsImpl::Int64SamplingCounter
@@ -604,6 +600,8 @@ ECode BatteryStatsImpl::Int64SamplingCounter::GetCountLocked(
     /* [in] */ Int32 which,
     /* [out] */ Int64* count)
 {
+    VALIDATE_NOT_NULL(count)
+
     Int64 val = mCount;
     if (which == STATS_SINCE_UNPLUGGED) {
         val -= mUnpluggedCount;
@@ -612,7 +610,8 @@ ECode BatteryStatsImpl::Int64SamplingCounter::GetCountLocked(
         val -= mLoadedCount;
     }
 
-    return val;
+    *count = val;
+    return NOERROR;
 }
 
 ECode BatteryStatsImpl::Int64SamplingCounter::LogState(
@@ -2106,7 +2105,6 @@ ECode BatteryStatsImpl::Uid::Proc::GetTimeAtCpuSpeedStep(
     return NOERROR;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::Pkg::Serv
 //==============================================================================
@@ -2329,7 +2327,6 @@ ECode BatteryStatsImpl::Uid::Pkg::Serv::GetStarts(
     return NOERROR;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::Pkg
 //==============================================================================
@@ -2473,7 +2470,6 @@ AutoPtr<BatteryStatsImpl::Uid::Pkg::Serv> BatteryStatsImpl::Uid::Pkg::NewService
     return obj;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::WakelockStats
 //==============================================================================
@@ -2482,7 +2478,6 @@ AutoPtr<BatteryStatsImpl::Uid::Wakelock> BatteryStatsImpl::Uid::WakelockStats::I
 {
     return new Wakelock(mHost);
 }
-
 
 //==============================================================================
 // BatteryStatsImpl::Uid::SyncStats
@@ -2495,7 +2490,6 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::SyncStats::Inst
     return st;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::JobStats
 //==============================================================================
@@ -2506,7 +2500,6 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::JobStats::Insta
     st->constructor(mHost, IBatteryStats::JOB, NULL, mHost->mHost->mOnBatteryTimeBase);
     return st;
 }
-
 
 //==============================================================================
 // BatteryStatsImpl::Uid
@@ -3191,7 +3184,7 @@ void BatteryStatsImpl::Uid::InitNetworkActivityLocked()
         AutoPtr<Int64SamplingCounter> c1 = new Int64SamplingCounter(mHost->mOnBatteryTimeBase);
         mNetworkByteActivityCounters->Set(i, c1);
         AutoPtr<Int64SamplingCounter> c2 = new Int64SamplingCounter(mHost->mOnBatteryTimeBase);
-        mNetworkByteActivityCounters->Set(i, c2);
+        mNetworkPacketActivityCounters->Set(i, c2);
     }
     mMobileRadioActiveTime = new Int64SamplingCounter(mHost->mOnBatteryTimeBase);
     mMobileRadioActiveCount = new Int64SamplingCounter(mHost->mOnBatteryTimeBase);
@@ -3527,10 +3520,10 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> next;
         it->GetNext((IInterface**)&next);
-        AutoPtr<IMapEntry> pkgEntry = IMapEntry::Probe(pkgEntry);
+        AutoPtr<IMapEntry> pkgEntry = IMapEntry::Probe(next);
         AutoPtr<IInterface> value;
         pkgEntry->GetValue((IInterface**)&value);
-        AutoPtr<Pkg> pkg = (Pkg*)(IObject*)value.Get();
+        AutoPtr<Pkg> pkg = (Pkg*)IObject::Probe(value);
         pkg->WriteToParcelLocked(out);
     }
 
@@ -4210,14 +4203,14 @@ AutoPtr<BatteryStatsImpl> BatteryStatsImpl::Uid::GetBatteryStats()
     return mHost;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::SetOnBatteryRunnable
 //==============================================================================
 
 ECode BatteryStatsImpl::SetOnBatteryRunnable::Run()
 {
-    {    AutoLock syncLock(mHost->mCheckinFileLock);
+    {
+        AutoLock syncLock(mHost->mCheckinFileLock);
         AutoPtr<IFileOutputStream> stream;
         // try {
         ECode ec = mHost->mCheckinFile->StartWrite((IFileOutputStream**)&stream);
@@ -4249,7 +4242,6 @@ ECode BatteryStatsImpl::SetOnBatteryRunnable::Run()
     return NOERROR;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::BatteryStatsWriteRunnable
 //==============================================================================
@@ -4259,7 +4251,6 @@ ECode BatteryStatsImpl::BatteryStatsWriteRunnable::Run()
     mHost->CommitPendingDataToDisk();
     return NOERROR;
 }
-
 
 //==============================================================================
 // BatteryStatsImpl
@@ -4444,10 +4435,15 @@ ECode BatteryStatsImpl::Init()
     mActiveEvents = new HistoryEventTracker();
     CParcel::New((IParcel**)&mHistoryBuffer);
     mHistoryLastWritten = new HistoryItem();
+    mHistoryLastWritten->constructor();
     mHistoryLastLastWritten = new HistoryItem();
+    mHistoryLastLastWritten->constructor();
     mHistoryReadTmp = new HistoryItem();
+    mHistoryReadTmp->constructor();
     mHistoryAddTmp = new HistoryItem();
+    mHistoryAddTmp->constructor();
     mHistoryCur = new HistoryItem();
+    mHistoryCur->constructor();
 
     mScreenBrightnessTimer = ArrayOf<StopwatchTimer*>::Alloc(NUM_SCREEN_BRIGHTNESS_BINS);
     mPhoneSignalStrengthsTimer = ArrayOf<StopwatchTimer*>::Alloc(ISignalStrength::NUM_SIGNAL_STRENGTH_BINS);
@@ -5355,9 +5351,10 @@ void BatteryStatsImpl::AddHistoryRecordInnerLocked(
             && ((mHistoryEnd->mStates2 ^ cur->mStates2) & mChangedStates2) == 0) {
         // If the current is the same as the one before, then we no
         // longer need the entry.
+        Boolean res;
         if (mHistoryLastEnd != NULL && mHistoryLastEnd->mCmd == HistoryItem::CMD_UPDATE
                 && (mHistoryBaseTime + elapsedRealtimeMs) < (mHistoryEnd->mTime + 500)
-                && mHistoryLastEnd->SameNonEvent(cur)) {
+                && (mHistoryLastEnd->SameNonEvent(cur, &res), res)) {
             mHistoryLastEnd->mNext = NULL;
             mHistoryEnd->mNext = mHistoryCache;
             mHistoryCache = mHistoryEnd;
@@ -5423,6 +5420,7 @@ void BatteryStatsImpl::AddHistoryRecordLocked(
     }
     else {
         rec = new HistoryItem();
+        rec->constructor();
     }
     rec->SetTo(mHistoryBaseTime + elapsedRealtimeMs, cmd, cur);
 
@@ -7748,7 +7746,7 @@ ECode BatteryStatsImpl::GetNetworkActivityPackets(
     VALIDATE_NOT_NULL(result)
     *result = 0;
     if (type >= 0 && type < mNetworkPacketActivityCounters->GetLength()) {
-        (*mNetworkByteActivityCounters)[type]->GetCountLocked(which, result);
+        (*mNetworkPacketActivityCounters)[type]->GetCountLocked(which, result);
     }
     return NOERROR;
 }
@@ -7890,11 +7888,12 @@ ECode BatteryStatsImpl::GetNextOldHistoryLocked(
     AutoPtr<HistoryItem> hi = (HistoryItem*)out;
     hi->SetTo(cur);
     mHistoryIterator = cur->mNext;
+    Boolean res;
     if (!mReadOverflow) {
         if (end) {
             Slogger::W(TAG, "New history ends before old history!");
         }
-        else if (!hi->Same(mHistoryReadTmp)) {
+        else if (hi->Same(mHistoryReadTmp, &res), !res) {
             // TODO
             // PrintWriter pw = new FastPrintWriter(new LogWriter(android.util.Log.WARN, TAG));
             // pw.println("Histories differ!");
@@ -9588,7 +9587,8 @@ void BatteryStatsImpl::ReadOldHistory(
     in->GetElementSize(&size);
     Int64 time;
     while (size - pos > 0 && (in->ReadInt64(&time), time >= 0)) {
-        AutoPtr<HistoryItem> rec = new HistoryItem(time, in);
+        AutoPtr<HistoryItem> rec = new HistoryItem();
+        rec->constructor(time, in);
         AddHistoryRecordLocked(rec);
     }
 }

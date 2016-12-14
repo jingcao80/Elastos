@@ -3,6 +3,7 @@ DIRS += applications
 DIRS += dashboard
 DIRS += deviceinfo
 DIRS += drawable
+DIRS += fuelgauge
 DIRS += inputmethod
 DIRS += location
 DIRS += notification

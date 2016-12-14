@@ -1419,7 +1419,7 @@ AutoPtr<IBatteryStatsImpl> CBatteryStatsHelper::GetStats(
         parcel->SetDataPosition(0);
         AutoPtr<CBatteryStatsImpl> stats;
         CBatteryStatsImpl::NewByFriend((CBatteryStatsImpl**)&stats);
-        IParcelable::Probe(stats)->ReadFromParcel(parcel);
+        stats->ReadFromParcel(parcel);
         stats->DistributeWorkLocked(IBatteryStats::STATS_SINCE_CHARGED);
         return IBatteryStatsImpl::Probe(stats);
         // } catch (IOException e) {

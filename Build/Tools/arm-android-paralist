@@ -510,7 +510,8 @@
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/dashboard
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/deviceinfo
-> Elastos/Packages/Apps/Settings/src/elastos/droid/settings/drawable
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/drawable
+> Elastos/Packages/Apps/Settings/src/elastos/droid/settings/fuelgauge
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/inputmethod
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/location
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings/notification

@@ -8,9 +8,9 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/os/BatteryStats.h"
 #include "elastos/droid/os/Handler.h"
-#include <elastos/core/Runnable.h>
 #include "elastos/droid/utility/CArrayMap.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Slogger.h>

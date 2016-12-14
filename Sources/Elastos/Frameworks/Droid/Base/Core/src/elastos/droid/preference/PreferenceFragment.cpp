@@ -117,15 +117,20 @@ PreferenceFragment::PreferenceFragment()
 {
 }
 
-ECode PreferenceFragment::OnCreate(
-    /*[in]*/ IBundle* savedInstanceState)
+ECode PreferenceFragment::constructor()
 {
-    Fragment::OnCreate(savedInstanceState);
-
     mHandler = new PreferenceFragmentHandler(this);
     mHandler->constructor();
     mRequestFocus = new RequestFocus(this);
     mListOnKeyListener = new InnerListener(this);
+
+    return Fragment::constructor();
+}
+
+ECode PreferenceFragment::OnCreate(
+    /*[in]*/ IBundle* savedInstanceState)
+{
+    Fragment::OnCreate(savedInstanceState);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);

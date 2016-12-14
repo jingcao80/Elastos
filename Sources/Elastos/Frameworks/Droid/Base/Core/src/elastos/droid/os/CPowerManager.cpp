@@ -187,10 +187,12 @@ ECode CPowerManager::IsWakeLockLevelSupported(
 {
     VALIDATE_NOT_NULL(isSupported);
     // try {
-    return mService->IsWakeLockLevelSupported(level, isSupported);
-    // } catch (RemoteException e) {
-    //     return false;
-    // }
+    ECode ec = mService->IsWakeLockLevelSupported(level, isSupported);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        *isSupported = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CPowerManager::IsScreenOn(
@@ -204,10 +206,12 @@ ECode CPowerManager::IsInteractive(
 {
     VALIDATE_NOT_NULL(result);
     // try {
-    return mService->IsInteractive(result);
-    // } catch (RemoteException e) {
-    //     return false;
-    // }
+    ECode ec = mService->IsInteractive(result);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CPowerManager::Reboot(
@@ -223,10 +227,12 @@ ECode CPowerManager::IsPowerSaveMode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // try {
-    return mService->IsPowerSaveMode(result);
-    // } catch (RemoteException e) {
-    // }
+    ECode ec = mService->IsPowerSaveMode(result);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CPowerManager::SetPowerSaveMode(
@@ -234,10 +240,12 @@ ECode CPowerManager::SetPowerSaveMode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // try {
-    return mService->SetPowerSaveMode(mode, result);
-    // } catch (RemoteException e) {
-    // }
+    ECode ec = mService->SetPowerSaveMode(mode, result);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CPowerManager::constructor(

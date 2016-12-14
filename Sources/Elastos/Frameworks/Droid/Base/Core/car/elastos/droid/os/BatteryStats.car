@@ -2,6 +2,7 @@ module
 {
     using interface Elastos.IO.IPrintWriter;
     using interface Elastos.Utility.IMap;
+    interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Utility.IPrinter;
     interface Elastos.Droid.Utility.ISparseArray;
 
@@ -595,6 +596,105 @@ module
                 EVENT_USER_FOREGROUND | EVENT_FLAG_START;
         const Int32 EVENT_USER_FOREGROUND_FINISH =
                 EVENT_USER_FOREGROUND | EVENT_FLAG_FINISH;
+
+        IsDeltaData(
+            [out] Boolean* result);
+
+        Clear();
+
+        SetTo(
+            [in] IBatteryStatsHistoryItem* o);
+
+        SetTo(
+            [in] Int64 time,
+            [in] Byte cmd,
+            [in] IBatteryStatsHistoryItem* o);
+
+        SameNonEvent(
+            [in] IBatteryStatsHistoryItem* o,
+            [out] Boolean* result);
+
+        Same(
+            [in] IBatteryStatsHistoryItem* o,
+            [out] Boolean* result);
+
+        SetTime(
+            [in] Int64 time);
+
+        GetTime(
+            [out] Int64* time);
+
+        SetCmd(
+            [in] Byte cmd);
+
+        GetCmd(
+            [out] Byte* cmd);
+
+        SetBatteryLevel(
+            [in] Byte batteryLevel);
+
+        GetBatteryLevel(
+            [out] Byte* batteryLevel);
+
+        SetBatteryStatus(
+            [in] Byte batteryStatus);
+
+        GetBatteryStatus(
+            [out] Byte* batteryStatus);
+
+        SetBatteryHealth(
+            [in] Byte batteryHealth);
+
+        GetBatteryHealth(
+            [out] Byte* batteryHealth);
+
+        SetBatteryPlugType(
+            [in] Byte batteryPlugType);
+
+        GetBatteryPlugType(
+            [out] Byte* batteryPlugType);
+
+        SetBatteryTemperature(
+            [in] Int16 batteryTemperature);
+
+        GetBatteryTemperature(
+            [out] Int16* batteryTemperature);
+
+        SetBatteryVoltage(
+            [in] Char32 batteryVoltage);
+
+        GetBatteryVoltage(
+            [out] Char32* batteryVoltage);
+
+        SetStates(
+            [in] Int32 states);
+
+        GetStates(
+            [out] Int32* states);
+
+        SetStates2(
+            [in] Int32 states2);
+
+        GetStates2(
+            [out] Int32* states2);
+
+        SetEventCode(
+            [in] Int32 eventCode);
+
+        GetEventCode(
+            [out] Int32* eventCode);
+
+        SetCurrentTime(
+            [in] Int64 currentTime);
+
+        GetCurrentTime(
+            [out] Int64* currentTime);
+
+        SetNumReadInts(
+            [in] Int32 numReadInts);
+
+        GetNumReadInts(
+            [out] Int32* numReadInts);
     }
 
     /**
@@ -1445,6 +1545,25 @@ module
 
         WriteToParcelWithoutUids(
             [in] IParcel* outParcel);
+
+        /**
+         * Temporary for settings.
+         */
+        DumpCheckinLocked(
+            [in] IContext* context,
+            [in] IPrintWriter* pw,
+            [in] Int32 which,
+            [in] Int32 reqUid);
+
+        /**
+         * Temporary for settings.
+         */
+        DumpLocked(
+            [in] IContext* context,
+            [in] IPrintWriter* pw,
+            [in] String prefix,
+            [in] Int32 which,
+            [in] Int32 reqUid);
     }
 
     } // namespace Os

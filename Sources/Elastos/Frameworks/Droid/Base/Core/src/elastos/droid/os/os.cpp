@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Content.h"
+#include "elastos/droid/os/CBatteryStatsHistoryItem.h"
 #include "elastos/droid/os/CBinder.h"
 #include "elastos/droid/os/CCancellationSignalTransport.h"
 #include "elastos/droid/os/CHandler.h"
@@ -16,6 +17,8 @@
 namespace Elastos {
 namespace Droid {
 namespace Os {
+
+CAR_OBJECT_IMPL(CBatteryStatsHistoryItem)
 
 CAR_OBJECT_IMPL(CBinder)
 

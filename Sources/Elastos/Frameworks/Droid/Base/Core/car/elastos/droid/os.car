@@ -154,6 +154,17 @@ module
         }
     }
 
+    class CBatteryStatsHistoryItem {
+        constructor();
+
+        constructor(
+            [in] Int64 time,
+            [in] IParcel* src);
+
+        interface IBatteryStatsHistoryItem;
+        interface IParcelable;
+    }
+
     // class CBinderDeathRecipient {
     //     interface IProxyDeathRecipient;
     // }

@@ -89,6 +89,8 @@ public:
 
     PreferenceFragment();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI OnCreate(
         /*[in]*/ IBundle* savedInstanceState);

@@ -179,14 +179,17 @@ public:
 
         HistoryItem();
 
-        HistoryItem(
+        CARAPI constructor();
+
+        CARAPI constructor(
             /* [in] */ Int64 time,
             /* [in] */ IParcel* src);
 
         /**
          * Return whether the command code is a delta data update.
          */
-        CARAPI_(Boolean) IsDeltaData();
+        CARAPI IsDeltaData(
+            /* [out] */ Boolean* result);
 
         CARAPI WriteToParcel(
             /* [in] */ IParcel* dest);
@@ -194,21 +197,101 @@ public:
         CARAPI ReadFromParcel(
             /* [in] */ IParcel* source);
 
-        CARAPI_(void) Clear();
+        CARAPI Clear();
 
-        CARAPI_(void) SetTo(
-            /* [in] */ HistoryItem* o);
+        CARAPI SetTo(
+            /* [in] */ IBatteryStatsHistoryItem* o);
 
-        CARAPI_(void) SetTo(
+        CARAPI SetTo(
             /* [in] */ Int64 time,
             /* [in] */ Byte cmd,
-            /* [in] */ HistoryItem* o);
+            /* [in] */ IBatteryStatsHistoryItem* o);
 
-        CARAPI_(Boolean) SameNonEvent(
-            /* [in] */ HistoryItem* o);
+        CARAPI SameNonEvent(
+            /* [in] */ IBatteryStatsHistoryItem* o,
+            /* [out] */ Boolean* result);
 
-        CARAPI_(Boolean) Same(
-            /* [in] */ HistoryItem* o);
+        CARAPI Same(
+            /* [in] */ IBatteryStatsHistoryItem* o,
+            /* [out] */ Boolean* result);
+
+        CARAPI SetTime(
+            /* [in] */ Int64 time);
+
+        CARAPI GetTime(
+            /* [out] */ Int64* time);
+
+        CARAPI SetCmd(
+            /* [in] */ Byte cmd);
+
+        CARAPI GetCmd(
+            /* [out] */ Byte* cmd);
+
+        CARAPI SetBatteryLevel(
+            /* [in] */ Byte batteryLevel);
+
+        CARAPI GetBatteryLevel(
+            /* [out] */ Byte* batteryLevel);
+
+        CARAPI SetBatteryStatus(
+            /* [in] */ Byte batteryStatus);
+
+        CARAPI GetBatteryStatus(
+            /* [out] */ Byte* batteryStatus);
+
+        CARAPI SetBatteryHealth(
+            /* [in] */ Byte batteryHealth);
+
+        CARAPI GetBatteryHealth(
+            /* [out] */ Byte* batteryHealth);
+
+        CARAPI SetBatteryPlugType(
+            /* [in] */ Byte batteryPlugType);
+
+        CARAPI GetBatteryPlugType(
+            /* [out] */ Byte* batteryPlugType);
+
+        CARAPI SetBatteryTemperature(
+            /* [in] */ Int16 batteryTemperature);
+
+        CARAPI GetBatteryTemperature(
+            /* [out] */ Int16* batteryTemperature);
+
+        CARAPI SetBatteryVoltage(
+            /* [in] */ Char32 batteryVoltage);
+
+        CARAPI GetBatteryVoltage(
+            /* [out] */ Char32* batteryVoltage);
+
+        CARAPI SetStates(
+            /* [in] */ Int32 states);
+
+        CARAPI GetStates(
+            /* [out] */ Int32* states);
+
+        CARAPI SetStates2(
+            /* [in] */ Int32 states2);
+
+        CARAPI GetStates2(
+            /* [out] */ Int32* states2);
+
+        CARAPI SetEventCode(
+            /* [in] */ Int32 eventCode);
+
+        CARAPI GetEventCode(
+            /* [out] */ Int32* eventCode);
+
+        CARAPI SetCurrentTime(
+            /* [in] */ Int64 currentTime);
+
+        CARAPI GetCurrentTime(
+            /* [out] */ Int64* currentTime);
+
+        CARAPI SetNumReadInts(
+            /* [in] */ Int32 numReadInts);
+
+        CARAPI GetNumReadInts(
+            /* [out] */ Int32* numReadInts);
 
     private:
         CARAPI_(void) SetToCommon(
@@ -422,7 +505,7 @@ public:
     /**
      * Temporary for settings.
      */
-    CARAPI_(void) DumpCheckinLocked(
+    CARAPI DumpCheckinLocked(
         /* [in] */ IContext* context,
         /* [in] */ IPrintWriter* pw,
         /* [in] */ Int32 which,
@@ -443,7 +526,7 @@ public:
     /**
      * Temporary for settings.
      */
-    CARAPI_(void) DumpLocked(
+    CARAPI DumpLocked(
         /* [in] */ IContext* context,
         /* [in] */ IPrintWriter* pw,
         /* [in] */ const String& prefix,

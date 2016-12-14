@@ -1,0 +1,15 @@
+TARGET_NAME = fuelgauge
+TARGET_TYPE = lib
+
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
+
+SOURCES += BatteryEntry.cpp
+SOURCES += CBatteryHistoryChart.cpp
+SOURCES += CBatteryHistoryDetail.cpp
+SOURCES += CBatteryHistoryPreference.cpp
+SOURCES += CBatterySaverSettings.cpp
+SOURCES += CPowerGaugePreference.cpp
+SOURCES += CPowerUsageDetail.cpp
+SOURCES += CPowerUsageSummary.cpp

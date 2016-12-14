@@ -22,6 +22,21 @@ public:
 
     CAR_SINGLETON_DECL();
 
+    CARAPI GetDEFAULT(
+        /* [out] */ ITypeface** typeface);
+
+    CARAPI GetDEFAULT_BOLD(
+        /* [out] */ ITypeface** typeface);
+
+    CARAPI GetSANS_SERIF(
+        /* [out] */ ITypeface** typeface);
+
+    CARAPI GetSERIF(
+        /* [out] */ ITypeface** typeface);
+
+    CARAPI GetMONOSPACE(
+        /* [out] */ ITypeface** typeface);
+
     /**
      * Create a typeface object given a family name, and option style information.
      * If null is passed for the name, then the "default" font will be chosen.
