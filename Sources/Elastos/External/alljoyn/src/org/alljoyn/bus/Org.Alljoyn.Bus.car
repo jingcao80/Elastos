@@ -22,6 +22,7 @@ module
     merge("../../../../car/org/alljoyn/bus/Observer.car");
     merge("../../../../car/org/alljoyn/bus/OnJoinSessionListener.car");
     merge("../../../../car/org/alljoyn/bus/OnPingListener.car");
+    merge("../../../../car/org/alljoyn/bus/PropertiesChangedListener.car");
     merge("../../../../car/org/alljoyn/bus/PropertyChangedEmitter.car");
     merge("../../../../car/org/alljoyn/bus/ProxyBusObject.car");
     merge("../../../../car/org/alljoyn/bus/SignalEmitter.car");

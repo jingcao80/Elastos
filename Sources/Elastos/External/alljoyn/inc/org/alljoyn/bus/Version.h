@@ -8,7 +8,7 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
-class Version
+class ECO_PUBLIC Version
 {
 public:
     /**

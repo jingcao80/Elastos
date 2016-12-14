@@ -1,0 +1,29 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFObserver {
+
+    /**
+     * The DoorEventListener listens to both propertyChanged events and signals.
+     */
+    /**
+     * @Involve
+     * interface IDoor
+     * interface Org.Alljoyn.Bus.IPropertiesChangedListener
+     */
+    interface IDoorEventListener {
+
+        /*
+         * Called when a personPassedThrough signal is received.
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusSignalHandler(iface = "org.alljoyn.bus.samples.observer.Door", signal = "PersonPassedThrough")]
+        PersonPassedThrough(
+            [in] String person);
+    }
+
+    } // namespace DFObserver
+    } // namespace DevSamples
+    } // namespace Elastos
+}
