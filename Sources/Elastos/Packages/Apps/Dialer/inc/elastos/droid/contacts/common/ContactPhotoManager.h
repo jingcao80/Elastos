@@ -281,6 +281,8 @@ public:
     static CARAPI_(AutoPtr<IContactPhotoManager>) CreateContactPhotoManager(
         /* [in] */ IContext* context);
 
+    using IContactPhotoManager::LoadThumbnail;
+
     /**
      * Calls {@link #loadThumbnail(ImageView, long, boolean, DefaultImageRequest,
      * DefaultImageProvider)} using the {@link DefaultImageProvider} {@link #DEFAULT_AVATAR}.

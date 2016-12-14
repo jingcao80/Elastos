@@ -69,17 +69,17 @@ private:
 
         const String mNumber;
 
-        const Int32 mPresentation;
+        Int32 mPresentation;
 
-        const Int32 mCallType;
+        Int32 mCallType;
 
-        const Int32 mFeatures;
+        Int32 mFeatures;
 
         AutoPtr<IPhoneAccountHandle> mAccountHandle;
 
-        const Int64 mTimestamp;
+        Int64 mTimestamp;
 
-        const Int32 mDurationInSec;
+        Int32 mDurationInSec;
 
         AutoPtr<IInteger64> mDataUsage;
     };

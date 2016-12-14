@@ -271,8 +271,7 @@ void LetterTileDrawable::SetScale(
 void LetterTileDrawable::SetOffset(
     /* [in] */ Float offset)
 {
-    assert(0);
-    // Assert::AssertTrue(offset >= -0.5f && offset <= 0.5f);
+    assert(offset >= -0.5f && offset <= 0.5f);
     mOffset = offset;
 }
 

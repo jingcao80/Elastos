@@ -216,7 +216,7 @@ AutoPtr<IDrawable> ContactPhotoManager::LetterTileDefaultImageProvider::GetDefau
        }
        else {
            drawable->SetContactDetails(defaultImageRequest->mDisplayName,
-                   defaultImageRequest->mIdentifier);
+                    defaultImageRequest->mIdentifier);
        }
        drawable->SetContactType(defaultImageRequest->mContactType);
        drawable->SetScale(defaultImageRequest->mScale);
@@ -232,7 +232,7 @@ AutoPtr<IDrawable> ContactPhotoManager::LetterTileDefaultImageProvider::GetDefau
 //=================================================================
 AutoPtr<IDrawable> ContactPhotoManager::BlankDefaultImageProvider::sDrawable;
 
-CAR_INTERFACE_IMPL(ContactPhotoManager::BlankDefaultImageProvider, Object, IContactPhotoManagerDefaultImageProvider)
+CAR_INTERFACE_IMPL(ContactPhotoManager::BlankDefaultImageProvider, Object, IContactPhotoManagerDefaultImageProvider);
 
 ECode ContactPhotoManager::BlankDefaultImageProvider::ApplyDefaultImage(
     /* [in] */ IImageView* view,
@@ -329,29 +329,125 @@ AutoPtr<IDrawable> ContactPhotoManager::GetDefaultAvatarDrawableForContact(
 AutoPtr<IUri> ContactPhotoManager::GetDefaultAvatarUriForContact(
     /* [in] */ DefaultImageRequest* request)
 {
-    assert(0);
-    return NULL;
+    AutoPtr<IUriBuilder> builder;
+    DEFAULT_IMAGE_URI->BuildUpon((IUriBuilder**)&builder);
+    if (request != NULL) {
+        if (!TextUtils::IsEmpty(request->mDisplayName)) {
+            builder->AppendQueryParameter(DISPLAY_NAME_PARAM_KEY, request->mDisplayName);
+        }
+        if (!TextUtils::IsEmpty(request->mIdentifier)) {
+            builder->AppendQueryParameter(IDENTIFIER_PARAM_KEY, request->mIdentifier);
+        }
+        if (request->mContactType != TYPE_DEFAULT) {
+            builder->AppendQueryParameter(CONTACT_TYPE_PARAM_KEY, StringUtils::ToString(request->mContactType));
+        }
+        if (request->mScale != SCALE_DEFAULT) {
+            builder->AppendQueryParameter(SCALE_PARAM_KEY, StringUtils::ToString(request->mScale));
+        }
+        if (request->mOffset != OFFSET_DEFAULT) {
+            builder->AppendQueryParameter(OFFSET_PARAM_KEY, StringUtils::ToString(request->mOffset));
+        }
+        if (request->mIsCircular != IS_CIRCULAR_DEFAULT) {
+            builder->AppendQueryParameter(IS_CIRCULAR_PARAM_KEY, StringUtils::ToString(request->mIsCircular));
+        }
+
+    }
+    AutoPtr<IUri> uri;
+    builder->Build((IUri**)&uri);
+    return uri;
 }
 
 String ContactPhotoManager::AppendBusinessContactType(
     /* [in] */ const String& photoUrl)
 {
-    assert(0);
-    return String(NULL);
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    AutoPtr<IUri> uri;
+    helper->Parse(photoUrl, (IUri**)&uri);
+    AutoPtr<IUriBuilder> builder;
+    uri->BuildUpon((IUriBuilder**)&builder);
+    builder->EncodedFragment(StringUtils::ToString(TYPE_BUSINESS));
+    AutoPtr<IUri> newUri;
+    builder->Build((IUri**)&newUri);
+    String str;
+    IObject::Probe(uri)->ToString(&str);
+    return str;
 }
 
 AutoPtr<IUri> ContactPhotoManager::RemoveContactType(
     /* [in] */ IUri* photoUri)
 {
-    assert(0);
-    return NULL;
+    String encodedFragment;
+    photoUri->GetEncodedFragment(&encodedFragment);
+    if (!TextUtils::IsEmpty(encodedFragment)) {
+        AutoPtr<IUriBuilder> builder;
+        photoUri->BuildUpon((IUriBuilder**)&builder);
+        builder->EncodedFragment(String(NULL));
+        AutoPtr<IUri> newUri;
+        builder->Build((IUri**)&newUri);
+        return newUri;
+    }
+    return photoUri;
 }
 
 Boolean ContactPhotoManager::IsBusinessContactUri(
     /* [in] */ IUri* photoUri)
 {
-    assert(0);
-    return FALSE;
+    if (photoUri == NULL) {
+        return FALSE;
+    }
+
+    String encodedFragment;
+    photoUri->GetEncodedFragment(&encodedFragment);
+    return !TextUtils::IsEmpty(encodedFragment)
+            && encodedFragment.Equals(StringUtils::ToString(TYPE_BUSINESS));
+}
+
+AutoPtr<ContactPhotoManager::DefaultImageRequest> ContactPhotoManager::GetDefaultImageRequestFromUri(
+    /* [in] */ IUri* uri)
+{
+    String name, identifier;
+    uri->GetQueryParameter(DISPLAY_NAME_PARAM_KEY, &name);
+    uri->GetQueryParameter(IDENTIFIER_PARAM_KEY, &identifier);
+    AutoPtr<DefaultImageRequest> request = new DefaultImageRequest(name, identifier, FALSE);
+    // try {
+    String contactType;
+    uri->GetQueryParameter(CONTACT_TYPE_PARAM_KEY, &contactType);
+    if (!TextUtils::IsEmpty(contactType)) {
+        request->mContactType = StringUtils::ParseInt32(contactType);
+    }
+
+    String scale;
+    uri->GetQueryParameter(SCALE_PARAM_KEY, &scale);
+    if (!TextUtils::IsEmpty(scale)) {
+        request->mScale = StringUtils::ParseFloat(scale);
+    }
+
+    String offset;
+    uri->GetQueryParameter(OFFSET_PARAM_KEY, &offset);
+    if (!TextUtils::IsEmpty(offset)) {
+        request->mOffset = StringUtils::ParseFloat(offset);
+    }
+
+    String isCircular;
+    uri->GetQueryParameter(IS_CIRCULAR_PARAM_KEY, &isCircular);
+    if (!TextUtils::IsEmpty(isCircular)) {
+        request->mIsCircular = StringUtils::ParseBoolean(isCircular);
+    }
+    // } catch (NumberFormatException e) {
+    //     Log.w(TAG, "Invalid DefaultImageRequest image parameters provided, ignoring and using "
+    //             + "defaults.");
+    // }
+
+    return request;
+}
+
+Boolean ContactPhotoManager::IsDefaultImageUri(
+    /* [in] */ IUri* uri)
+{
+    String scheme;
+    uri->GetScheme(&scheme);
+    return DEFAULT_IMAGE_URI_SCHEME.Equals(scheme);
 }
 
 AutoPtr<IContactPhotoManager> ContactPhotoManager::GetInstance(
@@ -384,8 +480,8 @@ ECode ContactPhotoManager::LoadThumbnail(
     /* [in] */ Boolean isCircular,
     /* [in] */ IContactPhotoManagerDefaultImageRequest* defaultImageRequest)
 {
-    assert(0);
-    return NOERROR;
+    return LoadThumbnail(view, photoId, darkTheme, isCircular,
+            defaultImageRequest, DEFAULT_AVATAR);
 }
 
 ECode ContactPhotoManager::LoadPhoto(
@@ -396,8 +492,8 @@ ECode ContactPhotoManager::LoadPhoto(
     /* [in] */ Boolean isCircular,
     /* [in] */ IContactPhotoManagerDefaultImageRequest* defaultImageRequest)
 {
-    assert(0);
-    return NOERROR;
+    return LoadPhoto(view, photoUri, requestedExtent, darkTheme, isCircular,
+            defaultImageRequest, DEFAULT_AVATAR);
 }
 
 ECode ContactPhotoManager::LoadDirectoryPhoto(
@@ -408,20 +504,6 @@ ECode ContactPhotoManager::LoadDirectoryPhoto(
     /* [in] */ IContactPhotoManagerDefaultImageRequest* defaultImageRequest)
 {
     return LoadPhoto(view, photoUri, -1, darkTheme, isCircular, defaultImageRequest, DEFAULT_AVATAR);
-}
-
-AutoPtr<ContactPhotoManager::DefaultImageRequest> ContactPhotoManager::GetDefaultImageRequestFromUri(
-    /* [in] */ IUri* uri)
-{
-    assert(0);
-    return NOERROR;
-}
-
-Boolean ContactPhotoManager::IsDefaultImageUri(
-    /* [in] */ IUri* uri)
-{
-    assert(0);
-    return FALSE;
 }
 
 
