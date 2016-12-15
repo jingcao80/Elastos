@@ -450,8 +450,7 @@ ECode CallLogAdapter::constructor(
     resources->GetColor(Elastos::Droid::Dialer::R::color::call_log_expanded_background_color, &mExpandedBackgroundColor);
     resources->GetDimension(Elastos::Droid::Dialer::R::dimen::call_log_expanded_translation_z, &mExpandedTranslationZ);
 
-    // TODO:
-    // mContactPhotoManager = ContactPhotoManager::GetInstance(mContext);
+    mContactPhotoManager = ContactPhotoManager::GetInstance(mContext);
     mPhoneNumberHelper = new PhoneNumberDisplayHelper(resources);
     AutoPtr<PhoneNumberUtilsWrapper> wrapper = new PhoneNumberUtilsWrapper();
     AutoPtr<PhoneCallDetailsHelper> phoneCallDetailsHelper = new PhoneCallDetailsHelper(
@@ -778,7 +777,7 @@ void CallLogAdapter::BindView(
     if (cachedInfo != NULL) {
         AutoPtr<IInterface> value;
         cachedInfo->GetValue((IInterface**)&value);
-        AutoPtr<ContactInfo> info = (ContactInfo*)(IObject*)value.Get();
+        info = (ContactInfo*)(IObject*)value.Get();
     }
     if (!PhoneNumberUtilsWrapper::CanPlaceCallsTo(cs, numberPresentation)
             || isVoicemailNumber) {
