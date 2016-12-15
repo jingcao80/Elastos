@@ -87,6 +87,10 @@ public:
         /* [in] */ CarDataType type,
         /* [out] */ IInterface** obj);
 
+    CARAPI GetArrayObject(
+        /* [in] */ CarDataType type,
+        /* [out] */ IInterface** obj);
+
     /**
      * Gets the object wrapped by this Variant when the wrapped object is a
      * generic type.
@@ -98,9 +102,9 @@ public:
      * @throws ClassCastException if Variant data cannot be converted to requested type
      * @see VariantTypeReference
      */
-    CARAPI GetObject(
-        /* [in] */ IVariantTypeReference* type,
-        /* [out] */ IInterface** obj);
+    // CARAPI GetObject(
+    //     /* [in] */ IVariantTypeReference* type,
+    //     /* [out] */ IInterface** obj);
 
     /**
      * Indicates whether some other Variant is "equal to" this one.

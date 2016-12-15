@@ -1,26 +1,21 @@
-TARGET_NAME = Elastos.DevSamples.DFObserver
+
+TARGET_NAME = Elastos.DevSamples.DFRawDemo.RawClient
 TARGET_TYPE = eco
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-include $(MAKEDIR)/../../sources.inc
 INCLUDES += $(MAKEDIR)
 INCLUDES += $(MAKEDIR)/src
 
-VPATH += $(MAKEDIR)/src/elastos/devsamples/dfobserver
+VPATH += $(MAKEDIR)/src/elastos/devsamples/dfrawdemo/rawclient
 
-SOURCES = Elastos.DevSamples.DFObserver.car
+SOURCES = Elastos.DevSamples.DFRawDemo.RawClient.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Org.Alljoyn.Bus.cpp
 SOURCES += CClient.cpp
-SOURCES += CDoorService.cpp
-SOURCES += MyAboutData.cpp
-SOURCES += DoorAdapter.cpp
-SOURCES += DoorAdapterItem.cpp
-SOURCES += BusHandler.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
@@ -28,9 +23,9 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_TARGETS)/Org.Alljoyn.Bus.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
-LIBRARIES += -lm -licuuc -llog -lutils
+LIBRARIES += -lm -licuuc -llog
 
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
-APP_PACKAGE_NAME = Elastos.DevSamples.DFObserver
-RES_NAMESPACE = Elastos.DevSamples.DFObserver
+APP_PACKAGE_NAME = Elastos.DevSamples.DFRawDemo.RawClient
+RES_NAMESPACE = Elastos.DevSamples.DFRawDemo.RawClient

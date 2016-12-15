@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFRawDemo {
+    namespace RawService {
+
+    /**
+     * The BusInterface annotation is used to tell the code that this interface is an AllJoyn interface.
+     *
+     * The 'name' value is used to specify by which name this interface will be known.  If the name is
+     * not given the fully qualified name of the Java interface is be used.  In most instances its best
+     * to assign an interface name since it helps promote code reuse.
+     */
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.bus.samples.raw.RawInterface")]
+    interface IRawInterface {
+        /**
+         * Ask the service to arrange a raw reliable session that can be used to
+         * transfer a "file" and return a contact port over which this session
+         * can be joined.
+         *
+         * @return an integer session port with which the raw session may be
+         * joined
+         *
+         * @throws BusException
+         */
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        RequestRawSession(
+            [out] Int16* port);
+    }
+
+    } // namespace RawService
+    } // namespace DFRawDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}

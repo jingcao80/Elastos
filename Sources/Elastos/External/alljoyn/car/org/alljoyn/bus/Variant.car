@@ -35,6 +35,10 @@ module
             [in] CarDataType type,
             [out] IInterface** obj);
 
+        GetArrayObject(
+            [in] CarDataType elementType,
+            [out] IInterface** obj);
+
         /**
          * Gets the object wrapped by this Variant when the wrapped object is a
          * generic type.
@@ -46,9 +50,9 @@ module
          * @throws ClassCastException if Variant data cannot be converted to requested type
          * @see VariantTypeReference
          */
-        GetObject(
-            [in] IVariantTypeReference* type,
-            [out] IInterface** obj);
+        // GetObject(
+        //     [in] IVariantTypeReference* type,
+        //     [out] IInterface** obj);
 
     }
 

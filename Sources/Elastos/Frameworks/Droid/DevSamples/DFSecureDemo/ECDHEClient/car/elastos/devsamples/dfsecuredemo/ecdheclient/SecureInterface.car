@@ -6,7 +6,7 @@ module
     namespace DFSecureDemo {
     namespace ECDHEClient {
 
-    [deprecated, @Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.bus.samples.secure.SecureInterface")
+    [@Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.bus.samples.secure.SecureInterface")
         , @Org.Alljoyn.Bus.Annotation.Secure(value = "required")]
     interface ISecureInterface {
 

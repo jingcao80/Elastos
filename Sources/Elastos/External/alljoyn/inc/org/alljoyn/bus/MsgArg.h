@@ -1,4 +1,4 @@
-
+\
 #ifndef __ORG_ALLJOYN_BUS_MSGARG_H__
 #define __ORG_ALLJOYN_BUS_MSGARG_H__
 
@@ -44,6 +44,11 @@ public:
         CARAPI AssignArgumentListOutput(
             /* [in] */ IArgumentList* args,
             /* [in] */ Int32 index);
+
+        CARAPI_(AutoPtr<IInterface>) Convert();
+
+        static AutoPtr<CarValue> Convert(
+            /* [in] */ IInterface* object);
 
     public:
         ParamIOAttribute mIOAttribute;

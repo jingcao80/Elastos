@@ -2,8 +2,19 @@
 #include "org/alljoyn/bus/Signature.h"
 #include <alljoyn/MsgArg.h>
 #include "alljoyn/SignatureUtils.h"
+#include "Elastos.CoreLibrary.Core.h"
 #include <elastos/utility/logging/Logger.h>
+#include "_Org.Alljoyn.Bus.h"
 
+using Elastos::Core::IArrayOf;
+using Elastos::Core::EIID_IArrayOf;
+using Elastos::Core::EIID_IByte;
+using Elastos::Core::EIID_IBoolean;
+using Elastos::Core::EIID_IInteger16;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_IInteger64;
+using Elastos::Core::EIID_IDouble;
+using Elastos::Core::EIID_ICharSequence;
 using Elastos::Utility::Logging::Logger;
 
 namespace Org {
@@ -71,15 +82,15 @@ String Signature::TypeSig(
             return (signature == NULL) ? String("d") : signature;
         case CarDataType_String:
             return (signature == NULL) ? String("s") : signature;
-        // case CarDataType_Interface:
-        //     {
-        //         InterfaceID iid;
-        //         IInterfaceInfo::Probe(typeInfo)->GetId(&iid);
-        //         if (iid == EIID_IVariant) {
-        //             return (signature == NULL) ? String("y") : signature;
-        //         }
-        //     }
-        //     break;
+        case CarDataType_Interface:
+            {
+                InterfaceID iid;
+                IInterfaceInfo::Probe(typeInfo)->GetId(&iid);
+                if (iid == EIID_IVariant) {
+                    return (signature == NULL) ? String("y") : signature;
+                }
+            }
+            break;
         case CarDataType_ArrayOf:
             {
                 AutoPtr<IDataTypeInfo> elementTypeInfo;
@@ -194,6 +205,44 @@ String Signature::TypeSig(
         sig += TypeSig(type, (signatures == NULL) ? String(NULL) : (*signatures)[i]);
     }
     return sig;
+}
+
+String Signature::TypeSig(
+    /* [in] */ IInterface* obj,
+    /* [in] */ const String& _signature)
+{
+    String sig("");
+    if (obj == NULL)
+        return sig;
+
+    String signature = _signature;
+    InterfaceID id;
+    obj->GetInterfaceID(obj, &id);
+    if (id == EIID_IArrayOf) {
+        sig = (signature == NULL) ? String("a") : signature.Substring(0, 1);
+        signature = (signature == NULL) ? signature : signature.Substring(1);
+        IArrayOf::Probe(obj)->GetTypeId(&id);
+    }
+
+    if (id == EIID_IByte)
+        return sig + ((signature == NULL) ? String("y") : signature);
+    else if (id == EIID_IBoolean)
+        return sig + ((signature == NULL) ? String("b") : signature);
+    else if (id == EIID_IInteger16)
+        return sig + ((signature == NULL) ? String("n") : signature);
+    else if (id == EIID_IInteger32)
+        return sig + ((signature == NULL) ? String("i") : signature);
+    else if (id == EIID_IInteger64)
+        return sig + ((signature == NULL) ? String("x") : signature);
+    else if (id == EIID_IDouble)
+        return sig + ((signature == NULL) ? String("d") : signature);
+    else if (id == EIID_ICharSequence)
+        return sig + ((signature == NULL) ? String("s") : signature);
+    else {
+        Logger::E("Signature", "unimplemented InterfaceID");
+    }
+
+    return signature;
 }
 
 } // namespace Bus

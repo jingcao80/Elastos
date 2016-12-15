@@ -84,7 +84,7 @@ ECode CVariant::GetSignature(
 {
     VALIDATE_NOT_NULL(signature)
     if (mValue != NULL) {
-        // *signature = Signature::TypeSig(mValue.getClass(), mSignature);
+        *signature = Signature::TypeSig(mValue, mSignature);
     }
     else if(mHandle != 0) {
         AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(1);
@@ -102,14 +102,39 @@ ECode CVariant::GetObject(
     /* [out] */ IInterface** obj)
 {
     VALIDATE_NOT_NULL(obj)
+    if (type == CarDataType_ArrayOf)
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
     if (mValue == NULL) {
-        MsgArg::Unmarshal(mHandle, type, (PVoid)&mValue);
+        AutoPtr<MsgArg::CarValue> value = new MsgArg::CarValue(type);
+        PVoid arg = value->ToValuePtr();
+        if (SUCCEEDED(MsgArg::Unmarshal(mHandle, type, arg)))
+            mValue = value->Convert();
     }
     // @SuppressWarnings(value = "unchecked")
     *obj = mValue;
     REFCOUNT_ADD(*obj)
     return NOERROR;
 }
+
+ECode CVariant::GetArrayObject(
+    /* [in] */ CarDataType elementType,
+    /* [out] */ IInterface** obj)
+{
+    VALIDATE_NOT_NULL(obj)
+    if (mValue == NULL) {
+        AutoPtr<MsgArg::CarValue> value = new MsgArg::CarValue(CarDataType_ArrayOf);
+        value->mElementType = elementType;
+        PVoid arg = value->ToValuePtr();
+        if (SUCCEEDED(MsgArg::Unmarshal(mHandle, CarDataType_ArrayOf, arg)))
+            mValue = value->Convert();
+    }
+    // @SuppressWarnings(value = "unchecked")
+    *obj = mValue;
+    REFCOUNT_ADD(*obj)
+    return NOERROR;
+}
+
 
 /**
  * Gets the object wrapped by this CVariant when object is specified by Class.
@@ -130,20 +155,20 @@ ECode CVariant::GetObject(
 //     return o;
 // }
 
-ECode CVariant::GetObject(
-    /* [in] */ IVariantTypeReference* type,
-    /* [out] */ IInterface** obj)
-{
-    VALIDATE_NOT_NULL(obj)
-    if (mValue == NULL) {
-        // Type sc = type.getClass().getGenericSuperclass();
-        // value = MsgArg.unmarshal(handle, ((ParameterizedType) sc).getActualTypeArguments()[0]);
-    }
-    // @SuppressWarnings(value = "unchecked")
-    *obj = mValue;
-    REFCOUNT_ADD(*obj)
-    return NOERROR;
-}
+// ECode CVariant::GetObject(
+//     /* [in] */ IVariantTypeReference* type,
+//     /* [out] */ IInterface** obj)
+// {
+//     VALIDATE_NOT_NULL(obj)
+//     if (mValue == NULL) {
+//         // Type sc = type.getClass().getGenericSuperclass();
+//         // value = MsgArg.unmarshal(handle, ((ParameterizedType) sc).getActualTypeArguments()[0]);
+//     }
+//     // @SuppressWarnings(value = "unchecked")
+//     *obj = mValue;
+//     REFCOUNT_ADD(*obj)
+//     return NOERROR;
+// }
 
 ECode CVariant::Equals(
     /* [in] */ IInterface* obj,
@@ -151,13 +176,17 @@ ECode CVariant::Equals(
 {
     VALIDATE_NOT_NULL(res)
     *res = FALSE;
-    AutoPtr<IInterface> obj1;
-    if (FAILED(GetObject(CarDataType_Interface, (IInterface**)&obj1)))
+    if (IVariant::Probe(obj) == NULL)
         return NOERROR;
-    AutoPtr<IInterface> obj2;
-    if (FAILED(IVariant::Probe(obj)->GetObject(CarDataType_Interface, (IInterface**)&obj2)))
-        return NOERROR;
-    *res = Object::Equals(obj1, obj2);
+
+    CVariant* other = (CVariant*)IVariant::Probe(obj);
+    if (mValue != NULL && other->mValue != NULL)
+        *res = Object::Equals(mValue, other->mValue);
+    else if (mHandle != 0 && other->mHandle != 0)
+        *res = *reinterpret_cast<ajn::MsgArg*>(mHandle) == *reinterpret_cast<ajn::MsgArg*>(other->mHandle);
+    else if (mValue == NULL && other->mValue == NULL && !mHandle && !other->mHandle)
+        *res = TRUE;
+
     return NOERROR;
 }
 

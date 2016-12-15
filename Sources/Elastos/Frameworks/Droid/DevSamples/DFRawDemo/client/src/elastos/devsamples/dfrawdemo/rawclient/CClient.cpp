@@ -2,22 +2,15 @@
 #include "CClient.h"
 #include "R.h"
 #include <Elastos.CoreLibrary.IO.h>
-#include <Elastos.Droid.Wifi.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/droid/R.h>
 
-using Elastos::Droid::App::CAlertDialogBuilder;
-using Elastos::Droid::App::IAlertDialogBuilder;
-using Elastos::Droid::App::IAlertDialog;
-using Elastos::Droid::App::IProgressDialogHelper;
 using Elastos::Droid::App::CProgressDialogHelper;
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::App::IProgressDialogHelper;
+using Elastos::Droid::App::IProgressDialog;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::View::LayoutInflater;
-using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenuInflater;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::Widget::CArrayAdapter;
@@ -27,19 +20,19 @@ using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
-using Elastos::Droid::Wifi::IWifiManager;
-using Elastos::Droid::Wifi::IWifiManagerMulticastLock;
 using Elastos::Core::CoreUtils;
+using Elastos::IO::CFileDescriptor;
+using Elastos::IO::CFileOutputStream;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IFlushable;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Concurrent::CCountDownLatch;
 
-using Org::Alljoyn::Bus::EIID_IAuthListener;
 using Org::Alljoyn::Bus::CBusAttachment;
 using Org::Alljoyn::Bus::CMutableInteger32Value;
 using Org::Alljoyn::Bus::CSessionOpts;
 using Org::Alljoyn::Bus::IBusListener;
 using Org::Alljoyn::Bus::IMutableInteger32Value;
-using Org::Alljoyn::Bus::IPasswordRequest;
 using Org::Alljoyn::Bus::ISessionListener;
 using Org::Alljoyn::Bus::ISessionOpts;
 using Org::Alljoyn::Bus::RemoteMessage_Receive;
@@ -48,8 +41,8 @@ using Org::Alljoyn::Bus::Alljoyn::CDaemonInit;
 
 namespace Elastos {
 namespace DevSamples {
-namespace DFSecureDemo {
-namespace SrpClient {
+namespace DFRawDemo {
+namespace RawClient {
 
 //======================================================================
 //  CClient::MyHander
@@ -71,7 +64,7 @@ ECode CClient::MyHandler::HandleMessage(
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
         String cat = CoreUtils::Unbox(ICharSequence::Probe(obj));
-        mHost->mListViewArrayAdapter->Add(CoreUtils::Convert(String("Pings:  ") + cat));
+        mHost->mListViewArrayAdapter->Add(CoreUtils::Convert(String("Ping:  ") + cat));
         break;
     }
     case MESSAGE_PING_REPLY: {
@@ -80,23 +73,6 @@ ECode CClient::MyHandler::HandleMessage(
         String ret = CoreUtils::Unbox(ICharSequence::Probe(obj));
         mHost->mListViewArrayAdapter->Add(CoreUtils::Convert(String("Reply:  ") + ret));
         ITextView::Probe(mHost->mEditText)->SetText(CoreUtils::Convert(String("")));
-        break;
-    }
-    case MESSAGE_GET_CREDENTIALS:
-        mHost->ShowDialog(DIALOG_GET_CREDENTIALS);
-        break;
-    case MESSAGE_AUTH_COMPLETE: {
-        AutoPtr<IInterface> obj;
-        msg->GetObj((IInterface**)&obj);
-        Boolean authenticated;
-        IBoolean::Probe(obj)->GetValue(&authenticated);
-        if (!authenticated) {
-            AutoPtr<IToastHelper> helper;
-            CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-            AutoPtr<IToast> toast;
-            helper->MakeText(mHost, CoreUtils::Convert(String("Authentication failed")), IToast::LENGTH_LONG, (IToast**)&toast);
-            toast->Show();
-        }
         break;
     }
     case MESSAGE_POST_TOAST: {
@@ -115,7 +91,7 @@ ECode CClient::MyHandler::HandleMessage(
         AutoPtr<IProgressDialogHelper> helper;
         CProgressDialogHelper::AcquireSingleton((IProgressDialogHelper**)&helper);
         helper->Show(mHost, CoreUtils::Convert(String("")),
-                CoreUtils::Convert(String("Finding Secure Service.\nPlease wait...")),
+                CoreUtils::Convert(String("Finding Raw Service.\nPlease wait...")),
                 TRUE, TRUE, (IProgressDialog**)&mHost->mDialog);
         break;
     }
@@ -159,105 +135,10 @@ ECode CClient::EditorListener::OnEditorAction(
         AutoPtr<ICharSequence> text;
         v->GetText((ICharSequence**)&text);
         AutoPtr<IMessage> msg;
-        mHost->mBusHandler->ObtainMessage(BusHandler::PING, text, (IMessage**)&msg);
+        mHost->mBusHandler->ObtainMessage(BusHandler::SEND_RAW, text, (IMessage**)&msg);
         mHost->mBusHandler->SendMessage(msg, result);
     }
     *result = TRUE;
-    return NOERROR;
-}
-
-
-CAR_INTERFACE_IMPL(CClient::OnEditorActionListener, Object, IOnEditorActionListener)
-
-CClient::OnEditorActionListener::OnEditorActionListener(
-    /* [in] */ CClient* host)
-    : mHost(host)
-{}
-
-ECode CClient::OnEditorActionListener::OnEditorAction(
-    /* [in] */ ITextView* view,
-    /* [in] */ Int32 actionId,
-    /* [in] */ IKeyEvent* event,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res)
-    Int32 action;
-    if (actionId == IEditorInfo::IME_NULL
-        && (event->GetAction(&action), action == IKeyEvent::ACTION_UP)) {
-        AutoPtr<ICharSequence> text;
-        view->GetText((ICharSequence**)&text);
-        text->ToString(&mHost->mPassword);
-        mHost->mLatch->CountDown();
-        mHost->DismissDialog(DIALOG_GET_CREDENTIALS);
-    }
-    *res = TRUE;
-    return NOERROR;
-}
-
-CAR_INTERFACE_IMPL(CClient::SrpKeyXListener, Object, IAuthListener)
-
-CClient::SrpKeyXListener::SrpKeyXListener(
-    /* [in] */ CClient* host)
-    : mHost(host)
-{
-}
-
-String CClient::SrpKeyXListener::GetMechanisms()
-{
-    return  String("ALLJOYN_SRP_KEYX");
-}
-
-String CClient::SrpKeyXListener::GetKeyStoreFileName()
-{
-    AutoPtr<IFile> file;
-    mHost->GetFileStreamPath(String("alljoyn_keystore"), (IFile**)&file);
-    String path;
-    file->GetAbsolutePath(&path);
-    return path;
-}
-
-ECode CClient::SrpKeyXListener::Requested(
-    /* [in] */ const String& authMechanism,
-    /* [in] */ const String& peer,
-    /* [in] */ Int32 count,
-    /* [in] */ const String& userName,
-    /* [in] */ ArrayOf<IAuthRequest*>* requests,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res)
-    *res = FALSE;
-    if (count <= 3) {
-        /*
-         * We need to wait here for the user to enter the credentials before we can
-         * return.  The latch takes care of the synchronization for us.
-         */
-        mHost->mLatch = NULL;
-        CCountDownLatch::New(1, (ICountDownLatch**)&mHost->mLatch);
-        mHost->SendUiMessage(MESSAGE_GET_CREDENTIALS, NULL);
-        if (FAILED(mHost->mLatch->Await())) {
-            Logger::E(TAG, "Error waiting for password");
-            return NOERROR;
-        }
-        Int32 len = requests ? requests->GetLength() : 0;
-        for (Int32 i = 0; i < len; i++) {
-            IAuthRequest* request = (*requests)[i];
-            if (IPasswordRequest::Probe(request)) {
-                IPasswordRequest::Probe(request)->SetPassword(mHost->mPassword.GetChars());
-            }
-        }
-        *res =  TRUE;
-    }
-    assert(0);
-    return NOERROR;
-}
-
-ECode CClient::SrpKeyXListener::Completed(
-    /* [in] */ const String& authMechanism,
-    /* [in] */ const String& authPeer,
-    /* [in] */ Boolean authenticated)
-{
-    Logger::D(TAG, "Listener: authentication %s completed %d", authMechanism.string(), authenticated);
-    mHost->SendUiMessage(MESSAGE_AUTH_COMPLETE, CoreUtils::Convert(authenticated));
     return NOERROR;
 }
 
@@ -279,13 +160,28 @@ ECode CClient::BusHandler::InnerBusListener::FoundAdvertisedName(
      * It is possible to join multiple session however joining multiple
      * sessions is not shown in this sample.
      */
-    if (!mHost->mIsConnected) {
-        AutoPtr<IMessage> msg;
-        mHost->ObtainMessage(JOIN_SESSION, (IMessage**)&msg);
-        msg->SetObj(CoreUtils::Convert(name));
-        Boolean result;
-        mHost->SendMessage(msg, &result);
+    if (name.Equals(SERVICE_NAME)) {
+        mHost->mHaveServiceName = TRUE;
     }
+    if (name.Equals(RAW_SERVICE_NAME)) {
+        mHost->mHaveRawServiceName = TRUE;
+    }
+
+    if (mHost->mHaveServiceName && mHost->mHaveRawServiceName) {
+        /*
+         * This client will only join the first service that it sees advertising
+         * the indicated well-known names.  If the program is already a member of
+         * a session (i.e. connected to a service) we will not attempt to join
+         * another session.
+         * It is possible to join multiple session however joining multiple
+         * sessions is not shown in this sample.
+         */
+        if(!mHost->mIsConnected){
+            Boolean result;
+            mHost->SendEmptyMessage(BusHandler::JOIN_SESSION, &result);
+        }
+    }
+
     return NOERROR;
 }
 
@@ -311,9 +207,10 @@ ECode CClient::BusHandler::InnerSessionListener::SessionLost(
 const Int32 CClient::BusHandler::CONNECT = 1;
 const Int32 CClient::BusHandler::JOIN_SESSION = 2;
 const Int32 CClient::BusHandler::DISCONNECT = 3;
-const Int32 CClient::BusHandler::PING = 4;
-const String CClient::BusHandler::SERVICE_NAME("org.alljoyn.bus.samples.secure");
-const Int16 CClient::BusHandler::CONTACT_PORT = 42;
+const Int32 CClient::BusHandler::SEND_RAW = 4;
+const String CClient::BusHandler::SERVICE_NAME("org.alljoyn.bus.samples.raw");
+const Int16 CClient::BusHandler::CONTACT_PORT = 88;
+const String CClient::BusHandler::RAW_SERVICE_NAME("org.alljoyn.bus.samples.yadda888");
 
 ECode CClient::BusHandler::constructor(
     /* [in] */ ILooper* looper,
@@ -321,9 +218,13 @@ ECode CClient::BusHandler::constructor(
 {
     Handler::constructor(looper);
 
-    mSessionId = 0;
+    mHaveServiceName = FALSE;
+    mHaveRawServiceName = FALSE;
+    mMsgSessionId = -1;
+    mRawSessionId = -1;
     mIsConnected = FALSE;
     mIsStoppingDiscovery = FALSE;
+    mStreamUp = FALSE;
     mHost = host;
     return NOERROR;
 }
@@ -334,7 +235,7 @@ ECode CClient::BusHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     switch(what) {
-    /* Connect to a remote instance of an object implementing the SecureInterface. */
+    /* Connect to a remote instance of an object implementing the RawInterface. */
     case CONNECT: {
         AutoPtr<IContext> context;
         mHost->GetApplicationContext((IContext**)&context);
@@ -358,16 +259,13 @@ ECode CClient::BusHandler::HandleMessage(
         CBusAttachment::New(pName, RemoteMessage_Receive, (IBusAttachment**)&mBus);
 
         /*
-         * Register the AuthListener before calling connect() to ensure that everything is
-         * in place before any remote peers access the service.
+         * If using the debug version of the AllJoyn libraries, tell
+         * them to write debug output to the OS log so we can see it
+         * using adb logcat.  Turn on all of the debugging output from
+         * the Java language bindings (module ALLJOYN_JAVA).
          */
-        ECode ec = mBus->RegisterAuthListener(mHost->mAuthListener->GetMechanisms(),
-            mHost->mAuthListener, mHost->mAuthListener->GetKeyStoreFileName());
-        mHost->LogStatus(String("BusAttachment.registerAuthListener()"), ec);
-        if (ec != E_STATUS_OK) {
-            mHost->Finish();
-            return NOERROR;
-        }
+        mBus->UseOSLogging(TRUE);
+        mBus->SetDebugLevel(String("ALLJOYN_JAVA"), 7);
 
         /*
          * Create a bus listener class
@@ -376,7 +274,7 @@ ECode CClient::BusHandler::HandleMessage(
         mBus->RegisterBusListener(bl);
 
         /* To communicate with AllJoyn objects, we must connect the BusAttachment to the bus. */
-        ec = mBus->Connect();
+        ECode ec = mBus->Connect();
         mHost->LogStatus(String("BusAttachment.connect()"), ec);
         if ((ECode)E_STATUS_OK != ec) {
             mHost->Finish();
@@ -392,6 +290,15 @@ ECode CClient::BusHandler::HandleMessage(
         ec = mBus->FindAdvertisedName(SERVICE_NAME);
         String strMsg("");
         strMsg.AppendFormat("BusAttachement.findAdvertisedName(%s)", SERVICE_NAME.string());
+        mHost->LogStatus(strMsg, ec);
+        if ((ECode)E_STATUS_OK != ec) {
+            mHost->Finish();
+            return NOERROR;
+        }
+
+        ec = mBus->FindAdvertisedName(RAW_SERVICE_NAME);
+        strMsg = "";
+        strMsg.AppendFormat("BusAttachement.findAdvertisedName(%s)", RAW_SERVICE_NAME.string());
         mHost->LogStatus(strMsg, ec);
         if ((ECode)E_STATUS_OK != ec) {
             mHost->Finish();
@@ -422,43 +329,43 @@ ECode CClient::BusHandler::HandleMessage(
         AutoPtr<IMutableInteger32Value> sessionId;
         CMutableInteger32Value::New((IMutableInteger32Value**)&sessionId);
 
-        AutoPtr<IInterface> obj;
-        msg->GetObj((IInterface**)&obj);
         AutoPtr<ISessionListener> sl = new InnerSessionListener(this);
-        ECode ec = mBus->JoinSession(CoreUtils::Unbox(ICharSequence::Probe(obj)),
+        ECode ec = mBus->JoinSession(SERVICE_NAME,
                 contactPort, sessionId, sessionOpts, sl);
         mHost->LogStatus(String("BusAttachment.joinSession()"), ec);
 
-        if (ec == (ECode)E_STATUS_OK) {
-            /*
-             * To communicate with an AllJoyn object, we create a ProxyBusObject.
-             * A ProxyBusObject is composed of a name, path, sessionID and interfaces.
-             *
-             * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
-             * "/sample", uses sessionID of CONTACT_PORT, and implements the SecureInterface.
-             */
-            AutoPtr<IClassLoader> loader;
-            mHost->GetClassLoader((IClassLoader**)&loader);
-            AutoPtr<IInterfaceInfo> itfcInfo;
-            loader->LoadInterface(String("Elastos.DevSamples.DFSecureDemo.SrpClient.ISecureInterface"),
-                    (IInterfaceInfo**)&itfcInfo);
-            AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(1);
-            busInterfaces->Set(0, itfcInfo);
-            Int32 value;
-            sessionId->GetValue(&value);
-            mProxyObj = NULL;
-            mBus->GetProxyBusObject(SERVICE_NAME, String("/SecureService"),
-                    value, busInterfaces, (IProxyBusObject**)&mProxyObj);
-
-            /* We make calls to the methods of the AllJoyn object through one of its interfaces. */
-            mSecureInterface = NULL;
-            mProxyObj->GetInterface(itfcInfo, (IInterface**)&mSecureInterface);
-
-            mSessionId = value;
-            mIsConnected = TRUE;
-            Boolean result;
-            mHost->mHandler->SendEmptyMessage(MESSAGE_STOP_PROGRESS_DIALOG, &result);
+        if (ec != (ECode)E_STATUS_OK) {
+            break;
         }
+
+        /*
+         * To communicate with an AllJoyn object, we create a ProxyBusObject.
+         * A ProxyBusObject is composed of a name, path, sessionID and interfaces.
+         *
+         * This ProxyBusObject is located at the well-known SERVICE_NAME, under path
+         * "/sample", uses sessionID of CONTACT_PORT, and implements the RawInterface.
+         */
+        AutoPtr<IClassLoader> loader;
+        mHost->GetClassLoader((IClassLoader**)&loader);
+        AutoPtr<IInterfaceInfo> itfcInfo;
+        loader->LoadInterface(String("Elastos.DevSamples.DFRawDemo.RawClient.IRawInterface"),
+                (IInterfaceInfo**)&itfcInfo);
+        AutoPtr< ArrayOf<IInterfaceInfo*> > busInterfaces = ArrayOf<IInterfaceInfo*>::Alloc(1);
+        busInterfaces->Set(0, itfcInfo);
+        Int32 value;
+        sessionId->GetValue(&value);
+        mProxyObj = NULL;
+        mBus->GetProxyBusObject(SERVICE_NAME, String("/RawService"),
+                value, busInterfaces, (IProxyBusObject**)&mProxyObj);
+
+        /* We make calls to the methods of the AllJoyn object through one of its interfaces. */
+        mRawInterface = NULL;
+        mProxyObj->GetInterface(itfcInfo, (IInterface**)&mRawInterface);
+
+        mMsgSessionId = value;
+        mIsConnected = TRUE;
+        Boolean result;
+        mHost->mHandler->SendEmptyMessage(MESSAGE_STOP_PROGRESS_DIALOG, &result);
         break;
     }
 
@@ -466,10 +373,16 @@ ECode CClient::BusHandler::HandleMessage(
     case DISCONNECT: {
         mIsStoppingDiscovery = TRUE;
         if (mIsConnected) {
-            ECode ec = mBus->LeaveSession(mSessionId);
-            mHost->LogStatus(String("BusAttachment.leaveSession()"), ec);
+            ECode ec = mBus->LeaveSession(mMsgSessionId);
+            mHost->LogStatus(String("BusAttachment.leaveSession(): message-based session"), ec);
+
+            ec = mBus->LeaveSession(mRawSessionId);
+            mHost->LogStatus(String("BusAttachment.leaveSession(): raw session"), ec);
         }
         mBus->Disconnect();
+        if (mStreamUp == true) {
+            ICloseable::Probe(mOutputStream)->Close();
+        }
         AutoPtr<ILooper> looper;
         GetLooper((ILooper**)&looper);
         looper->Quit();
@@ -477,29 +390,123 @@ ECode CClient::BusHandler::HandleMessage(
     }
 
     /*
-     * Call the service's Cat method through the ProxyBusObject.
+     * We have a string to send to the server via a raw session
+     * socket.  If this is the first string we've ever sent on this
+     * session, we need to get a so-called raw session started in the
+     * service.  We are eventually going to talk to the raw session
+     * over a socket FileDescriptor, but don't confuse this "socket
+     * used to communicate over a raw session" with the idea of a
+     * BSD raw socket (which allow you to provide your own IP or
+     * Ethernet headers).  Raw sessions only means that the data
+     * sent over the session will be sent using the underlying socket
+     * fiel descriptor and will not be encapsulated in AllJoyn
+     * messages).
      *
-     * This will also print the String that was sent to the service and the String that was
-     * received from the service to the user interface.
+     * Once we have joined the raw session, we can retrieve the
+     * underlying session's OS socket file descriptor and build a Java
+     * FileDescriptor using a private constructor found via reflection.
+     * We then create a Java output stream using that FileDescriptor.
+     *
+     * Once/If we have the raw session all set up, and have a Java IO
+     * stream ready, we simply send the bytes of the string to the
+     * service directly using the Java stream.  This completely
+     * bypasses AllJoyn which was used for discovery and connection
+     * establishment.
      */
-    case PING: {
-    // try {
-        if (mSecureInterface != NULL) {
+    case SEND_RAW: {
+        if (!mIsConnected || !mStreamUp) {
+            // try {
+                /*
+                 * In order get a raw session to join, we need to get an
+                 * ephemeral contact port.  As a part of the RawInterface,
+                 * we have a method used to get that port.  Note that
+                 * errors are returned through Java exceptions, and so we
+                 * wrap this code in a try catch block.
+                 */
+                Logger::I(TAG, "RequestRawSession()");
+                Int16 contactPort;
+                mRawInterface->RequestRawSession(&contactPort);
+                Logger::I(TAG, "RequestRawSession() returns %d", contactPort);
+
+                /*
+                 * Now join the raw session.  Note that we are asking
+                 * for TRAFFIC_RAW_RELIABLE.  Once this happens, the
+                 * session is ready for raw traffic that will not be
+                 * encapsulated in AllJoyn messages.
+                 */
+                AutoPtr<ISessionOpts> sessionOpts;
+                CSessionOpts::New((ISessionOpts**)&sessionOpts);
+                sessionOpts->SetTraffic(ISessionOpts::TRAFFIC_RAW_RELIABLE);
+                AutoPtr<IMutableInteger32Value> sessionId;
+                CMutableInteger32Value::New((IMutableInteger32Value**)&sessionId);
+                Logger::I(TAG, "joinSession()");
+                AutoPtr<ISessionListener> sl = new SessionListener();
+                ECode ec = mBus->JoinSession(RAW_SERVICE_NAME, contactPort, sessionId, sessionOpts, sl);
+                mHost->LogStatus(String("BusAttachment.joinSession()"), ec);
+                if (ec != (ECode)E_STATUS_OK) {
+                    break;
+                }
+                sessionId->GetValue(&mRawSessionId);
+
+                /*
+                 * The session is in raw mode, but we need to get a
+                 * socket file descriptor back from AllJoyn that
+                 * represents the established connection.  We are then
+                 * free to do whatever we want with the sock.
+                 */
+                Logger::I(TAG, "getSessionFd()");
+                AutoPtr<IMutableInteger32Value> sockFd;
+                CMutableInteger32Value::New((IMutableInteger32Value**)&sockFd);
+                ec = mBus->GetSessionFd(mRawSessionId, sockFd);
+                mHost->LogStatus(String("BusAttachment.getSessionFd()"), ec);
+                if (ec != (ECode)E_STATUS_OK) {
+                    break;
+                }
+
+                /*
+                 * We have a socked FD, but now we need a Java file
+                 * descriptor.  There is no appropriate constructor,
+                 * public or not in the Dalvik FileDescriptor, so
+                 * we new up a file descriptor and set its internal
+                 * descriptor field using reflection.
+                 */
+                AutoPtr<IFileDescriptor> fd;
+                CFileDescriptor::New((IFileDescriptor**)&fd);
+                Int32 value;
+                sockFd->GetValue(&value);
+                fd->SetDescriptor(value);
+
+                /*
+                 * Now that we have a FileDescriptor with an AllJoyn
+                 * raw session socket FD in it, we can use it like
+                 * any other "normal" FileDescriptor.
+                 */
+                if (SUCCEEDED(CFileOutputStream::New(fd, (IOutputStream**)&mOutputStream)))
+                    mStreamUp = TRUE;
+            // } catch (Throwable ex) {
+            //     Logger::I(TAG, String.format("Exception bringing up raw stream: %s", ex.toString()));
+            // }
+        }
+
+        /*
+         * If we've sucessfully created an output stream from the raw
+         * session connection established by AllJoyn, we write the
+         * byte string (from the user) to the TCP stream that now
+         * underlies it all.
+         */
+        if (mStreamUp == TRUE) {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            String str = CoreUtils::Unbox(ICharSequence::Probe(obj));
-            mHost->SendUiMessage(MESSAGE_PING, obj);
-            String reply;
-            mSecureInterface->Ping(str, &reply);
-            mHost->SendUiMessage(MESSAGE_PING_REPLY, CoreUtils::Convert(reply));
+            String string = CoreUtils::Unbox(ICharSequence::Probe(obj)) + "\n";
+            // try {
+                Logger::I(TAG, "Writing %s to output stream", string.string());
+                mOutputStream->Write(string.GetBytes());
+                Logger::I(TAG, "Flushing stream");
+                IFlushable::Probe(mOutputStream)->Flush();
+            // } catch (IOException ex) {
+            //     Logger::I(TAG, "Exception writing and flushing the string");
+            // }
         }
-    // catch (ErrorReplyBusException erbe) {
-    //     logException("SecureInterface.Ping() " + erbe.getErrorName() + ": " +
-    //        erbe.getErrorMessage() + " status: " + erbe.getErrorStatus().getErrorCode(), erbe);
-    // }
-    // catch (BusException ex) {
-    //     logException("SecureInterface.Ping()", ex);
-    // }
         break;
     }
     default:
@@ -523,12 +530,10 @@ ECode CClient::BusHandler::ToString(
 const Int32 CClient::DIALOG_GET_CREDENTIALS;
 const Int32 CClient::MESSAGE_PING;
 const Int32 CClient::MESSAGE_PING_REPLY;
-const Int32 CClient::MESSAGE_GET_CREDENTIALS;
-const Int32 CClient::MESSAGE_AUTH_COMPLETE;
 const Int32 CClient::MESSAGE_POST_TOAST;
 const Int32 CClient::MESSAGE_START_PROGRESS_DIALOG;
 const Int32 CClient::MESSAGE_STOP_PROGRESS_DIALOG;
-const String CClient::TAG("SecureSrpClient");
+const String CClient::TAG("RawRawClient");
 
 ECode CClient::constructor()
 {
@@ -563,7 +568,6 @@ ECode CClient::OnCreate(
     mBusHandler = new BusHandler();
     mBusHandler->constructor(looper, this);
 
-    mAuthListener = new SrpKeyXListener(this);
     Boolean result;
     mBusHandler->SendEmptyMessage(BusHandler::CONNECT, &result);
     mHandler->SendEmptyMessage(MESSAGE_START_PROGRESS_DIALOG, &result);
@@ -612,45 +616,6 @@ ECode CClient::OnDestroy()
     return NOERROR;
 }
 
-AutoPtr<IDialog> CClient::OnCreateDialog(
-    /* [in] */ Int32 id)
-{
-    switch (id) {
-    case DIALOG_GET_CREDENTIALS: {
-        AutoPtr<ILayoutInflater> factory;
-        LayoutInflater::From(this, (ILayoutInflater**)&factory);
-        AutoPtr<IView> view;
-        factory->Inflate(R::layout::alert_dialog, NULL, (IView**)&view);
-        AutoPtr<IView> editText;
-        view->FindViewById(R::id::PasswordEditText, (IView**)&editText);;
-        AutoPtr<OnEditorActionListener> listener = new OnEditorActionListener(this);
-        ITextView::Probe(editText)->SetOnEditorActionListener(listener);
-
-        AutoPtr<IAlertDialog> dialog;
-        AutoPtr<IAlertDialogBuilder> builder;
-        CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
-        builder->SetIcon(Elastos::Droid::R::drawable::ic_dialog_alert);
-        builder->SetTitle(R::string::alert_dialog_password);
-        builder->SetCancelable(FALSE);
-        builder->SetView(view);
-        builder->Create((IAlertDialog**)&dialog);
-        return IDialog::Probe(dialog);
-    }
-    default:
-        return NULL;
-    }
-}
-
-void CClient::SendUiMessage(
-    /* [in] */ Int32 what,
-    /* [in] */ IInterface* obj)
-{
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(what, obj, (IMessage**)&msg);
-    Boolean result;
-    mHandler->SendMessage(msg, &result);
-}
-
 void CClient::LogStatus(
     /* [in] */ const String& msg,
     /* [in] */ ECode status)
@@ -669,19 +634,6 @@ void CClient::LogStatus(
     }
 }
 
-void CClient::LogException(
-    /* [in] */ const String& msg,
-    /* [in] */ ECode ex)
-{
-    String log("");
-    log.AppendFormat("%s: 0x%08x", msg.string(), ex);
-    AutoPtr<IMessage> toastMsg;
-    mHandler->ObtainMessage(MESSAGE_POST_TOAST, CoreUtils::Convert(log), (IMessage**)&toastMsg);
-    Boolean result;
-    mHandler->SendMessage(toastMsg, &result);
-    Logger::E(TAG, log.string());
-}
-
 ECode CClient::GetClassID(
     /* [out] */ ClassID* clsid)
 {
@@ -690,7 +642,7 @@ ECode CClient::GetClassID(
     return NOERROR;
 }
 
-} // namespace SrpClient
-} // namespace DFSecureDemo
+} // namespace RawClient
+} // namespace DFRawDemo
 } // namespace DevSamples
 } // namespace Elastos

@@ -1,12 +1,32 @@
 
 #include "org/alljoyn/bus/MsgArg.h"
+#include "org/alljoyn/bus/CVariant.h"
 #include "org/alljoyn/bus/Signature.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/MsgArg.h>
 #include <alljoyn/MsgArgUtils.h>
 #include "_Org.Alljoyn.Bus.h"
+#include "Elastos.CoreLibrary.Core.h"
 
+using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_IArrayOf;
+using Elastos::Core::EIID_IByte;
+using Elastos::Core::EIID_IBoolean;
+using Elastos::Core::EIID_IInteger16;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_IInteger64;
+using Elastos::Core::EIID_IDouble;
+using Elastos::Core::EIID_ICharSequence;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
+using Elastos::Core::IBoolean;
+using Elastos::Core::IInteger16;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::IDouble;
+using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
 
 namespace Org {
@@ -136,7 +156,7 @@ ECode MsgArg::CarValue::SetToArgumentList(
             case CarDataType_Enum:
                 args->SetInputArgumentOfEnum(index, mEnumValue);
                 break;
-            case CarDataType_ArrayOf: {
+            case CarDataType_ArrayOf:
                 args->SetInputArgumentOfCarArray(index, mCarQuintet);
                 break;
             case CarDataType_Interface:
@@ -144,7 +164,6 @@ ECode MsgArg::CarValue::SetToArgumentList(
                 break;
             default:
                 Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
-            }
         }
     }
     else {
@@ -173,7 +192,7 @@ ECode MsgArg::CarValue::SetToArgumentList(
             case CarDataType_Enum:
                 args->SetOutputArgumentOfEnumPtr(index, &mEnumValue);
                 break;
-            case CarDataType_ArrayOf: {
+            case CarDataType_ArrayOf:
                 args->SetOutputArgumentOfCarArrayPtrPtr(index, &mCarQuintet);
                 break;
             case CarDataType_Interface:
@@ -181,7 +200,6 @@ ECode MsgArg::CarValue::SetToArgumentList(
                 break;
             default:
                 Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
-            }
         }
     }
     return NOERROR;
@@ -217,7 +235,7 @@ ECode MsgArg::CarValue::GetFromArgumentList(
             case CarDataType_Enum:
                 args->GetInputArgumentOfEnum(index, &mEnumValue);
                 break;
-            case CarDataType_ArrayOf: {
+            case CarDataType_ArrayOf:
                 args->GetInputArgumentOfCarArray(index, &mCarQuintet);
                 break;
             case CarDataType_Interface:
@@ -225,7 +243,6 @@ ECode MsgArg::CarValue::GetFromArgumentList(
                 break;
             default:
                 Logger::E(TAG, "CarValue::GetFromArgumentList unimplemented index = %d, type = %d", index, mType);
-            }
         }
     }
 
@@ -262,7 +279,7 @@ ECode MsgArg::CarValue::AssignArgumentListOutput(
             case CarDataType_Enum:
                 args->AssignOutputArgumentOfEnumPtr(index, mEnumValue);
                 break;
-            case CarDataType_ArrayOf: {
+            case CarDataType_ArrayOf:
                 args->AssignOutputArgumentOfCarArrayPtrPtr(index, mCarQuintet);
                 break;
             case CarDataType_Interface:
@@ -270,11 +287,210 @@ ECode MsgArg::CarValue::AssignArgumentListOutput(
                 break;
             default:
                 Logger::E(TAG, "CarValue::AssignArgumentListOutput unimplemented index = %d, type = %d", index, mType);
-            }
         }
     }
 
     return NOERROR;
+}
+
+AutoPtr<IInterface> MsgArg::CarValue::Convert()
+{
+    AutoPtr<IInterface> ret;
+    switch (mType) {
+        case CarDataType_Int16:
+            ret = CoreUtils::Convert(mInt16Value);
+            break;
+        case CarDataType_Int32:
+            ret = CoreUtils::Convert(mInt32Value);
+            break;
+        case CarDataType_Int64:
+            ret = CoreUtils::Convert(mInt64Value);
+            break;
+        case CarDataType_Byte:
+            ret = CoreUtils::ConvertByte(mByteValue);
+            break;
+        case CarDataType_Double:
+            ret = CoreUtils::Convert(mDoubleValue);
+            break;
+        case CarDataType_String:
+            ret = CoreUtils::Convert(mStringValue);
+            break;
+        case CarDataType_Boolean:
+            ret = CoreUtils::Convert(mBooleanValue);
+            break;
+        case CarDataType_Enum:
+            ret = CoreUtils::Convert(mEnumValue);
+            break;
+        case CarDataType_ArrayOf: {
+            switch (mElementType) {
+                case CarDataType_Int16:
+                    ret = CoreUtils::Convert((ArrayOf<Int16>*)mCarQuintet);
+                    break;
+                case CarDataType_Int32:
+                    ret = CoreUtils::Convert((ArrayOf<Int32>*)mCarQuintet);
+                    break;
+                case CarDataType_Int64:
+                    ret = CoreUtils::Convert((ArrayOf<Int64>*)mCarQuintet);
+                    break;
+                case CarDataType_Byte:
+                    ret = CoreUtils::ConvertByteArray((ArrayOf<Byte>*)mCarQuintet);
+                    break;
+                case CarDataType_Double:
+                    ret = CoreUtils::Convert((ArrayOf<Double>*)mCarQuintet);
+                    break;
+                case CarDataType_Boolean:
+                    ret = CoreUtils::Convert((ArrayOf<Boolean>*)mCarQuintet);
+                    break;
+                case CarDataType_Enum:
+                    ret = CoreUtils::Convert((ArrayOf<Int32>*)mCarQuintet);
+                    break;
+                case CarDataType_String:
+                    ret = CoreUtils::Convert((ArrayOf<String>*)mCarQuintet);
+                    break;
+                case CarDataType_Interface:
+                    ret = CoreUtils::Convert((ArrayOf<IInterface*>*)mCarQuintet);
+                    break;
+                default:
+                    Logger::E(TAG, "CarValue::Convert unimplemented mElementType = %d", mElementType);
+            }
+            break;
+        }
+        case CarDataType_Interface:
+            ret = mObjectValue;
+            break;
+        default:
+            Logger::E(TAG, "CarValue::Convert unimplemented type = %d", mType);
+    }
+
+    return ret;
+}
+
+AutoPtr<MsgArg::CarValue> MsgArg::CarValue::Convert(
+    /* [in] */ IInterface* object)
+{
+    AutoPtr<CarValue> value;
+
+    if (IByte::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_Byte);
+        IByte::Probe(object)->GetValue(&value->mByteValue);
+    }
+    else if (IBoolean::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_Boolean);
+        IBoolean::Probe(object)->GetValue(&value->mBooleanValue);
+    }
+    else if (IInteger16::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_Int16);
+        IInteger16::Probe(object)->GetValue(&value->mInt16Value);
+    }
+    else if (IInteger32::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_Int32);
+        IInteger32::Probe(object)->GetValue(&value->mInt32Value);
+    }
+    else if (IInteger64::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_Int64);
+        IInteger64::Probe(object)->GetValue(&value->mInt64Value);
+    }
+    else if (IDouble::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_Double);
+        IDouble::Probe(object)->GetValue(&value->mDoubleValue);
+    }
+    else if (ICharSequence::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_String);
+        ICharSequence::Probe(object)->ToString(&value->mStringValue);
+    }
+    else if (IArrayOf::Probe(object) != NULL) {
+        value = new CarValue(CarDataType_ArrayOf);
+        IArrayOf* iarray = IArrayOf::Probe(object);
+        Int32 size;
+        iarray->GetLength(&size);
+        InterfaceID id;
+        iarray->GetTypeId(&id);
+        if (id == EIID_IByte) {
+            AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                IByte::Probe(item)->GetValue(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_Byte;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else if (id == EIID_IBoolean) {
+            AutoPtr<ArrayOf<Boolean> > array = ArrayOf<Boolean>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                IBoolean::Probe(item)->GetValue(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_Boolean;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else if (id == EIID_IInteger16) {
+            AutoPtr<ArrayOf<Int16> > array = ArrayOf<Int16>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                IInteger16::Probe(item)->GetValue(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_Int16;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else if (id == EIID_IInteger32) {
+            AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                IInteger32::Probe(item)->GetValue(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_Int32;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else if (id == EIID_IInteger64) {
+            AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                IInteger64::Probe(item)->GetValue(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_Int64;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else if (id == EIID_IDouble) {
+            AutoPtr<ArrayOf<Double> > array = ArrayOf<Double>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                IDouble::Probe(item)->GetValue(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_Double;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else if (id == EIID_ICharSequence) {
+            AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> item;
+                iarray->Get(i, (IInterface**)&item);
+                ICharSequence::Probe(item)->ToString(&(*array)[i]);
+            }
+            value->mElementType = CarDataType_String;
+            value->mCarQuintet = array;
+            array->AddRef();
+        }
+        else {
+            assert(0);
+        }
+    }
+    else {
+        Logger::E(TAG, "CarValue::Convert unimplemented object %s", TO_CSTR(object));
+    }
+
+    return value;
 }
 
 const Int32 MsgArg::ALLJOYN_INVALID          =  0;
@@ -1193,9 +1409,14 @@ ECode MsgArg::Unmarshal(
             }
             break;
         case ALLJOYN_VARIANT:
-            // Variant variant = new Variant();
-            // variant.setMsgArg(msgArg);
-            // return variant;
+            {
+                AutoPtr<CVariant> variant;
+                CVariant::NewByFriend((CVariant**)&variant);
+                variant->SetMsgArg(msgArg);
+                *(PInterface*)object = (IVariant*)variant;
+                variant->AddRef();
+            }
+            break;
         default:
             Logger::E(TAG, "unimplemented '%s'", GetSignature(msgArg).string());
             assert(0);
@@ -1427,29 +1648,29 @@ ECode MsgArg::Marshal(
                 // }
                 switch (elementTypeId) {
                 case ALLJOYN_BYTE:
-                    Set(msgArg, sig, (ArrayOf<Byte>*)arg);
+                    Set(msgArg, sig, *(ArrayOf<Byte>**)arg);
                     break;
                 case ALLJOYN_BOOLEAN:
                     // if (arg instanceof ArrayOf<Boolean>*){
-                        Set(msgArg, sig, (ArrayOf<Boolean>*)arg);
+                        Set(msgArg, sig, *(ArrayOf<Boolean>**)arg);
                     // } else {
-                    //     Set(msgArg, sig, (ArrayOf<Boolean>*)arg);
+                    //     Set(msgArg, sig, *(ArrayOf<Boolean>**)arg);
                     // }
                     break;
                 case ALLJOYN_INT16:
                 case ALLJOYN_UINT16:
-                    Set(msgArg, sig, (ArrayOf<Int16>*)arg);
+                    Set(msgArg, sig, *(ArrayOf<Int16>**)arg);
                     break;
                 case ALLJOYN_INT32:
                 case ALLJOYN_UINT32:
-                    Set(msgArg, sig, (ArrayOf<Int32>*)arg);
+                    Set(msgArg, sig, *(ArrayOf<Int32>**)arg);
                     break;
                 case ALLJOYN_INT64:
                 case ALLJOYN_UINT64:
-                    Set(msgArg, sig, (ArrayOf<Int64>*)arg);
+                    Set(msgArg, sig, *(ArrayOf<Int64>**)arg);
                     break;
                 case ALLJOYN_DOUBLE:
-                    Set(msgArg, sig, (ArrayOf<Double>*)arg);
+                    Set(msgArg, sig, *(ArrayOf<Double>**)arg);
                     break;
                 case ALLJOYN_STRING:
                     {
@@ -1489,14 +1710,21 @@ ECode MsgArg::Marshal(
             // }
             // break;
         case ALLJOYN_VARIANT:
-            // Variant variant = (Variant) arg;
-            // if (variant.getMsgArg() != 0) {
-            //     SetVariant(msgArg, sig, variant.getMsgArg());
-            // } else {
-            //     SetVariant(msgArg);
-            //     marshal(getVal(msgArg), variant.getSignature(), variant.getValue());
-            // }
-            // break;
+            {
+                CVariant* variant = (CVariant*)IVariant::Probe(*(PInterface*)arg);
+                assert(variant);
+                if (variant->GetMsgArg() != 0) {
+                    SetVariant(msgArg, sig, variant->GetMsgArg());
+                }
+                else {
+                    SetVariant(msgArg);
+                    String signature;
+                    variant->GetSignature(&signature);
+                    AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
+                    Marshal(GetVal(msgArg), signature, value->ToValuePtr());
+                }
+            }
+            break;
         case ALLJOYN_DICT_ENTRY_OPEN:
             // Map.Entry<?, ?> entry = (Map.Entry<?, ?>) arg;
             // String[] sigs = Signature.split(sig.substring(1, sig.length() - 1));

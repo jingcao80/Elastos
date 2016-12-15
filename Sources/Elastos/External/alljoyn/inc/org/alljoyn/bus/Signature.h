@@ -40,6 +40,10 @@ public:
         /* [in] */ const String& signature,
         /* [in] */ Boolean input);
 
+    static CARAPI_(String) TypeSig(
+        /* [in] */ IInterface* obj,
+        /* [in] */ const String& signature);
+
 private:
     Signature();
 };
