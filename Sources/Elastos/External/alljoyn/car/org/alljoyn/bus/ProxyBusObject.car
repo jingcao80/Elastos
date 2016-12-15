@@ -1,11 +1,13 @@
 
 module
 {
+    interface Org.Alljoyn.Bus.IPropertiesChangedListener;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
-    [local]
+    [local, deprecated]
     interface IProxyBusObject {
         /** Enable property caching for this proxy bus object. */
         EnablePropertyCaching();
@@ -60,7 +62,7 @@ module
          * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
          */
         GetInterface(
-            [in] IInterfaceInfo* intfInfo,
+            [in] InterfaceID iid,
             [out] IInterface** intf);
 
         /**
@@ -140,8 +142,10 @@ module
          *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
          *      - #ER_BUS_NO_SUCH_PROPERTY if the property does not exist
          */
-        // public native Status registerPropertiesChangedListener(String iface, String[] properties,
-        //                                                       PropertiesChangedListener listener);
+        RegisterPropertiesChangedListener(
+            [in] String iface, 
+            [in] ArrayOf<String>* properties,
+            [in] IPropertiesChangedListener* listener);
 
         /**
          * Function to unregister a handler for property change events.
@@ -152,8 +156,9 @@ module
          *      - #ER_OK if the handler was registered successfully
          *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
          */
-        // public native Status unregisterPropertiesChangedListener(String iface,
-        //                                                         PropertiesChangedListener listener);
+        UnregisterPropertiesChangedListener(
+            [in] String iface,
+            [in] IPropertiesChangedListener* listener);
     }
 
     } // namespace Bus

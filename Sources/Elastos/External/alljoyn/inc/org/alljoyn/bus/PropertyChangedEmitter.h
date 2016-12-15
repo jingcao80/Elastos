@@ -47,8 +47,8 @@ public:
      * @throws BusException indicating failure to send the PropertyChanged signal
      */
     CARAPI PropertyChanged(
-        /* [in] */ String ifaceName,
-        /* [in] */ String propertyName,
+        /* [in] */ const String& ifaceName,
+        /* [in] */ const String& propertyName,
         /* [in] */ IVariant* newValue);
 
     /**

@@ -1548,6 +1548,7 @@ private:
     friend class NativeObserver;
     friend class Observer;
     friend class ProxyBusObject;
+    friend class CAboutObj;
 
     AutoPtr<ISet> mRegisteredAboutListeners;
 

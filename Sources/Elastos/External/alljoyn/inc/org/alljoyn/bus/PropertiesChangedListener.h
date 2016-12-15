@@ -75,7 +75,7 @@ public:
      * @param changed       Property values that changed as an array of dictionary entries, signature "a{sv}".
      * @param invalidated   Properties whose values have been invalidated, signature "as".
      */
-    virtual CARAPI PropertyChanged(
+    virtual CARAPI PropertiesChanged(
         /* [in] */ IProxyBusObject* pObj,
         /* [in] */ const String& ifaceName,
         /* [in] */ IMap* changed,
@@ -89,6 +89,7 @@ private:
     void Destroy();
 
 private:
+    friend class NativeProxyBusObject;
 
     /**
      * The opaque pointer to the underlying C++ object which is actually tied

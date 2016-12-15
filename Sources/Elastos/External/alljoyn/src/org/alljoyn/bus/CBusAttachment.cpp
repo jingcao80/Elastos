@@ -261,9 +261,10 @@ ECode CBusAttachment::constructor(
     GetModuleClassLoader()->LoadInterface(String("Org.Alljoyn.Bus.Ifaces.IDBusProxyObj"), (IInterfaceInfo**)&dbusProxyObj);
     busInterfaces->Set(0, dbusProxyObj);
     mDbusbo = new ProxyBusObject();
-    mDbusbo->constructor(this, String("org.freedesktop.DBus"), String("/org/freedesktop/DBus"), SESSION_ID_ANY,
-            busInterfaces);
-    mDbusbo->GetInterface(dbusProxyObj, (IInterface**)&mDbus);
+    mDbusbo->constructor(this,
+        String("org.freedesktop.DBus"),
+        String("/org/freedesktop/DBus"), SESSION_ID_ANY, busInterfaces);
+    mDbusbo->GetInterface(EIID_IDBusProxyObj, (IInterface**)&mDbus);
     AutoPtr<IExecutors> executors;
     CExecutors::AcquireSingleton((IExecutors**)&executors);
     executors->NewSingleThreadExecutor((IExecutorService**)&mExecutor);

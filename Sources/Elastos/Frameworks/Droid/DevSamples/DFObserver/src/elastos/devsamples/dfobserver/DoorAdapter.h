@@ -8,7 +8,6 @@
 #include "elastos/droid/widget/BaseAdapter.h"
 #include <elastos/utility/etl/List.h>
 #include "elastos/core/Runnable.h"
-#include "DoorAdapterItem.h"
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Widget::ICheckBox;
@@ -46,13 +45,13 @@ private:
     public:
         UpdateUIRunnable(
             /* [in] */ DoorAdapter* host,
-            /* [in] */ DoorAdapterItem* door,
+            /* [in] */ IDoorAdapterItem* door,
             /* [in] */ Boolean add);
 
         CARAPI Run();
     private:
         DoorAdapter* mHost;
-        AutoPtr<DoorAdapterItem> mDoor;
+        AutoPtr<IDoorAdapterItem> mDoor;
         Boolean mIsAdd;
     };
 
@@ -91,15 +90,15 @@ public:
 
     /** Add an extra door to the adapter and update the UI accordingly. */
     CARAPI Add(
-        /* [in] */ DoorAdapterItem* door);
+        /* [in] */ IDoorAdapterItem* door);
 
     /** Removes a door from the adapter and update the UI accordingly. */
     CARAPI Remove(
-        /* [in] */ DoorAdapterItem* door);
+        /* [in] */ IDoorAdapterItem* door);
 
     /** Updates the UI. Make sure the latest changes are shown on the UI. */
     CARAPI UpdateUI(
-        /* [in] */ DoorAdapterItem* door,
+        /* [in] */ IDoorAdapterItem* door,
         /* [in] */ Boolean add);
 
     /** Show a notification in the UI upon receiving an signal from a door. */
@@ -108,7 +107,7 @@ public:
 
     /** update UI after receiving an event from a door. */
     CARAPI PropertyUpdate(
-        /* [in] */ DoorAdapterItem* item);
+        /* [in] */ IDoorAdapterItem* item);
 
     /** Sends notification of events from local provided doors. */
     CARAPI SendDoorEvent(
@@ -120,7 +119,7 @@ private:
      * The list of door info objects. A Vector is used to synchronize access on
      * it between threads.
      */
-    List<AutoPtr<DoorAdapterItem> > mList;
+    List<AutoPtr<IDoorAdapterItem> > mList;
     /** The handler for sending messages to the UI thread. */
     AutoPtr<IHandler> mHandler;
 };

@@ -116,6 +116,9 @@ public:
         /* [in] */ IInterface* obj,
         /* [out] */ Boolean* res);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 public:
     /** Gets the wrapped native object. */
     CARAPI_(Int64) GetMsgArg();

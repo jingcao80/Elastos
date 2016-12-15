@@ -21,6 +21,7 @@ INCLUDES += $(PREBUILD_INC)/gnu-libstdc++/4.8/include/backward
 INCLUDES += $(PREBUILD_INC)/gnu-libstdc++/4.8/libs/armeabi-v7a/include
 
 SOURCES = Org.Alljoyn.Bus.car
+SOURCES += CAboutObj.cpp
 SOURCES += AuthListener.cpp
 SOURCES += BusListener.cpp
 SOURCES += CBusAttachment.cpp

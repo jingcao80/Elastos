@@ -43,6 +43,10 @@ module
     merge("../../../../car/org/alljoyn/bus/ifaces/Peer.car");
     merge("../../../../car/org/alljoyn/bus/ifaces/Properties.car");
 
+
+    using interface Elastos.IO.ICloseable;
+
+    
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
@@ -160,6 +164,50 @@ module
             [in] IBusObject* source);
 
         interface ISignalEmitter;
+    }
+
+    class CPropertyChangedEmitter {
+        constructor(
+            [in] IBusObject* source,
+            [in] Int32 sessionId,
+            [in] GlobalBroadcast globalBroadcast);
+
+        constructor(
+            [in] IBusObject* source,
+            [in] Int32 sessionId);
+
+        constructor(
+            [in] IBusObject* source);
+
+        interface IPropertyChangedEmitter;
+        interface ISignalEmitter;
+    }
+
+    [local, deprecated]
+    class CObserver {
+        constructor(
+            [in] IBusAttachment* bus,
+            [in] ArrayOf<IInterfaceInfo*>* mandatoryInterfaces,
+            [in] ArrayOf<IInterfaceInfo*>* optionalInterfaces);
+
+        constructor(
+            [in] IBusAttachment* bus,
+            [in] ArrayOf<IInterfaceInfo*>* mandatoryInterfaces);
+
+        interface IObserver;
+        interface ICloseable;
+    }
+
+    [local]
+    class CAboutObj {
+        constructor(
+            [in] IBusAttachment* bus);
+
+        constructor(
+            [in] IBusAttachment* bus,
+            [in] Boolean isAboutObjectAnnounced);
+
+        interface IAboutObj;
     }
 
     } // namespace Bus

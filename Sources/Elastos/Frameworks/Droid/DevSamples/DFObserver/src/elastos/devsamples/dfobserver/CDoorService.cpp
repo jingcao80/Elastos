@@ -1,18 +1,26 @@
 
 #include "CDoorService.h"
 #include <elastos/core/Thread.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Org::Alljoyn::Bus::IVariant;
+using Org::Alljoyn::Bus::CVariant;
 using Org::Alljoyn::Bus::EIID_IBusObject;
 using Org::Alljoyn::Bus::GlobalBroadcast_Off;
 using Org::Alljoyn::Bus::IBusAttachment;
 using Org::Alljoyn::Bus::ISignalEmitter;
 using Org::Alljoyn::Bus::CSignalEmitter;
-// using Org::Alljoyn::Bus::CPropertyChangedEmitter;
+using Org::Alljoyn::Bus::CPropertyChangedEmitter;
 using Elastos::Core::Thread;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace DevSamples {
 namespace DFObserver {
+
+static const String TAG("CDoorService");
 
 CAR_INTERFACE_IMPL_3(CDoorService, Object, IDoorService, IDoor, IBusObject)
 
@@ -32,9 +40,8 @@ ECode CDoorService::constructor(
 {
     mLocation = location;
     mBushandler = (BusHandler*)handler;
-    assert(0 && "TODO");
-    // CPropertyChangedEmitter::New(this, IBusAttachment::SESSION_ID_ALL_HOSTED,
-    //     GlobalBroadcast_Off, (IPropertyChangedEmitter**)&mPce);
+    CPropertyChangedEmitter::New(this, IBusAttachment::SESSION_ID_ALL_HOSTED,
+        GlobalBroadcast_Off, (IPropertyChangedEmitter**)&mPce);
     return NOERROR;
 }
 
@@ -101,6 +108,8 @@ ECode CDoorService::Close()
 
 ECode CDoorService::KnockAndRunRunnable::Run()
 {
+    Logger::I(TAG, " >> KnockAndRunRunnable::Run()");
+
     if (!mHost->mIsOpen) {
         mHost->mIsOpen = true;
         mHost->SendDoorEvent(TRUE);
@@ -121,11 +130,10 @@ ECode CDoorService::KnockAndRunRunnable::Run()
     mHost->mIsOpen = FALSE;
     mHost->SendDoorEvent(FALSE);
 
-    assert(0 && "TODO");
     // Invalidate the keyCode
-    // mHost->mPce->PropertyChanged(
-    //     IDoor::DOOR_INTF_NAME, String("KeyCode"), new Variant(0));
-
+    AutoPtr<IVariant> v;
+    CVariant::New(CoreUtils::Convert(0), (IVariant**)&v);
+    mHost->mPce->PropertyChanged(IDoor::DOOR_INTF_NAME, String("KeyCode"), v);
     return NOERROR;
 }
 
@@ -156,8 +164,9 @@ ECode CDoorService::GetInternalLocation(
 ECode CDoorService::SendDoorEvent(
     /* [in] */ Boolean b)
 {
-    assert(0 && "TODO");
-    // mPce->PropertyChanged(IDoor::DOOR_INTF_NAME, String("IsOpen"), new Variant(b));
+    AutoPtr<IVariant> v;
+    CVariant::New(CoreUtils::Convert(b), (IVariant**)&v);
+    mPce->PropertyChanged(IDoor::DOOR_INTF_NAME, String("IsOpen"), v);
     return NOERROR;
 }
 

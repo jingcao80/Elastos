@@ -52,8 +52,8 @@ ECode PropertyChangedEmitter::constructor(
 }
 
 ECode PropertyChangedEmitter::PropertyChanged(
-    /* [in] */ String ifaceName,
-    /* [in] */ String propertyName,
+    /* [in] */ const String& ifaceName,
+    /* [in] */ const String& propertyName,
     /* [in] */ IVariant* newValue)
 {
     AutoPtr<IMap> propsChanged; // HashMap<String, Variant>();

@@ -1,12 +1,24 @@
 
 module
 {
+	interface Org.Alljoyn.Bus.IAboutDataListener;
+	
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
     interface IAboutObj {
+	    Announce(
+	        [in] Int16 sessionPort,
+	        [in] IAboutDataListener* aboutData);
 
+	    /**
+	     * Cancel the last announce signal sent. If no signals have been sent this
+	     * method call will return.
+	     *
+	     * @return Status.OK on success
+	     */
+	    Unannounce();
     }
 
     } // namespace Bus

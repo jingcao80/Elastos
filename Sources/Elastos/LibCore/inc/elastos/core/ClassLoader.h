@@ -63,7 +63,7 @@ public:
         /* [out] */ IClassInfo** klass);
 
     CARAPI LoadInterface(
-        /* [in] */ const String& className,
+        /* [in] */ const String& interfaceName,
         /* [out] */ IInterfaceInfo** klass);
 
     CARAPI ToString(

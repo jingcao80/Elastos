@@ -80,6 +80,8 @@ ECode MyAboutData::GetAboutData(
     aboutData->Put(CoreUtils::Convert("Description"),
         CreateStringVariant("Sample showing the about feature in a service application"));
 
+    *data = aboutData;
+    REFCOUNT_ADD(*data)
     return NOERROR;
 }
 

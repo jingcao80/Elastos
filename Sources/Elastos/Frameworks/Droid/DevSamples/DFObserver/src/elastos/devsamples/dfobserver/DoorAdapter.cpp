@@ -31,7 +31,7 @@ ECode DoorAdapter::UpdateRunnable::Run()
 
 DoorAdapter::UpdateUIRunnable::UpdateUIRunnable(
     /* [in] */ DoorAdapter* host,
-    /* [in] */ DoorAdapterItem* door,
+    /* [in] */ IDoorAdapterItem* door,
     /* [in] */ Boolean add)
     : mHost(host)
     , mDoor(door)
@@ -41,7 +41,7 @@ DoorAdapter::UpdateUIRunnable::UpdateUIRunnable(
 
 ECode DoorAdapter::UpdateUIRunnable::Run()
 {
-    AutoPtr<DoorAdapterItem> item = mDoor;
+    AutoPtr<IDoorAdapterItem> item = mDoor;
    if (mIsAdd) {
         mHost->mList.PushBack(item);
     }
@@ -83,7 +83,7 @@ ECode DoorAdapter::GetItem(
 {
     VALIDATE_NOT_NULL(obj)
     assert(position > 0 && position < (Int32)mList.GetSize());
-    *obj = (IObject*)mList[position];
+    *obj = mList[position];
     REFCOUNT_ADD(*obj)
     return NOERROR;
 }
@@ -128,7 +128,7 @@ ECode DoorAdapter::GetView(
     AutoPtr<IInterface> obj;
     convertView->GetTag((IInterface**)&obj);
     DoorViewHolder* data = (DoorViewHolder*)IObject::Probe(obj);
-    AutoPtr<DoorAdapterItem> item = mList[position];
+    AutoPtr<IDoorAdapterItem> item = mList[position];
     String name;
     item->GetName(&name);
     Boolean bval;
@@ -142,17 +142,17 @@ ECode DoorAdapter::GetView(
 
 /** Add an extra door to the adapter and update the UI accordingly. */
 ECode DoorAdapter::Add(
-    /* [in] */ DoorAdapterItem* door)
+    /* [in] */ IDoorAdapterItem* door)
 {
     return UpdateUI(door, TRUE);
 }
 
 /** Removes a door from the adapter and update the UI accordingly. */
 ECode DoorAdapter::Remove(
-    /* [in] */ DoorAdapterItem* door)
+    /* [in] */ IDoorAdapterItem* door)
 {
-    AutoPtr<DoorAdapterItem> item = door;
-    List<AutoPtr<DoorAdapterItem> >::Iterator it = Find(mList.Begin(), mList.End(), item);
+    AutoPtr<IDoorAdapterItem> item = door;
+    List<AutoPtr<IDoorAdapterItem> >::Iterator it = Find(mList.Begin(), mList.End(), item);
     if (it != mList.End()) {
         UpdateUI(door, FALSE);
     }
@@ -161,7 +161,7 @@ ECode DoorAdapter::Remove(
 
 /** Updates the UI. Make sure the latest changes are shown on the UI. */
 ECode DoorAdapter::UpdateUI(
-    /* [in] */ DoorAdapterItem* door,
+    /* [in] */ IDoorAdapterItem* door,
     /* [in] */ Boolean add)
 {
     AutoPtr<IRunnable> runnable = new UpdateUIRunnable(this, door, add);
@@ -185,7 +185,7 @@ ECode DoorAdapter::SendSignal(
 
 /** update UI after receiving an event from a door. */
 ECode DoorAdapter::PropertyUpdate(
-    /* [in] */ DoorAdapterItem* item)
+    /* [in] */ IDoorAdapterItem* item)
 {
     String name;
     item->GetName(&name);

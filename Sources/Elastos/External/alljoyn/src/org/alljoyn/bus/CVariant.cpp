@@ -2,9 +2,13 @@
 #include "org/alljoyn/bus/CVariant.h"
 #include "org/alljoyn/bus/MsgArg.h"
 #include "org/alljoyn/bus/Signature.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <alljoyn/MsgArg.h>
 
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Org {
@@ -83,17 +87,17 @@ ECode CVariant::GetSignature(
     /* [out] */ String* signature)
 {
     VALIDATE_NOT_NULL(signature)
+    *signature = NULL;
+
     if (mValue != NULL) {
         *signature = Signature::TypeSig(mValue, mSignature);
     }
-    else if(mHandle != 0) {
+    else if (mHandle != 0) {
         AutoPtr<ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(1);
         (*array)[0] = mHandle;
         *signature = MsgArg::GetSignature(array);
     }
-    else {
-        *signature = NULL;
-    }
+
     return NOERROR;
 }
 
@@ -187,6 +191,21 @@ ECode CVariant::Equals(
     else if (mValue == NULL && other->mValue == NULL && !mHandle && !other->mHandle)
         *res = TRUE;
 
+    return NOERROR;
+}
+
+ECode CVariant::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CVariant{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", value:";
+    sb += Object::ToString(mValue);
+    sb += ", signature:";
+    sb += mSignature;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

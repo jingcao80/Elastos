@@ -4,6 +4,12 @@
 
 #include "_Org.Alljoyn.Bus.h"
 #include <alljoyn/ProxyBusObject.h>
+#include <elastos/core/Object.h>
+#include <elastos/utility/etl/List.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Core::Object;
+using Elastos::Utility::Etl::List;
 
 namespace Org {
 namespace Alljoyn {
@@ -24,24 +30,51 @@ public:
 
     ~NativeProxyBusObject();
 
-    // QStatus RegisterPropertiesChangedListener(jstring jifaceName, jobjectArray jproperties, jobject jpropertiesChangedListener);
+    CARAPI RegisterPropertiesChangedListener(
+        /* [in] */ const String& ifaceName,
+        /* [in] */ ArrayOf<String>* properties,
+        /* [in] */ IPropertiesChangedListener* propertiesChangedListener);
 
-    // QStatus UnregisterPropertiesChangedListener(jstring jifaceName, jobject jpropertiesChangedListener);
+    CARAPI UnregisterPropertiesChangedListener(
+        /* [in] */ const String& ifaceName,
+        /* [in] */ IPropertiesChangedListener* propertiesChangedListener);
+
+    using ajn::ProxyBusObject::AddInterface;
+
+private:
+    static ECode AddInterfaceStatus(
+        /* [in] */ IProxyBusObject* pbo,
+        /* [in] */ NativeBusAttachment* busPtr,
+        /* [in] */ const String& interfaceName);
+
+    static ECode AddInterface(
+        /* [in] */ IProxyBusObject* pbo,
+        /* [in] */ NativeBusAttachment* busPtr,
+        /* [in] */ const String& interfaceName);
 
 private:
     NativeProxyBusObject(const NativeProxyBusObject& other);
     NativeProxyBusObject& operator =(const NativeProxyBusObject& other);
 
-    // Mutex propertiesChangedListenersLock;
-    // class Listener {
-    //   public:
-    //     const String ifaceName;
-    //     jobject jlistener;
-    //     Listener(const String& ifaceName, jobject jlistener) : ifaceName(ifaceName), jlistener(jlistener) { }
-    //   private:
-    //     Listener& operator =(const Listener& other);
-    // };
-    // list<Listener> propertiesChangedListeners;
+    Object mPropertiesChangedListenersLock;
+
+    class Listener
+        : public Object
+    {
+      public:
+        const String mIfaceName;
+        AutoPtr<IPropertiesChangedListener> mListener;
+
+        Listener(
+            /* [in] */ const String& ifaceName,
+            /* [in] */ IPropertiesChangedListener* listener)
+            : mIfaceName(ifaceName), mListener(listener)
+        {}
+
+      private:
+        Listener& operator =(const Listener& other);
+    };
+    List< AutoPtr<Listener> > mPropertiesChangedListeners;
 
 public:
     NativeBusAttachment* mBusPtr;

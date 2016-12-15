@@ -159,7 +159,7 @@ public:
      * @see BusAttachment#getProxyBusObject(String, String, int, Class[])
      */
     CARAPI GetInterface(
-        /* [in] */ IInterfaceInfo* intfInfo,
+        /* [in] */ const InterfaceID& iid,
         /* [out] */ IInterface** intf);
 
     /**
@@ -191,6 +191,86 @@ public:
      */
     CARAPI IsSecure(
         /* [out] */ Boolean* isSecure);
+
+    // /**
+    //  * Get a property from an interface on the remote object.
+    //  *
+    //  * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+    //  * @param iface the interface that the property exists on
+    //  * @param propertyName the name of the property
+    //  * @return Variant containing the value of the property
+    //  * @throws BusException if the named property doesn't exist
+    //  */
+    // public <T> Variant getProperty(Class<T> iface, String propertyName) throws BusException {
+    //     return getProperty(bus, InterfaceDescription.getName(iface), propertyName);
+    // }
+
+    // /**
+    //  * Set a property on an interface on the remote object.
+    //  *
+    //  * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+    //  * @param iface the interface that the property exists on
+    //  * @param propertyName the name of the property
+    //  * @param value the value for the property
+    //  * @throws BusException if the named property doesn't exist or cannot be set
+    //  */
+    // public <T> void setProperty(Class<T> iface, String propertyName, Variant value) throws BusException {
+    //     setProperty(bus, InterfaceDescription.getName(iface), propertyName, value.getSignature(), value.getValue());;
+    // }
+
+    // /**
+    //  * Get all properties from an interface on the remote object.
+    //  *
+    //  * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+    //  * @param iface the interface
+    //  * @return a Map of name/value associations
+    //  * @throws BusException if request cannot be honored
+    //  */
+    // public <T> Map<String, Variant> getAllProperties(Class<T> iface) throws BusException {
+    //     Map<String, Variant> map = null;
+    //     try {
+    //         Type returnType;
+    //         returnType = org.alljoyn.bus.ifaces.Properties.class.getMethod("GetAll", String.class).getGenericReturnType();
+    //         map = getAllProperties(bus, returnType, InterfaceDescription.getName(iface));
+    //     } catch (NoSuchMethodException e) {
+    //         /* This will not happen */
+    //         System.err.println("Unexpected NoSuchMethodException for the GetAll method");
+    //     }
+    //     return map;
+    // }
+
+    /**
+     * Function to register a handler for property change events.
+     * Note that registering the same handler callback for the same
+     * interface will overwrite the previous registration.  The same
+     * handler callback may be registered for several different
+     * interfaces simultaneously.
+     *
+     * @param iface             Remote object's interface on which the property is defined.
+     * @param properties        The name of the properties to monitor (NULL for all).
+     * @param listener          Reference to the object that will receive the callback.
+     * @return
+     *      - #ER_OK if the handler was registered successfully
+     *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
+     *      - #ER_BUS_NO_SUCH_PROPERTY if the property does not exist
+     */
+    CARAPI RegisterPropertiesChangedListener(
+        /* [in] */ const String& iface,
+        /* [in] */ ArrayOf<String>* properties,
+        /* [in] */ IPropertiesChangedListener* listener);
+
+    /**
+     * Function to unregister a handler for property change events.
+     *
+     * @param iface     Remote object's interface on which the property is defined.
+     * @param listener  Reference to the object that used to receive the callback.
+     * @return
+     *      - #ER_OK if the handler was registered successfully
+     *      - #ER_BUS_NO_SUCH_INTERFACE if the specified interfaces does not exist on the remote object.
+     */
+    CARAPI UnregisterPropertiesChangedListener(
+        /* [in] */ const String& iface,
+        /* [in] */ IPropertiesChangedListener* listener);
 
 protected:
     /** Called by native code to lazily add an interface when a proxy method is invoked. */
@@ -225,7 +305,25 @@ private:
         /* [in] */ NativeBusAttachment* busAttachment,
         /* [in] */ const String& name);
 
+    // /** Get a property of the remote object. */
+    // private native Variant getProperty(BusAttachment busAttachment, String interfaceName,
+    //         String propertyName) throws BusException;
+
+    // private native Map<String, Variant> getAllProperties(BusAttachment busAttachment, Type outType, String interfaceName) throws BusException;
+
+    // /** Set a property of the remote object. */
+    // private native void setProperty(BusAttachment busAttachment, String interfaceName,
+    //         String propertyName, String signature, Object value) throws BusException;
+
+    /** Is the remote object for this proxy bus object secure. */
+    Boolean IsProxyBusObjectSecure();
+
 private:
+    friend class NativeProxyBusObject;
+
+    static const Int32 AUTO_START = 0x02;
+    static const Int32 ENCRYPTED = 0x80;
+
     /** The bus the remote object is connected to. */
     CBusAttachment* mBus;
 

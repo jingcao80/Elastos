@@ -18,6 +18,7 @@ using Org::Alljoyn::Bus::ISessionOpts;
 using Org::Alljoyn::Bus::IBusAttachment;
 using Org::Alljoyn::Bus::IObserver;
 using Org::Alljoyn::Bus::IAboutObj;
+using Org::Alljoyn::Bus::IObserverListener;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Utility::Concurrent::IConcurrentHashMap;
@@ -31,6 +32,25 @@ class BusHandler
     : public Handler
 {
 private:
+    class ObserverListener
+        : public Object
+        , public IObserverListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ObserverListener(
+            /* [in] */ BusHandler* host);
+
+        CARAPI ObjectDiscovered(
+            /* [in] */ IProxyBusObject* object);
+
+        CARAPI ObjectLost(
+            /* [in] */ IProxyBusObject* object);
+    private:
+        BusHandler* mHost;
+    };
+
     /**
      * The DoorEventListener listens to both propertyChanged events and signals.
      */
@@ -113,7 +133,7 @@ private:
     AutoPtr<IObserver> mObserver;
     List< AutoPtr<IDoorService> > mDoors;
 
-    AutoPtr<IDoorEventListener> mDoorListener;
+    AutoPtr<DoorEventListener> mDoorListener;
     AutoPtr<IConcurrentHashMap> mMap;   // ConcurrentHashMap<DoorAdapterItem, ProxyBusObject>
     AutoPtr<DoorAdapter> mDoorAdapter;
     AutoPtr<IAboutObj> mAboutObj;

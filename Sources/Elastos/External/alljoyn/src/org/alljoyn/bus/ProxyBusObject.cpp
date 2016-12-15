@@ -178,6 +178,9 @@ ECode ProxyBusObject::Handler::Invoke(
 //=============================================================
 const String ProxyBusObject::TAG("ProxyBusObject");
 
+const Int32 ProxyBusObject::AUTO_START;
+const Int32 ProxyBusObject::ENCRYPTED;
+
 CAR_INTERFACE_IMPL(ProxyBusObject, Object, IProxyBusObject)
 
 ECode ProxyBusObject::constructor(
@@ -450,33 +453,37 @@ ECode ProxyBusObject::MethodCall(
 
 ECode ProxyBusObject::EnablePropertyCaching()
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode ProxyBusObject::ReleaseResources()
 {
+    assert(0 && "TODO");
     return NOERROR;
 }
 
 ECode ProxyBusObject::GetBusName(
     /* [out] */ String* busName)
 {
+    VALIDATE_NOT_NULL(busName)
+    *busName = mBusName;
     return NOERROR;
 }
 
 ECode ProxyBusObject::GetObjPath(
     /* [out] */ String* objPath)
 {
+    VALIDATE_NOT_NULL(objPath)
+    *objPath = mObjPath;
     return NOERROR;
 }
 
 ECode ProxyBusObject::GetInterface(
-    /* [in] */ IInterfaceInfo* intfInfo,
+    /* [in] */ const InterfaceID& iid,
     /* [out] */ IInterface** intf)
 {
     VALIDATE_NOT_NULL(intf);
-    InterfaceID iid;
-    intfInfo->GetId(&iid);
     *intf = mProxy->Probe(iid);
     REFCOUNT_ADD(*intf);
     return NOERROR;
@@ -485,19 +492,58 @@ ECode ProxyBusObject::GetInterface(
 ECode ProxyBusObject::SetReplyTimeout(
     /* [in] */ Int32 timeoutMsecs)
 {
+    mReplyTimeoutMsecs = timeoutMsecs;
     return NOERROR;
 }
 
 ECode ProxyBusObject::SetAutoStart(
     /* [in] */ Boolean autoStart)
 {
+    mFlags = autoStart ? mFlags | AUTO_START : mFlags & ~AUTO_START;
     return NOERROR;
 }
 
 ECode ProxyBusObject::IsSecure(
     /* [out] */ Boolean* isSecure)
 {
+    VALIDATE_NOT_NULL(isSecure)
+    *isSecure = IsProxyBusObjectSecure();;
     return NOERROR;
+}
+
+Boolean ProxyBusObject::IsProxyBusObjectSecure()
+{
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    if (proxyBusObj == NULL) {
+        Logger::E(TAG, "IsProxyBusObjectSecure(): NULL ProxyBusObject pointer");
+        return FALSE;
+    }
+    return proxyBusObj->IsSecure();
+}
+
+ECode ProxyBusObject::RegisterPropertiesChangedListener(
+    /* [in] */ const String& iface,
+    /* [in] */ ArrayOf<String>* properties,
+    /* [in] */ IPropertiesChangedListener* listener)
+{
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    if (proxyBusObj == NULL) {
+        Logger::E(TAG, "RegisterPropertiesChangedListener(): NULL ProxyBusObject pointer");
+        return FALSE;
+    }
+    return proxyBusObj->RegisterPropertiesChangedListener(iface, properties, listener);
+}
+
+ECode ProxyBusObject::UnregisterPropertiesChangedListener(
+    /* [in] */ const String& iface,
+    /* [in] */ IPropertiesChangedListener* listener)
+{
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    if (proxyBusObj == NULL) {
+        Logger::E(TAG, "UnregisterPropertiesChangedListener(): NULL ProxyBusObject pointer");
+        return FALSE;
+    }
+    return proxyBusObj->UnregisterPropertiesChangedListener(iface, listener);
 }
 
 ECode ProxyBusObject::AddInterface(

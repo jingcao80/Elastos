@@ -325,7 +325,7 @@ ECode CClient::BusHandler::HandleMessage(
 
             /* We make calls to the methods of the AllJoyn object through one of its interfaces. */
             mBasicInterface = NULL;
-            mProxyObj->GetInterface(itfcInfo, (IInterface**)&mBasicInterface);
+            mProxyObj->GetInterface(EIID_IBasicInterface, (IInterface**)&mBasicInterface);
 
             mSessionId = value;
             mIsConnected = TRUE;
