@@ -87,6 +87,23 @@ Typeface::Typeface()
 
 Typeface::~Typeface()
 {
+    // TODO: for debug
+    String typefaceName;
+    ITypeface* thisPtr = (ITypeface*)this;
+    if (thisPtr == DEFAULT.Get()) typefaceName = "DEFAULT";
+    else if (thisPtr == DEFAULT_BOLD.Get()) typefaceName = "DEFAULT_BOLD";
+    else if (thisPtr == SANS_SERIF.Get()) typefaceName = "SANS_SERIF";
+    else if (thisPtr == SERIF.Get()) typefaceName = "SERIF";
+    else if (thisPtr == MONOSPACE.Get()) typefaceName = "MONOSPACE";
+    else if (thisPtr == DEFAULT_INTERNAL.Get()) typefaceName = "DEFAULT_INTERNAL";
+    else if (thisPtr == DEFAULT_BOLD_INTERNAL.Get()) typefaceName = "DEFAULT_BOLD_INTERNAL";
+    else if (thisPtr == SANS_SERIF_INTERNAL.Get()) typefaceName = "SANS_SERIF_INTERNAL";
+    else if (thisPtr == SERIF_INTERNAL.Get()) typefaceName = "SERIF_INTERNAL";
+    else if (thisPtr == MONOSPACE_INTERNAL.Get()) typefaceName = "MONOSPACE_INTERNAL";
+    else typefaceName = "Unknow";
+
+    ALOGD("======== Delete %s typeface ========", typefaceName.string());
+
     NativeUnref(mNativeInstance);
 }
 
