@@ -146,8 +146,7 @@ void CSearchPanelView::StartAssistActivity()
     ICommandQueueCallbacks::Probe(mBar)->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_SEARCH_PANEL);
 
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO [StartAssistActivity]: Not implement SEARCH_SERVICE.");
-    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<ISearchManager> sm = ISearchManager::Probe(obj);
     AutoPtr<IIntent> intent;
     if (sm != NULL) {
@@ -189,8 +188,7 @@ ECode CSearchPanelView::OnFinishInflate()
 void CSearchPanelView::MaybeSwapSearchIcon()
 {
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO [MaybeSwapSearchIcon]: Not implement SEARCH_SERVICE.");
-    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<IIntent> intent;
     if (ISearchManager::Probe(obj) != NULL) {
         ISearchManager::Probe(obj)->GetAssistIntent(mContext, FALSE,
@@ -410,8 +408,7 @@ ECode CSearchPanelView::IsAssistantAvailable(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO [IsAssistantAvailable]: Not implement SEARCH_SERVICE.");
-    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     AutoPtr<IIntent> intent;
     if (ISearchManager::Probe(obj) != NULL) {
         ISearchManager::Probe(obj)->GetAssistIntent(mContext, FALSE,

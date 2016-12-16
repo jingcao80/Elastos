@@ -4479,7 +4479,7 @@ Boolean NotificationManagerService::CancelAllNotificationsInt(
         Int32 N = 0;
         mNotificationList->GetSize(&N);
         AutoPtr<IArrayList> canceledNotifications;
-        for (Int32 i = 0; i < N; i++) {
+        for (Int32 i = N -1; i >= 0; --i) {
             AutoPtr<IInterface> obj;
             mNotificationList->Get(i, (IInterface**)&obj);
             AutoPtr<NotificationRecord> r = (NotificationRecord*)INotificationRecord::Probe(obj);

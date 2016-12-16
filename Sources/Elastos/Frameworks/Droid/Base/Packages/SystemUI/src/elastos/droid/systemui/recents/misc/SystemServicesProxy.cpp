@@ -121,8 +121,7 @@ SystemServicesProxy::SystemServicesProxy(
     context->GetPackageManager((IPackageManager**)&mPm);
     mIpm = AppGlobals::GetPackageManager();
     obj = NULL;
-    Logger::D(TAG, "TODO [SystemServicesProxy]: Not implement [SEARCH_SERVICE].");
-    // context->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    context->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     mSm = ISearchManager::Probe(obj);
     obj = NULL;
     context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);

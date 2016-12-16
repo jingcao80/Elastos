@@ -470,8 +470,7 @@ Boolean CKeyguardBottomAreaView::IsCameraDisabledByDpm()
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
-    // ctx->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+    ctx->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     AutoPtr<IDevicePolicyManager> dpm = IDevicePolicyManager::Probe(obj);
     if (dpm != NULL) {
         ECode ec = NOERROR;

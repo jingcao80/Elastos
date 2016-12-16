@@ -93,20 +93,17 @@ SecurityControllerImpl::SecurityControllerImpl(
 
     CArrayList::New((IArrayList**)&mCallbacks);
 
-    Logger::I(TAG, " >> TODO: CONNECTIVITY_SERVICE");
     mContext = context;
     obj = NULL;
-    // context->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+    context->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
 
     obj = NULL;
     context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    // mConnectivityManager = IConnectivityManager::Probe(obj);
+    mConnectivityManager = IConnectivityManager::Probe(obj);
 
     // // TODO: re-register network callback on user change.
-    // if (mConnectivityManager != NULL) {
-    //     mConnectivityManager->RegisterNetworkCallback(REQUEST, mNetworkCallback);
-    // }
+    mConnectivityManager->RegisterNetworkCallback(REQUEST, mNetworkCallback);
 
     AutoPtr<IActivityManagerHelper> amHelper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
@@ -134,8 +131,7 @@ ECode SecurityControllerImpl::HasDeviceOwner(
     VALIDATE_NOT_NULL(result);
     String value;
     if (mDevicePolicyManager != NULL) {
-        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
-        // mDevicePolicyManager->GetDeviceOwner(&value);
+        mDevicePolicyManager->GetDeviceOwner(&value);
     }
     *result = !TextUtils::IsEmpty(value);
     return NOERROR;
@@ -147,8 +143,7 @@ ECode SecurityControllerImpl::HasProfileOwner(
     VALIDATE_NOT_NULL(result);
     String value;
     if (mDevicePolicyManager != NULL) {
-        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
-        // mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, &value);
+        mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, &value);
     }
     *result = !TextUtils::IsEmpty(value);
     return NOERROR;
@@ -159,8 +154,7 @@ ECode SecurityControllerImpl::GetDeviceOwnerName(
 {
     VALIDATE_NOT_NULL(result);
     if (mDevicePolicyManager != NULL) {
-        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
-        // return mDevicePolicyManager->GetDeviceOwnerName(result);
+        return mDevicePolicyManager->GetDeviceOwnerName(result);
     }
 
     *result = String(NULL);
@@ -172,8 +166,7 @@ ECode SecurityControllerImpl::GetProfileOwnerName(
 {
     VALIDATE_NOT_NULL(result);
     if (mDevicePolicyManager != NULL) {
-        Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
-        // return mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, result);
+        return mDevicePolicyManager->GetProfileOwnerNameAsUser(mCurrentUserId, result);
     }
 
     *result = String(NULL);

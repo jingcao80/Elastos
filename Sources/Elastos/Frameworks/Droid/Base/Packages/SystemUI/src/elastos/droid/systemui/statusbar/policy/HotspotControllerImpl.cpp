@@ -42,10 +42,9 @@ HotspotControllerImpl::HotspotControllerImpl(
     mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
 
-    Logger::I(TAG, " >> TODO: CONNECTIVITY_SERVICE");
     obj = NULL;
-    // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    // mConnectivityManager = IConnectivityManager::Probe(obj);
+    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    mConnectivityManager = IConnectivityManager::Probe(obj);
 }
 
 ECode HotspotControllerImpl::AddCallback(

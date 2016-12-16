@@ -1147,17 +1147,18 @@ void BaseStatusBar::UpdateCurrentProfilesCache()
     if (mUserManager != NULL) {
         AutoPtr<IList> lists;
         mUserManager->GetProfiles(mCurrentUserId, (IList**)&lists);
-
-        AutoPtr<IIterator> ator;
-        lists->GetIterator((IIterator**)&ator);
-        Boolean has = FALSE;
-        while (ator->HasNext(&has), has) {
-            AutoPtr<IInterface> obj;
-            ator->GetNext((IInterface**)&obj);
-            AutoPtr<IUserInfo> user = IUserInfo::Probe(obj);
-            Int32 id = 0;
-            user->GetId(&id);
-            mCurrentProfiles->Put(id, user);
+        if (lists != NULL) {
+            AutoPtr<IIterator> ator;
+            lists->GetIterator((IIterator**)&ator);
+            Boolean has = FALSE;
+            while (ator->HasNext(&has), has) {
+                AutoPtr<IInterface> obj;
+                ator->GetNext((IInterface**)&obj);
+                AutoPtr<IUserInfo> user = IUserInfo::Probe(obj);
+                Int32 id = 0;
+                user->GetId(&id);
+                mCurrentProfiles->Put(id, user);
+            }
         }
     }
 }
@@ -1174,8 +1175,7 @@ ECode BaseStatusBar::Start()
     mWindowManager->GetDefaultDisplay((IDisplay**)&mDisplay);
 
     obj = NULL;
-    Logger::I(TAG, " TODO >> DEVICE_POLICY_SERVICE");
-    // mContext->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
 
     AutoPtr<INotificationColorUtilHelper> ncuHelper;

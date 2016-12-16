@@ -27,8 +27,6 @@ CBatteryMeterViewBatteryTracker::CBatteryMeterViewBatteryTracker()
     , mTemperature(0)
     , mTestmode(FALSE)
 {
-    mLevel = 50;
-    Logger::D("CBatteryMeterViewBatteryTracker", "TODO: Set mLevel = 50.");
 }
 
 ECode CBatteryMeterViewBatteryTracker::constructor(

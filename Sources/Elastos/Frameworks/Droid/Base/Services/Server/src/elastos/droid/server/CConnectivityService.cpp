@@ -512,7 +512,7 @@ void CConnectivityService::NetworkRequestInfo::UnlinkDeathRecipient()
 
 ECode CConnectivityService::NetworkRequestInfo::ProxyDied()
 {
-    Slogger::D("CConnectivityService", "ConnectivityService NetworkRequestInfo binderDied(%s, %)",
+    Slogger::D("CConnectivityService", "ConnectivityService NetworkRequestInfo binderDied(%s, %s)",
         TO_CSTR(mRequest), TO_CSTR(mBinder));
     mHost->ReleaseNetworkRequest(mRequest);
     return NOERROR;
@@ -2264,7 +2264,7 @@ void CConnectivityService::HandleRegisterNetworkRequest(
     AutoPtr<NetworkAgentInfo> bestNetwork;
 
     AutoPtr<ICollection> values;
-    mNetworkRequests->GetValues((ICollection**)&values);
+    mNetworkAgentInfos->GetValues((ICollection**)&values);
     AutoPtr<IIterator> it;
     values->GetIterator((IIterator**)&it);
     Boolean hasNext, bval;
