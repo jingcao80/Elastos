@@ -6,19 +6,23 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include <elastos/core/Runnable.h>
-#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/dialer/calllog/CallLogFragment.h"
 #include "elastos/droid/dialerbind/analytics/AnalyticsActivity.h"
+#include "elastos/droid/support/v13/app/FragmentPagerAdapter.h"
+#include <elastos/core/Runnable.h>
 
+using Elastos::Droid::Contacts::Common::List::IViewPagerTabs;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Support::V4::View::IViewPager;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Core::Runnable;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsActivity;
 using Elastos::Droid::Dialer::Voicemail::IVoicemailStatusHelper;
+using Elastos::Droid::Support::V13::App::FragmentPagerAdapter;
 
 namespace Elastos {
 namespace Droid {
@@ -31,31 +35,31 @@ class CallLogActivity
     , public ICallLogQueryHandlerListener
 {
 public:
-    // class ViewPagerAdapter
-    //     : public FragmentPagerAdapter
-    // {
-    // public:
-    //     ViewPagerAdapter(
-    //         /* [in] */ IFragmentManager* fm,
-    //         /* [in] */ CallLogActivity* host);
+    class ViewPagerAdapter
+        : public FragmentPagerAdapter
+    {
+    public:
+        ViewPagerAdapter(
+            /* [in] */ IFragmentManager* fm,
+            /* [in] */ CallLogActivity* host);
 
-            // @Override
-    //     CARAPI GetItem(
-    //         /* [in] */ Int32 position,
-    //         /* [out] */ IFragment** item);
+        // @Override
+        CARAPI GetItem(
+            /* [in] */ Int32 position,
+            /* [out] */ IFragment** item);
 
-            // @Override
-    //     CARAPI GetPageTitle(
-    //         /* [in] */ Int32 position,
-    //         /* [out] */ ICharSequence** title);
+        // @Override
+        CARAPI GetPageTitle(
+            /* [in] */ Int32 position,
+            /* [out] */ ICharSequence** title);
 
-            // @Override
-    //     CARAPI GetCount(
-    //         /* [out] */ Int32* count);
+        // @Override
+        CARAPI GetCount(
+            /* [out] */ Int32* count);
 
-    // private:
-    //     CallLogActivity* mHost;
-    // };
+    private:
+        CallLogActivity* mHost;
+    };
 
 private:
     class WaitForVoicemailTimeoutRunnable
@@ -116,22 +120,21 @@ protected:
     CARAPI OnResume();
 
 private:
-    static const Int32 WAIT_FOR_VOICEMAIL_PROVIDER_TIMEOUT_MS; // = 300;
-    static const Int32 TAB_INDEX_ALL; // = 0;
-    static const Int32 TAB_INDEX_MISSED; // = 1;
-    static const Int32 TAB_INDEX_VOICEMAIL; // = 2;
+    static const Int32 WAIT_FOR_VOICEMAIL_PROVIDER_TIMEOUT_MS = 300;
+    static const Int32 TAB_INDEX_ALL = 0;
+    static const Int32 TAB_INDEX_MISSED = 1;
+    static const Int32 TAB_INDEX_VOICEMAIL = 2;
 
-    static const Int32 TAB_INDEX_COUNT_DEFAULT; // = 2;
-    static const Int32 TAB_INDEX_COUNT_WITH_VOICEMAIL; // = 3;
+    static const Int32 TAB_INDEX_COUNT_DEFAULT = 2;
+    static const Int32 TAB_INDEX_COUNT_WITH_VOICEMAIL = 3;
 
     AutoPtr<IHandler> mHandler;
-    // TODO:
-    // AutoPtr<IViewPager> mViewPager;
-    // AutoPtr<IViewPagerTabs> mViewPagerTabs;
-    // AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
-    AutoPtr<ICallLogFragment> mAllCallsFragment;
-    AutoPtr<ICallLogFragment> mMissedCallsFragment;
-    AutoPtr<ICallLogFragment> mVoicemailFragment;
+    AutoPtr<IViewPager> mViewPager;
+    AutoPtr<IViewPagerTabs> mViewPagerTabs;
+    AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
+    AutoPtr<CallLogFragment> mAllCallsFragment;
+    AutoPtr<CallLogFragment> mMissedCallsFragment;
+    AutoPtr<CallLogFragment> mVoicemailFragment;
     AutoPtr<IVoicemailStatusHelper> mVoicemailStatusHelper;
 
     Boolean mSwitchToVoicemailTab;
