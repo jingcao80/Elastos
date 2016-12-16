@@ -19,7 +19,7 @@
     android:layout_height="match_parent"
     android:id="@+id/calllog_frame"
     android:orientation="vertical">
-    <com.android.contacts.common.list.ViewPagerTabs
+    <Elastos.Droid.Contacts.Common.List.CViewPagerTabs
         android:id="@+id/viewpager_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/tab_height"
@@ -28,7 +28,7 @@
         android:layout_gravity="top"
         android:elevation="@dimen/tab_elevation"
         style="@style/DialtactsActionBarTabTextStyle" />
-    <android.support.v4.view.ViewPager
+    <Elastos.Droid.Support.V4.View.CViewPager
         android:id="@+id/call_log_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"

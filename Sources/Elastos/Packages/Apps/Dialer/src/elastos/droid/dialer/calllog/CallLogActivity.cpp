@@ -79,7 +79,8 @@ ECode CallLogActivity::ViewPagerAdapter::GetPageTitle(
     /* [out] */ ICharSequence** title)
 {
     VALIDATE_NOT_NULL(title)
-    *title = CoreUtils::Convert((*mHost->mTabTitles)[position]);
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert((*mHost->mTabTitles)[position]);
+    *title = cs;
     REFCOUNT_ADD(*title)
     return NOERROR;
 }
