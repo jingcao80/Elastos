@@ -3,12 +3,14 @@
 #define __ORG_ALLJOYN_BUS_PROXYBUSOBJECT_H__
 
 #include "_Org.Alljoyn.Bus.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Core::Object;
 using Elastos::Core::Reflect::IInvocationHandler;
+using Elastos::Utility::IMap;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::List;
 
@@ -192,52 +194,45 @@ public:
     CARAPI IsSecure(
         /* [out] */ Boolean* isSecure);
 
-    // /**
-    //  * Get a property from an interface on the remote object.
-    //  *
-    //  * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
-    //  * @param iface the interface that the property exists on
-    //  * @param propertyName the name of the property
-    //  * @return Variant containing the value of the property
-    //  * @throws BusException if the named property doesn't exist
-    //  */
-    // public <T> Variant getProperty(Class<T> iface, String propertyName) throws BusException {
-    //     return getProperty(bus, InterfaceDescription.getName(iface), propertyName);
-    // }
+    /**
+     * Get a property from an interface on the remote object.
+     *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+     * @param iface the interface that the property exists on
+     * @param propertyName the name of the property
+     * @return Variant containing the value of the property
+     * @throws BusException if the named property doesn't exist
+     */
+    CARAPI GetProperty(
+        /* [in] */ IInterfaceInfo* iface,
+        /* [in] */ const String& propertyName,
+        /* [out] */ IVariant** value);
 
-    // /**
-    //  * Set a property on an interface on the remote object.
-    //  *
-    //  * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
-    //  * @param iface the interface that the property exists on
-    //  * @param propertyName the name of the property
-    //  * @param value the value for the property
-    //  * @throws BusException if the named property doesn't exist or cannot be set
-    //  */
-    // public <T> void setProperty(Class<T> iface, String propertyName, Variant value) throws BusException {
-    //     setProperty(bus, InterfaceDescription.getName(iface), propertyName, value.getSignature(), value.getValue());;
-    // }
+    /**
+     * Set a property on an interface on the remote object.
+     *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+     * @param iface the interface that the property exists on
+     * @param propertyName the name of the property
+     * @param value the value for the property
+     * @throws BusException if the named property doesn't exist or cannot be set
+     */
+    CARAPI SetProperty(
+        /* [in] */ IInterfaceInfo* iface,
+        /* [in] */ const String& propertyName,
+        /* [in] */ IVariant* value);
 
-    // /**
-    //  * Get all properties from an interface on the remote object.
-    //  *
-    //  * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
-    //  * @param iface the interface
-    //  * @return a Map of name/value associations
-    //  * @throws BusException if request cannot be honored
-    //  */
-    // public <T> Map<String, Variant> getAllProperties(Class<T> iface) throws BusException {
-    //     Map<String, Variant> map = null;
-    //     try {
-    //         Type returnType;
-    //         returnType = org.alljoyn.bus.ifaces.Properties.class.getMethod("GetAll", String.class).getGenericReturnType();
-    //         map = getAllProperties(bus, returnType, InterfaceDescription.getName(iface));
-    //     } catch (NoSuchMethodException e) {
-    //         /* This will not happen */
-    //         System.err.println("Unexpected NoSuchMethodException for the GetAll method");
-    //     }
-    //     return map;
-    // }
+    /**
+     * Get all properties from an interface on the remote object.
+     *
+     * @param <T> any class implementation of a interface annotated with AllJoyn interface annotations
+     * @param iface the interface
+     * @return a Map of name/value associations
+     * @throws BusException if request cannot be honored
+     */
+    CARAPI GetAllProperties(
+        /* [in] */ IInterfaceInfo* iface,
+        /* [out] */ IMap** map);  //Map<String, Variant>
 
     /**
      * Function to register a handler for property change events.

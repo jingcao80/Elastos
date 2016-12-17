@@ -3,12 +3,14 @@
 #define __ORG_ALLJOYN_BUS_NATIVEPROXYBUSOBJECT_H__
 
 #include "_Org.Alljoyn.Bus.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <alljoyn/ProxyBusObject.h>
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::Object;
+using Elastos::Utility::IMap;
 using Elastos::Utility::Etl::List;
 
 namespace Org {
@@ -39,7 +41,26 @@ public:
         /* [in] */ const String& ifaceName,
         /* [in] */ IPropertiesChangedListener* propertiesChangedListener);
 
+    CARAPI GetProperty(
+        /* [in] */ const String& ifaceName,
+        /* [in] */ const String& propertyName,
+        /* [out] */ IVariant** value);
+
+    CARAPI SetProperty(
+        /* [in] */ const String& ifaceName,
+        /* [in] */ const String& propertyName,
+        /* [in] */ const String& signature,
+        /* [in] */ IInterface* value);
+
+    CARAPI GetAllProperties(
+        /* [in] */ const String& ifaceName,
+        /* [in] */ CarDataType outtype,
+        /* [out] */ IMap** map);  //Map<String, Variant>
+
     using ajn::ProxyBusObject::AddInterface;
+    using ajn::ProxyBusObject::GetProperty;
+    using ajn::ProxyBusObject::SetProperty;
+    using ajn::ProxyBusObject::GetAllProperties;
 
 private:
     static ECode AddInterfaceStatus(

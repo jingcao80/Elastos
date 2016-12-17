@@ -2,6 +2,7 @@
 #include "org/alljoyn/bus/CBusAttachment.h"
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/MsgArg.h"
+#include "org/alljoyn/bus/CVariant.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeProxyBusObject.h"
 #include "org/alljoyn/bus/ProxyBusObject.h"
@@ -169,7 +170,7 @@ ECode ProxyBusObject::Handler::Invoke(
 
     //Unmarshal_out
 
-    return NOERROR;
+    return ec;
 }
 
 
@@ -305,7 +306,7 @@ ECode ProxyBusObject::MethodCall(
     /* [in] */ const String& inputSig,
     // Type outType,
     /* [in] */ IMethodInfo* method,
-    /* [in] */ IArgumentList* _args,
+    /* [in] */ IArgumentList* carArgs,
     /* [in] */ Int32 replyTimeoutMsecs,
     /* [in] */ Int32 flags)
 {
@@ -352,11 +353,13 @@ ECode ProxyBusObject::MethodCall(
     const ajn::MsgArg* replyArgs;
     size_t numReplyArgs;
 
-    ec = MsgArg::MarshalIn((Int64)&args, inputSig, method, _args);
+    Logger::I(TAG, " >> MarshalIn: inputSig: '%s'", inputSig.string());
+    ec = MsgArg::MarshalIn((Int64)&args, inputSig, method, carArgs);
     if (FAILED(ec)) {
         Logger::E(TAG, "MethodCall(): Marshal failure");
         return E_STATUS_FAIL;
     }
+    Logger::I(TAG, " >> MarshalIn: result: '%s'", args.ToString().c_str());
 
     /*
      * If we call any method on the org.freedesktop.DBus.Properties interface
@@ -420,10 +423,10 @@ ECode ProxyBusObject::MethodCall(
                     structArg.v_struct.members[i] = replyArgs[i];
                 }
                 structArg.SetOwnershipFlags(ajn::MsgArg::OwnsArgs);
-                MsgArg::UnmarshalOut((Int64)&structArg, method, _args);
+                MsgArg::UnmarshalOut((Int64)&structArg, method, carArgs);
             }
             else if (numReplyArgs > 0) {
-                MsgArg::UnmarshalOut((Int64)&replyArgs[0], method, _args);
+                MsgArg::UnmarshalOut((Int64)&replyArgs[0], method, carArgs);
             }
         }
         else if (ER_BUS_REPLY_IS_ERROR_MESSAGE == status) {
@@ -569,6 +572,52 @@ ECode ProxyBusObject::AddInterface(
 
     ec = proxyBusObj->AddInterface(*intf);
     return ec;
+}
+
+ECode ProxyBusObject::GetProperty(
+    /* [in] */ IInterfaceInfo* iface,
+    /* [in] */ const String& propertyName,
+    /* [out] */ IVariant** value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    assert(proxyBusObj != NULL);
+
+    return proxyBusObj->GetProperty(InterfaceDescription::GetName(iface), propertyName, value);
+}
+
+ECode ProxyBusObject::SetProperty(
+    /* [in] */ IInterfaceInfo* iface,
+    /* [in] */ const String& propertyName,
+    /* [in] */ IVariant* value)
+{
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    assert(proxyBusObj != NULL);
+
+    String signature;
+    value->GetSignature(&signature);
+    return proxyBusObj->SetProperty(
+        InterfaceDescription::GetName(iface), propertyName,
+        signature, ((CVariant*)value)->GetValue());
+}
+
+ECode ProxyBusObject::GetAllProperties(
+    /* [in] */ IInterfaceInfo* iface,
+    /* [out] */ IMap** map)  //Map<String, Variant>
+{
+    VALIDATE_NOT_NULL(map)
+    *map = NULL;
+
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    assert(proxyBusObj != NULL);
+
+    assert(0 && "TODO");
+    CarDataType returnType = CarDataType_Interface;
+    //     returnType = org.alljoyn.bus.ifaces.Properties.class.getMethod("GetAll", String.class).getGenericReturnType();
+    return proxyBusObj->GetAllProperties(InterfaceDescription::GetName(iface), returnType, map);
+
 }
 
 } // namespace Bus

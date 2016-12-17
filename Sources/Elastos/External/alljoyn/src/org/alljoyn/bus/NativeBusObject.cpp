@@ -60,6 +60,14 @@ NativeBusObject::~NativeBusObject()
     mBusPtr = NULL;
 }
 
+static void LogBusMethod(const ajn::InterfaceDescription::Member* member)
+{
+    Logger::I("NativeBusObject", " >> ===================== BusMethod Info ============================");
+    Logger::I("NativeBusObject", " >> name: %s, signature: %s", member->name.c_str(), member->signature.c_str());
+    Logger::I("NativeBusObject", " >> returnSignature: %s, argNames: %s", member->returnSignature.c_str(), member->argNames.c_str());
+    Logger::I("NativeBusObject", " >> accessPerms: %s, description: %s", member->accessPerms.c_str(), member->description.c_str());
+}
+
 QStatus NativeBusObject::AddInterfaces(
     /* [in] */ ArrayOf<IInterfaceDescription*>* busInterfaces)
 {
@@ -185,7 +193,6 @@ void NativeBusObject::MethodHandler(
 {
     if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::MethodHandler()");
 
-
     NativeMessageContext context(msg);
     /*
      * The Java method is called via invoke() on the
@@ -194,6 +201,7 @@ void NativeBusObject::MethodHandler(
      * figure out the signature of each method to lookup.
      */
     String key = String(member->iface->GetName()) + member->name.c_str();
+    LogBusMethod(member);
 
     /*
      * We're going to wander into a list of methods and pick one.  Lock the
@@ -215,6 +223,7 @@ void NativeBusObject::MethodHandler(
     if (ER_OK != status) {
         mMapLock.Unlock();
         MethodReply(member, msg, status);
+        Logger::E(TAG, "MethodHandler: Unmarshal error!");
         return;
     }
 
