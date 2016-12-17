@@ -26,6 +26,7 @@ using Elastos::Droid::Widget::IListView;
 // using Elastos::Droid::Widget::ITextView;
 // using Elastos::Droid::Widget::IOnEditorActionListener;
 using Elastos::Core::Object;
+using Elastos::Utility::IMap;
 
 // using Org::Alljoyn::Bus::BusListener;
 using Org::Alljoyn::Bus::IBusAttachment;
@@ -75,6 +76,15 @@ public:
             /* [out] */ Double* op6,
             /* [out] */ String* op7,
             /* [out, callee] */ ArrayOf<String>** op8);
+
+        CARAPI TestMap(
+            /* [in] */ IMap* bytebooleanMap,      //<Byte, Boolean>
+            /* [in] */ IMap* int16int32Map,       //<Int16, Int32>
+            /* [in] */ IMap* int64doubleMap,      //<Int64, Double>
+            /* [in] */ IMap* strstrMap,           //<String, String>
+            /* [in] */ IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
+            /* [in] */ IMap* strstrarrayMap,      //<String, ArrayOf<String> >
+            /* [in] */ IMap* strstrint32mapMap);  //<String, Map<String, Int32> >
 
     private:
         /* Helper function to send a message to the UI thread. */

@@ -656,6 +656,9 @@ ECode Arrays::DeepToString(
         for (Int32 i = 0; i < length; ++i) {
             AutoPtr<IInterface> element;
             array->Get(i, (IInterface**)&element);
+            if (i != 0) {
+                sb += ", ";
+            }
             DeepToString(element, origArray, sb);
         }
         sb.AppendChar(']');

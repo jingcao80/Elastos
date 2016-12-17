@@ -27,6 +27,7 @@ using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IOnEditorActionListener;
 using Elastos::Core::Object;
+using Elastos::Utility::IMap;
 
 using Org::Alljoyn::Bus::BusListener;
 using Org::Alljoyn::Bus::IBusAttachment;

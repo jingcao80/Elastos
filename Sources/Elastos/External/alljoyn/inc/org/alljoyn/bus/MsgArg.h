@@ -348,6 +348,9 @@ private:
         /* [in] */ const String& sig,
         /* [out] */ IInterface** arg);
 
+    static InterfaceID GetInterfaceIDByTypeId(
+        /* [in] */ Char32 typeId);
+
 private:
     /*
      * The AllJoyn data type IDs.
