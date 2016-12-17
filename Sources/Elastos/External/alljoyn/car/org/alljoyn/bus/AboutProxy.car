@@ -1,0 +1,21 @@
+
+module
+{
+    interface Org.Alljoyn.Bus.Ifaces.IAbout;
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * Get proxy access to the org.alljoyn.About interface.
+     *
+     * This class enables the user to interact with the remote About BusObject
+     */
+    interface IAboutProxy {
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

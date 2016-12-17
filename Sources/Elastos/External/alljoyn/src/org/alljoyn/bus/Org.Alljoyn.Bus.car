@@ -4,10 +4,16 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     merge("../../../../car/org/alljoyn/bus/Exception.car");
+    merge("../../../../car/org/alljoyn/bus/AboutData.car");
     merge("../../../../car/org/alljoyn/bus/AboutDataListener.car");
+    merge("../../../../car/org/alljoyn/bus/AboutIcon.car");
+    merge("../../../../car/org/alljoyn/bus/AboutIconObj.car");
+    merge("../../../../car/org/alljoyn/bus/AboutIconProxy.car");
+    merge("../../../../car/org/alljoyn/bus/AboutKeys.car");
     merge("../../../../car/org/alljoyn/bus/AboutListener.car");
     merge("../../../../car/org/alljoyn/bus/AboutObj.car");
     merge("../../../../car/org/alljoyn/bus/AboutObjectDescription.car");
+    merge("../../../../car/org/alljoyn/bus/AboutProxy.car");
     merge("../../../../car/org/alljoyn/bus/AuthListener.car");
     merge("../../../../car/org/alljoyn/bus/BusAttachment.car");
     merge("../../../../car/org/alljoyn/bus/BusListener.car");
@@ -43,10 +49,9 @@ module
     merge("../../../../car/org/alljoyn/bus/ifaces/Peer.car");
     merge("../../../../car/org/alljoyn/bus/ifaces/Properties.car");
 
-
+    interface Org.Alljoyn.Bus.Ifaces.IIcon;
     using interface Elastos.IO.ICloseable;
 
-    
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
@@ -57,6 +62,181 @@ module
     }
 
     } // namespace Alljoyn
+
+    class CAboutData {
+        /**
+         * Create an AboutData class. The default language will will not be set.
+         * Use the constructor that takes a default language tag; or set the
+         * language using the SetDefaultLanguage member function, CreateFromMsgArg
+         * member function or the CreateFromXml member function.
+         *
+         * The default language should be specified before any tag that requires
+         * localization. These tags are.
+         *  - DeviceName
+         *  - AppName
+         *  - Manufacturer
+         *  - Description
+         * @throws BusException
+         */
+        constructor();
+
+        /**
+         * constructor
+         *
+         * @param defaultLanguage a Locale containing a IETF language tag specified
+         *                        by RFC 5646 specifying the default language for the
+         *                        AboutData fields
+         * @throws BusException
+         */
+        constructor(
+            [in] String defaultLanguage);
+
+        /**
+         * constructor
+         *
+         * All Localized tags will be set to the default language.
+         *
+         * @param aboutData Map containing the AboutData dictionary
+         *
+         * @throws BusException
+         */
+        constructor(
+            [in] IMap* aboutData);
+
+        /**
+         * constructor
+         *
+         * @param aboutData Map containing the AboutData dictionary
+         * @param language a Locale containing a IETF language tag specified by RFC 5646
+         *
+         * @throws BusException
+         */
+
+        constructor(
+            [in] IMap* aboutData,
+            [in] String language);
+
+        interface IAboutData;
+        interface IAboutDataListener;
+        interface IAboutKeys;
+    }
+
+    [deprecated]
+    class CAboutIcon {
+        /**
+         * Set the content for an icon.  The content must fit into a MsgArg so the
+         * largest size for the icon data is MAX_CONTENT_LENGTH bytes.
+         *
+         * Note as long as the MIME type matches it is possible to set both icon content
+         * and icon URL
+         *
+         * If an error is returned the icon content will remain unchanged.
+         *
+         * @param mimeType a MIME type indicating the icon image type. Typical
+         *                     value will be `image/jpeg` or `image/png`
+         * @param content  an array of bytes that represent an icon
+         *
+         * @throws BusException if unable to create AboutIcon
+         * <ul>
+         *   <li>"MAX_CONTENT_LENGTH exceeded" if icon is too large</li>
+         * </ul>
+         */
+        constructor(
+            [in] String mimeType,
+            [in] ArrayOf<Byte>* content);
+
+        /**
+         * Set a URL that contains the icon for the application.
+         *
+         * @param mimeType a MIME type indicating the icon image type. Typical
+         *                     value will be `image/jpeg` or `image/png`
+         * @param url      A URL that contains the location of the icon hosted in
+         *                     the cloud.
+         *
+         * @throws BusException if unable to create AboutIcon
+         */
+        constructor(
+            [in] String mimeType,
+            [in] String url);
+
+        /**
+         * Set the URL and content for an icon.  The content must fit into a MsgArg so the
+         * largest size for the icon data is MAX_CONTENT_LENGTH bytes.
+         *
+         * Note the MIME type for the content and the URL must match
+         *
+         * If an error is returned the icon content will remain unchanged.
+         *
+         * @param mimeType a MIME type indicating the icon image type. Typical
+         *                     value will be `image/jpeg` or `image/png`
+         * @param url      A URL that contains the location of the icon hosted in
+         *                 the cloud.
+         * @param content  an array of bytes that represent an icon
+         *
+         * @throws BusException if unable to create AboutIcon
+         * <ul>
+         *   <li>"MAX_CONTENT_LENGTH exceeded" if icon is too large</li>
+         * </ul>
+         */
+        constructor(
+            [in] String mimeType,
+            [in] String url,
+            [in] ArrayOf<Byte>* content);
+
+        interface IAboutIcon;
+    }
+
+    [local]
+    class CAboutIconObj {
+        /**
+         * Create an About Icon BusObject
+         *
+         * @param bus BusAttachment instance associated with this BusObject
+         * @param icon instance of an AboutIcon which holds the icon image
+         */
+        constructor(
+            [in] IBusAttachment* bus,
+            [in] IAboutIcon* icon);
+
+        interface IAboutIconObj;
+        interface IIcon;
+        interface IBusObject;
+    }
+
+    [local]
+    class CAboutIconProxy {
+        /**
+         * AboutProxy constructor
+         *
+         * @param bus the BusAttachment that owns this ProxyBusObject
+         * @param busName the unique or well-known name of the remote AllJoyn BusAttachment
+         * @param sessionId the session ID this ProxyBusObject will use
+         */
+        constructor(
+            [in] IBusAttachment* bus,
+            [in] String busName,
+            [in] Int32 sessionId);
+
+        interface IAboutIconProxy;
+        interface IIcon;
+    }
+
+    [local]
+    class CAboutProxy {
+        /**
+         * AboutProxy constructor
+         *
+         * @param bus the BusAttachment that owns this ProxyBusObject
+         * @param busName the unique or well-known name of the remote AllJoyn BusAttachment
+         * @param sessionId the session ID this ProxyBusObject will use
+         */
+        constructor(
+            [in] IBusAttachment* bus,
+            [in] String busName,
+            [in] Int32 sessionId);
+
+        interface IAboutProxy;
+    }
 
     class CBusAttachment {
         /**

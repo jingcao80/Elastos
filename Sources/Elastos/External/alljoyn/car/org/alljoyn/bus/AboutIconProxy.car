@@ -1,0 +1,20 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * @Involve
+     * interface IIcon
+     */
+    interface IAboutIconProxy {
+        GetAboutIcon(
+            [out] IAboutIcon** aboutIcon);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

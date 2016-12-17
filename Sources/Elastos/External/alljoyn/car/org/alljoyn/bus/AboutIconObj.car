@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * AboutIconObj is an AllJoyn BusObject that implements the org.alljoyn.Icon
+     * standard interface. Applications that provide AllJoyn IoE services to receive
+     * info about the Icon of the service.
+     */
+    /**
+     * @Involve
+     * interface IIcon
+     * interface IBusObject
+     */
+    interface IAboutIconObj {
+
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

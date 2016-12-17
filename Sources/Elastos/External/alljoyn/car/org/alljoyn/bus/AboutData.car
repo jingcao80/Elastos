@@ -1,0 +1,739 @@
+
+module
+{
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.IUUID;
+    interface Org.Alljoyn.Bus.IVariant;
+
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * @Involve
+     * interface IAboutDataListener
+     * interface IAboutKeys
+     */
+    [deprecated]
+    interface IAboutData {
+        /**
+         * The AboutData has all of the required fields
+         *
+         * If no language is given default language will be checked
+         *
+         * @param language a Locale containing a IETF language tag specified by RFC 5646
+         *
+         * @return true if all required field are listed for the given language
+         */
+        IsValid(
+            [in] String language,
+            [out] Boolean* res);
+
+        /**
+         * The AboutData has all of the required fields.
+         *
+         * Only fields for the default language will be checked.
+         *
+         * @return true if all required field are listed for the given language
+         */
+        IsValid(
+            [out] Boolean* res);
+
+        /**
+         * Fill in the AboutData fields using a String/Variant Map.
+         *
+         * The MsgArg must contain a dictionary of type a{sv} The expected use of this
+         * class is to fill in the AboutData using a Map obtain from the Announce
+         * signal or the GetAboutData method from org.alljoyn.about interface.
+         *
+         * @param aboutData Map containing the AboutData dictionary
+         * @param language a Locale containing a IETF language tag specified by RFC 5646
+         *
+         * @throws BusException indicating that the aboutData Map is missing a
+         *                      required field. Typically this means the default
+         *                      language was not specified.
+         */
+        CreateFromAnnoncedAboutData(
+            [in] IMap* aboutData,
+            [in] String language);
+
+        /**
+         * Fill in the AboutData fields using a String/Variant Map.
+         *
+         * All Localized tags will be set to the default language.
+         *
+         * The MsgArg must contain a dictionary of type a{sv} The expected use of this
+         * class is to fill in the AboutData using a Map obtain from the Announce
+         * signal or the GetAboutData method from org.alljoyn.about interface.
+         *
+         * @param aboutData Map containing the AboutData dictionary
+         *
+         * @throws BusException indicating that the aboutData Map is missing a
+         *                      required field. Typically this means the default
+         *                      language was not specified.
+         */
+        CreateFromAnnouncedAboutData(
+            [in] IMap* aboutData);
+
+        /**
+         * Set the AppId for the AboutData
+         *
+         * AppId Should be a 128-bit UUID as specified in by RFC 4122.
+         *
+         * Passing in non-128-bit byte arrays will still Set the AppId but the
+         * setAppId member function will always throw a BusException indicating
+         * the AppId is not 128-bits (16-bytes).
+         *
+         * AppId IS required
+         * AppId IS part of the Announce signal
+         * AppId CAN NOT be localized for other languages
+         *
+         * @param appId the a globally unique array of bytes used as an ID for the
+         *              application
+         *
+         * @throws BusException if the AppId is not a 128-bit field
+         */
+        SetAppId(
+            [in] ArrayOf<Byte>* appId);
+
+        /**
+         * Get the AppId from the AboutData
+         *
+         * AppId IS required
+         * AppId IS part of the Announce signal
+         * AppId CAN NOT be localized for other languages
+         *
+         * @return bytes representing a unique AppId
+         *
+         * @throws BusException indicating failure to find the AppId
+         */
+        GetAppId(
+            [out, callee] ArrayOf<Byte>* appId);
+
+        /**
+         * Set the AppId for the AboutData using a hex encoded String.
+         *
+         * AppId IS required
+         * AppId IS part of the Announce signal
+         * AppId CAN NOT be localized for other languages
+         *
+         * @param appId Hex encoded String representing a globally unique array of bytes used
+         *              as an ID for the application.
+         *
+         * @throws BusException indicating failure to set the AppId
+         */
+        SetAppId(
+            [in] String appId);
+
+        GetAppIdAsHexString(
+            [out] String* appId);
+
+        /**
+         * Set the AppId for the AboutData using a UUID.
+         *
+         * Unlike setAppId(byte[]) this member function will only set the AppId if
+         * a UUID is specified.
+         *
+         * AppId IS required
+         * AppId IS part of the Announce signal
+         * AppId CAN NOT be localized for other languages
+         *
+         * @param appId UUID representing a globally unique array of bytes used
+         *              as an ID for the application.
+         *
+         * @throws BusException indicating failure to set the AppId
+         */
+        SetAppId(
+            [in] IUUID* appId);
+
+        /**
+         * Get the AppId UUID from the AboutData
+         *
+         * AppId IS required
+         * AppId IS part of the Announce signal
+         * AppId CAN NOT be localized for other languages
+         *
+         * @return the UUID for the AppId
+         *
+         * @throws BusException indicating failure to find the AppId
+         */
+        GetAppIdAsUUID(
+            [out] IUUID** appId);
+
+        /**
+         * Set the default language.
+         *
+         * This Locale language tag is automatically added to the SupportedLanguage
+         * list. The Locale language tag should be an IETF language tag specified by
+         * RFC 5646.
+         *
+         * DefaultLanguage is Required
+         * DefaultLanguage is part of the Announce signal
+         *
+         * @param defaultLanguage Locale specifying the IETF language tag for the
+         *                        default language
+         *
+         * @throws BusException indicating error when setting the default language
+         */
+        SetDefaultLanguage(
+            [in] String defaultLanguage);
+
+        /**
+         * Get the DefaultLanguage from the AboutData
+         *
+         * @return Locale indicating the default language.
+         * @throws BusException indicating failure to get the default language
+         */
+        GetDefaultLanguage(
+            [out] String* language);
+
+        /**
+         * Set the DeviceName to the AboutData
+         *
+         * DeviceName is not required
+         * DeviceName is part of the Announce signal
+         * DeviceName can be localized for other languages
+         *
+         * @param deviceName the deviceName (UTF8 encoded string)
+         * @param language Locale language tag specified by RFC 5646 if language is
+         *                 NULL the DeviceName will be set for the default language.
+         *
+         * @throws BusException indicating failure to set the device name
+         */
+        SetDeviceName(
+            [in] String deviceName,
+            [in] String language);
+
+        /**
+         * Set the DeviceName to the AboutData for the default language
+         *
+         * Default language must be set.
+         *
+         * DeviceName is not required
+         * DeviceName is part of the Announce signal
+         * DeviceName can be localized for other languages
+         *
+         * @param deviceName deviceName the deviceName (UTF8 encoded string)
+         *
+         * @throws BusException indicating failure to set the device name
+         */
+        SetDeviceName(
+            [in] String deviceName);
+
+        /**
+         * Get the DeviceName from the About data
+         *
+         * DeviceName is not required
+         * DeviceName is part of the Announce signal
+         * DeviceName can be localized for other languages
+         *
+         * @param language Locale for the IETF language tag specified by RFC 5646
+         *                 if language is NULL the DeviceName for the default
+         *                 language will be returned.
+         *
+         * @return the deviceName found in the AboutData
+         * @throws BusException error indicating failure to obtain the device name
+         */
+        GetDeviceName(
+            [in] String language,
+            [out] String* deviceName);
+
+        GetDeviceName(
+            [out] String* deviceName);
+
+        /**
+         * Set the DeviceId from the AboutData
+         *
+         * DeviceId IS required
+         * DeviceId IS part of the announce signal
+         * DeviceId CAN NOT be localized for other languages
+         *
+         * @param deviceId is a string with a value generated using platform specific
+         *                 means
+         *
+         * @throws BusException indicating failure to obtain the device id.
+         */
+        SetDeviceId(
+            [in] String deviceId);
+
+        /**
+         * Get the DeviceId from the AboutData
+         *
+         * DeviceId IS required
+         * DeviceId IS part of the announce signal
+         * DeviceId CAN NOT be localized for other languages
+         *
+         * @return the DeviceId string
+         * @throws BusException indicating failure to find device id.
+         */
+        GetDeviceId(
+            [out] String* deviceId);
+
+        /**
+         * Set the AppName to the AboutData
+         *
+         * AppName is required
+         * AppName is part of the announce signal
+         * AppName can be localized for other languages
+         *
+         * @param appName the AppName (UTF8 encoded string)
+         * @param language Locale for the IETF language tag specified by RFC 5646
+         *                 if language is NULL the AppName will be set for the
+         *                 default language.
+         *
+         * @throws BusException indicating failure to set the AppName.
+         */
+        SetAppName(
+            [in] String appName,
+            [in] String language);
+
+        /**
+         * Set the AppName to the AboutData for the default language.
+         *
+         * AppName is required
+         * AppName is part of the announce signal
+         * AppName can be localized for other languages
+         *
+         * @param appName the AppName (UTF8 encoded string)
+         *
+         * @throws BusException indicating failure to set the AppName.
+         */
+        SetAppName(
+            [in] String appName);
+
+        /**
+         * Get the AppName from the About data
+         *
+         * AppName is required
+         * AppName is part of the announce signal
+         * AppName can be localized for other languages
+         *
+         * @param language Locale for the IETF language tag specified by RFC 5646
+         *                 if language is NULL the AppName for the default language
+         *                 will be returned.
+         *
+         * @return The application name
+         * @throws BusException indicates failure to obtain the application name.
+         */
+        GetAppName(
+            [in] String language,
+            [out] String* appName);
+
+        /**
+         * Get the AppName from the About data for the default language
+         *
+         * AppName is required
+         * AppName is part of the announce signal
+         * AppName can be localized for other languages
+         *
+         * @return The application name
+         * @throws BusException indicates failure to obtain the application name.
+         */
+        GetAppName(
+            [out] String* appName);
+
+        /**
+         * Set the Manufacture for the AboutData
+         *
+         * Manufacture is required
+         * Manufacture is part of the announce signal
+         * Manufacture can be localized for other languages
+         *
+         * @param manufacturer the Manufacturer (UTF8 encoded string)
+         * @param language Locale containing the IETF language tag specified by
+         *                 RFC 5646 if language is NULL the Manufacture will be set
+         *                 for the default language.
+         *
+         * @throws BusException unable to set the Manufacture
+         */
+        SetManufacturer(
+            [in] String manufacturer,
+            [in] String language);
+
+        /**
+         * Set the Manufacture for the AboutData for the default language.
+         *
+         * Manufacture is required
+         * Manufacture is part of the announce signal
+         * Manufacture can be localized for other languages
+         *
+         * @param manufacturer the Manufacturer (UTF8 encoded string)
+         *
+         * @throws BusException unable to set the Manufacture
+         */
+        SetManufacturer(
+            [in] String manufacturer);
+
+        /**
+         * Get the Manufacturer from the About data.
+         *
+         * Manufacture is required
+         * Manufacture is part of the announce signal
+         * Manufacture can be localized for other languages
+         *
+         * @param language Locale containing the IETF language tag specified by
+         *                 RFC 5646 if language is NULL the Manufacturer for the
+         *                 default language will be returned.
+         *
+         * @return The Manufacture for the specified language
+         * @throws BusException indicating failure to obtain the manufacturer name
+         */
+        GetManufacturer(
+            [in] String language,
+            [out] String* manufacturer);
+
+        /**
+         * Get the Manufacturer from the About data for the default language.
+         *
+         * Manufacture is required
+         * Manufacture is part of the announce signal
+         * Manufacture can be localized for other languages
+         *
+         * @return The Manufacture for the default language.
+         * @throws BusException indicating failure to obtain the manufacturer name
+         */
+        GetManufacturer(
+            [out] String* manufacturer);
+
+        /**
+         * Set the ModelNumber to the AboutData
+         *
+         * ModelNumber is required
+         * ModelNumber is part of the announce signal
+         * ModelNumber can not be localized for other languages
+         *
+         * @param modelNumber the application model number
+         *
+         * @throws BusException indicating failure to set the model number
+         */
+        SetModelNumber(
+            [in] String modelNumber);
+
+        /**
+         * Get the ModelNumber from the AboutData
+         *
+         * ModelNumber IS required
+         * ModelNumber IS part of the announce signal
+         * ModelNumber CAN NOT be localized for other languages
+         *
+         * @return the model number
+         * @throws BusException indicating failure to obtain the model number
+         */
+        GetModelNumber(
+            [out] String* modelNumber);
+
+        /**
+         * Set a supported language.
+         *
+         * This is a Locale representing the a single language. The language is
+         * specified in a Locale using IETF language tags specified by the RFC 5646.
+         *
+         * If the language tag has already been added no error will be thrown. The
+         * method will returned with no changes being made.
+         *
+         * @param language Locale containing the IETF language tag
+         *
+         * @throws BusException indicating failure to set the language tag.
+         */
+        SetSupportedLanguage(
+            [in] String language);
+
+        /**
+         * Set supported languages.
+         *
+         * This is an array of Locals representing the supported languages. The
+         * languages are specified in a Locals using IETF language tags specified
+         * by the RFC 5646.
+         *
+         * If a language tag has already been added no error will be thrown. The
+         * method will continue to add other languages in the array.
+         *
+         * @param languages An array of Locals containing the IETF language tag
+         *
+         * @throws BusException indicating failure to set the language tags.
+         */
+        SetSupportedLanguages(
+            [in] ArrayOf<String>* languages);
+
+        /**
+         * Get and array of supported languages
+         *
+         * @return An array of locals containing languageTags.
+         * @throws BusException indicating failure obtaining language tags
+         */
+        GetSupportedLanguages(
+            [out, callee] ArrayOf<String>* languages);
+
+        /**
+         * Set the Description to the AboutData
+         *
+         * Description IS required
+         * Description IS NOT part of the announce signal
+         * Description CAN BE localized for other languages
+         *
+         * @param description the Description (UTF8 encoded string)
+         * @param language Locale containing the IETF language tag specified by
+         *                 RFC 5646 if language is NULL the Description will be set
+         *                 for the default language.
+         *
+         * @throws BusException indicating failure to set the description.
+         */
+        SetDescription(
+            [in] String description,
+            [in] String language);
+
+        /**
+         * Set the Description to the AboutData for the default language.
+         *
+         * Description IS required
+         * Description IS NOT part of the announce signal
+         * Description CAN BE localized for other languages
+         *
+         * @param description the Description (UTF8 encoded string)
+         *
+         * @throws BusException indicating failure to set the description.
+         */
+        SetDescription(
+            [in] String description);
+
+        /**
+         * Get the Description from the About data
+         *
+         * Description IS required
+         * Description IS NOT part of the announce signal
+         * Description CAN BE localized for other languages
+         *
+         * @param language the IETF language tag specified by RFC 5646
+         *        if language is NULL the Description for the default language will be returned.
+         *
+         * @return The description.
+         * @throws BusException indicating failure to get the description
+         */
+        GetDescription(
+            [in] String language,
+            [out] String* description);
+
+        /**
+         * Get the Description from the About data for the default language.
+         *
+         * Description IS required
+         * Description IS NOT part of the announce signal
+         * Description CAN BE localized for other languages
+         *
+         * @return The description for the default language.
+         * @throws BusException indicating failure to get the description
+         */
+        GetDescription(
+            [out] String* description);
+
+        /**
+         * Set the DateOfManufacture to the AboutData
+         *
+         * The date of manufacture using the format YYYY-MM-DD.  Known as XML
+         * DateTime format.
+         *
+         * ModelNumber IS NOT required
+         * ModelNumber IS NOT part of the announce signal
+         * ModelNumber CAN NOT be localized for other languages
+         *
+         * @param dateOfManufacture the date of manufacture using YYYY-MM-DD format
+         *
+         * @throws BusException indicating failure to set the date of manufacture
+         */
+        SetDateOfManufacture(
+            [in] String dateOfManufacture);
+
+        /**
+         * Get the DatOfManufacture from the AboutData
+         *
+         * The date of manufacture using the format YYYY-MM-DD.  Known as XML
+         * DateTime format.
+         *
+         * ModelNumber IS NOT required
+         * ModelNumber IS NOT part of the announce signal
+         * ModelNumber CAN NOT be localized for other languages
+         *
+         * @return the date of manufacture
+         * @throws BusException indicating failure to get the date of manufacture.
+         */
+        GetDateOfManufacture(
+            [out] String* dateOfManufacture);
+
+        /**
+         * Set the SoftwareVersion to the AboutData
+         *
+         * SoftwareVersion IS required
+         * SoftwareVersion IS NOT part of the announce signal
+         * SoftwareVersion CAN NOT be localized for other languages
+         *
+         * @param softwareVersion the software version for the OEM software
+         *
+         * @throws BusException indicating failure to set the software version.
+         */
+        SetSoftwareVersion(
+            [in] String softwareVersion);
+
+        /**
+         * Get the SoftwareVersion from the AboutData
+         *
+         * SoftwareVersion IS required
+         * SoftwareVersion IS NOT part of the announce signal
+         * SoftwareVersion CAN NOT be localized for other languages
+         *
+         * @return The software version
+         * @throws BusException indicating failure to get the software version.
+         */
+        GetSoftwareVersion(
+            [out] String* softwareVersion);
+
+        /**
+         * Get the AJSoftwareVersion from the AboutData
+         *
+         * The AJSoftwareVersion is automatically set when the AboutData is created
+         * or when it is read from remote device.
+         *
+         * ModelNumber IS required
+         * ModelNumber IS NOT part of the announce signal
+         * ModelNumber CAN NOT be localized for other languages
+         *
+         * @return the AllJoyn software version
+         * @throws BusException indicating failure to get the AllJoyn software version
+         */
+        GetAJSoftwareVersion(
+            [out] String* softwareVersion);
+
+        /**
+         * Set the HardwareVersion to the AboutData
+         *
+         * HardwareVersion IS NOT required
+         * HardwareVersion IS NOT part of the announce signal
+         * HardwareVersion CAN NOT be localized for other languages
+         *
+         * @param hardwareVersion the device hardware version
+         *
+         * @throws BusException indicating failure to set the hardware version
+         */
+        SetHardwareVersion(
+            [in] String hardwareVersion);
+
+        /**
+         * Get the HardwareVersion from the AboutData
+         *
+         * HardwareVersion IS NOT required
+         * HardwareVersion IS NOT part of the announce signal
+         * HardwareVersion CAN NOT be localized for other languages
+         *
+         * @return The hardware version
+         * @throws BusException indicating failure to read the hardware version.
+         */
+        GetHardwareVersion(
+            [out] String* hardwareVersion);
+
+        /**
+         * Set the SupportUrl to the AboutData
+         *
+         * SupportUrl IS NOT required
+         * SupportUrl IS NOT part of the announce signal
+         * SupportUrl CAN NOT be localized for other languages
+         *
+         * @param supportUrl the support URL to be populated by OEM
+         *
+         * @throws BusException indicating failure to set the support URL
+         */
+        SetSupportUrl(
+            [in] String supportUrl);
+
+        /**
+         * Get the SupportUrl from the AboutData
+         *
+         * SupportUrl IS NOT required
+         * SupportUrl IS NOT part of the announce signal
+         * SupportUrl CAN NOT be localized for other languages
+         *
+         * @return The support URL
+         * @throws BusException indicating failure to get the support URL
+         */
+        GetSupportUrl(
+            [out] String* supportUrl);
+
+        /**
+         * generic way to Set new field.  Every field could be set this way.
+         *
+         * Unless the generic field is one of the pre-defined fields when they are
+         * set they will have the following specifications
+         *   NOT required
+         *   NOT part of the announce signal
+         *   CAN be localized if it is a string NOT localized otherwise
+         *
+         * Since every field can be localized even if the field is not localized it
+         * must be set for every language.
+         *
+         * @param name     the name of the field to set
+         * @param value    a MsgArg that contains the value that is set for the field
+         * @param language The IETF language tag specified by RFC 5646 if language
+         *                 is NULL the default language will be used.  Only used for
+         *                 fields that are marked as localizable.
+         *
+         * @throws BusException indicating failure to set the field
+         */
+        SetField(
+            [in] String name,
+            [in] IVariant* value,
+            [in] String language);
+
+        SetField(
+            [in] String name,
+            [in] IVariant* value);
+
+        /**
+         * Is the given field name required to make an About announcement
+         *
+         * @param fieldName the name of the field
+         *
+         * @return
+         * <ul>
+         *   <li> <code>true</code> if the field is required to make an About announcement</li>
+         *   <li> <code>false</code> otherwise.  If the fieldName is unknown false will be returned</li>
+         * </ul>
+         */
+        IsFieldRequired(
+            [in] String fieldName,
+            [out] Boolean* res);
+
+        /**
+         * Is the given field part of the announce signal
+         *
+         * @param fieldName the name of the field
+         *
+         * @return
+         * <ul>
+         *   <li><code>true</code> if the field is part of the announce signal</li>
+         *   <li><code>false</code> otherwise.  If the fieldName is unknown false will be returned</li>
+         * </ul>
+         */
+        IsFieldAnnounced(
+            [in] String fieldName,
+            [out] Boolean* res);
+
+        /**
+         * Is the given field a localized field.
+         *
+         * Localized fields should be provided for every supported language.
+         *
+         * @param fieldName the name of the field
+         *
+         * @return
+         * <ul>
+         *   <li><code>true</code> if the field is a localizable value</li>
+         *   <li><code>false</code> otherwise.  If the fieldName is unknown false will be returned.</li>
+         * </ul>
+         */
+        IsFieldLocalized(
+            [in] String fieldName,
+            [out] Boolean* res);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

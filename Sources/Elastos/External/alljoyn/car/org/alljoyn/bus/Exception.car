@@ -1089,4 +1089,11 @@ module
 
     /** <b><tt>0xa004</tt></b> An AuthListener is already set on this BusAttachment. */
     const E_STATUS_ALREADY_REGISTERED = 0xa004;
+
+    //==========================================================================
+    // Elastos alljoyn exception codes (Family: 0x72 - F2)
+    const E_BUS_EXCEPTION                           = 0xF2000000;
+    const E_ANNOTATION_BUS_EXCEPTION                = 0xF2010000;
+    const E_ERROR_REPLY_BUS_EXCEPTION               = 0xF2020000;
+    const E_MARSHAL_BUS_EXCEPTION                   = 0xF2030000;
 }

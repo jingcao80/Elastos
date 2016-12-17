@@ -1,0 +1,34 @@
+
+module
+{
+    namespace Org {
+    namespace Alljoyn {
+    namespace Bus {
+
+    /**
+     * Container class to hold information about an icon
+     */
+    interface IAboutIcon {
+        /**
+         * @return A string indicating the image MIME type
+         */
+        GetMimeType(
+            [out] String* mimetype);
+
+        /**
+         * @return A URL indicating the cloud location of the icon
+         */
+        GetUrl(
+            [out] String* url);
+
+        /**
+         * @return an array of bytes containing the binary content for the icon
+         */
+        GetContent(
+            [out, callee] ArrayOf<Byte>* content);
+    }
+
+    } // namespace Bus
+    } // namespace Alljoyn
+    } // namespace Org
+}

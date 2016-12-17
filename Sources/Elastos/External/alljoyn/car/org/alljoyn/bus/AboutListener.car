@@ -1,12 +1,31 @@
 
 module
 {
+    using interface Elastos.Utility.IMap;
+    interface Org.Alljoyn.Bus.IAboutObjectDescription;
+
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
 
+    [deprecated]
     interface IAboutListener {
-
+        /**
+         * Called by the bus when an announcement containing information about the
+         * application and interfaces is found
+         *
+         * @param busName   well know name of the remote BusAttachment
+         * @param version   version of the Announce signal from the remote About Object
+         * @param port      SessionPort used by the announcer
+         * @param objectDescriptions a list of object paths and interfaces in the announcement
+         * @param aboutData a dictionary of key/value pairs of the AboutData
+         */
+        Announced(
+            [in] String busName,
+            [in] Int32 ver,
+            [in] Int16 port,
+            [in] ArrayOf<IAboutObjectDescription*>* objectDescriptions,
+            [in] IMap* aboutData); // Map<String, Variant>
     }
 
     } // namespace Bus
