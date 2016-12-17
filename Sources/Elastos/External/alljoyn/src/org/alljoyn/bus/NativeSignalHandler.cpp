@@ -89,16 +89,16 @@ void NativeSignalHandler::SignalHandler(
     AutoPtr<IArgumentList> args;
     ECode ec = MsgArg::UnmarshalIn(mMethod, (Int64)ajnArgs, (IArgumentList**)&args);
     if (FAILED(ec)) {
-		String methodName;
-		mMethod->GetName(&methodName);
+        String methodName;
+        mMethod->GetName(&methodName);
         Logger::E(TAG, "Failed to Unmarshal for method %s", methodName.string());
         return;
     }
 
     ec = mMethod->Invoke(handler, args);
     if (FAILED(ec)) {
-		String methodName;
-		mMethod->GetName(&methodName);
+        String methodName;
+        mMethod->GetName(&methodName);
         Logger::E(TAG, "%s failed to Invoke method %s", TO_CSTR(handler), methodName.string());
     }
 }

@@ -338,6 +338,16 @@ public:
 private:
     MsgArg();
 
+    static CARAPI MarshalInterface(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& sig,
+        /* [in] */ IInterface* arg);
+
+    static CARAPI UnmarshalInterface(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& sig,
+        /* [out] */ IInterface** arg);
+
 private:
     /*
      * The AllJoyn data type IDs.

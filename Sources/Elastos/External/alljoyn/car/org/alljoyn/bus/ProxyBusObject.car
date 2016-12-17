@@ -2,6 +2,9 @@
 module
 {
     interface Org.Alljoyn.Bus.IPropertiesChangedListener;
+    interface Org.Alljoyn.Bus.IVariant;
+    
+    using interface Elastos.Utility.IMap;
 
     namespace Org {
     namespace Alljoyn {
@@ -104,7 +107,10 @@ module
          * @return Variant containing the value of the property
          * @throws BusException if the named property doesn't exist
          */
-        // public <T> Variant getProperty(Class<T> iface, String propertyName);
+        GetProperty(
+            [in] IInterfaceInfo* iface,
+            [in] String propertyName,
+            [out] IVariant** value);
 
         /**
          * Set a property on an interface on the remote object.
@@ -115,7 +121,10 @@ module
          * @param value the value for the property
          * @throws BusException if the named property doesn't exist or cannot be set
          */
-        // public <T> void setProperty(Class<T> iface, String propertyName, Variant value);
+        SetProperty(
+            [in] IInterfaceInfo* iface,
+            [in] String propertyName,
+            [in] IVariant* value);
 
         /**
          * Get all properties from an interface on the remote object.
@@ -125,7 +134,9 @@ module
          * @return a Map of name/value associations
          * @throws BusException if request cannot be honored
          */
-        // public <T> Map<String, Variant> getAllProperties(Class<T> iface);
+        GetAllProperties(
+            [in] IInterfaceInfo* iface,
+            [out] IMap** map);  //Map<String, Variant>
 
         /**
          * Function to register a handler for property change events.

@@ -9,6 +9,7 @@
 #include <alljoyn/MsgArgUtils.h>
 #include "_Org.Alljoyn.Bus.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IArrayOf;
@@ -27,6 +28,11 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
 using Elastos::Core::IDouble;
 using Elastos::Core::ICharSequence;
+using Elastos::Utility::ISet;;
+using Elastos::Utility::IMap;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 namespace Org {
@@ -34,6 +40,7 @@ namespace Alljoyn {
 namespace Bus {
 
 static const String TAG("MsgArg");
+static const Boolean DEBUG_MAP = TRUE;
 
 MsgArg::CarValue::CarValue(
     /* [in] */ CarDataType type)
@@ -122,6 +129,8 @@ PVoid MsgArg::CarValue::ToValuePtr()
             break;
         default:
             Logger::E(TAG, "CarValue::ToValuePtr unimplemented type = %d", mType);
+            assert(0);
+            break;
     }
     return arg;
 }
@@ -132,74 +141,78 @@ ECode MsgArg::CarValue::SetToArgumentList(
 {
     if (mIOAttribute == ParamIOAttribute_In) {
         switch (mType) {
-            case CarDataType_Int16:
-                args->SetInputArgumentOfInt16(index, mInt16Value);
-                break;
-            case CarDataType_Int32:
-                args->SetInputArgumentOfInt32(index, mInt32Value);
-                break;
-            case CarDataType_Int64:
-                args->SetInputArgumentOfInt64(index, mInt64Value);
-                break;
-            case CarDataType_Byte:
-                args->SetInputArgumentOfByte(index, mByteValue);
-                break;
-            case CarDataType_Double:
-                args->SetInputArgumentOfDouble(index, mDoubleValue);
-                break;
-            case CarDataType_String:
-                args->SetInputArgumentOfString(index, mStringValue);
-                break;
-            case CarDataType_Boolean:
-                args->SetInputArgumentOfBoolean(index, mBooleanValue);
-                break;
-            case CarDataType_Enum:
-                args->SetInputArgumentOfEnum(index, mEnumValue);
-                break;
-            case CarDataType_ArrayOf:
-                args->SetInputArgumentOfCarArray(index, mCarQuintet);
-                break;
-            case CarDataType_Interface:
-                args->SetInputArgumentOfObjectPtr(index, mObjectValue);
-                break;
-            default:
-                Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
+        case CarDataType_Int16:
+            args->SetInputArgumentOfInt16(index, mInt16Value);
+            break;
+        case CarDataType_Int32:
+            args->SetInputArgumentOfInt32(index, mInt32Value);
+            break;
+        case CarDataType_Int64:
+            args->SetInputArgumentOfInt64(index, mInt64Value);
+            break;
+        case CarDataType_Byte:
+            args->SetInputArgumentOfByte(index, mByteValue);
+            break;
+        case CarDataType_Double:
+            args->SetInputArgumentOfDouble(index, mDoubleValue);
+            break;
+        case CarDataType_String:
+            args->SetInputArgumentOfString(index, mStringValue);
+            break;
+        case CarDataType_Boolean:
+            args->SetInputArgumentOfBoolean(index, mBooleanValue);
+            break;
+        case CarDataType_Enum:
+            args->SetInputArgumentOfEnum(index, mEnumValue);
+            break;
+        case CarDataType_ArrayOf:
+            args->SetInputArgumentOfCarArray(index, mCarQuintet);
+            break;
+        case CarDataType_Interface:
+            args->SetInputArgumentOfObjectPtr(index, mObjectValue);
+            break;
+        default:
+            Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
+            assert(0);
+            break;
         }
     }
     else {
         switch (mType) {
-            case CarDataType_Int16:
-                args->SetOutputArgumentOfInt16Ptr(index, &mInt16Value);
-                break;
-            case CarDataType_Int32:
-                args->SetOutputArgumentOfInt32Ptr(index, &mInt32Value);
-                break;
-            case CarDataType_Int64:
-                args->SetOutputArgumentOfInt64Ptr(index, &mInt64Value);
-                break;
-            case CarDataType_Byte:
-                args->SetOutputArgumentOfBytePtr(index, &mByteValue);
-                break;
-            case CarDataType_Double:
-                args->SetOutputArgumentOfDoublePtr(index, &mDoubleValue);
-                break;
-            case CarDataType_String:
-                args->SetOutputArgumentOfStringPtr(index, &mStringValue);
-                break;
-            case CarDataType_Boolean:
-                args->SetOutputArgumentOfBooleanPtr(index, &mBooleanValue);
-                break;
-            case CarDataType_Enum:
-                args->SetOutputArgumentOfEnumPtr(index, &mEnumValue);
-                break;
-            case CarDataType_ArrayOf:
-                args->SetOutputArgumentOfCarArrayPtrPtr(index, &mCarQuintet);
-                break;
-            case CarDataType_Interface:
-                args->SetOutputArgumentOfObjectPtrPtr(index, (IInterface**)&mObjectValue);
-                break;
-            default:
-                Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
+        case CarDataType_Int16:
+            args->SetOutputArgumentOfInt16Ptr(index, &mInt16Value);
+            break;
+        case CarDataType_Int32:
+            args->SetOutputArgumentOfInt32Ptr(index, &mInt32Value);
+            break;
+        case CarDataType_Int64:
+            args->SetOutputArgumentOfInt64Ptr(index, &mInt64Value);
+            break;
+        case CarDataType_Byte:
+            args->SetOutputArgumentOfBytePtr(index, &mByteValue);
+            break;
+        case CarDataType_Double:
+            args->SetOutputArgumentOfDoublePtr(index, &mDoubleValue);
+            break;
+        case CarDataType_String:
+            args->SetOutputArgumentOfStringPtr(index, &mStringValue);
+            break;
+        case CarDataType_Boolean:
+            args->SetOutputArgumentOfBooleanPtr(index, &mBooleanValue);
+            break;
+        case CarDataType_Enum:
+            args->SetOutputArgumentOfEnumPtr(index, &mEnumValue);
+            break;
+        case CarDataType_ArrayOf:
+            args->SetOutputArgumentOfCarArrayPtrPtr(index, &mCarQuintet);
+            break;
+        case CarDataType_Interface:
+            args->SetOutputArgumentOfObjectPtrPtr(index, (IInterface**)&mObjectValue);
+            break;
+        default:
+            Logger::E(TAG, "CarValue::SetToArgumentList unimplemented index = %d, type = %d", index, mType);
+            assert(0);
+            break;
         }
     }
     return NOERROR;
@@ -211,39 +224,44 @@ ECode MsgArg::CarValue::GetFromArgumentList(
 {
     if (mIOAttribute == ParamIOAttribute_In) {
         switch (mType) {
-            case CarDataType_Int16:
-                args->GetInputArgumentOfInt16(index, &mInt16Value);
-                break;
-            case CarDataType_Int32:
-                args->GetInputArgumentOfInt32(index, &mInt32Value);
-                break;
-            case CarDataType_Int64:
-                args->GetInputArgumentOfInt64(index, &mInt64Value);
-                break;
-            case CarDataType_Byte:
-                args->GetInputArgumentOfByte(index, &mByteValue);
-                break;
-            case CarDataType_Double:
-                args->GetInputArgumentOfDouble(index, &mDoubleValue);
-                break;
-            case CarDataType_String:
-                args->GetInputArgumentOfString(index, &mStringValue);
-                break;
-            case CarDataType_Boolean:
-                args->GetInputArgumentOfBoolean(index, &mBooleanValue);
-                break;
-            case CarDataType_Enum:
-                args->GetInputArgumentOfEnum(index, &mEnumValue);
-                break;
-            case CarDataType_ArrayOf:
-                args->GetInputArgumentOfCarArray(index, &mCarQuintet);
-                break;
-            case CarDataType_Interface:
-                args->GetInputArgumentOfObjectPtr(index, (IInterface**)&mObjectValue);
-                break;
-            default:
-                Logger::E(TAG, "CarValue::GetFromArgumentList unimplemented index = %d, type = %d", index, mType);
+        case CarDataType_Int16:
+            args->GetInputArgumentOfInt16(index, &mInt16Value);
+            break;
+        case CarDataType_Int32:
+            args->GetInputArgumentOfInt32(index, &mInt32Value);
+            break;
+        case CarDataType_Int64:
+            args->GetInputArgumentOfInt64(index, &mInt64Value);
+            break;
+        case CarDataType_Byte:
+            args->GetInputArgumentOfByte(index, &mByteValue);
+            break;
+        case CarDataType_Double:
+            args->GetInputArgumentOfDouble(index, &mDoubleValue);
+            break;
+        case CarDataType_String:
+            args->GetInputArgumentOfString(index, &mStringValue);
+            break;
+        case CarDataType_Boolean:
+            args->GetInputArgumentOfBoolean(index, &mBooleanValue);
+            break;
+        case CarDataType_Enum:
+            args->GetInputArgumentOfEnum(index, &mEnumValue);
+            break;
+        case CarDataType_ArrayOf:
+            args->GetInputArgumentOfCarArray(index, &mCarQuintet);
+            break;
+        case CarDataType_Interface:
+            args->GetInputArgumentOfObjectPtr(index, (IInterface**)&mObjectValue);
+            break;
+        default:
+            Logger::E(TAG, "CarValue::GetFromArgumentList unimplemented index = %d, type = %d", index, mType);
+            assert(0);
+            break;
         }
+    }
+    else {
+        assert(0);
     }
 
     return NOERROR;
@@ -255,39 +273,44 @@ ECode MsgArg::CarValue::AssignArgumentListOutput(
 {
     if (mIOAttribute != ParamIOAttribute_In) {
         switch (mType) {
-            case CarDataType_Int16:
-                args->AssignOutputArgumentOfInt16Ptr(index, mInt16Value);
-                break;
-            case CarDataType_Int32:
-                args->AssignOutputArgumentOfInt32Ptr(index, mInt32Value);
-                break;
-            case CarDataType_Int64:
-                args->AssignOutputArgumentOfInt64Ptr(index, mInt64Value);
-                break;
-            case CarDataType_Byte:
-                args->AssignOutputArgumentOfBytePtr(index, mByteValue);
-                break;
-            case CarDataType_Double:
-                args->AssignOutputArgumentOfDoublePtr(index, mDoubleValue);
-                break;
-            case CarDataType_String:
-                args->AssignOutputArgumentOfStringPtr(index, mStringValue);
-                break;
-            case CarDataType_Boolean:
-                args->AssignOutputArgumentOfBooleanPtr(index, mBooleanValue);
-                break;
-            case CarDataType_Enum:
-                args->AssignOutputArgumentOfEnumPtr(index, mEnumValue);
-                break;
-            case CarDataType_ArrayOf:
-                args->AssignOutputArgumentOfCarArrayPtrPtr(index, mCarQuintet);
-                break;
-            case CarDataType_Interface:
-                args->AssignOutputArgumentOfObjectPtrPtr(index, mObjectValue);
-                break;
-            default:
-                Logger::E(TAG, "CarValue::AssignArgumentListOutput unimplemented index = %d, type = %d", index, mType);
+        case CarDataType_Int16:
+            args->AssignOutputArgumentOfInt16Ptr(index, mInt16Value);
+            break;
+        case CarDataType_Int32:
+            args->AssignOutputArgumentOfInt32Ptr(index, mInt32Value);
+            break;
+        case CarDataType_Int64:
+            args->AssignOutputArgumentOfInt64Ptr(index, mInt64Value);
+            break;
+        case CarDataType_Byte:
+            args->AssignOutputArgumentOfBytePtr(index, mByteValue);
+            break;
+        case CarDataType_Double:
+            args->AssignOutputArgumentOfDoublePtr(index, mDoubleValue);
+            break;
+        case CarDataType_String:
+            args->AssignOutputArgumentOfStringPtr(index, mStringValue);
+            break;
+        case CarDataType_Boolean:
+            args->AssignOutputArgumentOfBooleanPtr(index, mBooleanValue);
+            break;
+        case CarDataType_Enum:
+            args->AssignOutputArgumentOfEnumPtr(index, mEnumValue);
+            break;
+        case CarDataType_ArrayOf:
+            args->AssignOutputArgumentOfCarArrayPtrPtr(index, mCarQuintet);
+            break;
+        case CarDataType_Interface:
+            args->AssignOutputArgumentOfObjectPtrPtr(index, mObjectValue);
+            break;
+        default:
+            Logger::E(TAG, "CarValue::AssignArgumentListOutput unimplemented index = %d, type = %d", index, mType);
+            assert(0);
+            break;
         }
+    }
+    else {
+        assert(0);
     }
 
     return NOERROR;
@@ -297,69 +320,73 @@ AutoPtr<IInterface> MsgArg::CarValue::Convert()
 {
     AutoPtr<IInterface> ret;
     switch (mType) {
+    case CarDataType_Int16:
+        ret = CoreUtils::Convert(mInt16Value);
+        break;
+    case CarDataType_Int32:
+        ret = CoreUtils::Convert(mInt32Value);
+        break;
+    case CarDataType_Int64:
+        ret = CoreUtils::Convert(mInt64Value);
+        break;
+    case CarDataType_Byte:
+        ret = CoreUtils::ConvertByte(mByteValue);
+        break;
+    case CarDataType_Double:
+        ret = CoreUtils::Convert(mDoubleValue);
+        break;
+    case CarDataType_String:
+        ret = CoreUtils::Convert(mStringValue);
+        break;
+    case CarDataType_Boolean:
+        ret = CoreUtils::Convert(mBooleanValue);
+        break;
+    case CarDataType_Enum:
+        ret = CoreUtils::Convert(mEnumValue);
+        break;
+    case CarDataType_ArrayOf: {
+        switch (mElementType) {
         case CarDataType_Int16:
-            ret = CoreUtils::Convert(mInt16Value);
+            ret = CoreUtils::Convert((ArrayOf<Int16>*)mCarQuintet);
             break;
         case CarDataType_Int32:
-            ret = CoreUtils::Convert(mInt32Value);
+            ret = CoreUtils::Convert((ArrayOf<Int32>*)mCarQuintet);
             break;
         case CarDataType_Int64:
-            ret = CoreUtils::Convert(mInt64Value);
+            ret = CoreUtils::Convert((ArrayOf<Int64>*)mCarQuintet);
             break;
         case CarDataType_Byte:
-            ret = CoreUtils::ConvertByte(mByteValue);
+            ret = CoreUtils::ConvertByteArray((ArrayOf<Byte>*)mCarQuintet);
             break;
         case CarDataType_Double:
-            ret = CoreUtils::Convert(mDoubleValue);
-            break;
-        case CarDataType_String:
-            ret = CoreUtils::Convert(mStringValue);
+            ret = CoreUtils::Convert((ArrayOf<Double>*)mCarQuintet);
             break;
         case CarDataType_Boolean:
-            ret = CoreUtils::Convert(mBooleanValue);
+            ret = CoreUtils::Convert((ArrayOf<Boolean>*)mCarQuintet);
             break;
         case CarDataType_Enum:
-            ret = CoreUtils::Convert(mEnumValue);
+            ret = CoreUtils::Convert((ArrayOf<Int32>*)mCarQuintet);
             break;
-        case CarDataType_ArrayOf: {
-            switch (mElementType) {
-                case CarDataType_Int16:
-                    ret = CoreUtils::Convert((ArrayOf<Int16>*)mCarQuintet);
-                    break;
-                case CarDataType_Int32:
-                    ret = CoreUtils::Convert((ArrayOf<Int32>*)mCarQuintet);
-                    break;
-                case CarDataType_Int64:
-                    ret = CoreUtils::Convert((ArrayOf<Int64>*)mCarQuintet);
-                    break;
-                case CarDataType_Byte:
-                    ret = CoreUtils::ConvertByteArray((ArrayOf<Byte>*)mCarQuintet);
-                    break;
-                case CarDataType_Double:
-                    ret = CoreUtils::Convert((ArrayOf<Double>*)mCarQuintet);
-                    break;
-                case CarDataType_Boolean:
-                    ret = CoreUtils::Convert((ArrayOf<Boolean>*)mCarQuintet);
-                    break;
-                case CarDataType_Enum:
-                    ret = CoreUtils::Convert((ArrayOf<Int32>*)mCarQuintet);
-                    break;
-                case CarDataType_String:
-                    ret = CoreUtils::Convert((ArrayOf<String>*)mCarQuintet);
-                    break;
-                case CarDataType_Interface:
-                    ret = CoreUtils::Convert((ArrayOf<IInterface*>*)mCarQuintet);
-                    break;
-                default:
-                    Logger::E(TAG, "CarValue::Convert unimplemented mElementType = %d", mElementType);
-            }
+        case CarDataType_String:
+            ret = CoreUtils::Convert((ArrayOf<String>*)mCarQuintet);
             break;
-        }
         case CarDataType_Interface:
-            ret = mObjectValue;
+            ret = CoreUtils::Convert((ArrayOf<IInterface*>*)mCarQuintet);
             break;
         default:
-            Logger::E(TAG, "CarValue::Convert unimplemented type = %d", mType);
+            Logger::E(TAG, "CarValue::Convert unimplemented mElementType = %d", mElementType);
+            assert(0);
+            break;
+        }
+        break;
+    }
+    case CarDataType_Interface:
+        ret = mObjectValue;
+        break;
+    default:
+        Logger::E(TAG, "CarValue::Convert unimplemented type = %d", mType);
+        assert(0);
+        break;
     }
 
     return ret;
@@ -488,6 +515,7 @@ AutoPtr<MsgArg::CarValue> MsgArg::CarValue::Convert(
     }
     else {
         Logger::E(TAG, "CarValue::Convert unimplemented object %s", TO_CSTR(object));
+        assert(0);
     }
 
     return value;
@@ -1169,6 +1197,527 @@ String MsgArg::GetSignature(
     return signature;
 }
 
+
+static AutoPtr<ArrayOf<String> > ConvertStringArray(
+    /* [in] */ IArrayOf* arrayOf)
+{
+    assert(arrayOf != NULL);
+    Int32 length;
+    arrayOf->GetLength(&length);
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(length);
+    InterfaceID iid;
+    arrayOf->GetTypeId(&iid);
+    assert(iid == EIID_ICharSequence);
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IInterface> obj;
+        arrayOf->Get(i, (IInterface**)&obj);
+        String element;
+        ICharSequence::Probe(obj)->ToString(&element);
+        array->Set(i, element);
+    }
+    return array;
+}
+
+template<typename ElementType, typename InterfaceType>
+static AutoPtr<ArrayOf<ElementType> > ConvertArray(
+    /* [in] */ IArrayOf* arrayOf)
+{
+    assert(arrayOf != NULL);
+    Int32 length;
+    arrayOf->GetLength(&length);
+    AutoPtr<ArrayOf<ElementType> > array = ArrayOf<ElementType>::Alloc(length);
+    InterfaceID iid;
+    arrayOf->GetTypeId(&iid);
+
+    assert(iid == EIID_IByte
+        || iid == EIID_IBoolean
+        || iid == EIID_IInteger16
+        || iid == EIID_IInteger32
+        || iid == EIID_IInteger64
+        || iid == EIID_IDouble);
+
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IInterface> obj;
+        arrayOf->Get(i, (IInterface**)&obj);
+        InterfaceType* elementObj = (InterfaceType*)obj->Probe(iid);
+        ElementType element;
+        elementObj->GetValue(&element);
+        array->Set(i, element);
+    }
+    return array;
+}
+
+ECode MsgArg::MarshalInterface(
+    /* [in] */ Int64 msgArg,
+    /* [in] */ const String& sig,
+    /* [in] */ IInterface* arg)
+{
+    if (DEBUG_MAP) {
+        Logger::D(TAG, "MarshalInterface: signature: '%s', arg: %s", sig.string(), TO_CSTR(arg));
+    }
+
+    switch (sig.GetChar(0)) {
+        case ALLJOYN_BYTE: {
+            Byte value;
+            IByte::Probe(arg)->GetValue(&value);
+            Set(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_BOOLEAN: {
+            Boolean value;
+            IBoolean::Probe(arg)->GetValue(&value);
+            SetBoolean(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_INT16:
+        case ALLJOYN_UINT16: {
+            Int16 value;
+            IInteger16::Probe(arg)->GetValue(&value);
+            Set(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_INT32:
+        case ALLJOYN_UINT32: {
+            Int32 value;
+            IInteger32::Probe(arg)->GetValue(&value);
+            Set(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_INT64:
+        case ALLJOYN_UINT64: {
+            Int64 value;
+            IInteger64::Probe(arg)->GetValue(&value);
+            Set(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_DOUBLE: {
+            Double value;
+            IDouble::Probe(arg)->GetValue(&value);
+            Set(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_STRING:
+        case ALLJOYN_SIGNATURE:
+        case ALLJOYN_OBJECT_PATH: {
+            if (arg == NULL) {
+                Logger::E(TAG, "line %d: cannot marshal NULL into '%s'", __LINE__, sig.string());
+                assert(0);
+                // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
+            }
+            String value;
+            ICharSequence::Probe(arg)->ToString(&value);
+            Set(msgArg, sig, value);
+            break;
+        }
+        case ALLJOYN_ARRAY: {
+            if (arg == NULL) {
+                Logger::E(TAG, "line %d: cannot marshal NULL into '%s'", __LINE__, sig.string());
+                assert(0);
+                // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
+            }
+
+            IArrayOf* arrayOf = IArrayOf::Probe(arg);
+            Char32 elementTypeId = sig.GetChar(1);
+
+            switch (elementTypeId) {
+                case ALLJOYN_BYTE: {
+                    AutoPtr< ArrayOf<Byte> > array = ConvertArray<Byte, IByte>(arrayOf);
+                    Set(msgArg, sig, array.Get());
+                    break;
+                }
+
+                case ALLJOYN_BOOLEAN: {
+                    AutoPtr< ArrayOf<Boolean> > array = ConvertArray<Boolean, IBoolean>(arrayOf);
+                    Set(msgArg, sig, array.Get());
+                    break;
+                }
+
+                case ALLJOYN_INT16:
+                case ALLJOYN_UINT16: {
+                    AutoPtr< ArrayOf<Int16> > array = ConvertArray<Int16, IInteger16>(arrayOf);
+                    Set(msgArg, sig, array.Get());
+                    break;
+                }
+
+                case ALLJOYN_INT32:
+                case ALLJOYN_UINT32: {
+                    AutoPtr< ArrayOf<Int32> > array = ConvertArray<Int32, IInteger32>(arrayOf);
+                    Set(msgArg, sig, array.Get());
+                    break;
+                }
+
+                case ALLJOYN_INT64:
+                case ALLJOYN_UINT64: {
+                    AutoPtr< ArrayOf<Int64> > array = ConvertArray<Int64, IInteger64>(arrayOf);
+                    Set(msgArg, sig, array.Get());
+                    break;
+                }
+
+                case ALLJOYN_DOUBLE: {
+                    AutoPtr< ArrayOf<Double> > array = ConvertArray<Double, IDouble>(arrayOf);
+                    Set(msgArg, sig, array.Get());
+                    break;
+                }
+
+                case ALLJOYN_STRING: {
+                    AutoPtr< ArrayOf<String> > array = ConvertStringArray(arrayOf);
+                    String elemSig = sig.Substring(1);
+                    SetArray(msgArg, elemSig, array->GetLength());
+                    for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
+                        Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*array)[i]);
+                    }
+                    break;
+                }
+
+                default: {
+                    if (elementTypeId == ALLJOYN_DICT_ENTRY_OPEN) {
+                        AutoPtr<IMap> map = IMap::Probe(arg);
+                        Int32 length;
+                        map->GetSize(&length);
+                        if (DEBUG_MAP) {
+                            Logger::I(TAG, " >> Marshal map with %d elements: %s", length, TO_CSTR(map));
+                        }
+
+                        String elemSig = sig.Substring(1);
+                        AutoPtr<ArrayOf<String> > sigs =  Signature::Split(elemSig.Substring(1, elemSig.GetLength() - 1));
+                        if (sigs == NULL || sigs->GetLength() < 2) {
+                            Logger::E(TAG, "MarshalBusException: cannot marshal map entry into '%s'", elemSig.string());
+                            return E_FAIL;
+                        }
+
+                        SetArray(msgArg, elemSig, length);
+
+                        AutoPtr<ISet> set;
+                        map->GetEntrySet((ISet**)&set);
+                        AutoPtr<IIterator> it;
+                        set->GetIterator((IIterator**)&it);
+                        length = GetNumElements(msgArg);
+                        Int32 i = 0;
+                        Boolean hasNext;
+                        IMapEntry* entry;
+                        while ((it->HasNext(&hasNext), hasNext) && i < length) {
+                            AutoPtr<IInterface> obj, key, value;;
+                            it->GetNext((IInterface**)&obj);
+                            entry = IMapEntry::Probe(obj);
+                            entry->GetKey((IInterface**)&key);
+                            entry->GetKey((IInterface**)&value);
+
+                            Int64 elementMsgArg = GetElement(msgArg, i++);
+                            SetDictEntry(elementMsgArg);
+                            MarshalInterface(GetKey(elementMsgArg), (*sigs)[0], key);
+                            MarshalInterface(GetVal(elementMsgArg), (*sigs)[1], value);
+                        }
+                    }
+                    else {
+                        Logger::D(TAG,"unimplemented ALLJOYN_ARRAY with signature : %s", sig.string());
+                        assert(0 && "TODO");
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+
+        case ALLJOYN_STRUCT_OPEN: {
+            Logger::D(TAG, "unimplemented '%s'", sig.string());
+            assert(0 && "TODO");
+            // Object[] args = Signature.structArgs(arg);
+            // String[] memberSigs = Signature.split(sig.substring(1, sig.length() - 1));
+            // if (memberSigs == null) {
+            //     throw new MarshalBusException("cannot marshal " + arg.getClass() + " into '"
+            //                                   + sig + "'");
+            // }
+            // SetStruct(msgArg, memberSigs.length);
+            // for (int i = 0; i < getNumMembers(msgArg); ++i) {
+            //     marshal(getMember(msgArg, i), memberSigs[i], args[i]);
+            break;
+        }
+
+        case ALLJOYN_VARIANT: {
+            Logger::D(TAG, "unimplemented '%s'", sig.string());
+            assert(0 && "TODO");
+
+            // CVariant* variant = (CVariant*)IVariant::Probe(arg);
+            // assert(variant);
+            // if (variant->GetMsgArg() != 0) {
+            //     SetVariant(msgArg, sig, variant->GetMsgArg());
+            // }
+            // else {
+            //     SetVariant(msgArg);
+            //     String signature;
+            //     variant->GetSignature(&signature);
+            //     AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
+            //     Marshal(GetVal(msgArg), signature, value->ToValuePtr());
+            // }
+            break;
+        }
+
+        case ALLJOYN_DICT_ENTRY_OPEN: {
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe(arg);
+            AutoPtr<ArrayOf<String> > sigs =  Signature::Split(sig.Substring(1, sig.GetLength() - 1));
+            if (sigs == NULL || sigs->GetLength() < 2) {
+                Logger::E(TAG, "MarshalBusException: cannot marshal %s into '%s'",
+                    TO_CSTR(entry), sig.string());
+                return E_FAIL;
+            }
+
+            if (DEBUG_MAP) {
+                Logger::I(TAG, " >> marshal MapEntry: %s %s", sig.string(), TO_CSTR(entry));
+            }
+
+            SetDictEntry(msgArg);
+
+            AutoPtr<IInterface> key, value;
+            entry->GetKey((IInterface**)&key);
+            entry->GetKey((IInterface**)&value);
+            MarshalInterface(GetKey(msgArg), (*sigs)[0], key);
+            MarshalInterface(GetVal(msgArg), (*sigs)[1], value);
+            break;
+        }
+
+        default: {
+            Logger::D(TAG, "MarshalInterface unimplemented '%s'", sig.string());
+            assert(0);
+            break;
+        }
+    }
+    return NOERROR;
+}
+
+ECode MsgArg::UnmarshalInterface(
+    /* [in] */ Int64 msgArg,
+    /* [in] */ const String& sig,
+    /* [out] */ IInterface** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    switch (sig.GetChar(0)) {
+        case ALLJOYN_BYTE: {
+            AutoPtr<IByte> value = CoreUtils::ConvertByte(GetByte(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_BOOLEAN: {
+            AutoPtr<IBoolean> value = CoreUtils::Convert(GetBool(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_INT16:
+        case ALLJOYN_UINT16: {
+            AutoPtr<IInteger16> value = CoreUtils::Convert(GetInt16(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_INT32:
+        case ALLJOYN_UINT32: {
+            AutoPtr<IInteger32> value = CoreUtils::Convert(GetInt32(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_INT64:
+        case ALLJOYN_UINT64: {
+            AutoPtr<IInteger64> value = CoreUtils::Convert(GetInt64(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_DOUBLE: {
+            AutoPtr<IDouble> value = CoreUtils::Convert(GetDouble(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_STRING: {
+            AutoPtr<ICharSequence> value = CoreUtils::Convert(GetString(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_SIGNATURE: {
+            AutoPtr<ICharSequence> value = CoreUtils::Convert(GetSignature(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case ALLJOYN_OBJECT_PATH: {
+            AutoPtr<ICharSequence> value = CoreUtils::Convert(GetObjPath(msgArg));
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        // case ALLJOYN_ARRAY: {
+        //     if (arg == NULL) {
+        //         Logger::E(TAG, "line %d: cannot marshal NULL into '%s'", __LINE__, sig.string());
+        //         assert(0);
+        //         // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
+        //     }
+
+        //     IArrayOf* arrayOf = IArrayOf::Probe(arg);
+
+        //     Char32 elementTypeId = sig.GetChar(1);
+        //     // if (ALLJOYN_DICT_ENTRY_OPEN == elementTypeId) {
+        //     //     arg = ((Map<?, ?>) arg).entrySet().toArray();
+        //     // }
+        //     switch (elementTypeId) {
+        //     case ALLJOYN_BYTE: {
+        //         AutoPtr< ArrayOf<Byte> > array = ConvertArray<Byte, IByte>(arrayOf);
+        //         Set(msgArg, sig, array.Get());
+        //         break;
+        //     }
+
+        //     case ALLJOYN_BOOLEAN: {
+        //         AutoPtr< ArrayOf<Boolean> > array = ConvertArray<Boolean, IBoolean>(arrayOf);
+        //         Set(msgArg, sig, array.Get());
+        //         break;
+        //     }
+
+        //     case ALLJOYN_INT16:
+        //     case ALLJOYN_UINT16: {
+        //         AutoPtr< ArrayOf<Int16> > array = ConvertArray<Int16, IInteger16>(arrayOf);
+        //         Set(msgArg, sig, array.Get());
+        //         break;
+        //     }
+
+        //     case ALLJOYN_INT32:
+        //     case ALLJOYN_UINT32: {
+        //         AutoPtr< ArrayOf<Int32> > array = ConvertArray<Int32, IInteger32>(arrayOf);
+        //         Set(msgArg, sig, array.Get());
+        //         break;
+        //     }
+
+        //     case ALLJOYN_INT64:
+        //     case ALLJOYN_UINT64: {
+        //         AutoPtr< ArrayOf<Int64> > array = ConvertArray<Int64, IInteger64>(arrayOf);
+        //         Set(msgArg, sig, array.Get());
+        //         break;
+        //     }
+
+        //     case ALLJOYN_DOUBLE: {
+        //         AutoPtr< ArrayOf<Double> > array = ConvertArray<Double, IDouble>(arrayOf);
+        //         Set(msgArg, sig, array.Get());
+        //         break;
+        //     }
+
+        //     case ALLJOYN_STRING: {
+        //         AutoPtr< ArrayOf<String> > array = ConvertStringArray(arrayOf);
+        //         String elemSig = sig.Substring(1);
+        //         SetArray(msgArg, elemSig, array->GetLength());
+        //         for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
+        //             Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*array)[i]);
+        //         }
+        //         break;
+        //     }
+
+        //     default: {
+        //         Logger::D(TAG,"ALLJOYN_ARRAY with signature : %s", sig.string());
+        //     //         if (elementTypeId == ALLJOYN_DICT_ENTRY_OPEN) {
+        //     //             // IMap
+        //     //             AutoPtr<IMap> map = IMap::Probe(*(IInterface**)arg);
+        //     //             Int32 length;
+        //     //             map->GetSize(&length);
+        //     //             Logger::I(TAG, " >> Marshal map with %d elements: %s", length, TO_CSTR(map));
+
+        //     //             String elemSig = sig.Substring(1);
+        //     //             SetArray(msgArg, elemSig, length);
+        //     //             AutoPtr<ISet> set;
+        //     //             map->GetEntrySet((ISet**)&set);
+        //     //             AutoPtr<IIterator> it;
+        //     //             set->GetIterator((IIterator**)&it);
+        //     //             length = GetNumElements(msgArg);
+        //     //             Int32 i = 0;
+        //     //             Boolean hasNext;
+        //     //             IMapEntry* entry;
+        //     //             while ((it->HasNext(&hasNext), hasNext) && i < length) {
+        //     //                 AutoPtr<IInterface> obj;
+        //     //                 it->GetNext((IInterface**)&obj);
+        //     //                 entry = IMapEntry::Probe(obj);
+        //     //                 Logger::I(TAG, "     >> marshal %d : %s", i, TO_CSTR(entry));
+        //     //                 Marshal(GetElement(msgArg, i++), elemSig, (PVoid)&entry);
+        //     //             }
+        //     //         }
+        //     //         else {
+        //     //             Logger::D(TAG,"unimplemented ALLJOYN_ARRAY with signature : %s", sig.string());
+        //     //             assert(0 && "TODO");
+        //     //         }
+        //             break;
+        //         }
+        //     }
+        //     break;
+        // }
+
+        // case ALLJOYN_STRUCT_OPEN: {
+        //         assert(0 && "TODO");
+        //         Logger::D(TAG, "unimplemented '%s'", sig.string());
+        //     // Object[] args = Signature.structArgs(arg);
+        //     // String[] memberSigs = Signature.split(sig.substring(1, sig.length() - 1));
+        //     // if (memberSigs == null) {
+        //     //     throw new MarshalBusException("cannot marshal " + arg.getClass() + " into '"
+        //     //                                   + sig + "'");
+        //     // }
+        //     // SetStruct(msgArg, memberSigs.length);
+        //     // for (int i = 0; i < getNumMembers(msgArg); ++i) {
+        //     //     marshal(getMember(msgArg, i), memberSigs[i], args[i]);
+        //     break;
+        // }
+
+        // case ALLJOYN_VARIANT: {
+        //     Logger::D(TAG, "unimplemented '%s'", sig.string());
+        //     assert(0);
+
+        //     // CVariant* variant = (CVariant*)IVariant::Probe(arg);
+        //     // assert(variant);
+        //     // if (variant->GetMsgArg() != 0) {
+        //     //     SetVariant(msgArg, sig, variant->GetMsgArg());
+        //     // }
+        //     // else {
+        //     //     SetVariant(msgArg);
+        //     //     String signature;
+        //     //     variant->GetSignature(&signature);
+        //     //     AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
+        //     //     Marshal(GetVal(msgArg), signature, value->ToValuePtr());
+        //     // }
+        //     break;
+        // }
+
+        // case ALLJOYN_DICT_ENTRY_OPEN: {
+        //     Logger::D(TAG, "unimplemented '%s'", sig.string());
+        //     assert(0);
+        //     // AutoPtr<IMapEntry> entry = IMapEntry::Probe(*(IInterface**)arg);
+        //     // AutoPtr<ArrayOf<String> > sigs =  Signature::Split(sig.Substring(1, sig.GetLength() - 1));
+        //     // if (sigs == NULL || sigs->GetLength() < 2) {
+        //     //     Logger::E(TAG, "MarshalBusException: cannot marshal %s into '%s'",
+        //     //         TO_CSTR(entry), sig.string());
+        //     //     return E_FAIL;
+        //     // }
+
+        //     // AutoPtr<IInterface> key, value;
+        //     // entry->GetKey((IInterface**)&key);
+        //     // entry->GetKey((IInterface**)&value);
+
+        //     // SetDictEntry(msgArg);
+        //     // Marshal(GetKey(msgArg), (*sigs)[0], key);
+        //     // Marshal(GetVal(msgArg), (*sigs)[1], value);
+        //     break;
+        // }
+
+        default: {
+            Logger::E(TAG, "UnmarshalInterface unimplemented '%s'", sig.string());
+            assert(0);
+            break;
+        }
+    }
+
+    if (DEBUG_MAP) {
+        Logger::D(TAG, "UnmarshalInterface: signature: '%s', value: %s", sig.string(), TO_CSTR(*result));
+    }
+    return NOERROR;
+}
+
 /**
  * Unmarshals a native MsgArg into a Java object.
  *
@@ -1183,160 +1732,99 @@ ECode MsgArg::Unmarshal(
     /* [in] */ CarDataType type,
     /* [out] */ PVoid object)
 {
-    // try {
-        switch (GetTypeId(msgArg)) {
-        case ALLJOYN_ARRAY:
-            // if (GetElemSig(msgArg).GetChar(0) == ALLJOYN_DICT_ENTRY_OPEN) {
-            //     Type rawType = ((ParameterizedType) type).getRawType();
-            //     rawType = (rawType == Map.class) ? HashMap.class : rawType;
-            //     object = ((Class<?>) rawType).newInstance();
-            //     for (int i = 0; i < getNumElements(msgArg); ++i) {
-            //         Int64 element  = getElement(msgArg, i);
-            //         Type[] typeArgs = ((ParameterizedType) type).getActualTypeArguments();
-            //         // TODO Can't seem to get it to suppress the warning here...
-            //         ((Map<Object, Object>) object).put(unmarshal(getKey(element), typeArgs[0]),
-            //                                            unmarshal(getVal(element), typeArgs[1]));
-            //     }
-            //     return object;
-            // } else {
-            //     Type componentType = (type instanceof GenericArrayType)
-            //         ? ((GenericArrayType) type).getGenericComponentType()
-            //         : ((Class<?>) type).getComponentType();
-            //     Class<?> componentClass;
-            //     if (componentType instanceof ParameterizedType) {
-            //         Type rawType = ((ParameterizedType) componentType).getRawType();
-            //         rawType = (rawType == Map.class) ? HashMap.class : rawType;
-            //         componentClass = (Class<?>) rawType;
-            //     } else {
-            //         componentClass = (Class<?>) componentType;
-            //     }
-            //     object = Array.newInstance(componentClass, getNumElements(msgArg));
-            //     for (int i = 0; i < getNumElements(msgArg); ++i) {
-            //         /*
-            //          * Under Sun the Array.set() is sufficient to check the
-            //          * type.  Under Android that is not the case.
-            //          */
-            //         Object component = unmarshal(getElement(msgArg, i), componentType);
-            //         if (!componentClass.isInstance(component)) {
-            //             throw new IllegalArgumentException("argument type mismatch");
-            //         }
-            //         Array.set(object, i, component);
-            //     }
-            //     return object;
-            // }
-            {
-                if (GetElemSig(msgArg).GetChar(0) == ALLJOYN_STRING) {
-                    Int32 size = GetNumElements(msgArg);
-                    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
-                    for (Int32 i = 0; i < size; ++i) {
-                        Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&(*array)[i]);
-                    }
-                    *(PCarQuintet*)object = array;
-                    array->AddRef();
-                }
-                else {
-                    Logger::E(TAG, "Unmarshal unimplemented ALLJOYN_ARRAY item is %s", GetElemSig(msgArg).string());
-                    assert(0);
-                    // Int32 size = GetNumElements(msgArg);
-                    // AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(size);
-                    // for (Int32 i = 0; i < size; ++i) {
-                    //     AutoPtr<IInterface> component;
-                    //     Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&component);
-                    //     array->Set(i, component);
-                    // }
-                    // *(PCarQuintet*)object = array;
-                    // array->AddRef();
-                }
-            }
-            break;
+    VALIDATE_NOT_NULL(object)
+
+    switch (GetTypeId(msgArg)) {
         case ALLJOYN_BOOLEAN:
             *(Boolean*)object = GetBool(msgArg);
             break;
-        case ALLJOYN_BOOLEAN_ARRAY:
-            {
+        case ALLJOYN_BOOLEAN_ARRAY:{
                 AutoPtr<ArrayOf<Boolean> > b = GetBoolArray(msgArg);
-                // Class<?> componentClass = ((Class<?>) type).getComponentType();
-                // if (componentClass == Boolean.class) {
-                //     Boolean[] B = new Boolean[b.length];
-                //     for (int i = 0; i < b.length; ++i) {
-                //         B[i] = b[i];
-                //     }
-                //     return B;
-                // }
                 *(PCarQuintet*)object = b;
                 b->AddRef();
+                break;
             }
-            break;
+
         case ALLJOYN_BYTE:
-            {
-                // object = getEnumObject(type, (int) getByte(msgArg));
-                // if (object == null) {
-                    *(Byte*)object = GetByte(msgArg);
-                // }
-            }
+            *(Byte*)object = GetByte(msgArg);
             break;
-        case ALLJOYN_BYTE_ARRAY:
-            {
-                AutoPtr<ArrayOf<Byte> > b = GetByteArray(msgArg);
-                *(PCarQuintet*)object = b;
-                b->AddRef();
-            }
+        case ALLJOYN_BYTE_ARRAY: {
+            AutoPtr<ArrayOf<Byte> > b = GetByteArray(msgArg);
+            *(PCarQuintet*)object = b;
+            b->AddRef();
             break;
+        }
+
+        case ALLJOYN_INT16:
+            *(Int16*)object = GetInt16(msgArg);
+            break;
+        case ALLJOYN_INT16_ARRAY: {
+            AutoPtr<ArrayOf<Int16> > array = GetInt16Array(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
+            break;
+        }
+
+        case ALLJOYN_INT32:
+            *(Int32*)object = GetInt32(msgArg);
+            break;
+        case ALLJOYN_INT32_ARRAY: {
+            AutoPtr<ArrayOf<Int32> > array = GetInt32Array(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
+            break;
+        }
+
+        case ALLJOYN_INT64:
+            *(Int64*)object = GetInt64(msgArg);
+            break;
+        case ALLJOYN_INT64_ARRAY: {
+            AutoPtr<ArrayOf<Int64> > array = GetInt64Array(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
+            break;
+        }
+
+        case ALLJOYN_UINT16:
+            *(Int16*)object = GetUint16(msgArg);
+            break;
+        case ALLJOYN_UINT16_ARRAY: {
+            AutoPtr<ArrayOf<Int16> > array = GetUint16Array(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
+            break;
+        }
+
+        case ALLJOYN_UINT32:
+            *(Int32*)object = GetUint32(msgArg);
+            break;
+        case ALLJOYN_UINT32_ARRAY: {
+            AutoPtr<ArrayOf<Int32> > array = GetUint32Array(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
+            break;
+        }
+
+        case ALLJOYN_UINT64:
+            *(Int64*)object = GetUint64(msgArg);
+            break;
+        case ALLJOYN_UINT64_ARRAY: {
+            AutoPtr<ArrayOf<Int64> > array = GetUint64Array(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
+        }
+        break;
+
         case ALLJOYN_DOUBLE:
             *(Double*)object = GetDouble(msgArg);
             break;
-        case ALLJOYN_DOUBLE_ARRAY:
-            {
-                AutoPtr<ArrayOf<Double> > array = GetDoubleArray(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
+        case ALLJOYN_DOUBLE_ARRAY: {
+            AutoPtr<ArrayOf<Double> > array = GetDoubleArray(msgArg);
+            *(PCarQuintet*)object = array;
+            array->AddRef();
             break;
-        case ALLJOYN_INT16:
-            {
-                // object = getEnumObject(type, (int) getInt16(msgArg));
-                // if (object == null) {
-                    *(Int16*)object = GetInt16(msgArg);
-                // }
-            }
-            break;
-        case ALLJOYN_INT16_ARRAY:
-            {
-                AutoPtr<ArrayOf<Int16> > array = GetInt16Array(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
-            break;
-        case ALLJOYN_INT32:
-            {
-                // object = getEnumObject(type, getInt32(msgArg));
-                // if (object == null) {
-                    *(Int32*)object = GetInt32(msgArg);
-                // }
-            }
-            break;
-        case ALLJOYN_INT32_ARRAY:
-            {
-                AutoPtr<ArrayOf<Int32> > array = GetInt32Array(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
-            break;
-        case ALLJOYN_INT64:
-            {
-                // object = getEnumObject(type, (int) getInt64(msgArg));
-                // if (object == null) {
-                    *(Int64*)object = GetInt64(msgArg);
-                // }
-            }
-            break;
-        case ALLJOYN_INT64_ARRAY:
-            {
-                AutoPtr<ArrayOf<Int64> > array = GetInt64Array(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
-            break;
+        }
+
         case ALLJOYN_OBJECT_PATH:
             *(String*)object = GetObjPath(msgArg);
             break;
@@ -1346,7 +1834,66 @@ ECode MsgArg::Unmarshal(
         case ALLJOYN_STRING:
             *(String*)object = GetString(msgArg);
             break;
-        case ALLJOYN_STRUCT:
+
+        case ALLJOYN_ARRAY: {
+            String sig = GetElemSig(msgArg);
+            assert(!sig.IsNullOrEmpty() && "signature of Array cannot be null!");
+
+            Char32 elementTypeId = sig.GetChar(0);
+            if (elementTypeId == ALLJOYN_DICT_ENTRY_OPEN) {
+                if (DEBUG_MAP) {
+                    Logger::I(TAG, " >> Unmarshal map: sig: %s", sig.string());
+                }
+                AutoPtr<ArrayOf<String> > sigs =  Signature::Split(sig.Substring(1, sig.GetLength() - 1));
+                if (sigs == NULL || sigs->GetLength() < 2) {
+                    Logger::E(TAG, "Unmarshal map: cannot Unmarshal from '%s'", sig.string());
+                    return E_FAIL;
+                }
+
+                Int32 size = GetNumElements(msgArg);
+                if (DEBUG_MAP) {
+                    Logger::I(TAG, " >> Unmarshal map with %d elements, key: '%s', value: '%s'",
+                        size, (*sigs)[0].string(), (*sigs)[1].string());
+                }
+
+                AutoPtr<IMap> map;
+                CHashMap::New(size, (IMap**)&map);
+                for (Int32 i = 0; i < size; ++i) {
+                    Int64 element  = GetElement(msgArg, i);
+                    AutoPtr<IInterface> key, value;
+                    UnmarshalInterface(GetKey(element), (*sigs)[0], (IInterface**)&key);
+                    UnmarshalInterface(GetVal(element), (*sigs)[1], (IInterface**)&value);
+                    if (DEBUG_MAP) {
+                        Logger::I(TAG, "    > unmarshal item %d: key: %s, value: %s", i, TO_CSTR(key), TO_CSTR(value));
+                    }
+                    map->Put(key, value);
+                }
+
+                *(PInterface*)object = map.Get();
+                map->AddRef();
+
+                if (DEBUG_MAP) {
+                    Logger::I(TAG, " >> Unmarshal map: %s", TO_CSTR(map));
+                }
+                return NOERROR;
+            }
+            else if (elementTypeId == ALLJOYN_STRING) {
+                Int32 size = GetNumElements(msgArg);
+                AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
+                for (Int32 i = 0; i < size; ++i) {
+                    Unmarshal(GetElement(msgArg, i), CarDataType_Interface, (PVoid)&(*array)[i]);
+                }
+                *(PCarQuintet*)object = array;
+                array->AddRef();
+            }
+            else {
+                Logger::E(TAG, "Unmarshal unimplemented ALLJOYN_ARRAY item is %s", GetElemSig(msgArg).string());
+                assert(0);
+            }
+            break;
+        }
+
+        case ALLJOYN_STRUCT: {
             // Type[] types = Signature.structTypes((Class<?>) type);
             // if (types.length != getNumMembers(msgArg)) {
             //     throw new MarshalBusException(
@@ -1361,73 +1908,30 @@ ECode MsgArg::Unmarshal(
             //     fields[i].set(object, value);
             // }
             // return object;
+            Logger::E(TAG, "unimplemented ALLJOYN_STRUCT '%s'", GetSignature(msgArg).string());
             assert(0);
-            break;
-        case ALLJOYN_UINT16:
-            {
-                // object = getEnumObject(type, (int) getUint16(msgArg));
-                // if (object == null) {
-                    *(Int32*)object = GetUint16(msgArg);
-                // }
-            }
-            break;
-        case ALLJOYN_UINT16_ARRAY:
-            {
-                AutoPtr<ArrayOf<Int16> > array = GetUint16Array(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
-            break;
-        case ALLJOYN_UINT32:
-            {
-                // object = getEnumObject(type, getUint32(msgArg));
-                // if (object == null) {
-                    *(Int32*)object = GetUint32(msgArg);
-                // }
-            }
-            break;
-        case ALLJOYN_UINT32_ARRAY:
-            {
-                AutoPtr<ArrayOf<Int32> > array = GetUint32Array(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
-            break;
-        case ALLJOYN_UINT64:
-            {
-                // object = getEnumObject(type, (int) getUint64(msgArg));
-                // if (object == null) {
-                    *(Int64*)object = GetUint64(msgArg);
-                // }
-            }
-            break;
-        case ALLJOYN_UINT64_ARRAY:
-            {
-                AutoPtr<ArrayOf<Int64> > array = GetUint64Array(msgArg);
-                *(PCarQuintet*)object = array;
-                array->AddRef();
-            }
-            break;
-        case ALLJOYN_VARIANT:
-            {
-                AutoPtr<CVariant> variant;
-                CVariant::NewByFriend((CVariant**)&variant);
-                variant->SetMsgArg(msgArg);
-                *(PInterface*)object = (IVariant*)variant;
-                variant->AddRef();
-            }
-            break;
-        default:
-            Logger::E(TAG, "unimplemented '%s'", GetSignature(msgArg).string());
-            assert(0);
-            // throw new MarshalBusException("unimplemented '"
-            //                               + getSignature(new Int64[] { msgArg }) + "'");
             break;
         }
-    // } catch (Throwable th) {
-    //     throw new MarshalBusException("cannot marshal '" + getSignature(new Int64[] { msgArg })
-    //                                   + "' into " + type, th);
-    // }
+
+        case ALLJOYN_VARIANT: {
+            AutoPtr<CVariant> variant;
+            CVariant::NewByFriend((CVariant**)&variant);
+            variant->SetMsgArg(msgArg);
+            *(PInterface*)object = (IVariant*)variant;
+            variant->AddRef();
+            break;
+        }
+
+        case ALLJOYN_DICT_ENTRY_OPEN:
+            assert(0 && "Should never happen!");
+            break;
+
+        default: {
+            Logger::E(TAG, "unimplemented '%s'", GetSignature(msgArg).string());
+            assert(0);
+            break;
+        }
+    }
 
     return NOERROR;
 }
@@ -1575,87 +2079,55 @@ ECode MsgArg::Marshal(
     /* [in] */ const String& sig,
     /* [in] */ PVoid arg)
 {
-    // try {
-        // Int32 value = GetEnumValue(arg);
-        switch (sig.GetChar(0)) {
+    switch (sig.GetChar(0)) {
         case ALLJOYN_BYTE:
-            // if (value != -1) {
-            //     Set(msgArg, sig, (Byte) value);
-            // }
-            // else {
-            //     Set(msgArg, sig, ((Number) arg).byteValue());
-            // }
             Set(msgArg, sig, *(Byte*)arg);
             break;
         case ALLJOYN_BOOLEAN:
-            // SetBoolean(msgArg, sig, ((Boolean) arg).booleanValue());
             SetBoolean(msgArg, sig, *(Boolean*)arg);
             break;
         case ALLJOYN_INT16:
         case ALLJOYN_UINT16:
-            // if (value != -1) {
-            //     Set(msgArg, sig, (Int16) value);
-            // }
-            // else {
-            //     Set(msgArg, sig, ((Number) arg).shortValue());
-            // }
             Set(msgArg, sig, *(Int16*)arg);
             break;
         case ALLJOYN_INT32:
         case ALLJOYN_UINT32:
-            // if (value != -1) {
-            //     Set(msgArg, sig, value);
-            // }
-            // else {
-            //     Set(msgArg, sig, ((Number) arg).intValue());
-            // }
             Set(msgArg, sig, *(Int32*)arg);
             break;
         case ALLJOYN_INT64:
         case ALLJOYN_UINT64:
-            // if (value != -1) {
-            //     Set(msgArg, sig, (Int64) value);
-            // }
-            // else {
-            //     Set(msgArg, sig, ((Number) arg).longValue());
-            // }
             Set(msgArg, sig, *(Int64*)arg);
             break;
         case ALLJOYN_DOUBLE:
-            // Set(msgArg, sig, ((Number) arg).doubleValue());
             Set(msgArg, sig, *(Double*)arg);
             break;
+
         case ALLJOYN_STRING:
         case ALLJOYN_SIGNATURE:
-        case ALLJOYN_OBJECT_PATH:
+        case ALLJOYN_OBJECT_PATH: {
             if (arg == NULL) {
-                Logger::E(TAG, "cannot marshal NULL into '%s'", sig.string());
+                Logger::E(TAG, "line %d: cannot marshal NULL into '%s'", __LINE__, sig.string());
                 assert(0);
-                // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
+                break;
             }
             Set(msgArg, sig, *(String*)arg);
             break;
-        case ALLJOYN_ARRAY:
-            {
-                if (arg == NULL) {
-                    Logger::E(TAG, "cannot marshal NULL into '%s'", sig.string());
-                    assert(0);
-                    // throw new MarshalBusException("cannot marshal NULL into '" + sig + "'");
-                }
-                Char32 elementTypeId = sig.GetChar(1);
-                // if (ALLJOYN_DICT_ENTRY_OPEN == elementTypeId) {
-                //     arg = ((Map<?, ?>) arg).entrySet().toArray();
-                // }
-                switch (elementTypeId) {
+        }
+
+        case ALLJOYN_ARRAY: {
+            if (arg == NULL) {
+                Logger::E(TAG, "line %d: cannot marshal NULL into '%s'", __LINE__, sig.string());
+                assert(0);
+                break;
+            }
+
+            Char32 elementTypeId = sig.GetChar(1);
+            switch (elementTypeId) {
                 case ALLJOYN_BYTE:
                     Set(msgArg, sig, *(ArrayOf<Byte>**)arg);
                     break;
                 case ALLJOYN_BOOLEAN:
-                    // if (arg instanceof ArrayOf<Boolean>*){
-                        Set(msgArg, sig, *(ArrayOf<Boolean>**)arg);
-                    // } else {
-                    //     Set(msgArg, sig, *(ArrayOf<Boolean>**)arg);
-                    // }
+                    Set(msgArg, sig, *(ArrayOf<Boolean>**)arg);
                     break;
                 case ALLJOYN_INT16:
                 case ALLJOYN_UINT16:
@@ -1672,32 +2144,77 @@ ECode MsgArg::Marshal(
                 case ALLJOYN_DOUBLE:
                     Set(msgArg, sig, *(ArrayOf<Double>**)arg);
                     break;
-                case ALLJOYN_STRING:
-                    {
-                        String elemSig = sig.Substring(1);
-                        AutoPtr<ArrayOf<String> > args = *(ArrayOf<String>**)arg;
-                        SetArray(msgArg, elemSig, args->GetLength());
-                        for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
-                            Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*args)[i]);
-                        }
-                    }
-                    break;
-                default:
-                    {
-                        Logger::D(TAG,"unimplemented ALLJOYN_ARRAY %s", sig.string());
-                        assert(0);
-                        // String elemSig = sig.Substring(1);
-                        // AutoPtr<ArrayOf<IInterface*> > args = *(ArrayOf<IInterface*>**)arg;
-                        // SetArray(msgArg, elemSig, args->GetLength());
-                        // for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
-                        //     Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*args)[i]);
-                        // }
+
+                case ALLJOYN_STRING: {
+                    String elemSig = sig.Substring(1);
+                    AutoPtr<ArrayOf<String> > args = *(ArrayOf<String>**)arg;
+                    SetArray(msgArg, elemSig, args->GetLength());
+                    for (Int32 i = 0; i < GetNumElements(msgArg); ++i) {
+                        Marshal(GetElement(msgArg, i), elemSig, (PVoid)&(*args)[i]);
                     }
                     break;
                 }
+
+                default: {
+                    if (elementTypeId == ALLJOYN_DICT_ENTRY_OPEN) {
+                        if (DEBUG_MAP) {
+                            Logger::D(TAG," >> Marshal map with signature : %s", sig.string());
+                        }
+
+                        AutoPtr<IMap> map = IMap::Probe(*(IInterface**)arg);
+                        Int32 length;
+                        map->GetSize(&length);
+                        if (DEBUG_MAP) {
+                            Logger::I(TAG, " >> Marshal map with %d elements: %s", length, TO_CSTR(map));
+                        }
+
+                        String elemSig = sig.Substring(1);
+                        AutoPtr<ArrayOf<String> > sigs =  Signature::Split(elemSig.Substring(1, elemSig.GetLength() - 1));
+                        if (sigs == NULL || sigs->GetLength() < 2) {
+                            Logger::E(TAG, "MarshalBusException: cannot marshal map entry into '%s'", elemSig.string());
+                            return E_FAIL;
+                        }
+
+                        SetArray(msgArg, elemSig, length);
+
+                        AutoPtr<ISet> set;
+                        map->GetEntrySet((ISet**)&set);
+                        AutoPtr<IIterator> it;
+                        set->GetIterator((IIterator**)&it);
+                        length = GetNumElements(msgArg);
+                        Int32 i = 0;
+                        Boolean hasNext;
+                        IMapEntry* entry;
+                        while ((it->HasNext(&hasNext), hasNext) && i < length) {
+                            AutoPtr<IInterface> obj, key, value;
+                            it->GetNext((IInterface**)&obj);
+                            entry = IMapEntry::Probe(obj);
+                            entry->GetKey((IInterface**)&key);
+                            entry->GetKey((IInterface**)&value);
+
+                            Int64 elementMsgArg = GetElement(msgArg, i++);
+                            SetDictEntry(elementMsgArg);
+                            MarshalInterface(GetKey(elementMsgArg), (*sigs)[0], key);
+                            MarshalInterface(GetVal(elementMsgArg), (*sigs)[1], value);
+
+                            // AutoPtr<IInterface> obj;
+                            // it->GetNext((IInterface**)&obj);
+                            // MarshalInterface(GetElement(msgArg, i++), elemSig, obj);
+                        }
+                    }
+                    else {
+                        Logger::D(TAG,"Marshal unimplemented ALLJOYN_ARRAY with signature : %s", sig.string());
+                        assert(0 && "TODO");
+                    }
+                }
+                break;
             }
             break;
-        case ALLJOYN_STRUCT_OPEN:
+        }
+
+        case ALLJOYN_STRUCT_OPEN: {
+            Logger::D(TAG,"Marshal unimplemented ALLJOYN_STRUCT_OPEN with signature : %s", sig.string());
+            assert(0 && "TODO");
             // Object[] args = Signature.structArgs(arg);
             // String[] memberSigs = Signature.split(sig.substring(1, sig.length() - 1));
             // if (memberSigs == null) {
@@ -1708,44 +2225,53 @@ ECode MsgArg::Marshal(
             // for (int i = 0; i < getNumMembers(msgArg); ++i) {
             //     marshal(getMember(msgArg, i), memberSigs[i], args[i]);
             // }
-            // break;
-        case ALLJOYN_VARIANT:
-            {
-                CVariant* variant = (CVariant*)IVariant::Probe(*(PInterface*)arg);
-                assert(variant);
-                if (variant->GetMsgArg() != 0) {
-                    SetVariant(msgArg, sig, variant->GetMsgArg());
-                }
-                else {
-                    SetVariant(msgArg);
-                    String signature;
-                    variant->GetSignature(&signature);
-                    AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
-                    Marshal(GetVal(msgArg), signature, value->ToValuePtr());
-                }
+            break;
+        }
+        case ALLJOYN_VARIANT: {
+            CVariant* variant = (CVariant*)IVariant::Probe(*(PInterface*)arg);
+            assert(variant);
+            if (variant->GetMsgArg() != 0) {
+                SetVariant(msgArg, sig, variant->GetMsgArg());
+            }
+            else {
+                SetVariant(msgArg);
+                String signature;
+                variant->GetSignature(&signature);
+                AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
+                Marshal(GetVal(msgArg), signature, value->ToValuePtr());
             }
             break;
-        case ALLJOYN_DICT_ENTRY_OPEN:
-            // Map.Entry<?, ?> entry = (Map.Entry<?, ?>) arg;
-            // String[] sigs = Signature.split(sig.substring(1, sig.length() - 1));
-            // if (sigs == null) {
-            //     throw new MarshalBusException("cannot marshal " + arg.getClass() + " into '"
-            //                                   + sig + "'");
-            // }
-            // SetDictEntry(msgArg);
-            // marshal(getKey(msgArg), sigs[0], entry.getKey());
-            // marshal(getVal(msgArg), sigs[1], entry.getValue());
-            // break;
-        default:
+        }
+
+        case ALLJOYN_DICT_ENTRY_OPEN: {
+            // assert(0 && "Should never happen!");
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe(*(IInterface**)arg);
+            AutoPtr<ArrayOf<String> > sigs =  Signature::Split(sig.Substring(1, sig.GetLength() - 1));
+            if (sigs == NULL || sigs->GetLength() < 2) {
+                Logger::E(TAG, "MarshalBusException: cannot marshal %s into '%s'",
+                    TO_CSTR(entry), sig.string());
+                return E_FAIL;
+            }
+
+            AutoPtr<IInterface> key, value;
+            entry->GetKey((IInterface**)&key);
+            entry->GetKey((IInterface**)&value);
+
+            SetDictEntry(msgArg);
+
+            Logger::I(TAG, " >> marshal MapEntry: %s %s", sig.string(), TO_CSTR(entry));
+            MarshalInterface(GetKey(msgArg), (*sigs)[0], key);
+            MarshalInterface(GetVal(msgArg), (*sigs)[1], value);
+            break;
+        }
+
+        default: {
             Logger::D(TAG, "unimplemented '%s'", sig.string());
             assert(0);
-            // throw new MarshalBusException("unimplemented '" + sig + "'");
+            break;
         }
-    // } catch (Throwable th) {
-    //     throw new MarshalBusException("cannot marshal " +
-    //                                   ((arg == null) ? "null" : arg.getClass()) +
-    //                                   " into '" + sig + "'", th);
-    // }
+    }
+
     return NOERROR;
 }
 
