@@ -165,6 +165,7 @@ ECode CArgumentList::GetParamValue(
         || (type != CarDataType_LocalPtr
         && (type != CarDataType_ArrayOf || mParamElem[index].mPointer > 1)
         && mParamElem[index].mPointer != pointer)) {
+        assert(0);
         return E_INVALID_ARGUMENT;
     }
 
@@ -194,12 +195,15 @@ ECode CArgumentList::GetParamValue(
         else {
             *(UInt32*)param = *(UInt32*)(mParamBuf + mParamElem[index].mPos);
         }
+
         if (param != 0 && pointer == 1) {
             if (type == CarDataType_Interface) {
-                ((IInterface*)param)->AddRef();
+                if (*(IInterface**)param) {
+                    (*(IInterface**)param)->AddRef();
+                }
             }
             else if (type == CarDataType_ArrayOf) {
-                _CarQuintet_AddRef((PCarQuintet)param);
+                _CarQuintet_AddRef(*(PCarQuintet*)param);
             }
         }
     }
@@ -207,6 +211,7 @@ ECode CArgumentList::GetParamValue(
         *(Int64*)param = *(Int64*)(mParamBuf + mParamElem[index].mPos);
     }
     else {
+        assert(0);
         return E_INVALID_OPERATION;
     }
 
@@ -516,7 +521,7 @@ ECode CArgumentList::GetInputArgumentOfCarArray(
     /* [in] */ Int32 index,
     /* [out] */ PCarQuintet* value)
 {
-    return GetParamValue(index, CarDataType_CarArray, ParamIOAttribute_In, 0, value);
+    return GetParamValue(index, CarDataType_CarArray, ParamIOAttribute_In, 1, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfCarArray(
@@ -538,7 +543,7 @@ ECode CArgumentList::GetInputArgumentOfObjectPtr(
     /* [in] */ Int32 index,
     /* [out] */ PInterface* value)
 {
-    return GetParamValue(index, CarDataType_Interface, ParamIOAttribute_In, 0, value);
+    return GetParamValue(index, CarDataType_Interface, ParamIOAttribute_In, 1, value);
 }
 
 ECode CArgumentList::SetInputArgumentOfObjectPtr(
@@ -573,12 +578,11 @@ ECode CArgumentList::SetInputArgumentOfObjectPtr(
         value = value->Probe(iid);
         if (!value) return E_NO_INTERFACE;
 
-        // TODO hold param's ref-count.
+        value->AddRef();
         IInterface** prev = mInterfaceParams.Get(&index);
         if (prev && *prev) {
             (*prev)->Release();
         }
-        value->AddRef();
         mInterfaceParams.Put(&index, (IInterface**)&value);
     }
 

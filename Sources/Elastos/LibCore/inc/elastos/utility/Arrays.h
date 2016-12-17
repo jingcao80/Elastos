@@ -1534,6 +1534,7 @@ ECode Arrays::DeepToString(
         Int32 length;
         array->GetLength(&length);
         for (Int32 i = 0; i < length; ++i) {
+            if (i != 0)  sb += ", ";
             AutoPtr<IInterface> element;
             array->Get(i, (IInterface**)&element);
             DeepToString(element.Get(), origArray, sb);
@@ -1582,6 +1583,7 @@ ECode Arrays::DeepToString(
         Int32 length;
         array->GetLength(&length);
         for (Int32 i = 0; i < length; ++i) {
+            if (i != 0)  sb += ", ";
             AutoPtr<IInterface> element;
             array->Get(i, (IInterface**)&element);
             DeepToString(element.Get(), origArray, sb);
@@ -1605,6 +1607,7 @@ String Arrays::DeepToString(
     StringBuilder sb(array->GetLength() * 9);
     sb.AppendChar('[');
     for (Int32 i = 0; i < array->GetLength(); ++i) {
+        if (i != 0)  sb += ", ";
         DeepToString((*array)[i], array, sb);
     }
     sb.AppendChar(']');

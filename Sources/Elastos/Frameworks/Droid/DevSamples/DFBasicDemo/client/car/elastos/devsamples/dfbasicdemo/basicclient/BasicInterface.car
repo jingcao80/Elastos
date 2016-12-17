@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Utility.IMap;
+    
     namespace Elastos {
     namespace DevSamples {
     namespace DFBasicDemo {
@@ -33,6 +35,16 @@ module
             [out] Double* op6,
             [out] String* op7,
             [out, callee] ArrayOf<String>* op8);
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "a{yb}a{ni}a{xd}a{ss}a{sai}a{sas}a{sa{si}}")]
+        TestMap(
+            [in] IMap* bytebooleanMap,      //<Byte, Boolean>
+            [in] IMap* int16int32Map,       //<Int16, Int32>
+            [in] IMap* int64doubleMap,      //<Int64, Double>
+            [in] IMap* strstrMap,           //<String, String>
+            [in] IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
+            [in] IMap* strstrarrayMap,      //<String, ArrayOf<String> >
+            [in] IMap* strstrint32mapMap);  //<String, Map<String, Int32> >
     }
 
     } // namespace BasicClient

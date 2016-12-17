@@ -2,6 +2,7 @@
 #include "CService.h"
 #include "CBasicService.h"
 #include "R.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -14,6 +15,9 @@ using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 using Org::Alljoyn::Bus::CBusAttachment;
@@ -138,6 +142,49 @@ ECode CService::BasicService::Test(
     *op7 = ip7;
     *op8 = ip8->Clone();
     REFCOUNT_ADD(*op8)
+    return NOERROR;
+}
+
+static void LogMap(
+    /* [in] */ IMap* map,
+    /* [in] */ const char* info)
+{
+    Int32 size;
+    map->GetSize(&size);
+
+    Logger::I("CService", " >> %s map with %d elements:", info, size);
+    AutoPtr<ISet> set;
+    map->GetEntrySet((ISet**)&set);
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IInterface> key, value;
+        IMapEntry::Probe(obj)->GetKey((IInterface**)&key);
+        IMapEntry::Probe(obj)->GetValue((IInterface**)&value);
+        Logger::I("CService", "    > [%s] : [%s]", TO_CSTR(key), TO_CSTR(value));
+    }
+}
+
+ECode CService::BasicService::TestMap(
+    /* [in] */ IMap* bytebooleanMap,      //<Byte, Boolean>
+    /* [in] */ IMap* int16int32Map,       //<Int16, Int32>
+    /* [in] */ IMap* int64doubleMap,      //<Int64, Double>
+    /* [in] */ IMap* strstrMap,           //<String, String>
+    /* [in] */ IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
+    /* [in] */ IMap* strstrarrayMap,      //<String, ArrayOf<String> >
+    /* [in] */ IMap* strstrint32mapMap)   //<String, Map<String, Int32> >
+{
+    Logger::D(TAG, " >> ============ TestMap ============ <<");
+    LogMap(bytebooleanMap,      "Map<Byte, Boolean>");
+    LogMap(int16int32Map,       "Map<Int16, Int32>");
+    LogMap(int64doubleMap,      "Map<Int64, Double>");
+    LogMap(strstrMap,           "Map<String, String>");
+    LogMap(strint32arrayMap,    "Map<String, ArrayOf<Int32>>");
+    LogMap(strstrarrayMap,      "Map<String, ArrayOf<String>>");
+    LogMap(strstrint32mapMap,   "Map<String, Map<String, Int32>>");
     return NOERROR;
 }
 

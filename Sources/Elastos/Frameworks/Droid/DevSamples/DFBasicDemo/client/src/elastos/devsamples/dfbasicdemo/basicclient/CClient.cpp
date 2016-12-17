@@ -1,6 +1,7 @@
 
 #include "CClient.h"
 #include "R.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -19,6 +20,9 @@ using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::EIID_ICharSequence;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
 using Org::Alljoyn::Bus::CBusAttachment;
@@ -365,48 +369,115 @@ ECode CClient::BusHandler::HandleMessage(
             String reply;
             mBasicInterface->Cat(str, str, &reply);
             SendUiMessage(MESSAGE_PING_REPLY, reply);
-            Byte ip1 = 1, op1;
-            Boolean ip2 = TRUE, op2;
-            Int16 ip3 = 2, op3;
-            Int32 ip4 = 3, op4;
-            Int64 ip5 = 4, op5;
-            Double ip6 = 5.5, op6;
-            String ip7("Elastos"), op7;
-            AutoPtr<ArrayOf<String> > ip8 = ArrayOf<String>::Alloc(2);
-            (*ip8)[0] = "test0";
-            (*ip8)[1] = "test1";
-            AutoPtr<ArrayOf<String> > op8;
-            mBasicInterface->Test(ip1, ip2, ip3, ip4, ip5, ip6, ip7, ip8, &op1, &op2,
-                &op3, &op4, &op5, &op6, &op7, (ArrayOf<String>**)&op8);
-            Boolean equals = TRUE;
-            if (ip1 != op1 || ip2 != op2 || ip3 != op3 ||
-                ip4 != op4 || ip5 != op5 || ip6 != op6 ||
-                ip7 != op7 || op8 == NULL ||
-                ip8->GetLength() != op8->GetLength()) {
-                equals = FALSE;
+
+            {
+                // Byte ip1 = 1, op1;
+                // Boolean ip2 = TRUE, op2;
+                // Int16 ip3 = 2, op3;
+                // Int32 ip4 = 3, op4;
+                // Int64 ip5 = 4, op5;
+                // Double ip6 = 5.5, op6;
+                // String ip7("Elastos"), op7;
+                // AutoPtr<ArrayOf<String> > ip8 = ArrayOf<String>::Alloc(2);
+                // (*ip8)[0] = "test0";
+                // (*ip8)[1] = "test1";
+                // AutoPtr<ArrayOf<String> > op8;
+                // mBasicInterface->Test(ip1, ip2, ip3, ip4, ip5, ip6, ip7, ip8, &op1, &op2,
+                //     &op3, &op4, &op5, &op6, &op7, (ArrayOf<String>**)&op8);
+                // Boolean equals = TRUE;
+                // if (ip1 != op1 || ip2 != op2 || ip3 != op3 ||
+                //     ip4 != op4 || ip5 != op5 || ip6 != op6 ||
+                //     ip7 != op7 || op8 == NULL ||
+                //     ip8->GetLength() != op8->GetLength()) {
+                //     equals = FALSE;
+                // }
+                // else {
+                //     for (Int32 i = 0; i < ip8->GetLength(); i++) {
+                //         if ((*ip8)[i] != (*op8)[i]) {
+                //             equals = FALSE;
+                //             break;
+                //         }
+                //     }
+                // }
+                // if (equals) {
+                //     Logger::D(TAG, "Test succeeded!");
+                // }
+                // else {
+                //     Logger::E(TAG, "Test failed!");
+                //     Logger::D(TAG, "Test reply Byte: %d, Boolean: %s Int16: %d Int32: %d, Int64: %lld Double: %f, String: %s",
+                //         op1, (op2 ? "TURE" : "FALSE"), op3, op4, op5, op6, op7.string());
+                //     Int32 len = ip8 ? ip8->GetLength() : 0;
+                //     Logger::D(TAG, "ArrayOf len = %d", len);
+                //     for (Int32 i = 0; i < len; i++) {
+                //         Logger::D(TAG, "ArrayOf[%d] = %s", i, (*ip8)[i].string());
+                //     }
+                //     assert(0);
+                // }
             }
-            else {
-                for (Int32 i = 0; i < ip8->GetLength(); i++) {
-                    if ((*ip8)[i] != (*op8)[i]) {
-                        equals = FALSE;
-                        break;
-                    }
-                }
+
+            {
+                Logger::I(TAG, " ========= Test IMap =============");
+                AutoPtr<IMap> bytebooleanMap, int16int32Map, int64doubleMap, strstrMap;
+                CHashMap::New((IMap**)&bytebooleanMap);
+                CHashMap::New((IMap**)&int16int32Map);
+                CHashMap::New((IMap**)&int64doubleMap);
+                CHashMap::New((IMap**)&strstrMap);
+                bytebooleanMap->Put(CoreUtils::ConvertByte('a'), CoreUtils::Convert(TRUE));
+                bytebooleanMap->Put(CoreUtils::ConvertByte('b'), CoreUtils::Convert(FALSE));
+
+                int16int32Map->Put(CoreUtils::Convert((Int16)15), CoreUtils::Convert((Int32)31));
+                int16int32Map->Put(CoreUtils::Convert((Int16)16), CoreUtils::Convert((Int32)32));
+
+                int64doubleMap->Put(CoreUtils::Convert((Int64)63), CoreUtils::Convert((Double)100.1));
+                int64doubleMap->Put(CoreUtils::Convert((Int64)64), CoreUtils::Convert((Double)100.2));
+
+                strstrMap->Put(CoreUtils::Convert("key a"), CoreUtils::Convert("value a"));
+                strstrMap->Put(CoreUtils::Convert("key b"), CoreUtils::Convert("value b"));
+
+                AutoPtr<IMap> strint32arrayMap, strstrarrayMap, strstrint32mapMap, strint32Map;
+                CHashMap::New((IMap**)&strint32arrayMap);
+                CHashMap::New((IMap**)&strstrarrayMap);
+                CHashMap::New((IMap**)&strstrint32mapMap);
+                CHashMap::New((IMap**)&strint32Map);
+
+                AutoPtr<IArrayOf> int32Array;
+                CArrayOf::New(EIID_IInteger32, 2, (IArrayOf**)&int32Array);
+                int32Array->Set(0, CoreUtils::Convert(1));
+                int32Array->Set(1, CoreUtils::Convert(2));
+                strint32arrayMap->Put(CoreUtils::Convert("String-ArrayOf<Int32>"), int32Array);
+
+                AutoPtr<IArrayOf> strArray;
+                CArrayOf::New(EIID_ICharSequence, 2, (IArrayOf**)&strArray);
+                strArray->Set(0, CoreUtils::Convert("string array item 0"));
+                strArray->Set(1, CoreUtils::Convert("string array item 1"));
+                strstrarrayMap->Put(CoreUtils::Convert("String-ArrayOf<String>"), strArray);
+
+                strint32Map->Put(CoreUtils::Convert("String-Int32"), CoreUtils::Convert(11));
+                strint32Map->Put(CoreUtils::Convert("String-Int32"), CoreUtils::Convert(12));
+                strstrint32mapMap->Put(CoreUtils::Convert("String-Map<String, Int32>"), strint32Map);
+
+                Logger::I(TAG, " >> TestMap:"
+                    "\n      Map<Byte, Boolean>: %p, %s"
+                    "\n      Map<Int16, Int32>: %p, %s"
+                    "\n      Map<Int64, Double>: %p, %s"
+                    "\n      Map<String, String>: %p : %s",
+                    "\n      Map<String, ArrayOf<Int32>>: %p, %s"
+                    "\n      Map<String, ArrayOf<String>>: %p, %s"
+                    "\n      Map<String, Map<String, Int32>>: %p : %s",
+                    bytebooleanMap.Get(), TO_CSTR(bytebooleanMap),
+                    int16int32Map.Get(), TO_CSTR(int16int32Map),
+                    int64doubleMap.Get(), TO_CSTR(int64doubleMap),
+                    strstrMap.Get(), TO_CSTR(strstrMap),
+                    strint32arrayMap.Get(), TO_CSTR(strint32arrayMap),
+                    strstrarrayMap.Get(), TO_CSTR(strstrarrayMap),
+                    strstrint32mapMap.Get(), TO_CSTR(strstrint32mapMap)
+                    );
+
+                mBasicInterface->TestMap(bytebooleanMap, int16int32Map, int64doubleMap, strstrMap,
+                    strint32arrayMap, strstrarrayMap, strstrint32mapMap);
+                Logger::I(TAG, " ========= Test IMap succeeded! =============");
             }
-            if (equals) {
-                Logger::D(TAG, "Test succeeded!");
-            }
-            else {
-                Logger::E(TAG, "Test failed!");
-                Logger::D(TAG, "Test reply Byte: %d, Boolean: %s Int16: %d Int32: %d, Int64: %lld Double: %f, String: %s",
-                    op1, (op2 ? "TURE" : "FALSE"), op3, op4, op5, op6, op7.string());
-                Int32 len = ip8 ? ip8->GetLength() : 0;
-                Logger::D(TAG, "ArrayOf len = %d", len);
-                for (Int32 i = 0; i < len; i++) {
-                    Logger::D(TAG, "ArrayOf[%d] = %s", i, (*ip8)[i].string());
-                }
-                assert(0);
-            }
+
         }
 //        } catch (BusException ex) {
 //            logException("BasicInterface.cat()", ex);
