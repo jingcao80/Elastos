@@ -331,7 +331,7 @@ ECode ProxyBusObject::MethodCall(
     if (!intf) {
         ec = AddInterface(busPtr, interfaceName);
         if (FAILED(ec)) {
-            Logger::E(TAG, "MethodCall(): Exception");
+            Logger::E(TAG, "MethodCall(): Exception, failed to GetInterface %s", interfaceName.string());
             busPtr->mBaProxyLock.Unlock();
             return ec;
         }
