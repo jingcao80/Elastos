@@ -77,15 +77,28 @@ public:
             /* [out] */ String* op7,
             /* [out, callee] */ ArrayOf<String>** op8);
 
-        CARAPI TestMap(
+        CARAPI TestArrayOf(
+            /* [in] */ ArrayOf<Int32>* inarray,
+            /* [out, callee] */ ArrayOf<Int32>** outarray);
+
+        CARAPI TestMapOne(
             /* [in] */ IMap* bytebooleanMap,      //<Byte, Boolean>
             /* [in] */ IMap* int16int32Map,       //<Int16, Int32>
             /* [in] */ IMap* int64doubleMap,      //<Int64, Double>
-            /* [in] */ IMap* strstrMap,           //<String, String>
+            /* [in] */ IMap* strstrMap);          //<String, String>
+
+        CARAPI TestMapTwo(
             /* [in] */ IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
             /* [in] */ IMap* strstrarrayMap,      //<String, ArrayOf<String> >
             /* [in] */ IMap* strstrint32mapMap);  //<String, Map<String, Int32> >
 
+        CARAPI TestMap(
+            /* [in] */ IMap* strint32arrayMap);
+
+        CARAPI TestOutMap(
+            /* [out] */ IMap** strint32arrayMap,    //<String, ArrayOf<Int32> >
+            /* [out] */ IMap** strstrarrayMap,      //<String, ArrayOf<String> >
+            /* [out] */ IMap** strstrint32mapMap);  //<String, Map<String, Int32> >
     private:
         /* Helper function to send a message to the UI thread. */
         CARAPI_(void) SendUiMessage(

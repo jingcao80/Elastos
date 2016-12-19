@@ -36,15 +36,29 @@ module
             [out] String* op7,
             [out, callee] ArrayOf<String>* op8);
 
-        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "a{yb}a{ni}a{xd}a{ss}a{sai}a{sas}a{sa{si}}")]
-        TestMap(
-            [in] IMap* bytebooleanMap,      //<Byte, Boolean>
-            [in] IMap* int16int32Map,       //<Int16, Int32>
-            [in] IMap* int64doubleMap,      //<Int64, Double>
-            [in] IMap* strstrMap,           //<String, String>
-            [in] IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
-            [in] IMap* strstrarrayMap,      //<String, ArrayOf<String> >
-            [in] IMap* strstrint32mapMap);  //<String, Map<String, Int32> >
+        [@Org.Alljoyn.Bus.Annotation.BusMethod]
+        TestArrayOf(
+            [in] ArrayOf<Int32>* inarray,
+            [out, callee] ArrayOf<Int32>* outarray);
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "a{yb}a{ni}a{xd}a{ss}")]
+        TestMapOne(
+            [in] IMap* bytebooleanMap,      //<Byte, Boolean>                   a{yb}
+            [in] IMap* int16int32Map,       //<Int16, Int32>                    a{ni}
+            [in] IMap* int64doubleMap,      //<Int64, Double>                   a{xd}
+            [in] IMap* strstrMap);          //<String, String>                  a{ss}
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "a{sai}a{sas}a{sa{si}}")]
+        TestMapTwo(
+            [in] IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >         a{sai}
+            [in] IMap* strstrarrayMap,      //<String, ArrayOf<String> >        a{sas}
+            [in] IMap* strstrint32mapMap);  //<String, Map<String, Int32> >     a{sa{si}}
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(replySignature = "a{sai}a{sas}a{sa{si}}")]
+        TestOutMap(
+            [out] IMap** strint32arrayMap,      //<String, ArrayOf<Int32> >         a{sai}
+            [out] IMap** strstrarrayMap,        //<String, ArrayOf<String> >        a{sas}
+            [out] IMap** strstrint32mapMap);    //<String, Map<String, Int32> >     a{sa{si}}
     }
 
     } // namespace BasicClient

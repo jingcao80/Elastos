@@ -398,6 +398,9 @@ ECode CInterfaceProxy::PackingArguments(
                     else
                         ASSERT_SUCCEEDED(argList->SetOutputArgumentOfCarArrayPtr(n, (PCarQuintet)*args))
                     break;
+                case CarDataType_Interface:
+                    ASSERT_SUCCEEDED(argList->SetOutputArgumentOfObjectPtrPtr(n, (PInterface*)*args))
+                    break;
                 // CarDataType_EMuid       = 10,
                 // CarDataType_EGuid       = 11,
                 // CarDataType_ECode       = 12,
@@ -406,7 +409,6 @@ ECode CInterfaceProxy::PackingArguments(
                 // CarDataType_Enum        = 15,
                 // CarDataType_CppVector   = 17,
                 // CarDataType_Struct      = 18,
-                // CarDataType_Interface   = 19
                 default:
                     Logger::E("Proxy", "MshProc: Invalid [out] type(%d), param index: %d.\n", type, n);
                     assert(0);
