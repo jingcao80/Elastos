@@ -15,8 +15,11 @@ using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_ICharSequence;
+using Elastos::Core::EIID_IInteger32;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IMapEntry;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
@@ -145,6 +148,20 @@ ECode CService::BasicService::Test(
     return NOERROR;
 }
 
+ECode CService::BasicService::TestArrayOf(
+    /* [in] */ ArrayOf<Int32>* inarray,
+    /* [out, callee] */ ArrayOf<Int32>** outarray)
+{
+    Logger::I(TAG, " >> TestArrayOf result:");
+    for (Int32 i = 0; i < inarray->GetLength(); i++) {
+        Logger::I(TAG, "    > item %d : %d", i, (*inarray)[i]);
+    }
+
+    *outarray = inarray->Clone();
+    REFCOUNT_ADD(*outarray)
+    return NOERROR;
+}
+
 static void LogMap(
     /* [in] */ IMap* map,
     /* [in] */ const char* info)
@@ -168,23 +185,86 @@ static void LogMap(
     }
 }
 
-ECode CService::BasicService::TestMap(
+ECode CService::BasicService::TestMapOne(
     /* [in] */ IMap* bytebooleanMap,      //<Byte, Boolean>
     /* [in] */ IMap* int16int32Map,       //<Int16, Int32>
     /* [in] */ IMap* int64doubleMap,      //<Int64, Double>
-    /* [in] */ IMap* strstrMap,           //<String, String>
-    /* [in] */ IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
-    /* [in] */ IMap* strstrarrayMap,      //<String, ArrayOf<String> >
-    /* [in] */ IMap* strstrint32mapMap)   //<String, Map<String, Int32> >
+    /* [in] */ IMap* strstrMap)           //<String, String>
 {
-    Logger::D(TAG, " >> ============ TestMap ============ <<");
+    Logger::D(TAG, " >> ============ TestMapOne ============ <<");
     LogMap(bytebooleanMap,      "Map<Byte, Boolean>");
     LogMap(int16int32Map,       "Map<Int16, Int32>");
     LogMap(int64doubleMap,      "Map<Int64, Double>");
     LogMap(strstrMap,           "Map<String, String>");
+    return NOERROR;
+}
+
+ECode CService::BasicService::TestMapTwo(
+    /* [in] */ IMap* strint32arrayMap,    //<String, ArrayOf<Int32> >
+    /* [in] */ IMap* strstrarrayMap,      //<String, ArrayOf<String> >
+    /* [in] */ IMap* strstrint32mapMap)   //<String, Map<String, Int32> >
+{
+    Logger::D(TAG, " >> ============ TestMapTwo ============ <<");
     LogMap(strint32arrayMap,    "Map<String, ArrayOf<Int32>>");
     LogMap(strstrarrayMap,      "Map<String, ArrayOf<String>>");
     LogMap(strstrint32mapMap,   "Map<String, Map<String, Int32>>");
+    return NOERROR;
+}
+
+ECode CService::BasicService::TestMap(
+    /* [in] */ IMap* strint32arrayMap)
+{
+    Logger::D(TAG, " >> ============ TestMap ============ <<");
+    LogMap(strint32arrayMap,    "Map");
+    return NOERROR;
+}
+
+ECode CService::BasicService::TestOutMap(
+    /* [out] */ IMap** strint32arrayMapResult,    //<String, ArrayOf<Int32> >
+    /* [out] */ IMap** strstrarrayMapResult,      //<String, ArrayOf<String> >
+    /* [out] */ IMap** strstrint32mapMapResult)   //<String, Map<String, Int32> >
+{
+    Logger::D(TAG, " >> ============ TestOutMap ============ <<");
+    VALIDATE_NOT_NULL(strint32arrayMapResult)
+    VALIDATE_NOT_NULL(strstrarrayMapResult)
+    VALIDATE_NOT_NULL(strstrint32mapMapResult)
+
+    AutoPtr<IMap> strint32arrayMap, strstrarrayMap, strstrint32mapMap, strint32Map;
+    CHashMap::New((IMap**)&strint32arrayMap);
+    CHashMap::New((IMap**)&strstrarrayMap);
+    CHashMap::New((IMap**)&strstrint32mapMap);
+    CHashMap::New((IMap**)&strint32Map);
+
+    AutoPtr<IArrayOf> int32Array;
+    CArrayOf::New(EIID_IInteger32, 2, (IArrayOf**)&int32Array);
+    int32Array->Set(0, CoreUtils::Convert(1));
+    int32Array->Set(1, CoreUtils::Convert(2));
+    strint32arrayMap->Put(CoreUtils::Convert("String-ArrayOf<Int32>"), int32Array);
+
+    AutoPtr<IArrayOf> strArray;
+    CArrayOf::New(EIID_ICharSequence, 2, (IArrayOf**)&strArray);
+    strArray->Set(0, CoreUtils::Convert("string array item 0"));
+    strArray->Set(1, CoreUtils::Convert("string array item 1"));
+    strstrarrayMap->Put(CoreUtils::Convert("String-ArrayOf<String>"), strArray);
+
+    strint32Map->Put(CoreUtils::Convert("key-11"), CoreUtils::Convert(11));
+    strint32Map->Put(CoreUtils::Convert("key-12"), CoreUtils::Convert(12));
+    strstrint32mapMap->Put(CoreUtils::Convert("String-Map<String, Int32>"), strint32Map);
+
+    Logger::I(TAG, " >> TestOutMap results:"
+        "\n      Map<String, ArrayOf<Int32>>: %p, %s"
+        "\n      Map<String, ArrayOf<String>>: %p, %s"
+        "\n      Map<String, Map<String, Int32>>: %p : %s",
+        strint32arrayMap.Get(), TO_CSTR(strint32arrayMap),
+        strstrarrayMap.Get(), TO_CSTR(strstrarrayMap),
+        strstrint32mapMap.Get(), TO_CSTR(strstrint32mapMap));
+
+    *strint32arrayMapResult = strint32arrayMap;
+    REFCOUNT_ADD(*strint32arrayMapResult)
+    *strstrarrayMapResult = strstrarrayMap;
+    REFCOUNT_ADD(*strstrarrayMapResult)
+    *strstrint32mapMapResult = strstrint32mapMap;
+    REFCOUNT_ADD(*strstrint32mapMapResult)
     return NOERROR;
 }
 
