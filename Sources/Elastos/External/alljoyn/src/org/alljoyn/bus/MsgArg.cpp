@@ -1226,6 +1226,19 @@ static AutoPtr<ArrayOf<ElementType> > ConvertArrayOfObject(
     return array;
 }
 
+static AutoPtr<IArrayOf> ConvertArrayOf(
+    /* [in] */ ArrayOf<Byte>* arrayOf)
+{
+    Int32 length = arrayOf->GetLength();
+    AutoPtr<IArrayOf> array;
+    CArrayOf::New(EIID_IByte, length, (IArrayOf**)&array);
+    for (Int32 i = 0; i < length; ++i) {
+        AutoPtr<IByte> obj = CoreUtils::ConvertByte((*arrayOf)[i]);
+        array->Set(i, obj);
+    }
+    return array;
+}
+
 template<typename ElementType, typename InterfaceType>
 static AutoPtr<IArrayOf> ConvertArrayOf(
     /* [in] */ ArrayOf<ElementType>* arrayOf,
@@ -1385,21 +1398,49 @@ ECode MsgArg::MarshalInterface(
                 }
             }
 
+            if (DEBUG_MAP) {
+                Logger::I(TAG, " marshal array of %c with sig: %s", elementTypeId, sig.string());
+            }
+
             switch (elementTypeId) {
-                case ALLJOYN_BYTE:
-                case ALLJOYN_BOOLEAN:
+                case ALLJOYN_BYTE: {
+                    AutoPtr<ArrayOf<Byte> > array = ConvertArrayOfObject<Byte, IByte>(arrayOf);
+                    Set(msgArg, sig, array);
+                    break;
+                }
+                case ALLJOYN_BOOLEAN: {
+                    AutoPtr<ArrayOf<Boolean> > array = ConvertArrayOfObject<Boolean, IBoolean>(arrayOf);
+                    Set(msgArg, sig, array);
+                    break;
+                }
                 case ALLJOYN_INT16:
-                case ALLJOYN_UINT16:
+                case ALLJOYN_UINT16: {
+                    AutoPtr<ArrayOf<Int16> > array = ConvertArrayOfObject<Int16, IInteger16>(arrayOf);
+                    Set(msgArg, sig, array);
+                    break;
+                }
                 case ALLJOYN_INT32:
-                case ALLJOYN_UINT32:
+                case ALLJOYN_UINT32: {
+                    AutoPtr<ArrayOf<Int32> > array = ConvertArrayOfObject<Int32, IInteger32>(arrayOf);
+                    Set(msgArg, sig, array);
+                    break;
+                }
                 case ALLJOYN_INT64:
-                case ALLJOYN_UINT64:
-                case ALLJOYN_DOUBLE:
-                case ALLJOYN_STRING:  {
+                case ALLJOYN_UINT64: {
+                    AutoPtr<ArrayOf<Int64> > array = ConvertArrayOfObject<Int64, IInteger64>(arrayOf);
+                    Set(msgArg, sig, array);
+                    break;
+                }
+                case ALLJOYN_DOUBLE: {
+                    AutoPtr<ArrayOf<Double> > array = ConvertArrayOfObject<Double, IDouble>(arrayOf);
+                    Set(msgArg, sig, array);
+                    break;
+                }
+
+                case ALLJOYN_STRING: {
                     Int32 length;
                     arrayOf->GetLength(&length);
                     SetArray(msgArg, elemSig, length);
-                    Logger::I(TAG, " marshal array of %c with sig: %s", elementTypeId, elemSig.string());
                     length = GetNumElements(msgArg);
                     for (Int32 i = 0; i < length; ++i) {
                         AutoPtr<IInterface> obj;
@@ -1519,12 +1560,12 @@ ECode MsgArg::UnmarshalInterface(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    Int32 typeId = GetTypeId(msgArg);
+    Char32 typeId = GetTypeId(msgArg);
     if (DEBUG_MAP) {
         Logger::D(TAG, " >> UnmarshalInterface with signature: %s, typeId: %c", sig.string(), typeId);
     }
 
-    switch (sig.GetChar(0)) {
+    switch (typeId) {
         case ALLJOYN_BYTE: {
             AutoPtr<IByte> value = CoreUtils::ConvertByte(GetByte(msgArg));
             *result = value;
@@ -1570,6 +1611,54 @@ ECode MsgArg::UnmarshalInterface(
             break;
         }
 
+        case ALLJOYN_BOOLEAN_ARRAY:{
+            AutoPtr<ArrayOf<Boolean> > array = GetBoolArray(msgArg);
+            AutoPtr<IArrayOf> value = ConvertArrayOf<Boolean, IBoolean>(array, EIID_IBoolean);
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
+        case ALLJOYN_BYTE_ARRAY: {
+            AutoPtr<ArrayOf<Byte> > array = GetByteArray(msgArg);
+            AutoPtr<IArrayOf> value = ConvertArrayOf(array);
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
+        case ALLJOYN_INT16_ARRAY: {
+            AutoPtr<ArrayOf<Int16> > array = GetInt16Array(msgArg);
+            AutoPtr<IArrayOf> value = ConvertArrayOf<Int16, IInteger16>(array, EIID_IInteger16);
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
+        case ALLJOYN_INT32_ARRAY: {
+            AutoPtr<ArrayOf<Int32> > array = GetInt32Array(msgArg);
+            AutoPtr<IArrayOf> value = ConvertArrayOf<Int32, IInteger32>(array, EIID_IInteger32);
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
+        case ALLJOYN_INT64_ARRAY: {
+            AutoPtr<ArrayOf<Int64> > array = GetInt64Array(msgArg);
+            AutoPtr<IArrayOf> value = ConvertArrayOf<Int64, IInteger64>(array, EIID_IInteger64);
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
+        case ALLJOYN_DOUBLE_ARRAY: {
+            AutoPtr<ArrayOf<Double> > array = GetDoubleArray(msgArg);
+            AutoPtr<IArrayOf> value = ConvertArrayOf<Double, IDouble>(array, EIID_IDouble);
+            *result = value;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
         case ALLJOYN_STRING: {
             AutoPtr<ICharSequence> value = CoreUtils::Convert(GetString(msgArg));
             *result = value;
@@ -1598,21 +1687,10 @@ ECode MsgArg::UnmarshalInterface(
             }
 
             Char32 elementTypeId = eleSig.GetChar(0);
-            if (elementTypeId ==ALLJOYN_BYTE
-                || elementTypeId ==ALLJOYN_BOOLEAN
-                || elementTypeId ==ALLJOYN_INT16
-                || elementTypeId ==ALLJOYN_UINT16
-                || elementTypeId ==ALLJOYN_INT32
-                || elementTypeId ==ALLJOYN_UINT32
-                || elementTypeId ==ALLJOYN_INT64
-                || elementTypeId ==ALLJOYN_UINT64
-                || elementTypeId ==ALLJOYN_DOUBLE
-                || elementTypeId ==ALLJOYN_STRING)
-            {
+            if (elementTypeId ==ALLJOYN_STRING) {
                 Int32 size = GetNumElements(msgArg);
-                InterfaceID iid = GetInterfaceIDByTypeId(elementTypeId);
                 AutoPtr<IArrayOf> array;
-                CArrayOf::New(iid, size, (IArrayOf**)&array);
+                CArrayOf::New(EIID_ICharSequence, size, (IArrayOf**)&array);
                 for (Int32 i = 0; i < size; ++i) {
                     AutoPtr<IInterface> obj;
                     UnmarshalInterface(GetElement(msgArg, i), eleSig, (IInterface**)&obj);
@@ -1717,7 +1795,12 @@ ECode MsgArg::Unmarshal(
 {
     VALIDATE_NOT_NULL(object)
 
-    switch (GetTypeId(msgArg)) {
+    Char32 typeId = GetTypeId(msgArg);
+    if (DEBUG_MAP) {
+        Logger::D(TAG, "==== Marshal: %c ====", typeId);
+    }
+
+    switch (typeId) {
         case ALLJOYN_BOOLEAN:
             *(Boolean*)object = GetBool(msgArg);
             break;
