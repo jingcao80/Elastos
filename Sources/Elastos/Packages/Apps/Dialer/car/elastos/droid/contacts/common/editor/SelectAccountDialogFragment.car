@@ -1,0 +1,31 @@
+module
+{
+
+    using interface Elastos.Droid.Os.IBundle;
+
+    interface Elastos.Droid.Contacts.Common.Model.Account.IAccountWithDataSet;
+
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Editor {
+
+    interface ISelectAccountDialogFragmentListener {
+
+        OnAccountChosen(
+            [in] IAccountWithDataSet* account,
+            [in] IBundle* extraArgs);
+
+        OnAccountSelectorCancelled();
+
+    }
+
+    } // Editor
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

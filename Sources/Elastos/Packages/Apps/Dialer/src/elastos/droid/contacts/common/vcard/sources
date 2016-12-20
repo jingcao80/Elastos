@@ -1,10 +1,8 @@
-
-TARGET_NAME= interactions
+TARGET_NAME= vcard
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
 
-SOURCES = TouchPointManager.cpp
-SOURCES += ImportExportDialogFragment.cpp
+SOURCES += VCardCommonArguments.cpp

@@ -9,3 +9,4 @@ DIRS += lettertiles
 DIRS += model
 DIRS += list
 DIRS += database
+DIRS += vcard

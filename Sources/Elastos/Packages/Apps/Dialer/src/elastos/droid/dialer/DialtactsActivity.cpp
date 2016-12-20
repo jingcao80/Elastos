@@ -16,6 +16,7 @@
 // #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/contacts/common/CallUtil.h"
 #include <elastos/droid/contacts/common/interactions/TouchPointManager.h>
+#include "elastos/droid/contacts/common/interactions/ImportExportDialogFragment.h"
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/R.h>
 #include <elastos/core/CoreUtils.h>
@@ -83,10 +84,10 @@ using Elastos::Droid::Dialer::Widget::CSearchEditTextLayout;
 using Elastos::Droid::Dialer::Widget::EIID_IActionBarControllerActivityUi;
 using Elastos::Droid::Dialer::Widget::EIID_IOnBackButtonClickedListener;
 using Elastos::Droid::Dialer::Util::DialerUtils;
-// using Elastos::Droid::Dialer::CallLog::ECLSID_CCallLogActivity;
 using Elastos::Droid::DialerBind::DatabaseHelperManager;
 using Elastos::Droid::Contacts::Common::CallUtil;
 using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
+using Elastos::Droid::Contacts::Common::Interactions::ImportExportDialogFragment;
 using Elastos::Droid::Contacts::Common::List::EIID_IOnPhoneNumberPickerActionListener;
 using Elastos::Droid::Contacts::Common::List::IContactEntryListFragment;
 using Elastos::Droid::Common::Widget::ICompositeCursorAdapter;
@@ -804,9 +805,7 @@ ECode DialtactsActivity::OnMenuItemClick(
             // done in {@link PeopleActivity}.
             AutoPtr<IFragmentManager> manager;
             GetFragmentManager((IFragmentManager**)&manager);
-            assert(0 && "TODO");
-            // ImportExportDialogFragment.show(manager, TRUE,
-            //         ECLSID_DialtactsActivity);
+            ImportExportDialogFragment::Show(manager, TRUE, IObject::Probe(TO_IINTERFACE(this)));
             *result = TRUE;
             return NOERROR;
         }
