@@ -93,12 +93,8 @@ String Formatter::FormatFileSize(
     String resStr;
     context->GetString(suffix, &resStr);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    AutoPtr<ICharSequence> cs;
-    CString::New(value, (ICharSequence**)&cs);
-    args->Set(0, cs);
-    cs = NULL;
-    CString::New(resStr, (ICharSequence**)&cs);
-    args->Set(1, cs);
+    args->Set(0, CoreUtils::Convert(value));
+    args->Set(1, CoreUtils::Convert(resStr));
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
     String ret;
@@ -137,70 +133,75 @@ String Formatter::FormatShortElapsedTime(
     }
     Int32 seconds = (Int32)secondsLong;
 
+    AutoPtr<ArrayOf<IInterface*> > args;
     String ret;
-    AutoPtr<IInteger32> daysPtr = CoreUtils::Convert(days);
-    AutoPtr<IInteger32> hoursPtr = CoreUtils::Convert(hours);
-    AutoPtr<IInteger32> minutesPtr = CoreUtils::Convert(minutes);
-    AutoPtr<IInteger32> secondsPtr = CoreUtils::Convert(seconds);
-
-    AutoPtr<ArrayOf<IInterface*> > daysFormat = ArrayOf<IInterface*>::Alloc(1);
-    (*daysFormat)[0] = daysPtr;
-
-    AutoPtr<ArrayOf<IInterface*> > hoursFormat = ArrayOf<IInterface*>::Alloc(1);
-    (*hoursFormat)[0] = hoursPtr;
-
-    AutoPtr<ArrayOf<IInterface*> > minutesFormat = ArrayOf<IInterface*>::Alloc(1);
-    (*minutesFormat)[0] = minutesPtr;
-
-    AutoPtr<ArrayOf<IInterface*> > secondsFormat = ArrayOf<IInterface*>::Alloc(1);
-    (*secondsFormat)[0] = secondsPtr;
-
-    AutoPtr<ArrayOf<IInterface*> > dayHourFormat = ArrayOf<IInterface*>::Alloc(2);
-    (*dayHourFormat)[0] = daysPtr;
-    (*dayHourFormat)[1] = hoursPtr;
-
-    AutoPtr<ArrayOf<IInterface*> > hourminuteFormat = ArrayOf<IInterface*>::Alloc(2);
-    (*hourminuteFormat)[0] = hoursPtr;
-    (*hourminuteFormat)[1] = minutesPtr;
-
-    AutoPtr<ArrayOf<IInterface*> > minutesecondFormat = ArrayOf<IInterface*>::Alloc(2);
-    (*minutesecondFormat)[0] = minutesPtr;
-    (*minutesecondFormat)[1] = secondsPtr;
 
     if (days >= 2) {
         days += (hours + 12) / 24;
-        context->GetString(R::string::durationDays, daysFormat, &ret);
-    } else if (days > 0) {
-        if (hours == 1) {
-            context->GetString(R::string::durationDayHour, dayHourFormat, &ret);
-            return ret;
-        }
-        context->GetString(R::string::durationDayHours, dayHourFormat, &ret);
-    } else if (hours >= 2) {
-        hours += (minutes + 30) / 60;
-        context->GetString(R::string::durationHours, hoursFormat, &ret);
-    } else if (hours > 0) {
-        if (minutes == 1) {
-            context->GetString(R::string::durationHourMinute, hourminuteFormat, &ret);
-            return ret;
-        }
-        context->GetString(R::string::durationHourMinutes, hourminuteFormat, &ret);
-    } else if (minutes >= 2) {
-        minutes += (seconds + 30) / 60;
-        context->GetString(R::string::durationMinutes, minutesFormat, &ret);
-    } else if (minutes > 0) {
-        if (seconds == 1) {
-            context->GetString(R::string::durationMinuteSecond, minutesecondFormat, &ret);
-            return ret;
-        }
-        context->GetString(R::string::durationMinuteSeconds, minutesecondFormat, &ret);
-    } else if (seconds == 1) {
-        context->GetString(R::string::durationSecond, secondsFormat, &ret);
+        args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, CoreUtils::Convert(days));
+        context->GetString(R::string::durationDays, args, &ret);
         return ret;
-    } else {
-        context->GetString(R::string::durationSeconds, secondsFormat, &ret);
     }
-    return ret;
+    else if (days > 0) {
+        args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert(days));
+        args->Set(1, CoreUtils::Convert(hours));
+        if (hours == 1) {
+            context->GetString(R::string::durationDayHour, args, &ret);
+            return ret;
+        }
+        context->GetString(R::string::durationDayHours, args, &ret);
+        return ret;
+    }
+    else if (hours >= 2) {
+        hours += (minutes + 30) / 60;
+        args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, CoreUtils::Convert(hours));
+        context->GetString(R::string::durationHours, args, &ret);
+        return ret;
+    }
+    else if (hours > 0) {
+        args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert(hours));
+        args->Set(1, CoreUtils::Convert(minutes));
+        if (minutes == 1) {
+            context->GetString(R::string::durationHourMinute, args, &ret);
+            return ret;
+        }
+        context->GetString(R::string::durationHourMinutes, args, &ret);
+        return ret;
+    }
+    else if (minutes >= 2) {
+        minutes += (seconds + 30) / 60;
+        args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, CoreUtils::Convert(minutes));
+        context->GetString(R::string::durationMinutes, args, &ret);
+        return ret;
+    }
+    else if (minutes > 0) {
+        args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert(minutes));
+        args->Set(1, CoreUtils::Convert(seconds));
+        if (seconds == 1) {
+            context->GetString(R::string::durationMinuteSecond, args, &ret);
+            return ret;
+        }
+        context->GetString(R::string::durationMinuteSeconds, args, &ret);
+        return ret;
+    }
+    else if (seconds == 1) {
+        args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, CoreUtils::Convert(seconds));
+        context->GetString(R::string::durationSecond, args, &ret);
+        return ret;
+    }
+    else {
+        args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, CoreUtils::Convert(seconds));
+        context->GetString(R::string::durationSeconds, args, &ret);
+        return ret;
+    }
 }
 
 } // namespace Format

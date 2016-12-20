@@ -1328,6 +1328,7 @@ ECode CBatteryHistoryChart::OnSizeChanged(
         // If there are fewer than 2 time labels, then they are useless.  Just
         // show an axis label giving the entire duration.
         AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
         mDurationString = Formatter::FormatShortElapsedTime(context,
                 mEndWallTime - mStartWallTime);
         Float data;

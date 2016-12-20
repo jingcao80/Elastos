@@ -340,9 +340,13 @@ ECode CMemoryFile::WriteBytes(
     return native_write(mFD, mAddress, buffer, srcOffset, destOffset, count, mAllowPurging);
 }
 
-AutoPtr<IFileDescriptor> CMemoryFile::GetFileDescriptor()
+ECode CMemoryFile::GetFileDescriptor(
+    /* [out] */ IFileDescriptor** fd)
 {
-    return mFD;
+    VALIDATE_NOT_NULL(fd)
+    *fd = mFD;
+    REFCOUNT_ADD(*fd)
+    return NOERROR;
 }
 
 ECode CMemoryFile::GetSize(

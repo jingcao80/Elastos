@@ -148,7 +148,8 @@ public:
      *
      * @hide
      */
-    AutoPtr<IFileDescriptor> GetFileDescriptor();
+    CARAPI GetFileDescriptor(
+        /* [out] */ IFileDescriptor** fd);
 
     /**
      * Returns the size of the memory file that the file descriptor refers to,

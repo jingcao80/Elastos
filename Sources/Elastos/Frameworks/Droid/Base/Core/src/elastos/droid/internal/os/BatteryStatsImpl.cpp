@@ -131,11 +131,10 @@ ECode BatteryStatsImpl::MyHandler::HandleMessage(
                 cb->BatteryNeedsCpuUpdate();
             }
             break;
-        case BatteryStatsImpl::MSG_REPORT_POWER_CHANGE:
-        {
-            Int32 arg1;
-            msg->GetArg1(&arg1);
+        case BatteryStatsImpl::MSG_REPORT_POWER_CHANGE: {
             if (cb != NULL) {
+                Int32 arg1;
+                msg->GetArg1(&arg1);
                 cb->BatteryPowerChanged(arg1 != 0);
             }
             break;
@@ -164,7 +163,43 @@ BatteryStatsImpl::TimeBase::TimeBase()
 void BatteryStatsImpl::TimeBase::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ const String& prefix)
-{}
+{
+    StringBuilder sb("");// = new StringBuilder(128);
+    pw->Print(prefix);
+    pw->Print(String("mRunning="));
+    pw->Println(mRunning);
+    sb.SetLength(0);
+    sb.Append(prefix);
+    sb.Append("mUptime=");
+    FormatTimeMs(sb, mUptime / 1000);
+    pw->Println(sb.ToString());
+
+    sb.SetLength(0);
+    sb.Append(prefix);
+    sb.Append("mRealtime=");
+    FormatTimeMs(sb, mRealtime / 1000);
+    pw->Println(sb.ToString());
+
+    sb.SetLength(0);
+    sb.Append(prefix);
+    sb.Append("mPastUptime=");
+    FormatTimeMs(sb, mPastUptime / 1000);
+    sb.Append("mUptimeStart=");
+    FormatTimeMs(sb, mUptimeStart / 1000);
+    sb.Append("mUnpluggedUptime=");
+    FormatTimeMs(sb, mUnpluggedUptime / 1000);
+    pw->Println(sb.ToString());
+
+    sb.SetLength(0);
+    sb.Append(prefix);
+    sb.Append("mPastRealtime=");
+    FormatTimeMs(sb, mPastRealtime / 1000);
+    sb.Append("mRealtimeStart=");
+    FormatTimeMs(sb, mRealtimeStart / 1000);
+    sb.Append("mUnpluggedRealtime=");
+    FormatTimeMs(sb, mUnpluggedRealtime / 1000);
+    pw->Println(sb.ToString());
+}
 
 void BatteryStatsImpl::TimeBase::Add(
     /* [in] */ ITimeBaseObs* observer)
@@ -362,6 +397,8 @@ void BatteryStatsImpl::TimeBase::WriteToParcel(
 // BatteryStatsImpl::Counter
 //==============================================================================
 
+CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Counter, Object, IBatteryStatsCounter, ITimeBaseObs)
+
 BatteryStatsImpl::Counter::Counter(
     /* [in] */ TimeBase* timeBase,
     /* [in] */ IParcel* in)
@@ -391,8 +428,6 @@ BatteryStatsImpl::Counter::Counter(
     mTimeBase = timeBase;
     timeBase->Add(this);
 }
-
-CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Counter, Object, IBatteryStatsCounter, ITimeBaseObs)
 
 void BatteryStatsImpl::Counter::WriteToParcel(
     /* [in] */ IParcel* out)
@@ -538,6 +573,8 @@ void BatteryStatsImpl::SamplingCounter::AddCountAtomic(
 // BatteryStatsImpl::Int64SamplingCounter
 //==============================================================================
 
+CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Int64SamplingCounter, Object, IBatteryStatsInt64Counter, ITimeBaseObs)
+
 BatteryStatsImpl::Int64SamplingCounter::Int64SamplingCounter(
     /* [in] */ TimeBase* timeBase,
     /* [in] */ IParcel* in)
@@ -566,8 +603,6 @@ BatteryStatsImpl::Int64SamplingCounter::Int64SamplingCounter(
 {
     timeBase->Add(this);
 }
-
-CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Int64SamplingCounter, Object, IBatteryStatsInt64Counter, ITimeBaseObs)
 
 void BatteryStatsImpl::Int64SamplingCounter::WriteToParcel(
     /* [in] */ IParcel* out)
@@ -674,6 +709,8 @@ void BatteryStatsImpl::Int64SamplingCounter::ReadSummaryFromParcelLocked(
 // BatteryStatsImpl::Timer
 //==============================================================================
 
+CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Timer, Object, IBatteryStatsTimer, ITimeBaseObs)
+
 BatteryStatsImpl::Timer::Timer()
     : mType(0)
     , mTimeBase(NULL)
@@ -714,8 +751,6 @@ ECode BatteryStatsImpl::Timer::constructor(
     timeBase->Add(this);
     return NOERROR;
 }
-
-CAR_INTERFACE_IMPL_2(BatteryStatsImpl::Timer, Object, IBatteryStatsTimer, ITimeBaseObs)
 
 Boolean BatteryStatsImpl::Timer::Reset(
     /* [in] */ Boolean detachIfReset)
@@ -887,7 +922,6 @@ void BatteryStatsImpl::Timer::ReadSummaryFromParcelLocked(
     mLastCount = 0;
     mUnpluggedCount = mCount;
 }
-
 
 //==============================================================================
 // BatteryStatsImpl::SamplingTimer
@@ -1082,13 +1116,11 @@ void BatteryStatsImpl::SamplingTimer::ReadSummaryFromParcelLocked(
     mTrackingReportedValues = value1 == 1;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::BatchTimer
 //==============================================================================
 BatteryStatsImpl::BatchTimer::BatchTimer()
     : Timer()
-    , mUid(0)
     , mLastAddedTime(0)
     , mLastAddedDuration(0)
     , mInDischarge(FALSE)
@@ -1243,14 +1275,13 @@ Boolean BatteryStatsImpl::BatchTimer::Reset(
     return !stillActive;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::StopwatchTimer
 //==============================================================================
 BatteryStatsImpl::StopwatchTimer::StopwatchTimer()
     : Timer()
-    , mUid(0)
     , mNesting(0)
+    , mUpdateTime(0)
     , mAcquireTime(0)
     , mTimeout(0)
     , mInList(FALSE)
@@ -1510,7 +1541,6 @@ void BatteryStatsImpl::StopwatchTimer::ReadSummaryFromParcelLocked(
     mNesting = 0;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::Wakelock
 //==============================================================================
@@ -1648,7 +1678,6 @@ ECode BatteryStatsImpl::Uid::Wakelock::GetStopwatchTimer(
     return NOERROR;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::Sensor
 //==============================================================================
@@ -1718,10 +1747,11 @@ ECode BatteryStatsImpl::Uid::Sensor::GetSensorTime(
     return NOERROR;
 }
 
-
 //==============================================================================
 // BatteryStatsImpl::Uid::Proc
 //==============================================================================
+
+CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Proc, Object, IBatteryStatsImplUidProc, IBatteryStatsUidProc, ITimeBaseObs)
 
 BatteryStatsImpl::Uid::Proc::Proc(
     /* [in] */ const String& name,
@@ -1752,8 +1782,6 @@ BatteryStatsImpl::Uid::Proc::Proc(
     mHost->GetCpuSpeedSteps(&steps);
     mSpeedBins = ArrayOf<SamplingCounter*>::Alloc(steps);
 }
-
-CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Proc, Object, IBatteryStatsImplUidProc, IBatteryStatsUidProc, ITimeBaseObs)
 
 ECode BatteryStatsImpl::Uid::Proc::OnTimeStarted(
     /* [in] */ Int64 elapsedRealtime,
@@ -2109,6 +2137,8 @@ ECode BatteryStatsImpl::Uid::Proc::GetTimeAtCpuSpeedStep(
 // BatteryStatsImpl::Uid::Pkg::Serv
 //==============================================================================
 
+CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg::Serv, Object, IBatteryStatsUidPkgServ, IBatteryStatsImplUidPkgServ, ITimeBaseObs)
+
 BatteryStatsImpl::Uid::Pkg::Serv::Serv()
     : mStartTime(0)
     , mRunningSince(0)
@@ -2136,8 +2166,6 @@ ECode BatteryStatsImpl::Uid::Pkg::Serv::constructor(
     mHost->mOnBatteryTimeBase->Add(this);
     return NOERROR;
 }
-
-CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg::Serv, Object, IBatteryStatsUidPkgServ, IBatteryStatsImplUidPkgServ, ITimeBaseObs)
 
 ECode BatteryStatsImpl::Uid::Pkg::Serv::OnTimeStarted(
     /* [in] */ Int64 elapsedRealtime,
@@ -2331,6 +2359,8 @@ ECode BatteryStatsImpl::Uid::Pkg::Serv::GetStarts(
 // BatteryStatsImpl::Uid::Pkg
 //==============================================================================
 
+CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg, Object, IBatteryStatsUidPkg, IBatteryStatsImplUidPkg, ITimeBaseObs)
+
 BatteryStatsImpl::Uid::Pkg::Pkg(
     /* [in] */ BatteryStatsImpl* host)
     : mWakeups(0)
@@ -2342,8 +2372,6 @@ BatteryStatsImpl::Uid::Pkg::Pkg(
     CHashMap::New((IHashMap**)&mServiceStats);
     mHost->mOnBatteryScreenOffTimeBase->Add(this);
 }
-
-CAR_INTERFACE_IMPL_3(BatteryStatsImpl::Uid::Pkg, Object, IBatteryStatsUidPkg, IBatteryStatsImplUidPkg, ITimeBaseObs)
 
 ECode BatteryStatsImpl::Uid::Pkg::OnTimeStarted(
     /* [in] */ Int64 elapsedRealtime,
@@ -2385,7 +2413,7 @@ void BatteryStatsImpl::Uid::Pkg::ReadFromParcelLocked(
         CString::New(serviceName, (ICharSequence**)&cs);
         AutoPtr<Serv> serv = new Serv();
         serv->constructor(mHost);
-        mServiceStats->Put(cs, (IObject*)serv.Get());
+        mServiceStats->Put(cs, (IObject*)serv);
 
         serv->ReadFromParcelLocked(in);
     }
@@ -2417,7 +2445,7 @@ void BatteryStatsImpl::Uid::Pkg::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         servEntry->GetValue((IInterface**)&value);
-        AutoPtr<Serv> serv = (Serv*)(IObject*)value.Get();
+        AutoPtr<Serv> serv = (Serv*)IObject::Probe(value);
         serv->WriteToParcelLocked(out);
     }
 }
@@ -3266,7 +3294,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
     for (Int32 iw = size - 1; iw >= 0; iw--) {
         AutoPtr<IInterface> value;
         wakeStats->GetValueAt(iw, (IInterface**)&value);
-        AutoPtr<Wakelock> wl = (Wakelock*)(IObject*)value.Get();
+        AutoPtr<Wakelock> wl = (Wakelock*)IObject::Probe(value);
         if (wl->Reset()) {
             wakeStats->RemoveAt(iw);
         }
@@ -3280,7 +3308,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
     for (Int32 is= size - 1; is >= 0; is--) {
         AutoPtr<IInterface> value;
         syncStats->GetValueAt(is, (IInterface**)&value);
-        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)(IObject*)value.Get();
+        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
         if (timer->Reset(FALSE)) {
             syncStats->RemoveAt(is);
             timer->Detach();
@@ -3295,7 +3323,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
     for (Int32 ij= size - 1; ij >= 0; ij--) {
         AutoPtr<IInterface> value;
         jobStats->GetValueAt(ij, (IInterface**)&value);
-        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)(IObject*)value.Get();
+        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
         if (timer->Reset(FALSE)) {
             jobStats->RemoveAt(ij);
             timer->Detach();
@@ -3309,7 +3337,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
     for (Int32 ise = size - 1; ise >= 0; ise--) {
         AutoPtr<IInterface> value;
         mSensorStats->ValueAt(ise, (IInterface**)&value);
-        AutoPtr<Sensor> s = (Sensor*)(IObject*)value.Get();
+        AutoPtr<Sensor> s = (Sensor*)IObject::Probe(value);
         if (s->Reset()) {
             mSensorStats->RemoveAt(ise);
         }
@@ -3321,7 +3349,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
     for (Int32 ip = size - 1; ip >= 0; ip--) {
         AutoPtr<IInterface> value;
         mProcessStats->GetValueAt(ip, (IInterface**)&value);
-        AutoPtr<Proc> proc = (Proc*)(IObject*)value.Get();
+        AutoPtr<Proc> proc = (Proc*)IObject::Probe(value);
         if (proc->mProcessState == PROCESS_STATE_NONE) {
             proc->Detach();
             mProcessStats->RemoveAt(ip);
@@ -3336,7 +3364,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
         for (Int32 i = size - 1; i >= 0; i--) {
             AutoPtr<IInterface> value;
             mPids->ValueAt(i, (IInterface**)&value);
-            AutoPtr<Pid> pid = (Pid*)(IObject*)value.Get();
+            AutoPtr<Pid> pid = (Pid*)IObject::Probe(value);
             if (pid->mWakeNesting > 0) {
                 active = TRUE;
             }
@@ -3358,7 +3386,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
             AutoPtr<IMapEntry> pkgEntry = IMapEntry::Probe(next);
             AutoPtr<IInterface> value;
             pkgEntry->GetValue((IInterface**)&value);
-            AutoPtr<Pkg> p = (Pkg*)(IObject*)value.Get();
+            AutoPtr<Pkg> p = (Pkg*)IObject::Probe(value);
             p->Detach();
             Int32 size;
             p->mServiceStats->GetSize(&size);
@@ -3374,7 +3402,7 @@ Boolean BatteryStatsImpl::Uid::Reset()
                     AutoPtr<IMapEntry> servEntry = IMapEntry::Probe(next);
                     AutoPtr<IInterface> value;
                     servEntry->GetValue((IInterface**)&value);
-                    AutoPtr<Pkg::Serv> serv = (Pkg::Serv*)(IObject*)value.Get();
+                    AutoPtr<Pkg::Serv> serv = (Pkg::Serv*)IObject::Probe(value);
                     serv->Detach();
                 }
             }
@@ -3445,7 +3473,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         wakeStats->GetValueAt(iw, (IInterface**)&value);
-        AutoPtr<Wakelock> wakelock = (Wakelock*)(IObject*)value.Get();
+        AutoPtr<Wakelock> wakelock = (Wakelock*)IObject::Probe(value);
         wakelock->WriteToParcelLocked(out, elapsedRealtimeUs);
     }
 
@@ -3461,7 +3489,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         syncStats->GetValueAt(is, (IInterface**)&value);
-        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)(IObject*)value.Get();
+        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
         BatteryStatsImpl::Timer::WriteTimerToParcel(out, timer, elapsedRealtimeUs);
     }
 
@@ -3477,7 +3505,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         syncStats->GetValueAt(ij, (IInterface**)&value);
-        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)(IObject*)value.Get();
+        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
         BatteryStatsImpl::Timer::WriteTimerToParcel(out, timer, elapsedRealtimeUs);
     }
 
@@ -3490,7 +3518,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteInt32(key);
         AutoPtr<IInterface> value;
         mSensorStats->ValueAt(ise, (IInterface**)&value);
-        AutoPtr<Sensor> sensor = (Sensor*)(IObject*)value.Get();
+        AutoPtr<Sensor> sensor = (Sensor*)IObject::Probe(value);
         sensor->WriteToParcelLocked(out, elapsedRealtimeUs);
     }
 
@@ -3505,7 +3533,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         mProcessStats->GetValueAt(ip, (IInterface**)&value);
-        AutoPtr<Proc> proc = (Proc*)(IObject*)value.Get();
+        AutoPtr<Proc> proc = (Proc*)IObject::Probe(value);
         proc->WriteToParcelLocked(out);
     }
 
@@ -3676,7 +3704,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
         in->ReadInt32(&sensorNumber);
         AutoPtr<Sensor> sensor = new Sensor(sensorNumber, this);
         sensor->ReadFromParcelLocked(mHost->mOnBatteryTimeBase, in);
-        mSensorStats->Put(sensorNumber, (IObject*)sensor.Get());
+        mSensorStats->Put(sensorNumber, (IObject*)sensor);
     }
 
     Int32 numProcs;
@@ -3689,7 +3717,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
         proc->ReadFromParcelLocked(in);
         AutoPtr<ICharSequence> cs;
         CString::New(processName, (ICharSequence**)&cs);
-        mProcessStats->Put(cs, (IObject*)proc.Get());
+        mProcessStats->Put(cs, (IObject*)proc);
     }
 
     Int32 numPkgs;
@@ -3702,7 +3730,7 @@ void BatteryStatsImpl::Uid::ReadFromParcelLocked(
         pkg->ReadFromParcelLocked(in);
         AutoPtr<ICharSequence> cs;
         CString::New(packageName, (ICharSequence**)&cs);
-        mPackageStats->Put(cs, (IObject*)pkg.Get());
+        mPackageStats->Put(cs, (IObject*)pkg);
     }
 
     mWifiRunning = FALSE;
@@ -3840,7 +3868,7 @@ AutoPtr<BatteryStatsImpl::Uid::Proc> BatteryStatsImpl::Uid::GetProcessStatsLocke
         mProcessStats->Put(cs, (IObject*)ps);
     }
     else {
-        ps = (Proc*)(IObject*)value.Get();
+        ps = (Proc*)IObject::Probe(value);
     }
 
     return ps;
@@ -3893,7 +3921,7 @@ void BatteryStatsImpl::Uid::UpdateRealProcessStateLocked(
             for (Int32 ip = size - 1; ip >= 0; ip--) {
                 AutoPtr<IInterface> value;
                 mProcessStats->GetValueAt(ip, (IInterface**)&value);
-                proc = (Proc*)(IObject*)value.Get();
+                proc = (Proc*)IObject::Probe(value);
                 if (proc->mProcessState < uidProcState) {
                     uidProcState = proc->mProcessState;
                 }
@@ -3923,7 +3951,7 @@ AutoPtr<BatteryStatsImpl::Uid::Pid> BatteryStatsImpl::Uid::GetPidStatsLocked(
         mPids->Put(pid, (IObject*)p);
     }
     else {
-        p = (Pid*)(IObject*)value.Get();
+        p = (Pid*)IObject::Probe(value);
     }
     return p;
 }
@@ -3938,10 +3966,10 @@ AutoPtr<BatteryStatsImpl::Uid::Pkg> BatteryStatsImpl::Uid::GetPackageStatsLocked
     AutoPtr<Pkg> ps;
     if (value == NULL) {
         ps = new Pkg(mHost);
-        mPackageStats->Put(cs, (IObject*)ps.Get());
+        mPackageStats->Put(cs, (IObject*)ps);
     }
     else {
-        ps = (Pkg*)(IObject*)value.Get();
+        ps = (Pkg*)IObject::Probe(value);
     }
 
     return ps;
@@ -3960,10 +3988,10 @@ AutoPtr<BatteryStatsImpl::Uid::Pkg::Serv> BatteryStatsImpl::Uid::GetServiceStats
     AutoPtr<Pkg::Serv> ss;
     if (value == NULL) {
         ss = ps->NewServiceStatsLocked();
-        ps->mServiceStats->Put(cs, (IObject*)ss.Get());
+        ps->mServiceStats->Put(cs, (IObject*)ss);
     }
     else {
-        ss = (Pkg::Serv*)(IObject*)value.Get();
+        ss = (Pkg::Serv*)IObject::Probe(value);
     }
 
     return ss;
@@ -4027,10 +4055,10 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::GetSensorTimerL
             return NULL;
         }
         se = new Sensor(sensor, this);
-        mSensorStats->Put(sensor, (IObject*)se.Get());
+        mSensorStats->Put(sensor, (IObject*)se);
     }
     else {
-        se = (Sensor*)(IObject*)value.Get();
+        se = (Sensor*)IObject::Probe(value);
     }
 
     AutoPtr<BatteryStatsImpl::StopwatchTimer> t = se->mTimer;
@@ -4127,7 +4155,7 @@ void BatteryStatsImpl::Uid::NoteStopWakeLocked(
     if (pid >= 0 && type == IBatteryStats::WAKE_TYPE_PARTIAL) {
         AutoPtr<IInterface> value;
         mPids->Get(pid, (IInterface**)&value);
-        AutoPtr<Pid> p = (Pid*)(IObject*)value.Get();
+        AutoPtr<Pid> p = (Pid*)IObject::Probe(value);
         if (p != NULL && p->mWakeNesting > 0) {
             if (p->mWakeNesting-- == 1) {
                 p->mWakeSumMs += elapsedRealtimeMs - p->mWakeStartMs;
@@ -4645,7 +4673,7 @@ AutoPtr<BatteryStatsImpl::SamplingTimer> BatteryStatsImpl::GetWakeupReasonTimerL
         mKernelWakelockStats->Put(cs, (IObject*)kwlt);
     }
     else {
-        kwlt = (SamplingTimer*)(IObject*)value.Get();
+        kwlt = (SamplingTimer*)IObject::Probe(value);
     }
     return kwlt;
 }
@@ -4806,7 +4834,7 @@ AutoPtr<BatteryStatsImpl::SamplingTimer> BatteryStatsImpl::GetKernelWakelockTime
         mKernelWakelockStats->Put(cs, (IObject*)kwlt);
     }
     else {
-        kwlt = (SamplingTimer*)(IObject*)value.Get();
+        kwlt = (SamplingTimer*)IObject::Probe(value);
     }
     return kwlt;
 }
@@ -4883,8 +4911,12 @@ void BatteryStatsImpl::ReadHistoryTag(
     /* [in] */ Int32 index,
     /* [in] */ HistoryTag* tag)
 {
-    tag->mString = (*mReadHistoryStrings)[index];
-    tag->mUid = (*mReadHistoryUids)[index];
+    if (index < mReadHistoryStrings->GetLength()) {
+        tag->mString = (*mReadHistoryStrings)[index];
+    }
+    if (index < mReadHistoryUids->GetLength()) {
+        tag->mUid = (*mReadHistoryUids)[index];
+    }
     tag->mPoolIdx = index;
 }
 
@@ -5071,7 +5103,7 @@ void BatteryStatsImpl::ReadHistoryDelta(
         Int32 batteryLevelInt;
         src->ReadInt32(&batteryLevelInt);
         cur->mBatteryLevel = (Byte)((batteryLevelInt >> 25) & 0x7f);
-        cur->mBatteryTemperature = (Char32)((batteryLevelInt << 7) >> 21);
+        cur->mBatteryTemperature = (Int16)((batteryLevelInt << 7) >> 21);
         cur->mBatteryVoltage = (Char32)(batteryLevelInt & 0x3fff);
         cur->mNumReadInts += 1;
         if (DEBUG)
@@ -6125,7 +6157,7 @@ ECode BatteryStatsImpl::NoteProcessDiedLocked(
     AutoPtr<IInterface> value;
     mUidStats->Get(uid, (IInterface**)&value);
     if (value != NULL) {
-        u = (Uid*)(IObject*)value.Get();
+        u = (Uid*)IObject::Probe(value);
         u->mPids->Remove(pid);
     }
     return NOERROR;
@@ -6144,12 +6176,12 @@ ECode BatteryStatsImpl::GetProcessWakeTime(
     AutoPtr<IInterface> value;
     mUidStats->Get(uid, (IInterface**)&value);
     if (value != NULL) {
-        u = (Uid*)(IObject*)value.Get();
+        u = (Uid*)IObject::Probe(value);
         AutoPtr<Uid::Pid> p;
         AutoPtr<IInterface> temp;
         u->mPids->Get(pid, (IInterface**)&temp);
         if (temp != NULL) {
-            p = (Uid::Pid*)(IObject*)temp.Get();
+            p = (Uid::Pid*)IObject::Probe(temp);
             *result = p->mWakeSumMs + (p->mWakeNesting > 0 ? (realtime - p->mWakeStartMs) : 0);
         }
     }
@@ -6167,7 +6199,7 @@ ECode BatteryStatsImpl::ReportExcessiveWakeLocked(
     AutoPtr<IInterface> value;
     mUidStats->Get(uid, (IInterface**)&value);
     if (value != NULL) {
-        u = (Uid*)(IObject*)value.Get();
+        u = (Uid*)IObject::Probe(value);
         u->ReportExcessiveWakeLocked(proc, overTime, usedTime);
     }
     return NOERROR;
@@ -6184,7 +6216,7 @@ ECode BatteryStatsImpl::ReportExcessiveCpuLocked(
     AutoPtr<IInterface> value;
     mUidStats->Get(uid, (IInterface**)&value);
     if (value != NULL) {
-        u = (Uid*)(IObject*)value.Get();
+        u = (Uid*)IObject::Probe(value);
         u->ReportExcessiveCpuLocked(proc, overTime, usedTime);
     }
     return NOERROR;
@@ -6829,7 +6861,7 @@ ECode BatteryStatsImpl::NoteResetAudioLocked()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> value;
             mUidStats->ValueAt(i, (IInterface**)&value);
-            AutoPtr<Uid> uid = (Uid*)(IObject*)value.Get();
+            AutoPtr<Uid> uid = (Uid*)IObject::Probe(value);
             uid->NoteResetAudioLocked(elapsedRealtime);
         }
     }
@@ -6852,7 +6884,7 @@ ECode BatteryStatsImpl::NoteResetVideoLocked()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> value;
             mUidStats->ValueAt(i, (IInterface**)&value);
-            AutoPtr<Uid> uid = (Uid*)(IObject*)value.Get();
+            AutoPtr<Uid> uid = (Uid*)IObject::Probe(value);
             uid->NoteResetAudioLocked(elapsedRealtime);
         }
     }
@@ -8187,7 +8219,7 @@ void BatteryStatsImpl::ResetAllStatsLocked()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> value;
         mUidStats->ValueAt(i, (IInterface**)&value);
-        AutoPtr<Uid> uid = (Uid*)(IObject*)value.Get();
+        AutoPtr<Uid> uid = (Uid*)IObject::Probe(value);
         if (uid->Reset()) {
             Int32 key;
             mUidStats->KeyAt(i, &key);
@@ -8205,7 +8237,7 @@ void BatteryStatsImpl::ResetAllStatsLocked()
         while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> value;
             it->GetNext((IInterface**)&value);
-            AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
+            AutoPtr<SamplingTimer> timer = (SamplingTimer*)IObject::Probe(value);
             mOnBatteryScreenOffTimeBase->Remove((ITimeBaseObs*)timer);
         }
         mKernelWakelockStats->Clear();
@@ -8220,7 +8252,7 @@ void BatteryStatsImpl::ResetAllStatsLocked()
         while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> value;
             it->GetNext((IInterface**)&value);
-            AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
+            AutoPtr<SamplingTimer> timer = (SamplingTimer*)IObject::Probe(value);
             mOnBatteryTimeBase->Remove((ITimeBaseObs*)timer);
         }
         mWakeupReasonStats->Clear();
@@ -8632,7 +8664,7 @@ void BatteryStatsImpl::UpdateKernelWakelocksLocked()
             mKernelWakelockStats->Put(cs, (IObject*)kwlt);
         }
         else {
-            kwlt = (SamplingTimer*)(IObject*)value.Get();
+            kwlt = (SamplingTimer*)IObject::Probe(value);
         }
         kwlt->UpdateCurrentReportedCount(kws->mCount);
         kwlt->UpdateCurrentReportedTotalTime(kws->mTotalTime);
@@ -8653,7 +8685,7 @@ void BatteryStatsImpl::UpdateKernelWakelocksLocked()
             AutoPtr<IMapEntry> ent = IMapEntry::Probe(next);
             AutoPtr<IInterface> value;
             ent->GetValue((IInterface**)&value);
-            AutoPtr<SamplingTimer> st = (SamplingTimer*)(IObject*)value.Get();
+            AutoPtr<SamplingTimer> st = (SamplingTimer*)IObject::Probe(value);
             if (st->GetUpdateVersion() != sKernelWakelockUpdateVersion) {
                 st->SetStale();
             }
@@ -9290,7 +9322,7 @@ void BatteryStatsImpl::DistributeWorkLocked(
     AutoPtr<IInterface> value;
     mUidStats->Get(IProcess::WIFI_UID, (IInterface**)&value);
     if (value != NULL) {
-        wifiUid = (Uid*)(IObject*)value.Get();
+        wifiUid = (Uid*)IObject::Probe(value);
     }
     if (wifiUid != NULL) {
         Int64 uSecTime;
@@ -9300,7 +9332,7 @@ void BatteryStatsImpl::DistributeWorkLocked(
         for (Int32 ip = size - 1; ip >= 0; ip--) {
             AutoPtr<IInterface> value;
             wifiUid->mProcessStats->GetValueAt(ip, (IInterface**)&value);
-            AutoPtr<Uid::Proc> proc = (Uid::Proc*)(IObject*)value.Get();
+            AutoPtr<Uid::Proc> proc = (Uid::Proc*)IObject::Probe(value);
             Int64 totalRunningTime;
             GetGlobalWifiRunningTime(uSecTime, which, &totalRunningTime);
             Int32 statsSize;
@@ -9308,7 +9340,7 @@ void BatteryStatsImpl::DistributeWorkLocked(
             for (Int32 i = 0; i < statsSize; i++) {
                 AutoPtr<IInterface> temp;
                 mUidStats->ValueAt(i, (IInterface**)&temp);
-                AutoPtr<Uid> uid = (Uid*)(IObject*)temp.Get();
+                AutoPtr<Uid> uid = (Uid*)IObject::Probe(temp);
                 if (uid->mUid != IProcess::WIFI_UID) {
                     Int64 uidRunningTime;
                     uid->GetWifiRunningTime(uSecTime, which, &uidRunningTime);
@@ -9782,7 +9814,7 @@ ECode BatteryStatsImpl::ReadSummaryFromParcel(
         Int32 uid;
         in->ReadInt32(&uid);
         AutoPtr<Uid> u = new Uid(uid, this);
-        mUidStats->Put(uid, (IObject*)u.Get());
+        mUidStats->Put(uid, (IObject*)u);
 
         u->mWifiRunning = FALSE;
         Int32 value;
@@ -10076,7 +10108,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
         AutoPtr<IInterface> value;
         ent->GetValue((IInterface**)&value);
         if (value != NULL) {
-            AutoPtr<SamplingTimer> kwlt = (SamplingTimer*)(IObject*)value.Get();
+            AutoPtr<SamplingTimer> kwlt = (SamplingTimer*)IObject::Probe(value);
             out->WriteInt32(1);
             AutoPtr<IInterface> ki;
             ent->GetKey((IInterface**)&ki);
@@ -10105,7 +10137,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
         AutoPtr<IInterface> value;
         ent->GetValue((IInterface**)&value);
         if (value == NULL) {
-            AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
+            AutoPtr<SamplingTimer> timer = (SamplingTimer*)IObject::Probe(value);
             out->WriteInt32(1);
             AutoPtr<IInterface> ki;
             ent->GetKey((IInterface**)&ki);
@@ -10129,7 +10161,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
         out->WriteInt32(key);
         AutoPtr<IInterface> value;
         mUidStats->ValueAt(iu, (IInterface**)&value);
-        AutoPtr<Uid> u = (Uid*)(IObject*)value.Get();
+        AutoPtr<Uid> u = (Uid*)IObject::Probe(value);
 
         if (u->mWifiRunningTimer != NULL) {
             out->WriteInt32(1);
@@ -10241,7 +10273,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
             out->WriteString(key);
             AutoPtr<IInterface> vi;
             wakeStats->GetValueAt(iw, (IInterface**)&vi);
-            AutoPtr<Uid::Wakelock> wl = (Uid::Wakelock*)(IObject*)vi.Get();
+            AutoPtr<Uid::Wakelock> wl = (Uid::Wakelock*)IObject::Probe(vi);
             if (wl->mTimerFull != NULL) {
                 out->WriteInt32(1);
                 wl->mTimerFull->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -10277,7 +10309,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
             out->WriteString(key);
             AutoPtr<IInterface> vi;
             syncStats->GetValueAt(is, (IInterface**)&vi);
-            AutoPtr<StopwatchTimer> timer = (StopwatchTimer*)(IObject*)vi.Get();
+            AutoPtr<StopwatchTimer> timer = (StopwatchTimer*)IObject::Probe(vi);
             timer->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
 
@@ -10293,7 +10325,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
             out->WriteString(key);
             AutoPtr<IInterface> vi;
             jobStats->GetValueAt(ij, (IInterface**)&vi);
-            AutoPtr<StopwatchTimer> timer = (StopwatchTimer*)(IObject*)vi.Get();
+            AutoPtr<StopwatchTimer> timer = (StopwatchTimer*)IObject::Probe(vi);
             timer->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
 
@@ -10306,7 +10338,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
             out->WriteInt32(key);
             AutoPtr<IInterface> value;
             u->mSensorStats->ValueAt(ise, (IInterface**)&value);
-            AutoPtr<Uid::Sensor> se = (Uid::Sensor*)(IObject*)value.Get();
+            AutoPtr<Uid::Sensor> se = (Uid::Sensor*)IObject::Probe(value);
             if (se->mTimer != NULL) {
                 out->WriteInt32(1);
                 se->mTimer->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -10327,7 +10359,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
             out->WriteString(key);
             AutoPtr<IInterface> vi;
             u->mProcessStats->GetValueAt(ip, (IInterface**)&vi);
-            AutoPtr<Uid::Proc> ps = (Uid::Proc*)(IObject*)vi.Get();
+            AutoPtr<Uid::Proc> ps = (Uid::Proc*)IObject::Probe(vi);
             out->WriteInt64(ps->mUserTime);
             out->WriteInt64(ps->mSystemTime);
             out->WriteInt64(ps->mForegroundTime);
@@ -10365,7 +10397,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
                 out->WriteString(key);
                 AutoPtr<IInterface> vi;
                 ent->GetValue((IInterface**)&vi);
-                AutoPtr<Uid::Pkg> ps = (Uid::Pkg*)(IObject*)vi.Get();
+                AutoPtr<Uid::Pkg> ps = (Uid::Pkg*)IObject::Probe(vi);
                 out->WriteInt32(ps->mWakeups);
                 ps->mServiceStats->GetSize(&NS);
                 out->WriteInt32(NS);
@@ -10386,7 +10418,7 @@ void BatteryStatsImpl::WriteSummaryToParcel(
                         out->WriteString(sKey);
                         AutoPtr<IInterface> svi;
                         sent->GetValue((IInterface**)&svi);
-                        AutoPtr<Uid::Pkg::Serv> ss = (Uid::Pkg::Serv*)(IObject*)svi.Get();
+                        AutoPtr<Uid::Pkg::Serv> ss = (Uid::Pkg::Serv*)IObject::Probe(svi);
                         Int64 time = ss->GetStartTimeToNowLocked(
                                 mOnBatteryTimeBase->GetUptime(NOW_SYS));
                         out->WriteInt64(time);
@@ -10584,7 +10616,7 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
         in->ReadInt32(&uid);
         AutoPtr<Uid> u = new Uid(uid, this);
         u->ReadFromParcelLocked(mOnBatteryTimeBase, mOnBatteryScreenOffTimeBase, in);
-        mUidStats->Append(uid, (IObject*)u.Get());
+        mUidStats->Append(uid, (IObject*)u);
     }
     return NOERROR;
 }
@@ -10711,7 +10743,7 @@ void BatteryStatsImpl::WriteToParcelLocked(
             AutoPtr<IInterface> value;
             ent->GetValue((IInterface**)&value);
             if (value != NULL) {
-                AutoPtr<SamplingTimer> kwlt = (SamplingTimer*)(IObject*)value.Get();
+                AutoPtr<SamplingTimer> kwlt = (SamplingTimer*)IObject::Probe(value);
                 out->WriteInt32(1);
                 AutoPtr<IInterface> ki;
                 ent->GetKey((IInterface**)&ki);
@@ -10738,7 +10770,7 @@ void BatteryStatsImpl::WriteToParcelLocked(
             AutoPtr<IInterface> value;
             ent->GetValue((IInterface**)&value);
             if (value != NULL) {
-                AutoPtr<SamplingTimer> timer = (SamplingTimer*)(IObject*)value.Get();
+                AutoPtr<SamplingTimer> timer = (SamplingTimer*)IObject::Probe(value);
                 out->WriteInt32(1);
                 AutoPtr<IInterface> ki;
                 ent->GetKey((IInterface**)&ki);
@@ -10768,7 +10800,7 @@ void BatteryStatsImpl::WriteToParcelLocked(
             out->WriteInt32(key);
             AutoPtr<IInterface> value;
             mUidStats->ValueAt(i, (IInterface**)&value);
-            AutoPtr<Uid> uid = (Uid*)(IObject*)value.Get();
+            AutoPtr<Uid> uid = (Uid*)IObject::Probe(value);
 
             uid->WriteToParcelLocked(out, uSecRealtime);
         }

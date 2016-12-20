@@ -4,29 +4,31 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/os/ParcelFileDescriptor.h"
 #include "elastos/droid/os/CParcelFileDescriptor.h"
+#include "elastos/droid/os/CMemoryFile.h"
 #include "elastos/droid/os/CParcel.h"
-
-#include <elastos/core/Math.h>
 #include <elastos/droid/system/OsConstants.h>
 #include <elastos/droid/system/Os.h>
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
 #include <sys/stat.h>
 #include <unistd.h>
 
+using Elastos::Droid::Os::CMemoryFile;
+using Elastos::Droid::Os::IMemoryFile;
+using Elastos::Droid::System::OsConstants;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
+using Elastos::IO::CFileDescriptor;
+using Elastos::IO::ByteOrder_BIG_ENDIAN;
+using Elastos::IO::EIID_ICloseable;
+using Elastos::Utility::Logging::Logger;
 using Libcore::IO::IIoUtils;
 using Libcore::IO::CIoUtils;
 using Libcore::IO::IIoBridge;
 using Libcore::IO::CIoBridge;
 using Libcore::IO::IMemory;
 using Libcore::IO::CMemory;
-using Elastos::IO::ByteOrder_BIG_ENDIAN;
-using Elastos::IO::EIID_ICloseable;
-using Elastos::Core::ICloseGuardHelper;
-using Elastos::Core::CCloseGuardHelper;
-using Elastos::IO::CFileDescriptor;
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::System::OsConstants;
 
 namespace Elastos {
 namespace Droid {
@@ -592,11 +594,12 @@ ECode ParcelFileDescriptor::CreateCommSocketPair(
     iu->SetBlocking(comm1, FALSE);
     iu->SetBlocking(comm2, FALSE);
 
-    *result = ArrayOf<IFileDescriptor*>::Alloc(2);
-    REFCOUNT_ADD(*result)
+    AutoPtr<ArrayOf<IFileDescriptor*> > args = ArrayOf<IFileDescriptor*>::Alloc(2);
+    args->Set(0, comm1);
+    args->Set(1, comm2);
 
-    (*result)->Set(0, comm1);
-    (*result)->Set(1, comm2);
+    *result = args;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -605,6 +608,21 @@ ECode ParcelFileDescriptor::FromData(
     /* [in] */ const String& name,
     /* [out] */ IParcelFileDescriptor** descriptor)
 {
+    VALIDATE_NOT_NULL(descriptor)
+    *descriptor = NULL;
+
+    if (data == NULL) return NOERROR;
+    AutoPtr<IMemoryFile> file;
+    CMemoryFile::New(name, data->GetLength(), (IMemoryFile**)&file);
+    if (data->GetLength() > 0) {
+        file->WriteBytes(data, 0, 0, data->GetLength());
+    }
+    file->Deactivate();
+    AutoPtr<IFileDescriptor> fd;
+    file->GetFileDescriptor((IFileDescriptor**)&fd);
+    if (fd != NULL) {
+        return CParcelFileDescriptor::New(fd, descriptor);
+    }
     return NOERROR;
 }
 
@@ -617,22 +635,27 @@ ECode ParcelFileDescriptor::ParseMode(
     Int32 modeBits;
     if (mode.Equals("r")) {
         modeBits = IParcelFileDescriptor::MODE_READ_ONLY;
-    } else if (mode.Equals("w") || mode.Equals("wt")) {
+    }
+    else if (mode.Equals("w") || mode.Equals("wt")) {
         modeBits = IParcelFileDescriptor::MODE_WRITE_ONLY
                 | IParcelFileDescriptor::MODE_CREATE
                 | IParcelFileDescriptor::MODE_TRUNCATE;
-    } else if (mode.Equals("wa")) {
+    }
+    else if (mode.Equals("wa")) {
         modeBits = IParcelFileDescriptor::MODE_WRITE_ONLY
                 | IParcelFileDescriptor::MODE_CREATE
                 | IParcelFileDescriptor::MODE_APPEND;
-    } else if (mode.Equals("rw")) {
+    }
+    else if (mode.Equals("rw")) {
         modeBits = IParcelFileDescriptor::MODE_READ_WRITE
                 | IParcelFileDescriptor::MODE_CREATE;
-    } else if (mode.Equals("rwt")) {
+    }
+    else if (mode.Equals("rwt")) {
         modeBits = IParcelFileDescriptor::MODE_READ_WRITE
                 | IParcelFileDescriptor::MODE_CREATE
                 | IParcelFileDescriptor::MODE_TRUNCATE;
-    } else {
+    }
+    else {
         // throw new IllegalArgumentException("Bad mode '" + mode + "'");
         Logger::E(TAG, "Bad mode %s", mode.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

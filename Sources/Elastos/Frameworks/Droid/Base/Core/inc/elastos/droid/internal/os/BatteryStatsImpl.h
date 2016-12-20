@@ -91,6 +91,8 @@ public:
     class TimeBase : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::TimeBase")
+
         TimeBase();
 
         CARAPI_(void) Dump(
@@ -177,6 +179,10 @@ public:
         , public ITimeBaseObs
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::Counter")
+
+        CAR_INTERFACE_DECL()
+
         Counter(
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
@@ -185,8 +191,6 @@ public:
             /* [in] */ TimeBase* timeBase);
 
         virtual ~Counter() {}
-
-        CAR_INTERFACE_DECL()
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out);
@@ -247,6 +251,8 @@ public:
     class SamplingCounter : public Counter
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::SamplingCounter")
+
         SamplingCounter(
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
@@ -264,14 +270,16 @@ public:
         , public ITimeBaseObs
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::Int64SamplingCounter")
+
+        CAR_INTERFACE_DECL()
+
         Int64SamplingCounter(
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
         Int64SamplingCounter(
             /* [in] */ TimeBase* timeBase);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out);
@@ -332,10 +340,9 @@ public:
         , public ITimeBaseObs
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::Timer")
 
         CAR_INTERFACE_DECL()
-
-        TO_STRING_IMPL("BatteryStatsImpl::Timer")
 
         Timer();
 
@@ -768,6 +775,8 @@ public:
     class OverflowArrayMap : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::OverflowArrayMap")
+
         OverflowArrayMap();
 
         CARAPI_(AutoPtr<IArrayMap>) GetMap();
@@ -812,6 +821,8 @@ public:
             , public IBatteryStatsUidWakelock
         {
         public:
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::Wakelock")
+
             Wakelock(
                 /* [in] */ Uid* host)
                 : mHost(host)
@@ -879,6 +890,8 @@ public:
             , public IBatteryStatsUidSensor
         {
         public:
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::Sensor")
+
             Sensor(
                 /* [in] */ Int32 handle,
                 /* [in] */ Uid* host)
@@ -925,11 +938,13 @@ public:
             , public ITimeBaseObs
         {
         public:
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::Proc")
+
+            CAR_INTERFACE_DECL()
+
             Proc(
                 /* [in] */ const String& name,
                 /* [in] */ BatteryStatsImpl* host);
-
-            CAR_INTERFACE_DECL()
 
             CARAPI OnTimeStarted(
                 /* [in] */ Int64 elapsedRealtime,
@@ -1133,6 +1148,8 @@ public:
                 , public ITimeBaseObs
             {
             public:
+                TO_STRING_IMPL("BatteryStatsImpl::Uid::Pkg::Serv")
+
                 CAR_INTERFACE_DECL()
 
                 Serv();
@@ -1288,10 +1305,12 @@ public:
             };
 
         public:
-            Pkg(
-                /* [in] */ BatteryStatsImpl* host);
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::Pkg")
 
             CAR_INTERFACE_DECL()
+
+            Pkg(
+                /* [in] */ BatteryStatsImpl* host);
 
             CARAPI OnTimeStarted(
                 /* [in] */ Int64 elapsedRealtime,
@@ -1366,6 +1385,8 @@ public:
         class WakelockStats : public OverflowArrayMap<Wakelock>
         {
         public:
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::WakelockStats")
+
             WakelockStats(
                 /* [in] */ Uid* uid)
                 : mHost(uid)
@@ -1380,6 +1401,8 @@ public:
         class SyncStats : public OverflowArrayMap<StopwatchTimer>
         {
         public:
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::SyncStats")
+
             SyncStats(
                 /* [in] */ Uid* uid)
                 : mHost(uid)
@@ -1394,6 +1417,8 @@ public:
         class JobStats : public OverflowArrayMap<StopwatchTimer>
         {
         public:
+            TO_STRING_IMPL("BatteryStatsImpl::Uid::JobStats")
+
             JobStats(
                 /* [in] */ Uid* uid)
                 : mHost(uid)
@@ -1811,6 +1836,8 @@ public:
     class BatteryStatsWriteRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::BatteryStatsWriteRunnable")
+
         BatteryStatsWriteRunnable(
             /* [in] */ BatteryStatsImpl* host)
             : mHost(host)
@@ -1826,6 +1853,8 @@ private:
     class KernelWakelockStats : public Object
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::KernelWakelockStats")
+
         KernelWakelockStats(
             /* [in] */ Int32 count,
             /* [in] */ Int64 totalTime,
@@ -1844,6 +1873,8 @@ private:
     class SetOnBatteryRunnable : public Runnable
     {
     public:
+        TO_STRING_IMPL("BatteryStatsImpl::SetOnBatteryRunnable")
+
         SetOnBatteryRunnable(
             /* [in] */ IParcel* in,
             /* [in] */ BatteryStatsImpl* host)
@@ -1859,9 +1890,11 @@ private:
     };
 
 public:
-    BatteryStatsImpl();
+    TO_STRING_IMPL("BatteryStatsImpl")
 
     CAR_INTERFACE_DECL()
+
+    BatteryStatsImpl();
 
     CARAPI constructor();
 

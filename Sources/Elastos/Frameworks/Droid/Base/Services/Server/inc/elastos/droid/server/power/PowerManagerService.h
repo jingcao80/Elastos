@@ -313,31 +313,31 @@ public:
 
         // update the uids being synchronized by network socket request manager
         CARAPI UpdateBlockedUids(
-        /* [in] */ Int32 uid,
-        /* [in] */ Boolean isBlocked);
+            /* [in] */ Int32 uid,
+            /* [in] */ Boolean isBlocked);
 
         CARAPI CpuBoost(
-        /* [in] */ Int32 duration);
+            /* [in] */ Int32 duration);
 
         CARAPI SetKeyboardVisibility(
-        /* [in] */ Boolean visible);
+            /* [in] */ Boolean visible);
 
         CARAPI SetKeyboardLight(
-        /* [in] */ Boolean on,
-        /* [in] */ Int32 key);
+            /* [in] */ Boolean on,
+            /* [in] */ Int32 key);
 
         CARAPI WakeUpWithProximityCheck(
-        /* [in] */ Int64 time);
+            /* [in] */ Int64 time);
 
         CARAPI SetPowerProfile(
-        /* [in] */ const String& profile,
-        /* [out] */ Boolean* result);
+            /* [in] */ const String& profile,
+            /* [out] */ Boolean* result);
 
         CARAPI GetPowerProfile(
-        /* [out] */ String* result);
+            /* [out] */ String* result);
 
         CARAPI ActivityResumed(
-        /* [in] */ const String& componentName);
+            /* [in] */ const String& componentName);
 
     protected:
         // @Override // Binder call

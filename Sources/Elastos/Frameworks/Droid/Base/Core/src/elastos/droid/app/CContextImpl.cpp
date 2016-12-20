@@ -47,6 +47,7 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
+#include "elastos/droid/os/CBatteryManager.h"
 #include "elastos/droid/os/CPowerManager.h"
 #include "elastos/droid/os/CSystemVibrator.h"
 // #include "elastos/droid/os/CDropBoxManager.h"
@@ -204,6 +205,8 @@ using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IIPowerManager;
 using Elastos::Droid::Os::IIUserManager;
 using Elastos::Droid::Os::CPowerManager;
+using Elastos::Droid::Os::CBatteryManager;
+using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::CStorageManager;
@@ -2454,11 +2457,10 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::BATTERY_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
-        // public Object createService(ContextImpl ctx) {
-        //     return new BatteryManager();
-        // }});
+        AutoPtr<IBatteryManager> batteryManager;
+        CBatteryManager::New((IBatteryManager**)&batteryManager);
+        *object = batteryManager;
+        REFCOUNT_ADD(*object);
         return NOERROR;
     }
     else if (IContext::NFC_SERVICE.Equals(name)) {

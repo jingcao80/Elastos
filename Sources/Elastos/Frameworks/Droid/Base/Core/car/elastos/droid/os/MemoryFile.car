@@ -3,6 +3,7 @@ module
 {
     using interface Elastos.IO.IInputStream;
     using interface Elastos.IO.IOutputStream;
+    using interface Elastos.IO.IFileDescriptor;
 
     namespace Elastos {
     namespace Droid {
@@ -16,6 +17,27 @@ module
          * file, it will be deleted.
          */
         Close();
+
+        /**
+         * Unmaps the memory file from the process's memory space, but does not close it.
+         * After this method has been called, read and write operations through this object
+         * will fail, but {@link #getFileDescriptor()} will still return a valid file descriptor.
+         *
+         * @hide
+         */
+        Deactivate();
+
+        /**
+         * Gets a FileDescriptor for the memory file.
+         *
+         * The returned file descriptor is not duplicated.
+         *
+         * @throws IOException If the memory file has been closed.
+         *
+         * @hide
+         */
+        GetFileDescriptor(
+            [out] IFileDescriptor** fd);
 
         /**
          * Returns the length of the memory file.
