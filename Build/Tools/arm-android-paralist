@@ -543,6 +543,7 @@
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/model
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/extensions
   Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/database
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/vcard
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/activity
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/database
