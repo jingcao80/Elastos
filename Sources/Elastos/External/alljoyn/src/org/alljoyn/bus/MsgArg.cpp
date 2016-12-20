@@ -1520,21 +1520,26 @@ ECode MsgArg::MarshalInterface(
         }
 
         case ALLJOYN_VARIANT: {
-            Logger::D(TAG, "unimplemented '%s'", sig.string());
-            assert(0 && "TODO");
+            IVariant* v = IVariant::Probe(arg);
+            if (v == NULL) {
+                Logger::E(TAG, "invalid signature '%s' or argument '%s'", sig.string(), TO_CSTR(arg));
+                assert(0 && "invalid signature or argument");
+                return E_FAIL;
+            }
 
-            // CVariant* variant = (CVariant*)IVariant::Probe(arg);
-            // assert(variant);
-            // if (variant->GetMsgArg() != 0) {
-            //     SetVariant(msgArg, sig, variant->GetMsgArg());
-            // }
-            // else {
-            //     SetVariant(msgArg);
-            //     String signature;
-            //     variant->GetSignature(&signature);
-            //     AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
-            //     Marshal(GetVal(msgArg), signature, value->ToValuePtr());
-            // }
+            CVariant* variant = (CVariant*)v;
+            String signature;
+            variant->GetSignature(&signature);
+
+            if (variant->GetMsgArg() != 0) {
+                Logger::I(TAG, " >> CVariant: sig: %s, signature: %s", sig.string(), signature.string());
+                SetVariant(msgArg, sig, variant->GetMsgArg());
+            }
+            else {
+                SetVariant(msgArg);
+                AutoPtr<IInterface> value = variant->GetValue();
+                MarshalInterface(GetVal(msgArg), signature, value);
+            }
             break;
         }
 
@@ -1759,14 +1764,11 @@ ECode MsgArg::UnmarshalInterface(
         }
 
         case ALLJOYN_VARIANT: {
-            Logger::D(TAG, "unimplemented '%s'", sig.string());
-            assert(0);
-
-            // AutoPtr<CVariant> variant;
-            // CVariant::NewByFriend((CVariant**)&variant);
-            // variant->SetMsgArg(msgArg);
-            // *(PInterface*)object = (IVariant*)variant;
-            // variant->AddRef();
+            AutoPtr<IVariant> variant;
+            CVariant::New((IVariant**)&variant);
+            ((CVariant*)variant.Get())->SetMsgArg(msgArg);
+            *result = variant;
+            REFCOUNT_ADD(*result)
             break;
         }
 
@@ -1790,14 +1792,13 @@ ECode MsgArg::UnmarshalInterface(
 
 ECode MsgArg::Unmarshal(
     /* [in] */ Int64 msgArg,
-    /* [in] */ CarDataType type,
     /* [out] */ PVoid object)
 {
     VALIDATE_NOT_NULL(object)
 
     Char32 typeId = GetTypeId(msgArg);
     if (DEBUG_MAP) {
-        Logger::D(TAG, "==== Marshal: %c ====", typeId);
+        Logger::D(TAG, "==== Unmarshal: %c ====", typeId);
     }
 
     switch (typeId) {
@@ -1947,7 +1948,7 @@ ECode MsgArg::Unmarshal(
                 Int32 size = GetNumElements(msgArg);
                 AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
                 for (Int32 i = 0; i < size; ++i) {
-                    Unmarshal(GetElement(msgArg, i), CarDataType_String, (PVoid)&(*array)[i]);
+                    Unmarshal(GetElement(msgArg, i), (PVoid)&(*array)[i]);
                 }
                 *(PCarQuintet*)object = array;
                 array->AddRef();
@@ -2046,7 +2047,7 @@ ECode MsgArg::UnmarshalIn(
         }
         if (ioAttr == ParamIOAttribute_In) {
             PVoid arg = value->ToValuePtr();
-            if (FAILED(Unmarshal(isStruct ? GetMember(msgArgs, inIndex++) : msgArgs, type, arg)))
+            if (FAILED(Unmarshal(isStruct ? GetMember(msgArgs, inIndex++) : msgArgs, arg)))
                 continue;
         }
         array->Set(i, value);
@@ -2115,7 +2116,7 @@ ECode MsgArg::UnmarshalOut(
         }
         PVoid arg = value->ToValuePtr();
         Int32 msgArg = typeId == ALLJOYN_STRUCT ? GetMember(msgArgs, outIndex) : msgArgs;
-        if (SUCCEEDED(Unmarshal(msgArg, type, arg)))
+        if (SUCCEEDED(Unmarshal(msgArg, arg)))
             value->AssignArgumentListOutput(args, i);
         outIndex++;
     }
@@ -2276,17 +2277,25 @@ ECode MsgArg::Marshal(
             break;
         }
         case ALLJOYN_VARIANT: {
-            CVariant* variant = (CVariant*)IVariant::Probe(*(PInterface*)arg);
-            assert(variant);
+            IVariant* v = IVariant::Probe(*(PInterface*)arg);
+            if (v == NULL) {
+                Logger::E(TAG, "line %d: cannot marshal NULL into '%s'", __LINE__, sig.string());
+                assert(0 && "invalid signature or argument");
+                return E_FAIL;
+            }
+
+            CVariant* variant = (CVariant*)v;
+            String signature;
+            variant->GetSignature(&signature);
+
             if (variant->GetMsgArg() != 0) {
+                Logger::I(TAG, " >> CVariant: sig: %s, signature: %s", sig.string(), signature.string());
                 SetVariant(msgArg, sig, variant->GetMsgArg());
             }
             else {
                 SetVariant(msgArg);
-                String signature;
-                variant->GetSignature(&signature);
-                AutoPtr<CarValue> value = CarValue::Convert(variant->GetValue());
-                Marshal(GetVal(msgArg), signature, value->ToValuePtr());
+                AutoPtr<IInterface> value = variant->GetValue();
+                MarshalInterface(GetVal(msgArg), signature, value);
             }
             break;
         }

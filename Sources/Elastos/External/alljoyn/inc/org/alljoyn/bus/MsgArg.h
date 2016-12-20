@@ -264,6 +264,16 @@ public:
     static CARAPI_(String) GetSignature(
         /* [in] */ ArrayOf<Int64>* msgArgs);
 
+    static CARAPI MarshalInterface(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& sig,
+        /* [in] */ IInterface* arg);
+
+    static CARAPI UnmarshalInterface(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& sig,
+        /* [out] */ IInterface** arg);
+
     /**
      * Unmarshals a native MsgArg into a Java object.
      *
@@ -275,7 +285,6 @@ public:
     // @SuppressWarnings("unchecked")
     static CARAPI Unmarshal(
         /* [in] */ Int64 msgArg,
-        /* [in] */ CarDataType type,
         /* [out] */ PVoid object);
 
     /**
@@ -337,16 +346,6 @@ public:
 
 private:
     MsgArg();
-
-    static CARAPI MarshalInterface(
-        /* [in] */ Int64 msgArg,
-        /* [in] */ const String& sig,
-        /* [in] */ IInterface* arg);
-
-    static CARAPI UnmarshalInterface(
-        /* [in] */ Int64 msgArg,
-        /* [in] */ const String& sig,
-        /* [out] */ IInterface** arg);
 
     static InterfaceID GetInterfaceIDByTypeId(
         /* [in] */ Char32 typeId);

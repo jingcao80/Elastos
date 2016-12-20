@@ -23,6 +23,7 @@ using Elastos::Utility::CHashMap;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
+using Org::Alljoyn::Bus::CVariant;
 using Org::Alljoyn::Bus::CBusAttachment;
 using Org::Alljoyn::Bus::CBusListener;
 using Org::Alljoyn::Bus::CMutableInteger16Value;
@@ -211,14 +212,6 @@ ECode CService::BasicService::TestMapTwo(
     return NOERROR;
 }
 
-ECode CService::BasicService::TestMap(
-    /* [in] */ IMap* strint32arrayMap)
-{
-    Logger::D(TAG, " >> ============ TestMap ============ <<");
-    LogMap(strint32arrayMap,    "Map");
-    return NOERROR;
-}
-
 ECode CService::BasicService::TestOutMap(
     /* [out] */ IMap** strint32arrayMapResult,    //<String, ArrayOf<Int32> >
     /* [out] */ IMap** strstrarrayMapResult,      //<String, ArrayOf<String> >
@@ -265,6 +258,33 @@ ECode CService::BasicService::TestOutMap(
     REFCOUNT_ADD(*strstrarrayMapResult)
     *strstrint32mapMapResult = strstrint32mapMap;
     REFCOUNT_ADD(*strstrint32mapMapResult)
+    return NOERROR;
+}
+
+ECode CService::BasicService::TestOutVariant(
+    /* [out] */ IVariant** result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    AutoPtr<IMap> strint32Map, strstrint32mapMap;
+    CHashMap::New((IMap**)&strint32Map);
+    CHashMap::New((IMap**)&strstrint32mapMap);
+
+    strint32Map->Put(CoreUtils::Convert("key-11"), CoreUtils::Convert(11));
+    strint32Map->Put(CoreUtils::Convert("key-12"), CoreUtils::Convert(12));
+    strstrint32mapMap->Put(CoreUtils::Convert("String-Map<String, Int32>"), strint32Map);
+
+    AutoPtr<IVariant> variant;
+    CVariant::New(strstrint32mapMap, String("a{sa{si}}"), (IVariant**)&variant);
+    *result = variant;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode CService::BasicService::TestVariant(
+    /* [in] */ IVariant* v)
+{
+    Logger::I(TAG, " >> TestVariant: v: %s", TO_CSTR(v));
     return NOERROR;
 }
 

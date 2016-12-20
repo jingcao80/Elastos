@@ -28,6 +28,8 @@ using Elastos::Utility::IMapEntry;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
+using Org::Alljoyn::Bus::IVariant;
+using Org::Alljoyn::Bus::CVariant;
 using Org::Alljoyn::Bus::CBusAttachment;
 using Org::Alljoyn::Bus::CMutableInteger32Value;
 using Org::Alljoyn::Bus::CSessionOpts;
@@ -390,13 +392,15 @@ ECode CClient::BusHandler::HandleMessage(
         if (mBasicInterface != NULL) {
             ECode ec = NOERROR;
 
-            // AutoPtr<IInterface> obj;
-            // msg->GetObj((IInterface**)&obj);
-            // String str = CoreUtils::Unbox(ICharSequence::Probe(obj));
-            // SendUiMessage(MESSAGE_PING, str + String(" and ") + str);
-            // String reply;
-            // mBasicInterface->Cat(str, str, &reply);
-            // SendUiMessage(MESSAGE_PING_REPLY, reply);
+            if (0) {
+                AutoPtr<IInterface> obj;
+                msg->GetObj((IInterface**)&obj);
+                String str = CoreUtils::Unbox(ICharSequence::Probe(obj));
+                SendUiMessage(MESSAGE_PING, str + String(" and ") + str);
+                String reply;
+                mBasicInterface->Cat(str, str, &reply);
+                SendUiMessage(MESSAGE_PING_REPLY, reply);
+            }
 
             if (0) {
                 Byte ip1 = 1, op1;
@@ -539,7 +543,7 @@ ECode CClient::BusHandler::HandleMessage(
                 Logger::I(TAG, " ========= Test In Map succeeded! =============");
             }
 
-            if (1) {
+            if (0) {
                 Logger::I(TAG, " ========= Test Out Map =============");
                 AutoPtr<IMap> strint32arrayMap, strstrarrayMap, strstrint32mapMap;
                 ec = mBasicInterface->TestOutMap(
@@ -556,6 +560,61 @@ ECode CClient::BusHandler::HandleMessage(
                 }
 
                 Logger::I(TAG, " ========= Test Out Map succeeded! =============");
+            }
+
+            if (0) {
+                Logger::I(TAG, " ========= Test Variant =============");
+                AutoPtr<IVariant> v;
+                // CVariant::New(CoreUtils::Convert(111), String("i"), (IVariant**)&v);
+                CVariant::New(CoreUtils::Convert("a String"), String("s"), (IVariant**)&v);
+
+                if (0) {
+                    AutoPtr<IArrayOf> int32Array;
+                    CArrayOf::New(EIID_IInteger32, 2, (IArrayOf**)&int32Array);
+                    int32Array->Set(0, CoreUtils::Convert(1));
+                    int32Array->Set(1, CoreUtils::Convert(2));
+                    CVariant::New(int32Array, String("ai"), (IVariant**)&v);
+                }
+
+                if (0) {
+                    AutoPtr<IArrayOf> strArray;
+                    CArrayOf::New(EIID_ICharSequence, 2, (IArrayOf**)&strArray);
+                    strArray->Set(0, CoreUtils::Convert("string array item 0"));
+                    strArray->Set(1, CoreUtils::Convert("string array item 1"));
+                    CVariant::New(strArray, String("as"), (IVariant**)&v);
+                }
+
+                if (1) {
+                    AutoPtr<IMap> strint32Map, strstrint32mapMap;
+                    CHashMap::New((IMap**)&strint32Map);
+                    CHashMap::New((IMap**)&strstrint32mapMap);
+
+                    strint32Map->Put(CoreUtils::Convert("key-11"), CoreUtils::Convert(11));
+                    strint32Map->Put(CoreUtils::Convert("key-12"), CoreUtils::Convert(12));
+                    strstrint32mapMap->Put(CoreUtils::Convert("String-Map<String, Int32>"), strint32Map);
+                    CVariant::New(strstrint32mapMap, String("a{sa{si}}"), (IVariant**)&v);
+                }
+
+                Logger::I(TAG, " >> TestVariant: %s", TO_CSTR(v));
+                ec = mBasicInterface->TestVariant(v);
+                if (FAILED(ec)) {
+                    Logger::I(TAG, " >> TestVariant failed. ec=%08x", ec);
+                }
+
+                Logger::I(TAG, " ========= Test Variant succeeded! =============");
+            }
+
+            if (1) {
+                Logger::I(TAG, " ========= Test Out Variant =============");
+                AutoPtr<IVariant> v;
+                ec = mBasicInterface->TestOutVariant((IVariant**)&v);
+                if (FAILED(ec)) {
+                    Logger::I(TAG, " >> TestOutVariant failed. ec=%08x", ec);
+                }
+                else {
+                    Logger::I(TAG, " >> TestOutVariant: result: %s", TO_CSTR(v));
+                }
+                Logger::I(TAG, " ========= Test Out Variant succeeded! =============");
             }
         }
 

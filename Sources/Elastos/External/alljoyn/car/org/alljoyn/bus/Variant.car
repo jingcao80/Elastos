@@ -2,7 +2,8 @@
 module
 {
     interface Org.Alljoyn.Bus.IVariantTypeReference;
-
+    using interface Elastos.Core.IArrayOf;
+    
     namespace Org {
     namespace Alljoyn {
     namespace Bus {
@@ -32,12 +33,10 @@ module
          * @throws ClassCastException if Variant data cannot be converted to requested type
          */
         GetObject(
-            [in] CarDataType type,
             [out] IInterface** obj);
 
         GetArrayObject(
-            [in] CarDataType elementType,
-            [out] IInterface** obj);
+            [out] IArrayOf** obj);
 
         /**
          * Gets the object wrapped by this Variant when the wrapped object is a

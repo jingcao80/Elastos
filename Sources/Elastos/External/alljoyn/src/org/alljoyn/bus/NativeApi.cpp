@@ -333,7 +333,7 @@ ECode Unmarshal(
     /* [in] */ CarDataType type,
     /* [out] */ PVoid object)
 {
-    return MsgArg::Unmarshal((Int64)arg, type, object);
+    return MsgArg::Unmarshal((Int64)arg, object);
 }
 
 /**
