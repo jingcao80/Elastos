@@ -83,7 +83,7 @@ public:
         /* [in] */ Int32 attributeIndex);
 
     virtual Boolean MatchesValue(
-        /* in */ const String& value);
+        /* in */ const String& value) = 0;
 
 public:
     static AutoPtr<COMPONENT_ValueProvider> COMPONENT;
@@ -118,9 +118,8 @@ public:
     virtual String GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* in */ const String& resolvedType) = 0;
 
-protected:
     ValueProvider(
         /* in */ const String& tag);
 };
@@ -229,6 +228,10 @@ class COMPONENT_ValueProvider
     : public ValueProvider
 {
 public:
+    COMPONENT_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -240,6 +243,10 @@ class COMPONENT_NAME_ValueProvider
     : public ValueProvider
 {
 public:
+    COMPONENT_NAME_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -250,6 +257,10 @@ class COMPONENT_PACKAGE_ValueProvider
     : public ValueProvider
 {
 public:
+    COMPONENT_PACKAGE_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -260,6 +271,10 @@ class ACTION_ValueProvider
     : public ValueProvider
 {
 public:
+    ACTION_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -270,6 +285,10 @@ class DATA_ValueProvider
     : public ValueProvider
 {
 public:
+    DATA_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -280,6 +299,10 @@ class MIME_TYPE_ValueProvider
     : public ValueProvider
 {
 public:
+    MIME_TYPE_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -290,6 +313,10 @@ class SCHEME_ValueProvider
     : public ValueProvider
 {
 public:
+    SCHEME_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -300,6 +327,10 @@ class SSP_ValueProvider
     : public ValueProvider
 {
 public:
+    SSP_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -310,6 +341,10 @@ class HOST_ValueProvider
     : public ValueProvider
 {
 public:
+    HOST_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
@@ -320,6 +355,10 @@ class PATH_ValueProvider
     : public ValueProvider
 {
 public:
+    PATH_ValueProvider(
+        /* in */ const String& tag)
+        : ValueProvider(tag) {}
+
     CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
