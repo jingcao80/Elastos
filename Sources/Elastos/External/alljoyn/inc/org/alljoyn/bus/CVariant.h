@@ -6,6 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
+using Elastos::Core::IArrayOf;
 
 namespace Org {
 namespace Alljoyn {
@@ -84,12 +85,10 @@ public:
      * @throws ClassCastException if Variant data cannot be converted to requested type
      */
     CARAPI GetObject(
-        /* [in] */ CarDataType type,
         /* [out] */ IInterface** obj);
 
     CARAPI GetArrayObject(
-        /* [in] */ CarDataType type,
-        /* [out] */ IInterface** obj);
+        /* [out] */ IArrayOf** obj);
 
     /**
      * Gets the object wrapped by this Variant when the wrapped object is a

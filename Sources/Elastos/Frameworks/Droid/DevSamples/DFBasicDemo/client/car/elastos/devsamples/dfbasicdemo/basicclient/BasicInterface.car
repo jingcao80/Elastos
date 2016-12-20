@@ -2,6 +2,7 @@
 module
 {
     using interface Elastos.Utility.IMap;
+    using interface Org.Alljoyn.Bus.IVariant;
     
     namespace Elastos {
     namespace DevSamples {
@@ -59,6 +60,14 @@ module
             [out] IMap** strint32arrayMap,      //<String, ArrayOf<Int32> >         a{sai}
             [out] IMap** strstrarrayMap,        //<String, ArrayOf<String> >        a{sas}
             [out] IMap** strstrint32mapMap);    //<String, Map<String, Int32> >     a{sa{si}}
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(signature = "v")]
+        TestVariant(
+            [in] IVariant* v);
+
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(replySignature = "v")]
+        TestOutVariant(
+            [out] IVariant** v);
     }
 
     } // namespace BasicClient
