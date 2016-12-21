@@ -49,7 +49,7 @@ ECode CSettingsActivity::OnCreate(
 
     AutoPtr<IPreferenceScreen> prefSet;
     GetPreferenceScreen((IPreferenceScreen**)&prefSet);
-    IPreferenceGroup* group = IPreferenceGroup::Probe(prefSet);
+    AutoPtr<IPreferenceGroup> group = IPreferenceGroup::Probe(prefSet);
 
     String key;
     GetString(R::string::setting_sound_key, &key);

@@ -239,6 +239,7 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Server::Wm::AppTransition;
+using Elastos::Droid::Server::Firewall::EIID_IAMSInterface;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 
@@ -665,6 +666,7 @@ ECode CActivityManagerService::ProcessCpuThread::Run()
 //==============================================================================
 // CActivityManagerService::IntentFirewallInterface
 //==============================================================================
+CAR_INTERFACE_IMPL(CActivityManagerService::IntentFirewallInterface, Object, IAMSInterface)
 
 CActivityManagerService::IntentFirewallInterface::IntentFirewallInterface(
     /* [in] */ CActivityManagerService* host)
@@ -672,21 +674,28 @@ CActivityManagerService::IntentFirewallInterface::IntentFirewallInterface(
 {}
 
 // @Override
-Int32 CActivityManagerService::IntentFirewallInterface::CheckComponentPermission(
+ECode CActivityManagerService::IntentFirewallInterface::CheckComponentPermission(
     /* [in] */ const String& permission,
     /* [in] */ Int32 pid,
     /* [in] */ Int32 uid,
     /* [in] */ Int32 owningUid,
-    /* [in] */ Boolean exported)
+    /* [in] */ Boolean exported,
+    /* [out] */ Int32* ret)
 {
-    return mHost->CheckComponentPermission(permission, pid, uid,
+    VALIDATE_NOT_NULL(ret)
+    *ret = mHost->CheckComponentPermission(permission, pid, uid,
             owningUid, exported);
+    return NOERROR;
 }
 
 // @Override
-AutoPtr<Object> CActivityManagerService::IntentFirewallInterface::GetAMSLock()
+ECode CActivityManagerService::IntentFirewallInterface::GetAMSLock(
+    /* [out] */ IInterface** ret)
 {
-    return mHost;
+    VALIDATE_NOT_NULL(ret)
+    *ret = IBinder::Probe(mHost);
+    REFCOUNT_ADD(*ret)
+    return NOERROR;
 }
 
 //==============================================================================
@@ -2883,7 +2892,7 @@ ECode CActivityManagerService::constructor(
     mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
     AutoPtr<IntentFirewallInterface> ifInterface = new IntentFirewallInterface(this);
     // TODO
-    // mIntentFirewall = new IntentFirewall(ifInterface, mHandler);
+    mIntentFirewall = new IntentFirewall(ifInterface, mHandler);
     mStackSupervisor = new ActivityStackSupervisor(this);
     mTaskPersister = new TaskPersister(systemDir, mStackSupervisor);
 

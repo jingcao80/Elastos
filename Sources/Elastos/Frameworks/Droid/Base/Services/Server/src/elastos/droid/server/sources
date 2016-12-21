@@ -110,6 +110,7 @@ SOURCES += WiredAccessoryManager.cpp
 
 
 ELASTOS_LIBS += accessibility/accessibility.lib
+ELASTOS_LIBS += firewall/firewall.lib
 ELASTOS_LIBS += am/am.lib
 ELASTOS_LIBS += appwidget/appwidget.lib
 ELASTOS_LIBS += clipboard/clipboard.lib

@@ -334,6 +334,17 @@ const String StringFilter::ATTR_PATTERN("pattern");
 const String StringFilter::ATTR_REGEX("regex");
 const String StringFilter::ATTR_IS_NULL("isNull");
 
+INIT_PROI_3 AutoPtr<COMPONENT_ValueProvider> StringFilter::COMPONENT = new COMPONENT_ValueProvider(String("component"));
+INIT_PROI_3 AutoPtr<COMPONENT_NAME_ValueProvider> StringFilter::COMPONENT_NAME = new COMPONENT_NAME_ValueProvider(String("component-name"));
+INIT_PROI_3 AutoPtr<COMPONENT_PACKAGE_ValueProvider> StringFilter::COMPONENT_PACKAGE = new COMPONENT_PACKAGE_ValueProvider(String("component-package"));
+INIT_PROI_3 AutoPtr<ACTION_ValueProvider> StringFilter::ACTION = new ACTION_ValueProvider(String("action"));
+INIT_PROI_3 AutoPtr<DATA_ValueProvider> StringFilter::DATA = new DATA_ValueProvider(String("data"));
+INIT_PROI_3 AutoPtr<MIME_TYPE_ValueProvider> StringFilter::MIME_TYPE = new MIME_TYPE_ValueProvider(String("mime-type"));
+INIT_PROI_3 AutoPtr<SCHEME_ValueProvider> StringFilter::SCHEME = new SCHEME_ValueProvider(String("scheme"));
+INIT_PROI_3 AutoPtr<SSP_ValueProvider> StringFilter::SSP = new SSP_ValueProvider(String("scheme-specific-part"));
+INIT_PROI_3 AutoPtr<HOST_ValueProvider> StringFilter::HOST = new HOST_ValueProvider(String("host"));
+INIT_PROI_3 AutoPtr<PATH_ValueProvider> StringFilter::PATH = new PATH_ValueProvider(String("path"));
+
 CAR_INTERFACE_IMPL(StringFilter, Object, IFilter);
 
 StringFilter::StringFilter(

@@ -1280,12 +1280,12 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
             result = new ServiceLookupResult(NULL, r->mPermission);
             return result;
         }
-        // assert(0 && "TODO");
-        Logger::I(TAG, "TODO: mIntentFirewall not ready.");
-        // if (!mAm->mIntentFirewall->GetService(r->mName, service, callingUid, callingPid,
-        //         resolvedType, r->mAppInfo)) {
-        //     return NULL;
-        // }
+        Boolean bCheckService = FALSE;
+        mAm->mIntentFirewall->CheckService(r->mName, service, callingUid, callingPid,
+                resolvedType, r->mAppInfo, &bCheckService);
+        if (!bCheckService) {
+            return NULL;
+        }
         result = new ServiceLookupResult(r, String(NULL));
         return result;
     }
