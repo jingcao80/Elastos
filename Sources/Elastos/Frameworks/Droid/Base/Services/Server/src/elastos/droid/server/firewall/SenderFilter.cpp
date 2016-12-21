@@ -142,7 +142,7 @@ ECode SenderFilter::USER_ID_Filter::Matches(
 // SenderFilter
 //=======================================================================================
 
-INIT_PROI_3 const AutoPtr<SenderFilter::FACTORY_FilterFactory> SenderFilter::FACTORY = new SenderFilter::FACTORY_FilterFactory(String("sender"));
+const AutoPtr<SenderFilter::FACTORY_FilterFactory> SenderFilter::FACTORY = new SenderFilter::FACTORY_FilterFactory(String("sender"));
 const AutoPtr<SenderFilter::SIGNATURE_Filter> SenderFilter::SIGNATURE = new SenderFilter::SIGNATURE_Filter();
 const AutoPtr<SenderFilter::SYSTEM_Filter> SenderFilter::SYSTEM = new SenderFilter::SYSTEM_Filter();
 const AutoPtr<SenderFilter::SYSTEM_OR_SIGNATURE_Filter> SenderFilter::SYSTEM_OR_SIGNATURE = new SenderFilter::SYSTEM_OR_SIGNATURE_Filter();

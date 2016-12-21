@@ -41,7 +41,7 @@ IFilter* SenderPermissionFilter::FACTORY_FilterFactory::NewFilter(
 // SenderPermissionFilter
 //=======================================================================================
 
-INIT_PROI_3 const AutoPtr<SenderPermissionFilter::FACTORY_FilterFactory> SenderPermissionFilter::FACTORY = new SenderPermissionFilter::FACTORY_FilterFactory(String("sender-permission"));
+const AutoPtr<SenderPermissionFilter::FACTORY_FilterFactory> SenderPermissionFilter::FACTORY = new SenderPermissionFilter::FACTORY_FilterFactory(String("sender-permission"));
 const String SenderPermissionFilter::ATTR_NAME("name");
 
 CAR_INTERFACE_IMPL(SenderPermissionFilter, Object, IFilter);

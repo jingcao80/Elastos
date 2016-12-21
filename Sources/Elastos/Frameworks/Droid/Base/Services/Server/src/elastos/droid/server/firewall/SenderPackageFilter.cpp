@@ -42,7 +42,7 @@ IFilter* SenderPackageFilter::FACTORY_FilterFactory::NewFilter(
 // SenderPackageFilter
 //=======================================================================================
 
-INIT_PROI_3 const AutoPtr<SenderPackageFilter::FACTORY_FilterFactory> SenderPackageFilter::FACTORY = new SenderPackageFilter::FACTORY_FilterFactory(String("sender-package"));
+const AutoPtr<SenderPackageFilter::FACTORY_FilterFactory> SenderPackageFilter::FACTORY = new SenderPackageFilter::FACTORY_FilterFactory(String("sender-package"));
 const String SenderPackageFilter::ATTR_NAME("name");
 
 CAR_INTERFACE_IMPL(SenderPackageFilter, Object, IFilter);
