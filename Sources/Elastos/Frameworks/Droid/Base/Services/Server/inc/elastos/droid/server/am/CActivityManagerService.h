@@ -22,6 +22,7 @@
 #include "elastos/droid/server/am/CompatModePackages.h"
 #include "elastos/droid/server/am/LockToAppRequestDialog.h"
 #include "elastos/droid/server/am/UserStartedState.h"
+#include "elastos/droid/server/firewall/IntentFirewall.h"
 #include "elastos/droid/server/pm/CUserManagerService.h"
 #include "elastos/droid/server/CAppOpsService.h"
 #include "elastos/droid/server/ServiceThread.h"
@@ -112,6 +113,8 @@ using Elastos::Droid::Server::ProcessMap;
 using Elastos::Droid::Server::IntentResolver;
 using Elastos::Droid::Server::CAppOpsService;
 using Elastos::Droid::Server::Pm::CUserManagerService;
+using Elastos::Droid::Server::Firewall::IntentFirewall;
+using Elastos::Droid::Server::Firewall::IAMSInterface;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IThread;
@@ -301,22 +304,28 @@ public:
     };
 
     // TODO
-    class IntentFirewallInterface : public Object// public IntentFirewall::AMSInterface
+    class IntentFirewallInterface
+        : public Object
+        , public IAMSInterface
     {
     public:
+        CAR_INTERFACE_DECL()
+
         IntentFirewallInterface(
             /* [in] */ CActivityManagerService* host);
 
         // @Override
-        CARAPI_(Int32) CheckComponentPermission(
+        CARAPI CheckComponentPermission(
             /* [in] */ const String& permission,
             /* [in] */ Int32 pid,
             /* [in] */ Int32 uid,
             /* [in] */ Int32 owningUid,
-            /* [in] */ Boolean exported);
+            /* [in] */ Boolean exported,
+            /* [out] */ Int32* ret);
 
         // @Override
-        CARAPI_(AutoPtr<Object>) GetAMSLock();
+        CARAPI GetAMSLock(
+            /* [out] */ IInterface** ret);
 
     private:
         CActivityManagerService* mHost;
@@ -3833,7 +3842,7 @@ public:
     /** Run all ActivityStacks through this */
     AutoPtr<ActivityStackSupervisor> mStackSupervisor;
 
-    // AutoPtr<IntentFirewall> mIntentFirewall;
+    AutoPtr<IntentFirewall> mIntentFirewall;
 
     AutoPtr<BroadcastQueue> mFgBroadcastQueue;
     AutoPtr<BroadcastQueue> mBgBroadcastQueue;

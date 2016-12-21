@@ -143,18 +143,24 @@ namespace Server {
 namespace Firewall {
 
 class IntentFirewall
+    : public Object
+    , public IIntentFirewall
 {
 
 private:
+    typedef IntentResolver<Elastos::Droid::Server::Firewall::FirewallIntentFilter, Elastos::Droid::Server::Firewall::Rule> IntentResolver_FirewallIntentFilter_Rule;
     class FirewallIntentResolver
-            : public IntentResolver<Elastos::Droid::Server::Firewall::FirewallIntentFilter, Elastos::Droid::Server::Firewall::Rule>
+        : public IntentResolver_FirewallIntentFilter_Rule
+        , public IFirewallIntentResolver
     {
     public:
+        CAR_INTERFACE_DECL()
+
         FirewallIntentResolver();
 
         CARAPI QueryByComponent(
             /* [in] */ IComponentName* componentName,
-            /* [in] */ List<Rule>* candidateRules);
+            /* [in] */ List<AutoPtr<Rule> >* candidateRules);
 
         CARAPI AddComponentFilter(
             /* [in] */ IComponentName* componentName,
@@ -195,8 +201,6 @@ private:
     public:
         TO_STRING_IMPL("IntentFirewall::FirewallHandler")
 
-        CAR_INTERFACE_DECL()
-
         FirewallHandler(
             /* [in] */ ILooper* looper);
 
@@ -225,6 +229,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     IntentFirewall(
         /* [in] */ IAMSInterface* ams,
         /* [in] */ IHandler* handler);
@@ -259,7 +265,7 @@ public:
         /* [out] */ Boolean *ret);
 
     CARAPI CheckIntent(
-        /* [in] */ FirewallIntentResolver* resolver,
+        /* [in] */ IFirewallIntentResolver* resolver,
         /* [in] */ IComponentName* resolvedComponent,
         /* [in] */ Int32 intentType,
         /* [in] */ IIntent* intent,
@@ -293,7 +299,6 @@ public:
         /* [out] */ Boolean *ret);
 
 public:
-    static void initIntentFirewall();
     static AutoPtr<IFile> GetRulesDir();
 
 public:
@@ -304,7 +309,7 @@ public:
         /* [in] */ IXmlPullParser* parser);
 
     // e.g. /data/system/ifw or /data/secure/system/ifw
-private:
+
     static const AutoPtr<IFile> RULES_DIR;                  // = new File(Environment->GetSystemSecureDirectory(), "ifw");
 
     static const Int32 LOG_PACKAGES_MAX_LENGTH;             // = 150;
@@ -369,7 +374,7 @@ private:
      */
     void ReadRules(
         /* [in] */ IFile* rulesFile,
-        /* [in] */ const ArrayOf<FirewallIntentResolver>& resolvers);
+        /* [in] */ const ArrayOf<FirewallIntentResolver*>& resolvers);
 
     /**
      * Checks if the caller has access to a component
@@ -400,6 +405,8 @@ public:
 } // Server
 } // Droid
 } // Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Firewall::IntentFirewall::FirewallIntentResolver, IInterface)
 
 #endif // __ELASTOS_DROID_Server_Firewall_IntentFirewall_H__
 
