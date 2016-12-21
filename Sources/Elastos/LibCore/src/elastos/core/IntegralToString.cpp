@@ -107,36 +107,34 @@ String IntegralToString::ToString(
 String IntegralToString::ConvertInt32(
     /* [in] */ Int32 i)
 {
+    // If i is Integer.MIN_VALUE, -i is still negative
+    if (i == 0x80000000/*Integer.MIN_VALUE*/)
+        return String("-2147483648");
+
     Boolean negative = FALSE;
     String quickResult;
     if (i < 0) {
         negative = TRUE;
         i = -i;
         if (i < 100) {
-            if (i < 0) {
-                // If -n is still negative, n is Integer.MIN_VALUE
-                quickResult = String("-2147483648");
+            if (SMALL_NEGATIVE_VALUES == NULL) {
+                SMALL_NEGATIVE_VALUES = ArrayOf<String>::Alloc(SMALL_VALUES_LENGTH);
             }
-            else {
-                if (SMALL_NEGATIVE_VALUES == NULL) {
-                    SMALL_NEGATIVE_VALUES = ArrayOf<String>::Alloc(SMALL_VALUES_LENGTH);
-                }
 
-                quickResult = (*SMALL_NEGATIVE_VALUES)[i];
-                if (quickResult.IsNull()) {
-                    StringBuilder sb(3);
-                    if (i < 10) {
-                        sb.AppendChar('-');
-                        sb.AppendChar(ONES[i]);
-                    }
-                    else {
-                        sb.AppendChar('-');
-                        sb.AppendChar(TENS[i]);
-                        sb.AppendChar(ONES[i]);
-                    }
-                    sb.ToString(&quickResult);
-                    (*SMALL_NEGATIVE_VALUES)[i] = quickResult;
+            quickResult = (*SMALL_NEGATIVE_VALUES)[i];
+            if (quickResult.IsNull()) {
+                StringBuilder sb(3);
+                if (i < 10) {
+                    sb.AppendChar('-');
+                    sb.AppendChar(ONES[i]);
                 }
+                else {
+                    sb.AppendChar('-');
+                    sb.AppendChar(TENS[i]);
+                    sb.AppendChar(ONES[i]);
+                }
+                sb.ToString(&quickResult);
+                (*SMALL_NEGATIVE_VALUES)[i] = quickResult;
             }
         }
     }

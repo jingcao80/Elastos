@@ -206,6 +206,8 @@ CAppOpsService::Op::Op(
     , mNesting(0)
     , mNoteOpCount(0)
     , mStartOpCount(0)
+    , mAllowedCount(0)
+    , mIgnoredCount(0)
 {
     mDialogReqQueue = new PermissionDialogReqQueue();
     CArrayList::New((IArrayList**)&mClientTokens);
