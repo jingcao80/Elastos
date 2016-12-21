@@ -486,7 +486,7 @@ ECode Profile::WriteToParcel(
 
     collection = NULL;
     AutoPtr<ArrayOf<IInterface*> > connections;
-    mStreams->GetValues((ICollection**)&collection);
+    mConnections->GetValues((ICollection**)&collection);
     collection->ToArray((ArrayOf<IInterface*>**)&connections);
     dest->WriteArrayOf((Handle32)connections.Get());
 

@@ -3,6 +3,7 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+    using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.Backup.IBackupAgent;
     using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
@@ -10,6 +11,17 @@ module
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContentProvider;
     using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IDialogInterface;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    using interface Elastos.Droid.Internal.App.IAlertActivity;
+    using interface Elastos.Droid.Internal.App.IAlertControllerAlertParamsOnPrepareListViewListener;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
 
     namespace Elastos {
     namespace Droid {
@@ -30,6 +42,27 @@ module
         interface IBackupAgent;
         interface IContextWrapper;
         interface IContext;
+    }
+
+    class CProfilePickerActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface IActivity;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IAlertActivity;
+        interface IDialogInterface;
+        interface IDialogInterfaceOnClickListener;
+        interface IAlertControllerAlertParamsOnPrepareListViewListener;
     }
 
     } // namespace SettingsProvider

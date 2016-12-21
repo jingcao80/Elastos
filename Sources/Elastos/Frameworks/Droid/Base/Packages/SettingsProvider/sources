@@ -22,6 +22,7 @@ SOURCES += DatabaseHelper.cpp
 SOURCES += SettingsBackupAgent.cpp
 SOURCES += SettingsHelper.cpp
 SOURCES += SettingsProvider.cpp
+SOURCES += CProfilePickerActivity.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

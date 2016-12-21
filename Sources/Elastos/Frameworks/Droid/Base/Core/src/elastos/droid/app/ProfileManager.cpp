@@ -1,5 +1,6 @@
 
 #include "elastos/droid/app/ProfileManager.h"
+#include "elastos/droid/app/CProfile.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/CParcelUuid.h"
 #include "elastos/droid/provider/CSettingsSystem.h"
@@ -37,7 +38,14 @@ const String ProfileManager::TAG("ProfileManager");
 
 const String ProfileManager::SYSTEM_PROFILES_ENABLED("system_profiles_enabled");
 
-AutoPtr<IProfile> ProfileManager::sEmptyProfile;
+static AutoPtr<IProfile> InitEmptyProfile()
+{
+    AutoPtr<IProfile> tmp;
+    CProfile::New(String("EmptyProfile"), (IProfile**)&tmp);
+    return tmp;
+}
+
+AutoPtr<IProfile> ProfileManager::sEmptyProfile = InitEmptyProfile();
 
 CAR_INTERFACE_IMPL(ProfileManager, Object, IProfileManager)
 
@@ -64,7 +72,6 @@ ECode ProfileManager::constructor(
     /* [in] */ IHandler* handler)
 {
     mContext = context;
-    // CProfile::New(String("EmptyProfile"), (IProfile**)&sEmptyProfile);
     return NOERROR;
 }
 

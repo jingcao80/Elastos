@@ -133,14 +133,14 @@ public:
     /**
      * @hide
      */
-    static AutoPtr<IUUID> NO_PROFILE; // = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    static AutoPtr<IUUID> NO_PROFILE;
 
 private:
     static AutoPtr<IIProfileManager> sService;
 
-    static const String TAG; // = "ProfileManager";
+    static const String TAG;
 
-    static const String SYSTEM_PROFILES_ENABLED; // = "system_profiles_enabled";
+    static const String SYSTEM_PROFILES_ENABLED;
 
     // A blank profile that is created to be returned if profiles disabled
     static AutoPtr<IProfile> sEmptyProfile;
