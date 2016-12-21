@@ -46,7 +46,7 @@ IFilter* NotFilter::FACTORY_FilterFactory::NewFilter(
 
 CAR_INTERFACE_IMPL(NotFilter, Object, IFilter);
 
-INIT_PROI_3 const AutoPtr<NotFilter::FACTORY_FilterFactory> NotFilter::FACTORY = new NotFilter::FACTORY_FilterFactory(String("not"));
+const AutoPtr<NotFilter::FACTORY_FilterFactory> NotFilter::FACTORY = new NotFilter::FACTORY_FilterFactory(String("not"));
 
 NotFilter::NotFilter(
     /* in */ IFilter* child)

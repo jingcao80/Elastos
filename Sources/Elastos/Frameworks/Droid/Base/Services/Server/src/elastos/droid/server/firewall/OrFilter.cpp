@@ -34,7 +34,7 @@ IFilter* OrFilter::FACTORY_FilterFactory::NewFilter(
 // OrFilter
 //=======================================================================================
 
-INIT_PROI_3 const AutoPtr<OrFilter::FACTORY_FilterFactory> OrFilter::FACTORY = new OrFilter::FACTORY_FilterFactory(String("or"));
+const AutoPtr<OrFilter::FACTORY_FilterFactory> OrFilter::FACTORY = new OrFilter::FACTORY_FilterFactory(String("or"));
 
 ECode OrFilter::Matches(
     /* [in] */ IIntentFirewall* ifw,

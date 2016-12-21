@@ -82,7 +82,7 @@ IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
 
 CAR_INTERFACE_IMPL(PortFilter, Object, IFilter);
 
-INIT_PROI_3 const AutoPtr<PortFilter::FACTORY_FilterFactory> PortFilter::FACTORY = new PortFilter::FACTORY_FilterFactory(String("port"));
+const AutoPtr<PortFilter::FACTORY_FilterFactory> PortFilter::FACTORY = new PortFilter::FACTORY_FilterFactory(String("port"));
 const String PortFilter::ATTR_EQUALS("equals");
 const String PortFilter::ATTR_MIN("min");
 const String PortFilter::ATTR_MAX("max");
