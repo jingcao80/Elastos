@@ -145,7 +145,6 @@ ECode CProfilePickerActivity::OnCreate(
     CArrayList::New((IArrayList**)&profileNames);
     Int32 size;
     mProfiles->GetSize(&size);
-    Logger::E(TAG, "==============[snow]======================mProfiles::size = %d", size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mProfiles->Get(i, (IInterface**)&obj);
