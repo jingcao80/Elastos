@@ -290,7 +290,7 @@ ECode CUninstallerActivity::OnCreate(
     // The class name may have been specified (e.g. when deleting an app from all apps)
     String className;
     packageUri->GetFragment(&className);
-    if (className != NULL) {
+    if (!className.IsNull()) {
         //try {
             AutoPtr<IComponentName> componentName;
             CComponentName::New((IComponentName**)&componentName);

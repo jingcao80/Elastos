@@ -25,7 +25,7 @@ String FilterFactory::GetTagName()
     return mTag;
 }
 
-IFilter* FilterFactory::NewFilter(
+AutoPtr<IFilter> FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     return NULL;

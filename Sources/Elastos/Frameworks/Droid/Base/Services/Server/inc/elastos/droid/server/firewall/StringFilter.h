@@ -73,16 +73,16 @@ public:
      *                    contain a string filter attribute
      * @return This StringFilter object
      */
-    static StringFilter* ReadFromXml(
+    static CARAPI_(AutoPtr<StringFilter>) ReadFromXml(
         /* [in] */ ValueProvider* valueProvider,
         /* [in] */ IXmlPullParser* parser);
 
-    static StringFilter* GetFilter(
+    static CARAPI_(AutoPtr<StringFilter>) GetFilter(
         /* [in] */ ValueProvider* valueProvider,
         /* [in] */ IXmlPullParser* parser,
         /* [in] */ Int32 attributeIndex);
 
-    virtual Boolean MatchesValue(
+    virtual CARAPI_(Boolean) MatchesValue(
         /* in */ const String& value) = 0;
 
 public:
@@ -98,12 +98,12 @@ public:
     static AutoPtr<PATH_ValueProvider> PATH;
 
 private:
-    static const String ATTR_EQUALS;        // = "equals";
-    static const String ATTR_STARTS_WITH;   // = "startsWith";
-    static const String ATTR_CONTAINS;      // = "contains";
-    static const String ATTR_PATTERN;       // = "pattern";
-    static const String ATTR_REGEX;         // = "regex";
-    static const String ATTR_IS_NULL;       // = "isNull";
+    static const String ATTR_EQUALS;
+    static const String ATTR_STARTS_WITH;
+    static const String ATTR_CONTAINS;
+    static const String ATTR_PATTERN;
+    static const String ATTR_REGEX;
+    static const String ATTR_IS_NULL;
 
     AutoPtr<ValueProvider> mValueProvider;
 };
@@ -112,10 +112,10 @@ class ValueProvider
     : public FilterFactory
 {
 public:
-    CARAPI_(IFilter*) NewFilter(
+    CARAPI_(AutoPtr<IFilter>) NewFilter(
         /* in */ IXmlPullParser* parser);
 
-    virtual String GetValue(
+    virtual CARAPI_(String) GetValue(
         /* in */ IComponentName* resolvedComponent,
         /* in */ IIntent* intent,
         /* in */ const String& resolvedType) = 0;
@@ -237,7 +237,6 @@ public:
         /* in */ IIntent* intent,
         /* in */ const String& resolvedType);
 };
-
 
 class COMPONENT_NAME_ValueProvider
     : public ValueProvider

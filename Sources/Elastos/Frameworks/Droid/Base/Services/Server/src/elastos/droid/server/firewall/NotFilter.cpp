@@ -16,7 +16,7 @@ NotFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* NotFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> NotFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     AutoPtr<IFilter> child;  // = NULL
@@ -35,9 +35,7 @@ IFilter* NotFilter::FACTORY_FilterFactory::NewFilter(
         }
     }
     AutoPtr<NotFilter> notFilter = new NotFilter(child);
-    REFCOUNT_ADD(notFilter);
-
-    return (IFilter*)notFilter;
+    return (IFilter*)notFilter.Get();
 }
 
 //=======================================================================================

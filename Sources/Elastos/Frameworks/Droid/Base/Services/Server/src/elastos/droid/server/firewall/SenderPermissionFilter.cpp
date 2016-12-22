@@ -20,21 +20,19 @@ SenderPermissionFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* SenderPermissionFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> SenderPermissionFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     String permission;
     parser->GetAttributeValue(String(NULL), ATTR_NAME, &permission);
-    if (permission == NULL) {
+    if (permission.IsNull()) {
         //throw new XmlPullParserException(
         //    "A package name must be specified.", parser, null);
         return NULL;
     }
 
     AutoPtr<SenderPermissionFilter> spFilter = new SenderPermissionFilter(permission);
-    REFCOUNT_ADD(spFilter);
-
-    return (IFilter*)spFilter;
+    return (IFilter*)spFilter.Get();
 }
 
 //=======================================================================================

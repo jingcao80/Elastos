@@ -15,19 +15,12 @@ OrFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* OrFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> OrFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
-    AutoPtr<OrFilter> orFilter;
-    AutoPtr<IFilter>  filter;
-    AutoPtr<FilterList> filterList;
-
-    orFilter = new OrFilter();
-    filterList = orFilter->ReadFromXml(parser);
-    filter = (IFilter*)filterList;
-    REFCOUNT_ADD(filter);
-
-    return (IFilter*)filter;
+    AutoPtr<OrFilter> orFilter = new OrFilter();
+    orFilter->ReadFromXml(parser);
+    return (IFilter*)orFilter.Get();
 }
 
 //=======================================================================================

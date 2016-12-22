@@ -20,7 +20,7 @@ PortFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> PortFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     Int32 lowerBound = NO_BOUND;
@@ -71,9 +71,7 @@ IFilter* PortFilter::FACTORY_FilterFactory::NewFilter(
 
     // an empty port filter is explicitly allowed, and checks for the existence of a port
     AutoPtr<PortFilter> portFilter = new PortFilter(lowerBound, upperBound);
-    REFCOUNT_ADD(portFilter);
-
-    return (IFilter*)portFilter;
+    return (IFilter*)portFilter.Get();
 }
 
 //=======================================================================================

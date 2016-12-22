@@ -23,7 +23,7 @@ public:
     CAR_INTERFACE_DECL()
 
     // throws IOException, XmlPullParserException
-    CARAPI_(FilterList*) ReadFromXml(
+    CARAPI ReadFromXml(
         /* in */ IXmlPullParser* parser);
 
     // throws IOException, XmlPullParserException

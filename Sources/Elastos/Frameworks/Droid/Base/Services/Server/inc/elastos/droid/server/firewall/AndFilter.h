@@ -30,7 +30,7 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(IFilter*) NewFilter(
+        CARAPI_(AutoPtr<IFilter>) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 

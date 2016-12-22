@@ -27,13 +27,11 @@ ValueProvider::ValueProvider(
     FilterFactory::constructor(tag);
 }
 
-IFilter* ValueProvider::NewFilter(
+AutoPtr<IFilter> ValueProvider::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     AutoPtr<StringFilter> stringFilter = StringFilter::ReadFromXml(this, parser);
-    REFCOUNT_ADD(stringFilter);
-
-    return (IFilter*)stringFilter;
+    return (IFilter*)stringFilter.Get();
 }
 
 //------------------------------------------------------------------------------
@@ -352,8 +350,7 @@ StringFilter::StringFilter(
     : mValueProvider(valueProvider)
 {}
 
-
-StringFilter* StringFilter::ReadFromXml(
+AutoPtr<StringFilter> StringFilter::ReadFromXml(
     /* [in] */ ValueProvider* valueProvider,
     /* [in] */ IXmlPullParser* parser)
 {
@@ -377,12 +374,11 @@ StringFilter* StringFilter::ReadFromXml(
         // empty filter is equivalent to an existence check
         filter = new IsNullFilter(valueProvider, FALSE);
     }
-    REFCOUNT_ADD(filter);
 
     return filter;
 }
 
-StringFilter* StringFilter::GetFilter(
+AutoPtr<StringFilter> StringFilter::GetFilter(
     /* [in] */ ValueProvider* valueProvider,
     /* [in] */ IXmlPullParser* parser,
     /* [in] */ Int32 attributeIndex)

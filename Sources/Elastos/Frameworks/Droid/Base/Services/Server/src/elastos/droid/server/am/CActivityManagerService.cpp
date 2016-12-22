@@ -2891,7 +2891,6 @@ ECode CActivityManagerService::constructor(
 
     mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
     AutoPtr<IntentFirewallInterface> ifInterface = new IntentFirewallInterface(this);
-    // TODO
     mIntentFirewall = new IntentFirewall(ifInterface, mHandler);
     mStackSupervisor = new ActivityStackSupervisor(this);
     mTaskPersister = new TaskPersister(systemDir, mStackSupervisor);

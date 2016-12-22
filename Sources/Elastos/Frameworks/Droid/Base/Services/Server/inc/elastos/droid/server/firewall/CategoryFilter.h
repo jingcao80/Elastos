@@ -32,7 +32,7 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(IFilter*) NewFilter(
+        CARAPI_(AutoPtr<IFilter>) NewFilter(
             /* in */ IXmlPullParser* parser);
     };
 
@@ -47,9 +47,10 @@ public:
         /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
-private:
+public:
     CAR_INTERFACE_DECL()
 
+private:
     CategoryFilter(
         /* in */ const String& categoryName);
 
