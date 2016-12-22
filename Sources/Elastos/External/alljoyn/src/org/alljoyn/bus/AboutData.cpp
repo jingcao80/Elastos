@@ -341,7 +341,7 @@ ECode AboutData::IsValid(
         AutoPtr<IInterface> value;
         mPropertyStore->Get(CoreUtils::Convert(ABOUT_DEFAULT_LANGUAGE), (IInterface**)&value);
         AutoPtr<IInterface> obj;
-        if (FAILED(IVariant::Probe(value)->GetObject(CarDataType_String, (IInterface**)&obj)))
+        if (FAILED(IVariant::Probe(value)->GetObject((IInterface**)&obj)))
             return NOERROR;
         language = ICharSequence::Probe(obj);
     }
@@ -429,7 +429,7 @@ ECode AboutData::CreateFromAnnoncedAboutData(
         }
         else {
             AutoPtr<IInterface> value;
-            IVariant::Probe(defaultLangArg)->GetObject(CarDataType_String, (IInterface**)&value);
+            IVariant::Probe(defaultLangArg)->GetObject((IInterface**)&value);
             ICharSequence::Probe(value)->ToString(&language);;
         }
     }
@@ -523,8 +523,8 @@ ECode AboutData::GetAppId(
     VALIDATE_NOT_NULL(appId)
     AutoPtr<IVariant> variant;
     GetField(ABOUT_APP_ID, (IVariant**)&variant);
-    AutoPtr<IInterface> value;
-    variant->GetArrayObject(CarDataType_Byte, (IInterface**)&value);
+    AutoPtr<IArrayOf> value;
+    variant->GetArrayObject((IArrayOf**)&value);
     AutoPtr<MsgArg::CarValue> carValue = MsgArg::CarValue::Convert(value);
     *appId = *(ArrayOf<Byte>**)carValue->ToValuePtr();
     REFCOUNT_ADD(*appId);
@@ -576,8 +576,8 @@ ECode AboutData::GetAppIdAsHexString(
     VALIDATE_NOT_NULL(appId)
     AutoPtr<IVariant> variant;
     GetField(ABOUT_APP_ID, (IVariant**)&variant);
-    AutoPtr<IInterface> value;
-    variant->GetArrayObject(CarDataType_Byte, (IInterface**)&value);
+    AutoPtr<IArrayOf> value;
+    variant->GetArrayObject((IArrayOf**)&value);
     AutoPtr<MsgArg::CarValue> carValue = MsgArg::CarValue::Convert(value);
     AutoPtr<ArrayOf<Byte> > array = *(ArrayOf<Byte>**)carValue->ToValuePtr();
     *appId = ByteArrayToHexString(array);
@@ -645,8 +645,8 @@ ECode AboutData::GetAppIdAsUUID(
     VALIDATE_NOT_NULL(appId)
     AutoPtr<IVariant> variant;
     GetField(ABOUT_APP_ID, (IVariant**)&variant);
-    AutoPtr<IInterface> value;
-    variant->GetArrayObject(CarDataType_Byte, (IInterface**)&value);
+    AutoPtr<IArrayOf> value;
+    variant->GetArrayObject((IArrayOf**)&value);
     AutoPtr<MsgArg::CarValue> carValue = MsgArg::CarValue::Convert(value);
     AutoPtr<ArrayOf<Byte> > appIdBytes = *(ArrayOf<Byte>**)carValue->ToValuePtr();
 
@@ -696,7 +696,7 @@ ECode AboutData::GetDefaultLanguage(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_DEFAULT_LANGUAGE, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(language);
 }
 
@@ -763,7 +763,7 @@ ECode AboutData::GetDeviceName(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_DEVICE_NAME, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(deviceName);
 }
 
@@ -809,7 +809,7 @@ ECode AboutData::GetDeviceId(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_DEVICE_ID, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(deviceId);
 }
 
@@ -875,7 +875,7 @@ ECode AboutData::GetAppName(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_APP_NAME, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(appName);
 }
 
@@ -957,7 +957,7 @@ ECode AboutData::GetManufacturer(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_MANUFACTURER, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(manufacturer);
 }
 
@@ -1013,7 +1013,7 @@ ECode AboutData::GetModelNumber(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_MODEL_NUMBER, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(modelNumber);
 }
 
@@ -1089,8 +1089,8 @@ ECode AboutData::GetSupportedLanguages(
 {
     AutoPtr<IVariant> variant;
     GetField(ABOUT_DEFAULT_LANGUAGE, (IVariant**)&variant);
-    AutoPtr<IInterface> value;
-    variant->GetArrayObject(CarDataType_String, (IInterface**)&value);
+    AutoPtr<IArrayOf> value;
+    variant->GetArrayObject((IArrayOf**)&value);
     AutoPtr<MsgArg::CarValue> carValue = MsgArg::CarValue::Convert(value);
     *languages = *(ArrayOf<String>**)carValue->ToValuePtr();
     REFCOUNT_ADD(*languages)
@@ -1159,7 +1159,7 @@ ECode AboutData::GetDescription(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_DESCRIPTION, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(description);
 }
 
@@ -1221,7 +1221,7 @@ ECode AboutData::GetDateOfManufacture(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_DATE_OF_MANUFACTURE, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(dateOfManufacture);
 }
 
@@ -1261,7 +1261,7 @@ ECode AboutData::GetSoftwareVersion(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_SOFTWARE_VERSION, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(softwareVersion);
 }
 
@@ -1285,7 +1285,7 @@ ECode AboutData::GetAJSoftwareVersion(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_AJ_SOFTWARE_VERSION, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(softwareVersion);
 }
 
@@ -1325,7 +1325,7 @@ ECode AboutData::GetHardwareVersion(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_HARDWARE_VERSION, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(hardwareVersion);
 }
 
@@ -1365,7 +1365,7 @@ ECode AboutData::GetSupportUrl(
     AutoPtr<IVariant> variant;
     GetField(ABOUT_SUPPORT_URL, (IVariant**)&variant);
     AutoPtr<IInterface> value;
-    variant->GetObject(CarDataType_String, (IInterface**)&value);
+    variant->GetObject((IInterface**)&value);
     return ICharSequence::Probe(value)->ToString(supportUrl);
 }
 
@@ -1421,7 +1421,7 @@ ECode AboutData::SetField(
     }
     if (name.Equals(ABOUT_DEFAULT_LANGUAGE)) {
         AutoPtr<IInterface> obj;
-        value->GetObject(CarDataType_String, (IInterface**)&obj);
+        value->GetObject((IInterface**)&obj);
         String lang;
         ICharSequence::Probe(obj)->ToString(&lang);
         SetSupportedLanguage(lang);
@@ -1435,7 +1435,7 @@ ECode AboutData::SetField(
                 AutoPtr<IInterface> val;
                 mPropertyStore->Get(CoreUtils::Convert(ABOUT_DEFAULT_LANGUAGE), (IInterface**)&val);
                 AutoPtr<IInterface> obj;
-                IVariant::Probe(val)->GetObject(CarDataType_String, (IInterface**)&obj);
+                IVariant::Probe(val)->GetObject((IInterface**)&obj);
                 ICharSequence::Probe(obj)->ToString(&language);
             }
             else {
@@ -1523,7 +1523,7 @@ ECode AboutData::GetField(
                 return E_BUS_EXCEPTION;
             }
             AutoPtr<IInterface> obj;
-            IVariant::Probe(v)->GetObject(CarDataType_String, (IInterface**)&obj);
+            IVariant::Probe(v)->GetObject((IInterface**)&obj);
             csLanguage = ICharSequence::Probe(obj);
         }
         else
@@ -1701,7 +1701,7 @@ ECode AboutData::GetAboutData(
         mPropertyStore->Get(CoreUtils::Convert(ABOUT_DEFAULT_LANGUAGE), (IInterface**)&v);
         assert(v != NULL);
         AutoPtr<IInterface> obj;
-        if (FAILED(IVariant::Probe(v)->GetObject(CarDataType_String, (IInterface**)&obj))) {
+        if (FAILED(IVariant::Probe(v)->GetObject((IInterface**)&obj))) {
             return E_ERROR_REPLY_BUS_EXCEPTION;
             // throw new ErrorReplyBusException(Status.LANGUAGE_NOT_SUPPORTED);
         }
@@ -1799,7 +1799,7 @@ ECode AboutData::GetAnnouncedAboutData(
     mPropertyStore->Get(CoreUtils::Convert(ABOUT_DEFAULT_LANGUAGE), (IInterface**)&v);
     assert(v != NULL);
     AutoPtr<IInterface> obj;
-    if (FAILED(IVariant::Probe(v)->GetObject(CarDataType_String, (IInterface**)&obj))) {
+    if (FAILED(IVariant::Probe(v)->GetObject((IInterface**)&obj))) {
         return E_ERROR_REPLY_BUS_EXCEPTION;
         // throw new ErrorReplyBusException(Status.LANGUAGE_NOT_SUPPORTED);
     }
