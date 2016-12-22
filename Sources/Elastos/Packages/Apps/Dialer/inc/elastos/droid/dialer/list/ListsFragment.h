@@ -58,6 +58,7 @@ namespace List {
 class ListsFragment
     : public AnalyticsFragment
     , public IListsFragment
+    , public ICallLogQueryHandlerListener
     , public ICallFetcher
 {
 public:
@@ -84,31 +85,6 @@ public:
         // @Override
         virtual CARAPI OnPageScrollStateChanged(
             /* [in] */ Int32 state);
-
-    private:
-        ListsFragment* mHost;
-    };
-
-    class InnerCallLogQueryHandlerListener
-        : public Object
-        , public ICallLogQueryHandlerListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        InnerCallLogQueryHandlerListener(
-            /* [in] */ ListsFragment* host)
-            : mHost(host)
-        {}
-
-        // @Override
-        CARAPI OnVoicemailStatusFetched(
-            /* [in] */ ICursor* statusCursor);
-
-        // @Override
-        CARAPI OnCallsFetched(
-            /* [in] */ ICursor* cursor,
-            /* [out] */ Boolean* result);
 
     private:
         ListsFragment* mHost;

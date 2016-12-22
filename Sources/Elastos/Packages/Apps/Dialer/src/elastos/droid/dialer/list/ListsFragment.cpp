@@ -76,25 +76,6 @@ ECode ListsFragment::InnerListener::OnPageScrollStateChanged(
 
 
 //=================================================================
-// ListsFragment::InnerCallLogQueryHandlerListener
-//=================================================================
-CAR_INTERFACE_IMPL(ListsFragment::InnerCallLogQueryHandlerListener, Object, ICallLogQueryHandlerListener)
-
-ECode ListsFragment::InnerCallLogQueryHandlerListener::OnVoicemailStatusFetched(
-    /* [in] */ ICursor* statusCursor)
-{
-    return mHost->OnVoicemailStatusFetched(statusCursor);
-}
-
-ECode ListsFragment::InnerCallLogQueryHandlerListener::OnCallsFetched(
-    /* [in] */ ICursor* cursor,
-    /* [out] */ Boolean* result)
-{
-    return mHost->OnCallsFetched(cursor, result);
-}
-
-
-//=================================================================
 // ListsFragment::ViewPagerAdapter
 //=================================================================
 ListsFragment::ViewPagerAdapter::ViewPagerAdapter(
@@ -319,7 +300,7 @@ const Int64 ListsFragment::OLDEST_RECENTS_DATE = 1000LL * 60 * 60 * 24 * 14;
 
 const String ListsFragment::KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE("key_last_dismissed_call_shortcut_date");
 
-CAR_INTERFACE_IMPL_2(ListsFragment, AnalyticsFragment, IListsFragment, ICallFetcher)
+CAR_INTERFACE_IMPL_3(ListsFragment, AnalyticsFragment, IListsFragment, ICallLogQueryHandlerListener, ICallFetcher)
 
 ListsFragment::ListsFragment()
     : mIsPanelOpen(TRUE)
@@ -383,14 +364,12 @@ ECode ListsFragment::OnCreate(
     AutoPtr<IContentResolver> resolver;
     IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
     mCallLogQueryHandler = new CallLogQueryHandler();
-    AutoPtr<ICallLogQueryHandlerListener> listener = (ICallLogQueryHandlerListener*)new InnerCallLogQueryHandlerListener(this);
-    mCallLogQueryHandler->constructor(resolver, listener, 1);
+    mCallLogQueryHandler->constructor(resolver, (ICallLogQueryHandlerListener*)this, 1);
     AutoPtr<IContext> ctx = IContext::Probe(activity);
     String currentCountryIso = GeoUtil::GetCurrentCountryIso(ctx);
     AutoPtr<ContactInfoHelper> helper = new ContactInfoHelper(ctx, currentCountryIso);
     mCallLogAdapter = ObjectFactory::NewCallLogAdapter(ctx, this,
             helper, NULL, NULL, FALSE);
-
     mMergedAdapter = new ShortcutCardsAdapter(ctx, this, mCallLogAdapter);
     return NOERROR;
 }
