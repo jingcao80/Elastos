@@ -105,6 +105,8 @@ private:
     static /*volatile*/ AutoPtr<ICloseGuardReporter> REPORTER;
 
     AutoPtr<IThrowable> mAllocationSite;
+
+    static const String TAG;
 };
 
 } // namespace Core

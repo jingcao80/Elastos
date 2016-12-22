@@ -17,6 +17,10 @@ using Elastos::Utility::Logging::Logger;
 
 extern void skia_set_text_gamma(float, float);
 
+#define GET_TYPEFACE_NATIVE_INSTANCE(obj) ((Typeface*)obj)->mNativeInstance
+#define SET_TYPEFACE_NATIVE_INSTANCE(obj, ni) ((Typeface*)obj)->mNativeInstance = ni
+#define SET_TYPEFACE_SHOULD_UNREF(obj, value) ((Typeface*)obj)->mShouldUnref = value
+
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
@@ -25,27 +29,22 @@ Typeface::StaticInitializer::StaticInitializer()
 {
     Init();
     // Set up defaults and typefaces exposed in public API
-    Typeface::Create(String(NULL), 0, (ITypeface**)&Typeface::DEFAULT_INTERNAL);
-    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&Typeface::DEFAULT_BOLD_INTERNAL);
-    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&Typeface::SANS_SERIF_INTERNAL);
-    Typeface::Create(String("serif"), 0, (ITypeface**)&Typeface::SERIF_INTERNAL);
-    Typeface::Create(String("monospace"), 0, (ITypeface**)&Typeface::MONOSPACE_INTERNAL);
+    Typeface::Create(String(NULL), 0, (ITypeface**)&DEFAULT_INTERNAL);
+    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&DEFAULT_BOLD_INTERNAL);
+    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&SANS_SERIF_INTERNAL);
+    Typeface::Create(String("serif"), 0, (ITypeface**)&SERIF_INTERNAL);
+    Typeface::Create(String("monospace"), 0, (ITypeface**)&MONOSPACE_INTERNAL);
 
-    AutoPtr<Typeface> tf = new Typeface();
-    tf->constructor(((Typeface*)DEFAULT_INTERNAL.Get())->mNativeInstance);
-    DEFAULT = tf;
-    tf = new Typeface();
-    tf->constructor(((Typeface*)DEFAULT_BOLD_INTERNAL.Get())->mNativeInstance);
-    DEFAULT_BOLD = tf;
-    tf = new Typeface();
-    tf->constructor(((Typeface*)SANS_SERIF_INTERNAL.Get())->mNativeInstance);
-    SANS_SERIF = tf;
-    tf = new Typeface();
-    tf->constructor(((Typeface*)SERIF_INTERNAL.Get())->mNativeInstance);
-    SERIF = tf;
-    tf = new Typeface();
-    tf->constructor(((Typeface*)MONOSPACE_INTERNAL.Get())->mNativeInstance);
-    MONOSPACE = tf;
+    CTypeface::New(GET_TYPEFACE_NATIVE_INSTANCE(DEFAULT_INTERNAL.Get()), (ITypeface**)&DEFAULT);
+    SET_TYPEFACE_SHOULD_UNREF(DEFAULT.Get(), FALSE);
+    CTypeface::New(GET_TYPEFACE_NATIVE_INSTANCE(DEFAULT_BOLD_INTERNAL.Get()), (ITypeface**)&DEFAULT_BOLD);
+    SET_TYPEFACE_SHOULD_UNREF(DEFAULT_BOLD.Get(), FALSE);
+    CTypeface::New(GET_TYPEFACE_NATIVE_INSTANCE(SANS_SERIF_INTERNAL.Get()), (ITypeface**)&SANS_SERIF);
+    SET_TYPEFACE_SHOULD_UNREF(SANS_SERIF.Get(), FALSE);
+    CTypeface::New(GET_TYPEFACE_NATIVE_INSTANCE(SERIF_INTERNAL.Get()), (ITypeface**)&SERIF);
+    SET_TYPEFACE_SHOULD_UNREF(SERIF.Get(), FALSE);
+    CTypeface::New(GET_TYPEFACE_NATIVE_INSTANCE(MONOSPACE_INTERNAL.Get()), (ITypeface**)&MONOSPACE);
+    SET_TYPEFACE_SHOULD_UNREF(MONOSPACE.Get(), FALSE);
 
     AutoPtr<ITypeface> italic, boldItalic;
     Typeface::Create(String(NULL), ITypeface::ITALIC, (ITypeface**)&italic);
@@ -83,28 +82,12 @@ CAR_INTERFACE_IMPL(Typeface, Object, ITypeface);
 Typeface::Typeface()
     : mNativeInstance(0)
     , mStyle(0)
+    , mShouldUnref(TRUE)
 {}
 
 Typeface::~Typeface()
 {
-    // TODO: for debug
-    String typefaceName;
-    ITypeface* thisPtr = (ITypeface*)this;
-    if (thisPtr == DEFAULT.Get()) typefaceName = "DEFAULT";
-    else if (thisPtr == DEFAULT_BOLD.Get()) typefaceName = "DEFAULT_BOLD";
-    else if (thisPtr == SANS_SERIF.Get()) typefaceName = "SANS_SERIF";
-    else if (thisPtr == SERIF.Get()) typefaceName = "SERIF";
-    else if (thisPtr == MONOSPACE.Get()) typefaceName = "MONOSPACE";
-    else if (thisPtr == DEFAULT_INTERNAL.Get()) typefaceName = "DEFAULT_INTERNAL";
-    else if (thisPtr == DEFAULT_BOLD_INTERNAL.Get()) typefaceName = "DEFAULT_BOLD_INTERNAL";
-    else if (thisPtr == SANS_SERIF_INTERNAL.Get()) typefaceName = "SANS_SERIF_INTERNAL";
-    else if (thisPtr == SERIF_INTERNAL.Get()) typefaceName = "SERIF_INTERNAL";
-    else if (thisPtr == MONOSPACE_INTERNAL.Get()) typefaceName = "MONOSPACE_INTERNAL";
-    else typefaceName = "Unknow";
-
-    ALOGD("======== Delete %s typeface ========", typefaceName.string());
-
-    NativeUnref(mNativeInstance);
+    if (mShouldUnref) NativeUnref(mNativeInstance);
 }
 
 ECode Typeface::GetStyle(
@@ -209,7 +192,7 @@ ECode Typeface::Create(
             return NOERROR;
         }
 
-        ni = ((Typeface*)family)->mNativeInstance;
+        ni =  GET_TYPEFACE_NATIVE_INSTANCE(family);
     }
 
     AutoPtr<ITypeface> tmpTypeface;
@@ -345,7 +328,7 @@ void Typeface::SetDefault(
     /* [in] */ ITypeface* t)
 {
     sDefaultTypeface = t;
-    NativeSetDefault(((Typeface*)t)->mNativeInstance);
+    NativeSetDefault(GET_TYPEFACE_NATIVE_INSTANCE(t));
 }
 
 Int64 Typeface::NativeCreateFromTypeface(
@@ -664,7 +647,7 @@ void Typeface::Init()
         Int32 weight = alias->mWeight;
         if (weight != 400) {
             newFace = NULL;
-            CTypeface::New(NativeCreateWeightAlias(((Typeface*)base.Get())->mNativeInstance, weight), (ITypeface**)&newFace);
+            CTypeface::New(NativeCreateWeightAlias(GET_TYPEFACE_NATIVE_INSTANCE(base.Get()), weight), (ITypeface**)&newFace);
         }
         sSystemFontMap[alias->mName] = newFace;
     }
@@ -700,16 +683,16 @@ void Typeface::RecreateDefaults()
     SERIF_INTERNAL = NULL;
     MONOSPACE_INTERNAL = NULL;
     Typeface::Create(String(NULL), 0, (ITypeface**)&DEFAULT_INTERNAL);
-    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&Typeface::DEFAULT_BOLD_INTERNAL);
-    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&Typeface::SANS_SERIF_INTERNAL);
-    Typeface::Create(String("serif"), 0, (ITypeface**)&Typeface::SERIF_INTERNAL);
-    Typeface::Create(String("monospace"), 0, (ITypeface**)&Typeface::MONOSPACE_INTERNAL);
+    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&DEFAULT_BOLD_INTERNAL);
+    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&SANS_SERIF_INTERNAL);
+    Typeface::Create(String("serif"), 0, (ITypeface**)&SERIF_INTERNAL);
+    Typeface::Create(String("monospace"), 0, (ITypeface**)&MONOSPACE_INTERNAL);
 
-    ((Typeface*)DEFAULT.Get())->mNativeInstance = ((Typeface*)DEFAULT_INTERNAL.Get())->mNativeInstance;
-    ((Typeface*)DEFAULT_BOLD.Get())->mNativeInstance = ((Typeface*)DEFAULT_BOLD_INTERNAL.Get())->mNativeInstance;
-    ((Typeface*)SANS_SERIF.Get())->mNativeInstance = ((Typeface*)SANS_SERIF_INTERNAL.Get())->mNativeInstance;
-    ((Typeface*)SERIF.Get())->mNativeInstance = ((Typeface*)SERIF_INTERNAL.Get())->mNativeInstance;
-    ((Typeface*)MONOSPACE.Get())->mNativeInstance = ((Typeface*)MONOSPACE_INTERNAL.Get())->mNativeInstance;
+    SET_TYPEFACE_NATIVE_INSTANCE(DEFAULT.Get(), GET_TYPEFACE_NATIVE_INSTANCE(DEFAULT_INTERNAL.Get()));
+    SET_TYPEFACE_NATIVE_INSTANCE(DEFAULT_BOLD.Get(), GET_TYPEFACE_NATIVE_INSTANCE(DEFAULT_BOLD_INTERNAL.Get()));
+    SET_TYPEFACE_NATIVE_INSTANCE(SANS_SERIF.Get(), GET_TYPEFACE_NATIVE_INSTANCE(SANS_SERIF_INTERNAL.Get()));
+    SET_TYPEFACE_NATIVE_INSTANCE(SERIF.Get(), GET_TYPEFACE_NATIVE_INSTANCE(SERIF_INTERNAL.Get()));
+    SET_TYPEFACE_NATIVE_INSTANCE(MONOSPACE.Get(), GET_TYPEFACE_NATIVE_INSTANCE(MONOSPACE_INTERNAL.Get()));
 
     AutoPtr<ITypeface> italic, boldItalic;
     Typeface::Create(String(NULL), ITypeface::ITALIC, (ITypeface**)&italic);

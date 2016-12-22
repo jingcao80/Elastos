@@ -2,7 +2,9 @@
 #include "CCloseGuard.h"
 #include "CThrowable.h"
 #include "StringBuilder.h"
-#include <cutils/log.h>
+#include "elastos/utility/logging/Logger.h"
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Core {
@@ -27,6 +29,7 @@ static AutoPtr<ICloseGuardReporter> InitREPORTER()
 Boolean CCloseGuard::ENABLED = TRUE;
 const AutoPtr<ICloseGuard> CCloseGuard::NOOP = InitNOOP();
 AutoPtr<ICloseGuardReporter> CCloseGuard::REPORTER = InitREPORTER();
+const String CCloseGuard::TAG("CCloseGuard");
 
 CAR_INTERFACE_IMPL(CCloseGuard::DefaultReporter, Object, ICloseGuardReporter)
 
@@ -34,11 +37,7 @@ ECode CCloseGuard::DefaultReporter::Report (
     /* [in] */ const String& message,
     /* [in] */ IThrowable* allocationSite)
 {
-    String str = Object::ToString(allocationSite);
-    StringBuilder sb("CCloseGuard :");
-    sb += str;
-    ALOGW(message);
-    ALOGW(sb.ToString());
+    Logger::W(TAG, "%s, %s", message.string(), TO_CSTR(allocationSite));
 
     // AutoPtr<ISystem> system;
     // CSystem::AcquireSingleton((ISystem**)&system);
@@ -67,7 +66,7 @@ ECode CCloseGuard::SetReporter(
     /* [in] */ ICloseGuardReporter* reporter)
 {
     if (reporter == NULL) {
-        ALOGE("CCloseGuard::SetReporter: reporter == null");
+        Logger::E(TAG, "SetReporter: reporter == null");
         return E_NULL_POINTER_EXCEPTION;
     }
     REPORTER = reporter;
@@ -84,7 +83,7 @@ ECode CCloseGuard::Open(
 {
     // always perform the check for valid API usage...
     if (closer.IsNull()) {
-        ALOGE("CCloseGuard::Open: closer == null");
+        Logger::E(TAG, "Open: closer == null");
         return E_NULL_POINTER_EXCEPTION;
     }
     // ...but avoid allocating an allocationSite if disabled
@@ -113,10 +112,8 @@ ECode CCloseGuard::WarnIfOpen()
         return NOERROR;
     }
 
-    StringBuilder sb("CCloseGuard: A resource was acquired but never released.");
-    sb += "See ICloseable for information on avoiding resource leaks.";
-    REPORTER->Report(sb.ToString(), mAllocationSite);
-    assert(0 && "Please review code!!");
+    REPORTER->Report(String("A resource was acquired but never released."
+            " See ICloseable for information on avoiding resource leaks."), mAllocationSite);
     return NOERROR;
 }
 

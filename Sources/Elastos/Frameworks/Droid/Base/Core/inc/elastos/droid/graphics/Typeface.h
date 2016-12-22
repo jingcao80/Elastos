@@ -284,6 +284,8 @@ private:
     static AutoPtr<ITypeface> MONOSPACE_INTERNAL;
 
     static const StaticInitializer sInitializer;
+
+    Boolean mShouldUnref;
 };
 
 } // namespace Graphics

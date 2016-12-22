@@ -1,6 +1,7 @@
 #include "IntegralToString.h"
 #include "Character.h"
 #include "StringBuilder.h"
+#include "Math.h"
 #include <stdlib.h>
 
 namespace Elastos {
@@ -108,8 +109,9 @@ String IntegralToString::ConvertInt32(
     /* [in] */ Int32 i)
 {
     // If i is Integer.MIN_VALUE, -i is still negative
-    if (i == 0x80000000/*Integer.MIN_VALUE*/)
+    if (i == Math::INT32_MIN_VALUE) {
         return String("-2147483648");
+    }
 
     Boolean negative = FALSE;
     String quickResult;
