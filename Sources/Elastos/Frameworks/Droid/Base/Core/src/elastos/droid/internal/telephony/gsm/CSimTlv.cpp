@@ -87,24 +87,27 @@ Boolean CSimTlv::ParseCurrentTlvObject()
 {
     // 0x00 and 0xff are invalid tag values
 
+    if (mCurOffset >= mRecord->GetLength()) {
+        return FALSE;
+    }
     // try {
-        if ((*mRecord)[mCurOffset] == 0 || ((*mRecord)[mCurOffset] & 0xff) == 0xff) {
-            return FALSE;
-        }
+    if ((*mRecord)[mCurOffset] == 0 || ((*mRecord)[mCurOffset] & 0xff) == 0xff) {
+        return FALSE;
+    }
 
-        if (((*mRecord)[mCurOffset + 1] & 0xff) < 0x80) {
-            // one byte length 0 - 0x7f
-            mCurDataLength = (*mRecord)[mCurOffset + 1] & 0xff;
-            mCurDataOffset = mCurOffset + 2;
-        }
-        else if (((*mRecord)[mCurOffset + 1] & 0xff) == 0x81) {
-            // two byte length 0x80 - 0xff
-            mCurDataLength = (*mRecord)[mCurOffset + 2] & 0xff;
-            mCurDataOffset = mCurOffset + 3;
-        }
-        else {
-            return FALSE;
-        }
+    if (((*mRecord)[mCurOffset + 1] & 0xff) < 0x80) {
+        // one byte length 0 - 0x7f
+        mCurDataLength = (*mRecord)[mCurOffset + 1] & 0xff;
+        mCurDataOffset = mCurOffset + 2;
+    }
+    else if (((*mRecord)[mCurOffset + 1] & 0xff) == 0x81) {
+        // two byte length 0x80 - 0xff
+        mCurDataLength = (*mRecord)[mCurOffset + 2] & 0xff;
+        mCurDataOffset = mCurOffset + 3;
+    }
+    else {
+        return FALSE;
+    }
     // } catch (ArrayIndexOutOfBoundsException ex) {
     //     return FALSE;
     // }

@@ -26,6 +26,7 @@ using Elastos::Droid::Internal::Telephony::CallForwardInfo;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
 using Elastos::Droid::Internal::Telephony::PhoneBase;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::R;
 using Elastos::Droid::Telephony::PhoneNumberUtils;
 using Elastos::Droid::Text::CSpannableStringBuilder;
@@ -1063,13 +1064,13 @@ ECode ImsPhoneMmiCode::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     switch (what) {
         case EVENT_SET_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             OnSetComplete(msg, ar);
             break;
 
         case EVENT_SET_CFF_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             /*
             * msg.arg1 = 1 means to set unconditional voice call forwarding
@@ -1090,27 +1091,27 @@ ECode ImsPhoneMmiCode::HandleMessage(
             break;
 
         case EVENT_SET_CFF_TIMER_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnSetComplete(msg, ar);
             break;
 
         case EVENT_QUERY_CF_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnQueryCfComplete(ar);
             break;
 
         case EVENT_QUERY_CFUT_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnQueryUncondCfTimerComplete(ar);
             break;
 
         case EVENT_QUERY_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnQueryComplete(ar);
             break;
 
         case EVENT_USSD_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 mState = IMmiCodeState_FAILED;
@@ -1131,17 +1132,17 @@ ECode ImsPhoneMmiCode::HandleMessage(
             break;
 
         case EVENT_SUPP_SVC_QUERY_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnSuppSvcQueryComplete(ar);
             break;
 
         case EVENT_QUERY_ICB_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnIcbQueryComplete(ar);
             break;
 
         case EVENT_GET_CLIR_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnQueryClirComplete(ar);
             break;
 

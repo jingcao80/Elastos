@@ -650,7 +650,7 @@ ECode CPhoneFactory::GetVoiceSubscription(
     // }
 
     AutoPtr<ISubscriptionControllerHelper> hlpSC;
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
     AutoPtr<ISubscriptionController> sc;
     hlpSC->GetInstance((ISubscriptionController**)&sc);
     Int32 phoneId = 0;

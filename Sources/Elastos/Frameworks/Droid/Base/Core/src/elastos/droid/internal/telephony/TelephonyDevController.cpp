@@ -9,8 +9,8 @@
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::R;
-
 using Elastos::Core::AutoLock;
 using Elastos::Utility::IList;
 using Elastos::Utility::CArrayList;
@@ -133,7 +133,7 @@ ECode TelephonyDevController::RegisterRIL(
     if (sRilHardwareConfig != NULL) {
         AutoPtr<IInterface> obj;
         sRilHardwareConfig->GetObj((IInterface**)&obj);
-        AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+        AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
         if (ar->mException == NULL) {
             HandleGetHardwareConfigChanged(ar);
         }
@@ -165,7 +165,7 @@ ECode TelephonyDevController::HandleMessage(
             }
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             HandleGetHardwareConfigChanged(ar);
         }
         break;

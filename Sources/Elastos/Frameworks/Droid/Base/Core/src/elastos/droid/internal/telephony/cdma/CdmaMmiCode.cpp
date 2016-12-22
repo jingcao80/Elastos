@@ -10,6 +10,7 @@
 
 using Elastos::Droid::Internal::Telephony::Uicc::AppState;
 using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_PUK;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
@@ -274,7 +275,7 @@ ECode CdmaMmiCode::HandleMessage(
     if (what == EVENT_SET_COMPLETE) {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
         OnSetComplete(msg, ar);
     }
     else {

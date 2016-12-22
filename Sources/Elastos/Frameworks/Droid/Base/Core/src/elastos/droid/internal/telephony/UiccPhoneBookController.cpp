@@ -1,5 +1,6 @@
 
 #include "elastos/droid/internal/telephony/UiccPhoneBookController.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 #include "elastos/droid/os/CServiceManager.h"
 
 using Elastos::Droid::Os::IServiceManager;
@@ -343,8 +344,7 @@ AutoPtr<IIccPhoneBookInterfaceManagerProxy> UiccPhoneBookController::GetIccPhone
     /* [in] */ Int64 subId)
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int32 phoneId = 0;
@@ -368,8 +368,7 @@ AutoPtr<IIccPhoneBookInterfaceManagerProxy> UiccPhoneBookController::GetIccPhone
 Int64 UiccPhoneBookController::GetDefaultSubId()
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int64 res = 0;

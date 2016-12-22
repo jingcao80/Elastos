@@ -3,6 +3,7 @@
 #include "elastos/droid/internal/telephony/GsmAlphabet.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
@@ -14,7 +15,9 @@ using Elastos::Droid::Internal::Telephony::Uicc::EIID_IIccConstants;
 using Elastos::Droid::Internal::Telephony::Uicc::IAdnRecord;
 using Elastos::Droid::Internal::Telephony::IccUtils;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IByte;
@@ -232,13 +235,15 @@ CUsimPhoneBookManager::CUsimPhoneBookManager()
 
 ECode CUsimPhoneBookManager::constructor()
 {
-    return NOERROR;
+    return Handler::constructor();
 }
 
 ECode CUsimPhoneBookManager::constructor(
     /* [in] */ IIccFileHandler* fh,
     /* [in] */ IAdnRecordCache* cache)
 {
+    Handler::constructor();
+
     mFh = fh;
     CArrayList::New((IArrayList**)&mPhoneBookRecords);
     CArrayList::New((IArrayList**)&mAdnLengthList);
@@ -374,7 +379,7 @@ ECode CUsimPhoneBookManager::UpdateEmailFile(
         *result = mSuccess;
         return NOERROR;
     }
-    if (mEmailPresentInIap && (oldEmail.IsEmpty() && !newEmail.IsEmpty())) {
+    if (mEmailPresentInIap && (TextUtils::IsEmpty(oldEmail) && !TextUtils::IsEmpty(newEmail))) {
         Int32 index;
         GetEmptyEmailNum_Pbrindex(pbrIndex, &index);
         if (index == 0) {
@@ -403,7 +408,7 @@ ECode CUsimPhoneBookManager::UpdateEmailFile(
         // }
     }
     if (mEmailPresentInIap && mSuccess
-            && (!oldEmail.IsEmpty() && newEmail.IsEmpty())) {
+            && (!TextUtils::IsEmpty(oldEmail) && TextUtils::IsEmpty(newEmail))) {
         mSuccess = UpdateIapFile(adnRecNum, oldEmail, newEmail, USIM_EFEMAIL_TAG);
     }
     *result = mSuccess;
@@ -436,7 +441,7 @@ ECode CUsimPhoneBookManager::UpdateAnrFile(
         *result = mSuccess;
         return NOERROR;
     }
-    if (mAnrPresentInIap && (oldAnr.IsEmpty() && !newAnr.IsEmpty())) {
+    if (mAnrPresentInIap && (TextUtils::IsEmpty(oldAnr) && !TextUtils::IsEmpty(newAnr))) {
         Int32 index;
         GetEmptyAnrNum_Pbrindex(pbrIndex, &index);
         if (index == 0) {
@@ -464,7 +469,7 @@ ECode CUsimPhoneBookManager::UpdateAnrFile(
         // }
     }
     if (mAnrPresentInIap && mSuccess
-            && (!oldAnr.IsEmpty() && newAnr.IsEmpty())) {
+            && (!TextUtils::IsEmpty(oldAnr) && TextUtils::IsEmpty(newAnr))) {
         mSuccess = UpdateIapFile(adnRecNum, oldAnr, newAnr, USIM_EFANR_TAG);
     }
     *result = mSuccess;
@@ -522,7 +527,7 @@ ECode CUsimPhoneBookManager::ParseType1EmailFile(
         for (Int32 j = 0; j < numEmailFiles; j++) {
             String email = ReadEmailRecord(i, pbrIndex, j*numRecs);
             emailList->Add(CoreUtils::Convert(email));
-            if (email.IsEmpty()) {
+            if (TextUtils::IsEmpty(email)) {
                 email = String("");
                 continue;
             }
@@ -587,7 +592,7 @@ ECode CUsimPhoneBookManager::ParseType1AnrFile(
         for (Int32 j = 0; j < numAnrFiles; j++) {
             String anr = ReadAnrRecord(i, pbrIndex, j*numRecs);
             anrList->Add(CoreUtils::Convert(anr));
-            if (anr.IsEmpty()) {
+            if (TextUtils::IsEmpty(anr)) {
                 anr = String("");
                 continue;
             }
@@ -654,7 +659,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
     switch (what) {
         case EVENT_PBR_LOAD_DONE:
             Log(String("Loading PBR done"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 CreatePbrFile(IArrayList::Probe(ar->mResult));
             }
@@ -665,7 +670,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             break;
         case EVENT_USIM_ADN_LOAD_DONE:
             Log(String("Loading USIM ADN records done"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
             if (ar->mException == NULL) {
                 mPhoneBookRecords->AddAll(ICollection::Probe(ar->mResult));
@@ -684,7 +689,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             break;
         case EVENT_IAP_LOAD_DONE:
             Log(String("Loading USIM IAP records done"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
             if (ar->mException == NULL) {
                 mIapFileRecord->Put(CoreUtils::Convert(pbrIndex), IArrayList::Probe(ar->mResult));
@@ -696,7 +701,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             break;
         case EVENT_EMAIL_LOAD_DONE:
             Log(String("Loading USIM Email records done"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
             if (ar->mException == NULL && mPbrFile != NULL) {
                 AutoPtr<IInterface> o;
@@ -710,8 +715,10 @@ ECode CUsimPhoneBookManager::HandleMessage(
                     mEmailFileRecord->Put(CoreUtils::Convert(pbrIndex), tmpList);
                 }
 
-                Int32 size;
-                tmpList->GetSize(&size);
+                Int32 size = 0;
+                if (tmpList != NULL) {
+                    tmpList->GetSize(&size);
+                }
                 Log(String("handlemessage EVENT_EMAIL_LOAD_DONE size is: ")
                         + StringUtils::ToString(size));
             }
@@ -722,7 +729,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             break;
         case EVENT_ANR_LOAD_DONE:
             Log(String("Loading USIM Anr records done"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
             if (ar->mException == NULL && mPbrFile != NULL) {
                 AutoPtr<IInterface> o;
@@ -736,8 +743,10 @@ ECode CUsimPhoneBookManager::HandleMessage(
                     mAnrFileRecord->Put(CoreUtils::Convert(pbrIndex), tmp);
                 }
 
-                Int32 size;
-                tmp->GetSize(&size);
+                Int32 size = 0;
+                if (tmp != NULL) {
+                    tmp->GetSize(&size);
+                }
                 Log(String("handlemessage EVENT_ANR_LOAD_DONE size is: ")
                         + StringUtils::ToString(size));
             }
@@ -748,7 +757,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             break;
         case EVENT_EF_EMAIL_RECORD_SIZE_DONE: {
             Log(String("Loading EF_EMAIL_RECORD_SIZE_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             String emails;
             ICharSequence::Probe(ar->mUserObj)->ToString(&emails);
             Int32 arg1, arg2;
@@ -841,7 +850,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
         }
         case EVENT_EF_ANR_RECORD_SIZE_DONE: {
             Log(String("Loading EF_ANR_RECORD_SIZE_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             String anrs;
             ICharSequence::Probe(ar->mUserObj)->ToString(&anrs);
             Int32 arg1, arg2;
@@ -945,7 +954,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
         }
         case EVENT_UPDATE_EMAIL_RECORD_DONE: {
             Log(String("Loading UPDATE_EMAIL_RECORD_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 mSuccess = FALSE;
             }
@@ -996,7 +1005,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
         }
         case EVENT_UPDATE_ANR_RECORD_DONE: {
             Log(String("Loading UPDATE_ANR_RECORD_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mUserObj);
             Int32 size;
@@ -1045,7 +1054,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
         }
         case EVENT_EF_IAP_RECORD_SIZE_DONE: {
             Log(String("EVENT_EF_IAP_RECORD_SIZE_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             Int32 arg1, arg2;
             msg->GetArg1(&arg1);
             msg->GetArg2(&arg2);
@@ -1143,7 +1152,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
         }
         case EVENT_UPDATE_IAP_RECORD_DONE: {
             Log(String("EVENT_UPDATE_IAP_RECORD_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 mSuccess = FALSE;
             }
@@ -1843,7 +1852,7 @@ void CUsimPhoneBookManager::UpdatePhoneAdnRecordWithEmail(
                 obj = NULL;
                 mPhoneBookRecords->Get(adnRecIndex, (IInterface**)&obj);
                 AutoPtr<IAdnRecord> rec = IAdnRecord::Probe(obj);
-                if (rec != NULL && (!(*emails)[0].IsEmpty())) {
+                if (rec != NULL && (!TextUtils::IsEmpty((*emails)[0]))) {
                     rec->SetEmails(emails);
                     mPhoneBookRecords->Set(adnRecIndex, rec);
 
@@ -1925,7 +1934,7 @@ void CUsimPhoneBookManager::UpdatePhoneAdnRecordWithAnr(
                 obj = NULL;
                 mPhoneBookRecords->Get(adnRecIndex, (IInterface**)&obj);
                 AutoPtr<IAdnRecord> rec = IAdnRecord::Probe(obj);
-                if (rec != NULL && (!(*anrs)[0].IsEmpty())) {
+                if (rec != NULL && (!TextUtils::IsEmpty((*anrs)[0]))) {
                     rec->SetAdditionalNumbers(anrs);
                     mPhoneBookRecords->Set(adnRecIndex, rec);
                 }
@@ -1960,6 +1969,12 @@ String CUsimPhoneBookManager::ReadEmailRecord(
     AutoPtr<IInterface> obj;
     mEmailFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
     AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+    Int32 len = 0;
+    list->GetSize(&len);
+    if (len <= recNum + offSet) {
+        return String(NULL);
+    }
+
     obj = NULL;
     list->Get(recNum + offSet, (IInterface**)&obj);
     AutoPtr<IArrayOf> iArray = IArrayOf::Probe(obj);
@@ -2111,10 +2126,10 @@ Int32 CUsimPhoneBookManager::GetEmailRecNumber(
             IArrayList::Probe(obj)->GetSize(&recsSize);
 
             Log(String("getEmailRecNumber recsSize is: ") + StringUtils::ToString(recsSize));
-            if (oldEmail.IsEmpty()) {
+            if (TextUtils::IsEmpty(oldEmail)) {
                 for (Int32 i = 0; i < recsSize; i++) {
                     String emailRecord = ReadEmailRecord(i, pbrIndex, 0);
-                    if (emailRecord.IsEmpty()) {
+                    if (TextUtils::IsEmpty(emailRecord)) {
                         Log(String("getEmailRecNumber: Got empty record.Email record num is :") +
                                  StringUtils::ToString(i + 1));
                         return i + 1;
@@ -2172,10 +2187,10 @@ Int32 CUsimPhoneBookManager::GetAnrRecNumber(
                 Int32 recsSize;
                 IArrayList::Probe(obj)->GetSize(&recsSize);
                 Log(String("getAnrRecNumber: anr record size is :") + StringUtils::ToString(recsSize));
-                if (oldAnr.IsEmpty()) {
+                if (TextUtils::IsEmpty(oldAnr)) {
                     for (Int32 i = 0; i < recsSize; i++) {
                         String anrRecord = ReadAnrRecord(i, pbrIndex, 0);
-                        if (anrRecord.IsEmpty()) {
+                        if (TextUtils::IsEmpty(anrRecord)) {
                             Log(String("getAnrRecNumber: Empty anr record. Anr record num is :") +
                                     StringUtils::ToString(i + 1));
                             return i + 1;
@@ -2202,7 +2217,7 @@ AutoPtr<ArrayOf<Byte> > CUsimPhoneBookManager::BuildEmailData(
     for (Int32 i = 0; i < length; i++) {
         (*data)[i] = (Byte) 0xff;
     }
-    if (email.IsEmpty()) {
+    if (TextUtils::IsEmpty(email)) {
         Log(String("[buildEmailData] Empty email record"));
         return data; // return the empty record (for delete)
     }
@@ -2228,7 +2243,7 @@ AutoPtr<ArrayOf<Byte> > CUsimPhoneBookManager::BuildAnrData(
     for (Int32 i = 0; i < length; i++) {
         (*data)[i] = (Byte) 0xff;
     }
-    if (anr.IsEmpty()) {
+    if (TextUtils::IsEmpty(anr)) {
         Log(String("[buildAnrData] Empty anr record"));
         return data; // return the empty record (for delete)
     }

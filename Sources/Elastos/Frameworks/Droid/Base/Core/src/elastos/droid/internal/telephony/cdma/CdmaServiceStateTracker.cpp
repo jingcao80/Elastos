@@ -295,7 +295,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
         // }
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
         OnSignalStrengthResult(ar, FALSE);
         QueueNextSignalStrengthPoll();
 
@@ -304,7 +304,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
     case EVENT_GET_LOC_DONE_CDMA: {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
         if (ar->mException == NULL) {
             AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
@@ -365,14 +365,14 @@ ECode CdmaServiceStateTracker::HandleMessage(
     case EVENT_POLL_STATE_GPRS: {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
         HandlePollStateResult(what, ar);
         break;
     }
     case EVENT_POLL_STATE_CDMA_SUBSCRIPTION:  {// Handle RIL_CDMA_SUBSCRIPTION
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
         if (ar->mException == NULL) {
             AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
@@ -433,7 +433,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
     case EVENT_NITZ_TIME: {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
         AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
         obj = NULL;
@@ -454,7 +454,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
 
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
         // The radio is telling us about signal strength changes,
         // so we don't have to ask it.
@@ -488,7 +488,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
     case EVENT_LOCATION_UPDATES_ENABLED: {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
         if (ar->mException == NULL) {
             AutoPtr<IMessage> msg;
@@ -506,7 +506,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
     case EVENT_OTA_PROVISION_STATUS_CHANGE: {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
         if (ar->mException == NULL) {
             AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
             AutoPtr<IInterface> obj;
@@ -527,7 +527,7 @@ ECode CdmaServiceStateTracker::HandleMessage(
     case EVENT_CDMA_PRL_VERSION_CHANGED: {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
         if (ar->mException == NULL) {
             AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
             AutoPtr<IInterface> obj;

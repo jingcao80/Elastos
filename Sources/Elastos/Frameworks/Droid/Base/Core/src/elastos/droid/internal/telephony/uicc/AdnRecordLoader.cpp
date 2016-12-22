@@ -13,9 +13,10 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
-
+using Elastos::Core::IArrayOf;
 using Elastos::Core::IByte;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
@@ -153,8 +154,8 @@ ECode AdnRecordLoader::HandleMessage(
     // try {
         switch (what) {
             case EVENT_EF_LINEAR_RECORD_SIZE_DONE: {
-                ar = (AsyncResult*)(IObject*)(obj.Get());
-                adn = (AdnRecord*)(IObject*)(ar->mUserObj).Get();
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
+                adn = (AdnRecord*)IAdnRecord::Probe(ar->mUserObj);
 
                 if (ar->mException != NULL) {
                     // throw new RuntimeException("get EF record size failed",
@@ -206,7 +207,7 @@ ECode AdnRecordLoader::HandleMessage(
                 break;
             }
             case EVENT_UPDATE_RECORD_DONE: {
-                ar = (AsyncResult*)(IObject*)(obj.Get());
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 if (ar->mException != NULL) {
                     // throw new RuntimeException("update EF adn record failed",
                     //         ar.exception);
@@ -217,7 +218,7 @@ ECode AdnRecordLoader::HandleMessage(
                 break;
             }
             case EVENT_ADN_LOAD_DONE: {
-                ar = (AsyncResult*)(IObject*)(obj.Get());
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
                 Int32 size = 0;
                 pArr->GetSize(&size);
@@ -247,7 +248,7 @@ ECode AdnRecordLoader::HandleMessage(
                 AutoPtr<IAdnRecord> tmp;
                 CAdnRecord::New(mEf, mRecordNumber, data, (IAdnRecord**)&tmp);
                 adn = (AdnRecord*)tmp.Get();
-                mResult = (IObject*)adn.Get();
+                mResult = adn->Probe(EIID_IInterface);
 
                 Boolean bHasExtendedRecord = FALSE;
                 adn->HasExtendedRecord(&bHasExtendedRecord);
@@ -267,7 +268,7 @@ ECode AdnRecordLoader::HandleMessage(
                 break;
             }
             case EVENT_EXT_RECORD_LOAD_DONE: {
-                ar = (AsyncResult*)(IObject*)(obj.Get());
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
                 Int32 size = 0;
                 pArr->GetSize(&size);
@@ -277,7 +278,7 @@ ECode AdnRecordLoader::HandleMessage(
                     pArr->Get(i, (IInterface**)&p);
                     IByte::Probe(p)->GetValue(&((*data)[i]));
                 }
-                adn = (AdnRecord*)(IObject*)(ar->mUserObj).Get();
+                adn = (AdnRecord*)IAdnRecord::Probe(ar->mUserObj);
 
                 if (ar->mException != NULL) {
                     // throw new RuntimeException("load failed", ar.exception);
@@ -301,7 +302,7 @@ ECode AdnRecordLoader::HandleMessage(
                 break;
             }
             case EVENT_ADN_LOAD_ALL_DONE: {
-                ar = (AsyncResult*)(IObject*)(obj.Get());
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 AutoPtr<IArrayList> datas = IArrayList::Probe(ar->mResult);
 
                 if (ar->mException != NULL) {
@@ -318,9 +319,23 @@ ECode AdnRecordLoader::HandleMessage(
                 for (Int32 i = 0, s = size; i < s; i++) {
                     AutoPtr<IInterface> p;
                     datas->Get(i, (IInterface**)&p);
-                    assert(0 && "TODO");
-                    // CAdnRecord::New(mEf, 1 + i, p, (IAdnRecord**)&adn);
-                    mAdns->Add((IObject*)adn.Get());
+                    AutoPtr<IArrayOf> array = IArrayOf::Probe(p);
+                    assert(array != NULL);
+
+                    Int32 len = 0;
+                    array->GetLength(&len);
+                    AutoPtr<ArrayOf<Byte> > bs = ArrayOf<Byte>::Alloc(len);
+                    for (Int32 x = 0; x < len; x++) {
+                        AutoPtr<IInterface> bo;
+                        array->Get(x, (IInterface**)&bo);
+                        IByte::Probe(bo)->GetValue(&((*bs)[x]));
+                    }
+
+                    AutoPtr<IAdnRecord> tmp;
+                    CAdnRecord::New(mEf, 1 + i, bs, (IAdnRecord**)&tmp);
+                    adn = (AdnRecord*)tmp.Get();
+
+                    mAdns->Add(tmp);
                     Boolean bHasExtendedRecord = FALSE;
                     adn->HasExtendedRecord(&bHasExtendedRecord);
                     if (bHasExtendedRecord) {

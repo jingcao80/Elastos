@@ -493,7 +493,7 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
         intent->GetData((IUri**)&documentData);
     }
 
-    //if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Looking for task of " + target + " in " + this);
+    if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Looking for task of %s in %s", TO_CSTR(target), TO_CSTR(this));
     Int32 size;
     mTaskHistory->GetSize(&size);
     for (Int32 taskNdx = size - 1; taskNdx >= 0; --taskNdx) {
@@ -530,18 +530,29 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
         if (taskIntent != NULL && taskIsDocument) {
             taskIsDocument = TRUE;
             taskIntent->GetData((IUri**)&taskDocumentData);
-        } else if (affinityIntent != NULL && affinityIsDocument
-            ) {
+        }
+        else if (affinityIntent != NULL && affinityIsDocument) {
             taskIsDocument = TRUE;
             affinityIntent->GetData((IUri**)&taskDocumentData);
-        } else {
+        }
+        else {
             taskIsDocument = FALSE;
         }
 
-        if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Comparing existing cls=");
-        //        + taskIntent.getComponent().flattenToShortString()
-        //        + "/aff=" + r.task.rootAffinity + " to new cls="
-        //        + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
+        if (CActivityManagerService::DEBUG_TASKS) {
+            AutoPtr<IComponentName> clstmp;
+            taskIntent->GetComponent((IComponentName**)&clstmp);
+            String s;
+            clstmp->FlattenToShortString(&s);
+            AutoPtr<IComponentName> clstmp2;
+            intent->GetComponent((IComponentName**)&clstmp2);
+            String s2, task;
+            clstmp2->FlattenToShortString(&s2);
+            info->GetTaskAffinity(&task);
+            Slogger::D(TAG, "Comparing existing cls=%s/aff=%s to new cls=%s/aff=%s",
+                    s.string(), r->mTask->mRootAffinity.string(), s2.string(), task.string());
+        }
+
         if (!isDocument && !taskIsDocument && (!task->mRootAffinity.IsNull())) {
             if (task->mRootAffinity.Equals(target->mTaskAffinity)) {
                 if (CActivityManagerService::DEBUG_TASKS) Slogger::D(TAG, "Found matching affinity!");
@@ -833,8 +844,7 @@ Boolean ActivityStack::StartPausingLocked(
     /* [in] */ Boolean dontWait)
 {
     if (mPausingActivity != NULL) {
-        // Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
-        //         + " state=" + mPausingActivity.state);
+        Slogger::W(TAG, "Going to pause when pause is already pending for %s state=%d", TO_CSTR(mPausingActivity), mPausingActivity->mState);
         if (mPausingActivity->mState == ActivityState_PAUSING) {
             CompletePauseLocked(FALSE);
         }
@@ -842,7 +852,7 @@ Boolean ActivityStack::StartPausingLocked(
     AutoPtr<ActivityRecord> prev = mResumedActivity;
     if (prev == NULL) {
         if (!resuming) {
-            //Slogger::Wtf(TAG, "Trying to pause when nothing is resumed");
+            Slogger::W(TAG, "Trying to pause when nothing is resumed");
             mStackSupervisor->ResumeTopActivitiesLocked();
         }
         return FALSE;
@@ -1133,9 +1143,9 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
             // mLaunchingBehind: Activities launching behind are at the back of the task stack
             // but must be drawn initially for the animation as though they were visible.
             if (!behindFullscreen || r->mLaunchTaskBehind) {
-                //if (CActivityManagerService::DEBUG_VISBILITY) Slogger::V(
-                //        TAG, "Make visible? " + r + " finishing=" + r.finishing
-                //        + " state=" + r.state);
+                if (CActivityManagerService::DEBUG_VISBILITY) {
+                    Slogger::V(TAG, "Make visible? %s finishing=%d state=%d", TO_CSTR(r), r->mFinishing, r->mState);
+                }
 
                 // First: if this is not the current activity being started, make
                 // sure it matches the current configuration.
@@ -1224,11 +1234,10 @@ void ActivityStack::EnsureActivitiesVisibleLocked(
                     behindFullscreen = TRUE;
                 }
             } else {
-                //if (CActivityManagerService::DEBUG_VISBILITY)
-                //  Slogger::V(
-                //    TAG, "Make invisible? " + r + " finishing=" + r.finishing
-                //    + " state=" + r.state
-                //    + " behindFullscreen=" + behindFullscreen);
+                if (CActivityManagerService::DEBUG_VISBILITY) {
+                    Slogger::V(TAG, "Make invisible? %s finishing=%d state=%d behindFullscreen=%d"
+                        , TO_CSTR(r), r->mFinishing, r->mState, behindFullscreen);
+                }
                 // Now for any activities that aren't visible to the user, make
                 // sure they no longer are keeping the screen frozen.
                 if (r->mVisible) {
@@ -2039,6 +2048,7 @@ void ActivityStack::StartActivityLocked(
     // Slot the activity into the history stack and proceed
     //if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slogger::I(TAG, "Adding activity " + r + " to stack to task " + task,
     //        new RuntimeException("here").fillInStackTrace());
+    if (ActivityStackSupervisor::DEBUG_ADD_REMOVE) Slogger::I(TAG, "Adding activity %s to stack to task %s", TO_CSTR(r), TO_CSTR(task));
     task->AddActivityToTop(r);
     task->SetFrontOfTask();
 
@@ -3904,9 +3914,8 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     /* [in] */ Int32 globalChanges)
 {
     if (mConfigWillChange) {
-        //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slogger::V(TAG,
-        //        "Skipping config check (will change): " + r);
+        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+            Slogger::V(TAG, "Skipping config check (will change): %s", TO_CSTR(r));
         return TRUE;
     }
 
@@ -3917,15 +3926,15 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     // object (the common case), then there is nothing to do.
     AutoPtr<IConfiguration> newConfig = mService->mConfiguration;
     if (r->mConfiguration == newConfig && !r->mForceNewConfig) {
-        //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slogger::V(TAG, "Configuration unchanged in " + r);
+        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+            Slogger::V(TAG, "Configuration unchanged in %s", TO_CSTR(r));
         return TRUE;
     }
 
     // We don't worry about activities that are finishing.
     if (r->mFinishing) {
-        //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slogger::V(TAG, "Configuration doesn't matter in finishing " + r);
+        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+            Slogger::V(TAG, "Configuration doesn't matter in finishing %s", TO_CSTR(r));
         r->StopFreezingScreenLocked(FALSE);
         return TRUE;
     }
@@ -3942,29 +3951,30 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     Int32 changes;
     oldConfig->Diff(newConfig, &changes);
     if (changes == 0 && !r->mForceNewConfig) {
-        //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slogger::V(TAG, "Configuration no differences in " + r);
+        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+            Slogger::V(TAG, "Configuration no differences in %s", TO_CSTR(r));
         return TRUE;
     }
 
     // If the activity isn't currently running, just leave the new
     // configuration and it will pick that up next time it starts.
     if (r->mApp == NULL || r->mApp->mThread == NULL) {
-        //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-        //  Slogger::V(TAG,
-        //        "Configuration doesn't matter not running " + r);
+        if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+            Slogger::V(TAG, "Configuration doesn't matter not running %s", TO_CSTR(r));
         r->StopFreezingScreenLocked(FALSE);
         r->mForceNewConfig = FALSE;
         return TRUE;
     }
 
     // Figure out how to handle the changes between the configurations.
-    //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION) {
-    //    Slogger::V(TAG, "Checking to restart " + r.info.name + ": changed=0x"
-    //            + Integer.toHexString(changes) + ", handles=0x"
-    //            + Integer.toHexString(r.info.getRealConfigChanged())
-    //            + ", newConfig=" + newConfig);
-    //}
+    if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION) {
+        String name;
+        IPackageItemInfo::Probe(r->mInfo)->GetName(&name);
+        Int32 c = 0;
+        r->mInfo->GetRealConfigChanged(&c);
+        Slogger::V(TAG, "Checking to restart %s: changed=0x%08x, handles=0x%08x, newConfig=%s"
+               , name.string(), changes, c, TO_CSTR(newConfig));
+    }
     Int32 realConfigChanged;
     r->mInfo->GetRealConfigChanged(&realConfigChanged);
     if ((changes&(~realConfigChanged)) != 0 || r->mForceNewConfig) {
@@ -3973,17 +3983,15 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
         r->StartFreezingScreenLocked(r->mApp, globalChanges);
         r->mForceNewConfig = FALSE;
         if (r->mApp == NULL || r->mApp->mThread == NULL) {
-            //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slogger::V(TAG,
-            //        "Config is destroying non-running " + r);
+            if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+            Slogger::V(TAG, "Config is destroying non-running %s", TO_CSTR(r));
             DestroyActivityLocked(r, TRUE, String("config"));
         } else if (r->mState == ActivityState_PAUSING) {
             // A little annoying: we are waiting for this activity to
             // finish pausing.  Let's not do anything now, but just
             // flag that it needs to be restarted when done pausing.
-            //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slogger::V(TAG,
-            //        "Config is skipping already pausing " + r);
+            if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+                Slogger::V(TAG, "Config is skipping already pausing %s", TO_CSTR(r));
             r->mConfigDestroy = TRUE;
             return TRUE;
         } else if (r->mState == ActivityState_RESUMED) {
@@ -3991,15 +3999,13 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
             // and we need to restart the top, resumed activity.
             // Instead of doing the normal handshaking, just say
             // "restart!".
-            //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slogger::V(TAG,
-            //        "Config is relaunching resumed " + r);
+            if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+                Slogger::V(TAG, "Config is relaunching resumed %s", TO_CSTR(r));
             RelaunchActivityLocked(r, r->mConfigChangeFlags, TRUE);
             r->mConfigChangeFlags = 0;
         } else {
-            //if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
-            //  Slogger::V(TAG,
-            //        "Config is relaunching non-resumed " + r);
+            if (CActivityManagerService::DEBUG_SWITCH || CActivityManagerService::DEBUG_CONFIGURATION)
+                Slogger::V(TAG, "Config is relaunching non-resumed %s", TO_CSTR(r));
             RelaunchActivityLocked(r, r->mConfigChangeFlags, FALSE);
             r->mConfigChangeFlags = 0;
         }
@@ -4016,7 +4022,7 @@ Boolean ActivityStack::EnsureActivityConfigurationLocked(
     // it last got.
     if (r->mApp != NULL && r->mApp->mThread != NULL) {
         //try {
-            //if (CActivityManagerService::DEBUG_CONFIGURATION) Slogger::V(TAG, "Sending new config to " + r);
+            if (CActivityManagerService::DEBUG_CONFIGURATION) Slogger::V(TAG, "Sending new config to %s", TO_CSTR(r));
             r->mApp->mThread->ScheduleActivityConfigurationChanged(IBinder::Probe(r->mAppToken));
         //} catch (RemoteException e) {
             // If process died, whatever.

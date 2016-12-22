@@ -43,6 +43,7 @@ using Elastos::Droid::Internal::Telephony::IccUtils;
 using Elastos::Droid::Internal::Telephony::IIccUtils;
 using Elastos::Droid::Os::HandlerThread;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::R;
@@ -252,7 +253,7 @@ ECode CatService::HandleMessage(
     }
     case MSG_ID_ICC_REFRESH: {
         if (obj != NULL) {
-            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar != NULL && ar->mResult != NULL) {
                 BroadcastCardStateAndIccRefreshResp(CARDSTATE_PRESENT,
                                 IIccRefreshResponse::Probe(ar->mResult));
@@ -269,7 +270,7 @@ ECode CatService::HandleMessage(
     case MSG_ID_ALPHA_NOTIFY: {
         CatLog::D(ICatService::Probe(this), String("Received CAT CC Alpha message from card"));
         if (obj != NULL) {
-            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar != NULL && ar->mResult != NULL) {
                 String str;
                 ICharSequence::Probe(ar->mResult)->ToString(&str);
@@ -311,7 +312,7 @@ ECode CatService::HandleMessage(
             CatLog::D(ICatService::Probe(this), String("handleMsg : MSG_ID_SEND_SMS_RESULT"));
             CancelTimeOut();
             CatLog::D(ICatService::Probe(this), String("The Msg ID data:") + StringUtils::ToString(what));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar == NULL || ar->mResult == NULL || mCurrntCmd == NULL || mCurrntCmd->mCmdDet == NULL)
                 break;
 

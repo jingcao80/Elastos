@@ -15,6 +15,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::R;
@@ -732,7 +733,7 @@ ECode CdmaCallTracker::HandleMessage(
             Logger::D(LOGTAG, "Event EVENT_POLL_CALLS_RESULT Received");
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if(msg == mLastRelevantPoll) {
                 if(DBG_POLL) Log(
@@ -758,7 +759,7 @@ ECode CdmaCallTracker::HandleMessage(
             Int32 causeCode;
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             OperationComplete();
 
@@ -820,7 +821,7 @@ ECode CdmaCallTracker::HandleMessage(
         case EVENT_CALL_WAITING_INFO_CDMA: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 HandleCallWaitingInfo(ICdmaCallWaitingNotification::Probe(ar->mResult));
                 Logger::D(LOGTAG, "Event EVENT_CALL_WAITING_INFO_CDMA Received");
@@ -830,7 +831,7 @@ ECode CdmaCallTracker::HandleMessage(
         case EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 // Assume 3 way call is connected
                 ((CdmaConnection*)mPendingMO.Get())->OnConnectedInOrOut();
@@ -841,7 +842,7 @@ ECode CdmaCallTracker::HandleMessage(
         case EVENT_THREE_WAY_DIAL_BLANK_FLASH: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 AutoPtr<CdmaCallTrackerRunnable> r = new CdmaCallTrackerRunnable(this);
                 Boolean b;

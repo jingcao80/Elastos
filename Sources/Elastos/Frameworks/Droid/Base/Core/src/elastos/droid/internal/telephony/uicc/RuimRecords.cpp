@@ -834,7 +834,7 @@ ECode RuimRecords::HandleMessage(
         break;
 
         case EVENT_GET_CDMA_SUBSCRIPTION_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
             Int32 size = 0;
             pArr->GetSize(&size);
@@ -859,7 +859,7 @@ ECode RuimRecords::HandleMessage(
         case EVENT_GET_ICCID_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
             Int32 size = 0;
             pArr->GetSize(&size);
@@ -882,7 +882,7 @@ ECode RuimRecords::HandleMessage(
         break;
         }
         case EVENT_UPDATE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Logger::I(LOGTAG, "RuimRecords update failed %p", ar->mException.Get());
             }
@@ -900,7 +900,7 @@ ECode RuimRecords::HandleMessage(
             Log(String("Event EVENT_GET_SST_DONE Received"));
         break;
         case EVENT_SET_MODEL_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Logger::I(LOGTAG, "Set EF Model failed %p", ar->mException.Get());
             }
@@ -912,7 +912,7 @@ ECode RuimRecords::HandleMessage(
             Boolean omhEnabled = FALSE;
             Boolean mmsicpEnabled = FALSE;
             isRecordLoadResponse = TRUE;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar != NULL && ar->mException == NULL) {
                 AutoPtr<IArrayList> pArr = IArrayList::Probe(((AsyncResult*)ar)->mResult);
                 Int32 size = 0;

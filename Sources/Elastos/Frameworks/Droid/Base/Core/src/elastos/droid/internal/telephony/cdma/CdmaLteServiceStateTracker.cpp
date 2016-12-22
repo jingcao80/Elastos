@@ -111,7 +111,7 @@ ECode CdmaLteServiceStateTracker::HandleMessage(
             if (DBG) Log(String("handleMessage EVENT_POLL_STATE_GPRS"));
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             HandlePollStateResult(what, ar);
             break;
         }

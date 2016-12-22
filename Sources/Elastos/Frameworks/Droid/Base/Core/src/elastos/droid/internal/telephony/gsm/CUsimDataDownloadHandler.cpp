@@ -12,6 +12,7 @@ using Elastos::Droid::Internal::Telephony::IccUtils;
 using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
 using Elastos::Droid::Internal::Telephony::Uicc::IccIoResult;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 // TODO:
 // using Elastos::Droid::Provider::Telephony::Sms::IIntents;
 using Elastos::Droid::Telephony::ISmsManager;
@@ -125,7 +126,7 @@ ECode CUsimDataDownloadHandler::HandleMessage(
             break;
 
         case EVENT_SEND_ENVELOPE_RESPONSE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 // Logger::E(TAG, "UICC Send Envelope failure, exception: " + ar.exception);
@@ -147,7 +148,7 @@ ECode CUsimDataDownloadHandler::HandleMessage(
             break;
         }
         case EVENT_WRITE_SMS_COMPLETE:
-        ar = (AsyncResult*)(IObject*)obj.Get();
+        ar = (AsyncResult*)IAsyncResult::Probe(obj);
         if (ar->mException != NULL) {
                 Logger::D(TAG, "Successfully wrote SMS-PP message to UICC");
                 mCi->AcknowledgeLastIncomingGsmSms(TRUE, 0, NULL);

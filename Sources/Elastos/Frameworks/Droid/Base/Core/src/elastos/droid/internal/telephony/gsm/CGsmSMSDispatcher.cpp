@@ -102,7 +102,7 @@ ECode CGsmSMSDispatcher::HandleMessage(
 
     switch (what) {
     case EVENT_NEW_SMS_STATUS_REPORT:
-        HandleStatusReport((AsyncResult*)(IObject*)obj.Get());
+        HandleStatusReport((AsyncResult*)IAsyncResult::Probe(obj));
         break;
 
     case EVENT_NEW_ICC_SMS:
@@ -121,7 +121,7 @@ ECode CGsmSMSDispatcher::HandleMessage(
         if (rec != NULL) {
             ISIMRecords* isimrecords = ISIMRecords::Probe(rec);
             SIMRecords* simrecords = (SIMRecords*)(isimrecords);
-            simrecords->HandleSmsOnIcc((AsyncResult*)(IObject*)obj.Get());
+            simrecords->HandleSmsOnIcc((AsyncResult*)IAsyncResult::Probe(obj));
         }
         break;
     }

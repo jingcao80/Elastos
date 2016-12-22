@@ -2318,7 +2318,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     // not actually be in recents.  Check for that, and if it isn't in recents just
     // consider it invalid.
     if (inTask != NULL && !inTask->mInRecents) {
-        //Slogger::W(TAG, "Starting activity in task not in recents: " + inTask);
+        Slogger::W(TAG, "Starting activity in task not in recents: %s", TO_CSTR(inTask));
         inTask = NULL;
     }
 
@@ -2405,7 +2405,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     // being launched is the same as the one making the call...  or, as
     // a special case, if we do not know the caller then we count the
     // current top activity as the caller.
-    if ((startFlags&IActivityManager::START_FLAG_ONLY_IF_NEEDED) != 0) {
+    if ((startFlags & IActivityManager::START_FLAG_ONLY_IF_NEEDED) != 0) {
         AutoPtr<ActivityRecord> checkedCaller = sourceRecord;
         if (checkedCaller == NULL) {
             checkedCaller = GetFocusedStack()->TopRunningNonDelayedActivityLocked(notTop);
@@ -2508,8 +2508,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
             // This activity is not being started from another...  in this
             // case we -always- start a new task.
             if ((launchFlags & IIntent::FLAG_ACTIVITY_NEW_TASK) == 0 && inTask == NULL) {
-                //Slogger::W(TAG, "startActivity called from non-Activity context; forcing " +
-                //        "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
+                Slogger::W(TAG, "startActivity called from non-Activity context; forcing Intent.FLAG_ACTIVITY_NEW_TASK for: %s", TO_CSTR(intent));
                 launchFlags |= IIntent::FLAG_ACTIVITY_NEW_TASK;
             }
         } else if (sourceRecord->mLaunchMode == IActivityInfo::LAUNCH_SINGLE_INSTANCE) {
@@ -2524,8 +2523,8 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
         }
     }
 
-    AutoPtr<IActivityInfo> newTaskInfo = NULL;
-    AutoPtr<IIntent> newTaskIntent = NULL;
+    AutoPtr<IActivityInfo> newTaskInfo;
+    AutoPtr<IIntent> newTaskIntent;
     AutoPtr<ActivityStack> sourceStack;
     if (sourceRecord != NULL) {
         if (sourceRecord->mFinishing) {
@@ -2535,8 +2534,8 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
             // the NEW_TASK flow and try to find a task for it. But save the task information
             // so it can be used when creating the new task.
             if ((launchFlags & IIntent::FLAG_ACTIVITY_NEW_TASK) == 0) {
-                //Slogger::W(TAG, "startActivity called from finishing " + sourceRecord
-                //        + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
+                Slogger::W(TAG, "startActivity called from finishing %s; forcing Intent.FLAG_ACTIVITY_NEW_TASK for: %s"
+                    , TO_CSTR(sourceRecord), TO_CSTR(intent));
                 launchFlags |= IIntent::FLAG_ACTIVITY_NEW_TASK;
                 newTaskInfo = sourceRecord->mInfo;
                 newTaskIntent = sourceRecord->mTask->mIntent;
@@ -2851,7 +2850,7 @@ ECode ActivityStackSupervisor::StartActivityUncheckedLocked(
     } else if (sourceRecord != NULL) {
         AutoPtr<TaskRecord> sourceTask = sourceRecord->mTask;
         if (IsLockTaskModeViolation(sourceTask)) {
-            //Slogger::E(TAG, "Attempted Lock Task Mode violation r=" + r);
+            Slogger::E(TAG, "Attempted Lock Task Mode violation r=%s", TO_CSTR(r));
             *result = IActivityManager::START_RETURN_LOCK_TASK_MODE_VIOLATION;
             return NOERROR;
         }

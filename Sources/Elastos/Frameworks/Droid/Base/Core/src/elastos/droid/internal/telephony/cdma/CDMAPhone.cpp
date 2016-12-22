@@ -1540,7 +1540,7 @@ ECode CDMAPhone::HandleMessage(
         case EVENT_GET_BASEBAND_VERSION_DONE:{
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 break;
@@ -1558,7 +1558,7 @@ ECode CDMAPhone::HandleMessage(
         case EVENT_GET_DEVICE_IDENTITY_DONE:{
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 break;
@@ -1652,7 +1652,7 @@ ECode CDMAPhone::HandleMessage(
         case EVENT_SET_VM_NUMBER_DONE:{
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (IIccException::Probe(ar->mException) != NULL) {
                 StoreVoiceMailNumber(mVmNumber);
                 ar->mException = NULL;
@@ -2225,7 +2225,7 @@ void CDMAPhone::HandleExitEmergencyCallbackMode(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
     if (DBG) {
         // Logger::D(LOGTAG, "handleExitEmergencyCallbackMode,ar->mException , mIsPhoneInEcmState "
         //         + ar->mException + mIsPhoneInEcmState);

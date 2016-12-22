@@ -285,7 +285,7 @@ ECode IccCardProxy::HandleMessage(
             break;
         case EVENT_PERSO_LOCKED:
             mUiccApplication->GetPersoSubState(&mPersoSubState);
-            mPersoLockedRegistrants->NotifyRegistrants((AsyncResult*)(IObject*)(obj.Get()));
+            mPersoLockedRegistrants->NotifyRegistrants((AsyncResult*)IAsyncResult::Probe(obj));
             SetExternalState(IccCardConstantsState_PERSO_LOCKED);
             break;
         case EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED:

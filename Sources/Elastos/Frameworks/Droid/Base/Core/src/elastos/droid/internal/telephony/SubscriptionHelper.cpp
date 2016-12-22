@@ -22,6 +22,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
@@ -243,7 +244,7 @@ ECode SubscriptionHelper::HandleMessage(
         case EVENT_REFRESH_OEM: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             index = IInteger32::Probe(ar->mUserObj);
             String str(" Received SIM refresh, reset sub state ");
             Int32 iIndex = 0;
@@ -397,7 +398,7 @@ void SubscriptionHelper::ProcessSetUiccSubscriptionDone(
     schlp->GetInstance((ISubscriptionController**)&subCtrlr);
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
     Int32 slotId = 0;
     msg->GetArg1(&slotId);
     Int32 newSubState = 0;

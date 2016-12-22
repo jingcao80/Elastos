@@ -340,7 +340,7 @@ ECode IsimUiccRecords::HandleMessage(
                 break;
 
             case EVENT_AKA_AUTHENTICATE_DONE:
-                ar = (AsyncResult*)(IObject*)obj.Get();
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 Log(String("EVENT_AKA_AUTHENTICATE_DONE"));
                 if (ar->mException != NULL) {
                     Log(String("Exception ISIM AKA: ") + TO_CSTR(ar->mException));

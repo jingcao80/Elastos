@@ -28,9 +28,10 @@
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Os::IRegistrant;
-using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Internal::Telephony::CSubscriptionControllerHelper;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::R;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
@@ -457,7 +458,7 @@ ECode IccRecords::HandleMessage(
     switch (what) {
         case EVENT_GET_ICC_RECORD_DONE: {
             // try {
-                ar = (AsyncResult*)(IObject*)obj.Get();
+                ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 AutoPtr<IIccRecordLoaded> recordLoaded = IIccRecordLoaded::Probe(ar->mUserObj);
                 if (DBG) {
                     String name;
@@ -481,7 +482,7 @@ ECode IccRecords::HandleMessage(
             break;
         }
         case EVENT_REFRESH: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (DBG) Log(String("Card REFRESH occurred: "));
             if (ar->mException == NULL) {
                 BroadcastRefresh();
@@ -493,7 +494,7 @@ ECode IccRecords::HandleMessage(
             break;
         }
         case EVENT_REFRESH_OEM: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (DBG) Log(String("Card REFRESH OEM occurred: "));
             if (ar->mException == NULL) {
                 AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
@@ -514,7 +515,7 @@ ECode IccRecords::HandleMessage(
             break;
         }
         case EVENT_AKA_AUTHENTICATE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             auth_rsp = NULL;
             if (DBG) Log(String("EVENT_AKA_AUTHENTICATE_DONE"));
             if (ar->mException != NULL) {
@@ -536,7 +537,7 @@ ECode IccRecords::HandleMessage(
             break;
         }
         case EVENT_GET_SMS_RECORD_SIZE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Loge(String("Exception in EVENT_GET_SMS_RECORD_SIZE_DONE ") + TO_CSTR(ar->mException));
                 break;

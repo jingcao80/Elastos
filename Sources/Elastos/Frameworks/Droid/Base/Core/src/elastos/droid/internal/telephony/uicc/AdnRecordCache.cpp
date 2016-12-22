@@ -11,10 +11,10 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Internal::Telephony::Gsm::CUsimPhoneBookManager;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Text::TextUtils;
-
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
@@ -49,6 +49,7 @@ AdnRecordCache::AdnRecordCache()
 ECode AdnRecordCache::constructor(
     /* [in] */ IIccFileHandler* fh)
 {
+    Handler::constructor();
     mFh = fh;
     CUsimPhoneBookManager::New(mFh, this, (IUsimPhoneBookManager**)&mUsimPhoneBookManager);
     return NOERROR;
@@ -379,7 +380,7 @@ ECode AdnRecordCache::HandleMessage(
     switch(what) {
         case EVENT_LOAD_ALL_ADN_LIKE_DONE: {
             /* arg1 is efid, obj.result is ArrayList<AdnRecord>*/
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             efid = arg1;
             AutoPtr<IInterface> _waiters;
             mAdnLikeWaiters->Get(efid, (IInterface**)&_waiters);
@@ -392,15 +393,15 @@ ECode AdnRecordCache::HandleMessage(
             NotifyWaiters(waiters, ar);
             AutoPtr<IInterface> p;
             mAdnLikeFiles->Get(EF_ADN, (IInterface**)&p);
-            Int32 size = 0;
-            IArrayList::Probe(p)->GetSize(&size);
             if (p != NULL) {
+                Int32 size = 0;
+                IArrayList::Probe(p)->GetSize(&size);
                 SetAdnCount(size);
             }
             break;
         }
         case EVENT_UPDATE_ADN_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             efid = arg1;
             Int32 index = arg2;
             AutoPtr<IAdnRecord> adn = IAdnRecord::Probe(ar->mUserObj);

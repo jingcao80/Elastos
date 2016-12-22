@@ -479,7 +479,7 @@ ECode ServiceStateTracker::HandleMessage(
             break;
 
         case EVENT_GET_CELL_INFO_LIST: {
-            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)(obj.Get());
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<CellInfoResult> result = (CellInfoResult*)(IObject*)(ar->mUserObj).Get();
             {
                 AutoLock syncLock(result->mLockObj);
@@ -503,7 +503,7 @@ ECode ServiceStateTracker::HandleMessage(
         }
 
         case EVENT_UNSOL_CELL_INFO_LIST: {
-            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)(obj.Get());
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 assert(0 && "TODO");
                 // Log(String("EVENT_UNSOL_CELL_INFO_LIST: error ignoring, e=") + StringUtils::ToString(ar->mException));

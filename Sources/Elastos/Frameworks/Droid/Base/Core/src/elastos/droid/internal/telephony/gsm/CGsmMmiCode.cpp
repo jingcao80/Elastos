@@ -19,6 +19,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::CallForwardInfo;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 using Elastos::Droid::Internal::Telephony::Uicc::AppState;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Telephony::PhoneNumberUtils;
 using Elastos::Droid::Text::CBidiFormatterHelper;
 using Elastos::Droid::Text::CSpannableStringBuilder;
@@ -920,13 +921,13 @@ ECode CGsmMmiCode::HandleMessage (
     msg->GetObj((IInterface**)&obj);
     switch (what) {
         case EVENT_SET_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             OnSetComplete(msg, ar);
             break;
 
         case EVENT_SET_CFF_COMPLETE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             /*
             * msg.arg1 = 1 means to set unconditional voice call forwarding
@@ -948,22 +949,22 @@ ECode CGsmMmiCode::HandleMessage (
             break;
         }
         case EVENT_GET_CLIR_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnGetClirComplete(ar);
         break;
 
         case EVENT_QUERY_CF_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnQueryCfComplete(ar);
         break;
 
         case EVENT_QUERY_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             OnQueryComplete(ar);
         break;
 
         case EVENT_USSD_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 mState = IMmiCodeState_FAILED;

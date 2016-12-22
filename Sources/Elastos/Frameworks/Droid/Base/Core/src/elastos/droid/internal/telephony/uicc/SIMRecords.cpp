@@ -651,7 +651,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_IMSI_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 Loge(String("Exception querying IMSI, Exception:") + TO_CSTR(ar->mException));
@@ -720,7 +720,7 @@ ECode SIMRecords::HandleMessage(
             Boolean isValidMbdn;
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -786,7 +786,7 @@ ECode SIMRecords::HandleMessage(
             mVoiceMailTag = NULL;
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
 
@@ -842,7 +842,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_MSISDN_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 Log(String("Invalid or missing EF[MSISDN]"));
@@ -859,7 +859,7 @@ ECode SIMRecords::HandleMessage(
         }
         case EVENT_SET_MSISDN_DONE: {
             isRecordLoadResponse = FALSE;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mUserObj != NULL) {
                 AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj))->mException
@@ -871,7 +871,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_MWIS_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -907,7 +907,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -938,7 +938,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_ICCID_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -964,7 +964,7 @@ ECode SIMRecords::HandleMessage(
             // try {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -1052,14 +1052,14 @@ ECode SIMRecords::HandleMessage(
         }
         case EVENT_GET_SPN_DONE: {
             isRecordLoadResponse = TRUE;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             GetSpnFsm(FALSE, ar);
         break;
         }
         case EVENT_GET_CFF_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -1095,7 +1095,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_SPDI_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -1115,7 +1115,7 @@ ECode SIMRecords::HandleMessage(
         break;
         }
         case EVENT_UPDATE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Logw(String("update failed. ") + TO_CSTR(ar->mException));
             }
@@ -1124,7 +1124,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_PNN_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -1161,7 +1161,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_ALL_SMS_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL)
                 break;
 
@@ -1176,7 +1176,7 @@ ECode SIMRecords::HandleMessage(
 
         case EVENT_GET_SMS_DONE: {
             isRecordLoadResponse = FALSE;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
                 assert(array != NULL);
@@ -1198,7 +1198,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_SST_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -1224,7 +1224,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_INFO_CPHS_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 break;
@@ -1251,7 +1251,7 @@ ECode SIMRecords::HandleMessage(
 
         case EVENT_SET_MBDN_DONE: {
             isRecordLoadResponse = FALSE;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (DBG) {
                 Log(String("EVENT_SET_MBDN_DONE ex:") + TO_CSTR(ar->mException));
@@ -1321,7 +1321,7 @@ ECode SIMRecords::HandleMessage(
         }
         case EVENT_SET_CPHS_MAILBOX_DONE: {
             isRecordLoadResponse = FALSE;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 mVoiceMailNum = mNewVoiceMailNum;
                 mVoiceMailTag = mNewVoiceMailTag;
@@ -1342,7 +1342,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_CFIS_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;
@@ -1382,7 +1382,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_CSP_CPHS_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
             if (ar->mException != NULL) {
                 Loge(String("Exception in fetching EF_CSP data ") + TO_CSTR(ar->mException));
@@ -1409,7 +1409,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_GET_GID1_DONE: {
             isRecordLoadResponse = TRUE;
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
             assert(array != NULL);
             Int32 len = 0;

@@ -9,7 +9,6 @@
 #include "elastos/droid/graphics/CColor.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/CHandlerThread.h"
-
 #include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Graphics::IBitmapHelper;
@@ -18,8 +17,8 @@ using Elastos::Droid::Graphics::CColor;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::CHandlerThread;
-
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IThread;
 using Elastos::Utility::CHashMap;
@@ -113,7 +112,7 @@ ECode IconLoader::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     switch (what) {
         case EVENT_READ_EF_IMG_RECOED_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
             Int32 size = 0;
             pArr->GetSize(&size);
@@ -133,7 +132,7 @@ ECode IconLoader::HandleMessage(
             break;
         }
         case EVENT_READ_ICON_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
             Int32 size = 0;
             pArr->GetSize(&size);
@@ -160,7 +159,7 @@ ECode IconLoader::HandleMessage(
             break;
         }
         case EVENT_READ_CLUT_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
             Int32 size = 0;
             pArr->GetSize(&size);

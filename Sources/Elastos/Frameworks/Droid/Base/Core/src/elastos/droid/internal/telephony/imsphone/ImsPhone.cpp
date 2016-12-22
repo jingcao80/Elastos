@@ -30,6 +30,7 @@ using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
 using Elastos::Droid::Internal::Telephony::Gsm::IGSMPhone;
 using Elastos::Droid::Internal::Telephony::CallForwardInfo;
 using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::IUserHandle;
@@ -1006,7 +1007,7 @@ ECode ImsPhone::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
     AutoPtr<IMessage> onComplete;
 
     Int32 what;

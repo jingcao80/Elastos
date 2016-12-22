@@ -135,7 +135,7 @@ Boolean CGsmCellBroadcastHandler::HandleSmsMessage(
     message->GetObj((IInterface**)&obj);
     // if (obj instanceof AsyncResult) {
     if (IAsyncResult::Probe(obj) != NULL) {
-        AutoPtr<ISmsCbMessage> cbMessage = HandleGsmBroadcastSms((AsyncResult*)(IObject*)obj.Get());
+        AutoPtr<ISmsCbMessage> cbMessage = HandleGsmBroadcastSms((AsyncResult*)IAsyncResult::Probe(obj));
         if (cbMessage != NULL) {
             HandleBroadcastSms(cbMessage);
             return TRUE;
