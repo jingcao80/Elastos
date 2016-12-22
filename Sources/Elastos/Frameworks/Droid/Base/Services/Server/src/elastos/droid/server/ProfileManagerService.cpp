@@ -478,6 +478,8 @@ AutoPtr<IProfile> ProfileManagerService::GetProfile(
     AutoPtr<IProfile> p;
     AutoPtr<ArrayOf<IUUID*> > uuids;
     for (Int32 i = 0; i < size; ++i) {
+        obj = NULL;
+        list->Get(i, (IInterface**)&obj);
         p = IProfile::Probe(obj);
         uuids = NULL;
         p->GetSecondaryUuids((ArrayOf<IUUID*>**)&uuids);
