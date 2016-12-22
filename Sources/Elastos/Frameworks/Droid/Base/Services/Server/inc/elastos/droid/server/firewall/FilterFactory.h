@@ -18,7 +18,7 @@ public:
     CARAPI_(String) GetTagName();
 
     // throws IOException, XmlPullParserException;
-    virtual IFilter* NewFilter(
+    virtual CARAPI_(AutoPtr<IFilter>) NewFilter(
         /* in */ IXmlPullParser* parser);
 
 protected:

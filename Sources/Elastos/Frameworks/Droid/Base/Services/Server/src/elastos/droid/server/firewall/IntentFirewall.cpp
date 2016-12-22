@@ -106,26 +106,26 @@ static AutoPtr<ArrayOf<FilterFactory*> > Init_factories()
 {
     AutoPtr<ArrayOf<FilterFactory*> > fct = ArrayOf<FilterFactory*>::Alloc(18);
 
-    (*fct)[0] = AndFilter::FACTORY;
-    (*fct)[1] = OrFilter::FACTORY;
-    (*fct)[2] = NotFilter::FACTORY;
+    fct->Set(0, AndFilter::FACTORY);
+    fct->Set(1, OrFilter::FACTORY);
+    fct->Set(2, NotFilter::FACTORY);
 
-    (*fct)[3] = StringFilter::ACTION;
-    (*fct)[4] = StringFilter::COMPONENT;
-    (*fct)[5] = StringFilter::COMPONENT_NAME;
-    (*fct)[6] = StringFilter::COMPONENT_PACKAGE;
-    (*fct)[7] = StringFilter::DATA;
-    (*fct)[8] = StringFilter::HOST;
-    (*fct)[9] = StringFilter::MIME_TYPE;
-    (*fct)[10] = StringFilter::SCHEME;
-    (*fct)[11] = StringFilter::PATH;
-    (*fct)[12] = StringFilter::SSP;
+    fct->Set(3, StringFilter::ACTION);
+    fct->Set(4, StringFilter::COMPONENT);
+    fct->Set(5, StringFilter::COMPONENT_NAME);
+    fct->Set(6, StringFilter::COMPONENT_PACKAGE);
+    fct->Set(7, StringFilter::DATA);
+    fct->Set(8, StringFilter::HOST);
+    fct->Set(9, StringFilter::MIME_TYPE);
+    fct->Set(10, StringFilter::SCHEME);
+    fct->Set(11, StringFilter::PATH);
+    fct->Set(12, StringFilter::SSP);
 
-    (*fct)[13] = CategoryFilter::FACTORY;
-    (*fct)[14] = SenderFilter::FACTORY;
-    (*fct)[15] = SenderPackageFilter::FACTORY;
-    (*fct)[16] = SenderPermissionFilter::FACTORY;
-    (*fct)[17] = PortFilter::FACTORY;
+    fct->Set(13, CategoryFilter::FACTORY);
+    fct->Set(14, SenderFilter::FACTORY);
+    fct->Set(15, SenderPackageFilter::FACTORY);
+    fct->Set(16, SenderPermissionFilter::FACTORY);
+    fct->Set(17, PortFilter::FACTORY);
     return fct;
 }
 AutoPtr<ArrayOf<FilterFactory*> > IntentFirewall::factories = Init_factories();
@@ -133,7 +133,8 @@ AutoPtr<ArrayOf<FilterFactory*> > IntentFirewall::factories = Init_factories();
 static AutoPtr<HashMap<String, AutoPtr<FilterFactory> > > Init_factoryMap()
 {
     // load factor ~= .75
-    AutoPtr<HashMap<String, AutoPtr<FilterFactory> > > fmap = new HashMap<String, AutoPtr<FilterFactory> >((*IntentFirewall::factories).GetLength() * 4 / 3);
+    AutoPtr<HashMap<String, AutoPtr<FilterFactory> > > fmap =
+            new HashMap<String, AutoPtr<FilterFactory> >((*IntentFirewall::factories).GetLength() * 4 / 3);
     for (Int32 i = 0;  i < (*IntentFirewall::factories).GetLength();  i++) {
         AutoPtr<FilterFactory> factory = (*IntentFirewall::factories)[i];
         (*fmap)[factory->GetTagName()] = factory;

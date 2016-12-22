@@ -21,7 +21,7 @@ SenderPackageFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* SenderPackageFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> SenderPackageFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     String packageName;
@@ -33,9 +33,7 @@ IFilter* SenderPackageFilter::FACTORY_FilterFactory::NewFilter(
     }
 
     AutoPtr<SenderPackageFilter> spFilter = new SenderPackageFilter(packageName);
-    REFCOUNT_ADD(spFilter);
-
-    return (IFilter*)spFilter;
+    return (IFilter*)spFilter.Get();
 }
 
 //=======================================================================================

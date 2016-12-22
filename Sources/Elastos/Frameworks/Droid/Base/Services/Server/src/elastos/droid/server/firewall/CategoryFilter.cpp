@@ -15,7 +15,7 @@ CategoryFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* CategoryFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> CategoryFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     String categoryName;

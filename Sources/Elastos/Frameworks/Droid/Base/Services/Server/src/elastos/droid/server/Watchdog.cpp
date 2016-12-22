@@ -707,6 +707,7 @@ ECode Watchdog::Run()
 
         waitedHalf = FALSE;
     }
+    return NOERROR;
 }
 
 AutoPtr<IFile> Watchdog::DumpKernelStackTraces()

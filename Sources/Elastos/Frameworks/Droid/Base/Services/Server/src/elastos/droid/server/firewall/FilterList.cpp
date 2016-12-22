@@ -11,7 +11,7 @@ namespace Firewall {
 
 CAR_INTERFACE_IMPL(FilterList, Object, IFilter);
 
-FilterList* FilterList::ReadFromXml(
+ECode FilterList::ReadFromXml(
     /* in */ IXmlPullParser* parser)
 {
     Int32 outerDepth;
@@ -21,7 +21,7 @@ FilterList* FilterList::ReadFromXml(
     while (XmlUtils::NextElementWithin(parser, outerDepth)) {
         ReadChild(parser);
     }
-    return this;
+    return NOERROR;
 }
 
 void FilterList::ReadChild(

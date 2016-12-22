@@ -33,7 +33,7 @@ SenderFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* SenderFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> SenderFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     String typeString;

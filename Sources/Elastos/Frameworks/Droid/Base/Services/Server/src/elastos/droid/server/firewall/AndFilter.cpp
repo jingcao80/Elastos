@@ -15,11 +15,12 @@ AndFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-IFilter* AndFilter::FACTORY_FilterFactory::NewFilter(
+AutoPtr<IFilter> AndFilter::FACTORY_FilterFactory::NewFilter(
     /* in */ IXmlPullParser* parser)
 {
     AutoPtr<AndFilter> filter = new AndFilter();
-    return (IFilter*)(filter->ReadFromXml(parser));
+    filter->ReadFromXml(parser);
+    return (IFilter*)filter.Get();
 }
 
 //=======================================================================================
