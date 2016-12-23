@@ -39,7 +39,7 @@ ECode ListFragment::MyOnItemClickListener::OnItemClick(
 }
 
 
-CAR_INTERFACE_IMPL(ListFragment, Fragment, IFragment)
+CAR_INTERFACE_IMPL(ListFragment, Fragment, IListFragment)
 
 ListFragment::ListFragment()
     : mAdapter(NULL)
