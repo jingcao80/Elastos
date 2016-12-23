@@ -5,7 +5,6 @@
 #include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
 #include "elastos/droid/telephony/CPhoneNumberUtils.h"
 #include "elastos/droid/text/TextUtils.h"
-
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
@@ -14,7 +13,6 @@
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
-
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
@@ -26,52 +24,6 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 namespace Uicc {
-
-////=====================================================================
-////                  AdnRecord::InnerParcelableCreator
-////=====================================================================
-//AdnRecord::InnerParcelableCreator::InnerParcelableCreator(
-//    /* [in] */ AdnRecord* owner)
-//    : mOwner(owner)
-//{
-//    // ==================before translated======================
-//    // mOwner = owner;
-//}
-//
-//ECode AdnRecord::InnerParcelableCreator::CreateFromParcel(
-//    /* [in] */ IParcel* source,
-//    /* [out] */ AdnRecord** result)
-//{
-//    VALIDATE_NOT_NULL(result);
-//    // ==================before translated======================
-//    // int efid;
-//    // int recordNumber;
-//    // String alphaTag;
-//    // String number;
-//    // String[] emails;
-//    // String[] additionalNumbers;
-//    // efid = source.readInt();
-//    // recordNumber = source.readInt();
-//    // alphaTag = source.readString();
-//    // number = source.readString();
-//    // emails = source.readStringArray();
-//    // additionalNumbers = source.readStringArray();
-//    //
-//    // return new AdnRecord(efid, recordNumber, alphaTag, number, emails, additionalNumbers);
-//    assert(0);
-//    return NOERROR;
-//}
-//
-//ECode AdnRecord::InnerParcelableCreator::NewArray(
-//    /* [in] */ Int32 size,
-//    /* [out] */ AdnRecord[]** result)
-//{
-//    VALIDATE_NOT_NULL(result);
-//    // ==================before translated======================
-//    // return new AdnRecord[size];
-//    assert(0);
-//    return NOERROR;
-//}
 
 //=====================================================================
 //                              AdnRecord
@@ -91,9 +43,11 @@ const Int32 AdnRecord::ADN_DIALING_NUMBER_START;
 const Int32 AdnRecord::ADN_DIALING_NUMBER_END;
 const Int32 AdnRecord::ADN_CAPABILITY_ID;
 const Int32 AdnRecord::ADN_EXTENSION_ID;
-//const AutoPtr<IParcelable> AutoPtr< ::Creator<AdnRecord> > AdnRecord::CREATOR = new InnerParcelableCreator(this);
 
 AdnRecord::AdnRecord()
+    : mExtRecord(0xff)
+    , mEfid(0)
+    , mRecordNumber(0)
 {
 }
 
@@ -241,11 +195,10 @@ ECode AdnRecord::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // *result = String("ADN Record '") + mAlphaTag
-    //         + String("' '") + mNumber
-    //         + String(" ") + mEmails + String(" ")
-    //         + mAdditionalNumbers + String("'");
+    *result = String("ADN Record '") + mAlphaTag
+            + String("' '") + mNumber
+            + String(" ") + Arrays::ToString(mEmails) + String(" ")
+            + Arrays::ToString(mAdditionalNumbers) + String("'");
     return NOERROR;
 }
 
@@ -350,47 +303,61 @@ ECode AdnRecord::UpdateAnrEmailArray(
     return NOERROR;
 }
 
-//ECode AdnRecord::DescribeContents(
-//    /* [out] */ Int32* result)
-//{
-//    VALIDATE_NOT_NULL(result);
-//    // ==================before translated======================
-//    // return 0;
-//    assert(0);
-//    return NOERROR;
-//}
+static void WriteStringArray(
+    /* [in] */ IParcel* dest,
+    /* [in] */ ArrayOf<String>* array)
+{
+    if (array != NULL) {
+        Int32 N = array->GetLength();
+        dest->WriteInt32(N);
+        for (Int32 i = 0; i < N; i++) {
+            dest->WriteString((*array)[i]);
+        }
+    }
+    else {
+        dest->WriteInt32(-1);
+    }
+}
+
+static void ReadStringArray(
+    /* [in] */ IParcel* source,
+    /* [out] */ ArrayOf<String>** result)
+{
+    Int32 length = 0;
+    source->ReadInt32(&length);
+    if (length >= 0) {
+        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(length);
+        for (Int32 i = 0; i < length; ++i) {
+            String str;
+            source->ReadString(&str);
+            array->Set(i, str);
+        }
+        *result = array;
+        REFCOUNT_ADD(*result);
+    }
+}
 
 ECode AdnRecord::WriteToParcel(
     /* [in] */ IParcel* dest)
-    ///* [in] */ Int32 flags)
 {
     dest->WriteInt32(mEfid);
     dest->WriteInt32(mRecordNumber);
     dest->WriteString(mAlphaTag);
     dest->WriteString(mNumber);
-    assert(0 && "TODO");
-    // dest->WriteStringArray(mEmails);
-    // dest->WriteStringArray(mAdditionalNumbers);
+    WriteStringArray(dest, mEmails);
+    WriteStringArray(dest, mAdditionalNumbers);
     return NOERROR;
 }
 
 ECode AdnRecord::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    // Int32 efid;
-    // Int32 recordNumber;
-    // String alphaTag;
-    // String number;
-    // String[] emails;
-    // String[] additionalNumbers;
-    // efid = source.readInt();
-    // recordNumber = source.readInt();
-    // alphaTag = source.readString();
-    // number = source.readString();
-    // emails = source.readStringArray();
-    // additionalNumbers = source.readStringArray();
-
-    // return new AdnRecord(efid, recordNumber, alphaTag, number, emails, additionalNumbers);
+    source->ReadInt32(&mEfid);
+    source->ReadInt32(&mRecordNumber);
+    source->ReadString(&mAlphaTag);
+    source->ReadString(&mNumber);
+    ReadStringArray(source, (ArrayOf<String>**)&mEmails);
+    ReadStringArray(source, (ArrayOf<String>**)&mAdditionalNumbers);
 
     return NOERROR;
 }

@@ -163,9 +163,9 @@ ECode AdnRecordLoader::HandleMessage(
                     return E_RUNTIME_EXCEPTION;
                 }
 
-                AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+                AutoPtr<IArrayOf> pArr = IArrayOf::Probe(ar->mResult);
                 Int32 size = 0;
-                pArr->GetSize(&size);
+                pArr->GetLength(&size);
                 AutoPtr<ArrayOf<Int32> > recordSize = ArrayOf<Int32>::Alloc(size);
                 for (Int32 i = 0; i < size; ++i) {
                     AutoPtr<IInterface> p;

@@ -393,6 +393,7 @@ ECode IccFileHandler::HandleMessage(
     AutoPtr<IUiccTlvDataHelper> hlp;
     CUiccTlvDataHelper::AcquireSingleton((IUiccTlvDataHelper**)&hlp);
     Boolean bTlvData = FALSE;
+    ECode ec = NOERROR;
     // try {
     switch (what) {
         case EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE: {
@@ -417,7 +418,8 @@ ECode IccFileHandler::HandleMessage(
                 tlvData->IsIncomplete(&bComplete);
                 if (bComplete) {
                     // throw new IccFileTypeMismatch();
-                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    break;
                 }
 
                 recordSize = ArrayOf<Int32>::Alloc(3);
@@ -439,7 +441,8 @@ ECode IccFileHandler::HandleMessage(
             }
             else {
                 // throw new IccFileTypeMismatch();
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                break;
             }
 
             SendResult(response, CoreUtils::Convert(recordSize));
@@ -469,7 +472,8 @@ ECode IccFileHandler::HandleMessage(
                 tlvData->IsIncomplete(&bComplete);
                 if (bComplete) {
                     // throw new IccFileTypeMismatch();
-                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    break;
                 }
 
                 AutoPtr<UiccTlvData> _tlvData = (UiccTlvData*)tlvData.Get();
@@ -482,7 +486,8 @@ ECode IccFileHandler::HandleMessage(
 
                 if (EF_TYPE_LINEAR_FIXED != (*data)[RESPONSE_DATA_STRUCTURE]) {
                     // throw new IccFileTypeMismatch();
-                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    break;
                 }
 
                 lc->mRecordSize = (*data)[RESPONSE_DATA_RECORD_LENGTH] & 0xFF;
@@ -494,7 +499,8 @@ ECode IccFileHandler::HandleMessage(
             }
             else {
                 // throw new IccFileTypeMismatch();
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                break;
             }
 
             if (lc->mLoadAll) {
@@ -537,7 +543,8 @@ ECode IccFileHandler::HandleMessage(
                 AutoPtr<UiccTlvData> _tlvData = (UiccTlvData*)tlvData.Get();
                 if (_tlvData->mFileSize < 0) {
                     // throw new IccFileTypeMismatch();
-                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    break;
                 }
 
                 size = _tlvData->mFileSize;
@@ -547,7 +554,8 @@ ECode IccFileHandler::HandleMessage(
 
                 if (EF_TYPE_TRANSPARENT != (*data)[RESPONSE_DATA_STRUCTURE]) {
                     // throw new IccFileTypeMismatch();
-                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                    break;
                 }
 
                 size = (((*data)[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
@@ -555,7 +563,8 @@ ECode IccFileHandler::HandleMessage(
             }
             else {
                 // throw new IccFileTypeMismatch();
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                ec = E_ILLEGAL_ARGUMENT_EXCEPTION;
+                break;
             }
 
             AutoPtr<IMessage> msg;
@@ -652,6 +661,14 @@ ECode IccFileHandler::HandleMessage(
     //         loge("uncaught exception" + exc);
     //     }
     // }
+    if (FAILED(ec)) {
+        if (response != NULL) {
+            SendResult(response, NULL/*, exc*/);
+        }
+        else {
+            Loge(String("uncaught exception")/* + exc*/);
+        }
+    }
     return NOERROR;
 }
 

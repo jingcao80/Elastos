@@ -995,7 +995,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
                 }
                 AutoPtr<IInterface> o;
                 mEmailFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
-                IArrayList::Probe(o)->Set(recordNumber - 1, 0);
+                IArrayList::Probe(o)->Set(recordNumber - 1, CoreUtils::Convert(0));
             }
             {
                 AutoLock lock(mLock);
@@ -1566,7 +1566,7 @@ void CUsimPhoneBookManager::ReadEmailFileAndWait(
         Int32 size;
         list->GetSize(&size);
         for (Int32 m = 0; m < size; m++) {
-            (*mEmailFlagsRecord)[recNum]->Add(0);
+            (*mEmailFlagsRecord)[recNum]->Add(CoreUtils::Convert(0));
         }
         mEmailFlags->Put(CoreUtils::Convert(recNum), (*mEmailFlagsRecord)[recNum]);
 
@@ -1650,7 +1650,7 @@ void CUsimPhoneBookManager::ReadAnrFileAndWait(
         Int32 size;
         list->GetSize(&size);
         for (Int32 m = 0; m < size; m++) {
-            (*mAnrFlagsRecord)[recNum]->Add(0);
+            (*mAnrFlagsRecord)[recNum]->Add(CoreUtils::Convert(0));
         }
         mAnrFlags->Put(CoreUtils::Convert(recNum), (*mAnrFlagsRecord)[recNum]);
 

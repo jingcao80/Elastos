@@ -1,5 +1,6 @@
 
 #include "elastos/droid/internal/telephony/IccPhoneBookInterfaceManager.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecord.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/os/Looper.h"
@@ -14,6 +15,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_CSIM;
 using Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_ISIM;
 using Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_USIM;
+using Elastos::Droid::Internal::Telephony::Uicc::CAdnRecord;
 using Elastos::Droid::Internal::Telephony::Uicc::IAdnRecord;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccConstants;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
@@ -21,6 +23,8 @@ using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::AutoLock;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 
@@ -57,8 +61,18 @@ ECode IccPhoneBookInterfaceManager::BaseHandler::HandleMessage(
             {
                 AutoLock lock(mHost->mLock);
                 if (ar->mException == NULL) {
-                    assert(0 && "TODO");
-                    // mHost->mRecordSize = (Int32[])ar->mResult;
+                    AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                    assert(array != NULL);
+                    Int32 len = 0;
+                    array->GetLength(&len);
+                    mHost->mRecordSize = ArrayOf<Int32>::Alloc(len);
+                    Int32 v = 0;
+                    for (Int32 i = 0; i < len; i++) {
+                        AutoPtr<IInterface> o;
+                        array->Get(i, (IInterface**)&o);
+                        IInteger32::Probe(o)->GetValue(&v);
+                        (*mHost->mRecordSize)[i] = v;
+                    }
 
                     // recordSize[0]  is the record length
                     // recordSize[1]  is the total length of the EF file
@@ -278,9 +292,8 @@ ECode IccPhoneBookInterfaceManager::UpdateAdnRecordsInEfBySearch(
         mBaseHandler->ObtainMessage(EVENT_UPDATE_DONE, status, (IMessage**)&response);
         AutoPtr<IAdnRecord> oldAdn;
         AutoPtr<IAdnRecord> newAdn;
-        assert(0 && "TODO");
-        // CAdnRecord::New(oldTag, oldPhoneNumber, (IAdnRecord**)&oldAdn);
-        // CAdnRecord::New(newTag, newPhoneNumber, (IAdnRecord**)&newAdn);
+        CAdnRecord::New(oldTag, oldPhoneNumber, (IAdnRecord**)&oldAdn);
+        CAdnRecord::New(newTag, newPhoneNumber, (IAdnRecord**)&newAdn);
         if (mAdnCache != NULL) {
             mAdnCache->UpdateAdnBySearch(efid, oldAdn, newAdn, pin2, response);
             WaitForResult(status);
@@ -349,9 +362,8 @@ ECode IccPhoneBookInterfaceManager::UpdateAdnRecordsWithContentValuesInEfBySearc
         mBaseHandler->ObtainMessage(EVENT_UPDATE_DONE, status, (IMessage**)&response);
         AutoPtr<IAdnRecord> oldAdn;
         AutoPtr<IAdnRecord> newAdn;
-        assert(0 && "TODO");
-        // CAdnRecord::New(oldTag, oldPhoneNumber, oldEmailArray, oldAnrArray, (IAdnRecord**)&oldAdn);
-        // CAdnRecord::New(newTag, newPhoneNumber, newEmailArray, newAnrArray, (IAdnRecord**)&newAdn);
+        CAdnRecord::New(oldTag, oldPhoneNumber, oldEmailArray, oldAnrArray, (IAdnRecord**)&oldAdn);
+        CAdnRecord::New(newTag, newPhoneNumber, newEmailArray, newAnrArray, (IAdnRecord**)&newAdn);
         if (mAdnCache != NULL) {
             mAdnCache->UpdateAdnBySearch(efid, oldAdn, newAdn, pin2, response);
             WaitForResult(status);
@@ -416,8 +428,7 @@ ECode IccPhoneBookInterfaceManager::UpdateAdnRecordsInEfByIndex(
         AutoPtr<IMessage> response;
         mBaseHandler->ObtainMessage(EVENT_UPDATE_DONE, status, (IMessage**)&response);
         AutoPtr<IAdnRecord> newAdn;
-        assert(0 && "TODO");
-        // CAdnRecord::New(newTag, newPhoneNumber, (IAdnRecord**)&newAdn);
+        CAdnRecord::New(newTag, newPhoneNumber, (IAdnRecord**)&newAdn);
         if (mAdnCache != NULL) {
             mAdnCache->UpdateAdnByIndex(efid, newAdn, index, pin2, response);
             WaitForResult(status);

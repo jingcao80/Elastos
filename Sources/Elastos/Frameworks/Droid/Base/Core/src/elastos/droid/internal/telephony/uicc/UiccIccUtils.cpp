@@ -271,11 +271,11 @@ String UiccIccUtils::BytesToHexString(
 
         b = 0x0f & ((*bytes)[i] >> 4);
 
-        ret.Append((Int32)(String("0123456789abcdef").GetChar(b)));
+        ret.AppendChar(String("0123456789abcdef").GetChar(b));
 
         b = 0x0f & (*bytes)[i];
 
-        ret.Append((Int32)(String("0123456789abcdef").GetChar(b)));
+        ret.AppendChar(String("0123456789abcdef").GetChar(b));
     }
 
     return ret.ToString();
@@ -407,12 +407,15 @@ AutoPtr<ArrayOf<Byte> > UiccIccUtils::StringToAdnStringField(
 {
     Boolean isUcs2 = FALSE;
     // try {
-        for (Int32 i = 0; i < alphaTag.GetLength(); i++) {
-            AutoPtr<IGsmAlphabet> gsmhlp;
-            CGsmAlphabet::AcquireSingleton((IGsmAlphabet**)&gsmhlp);
-            Int32 res = 0;
-            gsmhlp->CountGsmSeptets(alphaTag.GetChar(i), TRUE, &res);
+    for (Int32 i = 0; i < alphaTag.GetLength(); i++) {
+        AutoPtr<IGsmAlphabet> gsmhlp;
+        CGsmAlphabet::AcquireSingleton((IGsmAlphabet**)&gsmhlp);
+        Int32 res = 0;
+        if (FAILED(gsmhlp->CountGsmSeptets(alphaTag.GetChar(i), TRUE, &res))) {
+            isUcs2 = TRUE;
+            break;
         }
+    }
     // } catch (EncodeException e) {
     //     isUcs2 = TRUE;
     // }
@@ -430,10 +433,15 @@ AutoPtr<ArrayOf<Byte> > UiccIccUtils::StringToAdnStringField(
         gsmhlp->StringToGsm8BitPacked(alphaTag, (ArrayOf<Byte>**)&res);
         return res;
     }
-    AutoPtr<ICharset> cs;
-    assert(0 && "TODO");
-    // Elastos::IO::Charset::Charset::ForName(String("UTF-16BE"), (ICharset**)&cs);
-    AutoPtr<ArrayOf<Byte> > alphaTagBytes = alphaTag.GetBytes(); // cs
+
+    // AutoPtr<ICharsetHelper> helper;
+    // CCharsetHelper::AcquireSingleton((ICharsetHelper**)&helper);
+    // AutoPtr<ICharset> cs;
+    // helper->ForName(String("UTF-16BE"), (ICharset**)&cs);
+
+    //TODO
+    // AutoPtr<ArrayOf<Byte> > alphaTagBytes = alphaTag.GetBytes(cs);
+    AutoPtr<ArrayOf<Byte> > alphaTagBytes = alphaTag.GetBytes();
     AutoPtr<ArrayOf<Byte> > ret = ArrayOf<Byte>::Alloc(1 + alphaTagBytes->GetLength());
     (*ret)[0] = (Byte)0x80;
     ret->Copy(1, alphaTagBytes, 0, alphaTagBytes->GetLength());

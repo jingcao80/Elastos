@@ -15,6 +15,7 @@ using Elastos::Droid::Internal::Telephony::Gsm::CUsimPhoneBookManager;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Core::CThrowable;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
@@ -209,9 +210,8 @@ ECode AdnRecordCache::UpdateAdnBySearch(
                 mUsimPhoneBookManager->GetEmptyAnrNum_Pbrindex(pbrIndex, &anrNum);
                 mUsimPhoneBookManager->GetEmptyEmailNum_Pbrindex(pbrIndex, &emailNum);
                 prePbrIndex = pbrIndex;
-                Logger::D(String("AdnRecordCache"), String("updateAdnBySearch, pbrIndex: ")
-                        + StringUtils::ToString(pbrIndex) + String(" anrNum:") + StringUtils::ToString(anrNum)
-                        + String(" emailNum:") + StringUtils::ToString(emailNum));
+                Logger::D("AdnRecordCache", "updateAdnBySearch, pbrIndex: %d anrNum:%d emailNum:%d"
+                        , pbrIndex, anrNum, emailNum);
             }
             AutoPtr<ArrayOf<String> > oldNumbers;
             oldAdn->GetAdditionalNumbers((ArrayOf<String>**)&oldNumbers);
@@ -231,7 +231,8 @@ ECode AdnRecordCache::UpdateAdnBySearch(
             }
         }
 
-        if (!isEmailOrAnrIsFull && Object::Equals(oldAdn, nextAdnRecord)) {
+        Boolean e = FALSE;
+        if (!isEmailOrAnrIsFull && (oldAdn->IsEqual(nextAdnRecord, &e), e)) {
             index = count;
             break;
         }
@@ -346,9 +347,9 @@ ECode AdnRecordCache::RequestLoadAllAdnLike(
 
         if (response != NULL) {
             AutoPtr<AsyncResult> p = AsyncResult::ForMessage(response);
-            assert(0 && "TODO");
-            // p->mException
-            //     = new RuntimeException(String("EF is not known ADN-like EF:") + StringUtils::ToString(efid));
+            AutoPtr<IThrowable> ex;
+            CThrowable::New(String("EF is not known ADN-like EF:") + StringUtils::ToString(efid), (IThrowable**)&ex);
+            p->mException = ex;
             response->SendToTarget();
         }
 
@@ -566,8 +567,9 @@ void AdnRecordCache::ClearWaiters()
         AutoPtr<IInterface> p;
         mAdnLikeWaiters->ValueAt(i, (IInterface**)&p);
         AutoPtr<IArrayList> waiters = IArrayList::Probe(p);
-        assert(0 && "TODO");
-        AutoPtr<AsyncResult> ar;// = new AsyncResult(NULL, NULL, new RuntimeException("AdnCache reset"));
+        AutoPtr<IThrowable> ex;
+        CThrowable::New(String("AdnCache reset"), (IThrowable**)&ex);
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, ex);
         NotifyWaiters(waiters, ar);
     }
     mAdnLikeWaiters->Clear();
@@ -590,9 +592,10 @@ void AdnRecordCache::SendErrorResponse(
     /* [in] */ const String& errString)
 {
     if (response != NULL) {
-        assert(0 && "TODO");
-        // Exception e = new RuntimeException(errString);
-        // AsyncResult::ForMessage(response).exception = e;
+        AutoPtr<IThrowable> ex;
+        CThrowable::New(errString, (IThrowable**)&ex);
+        AutoPtr<AsyncResult> ar = AsyncResult::ForMessage(response);
+        ar->mException = ex;
         response->SendToTarget();
     }
 }
@@ -662,23 +665,29 @@ Boolean AdnRecordCache::UpdateAnrEmailFile(
     /* [in] */ Int32 efidIndex)
 {
     Boolean success = TRUE;
+    ECode ec = NOERROR;
     // try {
-        switch (tag) {
-            case USIM_EFEMAIL_TAG:
-                mUsimPhoneBookManager
-                        ->UpdateEmailFile(index, oldRecord, newRecord, efidIndex, &success);
-                break;
-            case USIM_EFANR_TAG:
-                mUsimPhoneBookManager
-                        ->UpdateAnrFile(index, oldRecord, newRecord, efidIndex, &success);
-                break;
-            default:
-                success = FALSE;
+    switch (tag) {
+        case USIM_EFEMAIL_TAG: {
+            ec = mUsimPhoneBookManager->UpdateEmailFile(index, oldRecord, newRecord, efidIndex, &success);
+            break;
         }
+        case USIM_EFANR_TAG: {
+            ec = mUsimPhoneBookManager->UpdateAnrFile(index, oldRecord, newRecord, efidIndex, &success);
+            break;
+        }
+        default: {
+            success = FALSE;
+        }
+    }
     // } catch (RuntimeException e) {
     //     success = false;
     //     Log.e("AdnRecordCache", "update usim record failed", e);
     // }
+    if (FAILED(ec)) {
+        success = FALSE;
+        Logger::E("AdnRecordCache", "update usim record failed");
+    }
 
     return success;
 }
