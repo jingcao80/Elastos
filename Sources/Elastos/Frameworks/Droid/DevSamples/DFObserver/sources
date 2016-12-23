@@ -21,6 +21,7 @@ SOURCES += MyAboutData.cpp
 SOURCES += DoorAdapter.cpp
 SOURCES += DoorAdapterItem.cpp
 SOURCES += BusHandler.cpp
+SOURCES += dfobserver.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

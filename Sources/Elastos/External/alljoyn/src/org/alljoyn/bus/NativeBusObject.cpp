@@ -139,6 +139,7 @@ QStatus NativeBusObject::AddInterfaces(
         }
 
         size_t numProps = intf->GetProperties(NULL);
+        if (DEBUG_LOG) Logger::D(TAG, "AddInterfaces::GetProperties() numProps:%d", numProps);
         const ajn::InterfaceDescription::Property** props = new const ajn::InterfaceDescription::Property*[numProps];
         if (!props) {
             return ER_OUT_OF_MEMORY;
@@ -149,8 +150,8 @@ QStatus NativeBusObject::AddInterfaces(
         for (size_t p = 0; p < numProps; ++p) {
             AutoPtr<Property> property = new Property();
             property->mSignature = props[p]->signature.c_str();
-
             String name(props[p]->name.c_str());
+
             if (name == NULL) {
                 status = ER_FAIL;
                 break;
@@ -158,24 +159,23 @@ QStatus NativeBusObject::AddInterfaces(
 
             AutoPtr<ArrayOf<IMethodInfo*> > methods = busInterface->GetProperty(name);
             if (!methods) {
+                Logger::E(TAG, "Failed to GetProperty for %s in %s", name.string(), intf->GetName());
                 status = ER_BUS_NO_SUCH_PROPERTY;
                 break;
             }
 
             property->mGet = (*methods)[0];
-            if (!property->mGet) {
-                status = ER_FAIL;
-                break;
-            }
-
             property->mSet = (*methods)[1];
-            if (!property->mSet) {
+            if (!property->mSet && !property->mGet) {
+                Logger::E(TAG, "Failed to find Get/Set method for property %s in %s", name.string(), intf->GetName());
                 status = ER_FAIL;
                 break;
             }
 
             String key = String(intf->GetName()) + props[p]->name.c_str();
             mProperties[key] = property;
+            if (DEBUG_LOG) Logger::D(TAG, "AddInterfaces:: AddProperty %d: name:%s, signature:%s in %s",
+                p, props[p]->name.c_str(), props[p]->signature.c_str(),  intf->GetName());
         }
         delete [] props;
         props = NULL;
@@ -201,7 +201,10 @@ void NativeBusObject::MethodHandler(
      * figure out the signature of each method to lookup.
      */
     String key = String(member->iface->GetName()) + member->name.c_str();
-    LogBusMethod(member);
+
+    if (DEBUG_LOG) {
+        LogBusMethod(member);
+    }
 
     /*
      * We're going to wander into a list of methods and pick one.  Lock the
@@ -387,7 +390,7 @@ QStatus NativeBusObject::Get(
     /* [in] */ const char* propName,
     /* [in] */ ajn::MsgArg& val)
 {
-    if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::Get()");
+    if (DEBUG_LOG) Logger::D(TAG, "Get(): %s, %s", ifcName, propName);
 
     String key = String(ifcName) + propName;
 
@@ -454,7 +457,7 @@ QStatus NativeBusObject::Set(
     /* [in] */ const char* propName,
     /* [in] */ ajn::MsgArg& val)
 {
-    if (DEBUG_LOG) Logger::D(TAG, "NativeBusObject::Set()");
+    if (DEBUG_LOG) Logger::D(TAG, "Set(): %s, %s", ifcName, propName);
 
     String key = String(ifcName) + propName;
 

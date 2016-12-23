@@ -11,23 +11,6 @@ module
      * interface Org.Alljoyn.Bus.IBusObject
      */
     interface IDoorService {
-        GetIsOpen(
-            [out] Boolean* value);
-
-        GetLocation(
-            [out] String* value);
-
-        GetKeyCode(
-            [out] Int32* value);
-
-        Open();
-
-        Close();
-
-        KnockAndRun();
-
-        PersonPassedThrough(
-            [in] String person);
 
         /**
          * Internal function to get the location of this door. No event is send to UI.

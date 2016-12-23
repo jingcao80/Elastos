@@ -129,6 +129,11 @@ ajn::MsgArg* Marshal(
     /* [in] */ PVoid obj,
     /* [in] */ ajn::MsgArg* arg);
 
+ajn::MsgArg* Marshal(
+    /* [in] */ const char* signature,
+    /* [in] */ IInterface* obj,
+    /* [in] */ ajn::MsgArg* arg);
+
 /**
  * Marshal an Object[] into MsgArgs.  The arguments are marshalled into an
  * ALLJOYN_STRUCT with the members set to the marshalled Object[] elements.
@@ -157,6 +162,10 @@ CARAPI Unmarshal(
     /* [in] */ const ajn::MsgArg* arg,
     /* [in] */ CarDataType type,
     /* [out] */ PVoid object);
+
+CARAPI Unmarshal(
+    /* [in] */ const ajn::MsgArg* arg,
+    /* [out] */ IInterface** object);
 
 /**
  * Unmarshal MsgArgs into an Object[].

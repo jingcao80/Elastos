@@ -22,7 +22,7 @@ public:
         /* [in] */ const String& name,
         /* [in] */ Boolean isOpen);
 
-    CARAPI IsOpen(
+    CARAPI GetIsOpen(
         /* [out] */ Boolean* value);
 
     CARAPI SetIsOpen(
@@ -31,6 +31,8 @@ public:
     CARAPI GetName(
         /* [out] */ String* name);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 private:
     String mName;
     Boolean mIsOpen;

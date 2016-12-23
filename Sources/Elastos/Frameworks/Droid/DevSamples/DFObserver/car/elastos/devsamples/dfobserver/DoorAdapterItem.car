@@ -9,7 +9,7 @@ module
      * A helper class for exchanging data between UI and Bus logic.
      */
     interface IDoorAdapterItem {
-        IsOpen(
+        GetIsOpen(
             [out] Boolean* value);
 
         SetIsOpen(

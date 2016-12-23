@@ -52,17 +52,18 @@ ECode CClient::UIHandler::HandleMessage(
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
 
-    Logger::I(TAG, " >> UIHandler::HandleMessage: %d", what);
 
     switch (what) {
         case MESSAGE_INCOMING_EVENT: {
             StringBuilder sb("Incoming event:  ");
             sb += Object::ToString(obj);
+            Logger::I(TAG, sb.ToString());
             mMsgListViewArrayAdapter->Add(CoreUtils::Convert(sb.ToString()));
             break;
         }
 
         case MESSAGE_UPDATE_UI: {
+            Logger::I(TAG, "MESSAGE_UPDATE_UI: %s", TO_CSTR(obj));
             IRunnable::Probe(obj)->Run();
             break;
         }
@@ -70,6 +71,7 @@ ECode CClient::UIHandler::HandleMessage(
         case MESSAGE_DOOR_EVENT: {
             StringBuilder sb("Door event:  ");
             sb += Object::ToString(obj);
+            Logger::I(TAG, sb.ToString());
             mMsgListViewArrayAdapter->Add(CoreUtils::Convert(sb.ToString()));
             break;
         }
@@ -120,6 +122,7 @@ ECode CClient::InnerListener::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
+    Logger::I(TAG, " >> OnItemClick: TOGGLE_DOOR %d", position);
     AutoPtr<IInterface> obj;
     IAdapterView::Probe(mHost->mDoorListView)->GetItemAtPosition(position, (IInterface**)&obj);
     AutoPtr<IMessage> msg;
@@ -136,6 +139,7 @@ ECode CClient::InnerListener::OnItemLongClick(
     /* [in] */ Int64 id,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >> OnItemLongClick: KNOCK_ON_DOOR %d", position);
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<IInterface> obj;
@@ -193,7 +197,7 @@ ECode CClient::OnCreate(
     mDoorListView = IListView::Probe(view);
     mDoorListAdapter = new DoorAdapter();
     mDoorListAdapter->constructor(mHandler);
-    IAdapterView::Probe(mMsgListView)->SetAdapter(mDoorListAdapter);
+    IAdapterView::Probe(mDoorListView)->SetAdapter(mDoorListAdapter);
 
     AutoPtr<InnerListener> l = new InnerListener(this);
     IAdapterView::Probe(mDoorListView)->SetOnItemLongClickListener(l);
@@ -286,8 +290,9 @@ ECode CClient::PositiveOnClickListener::OnClick(
 {
     AutoPtr<ICharSequence> csq;
     ITextView::Probe(mView)->GetText((ICharSequence**)&csq);
+    Logger::I(TAG, " >> OnClick createDoor: %s", TO_CSTR(csq));
     AutoPtr<IMessage> msg;
-    mHost->mBusHandler->ObtainMessage(BusHandler::CREATE_DOOR, csq, (IMessage**)&csq);
+    mHost->mBusHandler->ObtainMessage(BusHandler::CREATE_DOOR, csq, (IMessage**)&msg);
     Boolean bval;
     return mHost->mBusHandler->SendMessage(msg, &bval);
 }
@@ -341,17 +346,20 @@ ECode CClient::OnOptionsItemSelected(
 
     Int32 id;
     item->GetItemId(&id);
-    Logger::I(TAG, " >> OnOptionsItemSelected(): %d", id);
 
     // Handle item selection
     switch (id) {
     case R::id::quit: {
+        Logger::I(TAG, " >> OnOptionsItemSelected quit");
+
         Finish();
         *result = TRUE;
         return NOERROR;
     }
 
     case R::id::createDoor: {
+        Logger::I(TAG, " >> OnOptionsItemSelected createDoor");
+
         AutoPtr<IAlertDialogBuilder> alert;
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&alert);
         alert->SetTitle(CoreUtils::Convert("Create Door"));
@@ -371,6 +379,8 @@ ECode CClient::OnOptionsItemSelected(
         return NOERROR;
     }
     case R::id::deleteDoor: {
+        Logger::I(TAG, " >> OnOptionsItemSelected deleteDoor");
+
         AutoPtr<IAlertDialogBuilder> alert;
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&alert);
         alert->SetTitle(CoreUtils::Convert("Delete Doors"));

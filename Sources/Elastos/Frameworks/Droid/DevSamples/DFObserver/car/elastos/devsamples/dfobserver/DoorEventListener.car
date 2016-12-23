@@ -18,7 +18,7 @@ module
         /*
          * Called when a personPassedThrough signal is received.
          */
-        [@Org.Alljoyn.Bus.Annotation.BusSignalHandler(iface = "org.alljoyn.bus.samples.observer.Door", signal = "PersonPassedThrough")]
+        [@Org.Alljoyn.Bus.Annotation.BusSignalHandler(iface = "Elastos.DevSamples.DFObserver.IDoor", signal = "PersonPassedThrough")]
         PersonPassedThrough(
             [in] String person);
     }

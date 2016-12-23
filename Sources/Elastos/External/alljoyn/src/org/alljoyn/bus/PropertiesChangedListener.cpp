@@ -24,19 +24,11 @@ ECode PropertiesChangedListener::constructor()
 
 void PropertiesChangedListener::Create()
 {
-    // try {
-    //     Method m = getClass().getMethod("propertiesChanged", new Class<?>[] {ProxyBusObject.class, String.class, Map.class, String[].class});
-    //     Type p[] = m.getGenericParameterTypes();
-    //     Type changedType = p[2];
-    //     Type invalidatedType = p[3];
-    //     create(changedType, invalidatedType);
-    // } catch (NoSuchMethodException ex) {
-    //     System.err.println("failed to get propertiesChanged method");  // Should never happen.
-    // }
-    assert(0 && "TODO");
+    // changed       Property values that changed as an array of dictionary entries, signature "a{sv}".
+    // invalidated   Properties whose values have been invalidated, signature "as".
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
-    NativePropertiesChangedListener* npcl = new NativePropertiesChangedListener(wr, NULL, NULL);
+    NativePropertiesChangedListener* npcl = new NativePropertiesChangedListener(wr, String("a{sv}"), String("as"));
     mHandle = reinterpret_cast<Int64>(npcl);
 }
 

@@ -30,6 +30,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("CDoorService::OpenRunnable")
+
         OpenRunnable(
             /* [in] */ CDoorService* host)
             : mHost(host)
@@ -45,6 +47,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("CDoorService::CloseRunnable")
+
         CloseRunnable(
             /* [in] */ CDoorService* host)
             : mHost(host)
@@ -60,6 +64,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("CDoorService::KnockAndRunRunnable")
+
         KnockAndRunRunnable(
             /* [in] */ CDoorService* host)
             : mHost(host)
@@ -83,6 +89,9 @@ public:
     CARAPI constructor(
         /* [in] */ const String& location,
         /* [in] */ IHandler* handler);
+
+    CARAPI SetDisplayName(
+        /* [in] */ const String& name);
 
     CARAPI GetIsOpen(
         /* [out] */ Boolean* value);

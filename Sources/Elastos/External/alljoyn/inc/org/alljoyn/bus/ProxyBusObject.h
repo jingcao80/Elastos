@@ -39,10 +39,10 @@ private:
                 /* [in] */ IMethodInfo* method);
 
         public:
-            IMethodInfo* mMethod;
+            AutoPtr<IMethodInfo> mMethod;
 
             Boolean mIsMethod;
-            // boolean isGet;
+            Boolean mIsGet;
 
             String mInputSig;
             String mOutSig;
@@ -267,6 +267,9 @@ public:
         /* [in] */ const String& iface,
         /* [in] */ IPropertiesChangedListener* listener);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 protected:
     /** Called by native code to lazily add an interface when a proxy method is invoked. */
     virtual CARAPI AddInterface(
@@ -301,14 +304,29 @@ private:
         /* [in] */ const String& name);
 
     // /** Get a property of the remote object. */
-    // private native Variant getProperty(BusAttachment busAttachment, String interfaceName,
-    //         String propertyName) throws BusException;
+    CARAPI GetProperty(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ const String& interfaceName,
+        /* [in] */ const String& propertyName,
+        /* [in] */ const String& signature,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args);
+
+    CARAPI GetProperty(
+        /* [in] */ const String& interfaceName,
+        /* [in] */ const String& propertyName,
+        /* [out] */ IVariant** value);
 
     // private native Map<String, Variant> getAllProperties(BusAttachment busAttachment, Type outType, String interfaceName) throws BusException;
 
-    // /** Set a property of the remote object. */
-    // private native void setProperty(BusAttachment busAttachment, String interfaceName,
-    //         String propertyName, String signature, Object value) throws BusException;
+    /** Set a property of the remote object. */
+    CARAPI SetProperty(
+        /* [in] */ CBusAttachment* busAttachment,
+        /* [in] */ const String& interfaceName,
+        /* [in] */ const String& propertyName,
+        /* [in] */ const String& signature,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args);
 
     /** Is the remote object for this proxy bus object secure. */
     Boolean IsProxyBusObjectSecure();

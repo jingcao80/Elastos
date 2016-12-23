@@ -4,10 +4,12 @@
 
 #include <elastos/coredef.h>
 #include <Elastos.CoreLibrary.Core.h>
+#include "_Org.Alljoyn.Bus.h"
 #include <elastos/utility/etl/Map.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Core::IBoolean;
+using Elastos::Core::IArrayOf;
 using Elastos::Utility::Etl::Map;
 
 namespace Org {
@@ -344,11 +346,38 @@ public:
     static CARAPI ReleaseRecord(
         /* [in] */ IArgumentList* args);
 
+    static AssignOutputPropery(
+        /* [in] */ const String& signature,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args,
+        /* [in] */ IVariant* property);
+
+    static GetInputPropery(
+        /* [in] */ Int64 msgArg,
+        /* [in] */ const String& signature,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args);
+
 private:
     MsgArg();
 
     static InterfaceID GetInterfaceIDByTypeId(
         /* [in] */ Char32 typeId);
+
+    static GetInputPropery(
+        /* [in] */ const String& signature,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args,
+        /* [in] */ CarDataType elementType,
+        /* [in] */ PCarQuintet carQuintet,
+        /* [out] */ IVariant** property);
+
+    static AssignOutputPropery(
+        /* [in] */ const String& signature,
+        /* [in] */ IMethodInfo* method,
+        /* [in] */ IArgumentList* args,
+        /* [in] */ CarDataType elementType,
+        /* [in] */ IArrayOf* arrayOf);
 
 private:
     /*

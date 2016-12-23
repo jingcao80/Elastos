@@ -2,14 +2,19 @@
 #include "org/alljoyn/bus/CBusAttachment.h"
 #include "org/alljoyn/bus/InterfaceDescription.h"
 #include "org/alljoyn/bus/MsgArg.h"
+#include "org/alljoyn/bus/Globals.h"
 #include "org/alljoyn/bus/CVariant.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeProxyBusObject.h"
 #include "org/alljoyn/bus/ProxyBusObject.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::AutoLock;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::Reflect::CProxyFactory;
 using Elastos::Core::Reflect::IProxyFactory;
@@ -20,19 +25,24 @@ namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
+static const Boolean DEBUG = FALSE;
+
 //=============================================================
 // ProxyBusObject::Handler::Invocation
 //=============================================================
 ProxyBusObject::Handler::Invocation::Invocation(
     /* [in] */ IMethodInfo* method)
     : mMethod(method)
+    , mIsMethod(FALSE)
+    , mIsGet(FALSE)
 {
     AutoPtr<IAnnotationInfo> ainfo;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&ainfo);
+    method->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&ainfo);
     if (ainfo != NULL) {
-        assert(0 && "TODO");
-        // this.isGet = method.getName().startsWith("get");
-        // this.outSig = InterfaceDescription.getPropertySig(method);
+        String methodName;
+        method->GetName(&methodName);
+        mIsGet = methodName.StartWith("Get");
+        mOutSig = InterfaceDescription::GetPropertySig(method);
     }
     else {
         mIsMethod = TRUE;
@@ -66,6 +76,10 @@ ECode ProxyBusObject::Handler::Invoke(
     AutoPtr<Invocation> invocation;
     String methodName;
     method->GetName(&methodName);
+    if (DEBUG) {
+        Logger::I(TAG, " >> ProxyBusObject::Handler::Invoke: %s", methodName.string());
+    }
+
     AutoPtr< List< AutoPtr<Invocation> > > invocationList;
     HashMap<String, AutoPtr< List< AutoPtr<Invocation> > > >::Iterator it =
             mInvocationCache.Find(methodName);
@@ -116,59 +130,58 @@ ECode ProxyBusObject::Handler::Invoke(
             }
         }
         if (invocation == NULL) {
-            // TODO:
-            // try {
-            //     Class<Object> objectClass = Object.class;
-            //     if (method.equals(objectClass.getMethod("toString"))) {
-            //         return proxyToString(proxy);
-            //     }
-            //     if (method.equals(objectClass.getMethod("equals",
-            //             objectClass))) {
-            //         return proxy == args[0];
-            //     }
-            //     if (method.equals(objectClass.getMethod("hashCode"))) {
-            //         return System.identityHashCode(proxy);
-            //     }
-            // } catch (NoSuchMethodException e) {
-            //     /*
-            //      * If NoSuchMethodException is encountered the code will
-            //      * drop through and throw a BusException.
-            //      */
+            // String signature;
+            // method->GetSignature(&signature);
+            // if (methodName.Equals("ToString") && signature.Equals("(LElastos/String;*)E")) {
+            //     return ProxyToString(proxy);
             // }
-            // throw new BusException("No such method: " + method);
+            // else if (methodName.Equals("Equals") && signature.Equals("(LIInterface;*Elastos/String;*Z)E")) {
+            //     return proxy == args[0];
+            // }
+            // else if (methodName.Equals("GetHashCode") && signature.Equals("(I32*)E")) {
+            //     return System.identityHashCode(proxy);
+            // }
+            // else {
+            //     throw new BusException("No such method: " + method);
+            // }
+            assert(0 && "TODO");
         }
         mInvocationCache[methodName] = invocationList;
     }
 
     ECode ec = NOERROR;
     if (invocation->mIsMethod) {
-        ec = mHost->MethodCall(mHost->mBus,
-                invocation->mInterfaceName,
-                invocation->mMethodName,
-                invocation->mInputSig,
-                // invocation->mGenericReturnType,
-                method,
-                args,
-                mHost->mReplyTimeoutMsecs,
-                mHost->mFlags);
+        ec = mHost->MethodCall(
+            mHost->mBus,
+            invocation->mInterfaceName,
+            invocation->mMethodName,
+            invocation->mInputSig,
+            // invocation->mGenericReturnType,
+            method,
+            args,
+            mHost->mReplyTimeoutMsecs,
+            mHost->mFlags);
     }
     else {
-        // TODO:
-        // if (invocation.isGet) {
-        //     Variant v = getProperty(bus,
-        //                             invocation.interfaceName,
-        //                             invocation.methodName);
-        //     value = v.getObject(invocation.genericReturnType);
-        // } else {
-        //     setProperty(bus,
-        //                 invocation.interfaceName,
-        //                 invocation.methodName,
-        //                 invocation.outSig,
-        //                 args[0]);
-        // }
+        if (invocation->mIsGet) {
+            ec = mHost->GetProperty(
+                mHost->mBus,
+                invocation->mInterfaceName,
+                invocation->mMethodName,
+                invocation->mOutSig,
+                method,
+                args);
+        }
+        else {
+            ec = mHost->SetProperty(
+                mHost->mBus,
+                invocation->mInterfaceName,
+                invocation->mMethodName,
+                invocation->mOutSig,
+                method,
+                args);
+        }
     }
-
-    //Unmarshal_out
 
     return ec;
 }
@@ -353,13 +366,18 @@ ECode ProxyBusObject::MethodCall(
     const ajn::MsgArg* replyArgs;
     size_t numReplyArgs;
 
-    Logger::I(TAG, " >> MarshalIn: inputSig: '%s'", inputSig.string());
+    if (DEBUG) {
+        Logger::I(TAG, " >> MarshalIn: inputSig: '%s'", inputSig.string());
+    }
+
     ec = MsgArg::MarshalIn((Int64)&args, inputSig, method, carArgs);
     if (FAILED(ec)) {
         Logger::E(TAG, "MethodCall(): Marshal failure");
         return E_STATUS_FAIL;
     }
-    Logger::I(TAG, " >> MarshalIn: result: '%s'", args.ToString().c_str());
+    if (DEBUG) {
+        Logger::I(TAG, " >> MethodCall() with MsgArg: '%s'", args.ToString().c_str());
+    }
 
     /*
      * If we call any method on the org.freedesktop.DBus.Properties interface
@@ -454,15 +472,279 @@ ECode ProxyBusObject::MethodCall(
     return ec;
 }
 
+ECode ProxyBusObject::SetProperty(
+    /* [in] */ IInterfaceInfo* iface,
+    /* [in] */ const String& propertyName,
+    /* [in] */ IVariant* value)
+{
+    String signature;
+    value->GetSignature(&signature);
+    AutoPtr<IInterface> v;
+    value->GetObject((IInterface**)&v);
+
+    assert(0 && "TODO");
+    // return SetProperty(mBus,
+    //     InterfaceDescription::GetName(iface),
+    //     propertyName,
+    //     signature, value.GetValue());
+    return NOERROR;
+}
+
+ECode ProxyBusObject::SetProperty(
+    /* [in] */ CBusAttachment* busAttachment,
+    /* [in] */ const String& interfaceName,
+    /* [in] */ const String& propertyName,
+    /* [in] */ const String& signature,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* args)
+{
+    if (DEBUG) {
+        Logger::I(TAG, " >> SetProperty: interface: %s, property: %s, signature: %s",
+            interfaceName.string(), propertyName.string(), signature.string());
+    }
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mBus->mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "MethodCall(): NULL bus pointer");
+        return E_STATUS_FAIL;
+    }
+
+    ECode ec = NOERROR;
+
+    /*
+     * This part of the binding and on down lower is fundamentally single
+     * threaded.  We want to eventually support multiple overlapping synchronous
+     * calls, but we do not support this now.
+     *
+     * It might sound reasonable for a user of the bindings to get around this
+     * limitation by spinning up a bunch of threads to make overlapping set
+     * property calls.  Since these calls will be coming in here to be
+     * dispatched, We have to actively prevent this from happening for now.
+     *
+     * It's a bit of a blunt instrument, but we acquire a common method call lock
+     * in the underlying bus attachment before allowing any method call on a
+     * proxy bus object to proceed.
+     */
+    AutoLock lock(busPtr->mBaProxyLock);
+
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+
+    const ajn::InterfaceDescription* intf = proxyBusObj->GetInterface(interfaceName.string());
+    if (!intf) {
+        ec = AddInterface(busPtr, interfaceName);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "GetProperty(): Exception, failed to GetInterface %s", interfaceName.string());
+            busPtr->mBaProxyLock.Unlock();
+            return ec;
+        }
+        intf = proxyBusObj->GetInterface(interfaceName.string());
+        assert(intf);
+    }
+
+    ajn::MsgArg arg;
+    ec = MsgArg::GetInputPropery((Int64)&arg, signature, method, args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "SetProperty(): GetInputPropery Exception, ec= %08x", ec);
+        return ec;
+    }
+
+    if (DEBUG) {
+        Logger::I(TAG, " >> SetProperty with MsgArg: %s, signature: %s",
+            arg.ToString().c_str(), arg.Signature().c_str());
+    }
+
+    ec = proxyBusObj->SetProperty(interfaceName.string(), propertyName.string(), arg);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "SetProperty(): SetProperty Exception, ec= %08x", ec);
+    }
+
+    return ec;
+}
+
+ECode ProxyBusObject::GetProperty(
+    /* [in] */ IInterfaceInfo* iface,
+    /* [in] */ const String& propertyName,
+    /* [out] */ IVariant** value)
+{
+    return GetProperty(InterfaceDescription::GetName(iface), propertyName, value);
+}
+
+ECode ProxyBusObject::GetProperty(
+    /* [in] */ const String& interfaceName,
+    /* [in] */ const String& propertyName,
+    /* [out] */ IVariant** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(mBus->mHandle);
+    if (busPtr == NULL) {
+        Logger::E(TAG, "MethodCall(): NULL bus pointer");
+        return E_STATUS_FAIL;
+    }
+
+    ECode ec = NOERROR;
+
+    /*
+     * This part of the binding and on down lower is fundamentally single
+     * threaded.  We want to eventually support multiple overlapping synchronous
+     * calls, but we do not support this now.
+     *
+     * It might sound reasonable for a user of the bindings to get around this
+     * limitation by spinning up a bunch of threads to make overlapping get
+     * property calls.  Since these calls will be coming in here to be
+     * dispatched, We have to actively prevent this from happening for now.
+     *
+     * It's a bit of a blunt instrument, but we acquire a common method call lock
+     * in the underlying bus attachment before allowing any method call on a
+     * proxy bus object to proceed.
+    */
+    AutoLock lock(busPtr->mBaProxyLock);
+
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+
+    const ajn::InterfaceDescription* intf = proxyBusObj->GetInterface(interfaceName.string());
+    if (!intf) {
+        ec = AddInterface(busPtr, interfaceName);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "GetProperty(): Exception, failed to GetInterface %s", interfaceName.string());
+            busPtr->mBaProxyLock.Unlock();
+            return ec;
+        }
+        intf = proxyBusObj->GetInterface(interfaceName.string());
+        assert(intf);
+    }
+
+    ajn::MsgArg value;
+    ec = proxyBusObj->GetProperty(interfaceName.string(), propertyName.string(), value);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "GetProperty() Exception, interface: %s, property: %s", interfaceName.string(), propertyName.string());
+        return ec;
+    }
+
+    AutoPtr<IVariant> v;
+    ec = MsgArg::Unmarshal((Int64)&value, (IVariant**)&v);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "GetProperty(): Unmarshal Exception");
+        return ec;
+    }
+
+    *result = v;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode ProxyBusObject::GetProperty(
+    /* [in] */ CBusAttachment* busAttachment,
+    /* [in] */ const String& interfaceName,
+    /* [in] */ const String& propertyName,
+    /* [in] */ const String& signature,
+    /* [in] */ IMethodInfo* method,
+    /* [in] */ IArgumentList* args)
+{
+    if (DEBUG) {
+        Logger::I(TAG, " >> GetProperty: interface: %s, property: %s", interfaceName.string(), propertyName.string());
+    }
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IVariant> variant;
+    FAIL_RETURN(GetProperty(interfaceName, propertyName, (IVariant**)&variant))
+    if (DEBUG) {
+        Logger::I(TAG, " >> GetProperty: variant: %s", TO_CSTR(variant));
+    }
+
+    Boolean isNull = FALSE;
+    args->IsOutputArgumentNullPtr(0, &isNull);
+    if (!isNull) {
+        ec = MsgArg::AssignOutputPropery(signature, method, args, variant);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "AssignOutputPropery: Exception! ec=%08x", ec);
+        }
+    }
+
+    return ec;
+}
+
+ECode ProxyBusObject::GetAllProperties(
+    /* [in] */ IInterfaceInfo* iface,
+    /* [out] */ IMap** map)  //Map<String, Variant>
+{
+    VALIDATE_NOT_NULL(map)
+    *map = NULL;
+
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    assert(proxyBusObj != NULL);
+
+    assert(0 && "TODO");
+    //returnType = org.alljoyn.bus.ifaces.Properties.class.getMethod("GetAll", String.class).getGenericReturnType();
+    // return proxyBusObj->GetAllProperties(InterfaceDescription::GetName(iface), returnType, map);
+
+    // String interfaceName(InterfaceDescription::GetName(iface));
+    // Logger::I(TAG, " >> GetAllProperties: interface: %s", interfaceName.string());
+
+    // /*
+    //  * This part of the binding and on down lower is fundamentally single
+    //  * threaded.  We want to eventually support multiple overlapping synchronous
+    //  * calls, but we do not support this now.
+    //  *
+    //  * It might sound reasonable for a user of the bindings to get around this
+    //  * limitation by spinning up a bunch of threads to make overlapping get
+    //  * property calls.  Since these calls will be coming in here to be
+    //  * dispatched, We have to actively prevent this from happening for now.
+    //  *
+    //  * It's a bit of a blunt instrument, but we acquire a common method call lock
+    //  * in the underlying bus attachment before allowing any method call on a
+    //  * proxy bus object to proceed.
+    //  */
+    // AutoLock lock(mBusPtr->mBaProxyLock);
+
+    // AutoPtr<IProxyBusObject> pbo;
+    // mPbo->Resolve(EIID_IProxyBusObject, (IInterface**)&pbo);
+    // if (!pbo) {
+    //     Logger::E(TAG, "RegisterPropertiesChangedListener(): Can't get new local reference to ProxyBusObject");
+    //     return E_STATUS_FAIL;
+    // }
+
+    ECode status = NOERROR;
+    // if (!ImplementsInterface(interfaceName.string())) {
+    //     status = AddInterface(pbo, mBusPtr, interfaceName);
+    //     if (status != E_STATUS_OK) {
+    //         Logger::E(TAG, "GetAllProperties(): AddInterfaceStatus Exception");
+    //         return status;
+    //     }
+    // }
+
+    // ajn::MsgArg value;
+    // status = GetAllProperties(interfaceName.string(), value);
+    // if (status == E_STATUS_OK) {
+    //     assert(0 && "TODO");
+    //     // status = Org::Alljoyn::Bus::MsgArg::Unmarshal((Int64)&value, outtype, (PVoid)map);
+    //     if (FAILED(status)) {
+    //         Logger::E(TAG, "GetAllProperties(): Unmarshal Exception");
+    //     }
+    // }
+    // else {
+    //     Logger::E(TAG, "GetAllProperties(): ajn::GetAllProperties Exception");
+    // }
+    return status;
+}
+
 ECode ProxyBusObject::EnablePropertyCaching()
 {
-    assert(0 && "TODO");
+    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
+    if (proxyBusObj == NULL) {
+        Logger::E(TAG, "EnablePropertyCaching(): NULL ProxyBusObject pointer");
+        return FALSE;
+    }
+
+    proxyBusObj->EnablePropertyCaching();
     return NOERROR;
 }
 
 ECode ProxyBusObject::ReleaseResources()
 {
-    assert(0 && "TODO");
+    Destroy();
     return NOERROR;
 }
 
@@ -574,49 +856,19 @@ ECode ProxyBusObject::AddInterface(
     return ec;
 }
 
-ECode ProxyBusObject::GetProperty(
-    /* [in] */ IInterfaceInfo* iface,
-    /* [in] */ const String& propertyName,
-    /* [out] */ IVariant** value)
+ECode ProxyBusObject::ToString(
+    /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(value)
-    *value = NULL;
-
-    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
-    assert(proxyBusObj != NULL);
-
-    return proxyBusObj->GetProperty(InterfaceDescription::GetName(iface), propertyName, value);
-}
-
-ECode ProxyBusObject::SetProperty(
-    /* [in] */ IInterfaceInfo* iface,
-    /* [in] */ const String& propertyName,
-    /* [in] */ IVariant* value)
-{
-    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
-    assert(proxyBusObj != NULL);
-
-    String signature;
-    value->GetSignature(&signature);
-    return proxyBusObj->SetProperty(
-        InterfaceDescription::GetName(iface), propertyName,
-        signature, ((CVariant*)value)->GetValue());
-}
-
-ECode ProxyBusObject::GetAllProperties(
-    /* [in] */ IInterfaceInfo* iface,
-    /* [out] */ IMap** map)  //Map<String, Variant>
-{
-    VALIDATE_NOT_NULL(map)
-    *map = NULL;
-
-    NativeProxyBusObject* proxyBusObj = reinterpret_cast<NativeProxyBusObject*>(mHandle);
-    assert(proxyBusObj != NULL);
-
-    assert(0 && "TODO");
-    CarDataType returnType = CarDataType_Interface;
-    //     returnType = org.alljoyn.bus.ifaces.Properties.class.getMethod("GetAll", String.class).getGenericReturnType();
-    return proxyBusObj->GetAllProperties(InterfaceDescription::GetName(iface), returnType, map);
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("ProxyBusObject{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", busname:";
+    sb += mBusName;
+    sb += ", objPath:";
+    sb += mObjPath;
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
 
 }
 

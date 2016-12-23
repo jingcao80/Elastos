@@ -14,15 +14,19 @@ module
         const String DOOR_INTF_NAME = "com.elastos.Door";
         const String PERSON_PASSED_THROUGH = "PersonPassedThrough";
 
-        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "1")]
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL")]
         GetIsOpen(
             [out] Boolean* value);
 
-        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "1")]
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL")]
         GetLocation(
             [out] String* value);
 
-        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "2", signature = "u")]
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL", signature = "s")]
+        SetDisplayName(
+            [in] String value);
+
+        [@Org.Alljoyn.Bus.Annotation.BusProperty(annotation = "BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL_INVALIDATES", signature = "u")]
         GetKeyCode(
             [out] Int32* value);
 
@@ -32,10 +36,10 @@ module
         [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "Close")]
         Close();
 
-        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "KnockAndRun", annotation = "1")]
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "KnockAndRun", annotation = "BusMethod.ANNOTATE_NO_REPLY")]
         KnockAndRun();
 
-        [@Org.Alljoyn.Bus.Annotation.BusSignal(name = "PersonPassedThrough")]
+        [@Org.Alljoyn.Bus.Annotation.BusSignal(name = "PersonPassedThrough", signature = "s")]
         PersonPassedThrough(
             [in] String person);
     }

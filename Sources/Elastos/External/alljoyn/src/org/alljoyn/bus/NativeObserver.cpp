@@ -31,6 +31,7 @@ NativeObserver::NativeObserver(
     }
 
     bus->GetInternal().GetObserverManager().RegisterObserver(this);
+    IWeakReferenceSource::Probe(listener)->GetWeakReference((IWeakReference**)&mObserver);
 }
 
 NativeObserver::~NativeObserver()
@@ -41,55 +42,26 @@ void NativeObserver::ObjectDiscovered(
     /* [in] */ const InterfaceSet& interfaces,
     /* [in] */ ajn::SessionId sessionid)
 {
-    assert(0 && "TODO");
-    // JScopedEnv env;
+    AutoPtr<IObserver> jo;
+    mObserver->Resolve(EIID_IObserver, (IInterface**)&jo);
+    if (jo == NULL) {
+        return;
+    }
 
-    // jobject jo = env->NewLocalRef(jobserver);
-    // if (!jo) {
-    //     return;
-    // }
+    String busname(oid.uniqueBusName.c_str());
+    String path(oid.objectPath.c_str());
+    Int32 jsessionid = sessionid;
+    AutoPtr<ArrayOf<String> > jinterfaces = ArrayOf<String>::Alloc(interfaces.size());
 
-    // JLocalRef<jclass> clazz = env->GetObjectClass(jo);
-    // if (clazz == NULL) {
-    //     return;
-    // }
-    // jmethodID mid = env->GetMethodID(clazz, "objectDiscovered", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;I)V");
-    // if (!mid) {
-    //     return;
-    // }
+    Int32 i = 0;
+    for (InterfaceSet::iterator it = interfaces.begin(); it != interfaces.end(); ++it) {
+        String intfname(it->c_str());
+        jinterfaces->Set(i++, intfname);
+    }
 
-    // JLocalRef<jstring> busname = env->NewStringUTF(oid.uniqueBusName.c_str());
-    // if (env->ExceptionCheck()) {
-    //     QCC_LogError(ER_FAIL, ("JObserver::ObjectDiscovered exception"));
-    //     return;
-    // }
-    // JLocalRef<jstring> path = env->NewStringUTF(oid.objectPath.c_str());
-    // if (env->ExceptionCheck()) {
-    //     QCC_LogError(ER_FAIL, ("JObserver::ObjectDiscovered exception"));
-    //     return;
-    // }
-    // jint jsessionid = sessionid;
-    // JLocalRef<jobjectArray> jinterfaces = env->NewObjectArray(interfaces.size(), CLS_String, NULL);
-    // if (env->ExceptionCheck()) {
-    //     QCC_LogError(ER_FAIL, ("JObserver::ObjectDiscovered exception"));
-    //     return;
-    // }
 
-    // jsize i = 0;
-    // for (InterfaceSet::iterator it = interfaces.begin(); it != interfaces.end(); ++it) {
-    //     JLocalRef<jstring> intfname = env->NewStringUTF(it->c_str());
-    //     if (env->ExceptionCheck()) {
-    //         QCC_LogError(ER_FAIL, ("JObserver::ObjectDiscovered exception"));
-    //         return;
-    //     }
-    //     env->SetObjectArrayElement(jinterfaces, i++, intfname);
-    //     if (env->ExceptionCheck()) {
-    //         QCC_LogError(ER_FAIL, ("JObserver::ObjectDiscovered exception"));
-    //         return;
-    //     }
-    // }
-
-    // env->CallVoidMethod(jo, mid, jstring(busname), jstring(path), jobjectArray(jinterfaces), jsessionid);
+    Observer* observer = (Observer*)jo.Get();
+    observer->ObjectDiscovered(busname, path, jinterfaces, jsessionid);
 }
 
 void NativeObserver::ObjectLost(

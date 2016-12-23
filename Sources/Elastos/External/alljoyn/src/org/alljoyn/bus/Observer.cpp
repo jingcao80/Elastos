@@ -1,4 +1,5 @@
 #include "org/alljoyn/bus/Observer.h"
+#include "org/alljoyn/bus/Globals.h"
 #include "org/alljoyn/bus/NativeObserver.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
@@ -21,6 +22,7 @@ namespace Alljoyn {
 namespace Bus {
 
 static const String TAG("Observer");
+static const Boolean DEBUG = FALSE;
 
 //============================================================================
 // Observer::ObjectId
@@ -342,6 +344,13 @@ void Observer::ObjectDiscovered(
     /* [in] */ ArrayOf<String>* interfaces,
     /* [in] */ Int32 sessionId)
 {
+    if (DEBUG) {
+		Logger::I(TAG, " >> ObjectDiscovered: busname: %s, path: %s, sessionId: %08x", busname.string(), path.string(), sessionId);
+		for (Int32 i = 0; i < interfaces->GetLength(); ++i) {
+		    Logger::I(TAG, "     > interface %d: %s", i, (*interfaces)[i].string());
+		}
+	}
+
     List<AutoPtr<IInterfaceInfo> > intfList;
 
     HashMap<String, AutoPtr<IInterfaceInfo> >::Iterator mit;
@@ -353,7 +362,7 @@ void Observer::ObjectDiscovered(
     }
 
     //TODO figure out what to do with secure bus objects
-    Int32 i =0;
+    Int32 i = 0;
     AutoPtr<ArrayOf<IInterfaceInfo*> > infos = ArrayOf<IInterfaceInfo*>::Alloc(intfList.GetSize());
     List<AutoPtr<IInterfaceInfo> >::Iterator lit;
     for (lit = intfList.Begin(); lit != intfList.End(); ++lit) {
@@ -376,6 +385,9 @@ void Observer::ObjectDiscovered(
     for (wit = copiedListeners->Begin(); wit != copiedListeners->End(); ++wit) {
         if ((*wit)->mEnabled) {
             // protect against exceptions in listener code.
+            if (DEBUG) {
+				Logger::I(TAG, " >> %s ObjectDiscovered: %s", TO_CSTR((*wit)->mListener), TO_CSTR(proxy));
+			}
             (*wit)->mListener->ObjectDiscovered(proxy);
         }
     }
@@ -417,9 +429,7 @@ String Observer::GetBusInterfaceName(
     /* [in] */ IInterfaceInfo* intf)
 {
     AutoPtr<IAnnotationInfo> annotation;
-    intf->GetAnnotation(
-        String("Org.Alljoyn.Bus.Annotation.BusInterface"),
-        (IAnnotationInfo**)&annotation);
+    intf->GetAnnotation(Globals::Annotation_BusInterface, (IAnnotationInfo**)&annotation);
 
     if (annotation != NULL) {
         String name;

@@ -5909,7 +5909,6 @@ void AbsListView::OnTouchDown(
             AutoPtr<IAdapter> adapter;
             GetAdapter((IAdapter**)&adapter);
             Boolean isEnabled;
-            IListAdapter::Probe(adapter)->IsEnabled(motionPosition, &isEnabled);
             if (mTouchMode == TOUCH_MODE_FLING) {
                 // Stopped a fling. It is a scroll.
                 CreateScrollingCache();
@@ -5918,7 +5917,8 @@ void AbsListView::OnTouchDown(
                 motionPosition = FindMotionRow(y);
                 mFlingRunnable->FlywheelTouch();
             }
-            else if ((motionPosition >= 0) && isEnabled) {
+            else if ((motionPosition >= 0)
+                && (IListAdapter::Probe(adapter)->IsEnabled(motionPosition, &isEnabled), isEnabled)) {
                 // User clicked on an actual view (and was not stopping a
                 // fling). It might be a click or a scroll. Assume it is a
                 // click until proven otherwise.

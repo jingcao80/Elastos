@@ -325,6 +325,8 @@ QStatus NativeBusAttachment::RegisterBusObject(
     /* [in] */ const String& desc,
     /* [in] */ ITranslator* translator)
 {
+    if (busObject == NULL) return ER_FAIL;
+
     AutoLock lock1(gBusObjectMapLock);
 
     AutoLock lock2(mBaCommonLock);
@@ -334,10 +336,9 @@ QStatus NativeBusAttachment::RegisterBusObject(
      * attachment multiple times.
      */
     if (IsLocalBusObject(busObject)) {
+        Logger::E(TAG, " RegisterBusObject: ER_BUS_OBJ_ALREADY_EXISTS IsLocalBusObject");
         return ER_BUS_OBJ_ALREADY_EXISTS;
     }
-
-    if (busObject == NULL) return ER_FAIL;
 
     /*
      * It is a programming error to register the same Java Bus Object with
@@ -346,12 +347,14 @@ QStatus NativeBusAttachment::RegisterBusObject(
      */
     NativeBusObject* ntBusObject = GetBackingObject(busObject);
     if (ntBusObject) {
+        Logger::E(TAG, " RegisterBusObject: ER_BUS_OBJ_ALREADY_EXISTS GetBackingObject");
         return ER_BUS_OBJ_ALREADY_EXISTS;
     }
     else {
         ntBusObject = new NativeBusObject(this, objPath, busObject);
         QStatus status = ntBusObject->AddInterfaces(busInterfaces);
         if (status != ER_OK) {
+            Logger::E(TAG, " RegisterBusObject: AddInterfaces");
             delete ntBusObject;
             return ER_FAIL;
         }

@@ -1,5 +1,6 @@
 #include "org/alljoyn/bus/PropertyChangedEmitter.h"
 #include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/Globals.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -32,10 +33,13 @@ ECode PropertyChangedEmitter::constructor(
     /* [in] */ Int32 sessionId,
     /* [in] */ GlobalBroadcast globalBroadcast)
 {
+    SignalEmitter::constructor(source, String(NULL), sessionId, globalBroadcast);
+
     AutoPtr<IInterface> obj;
     GetInterface(Org::Alljoyn::Bus::Ifaces::EIID_IProperties, (IInterface**)&obj);
     mProps = Org::Alljoyn::Bus::Ifaces::IProperties::Probe(obj);
-    return SignalEmitter::constructor(source, String(NULL), sessionId, globalBroadcast);
+    assert(mProps != NULL);
+    return NOERROR;
 }
 
 ECode PropertyChangedEmitter::constructor(
@@ -117,13 +121,11 @@ ECode PropertyChangedEmitter::PropertiesChanged(
 
         assert(0 && "TODO");
         AutoPtr<IAnnotationInfo> busPropertyAnn;
-        m->GetAnnotation(
-            String("Org.Alljoyn.Bus.Annotaion.BusProperty"), (IAnnotationInfo**)&busPropertyAnn);
+        m->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&busPropertyAnn);
         if (busPropertyAnn != NULL) {
             // need to emit
             AutoPtr<IAnnotationInfo> bas;
-            m->GetAnnotation(
-                String("Org.Alljoyn.Bus.Annotaion.BusAnnotations"), (IAnnotationInfo**)&bas);
+            m->GetAnnotation(Globals::Annotation_BusAnnotations, (IAnnotationInfo**)&bas);
             if (bas != NULL) {
                 String value;
                 AutoPtr< ArrayOf<String> > keys;

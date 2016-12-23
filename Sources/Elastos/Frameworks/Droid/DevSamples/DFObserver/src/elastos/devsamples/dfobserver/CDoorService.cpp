@@ -45,12 +45,21 @@ ECode CDoorService::constructor(
     return NOERROR;
 }
 
+ECode CDoorService::SetDisplayName(
+    /* [in] */ const String& name)
+{
+    SendUiMessage(String("Property Name is Setted"));
+    Logger::I(TAG, " >> SetDisplayName: %s", name.string());
+    return NOERROR;
+}
+
 ECode CDoorService::GetIsOpen(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
     SendUiMessage(String("Property IsOpen is queried"));
     *value = mIsOpen;
+    Logger::I(TAG, " >> GetIsOpen: %d", mIsOpen);
     return NOERROR;
 }
 
@@ -60,6 +69,7 @@ ECode CDoorService::GetLocation(
     VALIDATE_NOT_NULL(value)
     SendUiMessage(String("Property Location is queried"));
     *value = mLocation;
+    Logger::I(TAG, " >> GetLocation: %s", mLocation.string());
     return NOERROR;
 }
 
@@ -69,6 +79,7 @@ ECode CDoorService::GetKeyCode(
     VALIDATE_NOT_NULL(value)
     SendUiMessage(String("Property KeyCode is queried"));
     *value = mKeyCode;
+    Logger::I(TAG, " >> GetKeyCode: %d", mKeyCode);
     return NOERROR;
 }
 
@@ -120,7 +131,7 @@ ECode CDoorService::KnockAndRunRunnable::Run()
     // Create a signal emitter and send out the personPassedTHrough
     // signal
     AutoPtr<ISignalEmitter> se;
-    CSignalEmitter::New((IBusObject*)this, IBusAttachment::SESSION_ID_ALL_HOSTED,
+    CSignalEmitter::New(mHost, IBusAttachment::SESSION_ID_ALL_HOSTED,
         GlobalBroadcast_Off, (ISignalEmitter**)&se);
     AutoPtr<IDoor> door;
     se->GetInterface(EIID_IDoor, (IInterface**)&door);
@@ -132,7 +143,7 @@ ECode CDoorService::KnockAndRunRunnable::Run()
 
     // Invalidate the keyCode
     AutoPtr<IVariant> v;
-    CVariant::New(CoreUtils::Convert(0), (IVariant**)&v);
+    CVariant::New(CoreUtils::Convert(0), String("i"), (IVariant**)&v);
     mHost->mPce->PropertyChanged(IDoor::DOOR_INTF_NAME, String("KeyCode"), v);
     return NOERROR;
 }
@@ -149,6 +160,7 @@ ECode CDoorService::KnockAndRun()
 ECode CDoorService::PersonPassedThrough(
     /* [in] */ const String& person)
 {
+    Logger::I(TAG, " >> PersonPassedThrough: %s", person.string());
     // personPassedThrough is a signal. No implementation is required.
     return NOERROR;
 }
@@ -165,7 +177,7 @@ ECode CDoorService::SendDoorEvent(
     /* [in] */ Boolean b)
 {
     AutoPtr<IVariant> v;
-    CVariant::New(CoreUtils::Convert(b), (IVariant**)&v);
+    CVariant::New(CoreUtils::Convert(b), String("b"), (IVariant**)&v);
     mPce->PropertyChanged(IDoor::DOOR_INTF_NAME, String("IsOpen"), v);
     return NOERROR;
 }

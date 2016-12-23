@@ -1,6 +1,7 @@
 #include "BusHandler.h"
 #include "DoorAdapterItem.h"
 #include "CDoorService.h"
+#include "CDoorEventListener.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.IO.h>
@@ -17,6 +18,7 @@ using Org::Alljoyn::Bus::CAboutObj;
 using Org::Alljoyn::Bus::CBusAttachment;
 using Org::Alljoyn::Bus::IMutableInteger16Value;
 using Org::Alljoyn::Bus::CMutableInteger16Value;
+using Org::Alljoyn::Bus::IPropertiesChangedListener;
 using Org::Alljoyn::Bus::EIID_IObserverListener;
 using Org::Alljoyn::Bus::RemoteMessage_Receive;
 using Org::Alljoyn::Bus::Alljoyn::IDaemonInit;
@@ -46,6 +48,8 @@ static const String TAG("BusHandler");
 // BusHandler::DoorEventListener
 //======================================================================
 
+CAR_INTERFACE_IMPL(BusHandler::DoorEventListener, PropertiesChangedListener, IDoorEventListener)
+
 ECode BusHandler::DoorEventListener::constructor(
     /* [in] */ IHandler* busHandler)
 {
@@ -61,10 +65,12 @@ ECode BusHandler::DoorEventListener::PersonPassedThrough(
     String sender;
     msgCtx->GetSender(&sender);
 
-    StringBuilder sb("personPassedThrough");
+    StringBuilder sb("personPassedThrough person:(");
     sb += person;
     sb += ") event received from ";
     sb += sender;
+
+    Logger::I(TAG, " >> PersonPassedThrough: %s", sb.ToString().string());
     mHost->mDoorAdapter->SendSignal(sb.ToString());
     return NOERROR;
 }
@@ -85,7 +91,7 @@ ECode BusHandler::DoorEventListener::PropertiesChanged(
     IVariant* v = IVariant::Probe(obj);
     if (v != NULL) {
         AutoPtr<IInterface> valueObj;
-        v->GetObject(CarDataType_Boolean, (IInterface**)&valueObj);
+        v->GetObject((IInterface**)&valueObj);
         Boolean value;
         IBoolean::Probe(valueObj)->GetValue(&value);
 
@@ -301,9 +307,8 @@ ECode BusHandler::HandleMessage(
             /*
              * Register a listener in order to receive signals emmited by doors.
              */
-            mDoorListener = new DoorEventListener();
-            mDoorListener->constructor(this);
-            ec = mBus->RegisterSignalHandlers((IDoorEventListener*)mDoorListener.Get());
+            CDoorEventListener::New(this, (IDoorEventListener**)&mDoorListener);
+            ec = mBus->RegisterSignalHandlers(mDoorListener);
             if (ec != (ECode)E_STATUS_OK) {
                 Logger::I(TAG, "Problem while registering signal handler");
                 return ec;
@@ -322,41 +327,46 @@ ECode BusHandler::HandleMessage(
         }
 
         case JOIN_SESSION: {
-            Logger::I(TAG, " >> HandleMessage JOIN_SESSION");
+            Logger::I(TAG, " >> HandleMessage JOIN_SESSION: %s", TO_CSTR(obj));
 
             /*
              * We have discovered a new door. Add it to our list and register
              * event listeners on it.
              */
-            AutoPtr<IProxyBusObject> obj = IProxyBusObject::Probe(obj);
-            obj->EnablePropertyCaching();
+            AutoPtr<IProxyBusObject> proxy = IProxyBusObject::Probe(obj);
+            proxy->EnablePropertyCaching();
             AutoPtr<IDoor> door;
-            obj->GetInterface(EIID_IDoor, (IInterface**)&door);
+            proxy->GetInterface(EIID_IDoor, (IInterface**)&door);
 
+            StringBuilder sb("");
             String str;
-            StringBuilder sb;
             door->GetLocation(&str);
             sb += str;
             sb += " (";
-            obj->GetBusName(&str);
+            proxy->GetBusName(&str);
             sb += str;
-            sb += " (";
-            obj->GetObjPath(&str);
+            proxy->GetObjPath(&str);
+            sb += str;
             sb += ")";
             String displayName = sb.ToString();
+            Logger::I(TAG, " new DoorAdapterItem: %s", displayName.string());
+            door->SetDisplayName(displayName);
             Boolean isOpen;
             door->GetIsOpen(&isOpen);
             AutoPtr<IDoorAdapterItem> item = (IDoorAdapterItem*)new DoorAdapterItem(displayName, isOpen);
-            mMap->Put(item, obj);
+            mMap->Put(item, proxy);
             AutoPtr<ArrayOf<String> > props = ArrayOf<String>::Alloc(1);
             props->Set(0, String("IsOpen"));
-            obj->RegisterPropertiesChangedListener(IDoor::DOOR_INTF_NAME, props, mDoorListener);
+            proxy->RegisterPropertiesChangedListener(IDoor::DOOR_INTF_NAME, props,
+                IPropertiesChangedListener::Probe(mDoorListener));
             mDoorAdapter->Add(item);
             break;
         }
 
         /* Release all resources acquired in the connect. */
         case DISCONNECT: {
+            Logger::I(TAG, " >> HandleMessage DISCONNECT");
+
             ICloseable::Probe(mObserver)->Close();
             List< AutoPtr<IDoorService> >::Iterator it;
             for (it = mDoors.Begin(); it != mDoors.End(); ++it) {
@@ -374,6 +384,8 @@ ECode BusHandler::HandleMessage(
          * Call the service's KnockOnDoor method through the ProxyBusObject.
          */
         case KNOCK_ON_DOOR: {
+            Logger::I(TAG, " >> HandleMessage KNOCK_ON_DOOR");
+
             AutoPtr<IInterface> pboObj;
             mMap->Get(obj, (IInterface**)&pboObj);
             IProxyBusObject* pbo = IProxyBusObject::Probe(pboObj);
@@ -391,6 +403,8 @@ ECode BusHandler::HandleMessage(
          * Call Toggle a door.
          */
         case TOGGLE_DOOR: {
+            Logger::I(TAG, " >> HandleMessage TOGGLE_DOOR");
+
             AutoPtr<IInterface> pboObj;
             mMap->Get(obj, (IInterface**)&pboObj);
             IProxyBusObject* pbo = IProxyBusObject::Probe(pboObj);
@@ -415,6 +429,8 @@ ECode BusHandler::HandleMessage(
          * Creates a local door
          */
         case CREATE_DOOR: {
+            Logger::I(TAG, " >> HandleMessage CREATE_DOOR");
+
             String location = Object::ToString(obj);
             AutoPtr<IDoorService> newDoor;
             CDoorService::New(location, this, (IDoorService**)&newDoor);
@@ -425,9 +441,12 @@ ECode BusHandler::HandleMessage(
             if ((ECode)E_STATUS_OK != mBus->RegisterBusObject(IBusObject::Probe(newDoor), location)) {
                 StringBuilder sb("Failed to create door '");
                 sb += location; sb += "'";
+                Logger::E(TAG, sb.ToString());
                 mDoorAdapter->SendDoorEvent(sb.ToString());
                 break;
             }
+            Logger::I(TAG, " >> HandleMessage created door: %s", location.string());
+
             mDoors.PushBack(newDoor);
             // Have About send a signal a new door is available.
             mAboutObj->Announce(CONTACT_PORT, mAboutData);
@@ -435,6 +454,8 @@ ECode BusHandler::HandleMessage(
         }
 
         case DELETE_DOOR: {
+            Logger::I(TAG, " >> HandleMessage DELETE_DOOR");
+
             AutoPtr<IArrayList> locations = IArrayList::Probe(obj);
             List< AutoPtr<IDoorService> >::Iterator it;
             Boolean bval;
@@ -468,6 +489,8 @@ ECode BusHandler::HandleMessage(
          * Executes a local task.
          */
         case EXECUTE_TASK: {
+            Logger::I(TAG, " >> HandleMessage EXECUTE_TASK %s", TO_CSTR(obj));
+
             IRunnable* task = IRunnable::Probe(obj);
             task->Run();
             break;

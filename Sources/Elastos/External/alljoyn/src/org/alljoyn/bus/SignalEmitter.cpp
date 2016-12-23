@@ -9,19 +9,20 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Core::Reflect::EIID_IInvocationHandler;
 using Elastos::Core::AutoLock;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::Reflect::CProxyFactory;
 using Elastos::Core::Reflect::IProxyFactory;
 using Elastos::Core::Reflect::EIID_IInvocationHandler;
 using Elastos::Utility::Logging::Logger;
+using Org::Alljoyn::Bus::Ifaces::EIID_IProperties;
 
 namespace Org {
 namespace Alljoyn {
 namespace Bus {
 
 static const String TAG("SignalEmitter");
+static const Boolean DEBUG = FALSE;
 
 CAR_INTERFACE_IMPL(SignalEmitter::Emitter, Object, IInvocationHandler)
 
@@ -51,10 +52,15 @@ ECode SignalEmitter::Emitter::Invoke(
         AutoPtr<IMethodInfo> methodInfo;
         ifceInfo->GetMethodInfo(name, signature, (IMethodInfo**)&methodInfo);
         if (methodInfo) {
+            String ifaceName = InterfaceDescription::GetName(ifceInfo);
+            if (DEBUG) {
+                Logger::I(TAG, " SignalEmitter Invoke: %s : %s, signature: %s",
+                    ifaceName.string(), name.string(), signature.string());
+            }
             mSignalEmitter->Signal(mSignalEmitter->mSource,
                mSignalEmitter->mDestination,
                mSignalEmitter->mSessionId,
-               InterfaceDescription::GetName(ifceInfo),
+               ifaceName,
                methodInfo,
                args,
                mSignalEmitter->mTimeToLive,
@@ -103,6 +109,11 @@ ECode SignalEmitter::constructor(
     AutoPtr<IInterfaceInfo> propertiesInfo;
     moduleClassLoader->LoadInterface(String("Org.Alljoyn.Bus.Ifaces.IProperties"),
         (IInterfaceInfo**)&propertiesInfo);
+    if (propertiesInfo == NULL) {
+        Logger::E(TAG, "Failed to load interfaces Org.Alljoyn.Bus.Ifaces.IProperties with class loader: %s",
+            TO_CSTR(moduleClassLoader));
+        assert(0 && "Failed to load interfaces Org.Alljoyn.Bus.Ifaces.IProperties");
+    }
     interfaces->Set(count, propertiesInfo);
 
     AutoPtr<IInvocationHandler> handler = new Emitter(this);
@@ -111,6 +122,7 @@ ECode SignalEmitter::constructor(
     AutoPtr<IInterface> obj;
     pf->NewProxyInstance(moduleClassLoader, interfaces, handler, (IInterface**)&obj);
     mProxy = IProxy::Probe(obj);
+    assert(mProxy->Probe(EIID_IProperties) != NULL);
 
     mMsgContext = new MessageContext();
     return NOERROR;
@@ -198,12 +210,21 @@ ECode SignalEmitter::Signal(
 {
     String signalName = InterfaceDescription::GetName(methodInfo);
     String inputSig = InterfaceDescription::GetInputSig(methodInfo);
+    if (DEBUG) {
+        Logger::I(TAG, " Signal: %s : %s, signature: %s",
+            ifaceName.string(), signalName.string(), inputSig.string());
+    }
 
     ajn::MsgArg args;
-    if (FAILED(MsgArg::MarshalIn((Int64)&args, inputSig, methodInfo, inArgs))) {
-        Logger::E(TAG, "Signal(): Marshal() error: ifaceName:%s, signalName:%s, inputSig:%s",
-            ifaceName.string(), signalName.string(), inputSig.string());
+    ECode ec = MsgArg::MarshalIn((Int64)&args, inputSig, methodInfo, inArgs);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Signal(): Marshal() error: ifaceName:%s, signalName:%s, inputSig:%s, ec=%08x",
+            ifaceName.string(), signalName.string(), inputSig.string(), ec);
         return E_FAIL;
+    }
+
+    if (DEBUG) {
+        Logger::I(TAG, " >> Signal with MsgArg: %s", args.ToString().c_str());
     }
 
     /*

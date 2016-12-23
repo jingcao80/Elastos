@@ -14,8 +14,8 @@ class NativePropertiesChangedListener : public ajn::ProxyBusObject::PropertiesCh
 public:
     NativePropertiesChangedListener(
         /* [in] */ IWeakReference* listener,
-        /* [in] */ IInterfaceInfo* changed,
-        /* [in] */ IInterfaceInfo* invalidated);
+        /* [in] */ const String& changedSig,
+        /* [in] */ const String& invalidated);
 
     ~NativePropertiesChangedListener();
 
@@ -33,8 +33,8 @@ private:
 
     AutoPtr<IWeakReference> mListener;
 
-    AutoPtr<IInterfaceInfo> mChangedType;
-    AutoPtr<IInterfaceInfo> mInvalidatedType;
+    String mChangedSignature;
+    String mInvalidatedSignature;
 };
 
 } // namespace Bus

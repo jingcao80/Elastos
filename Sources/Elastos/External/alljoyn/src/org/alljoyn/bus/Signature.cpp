@@ -57,8 +57,6 @@ String Signature::TypeSig(
     /* [in] */ IDataTypeInfo* typeInfo,
     /* [in] */ const String& signature)
 {
-    Logger::I(TAG, " >> TypeSig: %s", signature.string());
-
     // if (type instanceof ParameterizedType) {
     //     return parameterizedTypeSig((ParameterizedType) type, signature);
     // } else if (type instanceof Class) {

@@ -54,7 +54,7 @@ QStatus NativeSignalHandler::Register(
     }
     const ajn::InterfaceDescription* intf = bus.GetInterface(ifaceName);
     if (!intf) {
-        Logger::E(TAG, "Register(): failed to GetInterface ifaceName:[%s], signalName:[%s], ancillary:[%s]",
+        Logger::I(TAG, "Register(): ER_BUS_NO_SUCH_INTERFACE ifaceName:[%s], signalName:[%s], ancillary:[%s]",
             ifaceName, signalName, ancillary);
         return ER_BUS_NO_SUCH_INTERFACE;
     }

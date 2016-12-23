@@ -31,6 +31,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("UpdateRunnable")
+
         UpdateRunnable(
             /* [in] */ DoorAdapter* host);
 
@@ -43,6 +45,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("UpdateUIRunnable")
+
         UpdateUIRunnable(
             /* [in] */ DoorAdapter* host,
             /* [in] */ IDoorAdapterItem* door,

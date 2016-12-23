@@ -1,4 +1,9 @@
 #include "DoorAdapterItem.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace DevSamples {
@@ -19,7 +24,7 @@ DoorAdapterItem::DoorAdapterItem(
 {
 }
 
-ECode DoorAdapterItem::IsOpen(
+ECode DoorAdapterItem::GetIsOpen(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
@@ -39,6 +44,18 @@ ECode DoorAdapterItem::GetName(
 {
     VALIDATE_NOT_NULL(name)
     *name = mName;
+    return NOERROR;
+}
+
+ECode DoorAdapterItem::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("Door{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", name:";    sb += mName;
+    sb += ", ";         sb += mIsOpen ? "Open" : "Closed";
+    *str = sb.ToString();
     return NOERROR;
 }
 

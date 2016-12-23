@@ -5,6 +5,7 @@
 #include "elastos/droid/view/LayoutInflater.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
@@ -13,10 +14,13 @@ using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::Widget::ICheckable;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace DevSamples {
 namespace DFObserver {
+
+static const String TAG("DoorAdapter");
 
 DoorAdapter::UpdateRunnable::UpdateRunnable(
     /* [in] */ DoorAdapter* host)
@@ -26,6 +30,7 @@ DoorAdapter::UpdateRunnable::UpdateRunnable(
 
 ECode DoorAdapter::UpdateRunnable::Run()
 {
+    Logger::I(TAG, " >> NotifyDataSetChanged");
     return mHost->NotifyDataSetChanged();
 }
 
@@ -43,9 +48,11 @@ ECode DoorAdapter::UpdateUIRunnable::Run()
 {
     AutoPtr<IDoorAdapterItem> item = mDoor;
    if (mIsAdd) {
+        Logger::I(TAG, " >> Add item %s", TO_CSTR(mDoor));
         mHost->mList.PushBack(item);
     }
     else {
+        Logger::I(TAG, " >> Remove item %s", TO_CSTR(mDoor));
         mHost->mList.Remove(item);
     }
     return mHost->NotifyDataSetChanged();
@@ -82,7 +89,6 @@ ECode DoorAdapter::GetItem(
     /* [out] */ IInterface** obj)
 {
     VALIDATE_NOT_NULL(obj)
-    assert(position > 0 && position < (Int32)mList.GetSize());
     *obj = mList[position];
     REFCOUNT_ADD(*obj)
     return NOERROR;
@@ -93,7 +99,6 @@ ECode DoorAdapter::GetItemId(
     /* [out] */ Int64* id)
 {
     VALIDATE_NOT_NULL(id)
-    assert(position > 0 && position < (Int32)mList.GetSize());
     *id = (Int64)(mList[position].Get());
     return NOERROR;
 }
@@ -132,7 +137,7 @@ ECode DoorAdapter::GetView(
     String name;
     item->GetName(&name);
     Boolean bval;
-    item->IsOpen(&bval);
+    item->GetIsOpen(&bval);
     data->mName->SetText(CoreUtils::Convert(name));
     ICheckable::Probe(data->mIsOpen)->SetChecked(bval);
     *result = convertView;
@@ -190,11 +195,13 @@ ECode DoorAdapter::PropertyUpdate(
     String name;
     item->GetName(&name);
     Boolean isOpen;
-    item->IsOpen(&isOpen);
+    item->GetIsOpen(&isOpen);
     StringBuilder sb(name);
     sb += " ";
     sb += isOpen ? "opened" : "closed";
     SendSignal(sb.ToString());
+
+    Logger::I(TAG, " >> PropertyUpdate: %s", sb.ToString().string());
 
     AutoPtr<IRunnable> runnable = new UpdateRunnable(this);
     AutoPtr<IMessage> msg;
@@ -207,6 +214,8 @@ ECode DoorAdapter::PropertyUpdate(
 ECode DoorAdapter::SendDoorEvent(
     /* [in] */ const String& string)
 {
+    Logger::I(TAG, " >> SendDoorEvent: %s", string.string());
+
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(CClient::MESSAGE_DOOR_EVENT, CoreUtils::Convert(string), (IMessage**)&msg);
     Boolean bval;

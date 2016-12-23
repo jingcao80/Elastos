@@ -3,6 +3,7 @@
 #include "org/alljoyn/bus/CBusAttachment.h"
 #include "org/alljoyn/bus/AuthListener.h"
 #include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/Globals.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeBusListener.h"
@@ -348,7 +349,9 @@ ECode CBusAttachment::RegisterBusObject(
     QStatus status = busPtr->RegisterBusObject(objPath.string(), busObj,
             busInterfaces, secure, languageTag, description, dt);
     if (status != ER_OK) {
-        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+        Logger::E(TAG, "%s: objPath:%s, busObj:%s, Exception: status=%08x, secure:%d, languageTag:%s, description:%s",
+            __FUNCTION__, objPath.string(), TO_CSTR(busObj),
+            secure, languageTag.string(), description.string());
     }
     return status;
 }
@@ -1699,9 +1702,7 @@ ECode CBusAttachment::RegisterSignalHandlers(
         for (Int32 i = 0; i < count; ++i) {
             method = (*methodInfos)[i];
             AutoPtr<IAnnotationInfo> annotation;
-            method->GetAnnotation(
-                String("Org.Alljoyn.Bus.Annotation.BusSignalHandler"),
-                (IAnnotationInfo**)&annotation);
+            method->GetAnnotation(Globals::Annotation_BusSignalHandler, (IAnnotationInfo**)&annotation);
             if (annotation != NULL) {
                 String matchRule;
                 annotation->GetValue(String("rule"), &matchRule);
@@ -1752,9 +1753,7 @@ ECode CBusAttachment::UnregisterSignalHandlers(
         for (Int32 i = 0; i < count; ++count) {
             method = (*methodInfos)[i];
             AutoPtr<IAnnotationInfo> annotation;
-            method->GetAnnotation(
-                String("Org.Alljoyn.Bus.Annotation.BusSignalHandler"),
-                (IAnnotationInfo**)&annotation);
+            method->GetAnnotation(Globals::Annotation_BusSignalHandler, (IAnnotationInfo**)&annotation);
             if (annotation != NULL) {
                 UnregisterSignalHandler(obj, method);
             }

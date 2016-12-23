@@ -37,6 +37,8 @@ public:
         : public ArrayAdapter
     {
     public:
+        TO_STRING_IMPL("CClient::MyArrayAdapter")
+
         MyArrayAdapter(
             /* [in] */ CClient* host);
 
@@ -72,6 +74,8 @@ public:
         , public IAdapterViewOnItemLongClickListener
     {
     public:
+        TO_STRING_IMPL("CClient::InnerListener")
+
         CAR_INTERFACE_DECL()
 
         InnerListener(
@@ -98,6 +102,8 @@ public:
         , public IDialogInterfaceOnClickListener
     {
     public:
+        TO_STRING_IMPL("CClient::PositiveOnClickListener")
+
         CAR_INTERFACE_DECL()
 
         PositiveOnClickListener(
@@ -117,6 +123,8 @@ public:
         , public IDialogInterfaceOnClickListener
     {
     public:
+        TO_STRING_IMPL("CClient::NilOnClickListener")
+
         CAR_INTERFACE_DECL()
 
          CARAPI OnClick(
@@ -132,6 +140,8 @@ public:
         , public IDialogInterfaceOnMultiChoiceClickListener
     {
     public:
+        TO_STRING_IMPL("CClient::OnMultiChoiceClickListener")
+
         CAR_INTERFACE_DECL()
 
         OnMultiChoiceClickListener(

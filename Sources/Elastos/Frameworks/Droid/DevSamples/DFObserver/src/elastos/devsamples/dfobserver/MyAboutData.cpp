@@ -27,7 +27,7 @@ static AutoPtr<IVariant> CreateStringVariant(
 {
     AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
     AutoPtr<IVariant> result;
-    CVariant::New(csq, (IVariant**)&result);
+    CVariant::New(csq, String("s"), (IVariant**)&result);
     return result;
 }
 
@@ -39,7 +39,7 @@ static AutoPtr<IVariant> CreateAppIdVariant()
         array->Set(i, CoreUtils::ConvertByte(i + 1));
     }
     AutoPtr<IVariant> result;
-    CVariant::New(array, (IVariant**)&result);
+    CVariant::New(array, String("ay"),(IVariant**)&result);
     return result;
 }
 
@@ -50,7 +50,7 @@ static AutoPtr<IVariant> CreateSupportedLanguagesVariant()
     array->Set(0, CoreUtils::Convert("en"));
 
     AutoPtr<IVariant> result;
-    CVariant::New(array, (IVariant**)&result);
+    CVariant::New(array, String("as"), (IVariant**)&result);
     return result;
 }
 

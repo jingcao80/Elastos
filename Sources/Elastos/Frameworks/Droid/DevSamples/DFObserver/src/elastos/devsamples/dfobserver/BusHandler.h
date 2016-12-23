@@ -31,12 +31,14 @@ namespace DFObserver {
 class BusHandler
     : public Handler
 {
-private:
+public:
     class ObserverListener
         : public Object
         , public IObserverListener
     {
     public:
+        TO_STRING_IMPL("BusHandler::ObserverListener")
+
         CAR_INTERFACE_DECL()
 
         ObserverListener(
@@ -56,8 +58,13 @@ private:
      */
     class DoorEventListener
         : public PropertiesChangedListener
+        , public IDoorEventListener
     {
     public:
+        TO_STRING_IMPL("BusHandler::DoorEventListener")
+
+        CAR_INTERFACE_DECL()
+
         CARAPI constructor(
             /* [in] */ IHandler* busHandler);
 
@@ -80,9 +87,12 @@ private:
         BusHandler* mHost;
     };
 
-    class InnerSessionPortListener : public SessionPortListener
+    class InnerSessionPortListener
+        : public SessionPortListener
     {
     public:
+        TO_STRING_IMPL("BusHandler::InnerSessionPortListener")
+
         CARAPI AcceptSessionJoiner(
             /* [in] */ Int16 sessionPort,
             /* [in] */ const String& joiner,
@@ -133,7 +143,7 @@ private:
     AutoPtr<IObserver> mObserver;
     List< AutoPtr<IDoorService> > mDoors;
 
-    AutoPtr<DoorEventListener> mDoorListener;
+    AutoPtr<IDoorEventListener> mDoorListener;
     AutoPtr<IConcurrentHashMap> mMap;   // ConcurrentHashMap<DoorAdapterItem, ProxyBusObject>
     AutoPtr<DoorAdapter> mDoorAdapter;
     AutoPtr<IAboutObj> mAboutObj;

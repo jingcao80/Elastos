@@ -1,4 +1,5 @@
 #include "org/alljoyn/bus/InterfaceDescription.h"
+#include "org/alljoyn/bus/Globals.h"
 #include "org/alljoyn/bus/NativeApi.h"
 #include "org/alljoyn/bus/NativeBusAttachment.h"
 #include "org/alljoyn/bus/NativeTranslator.h"
@@ -28,6 +29,8 @@ const Int32 InterfaceDescription::AJ_IFC_SECURITY_REQUIRED;
 const Int32 InterfaceDescription::AJ_IFC_SECURITY_OFF;
 const String InterfaceDescription::TAG("InterfaceDescription");
 
+static const Boolean DEBUG_PROP = FALSE;
+
 CAR_INTERFACE_IMPL(InterfaceDescription, Object, IInterfaceDescription);
 
 InterfaceDescription::InterfaceDescription()
@@ -41,6 +44,10 @@ ECode InterfaceDescription::Create(
     /* [in] */ Int32 numProps,
     /* [in] */ Int32 numMembers)
 {
+    if (DEBUG_PROP) {
+        Logger::I(TAG, " >> Create %s, numProps: %d, numMembers: %d", name.string(), numProps, numMembers);
+    }
+
     NativeBusAttachment* busPtr = reinterpret_cast<NativeBusAttachment*>(busAttachment->mHandle);
     if (busPtr == NULL) {
         Logger::E(TAG, "Create(): NULL bus pointer");
@@ -167,6 +174,11 @@ ECode InterfaceDescription::AddProperty(
     /* [in] */ Int32 access,
     /* [in] */ Int32 annotation)
 {
+    if (DEBUG_PROP) {
+        Logger::I(TAG, " >> AddProperty: %s, signature: %s, access: %s, annotation: %d",
+            name.string(), signature.string(), access == READ ? "Get" : "Set", annotation);
+    }
+
     ajn::InterfaceDescription* intf = reinterpret_cast<ajn::InterfaceDescription*>(mHandle);
     assert(intf);
 
@@ -213,6 +225,11 @@ ECode InterfaceDescription::AddPropertyAnnotation(
     /* [in] */ const String& annotation,
     /* [in] */ const String& value)
 {
+    if (DEBUG_PROP) {
+        Logger::I(TAG, " >> AddPropertyAnnotation: %s, annotation: %s, value: %s",
+            property.string(), annotation.string(), value.string());
+    }
+
     ajn::InterfaceDescription* intf = reinterpret_cast<ajn::InterfaceDescription*>(mHandle);
     assert(intf);
 
@@ -380,7 +397,7 @@ ECode InterfaceDescription::Create(
 
     Int32 securePolicy = AJ_IFC_SECURITY_INHERIT;
     AutoPtr<IAnnotationInfo> secureAnnotation;
-    busInterface->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.Secure"), (IAnnotationInfo**)&secureAnnotation);
+    busInterface->GetAnnotation(Globals::Annotation_Secure, (IAnnotationInfo**)&secureAnnotation);
     if (secureAnnotation != NULL) {
         String value;
         secureAnnotation->GetValue(String("value"), &value);
@@ -429,7 +446,7 @@ ECode InterfaceDescription::Create(
     ConfigureDescriptions(busAttachment, busInterface);
 
     AutoPtr<IAnnotationInfo> intf;
-    busInterface->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&intf);
+    busInterface->GetAnnotation(Globals::Annotation_BusInterface, (IAnnotationInfo**)&intf);
     if (intf != NULL) {
         String announced;
         intf->GetValue(String("announced"), &announced);
@@ -453,7 +470,7 @@ ECode InterfaceDescription::ConfigureDescriptions(
     /* [in] */ IInterfaceInfo* busInterface)
 {
     AutoPtr<IAnnotationInfo> ifcNote;
-    busInterface->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&ifcNote);
+    busInterface->GetAnnotation(Globals::Annotation_BusInterface, (IAnnotationInfo**)&ifcNote);
     if(NULL == ifcNote)
         return NOERROR;
 
@@ -475,7 +492,7 @@ ECode InterfaceDescription::ConfigureDescriptions(
         String name = GetName(method);
 
         AutoPtr<IAnnotationInfo> methodNote;
-        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&methodNote);
+        method->GetAnnotation(Globals::Annotation_BusMethod, (IAnnotationInfo**)&methodNote);
         String description;
         if (methodNote != NULL && (methodNote->GetValue(String("description"), &description), description.GetLength() > 0)) {
             SetMemberDescription(name, description, FALSE);
@@ -483,7 +500,7 @@ ECode InterfaceDescription::ConfigureDescriptions(
         }
 
         AutoPtr<IAnnotationInfo> signalNote;
-        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&signalNote);
+        method->GetAnnotation(Globals::Annotation_BusSignal, (IAnnotationInfo**)&signalNote);
         if (signalNote != NULL && (signalNote->GetValue(String("description"), &description), description.GetLength() > 0)) {
             String sessionless;
             signalNote->GetValue(String("sessionless"), &sessionless);
@@ -492,7 +509,7 @@ ECode InterfaceDescription::ConfigureDescriptions(
         }
 
         AutoPtr<IAnnotationInfo> propNote;
-        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&propNote);
+        method->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&propNote);
         if (propNote != NULL && (propNote->GetValue(String("description"), &description), description.GetLength() > 0)) {
             SetPropertyDescription(name, description);
             hasDescriptions = TRUE;
@@ -532,19 +549,30 @@ ECode InterfaceDescription::ConfigureDescriptions(
 ECode InterfaceDescription::GetProperties(
     /* [in] */ IInterfaceInfo* busInterface)
 {
+    String ifceName;
+    busInterface->GetName(&ifceName);
+
+    if (DEBUG_PROP) {
+        Logger::I(TAG, " >> GetProperties: %s", ifceName.string());
+    }
+
     Int32 count;
     busInterface->GetMethodCount(&count);
     AutoPtr< ArrayOf<IMethodInfo*> > methods = ArrayOf<IMethodInfo*>::Alloc(count);
     busInterface->GetAllMethodInfos(methods);
+    IMethodInfo* method;
+    String methodName, signature;
     for (Int32 i = 0; i < methods->GetLength(); i++) {
-        IMethodInfo* method = (*methods)[i];
+        method = (*methods)[i];
+
         AutoPtr<IAnnotationInfo> busProperty;
-        method->GetAnnotation(String("Org.Alljoyn.Bus.BusProperty"), (IAnnotationInfo**)&busProperty);
+        method->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&busProperty);
         if (busProperty != NULL) {
+            method->GetName(&methodName);
             String name = GetName(method);
             AutoPtr<Property> property = mProperties[name];
-            // AutoPtr<IAnnotationInfo> propertyAnnotations;
-            // method->GetAnnotation(String("Org.Alljoyn.Bus.BusAnnotations"), (IAnnotationInfo**)&propertyAnnotations);
+            AutoPtr<IAnnotationInfo> propertyAnnotations;
+            method->GetAnnotation(Globals::Annotation_BusAnnotations, (IAnnotationInfo**)&propertyAnnotations);
             AutoPtr<HashMap<String, String> > annotations = new HashMap<String, String>();
             // TODO:
             // if (propertyAnnotations != NULL) {
@@ -553,20 +581,19 @@ ECode InterfaceDescription::GetProperties(
             //     }
             // }
 
+            signature = GetPropertySig(method);
             if (property == NULL) {
-                property = new Property(name, GetPropertySig(method), annotations);
+                property = new Property(name, signature, annotations);
             }
-            else if (!property->mSignature.Equals(GetPropertySig(method))) {
+            else if (!property->mSignature.Equals(signature)) {
+                Logger::E(TAG, " >> GetProperties signature does not match.");
                 return E_STATUS_BAD_ANNOTATION;
             }
 
-            String methodName;
-            method->GetName(&methodName);
-            if (methodName.StartWith("Get")) {
+               if (methodName.StartWith("Get")) {
                 property->mGet = method;
             }
-            else if (methodName.StartWith("Set")
-                /*&& (method.getGenericReturnType().equals(void.class))*/) {
+            else if (methodName.StartWith("Set")) {
                 property->mSet = method;
             }
             else {
@@ -586,6 +613,7 @@ ECode InterfaceDescription::AddProperties(
     AutoPtr< ArrayOf<IMethodInfo*> > methods = ArrayOf<IMethodInfo*>::Alloc(count);
     busInterface->GetAllMethodInfos(methods);
 
+    String methodName;
     HashMap<String, AutoPtr<Property> >::Iterator it = mProperties.Begin();
     for (; it != mProperties.End(); ++it) {
         Property* property = it->mSecond;
@@ -595,12 +623,21 @@ ECode InterfaceDescription::AddProperties(
         for (Int32 i = 0; i < methods->GetLength(); i++) {
             IMethodInfo* method = (*methods)[i];
             AutoPtr<IAnnotationInfo> p;
-            method->GetAnnotation(String("Org.Alljoyn.Bus.BusProperty"), (IAnnotationInfo**)&p);
+            method->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&p);
             if (p != NULL) {
-                if (GetName(method).Equals(property->mName)) {
+                methodName = GetName(method);
+                if (methodName.Equals(property->mName)) {
                     String strAnnotation;
                     p->GetValue(String("annotation"), &strAnnotation);
-                    annotation = StringUtils::ParseInt32(strAnnotation);
+                    if (strAnnotation.Equals(Globals::BusProperty_ANNOTATE_EMIT_CHANGED_SIGNAL_STRING)) {
+                        annotation = 1;
+                    }
+                    else if (strAnnotation.Equals(Globals::BusProperty_ANNOTATE_EMIT_CHANGED_SIGNAL_INVALIDATES_STRING)) {
+                        annotation = 2;
+                    }
+                    else {
+                        annotation = StringUtils::ParseInt32(strAnnotation);
+                    }
                 }
             }
         }
@@ -609,11 +646,11 @@ ECode InterfaceDescription::AddProperties(
             return status;
         }
 
-        if (annotation == 1/*BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL*/) {
-            (*property->mAnnotations)[String("org.freedesktop.DBus.Property.EmitsChangedSignal")] = String("true");
+        if (annotation == Globals::BusProperty_ANNOTATE_EMIT_CHANGED_SIGNAL) {
+            (*property->mAnnotations)[Globals::BusProperty_EmitsChangedSignal] = String("true");
         }
-        else if (annotation == 2/*BusProperty.ANNOTATE_EMIT_CHANGED_SIGNAL_INVALIDATES*/) {
-            (*property->mAnnotations)[String("org.freedesktop.DBus.Property.EmitsChangedSignal")] = String("invalidates");
+        else if (annotation == Globals::BusProperty_ANNOTATE_EMIT_CHANGED_SIGNAL_INVALIDATES) {
+            (*property->mAnnotations)[Globals::BusProperty_EmitsChangedSignal] = String("invalidates");
         }
 
         // loop through the map of properties and add them via native code
@@ -635,12 +672,12 @@ ECode InterfaceDescription::GetMembers(
     for (Int32 i = 0; i < methods->GetLength(); i++) {
         IMethodInfo* method = (*methods)[i];
         AutoPtr<IAnnotationInfo> busMethod;
-        method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
+        method->GetAnnotation(Globals::Annotation_BusMethod, (IAnnotationInfo**)&busMethod);
         AutoPtr<IAnnotationInfo> busSignal;
         if (busMethod != NULL) {
             mMembers.PushBack(method);
         }
-        else if (method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"),
+        else if (method->GetAnnotation(Globals::Annotation_BusSignal,
             (IAnnotationInfo**)&busSignal), busSignal != NULL) {
             mMembers.PushBack(method);
         }
@@ -658,11 +695,11 @@ ECode InterfaceDescription::AddMembers(
         Int32 annotation = 0;
         String accessPerm;
         AutoPtr<IAnnotationInfo> m;
-        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&m);
+        member->GetAnnotation(Globals::Annotation_BusMethod, (IAnnotationInfo**)&m);
         AutoPtr<IAnnotationInfo> s;
-        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&s);
+        member->GetAnnotation(Globals::Annotation_BusSignal, (IAnnotationInfo**)&s);
         AutoPtr<IAnnotationInfo> ap;
-        member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.AccessPermission"), (IAnnotationInfo**)&ap);
+        member->GetAnnotation(Globals::Annotation_AccessPermission, (IAnnotationInfo**)&ap);
 
         String value;
         if (m != NULL) {
@@ -689,7 +726,7 @@ ECode InterfaceDescription::AddMembers(
 
             // pull out the DBus annotations
             AutoPtr<IAnnotationInfo> dbusAnnotations;
-            member->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusAnnotations"),
+            member->GetAnnotation(Globals::Annotation_BusAnnotations,
                 (IAnnotationInfo**)&dbusAnnotations);
             // if (dbusAnnotations != NULL) {
             //     for (BusAnnotation busAnnotation : dbusAnnotations.value()) {
@@ -723,7 +760,7 @@ ECode InterfaceDescription::Create(
         }
 
         AutoPtr<IAnnotationInfo> ifcNote;
-        intf->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&ifcNote);
+        intf->GetAnnotation(Globals::Annotation_BusInterface, (IAnnotationInfo**)&ifcNote);
         if (ifcNote != NULL) {
             AutoPtr<InterfaceDescription> desc = new InterfaceDescription();
 
@@ -742,7 +779,7 @@ String InterfaceDescription::GetName(
     /* [in] */ IInterfaceInfo* intf)
 {
     AutoPtr<IAnnotationInfo> busIntf;
-    intf->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusInterface"), (IAnnotationInfo**)&busIntf);
+    intf->GetAnnotation(Globals::Annotation_BusInterface, (IAnnotationInfo**)&busIntf);
     String name;
     if (busIntf != NULL && (busIntf->GetValue(String("name"), &name), !name.IsNullOrEmpty())) {
         return name;
@@ -773,18 +810,18 @@ String InterfaceDescription::GetName(
     /* [in] */ IMethodInfo* method)
 {
     AutoPtr<IAnnotationInfo> busMethod;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
+    method->GetAnnotation(Globals::Annotation_BusMethod, (IAnnotationInfo**)&busMethod);
     String name;
     if (busMethod != NULL && (busMethod->GetValue(String("name"), &name), !name.IsNullOrEmpty())) {
         return name;
     }
     AutoPtr<IAnnotationInfo> busSignal;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
+    method->GetAnnotation(Globals::Annotation_BusSignal, (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("name"), &name), !name.IsNullOrEmpty())) {
         return name;
     }
     AutoPtr<IAnnotationInfo> busProperty;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&busProperty);
+    method->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&busProperty);
     if (busProperty != NULL) {
         busProperty->GetValue(String("name"), &name);
         if (!name.IsNullOrEmpty()) {
@@ -810,13 +847,13 @@ String InterfaceDescription::GetInputSig(
     method->GetAllParamInfos(paramInfos);
 
     AutoPtr<IAnnotationInfo> busMethod;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
+    method->GetAnnotation(Globals::Annotation_BusMethod, (IAnnotationInfo**)&busMethod);
     String signature;
     if (busMethod != NULL && (busMethod->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
         return Signature::TypeSig(paramInfos, signature, TRUE);
     }
     AutoPtr<IAnnotationInfo> busSignal;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
+    method->GetAnnotation(Globals::Annotation_BusSignal, (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("signature"), &signature), signature.GetLength() > 0)) {
         return Signature::TypeSig(paramInfos, signature, TRUE);
     }
@@ -833,13 +870,13 @@ String InterfaceDescription::GetOutSig(
     method->GetAllParamInfos(paramInfos);
 
     AutoPtr<IAnnotationInfo> busMethod;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusMethod"), (IAnnotationInfo**)&busMethod);
+    method->GetAnnotation(Globals::Annotation_BusMethod, (IAnnotationInfo**)&busMethod);
     String replySignature;
     if (busMethod != NULL && (busMethod->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
         return Signature::TypeSig(paramInfos, replySignature, FALSE);
     }
     AutoPtr<IAnnotationInfo> busSignal;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusSignal"), (IAnnotationInfo**)&busSignal);
+    method->GetAnnotation(Globals::Annotation_BusSignal, (IAnnotationInfo**)&busSignal);
     if (busSignal != NULL && (busSignal->GetValue(String("replySignature"), &replySignature), replySignature.GetLength() > 0)) {
         return Signature::TypeSig(paramInfos, replySignature, FALSE);
     }
@@ -862,7 +899,7 @@ String InterfaceDescription::GetPropertySig(
         paramInfo->GetTypeInfo((IDataTypeInfo**)&type);
     }
     AutoPtr<IAnnotationInfo> busProperty;
-    method->GetAnnotation(String("Org.Alljoyn.Bus.Annotation.BusProperty"), (IAnnotationInfo**)&busProperty);
+    method->GetAnnotation(Globals::Annotation_BusProperty, (IAnnotationInfo**)&busProperty);
     String signature;
     if (busProperty != NULL && (busProperty->GetValue(String("signature"), &signature),
         signature.GetLength() > 0)) {

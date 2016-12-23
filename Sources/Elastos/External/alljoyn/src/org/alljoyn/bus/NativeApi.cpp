@@ -295,6 +295,21 @@ ajn::MsgArg* Marshal(
     return arg;
 }
 
+ajn::MsgArg* Marshal(
+    /* [in] */ const char* signature,
+    /* [in] */ IInterface* obj,
+    /* [in] */ ajn::MsgArg* arg)
+{
+    if (!signature) {
+        return NULL;
+    }
+
+    if (FAILED(MsgArg::MarshalInterface((Int64)arg, String(signature), obj))) {
+        return NULL;
+    }
+    return arg;
+}
+
 /**
  * Marshal an Object[] into MsgArgs.  The arguments are marshalled into an
  * ALLJOYN_STRUCT with the members set to the marshalled Object[] elements.
@@ -334,6 +349,14 @@ ECode Unmarshal(
     /* [out] */ PVoid object)
 {
     return MsgArg::Unmarshal((Int64)arg, object);
+}
+
+ECode Unmarshal(
+    /* [in] */ const ajn::MsgArg* arg,
+    /* [in] */ const char* signature,
+    /* [out] */ IInterface** object)
+{
+    return MsgArg::UnmarshalInterface((Int64)arg, String(signature), object);
 }
 
 /**

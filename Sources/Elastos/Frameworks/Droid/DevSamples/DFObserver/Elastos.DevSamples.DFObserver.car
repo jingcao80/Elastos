@@ -23,6 +23,7 @@ module
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Org.Alljoyn.Bus.IBusObject;
+    using interface Org.Alljoyn.Bus.IPropertiesChangedListener;
 
     namespace Elastos {
     namespace DevSamples {
@@ -52,6 +53,14 @@ module
         interface IDoorService;
         interface IDoor;
         interface IBusObject;
+    }
+
+    class CDoorEventListener {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IDoorEventListener;
+        interface IPropertiesChangedListener;
     }
 
     } // namespace DFObserver
