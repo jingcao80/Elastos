@@ -518,17 +518,15 @@ ECode CCursorNative::GetColumnNames(
 
     if (jcolumnNames != NULL) {
         jint jcount = env->GetArrayLength(jcolumnNames);
-        if (jcount > 0) {
-            *columnNames = ArrayOf<String>::Alloc((Int32)jcount);
-            REFCOUNT_ADD(*columnNames)
-            if (*columnNames != NULL) {
-                for (Int32 i = 0; i < jcount; i++) {
-                    jstring jcolumnName = (jstring)env->GetObjectArrayElement(jcolumnNames, i);
-                    Util::CheckErrorAndLog(env, "GetColumnNames", "Fail GetObjectArrayElement: jcolumnNames %d", __LINE__);
-                    String columnName = Util::GetElString(env, jcolumnName);
-                    (*columnNames)->Set(i, columnName);
-                    env->DeleteLocalRef(jcolumnName);
-                }
+        *columnNames = ArrayOf<String>::Alloc((Int32)jcount);
+        REFCOUNT_ADD(*columnNames)
+        if (*columnNames != NULL) {
+            for (Int32 i = 0; i < jcount; i++) {
+                jstring jcolumnName = (jstring)env->GetObjectArrayElement(jcolumnNames, i);
+                Util::CheckErrorAndLog(env, "GetColumnNames", "Fail GetObjectArrayElement: jcolumnNames %d", __LINE__);
+                String columnName = Util::GetElString(env, jcolumnName);
+                (*columnNames)->Set(i, columnName);
+                env->DeleteLocalRef(jcolumnName);
             }
         }
         env->DeleteLocalRef(jcolumnNames);
