@@ -16,6 +16,7 @@ using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Core::CThrowable;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IByte;
 using Elastos::Core::IInteger32;
@@ -150,106 +151,208 @@ ECode AdnRecordLoader::HandleMessage(
     msg->GetWhat(&what);
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
+    AutoPtr<IThrowable> exc;
+    ECode ec = NOERROR;
 
     // try {
-        switch (what) {
-            case EVENT_EF_LINEAR_RECORD_SIZE_DONE: {
-                ar = (AsyncResult*)IAsyncResult::Probe(obj);
-                adn = (AdnRecord*)IAdnRecord::Probe(ar->mUserObj);
+    switch (what) {
+        case EVENT_EF_LINEAR_RECORD_SIZE_DONE: {
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            adn = (AdnRecord*)IAdnRecord::Probe(ar->mUserObj);
 
-                if (ar->mException != NULL) {
-                    // throw new RuntimeException("get EF record size failed",
-                    //         ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
+            if (ar->mException != NULL) {
+                // throw new RuntimeException("get EF record size failed",
+                //         ar.exception);
+                CThrowable::New(String("get EF record size failed"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
+                break;
+            }
 
-                AutoPtr<IArrayOf> pArr = IArrayOf::Probe(ar->mResult);
-                Int32 size = 0;
-                pArr->GetLength(&size);
-                AutoPtr<ArrayOf<Int32> > recordSize = ArrayOf<Int32>::Alloc(size);
-                for (Int32 i = 0; i < size; ++i) {
-                    AutoPtr<IInterface> p;
-                    pArr->Get(i, (IInterface**)&p);
-                    IInteger32::Probe(p)->GetValue(&((*recordSize)[i]));
-                }
-                // recordSize is int[3] array
-                // int[0]  is the record length
-                // int[1]  is the total length of the EF file
-                // int[2]  is the number of records in the EF file
-                // So int[0] * int[2] = int[1]
-                if (recordSize->GetLength() != 3 || mRecordNumber > (*recordSize)[2]) {
-                    // throw new RuntimeException("get wrong EF record size format",
-                    //         ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
+            AutoPtr<IArrayOf> pArr = IArrayOf::Probe(ar->mResult);
+            Int32 size = 0;
+            pArr->GetLength(&size);
+            AutoPtr<ArrayOf<Int32> > recordSize = ArrayOf<Int32>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> p;
+                pArr->Get(i, (IInterface**)&p);
+                IInteger32::Probe(p)->GetValue(&((*recordSize)[i]));
+            }
+            // recordSize is int[3] array
+            // int[0]  is the record length
+            // int[1]  is the total length of the EF file
+            // int[2]  is the number of records in the EF file
+            // So int[0] * int[2] = int[1]
+            if (recordSize->GetLength() != 3 || mRecordNumber > (*recordSize)[2]) {
+                // throw new RuntimeException("get wrong EF record size format",
+                //         ar.exception);
+                CThrowable::New(String("get wrong EF record size format"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
+                break;
+            }
 
-                adn->BuildAdnString((*recordSize)[0], (ArrayOf<Byte>**)&data);
+            adn->BuildAdnString((*recordSize)[0], (ArrayOf<Byte>**)&data);
 
-                if (data == NULL) {
-                    // throw new RuntimeException("wrong ADN format",
-                    //         ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
+            if (data == NULL) {
+                // throw new RuntimeException("wrong ADN format",
+                //         ar.exception);
+                CThrowable::New(String("wrong ADN format"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
+                break;
+            }
 
-                AutoPtr<IMessage> msg;
-                ObtainMessage(EVENT_UPDATE_RECORD_DONE, (IMessage**)&msg);
-                if (mEf == IIccConstants::EF_ADN) {
-                    mFh->UpdateEFLinearFixed(mEf, GetEFPath(mEf), mRecordNumber,
-                            data, mPin2, msg);
-                }
-                else {
-                    mFh->UpdateEFLinearFixed(mEf, mRecordNumber,
-                            data, mPin2, msg);
-                }
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_RECORD_DONE, (IMessage**)&msg);
+            if (mEf == IIccConstants::EF_ADN) {
+                mFh->UpdateEFLinearFixed(mEf, GetEFPath(mEf), mRecordNumber,
+                        data, mPin2, msg);
+            }
+            else {
+                mFh->UpdateEFLinearFixed(mEf, mRecordNumber,
+                        data, mPin2, msg);
+            }
+
+            mPendingExtLoads = 1;
+
+            break;
+        }
+        case EVENT_UPDATE_RECORD_DONE: {
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            if (ar->mException != NULL) {
+                // throw new RuntimeException("update EF adn record failed",
+                //         ar.exception);
+                CThrowable::New(String("update EF adn record failed"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
+                break;
+            }
+            mPendingExtLoads = 0;
+            mResult = NULL;
+            break;
+        }
+        case EVENT_ADN_LOAD_DONE: {
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> p;
+                pArr->Get(i, (IInterface**)&p);
+                IByte::Probe(p)->GetValue(&((*data)[i]));
+            }
+
+            if (ar->mException != NULL) {
+                // throw new RuntimeException("load failed", ar.exception);
+                CThrowable::New(String("load failed"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
+                break;
+            }
+
+            if (VDBG) {
+                AutoPtr<IIccUtils> iccu;
+                CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+                String str;
+                iccu->BytesToHexString(data, &str);
+                Logger::D(LOGTAG, String("ADN EF: 0x")
+                    + StringUtils::ToString(mEf)
+                    + String(":") + StringUtils::ToString(mRecordNumber)
+                    + String("\n") + str);
+            }
+
+            AutoPtr<IAdnRecord> tmp;
+            CAdnRecord::New(mEf, mRecordNumber, data, (IAdnRecord**)&tmp);
+            adn = (AdnRecord*)tmp.Get();
+            mResult = adn->Probe(EIID_IInterface);
+
+            Boolean bHasExtendedRecord = FALSE;
+            adn->HasExtendedRecord(&bHasExtendedRecord);
+            if (bHasExtendedRecord) {
+                // If we have a valid value in the ext record field,
+                // we're not done yet: we need to read the corresponding
+                // ext record and append it
 
                 mPendingExtLoads = 1;
 
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_EXT_RECORD_LOAD_DONE, (IObject*)adn.Get(), (IMessage**)&msg);
+                mFh->LoadEFLinearFixed(
+                    mExtensionEF, adn->mExtRecord,
+                    msg);
+            }
+            break;
+        }
+        case EVENT_EXT_RECORD_LOAD_DONE: {
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
+            Int32 size = 0;
+            pArr->GetSize(&size);
+            data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> p;
+                pArr->Get(i, (IInterface**)&p);
+                IByte::Probe(p)->GetValue(&((*data)[i]));
+            }
+            adn = (AdnRecord*)IAdnRecord::Probe(ar->mUserObj);
+
+            if (ar->mException != NULL) {
+                // throw new RuntimeException("load failed", ar.exception);
+                CThrowable::New(String("load failed"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
                 break;
             }
-            case EVENT_UPDATE_RECORD_DONE: {
-                ar = (AsyncResult*)IAsyncResult::Probe(obj);
-                if (ar->mException != NULL) {
-                    // throw new RuntimeException("update EF adn record failed",
-                    //         ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
-                mPendingExtLoads = 0;
-                mResult = NULL;
+
+            AutoPtr<IIccUtils> iccu;
+            CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+            String str;
+            iccu->BytesToHexString(data, &str);
+            Logger::D(LOGTAG, String("ADN extension EF: 0x")
+                + StringUtils::ToString(mExtensionEF)
+                + String(":") + StringUtils::ToString(adn->mExtRecord)
+                + String("\n") + str);
+
+            adn->AppendExtRecord(data);
+
+            mPendingExtLoads--;
+            // result should have been set in
+            // EVENT_ADN_LOAD_DONE or EVENT_ADN_LOAD_ALL_DONE
+            break;
+        }
+        case EVENT_ADN_LOAD_ALL_DONE: {
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            AutoPtr<IArrayList> datas = IArrayList::Probe(ar->mResult);
+
+            if (ar->mException != NULL) {
+                // throw new RuntimeException("load failed", ar.exception);
+                CThrowable::New(String("load failed"), (IThrowable**)&exc);
+                ec = E_RUNTIME_EXCEPTION;
                 break;
             }
-            case EVENT_ADN_LOAD_DONE: {
-                ar = (AsyncResult*)IAsyncResult::Probe(obj);
-                AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
-                Int32 size = 0;
-                pArr->GetSize(&size);
-                data = ArrayOf<Byte>::Alloc(size);
-                for (Int32 i = 0; i < size; ++i) {
-                    AutoPtr<IInterface> p;
-                    pArr->Get(i, (IInterface**)&p);
-                    IByte::Probe(p)->GetValue(&((*data)[i]));
-                }
 
-                if (ar->mException != NULL) {
-                    // throw new RuntimeException("load failed", ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
+            Int32 size = 0;
+            datas->GetSize(&size);
+            CArrayList::New(size, (IArrayList**)&mAdns);
+            mResult = mAdns;
+            mPendingExtLoads = 0;
 
-                if (VDBG) {
-                    AutoPtr<IIccUtils> iccu;
-                    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
-                    String str;
-                    iccu->BytesToHexString(data, &str);
-                    Logger::D(LOGTAG, String("ADN EF: 0x")
-                        + StringUtils::ToString(mEf)
-                        + String(":") + StringUtils::ToString(mRecordNumber)
-                        + String("\n") + str);
+            for (Int32 i = 0, s = size; i < s; i++) {
+                AutoPtr<IInterface> p;
+                datas->Get(i, (IInterface**)&p);
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(p);
+                assert(array != NULL);
+
+                Int32 len = 0;
+                array->GetLength(&len);
+                AutoPtr<ArrayOf<Byte> > bs = ArrayOf<Byte>::Alloc(len);
+                for (Int32 x = 0; x < len; x++) {
+                    AutoPtr<IInterface> bo;
+                    array->Get(x, (IInterface**)&bo);
+                    IByte::Probe(bo)->GetValue(&((*bs)[x]));
                 }
 
                 AutoPtr<IAdnRecord> tmp;
-                CAdnRecord::New(mEf, mRecordNumber, data, (IAdnRecord**)&tmp);
+                CAdnRecord::New(mEf, 1 + i, bs, (IAdnRecord**)&tmp);
                 adn = (AdnRecord*)tmp.Get();
-                mResult = adn->Probe(EIID_IInterface);
 
+                mAdns->Add(tmp);
                 Boolean bHasExtendedRecord = FALSE;
                 adn->HasExtendedRecord(&bHasExtendedRecord);
                 if (bHasExtendedRecord) {
@@ -257,103 +360,17 @@ ECode AdnRecordLoader::HandleMessage(
                     // we're not done yet: we need to read the corresponding
                     // ext record and append it
 
-                    mPendingExtLoads = 1;
-
+                    mPendingExtLoads++;
                     AutoPtr<IMessage> msg;
                     ObtainMessage(EVENT_EXT_RECORD_LOAD_DONE, (IObject*)adn.Get(), (IMessage**)&msg);
                     mFh->LoadEFLinearFixed(
                         mExtensionEF, adn->mExtRecord,
                         msg);
                 }
-                break;
             }
-            case EVENT_EXT_RECORD_LOAD_DONE: {
-                ar = (AsyncResult*)IAsyncResult::Probe(obj);
-                AutoPtr<IArrayList> pArr = IArrayList::Probe(ar->mResult);
-                Int32 size = 0;
-                pArr->GetSize(&size);
-                data = ArrayOf<Byte>::Alloc(size);
-                for (Int32 i = 0; i < size; ++i) {
-                    AutoPtr<IInterface> p;
-                    pArr->Get(i, (IInterface**)&p);
-                    IByte::Probe(p)->GetValue(&((*data)[i]));
-                }
-                adn = (AdnRecord*)IAdnRecord::Probe(ar->mUserObj);
-
-                if (ar->mException != NULL) {
-                    // throw new RuntimeException("load failed", ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
-
-                AutoPtr<IIccUtils> iccu;
-                CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
-                String str;
-                iccu->BytesToHexString(data, &str);
-                Logger::D(LOGTAG, String("ADN extension EF: 0x")
-                    + StringUtils::ToString(mExtensionEF)
-                    + String(":") + StringUtils::ToString(adn->mExtRecord)
-                    + String("\n") + str);
-
-                adn->AppendExtRecord(data);
-
-                mPendingExtLoads--;
-                // result should have been set in
-                // EVENT_ADN_LOAD_DONE or EVENT_ADN_LOAD_ALL_DONE
-                break;
-            }
-            case EVENT_ADN_LOAD_ALL_DONE: {
-                ar = (AsyncResult*)IAsyncResult::Probe(obj);
-                AutoPtr<IArrayList> datas = IArrayList::Probe(ar->mResult);
-
-                if (ar->mException != NULL) {
-                    // throw new RuntimeException("load failed", ar.exception);
-                    return E_RUNTIME_EXCEPTION;
-                }
-
-                Int32 size = 0;
-                datas->GetSize(&size);
-                CArrayList::New(size, (IArrayList**)&mAdns);
-                mResult = mAdns;
-                mPendingExtLoads = 0;
-
-                for (Int32 i = 0, s = size; i < s; i++) {
-                    AutoPtr<IInterface> p;
-                    datas->Get(i, (IInterface**)&p);
-                    AutoPtr<IArrayOf> array = IArrayOf::Probe(p);
-                    assert(array != NULL);
-
-                    Int32 len = 0;
-                    array->GetLength(&len);
-                    AutoPtr<ArrayOf<Byte> > bs = ArrayOf<Byte>::Alloc(len);
-                    for (Int32 x = 0; x < len; x++) {
-                        AutoPtr<IInterface> bo;
-                        array->Get(x, (IInterface**)&bo);
-                        IByte::Probe(bo)->GetValue(&((*bs)[x]));
-                    }
-
-                    AutoPtr<IAdnRecord> tmp;
-                    CAdnRecord::New(mEf, 1 + i, bs, (IAdnRecord**)&tmp);
-                    adn = (AdnRecord*)tmp.Get();
-
-                    mAdns->Add(tmp);
-                    Boolean bHasExtendedRecord = FALSE;
-                    adn->HasExtendedRecord(&bHasExtendedRecord);
-                    if (bHasExtendedRecord) {
-                        // If we have a valid value in the ext record field,
-                        // we're not done yet: we need to read the corresponding
-                        // ext record and append it
-
-                        mPendingExtLoads++;
-                        AutoPtr<IMessage> msg;
-                        ObtainMessage(EVENT_EXT_RECORD_LOAD_DONE, (IObject*)adn.Get(), (IMessage**)&msg);
-                        mFh->LoadEFLinearFixed(
-                            mExtensionEF, adn->mExtRecord,
-                            msg);
-                    }
-                }
-            break;
-            }
+        break;
         }
+    }
     // } catch (RuntimeException exc) {
     //     if (mUserResponse != NULL) {
     //         AsyncResult.forMessage(mUserResponse)
@@ -365,6 +382,19 @@ ECode AdnRecordLoader::HandleMessage(
     //     }
     //     return;
     // }
+
+    if (ec == (ECode)E_RUNTIME_EXCEPTION) {
+        if (mUserResponse != NULL) {
+            AutoPtr<AsyncResult> ar = AsyncResult::ForMessage(mUserResponse);
+            ar->mException = exc;
+Logger::D("AdnRecordLoader", "[TODO wanli HandleMessage] =============1, exc=[%s]", TO_CSTR(exc));
+            mUserResponse->SendToTarget();
+            // Loading is all or nothing--either every load succeeds
+            // or we fail the whole thing.
+            mUserResponse = NULL;
+        }
+        return NOERROR;
+    }
 
     if (mUserResponse != NULL && mPendingExtLoads == 0) {
         AsyncResult::ForMessage(mUserResponse)->mResult
