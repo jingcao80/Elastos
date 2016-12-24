@@ -63,6 +63,8 @@ public:
     static CARAPI_(AutoPtr<ICharSequence>) Convert(
         /* [in] */ const char* str);
 
+    // Convert ArrayOf to IArrayOf
+    //
     static CARAPI_(AutoPtr<IArrayOf>) ConvertByteArray(
         /* [in] */ ArrayOf<Byte>* arr);
 
@@ -90,21 +92,163 @@ public:
     static CARAPI_(AutoPtr<IArrayOf>) Convert(
         /* [in] */ ArrayOf<String>* arr);
 
-    template<typename T>
-    static CARAPI_(AutoPtr<IArrayOf>) Convert(
-        /* [in] */ ArrayOf<T*>* arr)
+    static CARAPI_(AutoPtr<IArrayOf>) ConvertByteArray(
+        /* [in] */ const AutoPtr< ArrayOf<Byte> >& arr)
     {
-        if (arr) {
-            Int32 length = arr->GetLength();
-            AutoPtr<IArrayOf> arrObj;
-            CArrayOf::New(EIID_IInterface, length, (IArrayOf**)&arrObj);
-            for (Int32 i = 0; i < length; ++i) {
-                arrObj->Set(i, TO_IINTERFACE((*arr)[i]));
-            }
+        return ConvertByteArray(arr.Get());
+    }
 
-            return arrObj;
+    static CARAPI_(AutoPtr<IArrayOf>) ConvertChar32Array(
+        /* [in] */ const AutoPtr< ArrayOf<Char32> >& arr)
+    {
+        return ConvertChar32Array(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        /* [in] */ const AutoPtr< ArrayOf<Boolean> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        /* [in] */ const AutoPtr< ArrayOf<Int16> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        const AutoPtr< ArrayOf<Int32> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        const AutoPtr< ArrayOf<Int64> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        const AutoPtr< ArrayOf<Float> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        const AutoPtr< ArrayOf<Double> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        const AutoPtr< ArrayOf<String> >& arr)
+    {
+        return Convert(arr.Get());
+    }
+
+    template<typename InterfaceType>
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        /* [in] */ ArrayOf<InterfaceType*>* arr,
+        /* [in] */ const InterfaceID& iid = EIID_IInterface)
+    {
+        if (arr == NULL) {
+            return NULL;
         }
-        return NULL;
+
+        Int32 length = arr->GetLength();
+        AutoPtr<IArrayOf> arrObj;
+        CArrayOf::New(iid, length, (IArrayOf**)&arrObj);
+        for (Int32 i = 0; i < length; ++i) {
+            arrObj->Set(i, (*arr)[i] ? (*arr)[i]->Probe(iid) : NULL);
+        }
+
+        return arrObj;
+    }
+
+    template<typename InterfaceType>
+    static CARAPI_(AutoPtr<IArrayOf>) Convert(
+        /* [in] */ const AutoPtr<ArrayOf<InterfaceType*> >& arr,
+        /* [in] */ const InterfaceID& iid)
+    {
+        return Convert<InterfaceType>(arr.Get(), iid);
+    }
+
+    // Convert IArrayOf to ArrayOf
+    //
+    // example: AutoPtr<ArrayOf<Byte> > array = Convert<Byte, IByte>(arrayOf);
+    //
+    template<typename ElementType, typename InterfaceType>
+    static AutoPtr<ArrayOf<ElementType> > Convert(
+        /* [in] */ IArrayOf* arrayOf)
+    {
+        if (arrayOf == NULL) {
+            return NULL;
+        }
+
+        Int32 length;
+        arrayOf->GetLength(&length);
+        AutoPtr<ArrayOf<ElementType> > array = ArrayOf<ElementType>::Alloc(length);
+        InterfaceID iid;
+        arrayOf->GetTypeId(&iid);
+
+        assert(iid == EIID_IByte
+            || iid == EIID_IChar32
+            || iid == EIID_IBoolean
+            || iid == EIID_IInteger16
+            || iid == EIID_IInteger32
+            || iid == EIID_IInteger64
+            || iid == EIID_IFloat
+            || iid == EIID_IDouble);
+
+        for (Int32 i = 0; i < length; ++i) {
+            AutoPtr<IInterface> obj;
+            arrayOf->Get(i, (IInterface**)&obj);
+            InterfaceType* elementObj = (InterfaceType*)obj->Probe(iid);
+            ElementType element;
+            elementObj->GetValue(&element);
+            array->Set(i, element);
+        }
+        return array;
+    }
+
+    template<typename InterfaceType>
+    static AutoPtr<ArrayOf<InterfaceType*> > Convert(
+        /* [in] */ IArrayOf* arrayOf)
+    {
+        if (arrayOf == NULL) {
+            return NULL;
+        }
+
+        Int32 length;
+        arrayOf->GetLength(&length);
+        AutoPtr<ArrayOf<InterfaceType*> > array = ArrayOf<InterfaceType*>::Alloc(length);
+        InterfaceID iid;
+        arrayOf->GetTypeId(&iid);
+
+        for (Int32 i = 0; i < length; ++i) {
+            AutoPtr<IInterface> obj;
+            arrayOf->Get(i, (IInterface**)&obj);
+            array->Set(i, obj ? (InterfaceType*)obj->Probe(iid) : NULL);
+        }
+        return array;
+    }
+
+    static AutoPtr<ArrayOf<String> > Convert(
+        /* [in] */ IArrayOf* arrayOf)
+    {
+        if (arrayOf == NULL) {
+            return NULL;
+        }
+
+        Int32 length;
+        arrayOf->GetLength(&length);
+        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(length);
+        for (Int32 i = 0; i < length; ++i) {
+            AutoPtr<IInterface> obj;
+            arrayOf->Get(i, (IInterface**)&obj);
+            array->Set(i, Object::ToString(obj));
+        }
+        return array;
     }
 
 private:
@@ -126,6 +270,8 @@ private:
         }
         return NULL;
     }
+
+
 
 private:
     ECO_LOCAL CoreUtils();

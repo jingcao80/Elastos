@@ -57,6 +57,7 @@
 
 using Elastos::Droid::Hardware::Camera2::Utils::TypeReference;
 using Elastos::Droid::Hardware::Camera2::Impl::CCameraMetadataNative;
+using Elastos::Droid::Hardware::Camera2::Params::EIID_IFace;
 using Elastos::Droid::Hardware::Camera2::Params::CFace;
 using Elastos::Droid::Hardware::Camera2::Params::CLensShadingMap;
 using Elastos::Droid::Hardware::Camera2::Params::IStreamConfiguration;
@@ -96,6 +97,7 @@ using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::EIID_IRect;
 using Elastos::Droid::Utility::ISize;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
@@ -155,7 +157,7 @@ ECode GetCommand_Faces::GetValue(
 
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
     AutoPtr<ArrayOf<IFace*> > array = metadataNative->GetFaces();
-    AutoPtr<IArrayOf> _outface = CoreUtils::Convert(array.Get());
+    AutoPtr<IArrayOf> _outface = CoreUtils::Convert(array, EIID_IFace);
     *outface = _outface;
     REFCOUNT_ADD(*outface);
     return NOERROR;
@@ -172,7 +174,7 @@ ECode GetCommand_FaceRectangles::GetValue(
 
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
     AutoPtr<ArrayOf<IRect*> > array = metadataNative->GetFaceRectangles();
-    AutoPtr<IArrayOf> _outface = CoreUtils::Convert(array.Get());
+    AutoPtr<IArrayOf> _outface = CoreUtils::Convert(array, EIID_IRect);
     *outface = _outface;
     REFCOUNT_ADD(*outface);
     return NOERROR;
@@ -1225,13 +1227,13 @@ Boolean CameraMetadataNative::SetFaces(
         i++;
     }
 
-    AutoPtr<IArrayOf> array = CoreUtils::Convert(faceRectangles.Get());
+    AutoPtr<IArrayOf> array = CoreUtils::Convert(faceRectangles, EIID_IRect);
     Set(CaptureResult::STATISTICS_FACE_RECTANGLES, array);
 
-    AutoPtr<IArrayOf> array2 = CoreUtils::Convert(faceIds.Get());
+    AutoPtr<IArrayOf> array2 = CoreUtils::Convert(faceIds);
     Set(CaptureResult::STATISTICS_FACE_IDS, array2);
 
-    AutoPtr<IArrayOf> array3 = CoreUtils::Convert(faceLandmarks.Get());
+    AutoPtr<IArrayOf> array3 = CoreUtils::Convert(faceLandmarks);
     Set(CaptureResult::STATISTICS_FACE_LANDMARKS, array3);
 
     AutoPtr<IArrayOf> array4 = CoreUtils::ConvertByteArray(faceScores);
@@ -1932,7 +1934,7 @@ Boolean CameraMetadataNative::SetFaceRectangles(
         newFaceRects->Set(i, tmp);
     }
 
-    AutoPtr<IArrayOf> array = CoreUtils::Convert(newFaceRects.Get());
+    AutoPtr<IArrayOf> array = CoreUtils::Convert(newFaceRects, EIID_IRect);
     SetBase(CaptureResult::STATISTICS_FACE_RECTANGLES, TO_IINTERFACE(array));
     return TRUE;
 }

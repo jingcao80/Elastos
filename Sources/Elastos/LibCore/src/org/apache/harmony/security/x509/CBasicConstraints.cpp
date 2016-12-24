@@ -117,7 +117,7 @@ ECode CBasicConstraints::GetEncoded(
         AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(2);
         array->Set(0, TO_IINTERFACE(bobj));
         array->Set(1, TO_IINTERFACE(iobj));
-        AutoPtr<IArrayOf> arrayof = CoreUtils::Convert((ArrayOf<IInterface*>*)array);
+        AutoPtr<IArrayOf> arrayof = CoreUtils::Convert(array, EIID_IInterface);
         ASN1->Encode(arrayof, (ArrayOf<Byte>**)&mEncoding);
     }
     *ppEncode = mEncoding;

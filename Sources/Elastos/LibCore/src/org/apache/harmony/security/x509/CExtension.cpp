@@ -84,7 +84,7 @@ ECode CExtension::MyASN1OctetString::GetDecodedObject(
     array->Set(0, obj);
     array->Set(1, TO_IINTERFACE(CoreUtils::ConvertByteArray(earray)));
 
-    AutoPtr<IArrayOf> tmp = CoreUtils::Convert((ArrayOf<IInterface*>*)array);
+    AutoPtr<IArrayOf> tmp = CoreUtils::Convert(array, EIID_IInterface);
     *object = tmp;
     REFCOUNT_ADD(*object);
     return NOERROR;

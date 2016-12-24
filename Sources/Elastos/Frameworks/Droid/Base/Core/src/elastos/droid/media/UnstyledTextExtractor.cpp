@@ -88,10 +88,10 @@ ECode UnstyledTextExtractor::OnLineEnd()
 
     Int32 size;
     mCurrentLine->GetSize(&size);
-    AutoPtr<ArrayOf<ITextTrackCueSpan*> > spans = ArrayOf<ITextTrackCueSpan*>::Alloc(size);
+    AutoPtr<ArrayOf<IInterface*> > spans;
     mCurrentLine->ToArray((ArrayOf<IInterface*>**)&spans);
     mCurrentLine->Clear();
-    AutoPtr<IArrayOf> spans_ = CoreUtils::Convert(spans.Get());
+    AutoPtr<IArrayOf> spans_ = CoreUtils::Convert(spans, EIID_ITextTrackCueSpan);
     return mLines->Add(spans_);
 }
 

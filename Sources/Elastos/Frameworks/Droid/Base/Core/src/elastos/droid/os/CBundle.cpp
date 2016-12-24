@@ -291,7 +291,7 @@ ECode CBundle::PutParcelableArray(
     assert(key != NULL);
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
-    AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value);
+    AutoPtr<IArrayOf> valueObj = CoreUtils::Convert(value, EIID_IParcelable);
     mMap->Put(keyObj.Get(), valueObj.Get());
     mFdsKnown = FALSE;
     return NOERROR;
