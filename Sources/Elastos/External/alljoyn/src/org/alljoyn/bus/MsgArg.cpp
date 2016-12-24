@@ -380,7 +380,7 @@ AutoPtr<IInterface> MsgArg::CarValue::Convert()
             ret = CoreUtils::Convert((ArrayOf<String>*)mCarQuintet);
             break;
         case CarDataType_Interface:
-            ret = CoreUtils::Convert((ArrayOf<IInterface*>*)mCarQuintet);
+            ret = CoreUtils::Convert((ArrayOf<IInterface*>*)mCarQuintet, EIID_IInterface);
             break;
         default:
             Logger::E(TAG, "CarValue::Convert unimplemented mElementType = %d", mElementType);
@@ -566,77 +566,6 @@ const Int32 MsgArg::ALLJOYN_BYTE_ARRAY       = ('y' << 8) | 'a';
 Map<AutoPtr<IArgumentList>, AutoPtr<ArrayOf<MsgArg::CarValue*> > > MsgArg::sRecords;
 Object MsgArg::sLock;
 
-template<typename ElementType, typename InterfaceType>
-AutoPtr<ArrayOf<ElementType> > Convert(
-    /* [in] */ IArrayOf* arrayOf)
-{
-    assert(arrayOf != NULL);
-    Int32 length;
-    arrayOf->GetLength(&length);
-    AutoPtr<ArrayOf<ElementType> > array = ArrayOf<ElementType>::Alloc(length);
-    InterfaceID iid;
-    arrayOf->GetTypeId(&iid);
-
-    assert(iid == EIID_IByte
-        || iid == EIID_IBoolean
-        || iid == EIID_IInteger16
-        || iid == EIID_IInteger32
-        || iid == EIID_IInteger64
-        || iid == EIID_IDouble);
-
-    for (Int32 i = 0; i < length; ++i) {
-        AutoPtr<IInterface> obj;
-        arrayOf->Get(i, (IInterface**)&obj);
-        InterfaceType* elementObj = (InterfaceType*)obj->Probe(iid);
-        ElementType element;
-        elementObj->GetValue(&element);
-        array->Set(i, element);
-    }
-    return array;
-}
-
-template<>
-AutoPtr<ArrayOf<String> > Convert<String, ICharSequence>(
-    /* [in] */ IArrayOf* arrayOf)
-{
-    assert(arrayOf != NULL);
-    Int32 length;
-    arrayOf->GetLength(&length);
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(length);
-    InterfaceID iid;
-    arrayOf->GetTypeId(&iid);
-    assert(iid == EIID_ICharSequence);
-
-    for (Int32 i = 0; i < length; ++i) {
-        AutoPtr<IInterface> obj;
-        arrayOf->Get(i, (IInterface**)&obj);
-        ICharSequence* elementObj = (ICharSequence*)obj->Probe(EIID_ICharSequence);
-        String element;
-        elementObj->ToString(&element);
-        array->Set(i, element);
-    }
-    return array;
-}
-
-template<>
-AutoPtr<ArrayOf<IInterface*> > Convert<IInterface*, IInterface>(
-    /* [in] */ IArrayOf* arrayOf)
-{
-    assert(arrayOf != NULL);
-    Int32 length;
-    arrayOf->GetLength(&length);
-    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(length);
-    InterfaceID iid;
-    arrayOf->GetTypeId(&iid);
-
-    for (Int32 i = 0; i < length; ++i) {
-        AutoPtr<IInterface> obj;
-        arrayOf->Get(i, (IInterface**)&obj);
-        array->Set(i, obj ? obj->Probe(iid) : NULL);
-    }
-    return array;
-}
-
 InterfaceID MsgArg::GetInterfaceIDByTypeId(
     /* [in] */ Char32 typeId)
 {
@@ -702,43 +631,43 @@ ECode MsgArg::AssignOutputPropery(
 
     switch (elementType) {
         case CarDataType_Byte: {
-            AutoPtr<ArrayOf<Byte> > array = Convert<Byte, IByte>(arrayOf);
+            AutoPtr<ArrayOf<Byte> > array = CoreUtils::Convert<Byte, IByte>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_Boolean: {
-            AutoPtr<ArrayOf<Boolean> > array = Convert<Boolean, IBoolean>(arrayOf);
+            AutoPtr<ArrayOf<Boolean> > array = CoreUtils::Convert<Boolean, IBoolean>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_Int16: {
-            AutoPtr<ArrayOf<Int16> > array = Convert<Int16, IInteger16>(arrayOf);
+            AutoPtr<ArrayOf<Int16> > array = CoreUtils::Convert<Int16, IInteger16>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_Enum:
         case CarDataType_Int32: {
-            AutoPtr<ArrayOf<Int32> > array = Convert<Int32, IInteger32>(arrayOf);
+            AutoPtr<ArrayOf<Int32> > array = CoreUtils::Convert<Int32, IInteger32>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_Int64: {
-            AutoPtr<ArrayOf<Int64> > array = Convert<Int64, IInteger64>(arrayOf);
+            AutoPtr<ArrayOf<Int64> > array = CoreUtils::Convert<Int64, IInteger64>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_Double: {
-            AutoPtr<ArrayOf<Double> > array = Convert<Double, IDouble>(arrayOf);
+            AutoPtr<ArrayOf<Double> > array = CoreUtils::Convert<Double, IDouble>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_String: {
-            AutoPtr<ArrayOf<String> > array = Convert<String, ICharSequence>(arrayOf);
+            AutoPtr<ArrayOf<String> > array = CoreUtils::Convert(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
         case CarDataType_Interface:  {
-            AutoPtr<ArrayOf<IInterface*> > array = Convert<IInterface*, IInterface>(arrayOf);
+            AutoPtr<ArrayOf<IInterface*> > array = CoreUtils::Convert<IInterface>(arrayOf);
             args->AssignOutputArgumentOfCarArrayPtrPtr(0, array);
             break;
         }
@@ -1626,35 +1555,35 @@ ECode MsgArg::MarshalInterface(
 
             switch (elementTypeId) {
                 case ALLJOYN_BYTE: {
-                    AutoPtr<ArrayOf<Byte> > array = Convert<Byte, IByte>(arrayOf);
+                    AutoPtr<ArrayOf<Byte> > array = CoreUtils::Convert<Byte, IByte>(arrayOf);
                     Set(msgArg, sig, array);
                     break;
                 }
                 case ALLJOYN_BOOLEAN: {
-                    AutoPtr<ArrayOf<Boolean> > array = Convert<Boolean, IBoolean>(arrayOf);
+                    AutoPtr<ArrayOf<Boolean> > array = CoreUtils::Convert<Boolean, IBoolean>(arrayOf);
                     Set(msgArg, sig, array);
                     break;
                 }
                 case ALLJOYN_INT16:
                 case ALLJOYN_UINT16: {
-                    AutoPtr<ArrayOf<Int16> > array = Convert<Int16, IInteger16>(arrayOf);
+                    AutoPtr<ArrayOf<Int16> > array = CoreUtils::Convert<Int16, IInteger16>(arrayOf);
                     Set(msgArg, sig, array);
                     break;
                 }
                 case ALLJOYN_INT32:
                 case ALLJOYN_UINT32: {
-                    AutoPtr<ArrayOf<Int32> > array = Convert<Int32, IInteger32>(arrayOf);
+                    AutoPtr<ArrayOf<Int32> > array = CoreUtils::Convert<Int32, IInteger32>(arrayOf);
                     Set(msgArg, sig, array);
                     break;
                 }
                 case ALLJOYN_INT64:
                 case ALLJOYN_UINT64: {
-                    AutoPtr<ArrayOf<Int64> > array = Convert<Int64, IInteger64>(arrayOf);
+                    AutoPtr<ArrayOf<Int64> > array = CoreUtils::Convert<Int64, IInteger64>(arrayOf);
                     Set(msgArg, sig, array);
                     break;
                 }
                 case ALLJOYN_DOUBLE: {
-                    AutoPtr<ArrayOf<Double> > array = Convert<Double, IDouble>(arrayOf);
+                    AutoPtr<ArrayOf<Double> > array = CoreUtils::Convert<Double, IDouble>(arrayOf);
                     Set(msgArg, sig, array);
                     break;
                 }

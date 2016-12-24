@@ -30,6 +30,7 @@ using Elastos::Droid::Wifi::EIID_IIWifiScanner;
 using Elastos::Droid::Wifi::IWifiScanner;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::CScanResult;
+using Elastos::Droid::Wifi::EIID_IScanResult;
 using Elastos::Droid::Wifi::CWifiScannerScanSettings;
 using Elastos::Droid::Wifi::CWifiScannerChannelSpec;
 using Elastos::Droid::Wifi::IWifiScannerBssidInfo;
@@ -175,7 +176,7 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Process
 
             AutoPtr<ArrayOf<IScanResult*> > scanResults;;
             mOwner->mOwner->GetScanResults(ci, (ArrayOf<IScanResult*>**)&scanResults);
-            AutoPtr<IArrayOf> result = CoreUtils::Convert(scanResults.Get());
+            AutoPtr<IArrayOf> result = CoreUtils::Convert(scanResults, EIID_IScanResult);
             mOwner->mOwner->ReplySucceeded(msg, result);
             break;
         }
@@ -251,17 +252,9 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Process
         case CMD_HOTLIST_AP_FOUND: {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
-                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
-
-                Int32 length;
-                iarray->GetLength(&length);
-                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
-                for (Int32 i = 0; i < length; ++i) {
-                    AutoPtr<IInterface> object;
-                    iarray->Get(i, (IInterface**)&object);
-                    results->Set(i, IScanResult::Probe(object));
-                }
-                if (DBG) Logger::D(TAG, "Found %d results", length);
+                IArrayOf* iarray = IArrayOf::Probe(obj);
+                AutoPtr<ArrayOf<IScanResult*> > results = CoreUtils::Convert<IScanResult>(iarray);
+                if (DBG) Logger::D(TAG, "Found %d results", results ? results->GetLength() : 0);
                 AutoPtr<ICollection> clients;
                 mOwner->mOwner->mClients->GetValues((ICollection**)&clients);
                 AutoPtr<ArrayOf<IInterface*> > array;
@@ -276,32 +269,17 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Process
         case CMD_WIFI_CHANGE_DETECTED: {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
-                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
-
-                Int32 length;
-                iarray->GetLength(&length);
-                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
-                for (Int32 i = 0; i < length; ++i) {
-                    AutoPtr<IInterface> object;
-                    iarray->Get(i, (IInterface**)&object);
-                    results->Set(i, IScanResult::Probe(object));
-                }
+                IArrayOf* iarray = IArrayOf::Probe(obj);
+                AutoPtr<ArrayOf<IScanResult*> > results = CoreUtils::Convert<IScanResult>(iarray);
                 mOwner->mOwner->ReportWifiChanged(results);
             }
             break;
         case CMD_WIFI_CHANGES_STABILIZED: {
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
-                AutoPtr<IArrayOf> iarray = IArrayOf::Probe(obj);
+                IArrayOf* iarray = IArrayOf::Probe(obj);
 
-                Int32 length;
-                iarray->GetLength(&length);
-                AutoPtr<ArrayOf<IScanResult*> > results = ArrayOf<IScanResult*>::Alloc(length);
-                for (Int32 i = 0; i < length; ++i) {
-                    AutoPtr<IInterface> object;
-                    iarray->Get(i, (IInterface**)&object);
-                    results->Set(i, IScanResult::Probe(object));
-                }
+                AutoPtr<ArrayOf<IScanResult*> > results = CoreUtils::Convert<IScanResult>(iarray);
                 mOwner->mOwner->ReportWifiStabilized(results);
             }
             break;
@@ -411,7 +389,8 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnHotlistApFound(
 {
     VALIDATE_NOT_NULL(results);
     if (DBG) Logger::D(TAG, "HotlistApFound event received");
-    SendMessage(CMD_HOTLIST_AP_FOUND, 0, 0, CoreUtils::Convert(results));
+    AutoPtr<IArrayOf> arrayOf = CoreUtils::Convert(results, EIID_IScanResult);
+    SendMessage(CMD_HOTLIST_AP_FOUND, 0, 0, arrayOf);
     return NOERROR;
 }
 
@@ -420,7 +399,8 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::OnChangesFound(
 {
     VALIDATE_NOT_NULL(results);
     if (DBG) Logger::D(TAG, "onWifiChangesFound event received");
-    SendMessage(CMD_WIFI_CHANGE_DETECTED, 0, 0, CoreUtils::Convert(results));
+    AutoPtr<IArrayOf> arrayOf = CoreUtils::Convert(results, EIID_IScanResult);
+    SendMessage(CMD_WIFI_CHANGE_DETECTED, 0, 0, arrayOf);
     return NOERROR;
 }
 
@@ -677,7 +657,8 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::ClientInfoLocal::DeliverS
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
     if (DBG) Logger::D(TAG, "Delivering messages directly");
-    mOwner->SendMessage(WIFI_CHANGE_CMD_NEW_SCAN_RESULTS, 0, 0, CoreUtils::Convert(results));
+    AutoPtr<IArrayOf> arrayOf = CoreUtils::Convert(results, EIID_IScanResult);
+    mOwner->SendMessage(WIFI_CHANGE_CMD_NEW_SCAN_RESULTS, 0, 0, arrayOf);
     return NOERROR;
 }
 
@@ -993,7 +974,8 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::OnChangesFound(
     /* [in] */ ArrayOf<IScanResult*>* results)
 {
     VALIDATE_NOT_NULL(results);
-    SendMessage(WIFI_CHANGE_CMD_CHANGE_DETECTED, 0, 0, CoreUtils::Convert(results));
+    AutoPtr<IArrayOf> arrayOf = CoreUtils::Convert(results, EIID_IScanResult);
+    SendMessage(WIFI_CHANGE_CMD_CHANGE_DETECTED, 0, 0, arrayOf);
     return NOERROR;
 }
 

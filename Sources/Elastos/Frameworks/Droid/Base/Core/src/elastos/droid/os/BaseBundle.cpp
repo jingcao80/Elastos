@@ -21,6 +21,7 @@ using Elastos::Core::CInteger64;
 using Elastos::Core::CFloat;
 using Elastos::Core::CDouble;
 using Elastos::Core::CString;
+using Elastos::Core::EIID_ICharSequence;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IList;
@@ -580,7 +581,7 @@ ECode BaseBundle::PutCharSequenceArray(
 {
     Unparcel();
     AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
-    AutoPtr<IArrayOf> arrObj = CoreUtils::Convert(value);
+    AutoPtr<IArrayOf> arrObj = CoreUtils::Convert(value, EIID_ICharSequence);
 
     return mMap->Put(keyObj.Get(), arrObj.Get());
 }

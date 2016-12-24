@@ -602,7 +602,7 @@ void HardwareCamera::JNICameraContext::postMetadata(
         obj->Set(i, face);
     }
 
-    AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(obj.Get());
+    AutoPtr<IArrayOf> arrayObj = CoreUtils::Convert(obj, EIID_ICameraFace);
     PostEventFromNative(mCameraJObjectWeak, msgType, 0, 0, arrayObj);
 }
 

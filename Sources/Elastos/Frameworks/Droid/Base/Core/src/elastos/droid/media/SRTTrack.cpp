@@ -85,12 +85,12 @@ ECode SRTTrack::OnData(
     String line;
     AutoPtr<IArrayOf>  arrayof;
     for (Int32 i = 0; i < length; ++i) {
-        tspan = NULL;
         line = (*lines)[i];
+        tspan = NULL;
         CTextTrackCueSpan::New(line, -1, (ITextTrackCueSpan**)&tspan);
         ttc->Set(i, tspan);
         arrayof = NULL;
-        arrayof = CoreUtils::Convert(ttc.Get());
+        arrayof = CoreUtils::Convert(ttc, EIID_ITextTrackCueSpan);
         arrays->Set(i, arrayof);
     }
     cue->SetLines(arrays.Get());
@@ -163,7 +163,7 @@ ECode SRTTrack::OnData(
             CTextTrackCueSpan::New(line, -1, (ITextTrackCueSpan**)&tspan);
             ttc->Set(i, tspan);
             arrayof = NULL;
-            arrayof = CoreUtils::Convert(ttc.Get());
+            arrayof = CoreUtils::Convert(ttc, EIID_ITextTrackCueSpan);
             arrays->Set(i, arrayof);
             strings->Set(i, ICharSequence::Probe((*outArray)[i]));
         }

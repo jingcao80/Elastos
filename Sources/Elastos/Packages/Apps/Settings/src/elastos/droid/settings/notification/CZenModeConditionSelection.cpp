@@ -13,6 +13,7 @@ using Elastos::Droid::Animation::CLayoutTransition;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Service::Notification::EIID_ICondition;
 using Elastos::Droid::Service::Notification::IConditionHelper;
 using Elastos::Droid::Service::Notification::CConditionHelper;
 using Elastos::Droid::Service::Notification::IZenModeConfigHelper;
@@ -55,8 +56,9 @@ ECode CZenModeConditionSelection::ConditionListener::OnConditionsReceived(
     /* [in] */ ArrayOf<ICondition*>* conditions)
 {
     if (conditions == NULL || conditions->GetLength() == 0) return NOERROR;
+    AutoPtr<IArrayOf> arrayOf = CoreUtils::Convert(conditions, EIID_ICondition);
     AutoPtr<IMessage> message;
-    mHost->mHandler->ObtainMessage(H::CONDITIONS, CoreUtils::Convert(conditions), (IMessage**)&message);
+    mHost->mHandler->ObtainMessage(H::CONDITIONS, arrayOf, (IMessage**)&message);
     return message->SendToTarget();
 }
 
@@ -85,18 +87,7 @@ ECode CZenModeConditionSelection::H::HandleMessage(
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
         IArrayOf* objArrayOf = IArrayOf::Probe(obj);
-
-        Int32 length = 0;
-        objArrayOf->GetLength(&length);
-
-        AutoPtr< ArrayOf<ICondition*> > array = ArrayOf<ICondition*>::Alloc(length);
-
-        for (Int32 i = 0; i < length; i++) {
-            AutoPtr<IInterface> tmp;
-            objArrayOf->Get(i, (IInterface**)&tmp);
-            array->Set(i, ICondition::Probe(tmp));
-        }
-
+        AutoPtr< ArrayOf<ICondition*> > array = CoreUtils::Convert<ICondition>(objArrayOf);
         mHost->HandleConditions(array);
     }
     return NOERROR;

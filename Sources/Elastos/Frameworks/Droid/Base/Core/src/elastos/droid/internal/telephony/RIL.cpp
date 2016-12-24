@@ -4882,7 +4882,8 @@ AutoPtr<IInterface> RIL::ResponseCallForward(
         pInfo->mTimeSeconds = timeSeconds;
     }
 
-    return CoreUtils::Convert(infos.Get());
+    AutoPtr<IArrayOf> array = CoreUtils::Convert(infos, EIID_ICallForwardInfo);
+    return array;
 }
 
 AutoPtr<IInterface> RIL::ResponseSuppServiceNotification(
