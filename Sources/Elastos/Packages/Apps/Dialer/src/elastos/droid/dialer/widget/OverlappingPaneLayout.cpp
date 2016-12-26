@@ -1318,7 +1318,7 @@ Boolean OverlappingPaneLayout::SmoothSlideTo(
     mSlideableView->GetLeft(&left);
     if (mDragHelper->SmoothSlideViewTo(mSlideableView, left, y)) {
         SetAllChildrenVisible();
-        assert(0 && "TODO");
+        // TODO:
         // ViewCompat.postInvalidateOnAnimation(this);
         return TRUE;
     }
@@ -1333,8 +1333,7 @@ ECode OverlappingPaneLayout::ComputeScroll()
             mDragHelper->Abort();
             return NOERROR;
         }
-
-        assert(0 && "TODO");
+        // TODO:
         // ViewCompat.postInvalidateOnAnimation(this);
     }
     return NOERROR;
