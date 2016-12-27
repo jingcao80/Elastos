@@ -1,9 +1,11 @@
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/server/firewall/PortFilter.h"
 #include <elastos/core/StringUtils.h>
-#include "Elastos.Droid.Content.h"
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::StringUtils;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,47 +22,41 @@ PortFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> PortFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode PortFilter::FACTORY_FilterFactory::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 lowerBound = NO_BOUND;
     Int32 upperBound = NO_BOUND;
 
-    String equalsValue;
+    String equalsValue(NULL);
     parser->GetAttributeValue(String(NULL), ATTR_EQUALS, &equalsValue);
-    if (equalsValue != NULL) {
-        Int32 value;
-        value = StringUtils::ParseInt32(equalsValue);
-
-        //throw new XmlPullParserException("Invalid port value: " + equalsValue,
-        //        parser, NULL);
+    if (!equalsValue.IsNull()) {
+        Int32 value = StringUtils::ParseInt32(equalsValue);
 
         lowerBound = value;
         upperBound = value;
     }
 
-    String lowerBoundString;
-    String upperBoundString;
-
+    String lowerBoundString(NULL);
+    String upperBoundString(NULL);
     parser->GetAttributeValue(String(NULL), ATTR_MIN, &lowerBoundString);
     parser->GetAttributeValue(String(NULL), ATTR_MAX, &upperBoundString);
-
-    if (lowerBoundString != NULL || upperBoundString != NULL) {
-        if (equalsValue != NULL) {
-            //throw new XmlPullParserException(
-            //        "Port filter cannot use both equals and range filtering",
-            //        parser, NULL);
-            return NULL;
+    if (!lowerBoundString.IsNull() || !upperBoundString.IsNull()) {
+        if (!equalsValue.IsNull()) {
+            Slogger::I("PortFilter", "Port filter cannot use both equals and range filtering %p", parser);
+            return E_XML_PULL_PARSER_EXCEPTION;
         }
 
-        if (lowerBoundString != NULL) {
+        if (!lowerBoundString.IsNull()) {
             lowerBound = StringUtils::ParseInt32(lowerBoundString);
             // throw new XmlPullParserException(
             //        "Invalid minimum port value: " + lowerBoundString,
             //        parser, NULL);
         }
 
-        if (upperBoundString != NULL) {
+        if (!upperBoundString.IsNull()) {
             upperBound = StringUtils::ParseInt32(upperBoundString);
 
             //throw new XmlPullParserException(
@@ -71,7 +67,9 @@ AutoPtr<IFilter> PortFilter::FACTORY_FilterFactory::NewFilter(
 
     // an empty port filter is explicitly allowed, and checks for the existence of a port
     AutoPtr<PortFilter> portFilter = new PortFilter(lowerBound, upperBound);
-    return (IFilter*)portFilter.Get();
+    *result = IFilter::Probe(portFilter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -104,6 +102,7 @@ ECode PortFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     Int32 port = -1;
     AutoPtr<IUri> uri;
     intent->GetData((IUri**)&uri);

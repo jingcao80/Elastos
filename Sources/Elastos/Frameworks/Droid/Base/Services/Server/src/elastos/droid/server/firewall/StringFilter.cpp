@@ -1,14 +1,14 @@
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/server/firewall/StringFilter.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/StringUtils.h>
-#include <Elastos.CoreLibrary.IO.h>
-#include <Elastos.CoreLibrary.Utility.h>
-#include "Elastos.Droid.Content.h"
 
-using Elastos::Core::StringUtils;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Net::IUri;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Regex::IMatcher;
 using Org::Xmlpull::V1::IXmlPullParser;
 
@@ -22,16 +22,20 @@ namespace Firewall {
 //------------------------------------------------------------------------------
 
 ValueProvider::ValueProvider(
-    /* in */ const String& tag)
+    /* [in] */ const String& tag)
 {
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> ValueProvider::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode ValueProvider::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoPtr<StringFilter> stringFilter = StringFilter::ReadFromXml(this, parser);
-    return (IFilter*)stringFilter.Get();
+    *result = IFilter::Probe(stringFilter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //------------------------------------------------------------------------------
@@ -39,15 +43,15 @@ AutoPtr<IFilter> ValueProvider::NewFilter(
 //------------------------------------------------------------------------------
 
 EqualsFilter::EqualsFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ const String& attrValue)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ const String& attrValue)
     : StringFilter(valueProvider), mFilterValue(attrValue)
 {}
 
 Boolean EqualsFilter::MatchesValue(
-    /* in */ const String& value)
+    /* [in] */ const String& value)
 {
-    return value != NULL && value.Equals(mFilterValue);
+    return !value.IsNull() && value.Equals(mFilterValue);
 }
 
 //------------------------------------------------------------------------------
@@ -55,15 +59,15 @@ Boolean EqualsFilter::MatchesValue(
 //------------------------------------------------------------------------------
 
 ContainsFilter::ContainsFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ const String& attrValue)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ const String& attrValue)
     : StringFilter(valueProvider), mFilterValue(attrValue)
 {}
 
 Boolean ContainsFilter::MatchesValue(
-    /* in */ const String& value)
+    /* [in] */ const String& value)
 {
-    return value != NULL && value.Contains(mFilterValue);
+    return !value.IsNull() && value.Contains(mFilterValue);
 }
 
 //------------------------------------------------------------------------------
@@ -71,15 +75,15 @@ Boolean ContainsFilter::MatchesValue(
 //------------------------------------------------------------------------------
 
 StartsWithFilter::StartsWithFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ const String& attrValue)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ const String& attrValue)
     : StringFilter(valueProvider), mFilterValue(attrValue)
 {}
 
 Boolean StartsWithFilter::MatchesValue(
-    /* in */ const String& value)
+    /* [in] */ const String& value)
 {
-    return value != NULL && value.StartWith(mFilterValue);
+    return !value.IsNull() && value.StartWith(mFilterValue);
 }
 
 //------------------------------------------------------------------------------
@@ -87,20 +91,19 @@ Boolean StartsWithFilter::MatchesValue(
 //------------------------------------------------------------------------------
 
 PatternStringFilter::PatternStringFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ const String& attrValue)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ const String& attrValue)
     : StringFilter(valueProvider)
 {
     CPatternMatcher::New(attrValue, IPatternMatcher::PATTERN_SIMPLE_GLOB, (IPatternMatcher**)&mPattern);
 }
 
 Boolean PatternStringFilter::MatchesValue(
-    /* in */ const String& value)
+    /* [in] */ const String& value)
 {
-    Boolean b;
-
+    Boolean b = FALSE;
     mPattern->Match(value, &b);
-    return value != NULL && b;
+    return !value.IsNull() && b;
 }
 
 //------------------------------------------------------------------------------
@@ -108,22 +111,22 @@ Boolean PatternStringFilter::MatchesValue(
 //------------------------------------------------------------------------------
 
 RegexFilter::RegexFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ const String& attrValue)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ const String& attrValue)
     : StringFilter(valueProvider)
 {
     Pattern::Compile(attrValue, (IPattern**)&mPattern);
 }
 
 Boolean RegexFilter::MatchesValue(
-    /* in */ const String& value)
+    /* [in] */ const String& value)
 {
     AutoPtr<IMatcher> matcher;
     Boolean matched;
 
     mPattern->Matcher(value, (IMatcher**)&matcher);
     matcher->Matches(&matched);
-    return value != NULL && matched;
+    return !value.IsNull() && matched;
 }
 
 //------------------------------------------------------------------------------
@@ -131,24 +134,24 @@ Boolean RegexFilter::MatchesValue(
 //------------------------------------------------------------------------------
 
 IsNullFilter::IsNullFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ const String& attrValue)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ const String& attrValue)
     : StringFilter(valueProvider)
 {
-     mIsNull = StringUtils::ParseBoolean(attrValue);
+    mIsNull = StringUtils::ParseBoolean(attrValue);
 }
 
 IsNullFilter::IsNullFilter(
-    /* in */ ValueProvider* valueProvider,
-    /* in */ Boolean isNull)
+    /* [in] */ ValueProvider* valueProvider,
+    /* [in] */ Boolean isNull)
     : StringFilter(valueProvider), mIsNull(isNull)
 {}
 
 
 Boolean IsNullFilter::MatchesValue(
-    /* in */ const String& value)
+    /* [in] */ const String& value)
 {
-    return (value == NULL) == mIsNull;
+    return (value.IsNull()) == mIsNull;
 }
 
 //------------------------------------------------------------------------------
@@ -358,7 +361,7 @@ AutoPtr<StringFilter> StringFilter::ReadFromXml(
     Int32 count;
 
     parser->GetAttributeCount(&count);
-    for (Int32 i = 0;  i < count;  i++) {
+    for (Int32 i = 0; i < count; i++) {
         AutoPtr<StringFilter> newFilter = GetFilter(valueProvider, parser, i);
         if (newFilter != NULL) {
             if (filter != NULL) {
@@ -433,9 +436,9 @@ ECode StringFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     String value = mValueProvider->GetValue(resolvedComponent, intent, resolvedType);
     *ret = MatchesValue(value);
-
     return NOERROR;
 }
 

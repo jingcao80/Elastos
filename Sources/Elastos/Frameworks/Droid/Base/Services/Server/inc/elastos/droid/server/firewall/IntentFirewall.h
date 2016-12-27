@@ -2,52 +2,32 @@
 #define __ELASTOS_DROID_Server_Firewall_IntentFirewall_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
-#include "elastos/droid/server/firewall/AndFilter.h"
-#include "elastos/droid/server/firewall/FilterFactory.h"
-#include "elastos/droid/server/IntentResolver.h"
-#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
-#include <Elastos.Droid.App.h>
-#include <Elastos.Droid.Os.h>
-#include <elastos/core/CoreUtils.h>
-#include "elastos/droid/internal/utility/ArrayUtils.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/content/IntentFilter.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/FileObserver.h"
+#include "elastos/droid/server/firewall/AndFilter.h"
+#include "elastos/droid/server/firewall/FilterFactory.h"
+#include "elastos/droid/server/IntentResolver.h"
+#include <elastos/core/Object.h>
 
-//using Elastos::Droid::App::IAppGlobals;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::IntentFilter;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
-using Elastos::Droid::Content::Pm::IIPackageManager;
-using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Os::IEnvironment;
-using Elastos::Droid::Os::IFileObserver;
 using Elastos::Droid::Os::FileObserver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Utility::IArrayMap;
-using Elastos::Droid::Utility::ISlog;
-using Elastos::Droid::Utility::IXml;
-using Elastos::Droid::Internal::Utility::ArrayUtils;
-using Elastos::Droid::Internal::Utility::XmlUtils;
-//using Elastos::Droid::Server::IEventLogTags;
-//using Elastos::Droid::Server::IIntentResolver;
-using Org::Xmlpull::V1::IXmlPullParser;
 
 using Elastos::IO::IFile;
-using Elastos::IO::IFileInputStream;
-//using Elastos::IO::IFileNotFoundException;
-//using Elastos::IO::IIOException;
 using Elastos::Utility::IArrayList;
-//using Elastos::Utility::IArrays;
-using Elastos::Utility::IHashMap;
-using Elastos::Utility::IList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -58,8 +38,11 @@ class Rule;
 
 class FirewallIntentFilter
     : public IntentFilter
+    , public IFirewallIntentFilter
 {
 public:
+    CAR_INTERFACE_DECL()
+
     FirewallIntentFilter(
         /* [in] */ Rule* rule);
 
@@ -87,52 +70,62 @@ public:
  */
 class Rule
     : public AndFilter
+    , public IRule
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    Rule();
+
     //@Override
     //throws IOException, XmlPullParserException
-    Rule* ReadFromXml(
+    CARAPI ReadFromXml(
         /* [in] */ IXmlPullParser* parser);
 
-    Int32 GetIntentFilterCount();
+    CARAPI GetIntentFilterCount(
+        /* [out] */ Int32* result);
 
-    FirewallIntentFilter* GetIntentFilter(
-        /* [in] */ Int32 index);
+    CARAPI GetIntentFilter(
+        /* [in] */ Int32 index,
+        /* [out] */ IFirewallIntentFilter** result);
 
-    Int32 GetComponentFilterCount();
+    CARAPI GetComponentFilterCount(
+        /* [out] */ Int32* result);
 
-    AutoPtr<IComponentName> GetComponentFilter(
-        /* [in] */ Int32 index);
+    CARAPI GetComponentFilter(
+        /* [in] */ Int32 index,
+        /* [out] */ IComponentName** result);
 
-    Boolean GetBlock();
+    CARAPI GetBlock(
+        /* [out] */ Boolean* result);
 
-    Boolean GetLog();
+    CARAPI GetLog(
+        /* [out] */ Boolean* result);
 
 protected:
     //@Override
     //throws IOException, XmlPullParserException
-     void ReadChild(
+     CARAPI ReadChild(
         /* [in] */ IXmlPullParser* parser);
 
 private:
-    static const String TAG_INTENT_FILTER;      // = "intent-filter";
-    static const String TAG_COMPONENT_FILTER;   // = "component-filter";
-    static const String ATTR_NAME;              // = "name";
+    static const String TAG_INTENT_FILTER;
+    static const String TAG_COMPONENT_FILTER;
+    static const String ATTR_NAME;
 
-    static const String ATTR_BLOCK;             // = "block";
-    static const String ATTR_LOG;               // = "log";
+    static const String ATTR_BLOCK;
+    static const String ATTR_LOG;
 
-    AutoPtr<IArrayList> mIntentFilters; //= new ArrayList<FirewallIntentFilter>(1);
-    AutoPtr<IArrayList> mComponentFilters;    // = new ArrayList<ComponentName>(0);
-    Boolean block;
-    Boolean log;
+    AutoPtr<IArrayList> mIntentFilters;     // ArrayList<FirewallIntentFilter>
+    AutoPtr<IArrayList> mComponentFilters;  // ArrayList<ComponentName>
+    Boolean mBlock;
+    Boolean mLog;
 };
 
 } // Firewall
 } // Server
 } // Droid
 } // Elastos
-
 
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Server::Firewall::FirewallIntentFilter);
 DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Firewall::FirewallIntentFilter, IInterface);
@@ -146,7 +139,6 @@ class IntentFirewall
     : public Object
     , public IIntentFirewall
 {
-
 private:
     typedef IntentResolver<Elastos::Droid::Server::Firewall::FirewallIntentFilter, Elastos::Droid::Server::Firewall::Rule> IntentResolver_FirewallIntentFilter_Rule;
     class FirewallIntentResolver
@@ -164,16 +156,16 @@ private:
 
         CARAPI AddComponentFilter(
             /* [in] */ IComponentName* componentName,
-            /* [in] */ Rule* rule);
+            /* [in] */ IRule* rule);
 
     protected:
         //@Override
-        Boolean AllowFilterResult(
+        CARAPI_(Boolean) AllowFilterResult(
             /* [in] */ FirewallIntentFilter* filter,
-            /* [in] */ List<Rule>* dest);
+            /* [in] */ List<AutoPtr<Rule> >* dest);
 
         //@Override
-        Boolean IsPackageForFilter(
+        CARAPI_(Boolean) IsPackageForFilter(
             /* [in] */ const String& packageName,
             /* [in] */ FirewallIntentFilter* filter);
 
@@ -182,17 +174,17 @@ private:
             /* [in] */ Int32 size);
 
         //@Override
-        AutoPtr<Rule> NewResult(
+        CARAPI_(AutoPtr<Rule>) NewResult(
             /* [in] */ FirewallIntentFilter* filter,
             /* [in] */ Int32 match,
             /* [in] */ Int32 userId);
 
         //@Override
-        void SortResults(
-            /* [in] */ List<Rule>* results);
+        CARAPI_(void) SortResults(
+            /* [in] */ List<AutoPtr<Rule> >* results);
 
     private:
-        AutoPtr<IArrayMap> mRulesByComponent;  // = new ArrayMap<ComponentName, Rule[]>(0);
+        AutoPtr<IArrayMap> mRulesByComponent;
     };
 
     class FirewallHandler
@@ -202,11 +194,14 @@ private:
         TO_STRING_IMPL("IntentFirewall::FirewallHandler")
 
         FirewallHandler(
-            /* [in] */ ILooper* looper);
+            /* [in] */ ILooper* looper,
+            /* [in] */ IntentFirewall* host);
 
         //@Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+    public:
+        IntentFirewall* mHost;
     };
 
     /**
@@ -217,7 +212,8 @@ private:
     {
     public:
         RuleObserver(
-            /* [in] */ IFile* monitoredDir);
+            /* [in] */ IFile* monitoredDir,
+            /* [in] */ IntentFirewall* host);
 
         //@Override
         CARAPI OnEvent(
@@ -226,12 +222,19 @@ private:
 
     private:
         static const Int32 MONITORED_EVENTS;
+        IntentFirewall* mHost;
     };
 
 public:
     CAR_INTERFACE_DECL()
 
+    IntentFirewall();
+
     IntentFirewall(
+        /* [in] */ IAMSInterface* ams,
+        /* [in] */ IHandler* handler);
+
+    CARAPI constructor(
         /* [in] */ IAMSInterface* ams,
         /* [in] */ IHandler* handler);
 
@@ -298,44 +301,14 @@ public:
         /* [in] */ Int32 uid2,
         /* [out] */ Boolean *ret);
 
-public:
-    static AutoPtr<IFile> GetRulesDir();
-
-public:
-    static const String TAG;        // = "IntentFirewall";
+    static CARAPI_(AutoPtr<IFile>) GetRulesDir();
 
     // throws IOException, XmlPullParserException
-    static AutoPtr<IFilter> ParseFilter(
-        /* [in] */ IXmlPullParser* parser);
+    static CARAPI ParseFilter(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ IFilter** result);
 
-    // e.g. /data/system/ifw or /data/secure/system/ifw
-
-    static const AutoPtr<IFile> RULES_DIR;                  // = new File(Environment->GetSystemSecureDirectory(), "ifw");
-
-    static const Int32 LOG_PACKAGES_MAX_LENGTH;             // = 150;
-    static const Int32 LOG_PACKAGES_SUFFICIENT_LENGTH;      // = 125;
-
-    static const String TAG_RULES;          // = "rules";
-    static const String TAG_ACTIVITY;       // = "activity";
-    static const String TAG_SERVICE;        // = "service";
-    static const String TAG_BROADCAST;      // = "broadcast";
-
-    static const Int32 TYPE_ACTIVITY;       // = 0;
-    static const Int32 TYPE_BROADCAST;      // = 1;
-    static const Int32 TYPE_SERVICE;        // = 2;
-
-    AutoPtr<IAMSInterface> mAms;
-    AutoPtr<RuleObserver> mObserver;
-
-    AutoPtr<FirewallIntentResolver> mActivityResolver;      // = new FirewallIntentResolver();
-    AutoPtr<FirewallIntentResolver> mBroadcastResolver;     // = new FirewallIntentResolver();
-    AutoPtr<FirewallIntentResolver> mServiceResolver;       // = new FirewallIntentResolver();
-
-    static AutoPtr<ArrayOf<FilterFactory*> > factories;
-    static AutoPtr<HashMap<String, AutoPtr<FilterFactory> > > factoryMap;
-
-private:
-    static void LogIntent(
+    static CARAPI_(void) LogIntent(
         /* [in] */ Int32 intentType,
         /* [in] */ IIntent* intent,
         /* [in] */ Int32 callerUid,
@@ -353,8 +326,8 @@ private:
      * next package, unless the total length of the built string so far is greater than
      * LOG_PACKAGES_SUFFICIENT_LENGTH, in which case it will stop and return what it has.
      */
-    static String JoinPackages(
-        /* [in] */ const ArrayOf<String>& packages);
+    static CARAPI_(String) JoinPackages(
+        /* [in] */ ArrayOf<String>* packages);
 
     /**
      * Reads rules from all xml files (*.xml) in the given directory, and replaces our set of rules
@@ -366,15 +339,15 @@ private:
      * All calls to this method from the file observer come through a handler and are inherently
      * serialized
      */
-    void ReadRulesDir(
+    CARAPI_(void) ReadRulesDir(
         /* [in] */ IFile* rulesDir);
 
     /**
      * Reads rules from the given file and add them to the given resolvers
      */
-    void ReadRules(
+    CARAPI_(void) ReadRules(
         /* [in] */ IFile* rulesFile,
-        /* [in] */ const ArrayOf<FirewallIntentResolver*>& resolvers);
+        /* [in] */ ArrayOf<FirewallIntentResolver*>* resolvers);
 
     /**
      * Checks if the caller has access to a component
@@ -386,18 +359,44 @@ private:
      * @param exported Whether the component is exported
      * @return True if the caller can access the described component
      */
-    Boolean CheckComponentPermission(
+    CARAPI_(Boolean) CheckComponentPermission(
         /* [in] */ const String& permission,
         /* [in] */ Int32 pid,
         /* [in] */ Int32 uid,
         /* [in] */ Int32 owningUid,
         /* [in] */ Boolean exported);
 
-    Boolean SignaturesMatch(
+    CARAPI_(Boolean) SignaturesMatch(
         /* [in] */ Int32 uid1,
         /* [in] */ Int32 uid2);
 
 public:
+    static const String TAG;
+
+    static const AutoPtr<IFile> RULES_DIR;
+
+    static const Int32 LOG_PACKAGES_MAX_LENGTH;
+    static const Int32 LOG_PACKAGES_SUFFICIENT_LENGTH;
+
+    static const String TAG_RULES;
+    static const String TAG_ACTIVITY;
+    static const String TAG_SERVICE;
+    static const String TAG_BROADCAST;
+
+    static const Int32 TYPE_ACTIVITY;
+    static const Int32 TYPE_BROADCAST;
+    static const Int32 TYPE_SERVICE;
+
+    AutoPtr<IAMSInterface> mAms;
+    AutoPtr<RuleObserver> mObserver;
+
+    AutoPtr<FirewallIntentResolver> mActivityResolver;
+    AutoPtr<FirewallIntentResolver> mBroadcastResolver;
+    AutoPtr<FirewallIntentResolver> mServiceResolver;
+
+    static AutoPtr<ArrayOf<FilterFactory*> > mFactories;
+    static AutoPtr<HashMap<String, AutoPtr<FilterFactory> > > mFactoryMap;
+
     AutoPtr<FirewallHandler> mHandler;
 };
 

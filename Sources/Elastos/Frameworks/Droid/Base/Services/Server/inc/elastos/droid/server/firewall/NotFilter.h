@@ -2,14 +2,11 @@
 #define __ELASTOS_DROID_Server_Firewall_NotFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/internal/utility/XmlUtils.h>
 #include "elastos/droid/server/firewall/FilterFactory.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Internal::Utility::XmlUtils;
-using Elastos::Utility::IArrayList;
 using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
@@ -29,9 +26,16 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(AutoPtr<IFilter>) NewFilter(
-            /* in */ IXmlPullParser* parser);
+        CARAPI NewFilter(
+            /* [in] */ IXmlPullParser* parser,
+            /* [out] */ IFilter** result);
     };
+
+public:
+    CAR_INTERFACE_DECL()
+
+    NotFilter(
+        /* [in] */ IFilter* child);
 
     //@Override
     CARAPI Matches(
@@ -43,12 +47,6 @@ public:
         /* [in] */ const String& resolvedType,
         /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
-
-public:
-    CAR_INTERFACE_DECL()
-
-    NotFilter(
-        /* in */ IFilter* child);
 
 public:
     static const AutoPtr<FACTORY_FilterFactory> FACTORY;

@@ -2,17 +2,17 @@
 #define __ELASTOS_DROID_Server_Firewall_AndFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/server/firewall/FilterList.h"
 #include "elastos/droid/server/firewall/FilterFactory.h"
+#include <elastos/core/Object.h>
 
-using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Utility::IArrayList;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Server::Firewall::IFilter;
+using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -30,8 +30,9 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(AutoPtr<IFilter>) NewFilter(
-            /* in */ IXmlPullParser* parser);
+        CARAPI NewFilter(
+            /* [in] */ IXmlPullParser* parser,
+            /* [out] */ IFilter** result);
     };
 
 public:

@@ -2,9 +2,9 @@
 #define __ELASTOS_DROID_Server_Firewall_SenderFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/server/firewall/FilterFactory.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
@@ -28,8 +28,9 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(AutoPtr<IFilter>) NewFilter(
-            /* in */ IXmlPullParser* parser);
+        CARAPI NewFilter(
+            /* [in] */ IXmlPullParser* parser,
+            /* [out] */ IFilter** result);
     };
 
     class SIGNATURE_Filter
@@ -122,7 +123,6 @@ public:
         /* [in] */ Int32 receivingUid,
         /* [out] */ Boolean *ret);
 
-public:
     static Boolean IsPrivilegedApp(
         /* [in] */ Int32 callerUid,
         /* [in] */ Int32 callerPid);
@@ -136,12 +136,12 @@ public:
     static const AutoPtr<USER_ID_Filter> USER_ID;
 
 private:
-    static const String ATTR_TYPE;          // = "type";
+    static const String ATTR_TYPE;
 
-    static const String VAL_SIGNATURE;      // = "signature";
-    static const String VAL_SYSTEM;         // = "system";
-    static const String VAL_SYSTEM_OR_SIGNATURE;    // = "system|signature";
-    static const String VAL_USER_ID;        // = "userId";
+    static const String VAL_SIGNATURE;
+    static const String VAL_SYSTEM;
+    static const String VAL_SYSTEM_OR_SIGNATURE;
+    static const String VAL_USER_ID;
 };
 
 } // Firewall

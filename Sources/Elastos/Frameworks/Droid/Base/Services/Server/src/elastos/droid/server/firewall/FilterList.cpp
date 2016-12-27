@@ -12,7 +12,7 @@ namespace Firewall {
 CAR_INTERFACE_IMPL(FilterList, Object, IFilter);
 
 ECode FilterList::ReadFromXml(
-    /* in */ IXmlPullParser* parser)
+    /* [in] */ IXmlPullParser* parser)
 {
     Int32 outerDepth;
 
@@ -24,11 +24,13 @@ ECode FilterList::ReadFromXml(
     return NOERROR;
 }
 
-void FilterList::ReadChild(
-    /* in */ IXmlPullParser* parser)
+ECode FilterList::ReadChild(
+    /* [in] */ IXmlPullParser* parser)
 {
-    AutoPtr<IFilter> filter = IntentFirewall::ParseFilter(parser);
-    children->Add(TO_IINTERFACE(filter));
+    AutoPtr<IFilter> filter;
+    IntentFirewall::ParseFilter(parser, (IFilter**)&filter);
+    mChildren->Add(TO_IINTERFACE(filter));
+    return NOERROR;
 }
 
 } // Firewall

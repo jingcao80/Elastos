@@ -1,5 +1,8 @@
 #include "elastos/droid/server/firewall/NotFilter.h"
 #include "elastos/droid/server/firewall/IntentFirewall.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+
+using Elastos::Droid::Internal::Utility::XmlUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -16,26 +19,31 @@ NotFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> NotFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode NotFilter::FACTORY_FilterFactory::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
-    AutoPtr<IFilter> child;  // = NULL
-    Int32 outerDepth;
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IFilter> child;
+    Int32 outerDepth = 0;
     parser->GetDepth(&outerDepth);
 
     while (XmlUtils::NextElementWithin(parser, outerDepth)) {
-        AutoPtr<IFilter> filter = IntentFirewall::ParseFilter(parser);
+        AutoPtr<IFilter> filter;
+        IntentFirewall::ParseFilter(parser, (IFilter**)&filter);
         if (child == NULL) {
             child = filter;
-        } else {
+        }
+        else {
             //throw new XmlPullParserException(
             //        "<not> tag can only contain a single child filter.", parser, null);
-            //return E_XML_PULL_PARSER_EXCEPTION;
-            return NULL;
+            return E_XML_PULL_PARSER_EXCEPTION;
         }
     }
     AutoPtr<NotFilter> notFilter = new NotFilter(child);
-    return (IFilter*)notFilter.Get();
+    *result = IFilter::Probe(notFilter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -61,6 +69,7 @@ ECode NotFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     mChild->Matches(ifw, resolvedComponent, intent, callerUid, callerPid, resolvedType,
                 receivingUid, ret);
     *ret = !*ret;

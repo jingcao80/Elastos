@@ -15,12 +15,16 @@ AndFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> AndFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode AndFilter::FACTORY_FilterFactory::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoPtr<AndFilter> filter = new AndFilter();
     filter->ReadFromXml(parser);
-    return (IFilter*)filter.Get();
+    *result = IFilter::Probe(filter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -39,14 +43,15 @@ ECode AndFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
-    Int32 size;
+    VALIDATE_NOT_NULL(ret)
 
-    children->GetSize(&size);
+    Int32 size = 0;
+    mChildren->GetSize(&size);
 
-    for (Int32 i = 0;  i < size;  i++) {
+    for (Int32 i = 0; i < size; i++) {
 
         AutoPtr<IInterface> filter;
-        children->Get(i, (IInterface**)&filter);
+        mChildren->Get(i, (IInterface**)&filter);
 
         IFilter::Probe(filter)->Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
                 resolvedType, receivingUid, ret);

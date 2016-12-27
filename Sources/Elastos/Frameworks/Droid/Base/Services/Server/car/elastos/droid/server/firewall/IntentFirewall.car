@@ -11,6 +11,35 @@ module
     namespace Server {
     namespace Firewall {
 
+    /*
+    * involved 
+    * interface IIntentFilter
+    */
+    interface IFirewallIntentFilter {
+    }
+
+    interface IRule {
+        GetIntentFilterCount(
+            [out] Int32* result);
+
+        GetIntentFilter(
+            [in] Int32 index,
+            [out] IFirewallIntentFilter** result);
+
+        GetComponentFilterCount(
+            [out] Int32* result);
+
+        GetComponentFilter(
+            [in] Int32 index,
+            [out] IComponentName** result);
+
+        GetBlock(
+            [out] Boolean* result);
+
+        GetLog(
+            [out] Boolean* result);
+    }
+
     [deprecated]
     interface IIntentFirewall {
         /**

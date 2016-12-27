@@ -15,12 +15,15 @@ OrFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> OrFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode OrFilter::FACTORY_FilterFactory::NewFilter(
+    /* in */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
     AutoPtr<OrFilter> orFilter = new OrFilter();
     orFilter->ReadFromXml(parser);
-    return (IFilter*)orFilter.Get();
+    *result = IFilter::Probe(orFilter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -39,18 +42,17 @@ ECode OrFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
-    Int32 size;
-
-    children->GetSize(&size);
-
-    for (Int32 i = 0;  i < size;  i++) {
-
+    VALIDATE_NOT_NULL(ret)
+    Int32 size = 0;
+    mChildren->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> filter;
-        children->Get(i, (IInterface**)&filter);
-
+        mChildren->Get(i, (IInterface**)&filter);
+        Boolean bRes = FALSE;
         IFilter::Probe(filter)->Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
-                resolvedType, receivingUid, ret);
-        if (*ret) {
+                resolvedType, receivingUid, &bRes);
+        if (bRes) {
+            *ret = TRUE;
             return NOERROR;
         }
     }

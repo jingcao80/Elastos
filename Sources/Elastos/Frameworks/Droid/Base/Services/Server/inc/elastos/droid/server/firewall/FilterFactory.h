@@ -2,9 +2,10 @@
 #define __ELASTOS_DROID_Server_Firewall_FilterFactory_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Server::Firewall::IFilter;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -17,15 +18,16 @@ class FilterFactory
 public:
     CARAPI_(String) GetTagName();
 
-    // throws IOException, XmlPullParserException;
-    virtual CARAPI_(AutoPtr<IFilter>) NewFilter(
-        /* in */ IXmlPullParser* parser);
+    virtual CARAPI NewFilter(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ IFilter** result) = 0;
 
 protected:
     FilterFactory();
 
     CARAPI constructor(
-        /* in */ const String& tag);
+        /* [in] */ const String& tag);
+
 private:
     String mTag;
 };

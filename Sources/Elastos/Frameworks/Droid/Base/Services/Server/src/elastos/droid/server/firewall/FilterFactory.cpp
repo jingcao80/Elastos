@@ -11,7 +11,7 @@ FilterFactory::FilterFactory()
 ECode FilterFactory::constructor(
     /* in */ const String& tag)
 {
-    if (tag == NULL) {
+    if (tag.IsNull()) {
         //throw new NullPointerException();
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -23,12 +23,6 @@ ECode FilterFactory::constructor(
 String FilterFactory::GetTagName()
 {
     return mTag;
-}
-
-AutoPtr<IFilter> FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
-{
-    return NULL;
 }
 
 } // Firewall

@@ -2,9 +2,9 @@
 #define __ELASTOS_DROID_Server_Firewall_PortFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/internal/utility/XmlUtils.h>
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/server/firewall/FilterFactory.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
@@ -29,9 +29,17 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(AutoPtr<IFilter>) NewFilter(
-            /* in */ IXmlPullParser* parser);
+        CARAPI NewFilter(
+            /* [in] */ IXmlPullParser* parser,
+            /* [out] */ IFilter** result);
     };
+
+public:
+    CAR_INTERFACE_DECL()
+
+    PortFilter(
+        /* [in] */ Int32 lowerBound,
+        /* [in] */ Int32 upperBound);
 
     //@Override
     CARAPI Matches(
@@ -45,21 +53,14 @@ public:
         /* [out] */ Boolean *ret);
 
 public:
-    CAR_INTERFACE_DECL()
-
-    PortFilter(
-        /* [in] */ Int32 lowerBound,
-        /* [in] */ Int32 upperBound);
-
-public:
     static const AutoPtr<FACTORY_FilterFactory> FACTORY;
 
 private:
-    static const String ATTR_EQUALS;    // = "equals";
-    static const String ATTR_MIN;       // = "min";
-    static const String ATTR_MAX;       // = "max";
+    static const String ATTR_EQUALS;
+    static const String ATTR_MIN;
+    static const String ATTR_MAX;
 
-    static const Int32 NO_BOUND;        // = -1;
+    static const Int32 NO_BOUND;
 
     // both bounds are inclusive
     Int32 mLowerBound;

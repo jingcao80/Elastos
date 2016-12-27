@@ -1,9 +1,11 @@
 #include "elastos/droid/server/firewall/SenderPermissionFilter.h"
 #include "elastos/droid/app/AppGlobals.h"
-#include <elastos/droid/os/UserHandle.h>
+#include "elastos/droid/os/UserHandle.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,19 +22,23 @@ SenderPermissionFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> SenderPermissionFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode SenderPermissionFilter::FACTORY_FilterFactory::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     String permission;
     parser->GetAttributeValue(String(NULL), ATTR_NAME, &permission);
     if (permission.IsNull()) {
-        //throw new XmlPullParserException(
-        //    "A package name must be specified.", parser, null);
-        return NULL;
+        Slogger::I("SenderPermissionFilter",
+            "A package name must be specified. %p", parser);
+        return E_XML_PULL_PARSER_EXCEPTION;
     }
 
     AutoPtr<SenderPermissionFilter> spFilter = new SenderPermissionFilter(permission);
-    return (IFilter*)spFilter.Get();
+    *result = IFilter::Probe(spFilter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -45,7 +51,7 @@ const String SenderPermissionFilter::ATTR_NAME("name");
 CAR_INTERFACE_IMPL(SenderPermissionFilter, Object, IFilter);
 
 SenderPermissionFilter::SenderPermissionFilter(
-    /* in */ const String& permission)
+    /* [in] */ const String& permission)
     : mPermission(permission)
 {}
 
@@ -59,6 +65,7 @@ ECode SenderPermissionFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     // We assume the component is exported here. If the component is not exported, then
     // ActivityManager would only resolve to this component for callers from the same uid.
     // In this case, it doesn't matter whether the component is exported or not.

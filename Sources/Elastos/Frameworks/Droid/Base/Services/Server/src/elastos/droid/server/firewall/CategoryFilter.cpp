@@ -1,4 +1,8 @@
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/server/firewall/CategoryFilter.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -15,19 +19,24 @@ CategoryFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> CategoryFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode CategoryFilter::FACTORY_FilterFactory::NewFilter(
+    /* in */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     String categoryName;
 
     ECode ec = parser->GetAttributeValue(String(NULL), CategoryFilter::ATTR_NAME, &categoryName);
 
-    if (FAILED(ec) || categoryName == NULL) {
-        //throw new XmlPullParserException("Category name must be specified.",
-        //        parser, null);
-        return NULL;
+    if (FAILED(ec) || categoryName.IsNull()) {
+        Slogger::I("CategoryFilter", "Category name must be specified. %p",
+                parser);
+        return E_XML_PULL_PARSER_EXCEPTION;
     }
-    return new CategoryFilter(categoryName);
+    AutoPtr<CategoryFilter> res = new CategoryFilter(categoryName);
+    *result = IFilter::Probe(res);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -54,6 +63,7 @@ ECode CategoryFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     AutoPtr<ArrayOf<String> > categories;
 
     ECode ec = intent->GetCategories((ArrayOf<String>**)&categories);
@@ -61,7 +71,7 @@ ECode CategoryFilter::Matches(
         *ret = FALSE;
         return NOERROR;
     }
-    *ret = (*categories).Contains(mCategoryName);
+    *ret = categories->Contains(mCategoryName);
 
     return NOERROR;
 }

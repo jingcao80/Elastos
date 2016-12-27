@@ -1,11 +1,17 @@
 module
 {
+    using interface Elastos.Utility.IList;
+    interface Elastos.Droid.Content.IComponentName;
+
     namespace Elastos {
     namespace Droid {
     namespace Server {
     namespace Firewall {
 
     interface IFirewallIntentResolver {
+        AddComponentFilter(
+            [in] IComponentName* componentName,
+            [in] IRule* rule);
     }
 
     } // Firewall

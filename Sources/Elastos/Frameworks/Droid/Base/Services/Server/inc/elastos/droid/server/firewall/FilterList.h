@@ -2,13 +2,14 @@
 #define __ELASTOS_DROID_Server_Firewall_FilterList_H__
 
 #include "_Elastos.Droid.Server.h"
-#include "elastos/core/Object.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Internal::Utility::XmlUtils;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Utility::IArrayList;
 using Elastos::Droid::Server::Firewall::IFilter;
+
+using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -24,15 +25,14 @@ public:
 
     // throws IOException, XmlPullParserException
     CARAPI ReadFromXml(
-        /* in */ IXmlPullParser* parser);
+        /* [in] */ IXmlPullParser* parser);
 
     // throws IOException, XmlPullParserException
-    CARAPI_(void) ReadChild(
-        /* in */ IXmlPullParser* parser);
+    CARAPI ReadChild(
+        /* [in] */ IXmlPullParser* parser);
 
 protected:
-    AutoPtr<IArrayList> children;
-
+    AutoPtr<IArrayList> mChildren;
 };
 
 } // Firewall

@@ -2,21 +2,21 @@
 #define __ELASTOS_DROID_Server_Firewall_StringFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <Elastos.Droid.Os.h>
-#include "elastos/core/Object.h"
-#include "elastos/utility/regex/Pattern.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/server/firewall/FilterFactory.h"
+#include <elastos/core/Object.h>
+#include <elastos/utility/regex/Pattern.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::Utility::XmlUtils;
-using Elastos::Utility::Regex::Pattern;
-using Elastos::Utility::Regex::IPattern;
-using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Utility::IArrayList;
 using Elastos::Droid::Os::CPatternMatcher;
 using Elastos::Droid::Os::IPatternMatcher;
+using Elastos::Utility::Regex::Pattern;
+using Elastos::Utility::Regex::IPattern;
+using Elastos::Utility::IArrayList;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -83,7 +83,7 @@ public:
         /* [in] */ Int32 attributeIndex);
 
     virtual CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value) = 0;
+        /* [in] */ const String& value) = 0;
 
 public:
     static AutoPtr<COMPONENT_ValueProvider> COMPONENT;
@@ -112,16 +112,17 @@ class ValueProvider
     : public FilterFactory
 {
 public:
-    CARAPI_(AutoPtr<IFilter>) NewFilter(
-        /* in */ IXmlPullParser* parser);
+    CARAPI NewFilter(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ IFilter** result);
 
     virtual CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType) = 0;
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType) = 0;
 
     ValueProvider(
-        /* in */ const String& tag);
+        /* [in] */ const String& tag);
 };
 
 class EqualsFilter
@@ -129,12 +130,12 @@ class EqualsFilter
 {
 public:
     EqualsFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ const String& attrValue);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ const String& attrValue);
 
     //@Override
     CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value);
+        /* [in] */ const String& value);
 
 private:
     String mFilterValue;
@@ -145,12 +146,12 @@ class ContainsFilter
 {
 public:
     ContainsFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ const String& attrValue);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ const String& attrValue);
 
     //@Override
     CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value);
+        /* [in] */ const String& value);
 
 private:
     String mFilterValue;
@@ -161,12 +162,12 @@ class StartsWithFilter
 {
 public:
     StartsWithFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ const String& attrValue);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ const String& attrValue);
 
     //@Override
     CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value);
+        /* [in] */ const String& value);
 
 private:
     String mFilterValue;
@@ -177,15 +178,15 @@ class PatternStringFilter
 {
 public:
     PatternStringFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ const String& attrValue);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ const String& attrValue);
 
     //@Override
     CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value);
+        /* [in] */ const String& value);
 
 private:
-     AutoPtr<IPatternMatcher> mPattern;
+    AutoPtr<IPatternMatcher> mPattern;
 };
 
 class RegexFilter
@@ -193,12 +194,12 @@ class RegexFilter
 {
 public:
     RegexFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ const String& attrValue);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ const String& attrValue);
 
     //@Override
     CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value);
+        /* [in] */ const String& value);
 
 private:
     AutoPtr<IPattern> mPattern;
@@ -209,16 +210,16 @@ class IsNullFilter
 {
 public:
     IsNullFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ const String& attrValue);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ const String& attrValue);
 
     IsNullFilter(
-        /* in */ ValueProvider* valueProvider,
-        /* in */ Boolean isNull);
+        /* [in] */ ValueProvider* valueProvider,
+        /* [in] */ Boolean isNull);
 
     //@Override
     CARAPI_(Boolean) MatchesValue(
-        /* in */ const String& value);
+        /* [in] */ const String& value);
 
 private:
     Boolean mIsNull;
@@ -229,13 +230,13 @@ class COMPONENT_ValueProvider
 {
 public:
     COMPONENT_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class COMPONENT_NAME_ValueProvider
@@ -243,13 +244,13 @@ class COMPONENT_NAME_ValueProvider
 {
 public:
     COMPONENT_NAME_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class COMPONENT_PACKAGE_ValueProvider
@@ -257,13 +258,13 @@ class COMPONENT_PACKAGE_ValueProvider
 {
 public:
     COMPONENT_PACKAGE_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class ACTION_ValueProvider
@@ -271,13 +272,13 @@ class ACTION_ValueProvider
 {
 public:
     ACTION_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class DATA_ValueProvider
@@ -285,13 +286,13 @@ class DATA_ValueProvider
 {
 public:
     DATA_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class MIME_TYPE_ValueProvider
@@ -299,13 +300,13 @@ class MIME_TYPE_ValueProvider
 {
 public:
     MIME_TYPE_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class SCHEME_ValueProvider
@@ -313,13 +314,13 @@ class SCHEME_ValueProvider
 {
 public:
     SCHEME_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class SSP_ValueProvider
@@ -327,13 +328,13 @@ class SSP_ValueProvider
 {
 public:
     SSP_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class HOST_ValueProvider
@@ -341,13 +342,13 @@ class HOST_ValueProvider
 {
 public:
     HOST_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 class PATH_ValueProvider
@@ -355,13 +356,13 @@ class PATH_ValueProvider
 {
 public:
     PATH_ValueProvider(
-        /* in */ const String& tag)
+        /* [in] */ const String& tag)
         : ValueProvider(tag) {}
 
     CARAPI_(String) GetValue(
-        /* in */ IComponentName* resolvedComponent,
-        /* in */ IIntent* intent,
-        /* in */ const String& resolvedType);
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ const String& resolvedType);
 };
 
 } // Firewall

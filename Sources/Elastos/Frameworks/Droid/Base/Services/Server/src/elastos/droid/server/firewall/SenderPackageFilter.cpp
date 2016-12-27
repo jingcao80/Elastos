@@ -1,10 +1,12 @@
 #include "elastos/droid/server/firewall/SenderPackageFilter.h"
 #include "elastos/droid/app/AppGlobals.h"
-#include <elastos/droid/os/UserHandle.h>
+#include "elastos/droid/os/UserHandle.h"
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Os::UserHandle;
-using Elastos::Droid::App::AppGlobals;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,19 +23,23 @@ SenderPackageFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> SenderPackageFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode SenderPackageFilter::FACTORY_FilterFactory::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     String packageName;
     parser->GetAttributeValue(String(NULL), ATTR_NAME, &packageName);
-    if (packageName == NULL) {
-        //throw new XmlPullParserException(
-        //    "A package name must be specified.", parser, null);
-        return NULL;
+    if (packageName.IsNull()) {
+        Slogger::I("SenderPackageFilter",
+            "A package name must be specified. %p", parser);
+        return E_XML_PULL_PARSER_EXCEPTION;
     }
 
     AutoPtr<SenderPackageFilter> spFilter = new SenderPackageFilter(packageName);
-    return (IFilter*)spFilter.Get();
+    *result = IFilter::Probe(spFilter);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -60,6 +66,7 @@ ECode SenderPackageFilter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     Int32 packageUid = -1;
 
     AutoPtr<IIPackageManager> pm = AppGlobals::GetPackageManager();

@@ -2,16 +2,15 @@
 #define __ELASTOS_DROID_Server_Firewall_SenderPackageFilter_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/core/Object.h>
 #include <elastos/droid/internal/utility/XmlUtils.h>
 #include "elastos/droid/server/firewall/FilterFactory.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Utility::IArrayList;
 using Org::Xmlpull::V1::IXmlPullParser;
-//using Elastos::Droid::Server::Firewall::IFilter;
 
 namespace Elastos {
 namespace Droid {
@@ -30,11 +29,17 @@ public:
         FACTORY_FilterFactory(
             /* [in] */ const String& tag);
 
-        CARAPI_(AutoPtr<IFilter>) NewFilter(
-            /* in */ IXmlPullParser* parser);
+        CARAPI NewFilter(
+            /* [in] */ IXmlPullParser* parser,
+            /* [out] */ IFilter** result);
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    SenderPackageFilter(
+        /* [in] */ const String& packageName);
+
     //@Override
     CARAPI Matches(
         /* [in] */ IIntentFirewall* ifw,
@@ -47,16 +52,10 @@ public:
         /* [out] */ Boolean *ret);
 
 public:
-    CAR_INTERFACE_DECL()
-
-    SenderPackageFilter(
-        /* in */ const String& packageName);
-
-public:
     static const AutoPtr<FACTORY_FilterFactory> FACTORY;
 
 private:
-    static const String ATTR_NAME;          // = "name";
+    static const String ATTR_NAME;
     String mPackageName;
 };
 

@@ -1,22 +1,20 @@
 #include "elastos/droid/server/firewall/SenderFilter.h"
 #include "elastos/droid/server/firewall/IntentFirewall.h"
-#include <elastos/core/StringUtils.h>
 #include "elastos/droid/app/AppGlobals.h"
-#include <elastos/core/Object.h>
-#include <elastos/core/StringUtils.h>
 #include <elastos/droid/os/Process.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::StringUtils;
+using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Slogger;
 using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Droid::App::AppGlobals;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -33,28 +31,41 @@ SenderFilter::FACTORY_FilterFactory::FACTORY_FilterFactory(
     FilterFactory::constructor(tag);
 }
 
-AutoPtr<IFilter> SenderFilter::FACTORY_FilterFactory::NewFilter(
-    /* in */ IXmlPullParser* parser)
+ECode SenderFilter::FACTORY_FilterFactory::NewFilter(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFilter** result)
 {
+    VALIDATE_NOT_NULL(result)
     String typeString;
     parser->GetAttributeValue(String(NULL), ATTR_TYPE, &typeString);
-    if (typeString == NULL) {
-        //throw new XmlPullParserException("type attribute must be specified for <sender>",
-        //        parser, null);
-        return NULL;
+    if (typeString.IsNull()) {
+        Slogger::I("SenderFilter", "type attribute must be specified for <sender> %p",
+               parser);
+        return E_XML_PULL_PARSER_EXCEPTION;
     }
     if (typeString.Equals(VAL_SYSTEM)) {
-        return SYSTEM;
-    } else if (typeString.Equals(VAL_SIGNATURE)) {
-        return SIGNATURE;
-    } else if (typeString.Equals(VAL_SYSTEM_OR_SIGNATURE)) {
-        return SYSTEM_OR_SIGNATURE;
-    } else if (typeString.Equals(VAL_USER_ID)) {
-        return USER_ID;
+        *result = SYSTEM;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
-    //throw new XmlPullParserException(
-    //        "Invalid type attribute for <sender>: " + typeString, parser, null);
-    return NULL;
+    else if (typeString.Equals(VAL_SIGNATURE)) {
+        *result = SIGNATURE;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    else if (typeString.Equals(VAL_SYSTEM_OR_SIGNATURE)) {
+        *result = SYSTEM_OR_SIGNATURE;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    else if (typeString.Equals(VAL_USER_ID)) {
+        *result = USER_ID;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    Slogger::I(
+            "Invalid type attribute for <sender>: %s %p", typeString.string(), parser);
+    return E_XML_PULL_PARSER_EXCEPTION;
 }
 
 //------------------------------------------------------------------------------
@@ -73,6 +84,7 @@ ECode SenderFilter::SIGNATURE_Filter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     ifw->SignaturesMatch(callerUid, receivingUid, ret);
     return NOERROR;
 }
@@ -93,6 +105,7 @@ ECode SenderFilter::SYSTEM_Filter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     *ret = IsPrivilegedApp(callerUid, callerPid);
     return NOERROR;
 }
@@ -113,6 +126,7 @@ ECode SenderFilter::SYSTEM_OR_SIGNATURE_Filter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     ifw->SignaturesMatch(callerUid, receivingUid, ret);
     *ret = (IsPrivilegedApp(callerUid, callerPid) || *ret);
     return NOERROR;
@@ -134,6 +148,7 @@ ECode SenderFilter::USER_ID_Filter::Matches(
     /* [in] */ Int32 receivingUid,
     /* [out] */ Boolean *ret)
 {
+    VALIDATE_NOT_NULL(ret)
     ifw->CheckComponentPermission(String(NULL), callerPid, callerUid, receivingUid, FALSE, ret);
     return NOERROR;
 }
