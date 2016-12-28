@@ -1403,7 +1403,8 @@ String CAssetManager::GetResourceTypeName(
     }
 
     if (name.type8 != NULL) {
-        return String(name.type8);
+        android::String8 str8(name.type8);
+        return String(str8.string());
     }
 
     if (name.type != NULL) {
@@ -1428,7 +1429,8 @@ String CAssetManager::GetResourceEntryName(
     }
 
     if (name.name8 != NULL) {
-        return String(name.type8);
+        android::String8 str8(name.name8);
+        return String(str8.string());
     }
 
     if (name.name != NULL) {

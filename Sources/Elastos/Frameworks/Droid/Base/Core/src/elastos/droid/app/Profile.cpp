@@ -667,7 +667,7 @@ ECode Profile::GetSecondaryUuids(
 ECode Profile::SetSecondaryUuids(
     /* [in] */ IList* uuids)
 {
-     mSecondaryUuids->Clear();
+    mSecondaryUuids->Clear();
     if (uuids != NULL) {
         mSecondaryUuids->AddAll(ICollection::Probe(uuids));
         mDirty = TRUE;
@@ -997,19 +997,19 @@ AutoPtr<IList> Profile::ReadSecondaryUuidsFromXml(
     AutoPtr<IArrayList> uuids;
     CArrayList::New((IArrayList**)&uuids);
     Int32 event;
-    String name;
     xpp->Next(&event);
-    xpp->GetName(&name);
 
-    AutoPtr<IUUIDHelper> helper;
-    CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
-    while (event != IXmlPullParser::END_TAG || !name.Equals("uuids")) {
+    String name;
+    while (event != IXmlPullParser::END_TAG || !(xpp->GetName(&name), name).Equals(String("uuids"))) {
         if (event == IXmlPullParser::START_TAG) {
+            xpp->GetName(&name);
             if (name.Equals("uuid")) {
                 // try {
                 AutoPtr<IUUID> uuid;
                 String text;
                 xpp->NextText(&text);
+                AutoPtr<IUUIDHelper> helper;
+                CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
                 ECode ec = helper->FromString(text, (IUUID**)&uuid);
                 if (ec == (ECode) E_NULL_POINTER_EXCEPTION) {
                     Logger::W(TAG, "Null Pointer - invalid UUID");
@@ -1129,14 +1129,15 @@ AutoPtr<IProfile> Profile::FromXml(
             String name;
             xpp->GetName(&name);
             String text;
-            xpp->NextText(&text);
             if (name.Equals("uuids")) {
                 profile->SetSecondaryUuids(ReadSecondaryUuidsFromXml(xpp, context));
             }
             if (name.Equals("statusbar")) {
+                xpp->NextText(&text);
                 profile->SetStatusBarIndicator(text.Equals("yes"));
             }
             if (name.Equals("profiletype")) {
+                xpp->NextText(&text);
                 profile->SetProfileType(text.Equals("toggle") ? TOGGLE_TYPE : CONDITIONAL_TYPE);
             }
             if (name.Equals("ringModeDescriptor")) {
@@ -1155,9 +1156,11 @@ AutoPtr<IProfile> Profile::FromXml(
                 profile->SetBrightness(bd);
             }
             if (name.Equals("screen-lock-mode")) {
+                xpp->NextText(&text);
                 profile->SetScreenLockMode(StringUtils::ParseInt32(text));
             }
             if (name.Equals("expanded-desktop-mode")) {
+                xpp->NextText(&text);
                 profile->SetExpandedDesktopMode(StringUtils::ParseInt32(text));
             }
             if (name.Equals("profileGroup")) {
