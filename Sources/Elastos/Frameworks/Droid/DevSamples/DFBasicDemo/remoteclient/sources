@@ -1,0 +1,33 @@
+
+TARGET_NAME = Elastos.DevSamples.DFBasicDemo.RemoteClient
+TARGET_TYPE = eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)
+INCLUDES += $(MAKEDIR)/src
+INCLUDES += $(MAKEDIR)/carrier3sdk/inc
+
+VPATH += $(MAKEDIR)/src/elastos/devsamples/dfbasicdemo/remoteclient
+
+SOURCES = Elastos.DevSamples.DFBasicDemo.RemoteClient.car
+SOURCES += R.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Org.Alljoyn.Bus.cpp
+SOURCES += CClient.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_TARGETS)/Org.Alljoyn.Bus.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += $(MAKEDIR)/carrier3sdk/lib/libeccore_native.a
+LIBRARIES += -lm -licuuc -llog
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+APP_PACKAGE_NAME = Elastos.DevSamples.DFBasicDemo.RemoteClient
+RES_NAMESPACE = Elastos.DevSamples.DFBasicDemo.RemoteClient

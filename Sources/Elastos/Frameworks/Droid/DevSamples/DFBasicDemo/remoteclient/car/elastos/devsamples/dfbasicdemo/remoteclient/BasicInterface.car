@@ -1,0 +1,22 @@
+
+module
+{
+    namespace Elastos {
+    namespace DevSamples {
+    namespace DFBasicDemo {
+    namespace RemoteClient {
+
+    [deprecated, @Org.Alljoyn.Bus.Annotation.BusInterface(name = "org.alljoyn.Bus.sample")]
+    interface IBasicInterface {
+        [@Org.Alljoyn.Bus.Annotation.BusMethod(name = "cat")]
+        Cat(
+            [in] String inStr1,
+            [in] String inStr2,
+            [out] String* result);
+    }
+
+    } // namespace RemoteClient
+    } // namespace DFBasicDemo
+    } // namespace DevSamples
+    } // namespace Elastos
+}
