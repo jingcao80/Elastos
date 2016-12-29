@@ -16,6 +16,8 @@ module
     namespace V1 {
 
         class CXmlPullParserFactory {
+            constructor();
+
             interface IXmlPullParserFactory;
         }
 

@@ -117,7 +117,6 @@ ECode XmlPullParserFactory::GetParserInstance(
     VALIDATE_NOT_NULL(parser)
     *parser = NULL;
 
-
     if (mParserClasses) {
         AutoPtr<IIterator> it;
         mParserClasses->GetIterator((IIterator**)&it);
@@ -126,7 +125,7 @@ ECode XmlPullParserFactory::GetParserInstance(
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
             if (obj != NULL) {
-                AutoPtr<IClassInfo> ci = IClassInfo::Probe(ci);
+                AutoPtr<IClassInfo> ci = IClassInfo::Probe(obj);
                 AutoPtr<IInterface> object;
                 ECode ec = ci->CreateObject((IInterface**)&object);
                 if (FAILED(ec)) continue;
@@ -191,9 +190,9 @@ ECode XmlPullParserFactory::NewInstance(
 {
     VALIDATE_NOT_NULL(xmlPullParserFac)
 
-    AutoPtr<CXmlPullParserFactory> factory;
-    CXmlPullParserFactory::NewByFriend((CXmlPullParserFactory**)&factory);
-    *xmlPullParserFac = (IXmlPullParserFactory*)factory.Get();
+    AutoPtr<IXmlPullParserFactory> factory;
+    CXmlPullParserFactory::New((IXmlPullParserFactory**)&factory);
+    *xmlPullParserFac = factory;
     REFCOUNT_ADD(*xmlPullParserFac);
     return NOERROR;
 }

@@ -833,7 +833,7 @@ ECode ProfileManagerService::LoadFromFile()
     AutoPtr<IXmlPullParser> xpp;
     FAIL_RETURN(xppf->NewPullParser((IXmlPullParser**)&xpp));
     AutoPtr<IFileReader> fr;
-    CFileReader::New(PROFILE_FILE, (IFileReader**)&fr);
+    FAIL_RETURN(CFileReader::New(PROFILE_FILE, (IFileReader**)&fr))
     FAIL_RETURN(xpp->SetInput(IReader::Probe(fr)));
     FAIL_RETURN(LoadXml(xpp.Get(), mContext.Get()));
     ICloseable::Probe(fr)->Close();
