@@ -3,11 +3,14 @@
 
 #include <elastos/droid/ext/frameworkext.h>
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
+using Elastos::Core::IComparator;
 using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ICollections;
 
 namespace Elastos {
 namespace Droid {
@@ -163,8 +166,8 @@ public:
         String mStatFile;
         String mCmdlineFile;
         String mThreadsDir;
-        AutoPtr< List< AutoPtr<Stats> > > mThreadStats;
-        AutoPtr< List< AutoPtr<Stats> > > mWorkingThreads;
+        AutoPtr<IArrayList> mThreadStats;
+        AutoPtr<IArrayList> mWorkingThreads;
 
         AutoPtr<IBatteryStatsImplUidProc> mBatteryStats;
 
@@ -195,6 +198,20 @@ public:
         Boolean mWorking;
         Boolean mAdded;
         Boolean mRemoved;
+    };
+
+private:
+    class Comparator
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CARAPI Compare(
+            /* [in] */ IInterface* lhs,
+            /* [in] */ IInterface* rhs,
+            /* [out] */ Int32* result);
     };
 
 public:
@@ -283,7 +300,7 @@ private:
         /* [in] */ Int32 parentPid,
         /* [in] */ Boolean first,
         /* [in] */ ArrayOf<Int32>* curPids,
-        /* [in] */ List< AutoPtr<Stats> >& allProcs);
+        /* [in] */ IArrayList* allProcs);
 
     CARAPI_(AutoPtr<ArrayOf<Int64> >) GetCpuSpeedTimes(
         /* [in] */ ArrayOf<Int64>* out);
@@ -384,8 +401,8 @@ private:
     AutoPtr< ArrayOf<Int32> > mCurPids;
     AutoPtr< ArrayOf<Int32> > mCurThreadPids;
 
-    List< AutoPtr<Stats> > mProcStats;
-    List< AutoPtr<Stats> > mWorkingProcs;
+    AutoPtr<IArrayList> mProcStats;
+    AutoPtr<IArrayList> mWorkingProcs;
     Boolean mWorkingProcsSorted;
 
     Boolean mFirst;
@@ -406,6 +423,8 @@ private:
      * The different speeds that the CPU can be running at.
      */
     AutoPtr< ArrayOf<Int64> > mCpuSpeeds;
+
+    AutoPtr<IComparator> sLoadComparator;
 };
 
 } // namespace Os

@@ -21,6 +21,7 @@ using Elastos::Droid::Os::IStrictModeThreadPolicy;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::EIID_IComparator;
 using Elastos::IO::IStringWriter;
 using Elastos::IO::CStringWriter;
 using Elastos::IO::CPrintWriter;
@@ -31,6 +32,8 @@ using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::IO::IFlushable;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CCollections;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -78,8 +81,8 @@ ProcessCpuTracker::Stats::Stats(
         CFile::New(procDir, String("task"), (IFile**)&tDir);
         tDir->ToString(&mThreadsDir);
         if (includeThreads) {
-            mThreadStats = new List< AutoPtr<Stats> >();
-            mWorkingThreads = new List< AutoPtr<Stats> >();
+            CArrayList::New((IArrayList**)&mThreadStats);
+            CArrayList::New((IArrayList**)&mWorkingThreads);
         }
     }
     else {
@@ -412,6 +415,39 @@ ECode ProcessCpuTracker::Stats::SetRemoved(
     return NOERROR;
 }
 
+
+//========================================================================
+// ProcessCpuTracker::Comparator
+//========================================================================
+CAR_INTERFACE_IMPL(ProcessCpuTracker::Comparator, Object, IComparator)
+
+ECode ProcessCpuTracker::Comparator::Compare(
+    /* [in] */ IInterface* lhs,
+    /* [in] */ IInterface* rhs,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Stats* sta = (Stats*)IProcessCpuTrackerStats::Probe(lhs);
+    Stats* stb = (Stats*)IProcessCpuTrackerStats::Probe(rhs);
+    Int32 ta = sta->mRel_utime + sta->mRel_stime;
+    Int32 tb = stb->mRel_utime + stb->mRel_stime;
+    if (ta != tb) {
+        *result = ta > tb ? -1 : 1;
+        return NOERROR;
+    }
+    if (sta->mAdded != stb->mAdded) {
+        *result = sta->mAdded ? -1 : 1;
+        return NOERROR;
+    }
+    if (sta->mRemoved != stb->mRemoved) {
+        *result = sta->mAdded ? -1 : 1;
+        return NOERROR;
+    }
+    *result = 0;
+    return NOERROR;
+}
+
+
 //========================================================================
 // ProcessCpuTracker
 //========================================================================
@@ -530,7 +566,11 @@ ProcessCpuTracker::ProcessCpuTracker()
     , mRelIdleTime(0)
     , mWorkingProcsSorted(FALSE)
     , mFirst(TRUE)
-{}
+{
+    CArrayList::New((IArrayList**)&mProcStats);
+    CArrayList::New((IArrayList**)&mWorkingProcs);
+    sLoadComparator = new Comparator();
+}
 
 ECode ProcessCpuTracker::constructor(
     /* [in] */ Boolean includeThreads)
@@ -647,29 +687,35 @@ AutoPtr<ArrayOf<Int32> > ProcessCpuTracker::CollectStats(
     /* [in] */ Int32 parentPid,
     /* [in] */ Boolean first,
     /* [in] */ ArrayOf<Int32>* curPids,
-    /* [in] */ List< AutoPtr<Stats> >& allProcs)
+    /* [in] */ IArrayList* allProcs)
 {
     AutoPtr<ArrayOf<Int32> > pids;
     Process::GetPids(statsFile, curPids, (ArrayOf<Int32>**)&pids);
     Int32 NP = (pids == NULL) ? 0 : pids->GetLength();
-    List< AutoPtr<Stats> >::Iterator curStatsIt = allProcs.Begin();
+    Int32 NS;
+    allProcs->GetSize(&NS);
+    Int32 curStatsIndex = 0;
     for (Int32 i = 0; i < NP; i++) {
         Int32 pid = (*pids)[i];
         if (pid < 0) {
             NP = pid;
             break;
         }
-        AutoPtr<Stats> st = curStatsIt != allProcs.End() ? *curStatsIt : NULL;
+        AutoPtr<Stats> st;
+        if (curStatsIndex < NS) {
+            AutoPtr<IInterface> obj;
+            allProcs->Get(curStatsIndex, (IInterface**)&obj);
+            st = (Stats*)IProcessCpuTrackerStats::Probe(obj);
+        }
+
         if (st != NULL && st->mPid == pid) {
             // Update an existing process...
             st->mAdded = FALSE;
             st->mWorking = FALSE;
-            ++curStatsIt;
+            curStatsIndex++;
             if (DEBUG) {
-                String process("process");
-                String thread("thread");
-                Slogger::V(TAG, "Existing %s pid %d : %p",
-                    parentPid < 0 ? process.string() : thread.string(), pid, st.Get());
+                Slogger::V(TAG, "Existing %s pid %d : %s",
+                        parentPid < 0 ? "process" : "thread", pid, TO_CSTR(st));
             }
 
             if (st->mInteresting) {
@@ -705,7 +751,7 @@ AutoPtr<ArrayOf<Int32> > ProcessCpuTracker::CollectStats(
                 if (parentPid < 0) {
                     GetName(st, st->mCmdlineFile);
                     if (st->mThreadStats != NULL) {
-                        mCurThreadPids = CollectStats(st->mThreadsDir, pid, FALSE, mCurThreadPids, *st->mThreadStats);
+                        mCurThreadPids = CollectStats(st->mThreadsDir, pid, FALSE, mCurThreadPids, st->mThreadStats);
                     }
                 }
 
@@ -737,13 +783,12 @@ AutoPtr<ArrayOf<Int32> > ProcessCpuTracker::CollectStats(
         if (st == NULL || st->mPid > pid) {
             // We have a new process!
             st = new Stats(pid, parentPid, mIncludeThreads);
-            curStatsIt = allProcs.Insert(curStatsIt, st);
-            ++curStatsIt;
+            allProcs->Add(curStatsIndex, (IProcessCpuTrackerStats*)st);
+            curStatsIndex++;
+            NS++;
             if (DEBUG) {
-                String process("process");
-                String thread("thread");
-                Slogger::V(TAG, "New %s pid %d : %p",
-                    parentPid < 0 ? process.string() : thread.string(), pid, st.Get());
+                Slogger::V(TAG, "New %s pid %d : %s",
+                    parentPid < 0 ? "process" : "thread", pid, TO_CSTR(st));
             }
 
             AutoPtr<ArrayOf<String> > procStatsString = mProcessFullStatsStringData;
@@ -783,7 +828,7 @@ AutoPtr<ArrayOf<Int32> > ProcessCpuTracker::CollectStats(
                 GetName(st, st->mCmdlineFile);
                 if (st->mThreadStats != NULL) {
                     mCurThreadPids = CollectStats(st->mThreadsDir, pid, TRUE,
-                            mCurThreadPids, *st->mThreadStats);
+                            mCurThreadPids, st->mThreadStats);
                 }
             }
             else if (st->mInteresting) {
@@ -815,34 +860,33 @@ AutoPtr<ArrayOf<Int32> > ProcessCpuTracker::CollectStats(
         st->mRel_majfaults = 0;
         st->mRemoved = TRUE;
         st->mWorking = TRUE;
-
+        allProcs->Remove(curStatsIndex);
+        NS--;
         if (DEBUG) {
-            String process("process");
-            String thread("thread");
             Slogger::V(TAG, "Removed %s pid %d : %p",
-                parentPid < 0 ? process.string() : thread.string(), pid, st.Get());
+                parentPid < 0 ? "process" : "thread", pid, st.Get());
         }
-
-        curStatsIt = allProcs.Erase(curStatsIt);
-
         // Decrement the loop counter so that we process the current pid
         // again the next time through the loop.
         i--;
         continue;
     }
 
-    while (curStatsIt != allProcs.End()) {
+    while (curStatsIndex < NS) {
         // This process has gone away!
-        AutoPtr<Stats> st = *curStatsIt;
+        AutoPtr<IInterface> obj;
+        allProcs->Get(curStatsIndex, (IInterface**)&obj);
+        Stats* st = (Stats*)IProcessCpuTrackerStats::Probe(obj);
         st->mRel_utime = 0;
         st->mRel_stime = 0;
         st->mRel_minfaults = 0;
         st->mRel_majfaults = 0;
         st->mRemoved = true;
         st->mWorking = true;
-        curStatsIt = allProcs.Erase(curStatsIt);
+        allProcs->Remove(curStatsIndex);
+        NS--;
         if (localLOGV) {
-            Slogger::V(TAG, "Removed pid %d : %p", st->mPid, st.Get());
+            Slogger::V(TAG, "Removed pid %d : %s", st->mPid, TO_CSTR(st));
         }
     }
 
@@ -1014,52 +1058,36 @@ ECode ProcessCpuTracker::GetTotalCpuPercent(
     return NOERROR;
 }
 
-static Boolean LoadCompare(
-    /* [in] */ const AutoPtr<ProcessCpuTracker::Stats>& sta,
-    /* [in] */ const AutoPtr<ProcessCpuTracker::Stats>& stb)
-{
-    Int32 ta = sta->mRel_utime + sta->mRel_stime;
-    Int32 tb = stb->mRel_utime + stb->mRel_stime;
-    if (ta != tb) {
-        return ta > tb ? TRUE : FALSE;
-    }
-    if (sta->mAdded != stb->mAdded) {
-        return sta->mAdded ? TRUE : FALSE;
-    }
-    if (sta->mRemoved != stb->mRemoved) {
-        return sta->mAdded ? TRUE : FALSE;
-    }
-    return TRUE;
-}
-
 void ProcessCpuTracker::BuildWorkingProcs()
 {
-    Boolean (*cmpFunc)(const AutoPtr<ProcessCpuTracker::Stats>&, const AutoPtr<ProcessCpuTracker::Stats>&);
-    cmpFunc = LoadCompare;
-
     if (!mWorkingProcsSorted) {
-        mWorkingProcs.Clear();
-        List< AutoPtr<Stats> >::Iterator it;
-        for (it = mProcStats.Begin(); it != mProcStats.End(); ++it) {
-            AutoPtr<Stats> stats = *it;
+        AutoPtr<ICollections> collections;
+        CCollections::AcquireSingleton((ICollections**)&collections);
+        mWorkingProcs->Clear();
+        Int32 N;
+        mProcStats->GetSize(&N);
+        for (Int32 i = 0; i < N; i++) {
+            AutoPtr<IInterface> obj;
+            mProcStats->Get(i, (IInterface**)&obj);
+            Stats* stats = (Stats*)IProcessCpuTrackerStats::Probe(obj);
             if (stats->mWorking) {
-                mWorkingProcs.PushBack(stats);
-                if (stats->mThreadStats != NULL && !stats->mThreadStats->IsEmpty()) {
+                mWorkingProcs->Add(obj);
+                Int32 M;
+                if (stats->mThreadStats != NULL && (stats->mThreadStats->GetSize(&M), M > 1)) {
                     stats->mWorkingThreads->Clear();
-                    List< AutoPtr<Stats> >::Iterator tit;
-                    for (tit = stats->mThreadStats->Begin(); tit != stats->mThreadStats->End(); ++tit) {
-                        AutoPtr<Stats> tstats = *tit;
+                    for (Int32 j = 0; j < M; j++) {
+                        AutoPtr<IInterface> tobj;
+                        stats->mThreadStats->Get(j, (IInterface**)&tobj);
+                        Stats* tstats = (Stats*)IProcessCpuTrackerStats::Probe(tobj);
                         if (tstats->mWorking) {
-                            stats->mWorkingThreads->PushBack(tstats);
+                            stats->mWorkingThreads->Add(tobj);
                         }
                     }
-
-                    stats->mWorkingThreads->Sort(cmpFunc);
+                    collections->Sort(IList::Probe(stats->mWorkingThreads), sLoadComparator);
                 }
             }
         }
-
-        mWorkingProcs.Sort(cmpFunc);
+        collections->Sort(IList::Probe(mWorkingProcs), sLoadComparator);
         mWorkingProcsSorted = TRUE;
     }
 }
@@ -1068,7 +1096,7 @@ ECode ProcessCpuTracker::CountStats(
     /* [out] */ Int32* stats)
 {
     VALIDATE_NOT_NULL(stats);
-    *stats = mProcStats.GetSize();
+    mProcStats->GetSize(stats);
     return NOERROR;
 }
 
@@ -1077,7 +1105,9 @@ ECode ProcessCpuTracker::GetStats(
     /* [out] */ IProcessCpuTrackerStats** stats)
 {
     VALIDATE_NOT_NULL(stats);
-    *stats = (IProcessCpuTrackerStats*)mProcStats[index];
+    AutoPtr<IInterface> obj;
+    mProcStats->Get(index, (IInterface**)&obj);
+    *stats = IProcessCpuTrackerStats::Probe(obj);
     REFCOUNT_ADD(*stats);
     return NOERROR;
 }
@@ -1087,7 +1117,7 @@ ECode ProcessCpuTracker::CountWorkingStats(
 {
     VALIDATE_NOT_NULL(stats);
     BuildWorkingProcs();
-    *stats = mWorkingProcs.GetSize();
+    mWorkingProcs->GetSize(stats);
     return NOERROR;
 }
 
@@ -1096,7 +1126,9 @@ ECode ProcessCpuTracker::GetWorkingStats(
     /* [out] */ IProcessCpuTrackerStats** stats)
 {
     VALIDATE_NOT_NULL(stats);
-    *stats = (IProcessCpuTrackerStats*)mWorkingProcs[index];
+    AutoPtr<IInterface> obj;
+    mWorkingProcs->Get(index, (IInterface**)&obj);
+    *stats = IProcessCpuTrackerStats::Probe(obj);
     REFCOUNT_ADD(*stats);
     return NOERROR;
 }
@@ -1164,16 +1196,22 @@ ECode ProcessCpuTracker::PrintCurrentState(
     // if (DEBUG) Slog.i(TAG, "totalTime " + totalTime + " over sample time "
     //        + (mCurrentSampleTime-mLastSampleTime));
 
-    List< AutoPtr<Stats> >::Iterator it;
-    for (it = mWorkingProcs.Begin(); it != mWorkingProcs.End(); ++it) {
-        AutoPtr<Stats> st = *it;
+    Int32 N;
+    mWorkingProcs->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mWorkingProcs->Get(i, (IInterface**)&obj);
+        Stats* st = (Stats*)IProcessCpuTrackerStats::Probe(obj);
         PrintProcessCPU(pw, st->mAdded ? String(" +") : (st->mRemoved ? String(" -"): String("  ")),
                 st->mPid, st->mName, (Int32)(st->mRel_uptime + 5) / 10,
                 st->mRel_utime, st->mRel_stime, 0, 0, 0, st->mRel_minfaults, st->mRel_majfaults);
         if (!st->mRemoved && st->mWorkingThreads != NULL) {
-            List< AutoPtr<Stats> >::Iterator tit;
-            for (tit = st->mWorkingThreads->Begin(); tit != st->mWorkingThreads->End(); ++tit) {
-                AutoPtr<Stats> tst = *tit;
+            Int32 M;
+            st->mWorkingThreads->GetSize(&M);
+            for (Int32 j = 0; j < M; j++) {
+                AutoPtr<IInterface> tobj;
+                st->mWorkingThreads->Get(j, (IInterface**)&tobj);
+                Stats* tst = (Stats*)IProcessCpuTrackerStats::Probe(tobj);
                 PrintProcessCPU(pw,
                         tst->mAdded ? String("   +") : (tst->mRemoved ? String("   -"): String("    ")),
                         tst->mPid, tst->mName, (Int32)(st->mRel_uptime + 5) / 10,
