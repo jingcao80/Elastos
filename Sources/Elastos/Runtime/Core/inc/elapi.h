@@ -4,9 +4,6 @@
   * Elastos API is Elastos's core set of application programming interfaces (APIs).
   */
 
-//==========================================================================
-// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 
 #ifndef __ELAPI_H__
 #define __ELAPI_H__

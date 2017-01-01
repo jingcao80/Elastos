@@ -1,6 +1,3 @@
-#==========================================================================
-# Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
-#==========================================================================
 
 lube.lbo :  $(MAKEDIR)/background/backcpp.lub       \
             $(MAKEDIR)/background/background.lub    \

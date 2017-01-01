@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 
 #ifndef __CCARARRAYVARIABLE_H__
 #define __CCARARRAYVARIABLE_H__

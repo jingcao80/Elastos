@@ -185,10 +185,6 @@ interface IActivity {
 生成与目标 eco 同名的 def 文件，如 <code>Elastos.CoreLibrary.eco</code> 对应的 def 文件为：<code>Elastos.CoreLibrary.def</code>，并放置在同一目录下，该 def 文件头示例如下：
 
 ``` cpp
-;;==========================================================================
-;; Copyright (c) 2000-2015,  Elastos, Inc.  All Rights Reserved.
-;;==========================================================================
-
 LIBRARY Elastos.CoreLibrary.eco
 
 EXPORTS

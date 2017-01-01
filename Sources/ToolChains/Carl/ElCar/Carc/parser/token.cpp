@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 
 // Token processor, read characters from input file byte-by-byte and
 // solved them as tokens which parser known.

@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 
 #ifndef __CVARIABLEOFCPPVECTOR_H__
 #define __CVARIABLEOFCPPVECTOR_H__

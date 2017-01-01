@@ -1,6 +1,3 @@
-#==========================================================================
-# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-#==========================================================================
 $(SPECIAL_TARGET) : elastos.exp
 ifeq "$(SystemRoot)" ""
 	if [ -f $(XDK_USER_LIB)/Elastos.Runtime.CarRuntime.lib ]; then \

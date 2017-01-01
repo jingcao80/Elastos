@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2009-2010,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 //
 // File:        CarCode.exe
 // Purpose:     Show a CAR component's fingerprint.
@@ -158,7 +155,19 @@ int getDependenceFromCls(const char *pszName)
 
 void showUsage()
 {
-    printf(" Copyright (c) 2010-2012, Elastos, Inc. All rights reserved.\n\n");
+    printf("Copyright (C) 2012 The Elastos Open Source Project\n");
+    printf("\n");
+    printf("Licensed under the Apache License, Version 2.0 (the \"License\");\n");
+    printf("you may not use this file except in compliance with the License.\n");
+    printf("You may obtain a copy of the License at\n");
+    printf("\n");
+    printf("     http://www.apache.org/licenses/LICENSE-2.0\n");
+    printf("\n");
+    printf("Unless required by applicable law or agreed to in writing, software\n");
+    printf("distributed under the License is distributed on an \"AS IS\" BASIS,\n");
+    printf("WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n");
+    printf("See the License for the specific language governing permissions and\n");
+    printf("limitations under the License.\n\n");
     printf(" carcode.exe:    Show a CAR component's fingerprint: checksum.manufacturingdate.\n");
     printf(" Usage:          carcode.exe [-b | -c | -d | -u] [ModuleName.dll | ModuleName.eco | ClsName.cls | DefName.def]\n");
     printf(" -b              output build-date\n");

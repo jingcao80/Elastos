@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 
 #ifndef __CCALLBACKMETHODINFO_H__
 #define __CCALLBACKMETHODINFO_H__

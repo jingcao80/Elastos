@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 
 #ifndef __ELASTOS_RUNTIME_ELQUINTET_H__
 #define __ELASTOS_RUNTIME_ELQUINTET_H__

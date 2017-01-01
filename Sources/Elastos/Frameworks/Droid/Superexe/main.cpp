@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2009,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 #include <Elastos.Droid.Server.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elautoptr.h>

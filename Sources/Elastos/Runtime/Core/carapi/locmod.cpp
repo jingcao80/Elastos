@@ -1,6 +1,3 @@
-//==========================================================================
-// Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-//==========================================================================
 #define __NO_LINKNODE_CONSTRUCTOR
 #include <locmod.h>
 #include <pthread.h>

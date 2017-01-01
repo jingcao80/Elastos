@@ -1,6 +1,3 @@
-#==========================================================================
-# Copyright (c) 2000-2008,  Elastos, Inc.  All Rights Reserved.
-#==========================================================================
 $(SPECIAL_TARGET) : $(XDK_TARGETS)/AudioTrack.eco
 	if [ ! -d $(XDK_TARGETS)/Snowfox ]; then \
 		$(MKDIR) $(XDK_TARGETS)/Snowfox; \
