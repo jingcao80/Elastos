@@ -110,7 +110,7 @@ enum {
      SESSION_MODE_PUNCH,
      SESSION_MODE_RELAY,
      SESSION_MODE_DISCONNECTED
-}; 
+};
 
 
 /*for session peer*/
@@ -119,20 +119,20 @@ struct ecPeerSessionInfo {
      * @brief Session state, can be 0: Ready, 1: Error
      *
      */
-     
+
     int  state;
    /**
      * @brief Channel number
      *
      */
    int  nChannels;
-   
+
    /**
      * @brief Session mode, can be
      *            SESSION_MODE_LAN,
      *            SESSION_MODE_PUNCH,
      *            SESSION_MODE_RELAY,
-     *            SESSION_MODE_DISCONNECTED, 
+     *            SESSION_MODE_DISCONNECTED,
      */
     int  mode;
 
