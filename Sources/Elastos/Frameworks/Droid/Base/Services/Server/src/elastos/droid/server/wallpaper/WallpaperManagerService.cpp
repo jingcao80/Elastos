@@ -33,8 +33,6 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CContextImpl;
@@ -42,9 +40,11 @@ using Elastos::Droid::App::CPendingIntent;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::CWallpaperInfo;
 using Elastos::Droid::App::CWallpaperManager;
+using Elastos::Droid::App::CWallpaperManagerHelper;
 using Elastos::Droid::App::EIID_IIWallpaperManager;
 using Elastos::Droid::App::EIID_IIUserSwitchObserver;
 using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::IWallpaperManagerHelper;
 // using Elastos::Droid::App::Backup::CBackupManager;
 using Elastos::Droid::App::Backup::IBackupManager;
 using Elastos::Droid::App::Backup::IWallpaperBackupHelper;
@@ -159,46 +159,48 @@ ECode WallpaperManagerService::WallpaperObserver::OnEvent(
     if (path.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    {    AutoLock syncLock(this);
-        AutoPtr<IFile> changedFile;
-        CFile::New(mWallpaperDir, path, (IFile**)&changedFile);
-        Boolean isEquals;
-        IObject::Probe(mWallpaperFile)->Equals(IInterface::Probe(changedFile), &isEquals);
-        if (isEquals) {
-            // changing the wallpaper means we'll need to back up the new one
-            Slogger::E(TAG, "TODO: CBackupManager is not compiled!");
-            // AutoPtr<IBinderHelper> bh;
-            // CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
-            // Int64 origId;
-            // bh->ClearCallingIdentity(&origId);
-            // AutoPtr<IBackupManager> bm;
-            // CBackupManager::New(mHost->mContext, (IBackupManager**)&bm);
-            // bm->DataChanged();
-            // bh->RestoreCallingIdentity(origId);
 
-            mHost->NotifyCallbacksLocked(mWallpaper.Get());
-            const Boolean written = (event == IFileObserver::CLOSE_WRITE || event == IFileObserver::MOVED_TO);
-            if (mWallpaper->mWallpaperComponent == NULL
-                    || event != IFileObserver::CLOSE_WRITE // includes the MOVED_TO case
-                    || mWallpaper->mImageWallpaperPending) {
-                if (written) {
-                    mWallpaper->mImageWallpaperPending = FALSE;
-                }
-                Boolean bwresult;
-                mHost->BindWallpaperComponentLocked(mHost->mImageWallpaper, TRUE,
-                        FALSE, mWallpaper, NULL, &bwresult);
-                mHost->SaveSettingsLocked(mWallpaper);
+    AutoLock lock(mHost->mLock);
+    AutoPtr<IFile> changedFile;
+    CFile::New(mWallpaperDir, path, (IFile**)&changedFile);
+    Boolean isEquals;
+    IObject::Probe(mWallpaperFile)->Equals(IInterface::Probe(changedFile), &isEquals);
+
+    if (isEquals) {
+        // changing the wallpaper means we'll need to back up the new one
+        Slogger::E(TAG, "TODO: CBackupManager is not compiled!");
+        // AutoPtr<IBinderHelper> bh;
+        // CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
+        // Int64 origId;
+        // bh->ClearCallingIdentity(&origId);
+        // AutoPtr<IBackupManager> bm;
+        // CBackupManager::New(mHost->mContext, (IBackupManager**)&bm);
+        // bm->DataChanged();
+        // bh->RestoreCallingIdentity(origId);
+
+        mHost->NotifyCallbacksLocked(mWallpaper.Get());
+        const Boolean written = (event == IFileObserver::CLOSE_WRITE || event == IFileObserver::MOVED_TO);
+        if (mWallpaper->mWallpaperComponent == NULL
+                || event != IFileObserver::CLOSE_WRITE // includes the MOVED_TO case
+                || mWallpaper->mImageWallpaperPending) {
+            if (written) {
+                mWallpaper->mImageWallpaperPending = FALSE;
             }
-        }
-        else if (IObject::Probe(mKeyguardWallpaperFile)->Equals(changedFile, &isEquals), isEquals) {
-            mHost->NotifyCallbacksLocked(mKeyguardWallpaper);
-            if (event == IFileObserver::CLOSE_WRITE
-                    || mKeyguardWallpaper->mImageWallpaperPending) {
-                mKeyguardWallpaper->mImageWallpaperPending = FALSE;
-                mHost->SaveSettingsLocked(mKeyguardWallpaper);
-            }
+            Boolean bwresult;
+            mHost->BindWallpaperComponentLocked(mHost->mImageWallpaper, TRUE,
+                    FALSE, mWallpaper, NULL, &bwresult);
+            mHost->SaveSettingsLocked(mWallpaper);
         }
     }
+    else if (IObject::Probe(mKeyguardWallpaperFile)->Equals(changedFile, &isEquals), isEquals) {
+        mHost->NotifyCallbacksLocked(mKeyguardWallpaper);
+        if (event == IFileObserver::CLOSE_WRITE
+                || mKeyguardWallpaper->mImageWallpaperPending) {
+            mKeyguardWallpaper->mImageWallpaperPending = FALSE;
+            mHost->SaveSettingsLocked(mKeyguardWallpaper);
+        }
+    }
+
     return NOERROR;
 }
 
@@ -274,17 +276,16 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    {    AutoLock syncLock(this);
-        AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
-        if ((_mWallpaper->mConnection).Get() == this) {
-            mService = IIWallpaperService::Probe(service);
-            mHost->AttachServiceLocked(this, mWallpaper);
-            // XXX should probably do saveSettingsLocked() later
-            // when we have an engine, but I'm not sure about
-            // locking there and anyway we always need to be able to
-            // recover if there is something wrong.
-            mHost->SaveSettingsLocked(_mWallpaper);
-        }
+    AutoLock lock(mHost->mLock);
+    AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
+    if ((_mWallpaper->mConnection).Get() == this) {
+        mService = IIWallpaperService::Probe(service);
+        mHost->AttachServiceLocked(this, mWallpaper);
+        // XXX should probably do saveSettingsLocked() later
+        // when we have an engine, but I'm not sure about
+        // locking there and anyway we always need to be able to
+        // recover if there is something wrong.
+        mHost->SaveSettingsLocked(_mWallpaper);
     }
     return NOERROR;
 }
@@ -292,7 +293,8 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceConnected(
 ECode WallpaperManagerService::WallpaperConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock lock(mHost->mLock);
         mService = NULL;
         mEngine = NULL;
         AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
@@ -325,25 +327,24 @@ ECode WallpaperManagerService::WallpaperConnection::OnServiceDisconnected(
 ECode WallpaperManagerService::WallpaperConnection::AttachEngine(
     /* [in] */ IIWallpaperEngine* engine)
 {
-    {    AutoLock syncLock(this);
-        AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
-        mEngine = engine;
-        if (mDimensionsChanged) {
-            ECode ec = mEngine->SetDesiredSize(_mWallpaper->mWidth, _mWallpaper->mHeight);
-            if (FAILED(ec)) {
-                Slogger::W(WallpaperManagerService::TAG, "Failed to set wallpaper dimensions");
-                return E_REMOTE_EXCEPTION;
-            }
-            mDimensionsChanged = FALSE;
+    AutoLock lock(mHost->mLock);
+    AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
+    mEngine = engine;
+    if (mDimensionsChanged) {
+        ECode ec = mEngine->SetDesiredSize(_mWallpaper->mWidth, _mWallpaper->mHeight);
+        if (FAILED(ec)) {
+            Slogger::W(WallpaperManagerService::TAG, "Failed to set wallpaper dimensions");
+            return E_REMOTE_EXCEPTION;
         }
-        if (mPaddingChanged) {
-            ECode ec = mEngine->SetDisplayPadding(_mWallpaper->mPadding);
-            if (FAILED(ec)) {
-                Slogger::W(WallpaperManagerService::TAG, "Failed to set wallpaper padding");
-                return E_REMOTE_EXCEPTION;
-            }
-            mPaddingChanged = FALSE;
+        mDimensionsChanged = FALSE;
+    }
+    if (mPaddingChanged) {
+        ECode ec = mEngine->SetDisplayPadding(_mWallpaper->mPadding);
+        if (FAILED(ec)) {
+            Slogger::W(WallpaperManagerService::TAG, "Failed to set wallpaper padding");
+            return E_REMOTE_EXCEPTION;
         }
+        mPaddingChanged = FALSE;
     }
     return NOERROR;
 }
@@ -351,19 +352,18 @@ ECode WallpaperManagerService::WallpaperConnection::AttachEngine(
 ECode WallpaperManagerService::WallpaperConnection::EngineShown(
     /* [in] */ IIWallpaperEngine* engine)
 {
-    {    AutoLock syncLock(this);
-        if (mReply != NULL) {
-            AutoPtr<IBinderHelper> bh;
-            CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
-            Int64 ident;
-            bh->ClearCallingIdentity(&ident);
-            ECode ec = mReply->SendResult(NULL);
-            if (FAILED(ec)) {
-                bh->RestoreCallingIdentity(ident);
-                return E_REMOTE_EXCEPTION;
-            }
-            mReply = NULL;
+    AutoLock lock(mHost->mLock);
+    if (mReply != NULL) {
+        AutoPtr<IBinderHelper> bh;
+        CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
+        Int64 ident;
+        bh->ClearCallingIdentity(&ident);
+        ECode ec = mReply->SendResult(NULL);
+        if (FAILED(ec)) {
+            bh->RestoreCallingIdentity(ident);
+            return E_REMOTE_EXCEPTION;
         }
+        mReply = NULL;
     }
     return NOERROR;
 }
@@ -373,13 +373,14 @@ ECode WallpaperManagerService::WallpaperConnection::SetWallpaper(
     /* [out] */ IParcelFileDescriptor** descriptor)
 {
     VALIDATE_NOT_NULL(descriptor)
-    {    AutoLock syncLock(this);
-        AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
-        if ((_mWallpaper->mConnection).Get() == this) {
-            return mHost->UpdateWallpaperBitmapLocked(name, mWallpaper, descriptor);
-        }
-        *descriptor = NULL;
+
+    AutoLock lock(mHost->mLock);
+    AutoPtr<WallpaperData> _mWallpaper = (WallpaperData*)mWallpaper.Get();
+    if ((_mWallpaper->mConnection).Get() == this) {
+        return mHost->UpdateWallpaperBitmapLocked(name, mWallpaper, descriptor);
     }
+    *descriptor = NULL;
+
     return NOERROR;
 }
 
@@ -397,28 +398,27 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateFinished(
     /* [in] */ const String& packageName,
     /* [in] */  Int32 uid)
 {
-    {    AutoLock syncLock(this);
-        Int32 userId;
-        GetChangingUserId(&userId);
-        if (mHost->mCurrentUserId != userId) {
-            return E_NULL_POINTER_EXCEPTION;
-        }
-        AutoPtr<IInterface> obj;
-        mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        if (wallpaper != NULL && wallpaper->mWallpaperComponent != NULL) {
-            String pn;
-            wallpaper->mWallpaperComponent->GetPackageName(&pn);
-            if (pn.Equals(packageName)) {
-                wallpaper->mWallpaperUpdating = FALSE;
-                AutoPtr<IComponentName> comp = wallpaper->mWallpaperComponent;
-                mHost->ClearWallpaperComponentLocked(wallpaper);
-                Boolean result;
-                mHost->BindWallpaperComponentLocked(comp.Get(), FALSE, FALSE, wallpaper, NULL, &result);
-                if (!result) {
-                    Slogger::W(WallpaperManagerService::TAG, "Wallpaper no longer available; reverting to default");
-                    mHost->ClearWallpaperLocked(FALSE, wallpaper->mUserId, NULL);
-                }
+    AutoLock lock(mHost->mLock);
+    Int32 userId;
+    GetChangingUserId(&userId);
+    if (mHost->mCurrentUserId != userId) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    AutoPtr<IInterface> obj;
+    mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
+    if (wallpaper != NULL && wallpaper->mWallpaperComponent != NULL) {
+        String pn;
+        wallpaper->mWallpaperComponent->GetPackageName(&pn);
+        if (pn.Equals(packageName)) {
+            wallpaper->mWallpaperUpdating = FALSE;
+            AutoPtr<IComponentName> comp = wallpaper->mWallpaperComponent;
+            mHost->ClearWallpaperComponentLocked(wallpaper);
+            Boolean result;
+            mHost->BindWallpaperComponentLocked(comp.Get(), FALSE, FALSE, wallpaper, NULL, &result);
+            if (!result) {
+                Slogger::W(WallpaperManagerService::TAG, "Wallpaper no longer available; reverting to default");
+                mHost->ClearWallpaperLocked(FALSE, wallpaper->mUserId, NULL);
             }
         }
     }
@@ -428,27 +428,26 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateFinished(
 ECode WallpaperManagerService::MyPackageMonitor::OnPackageModified(
     /* [in] */ const String& packageName)
 {
-    {    AutoLock syncLock(this);
-        Int32 userId;
-        GetChangingUserId(&userId);
-        if (mHost->mCurrentUserId != userId) {
+    AutoLock lock(mHost->mLock);
+    Int32 userId;
+    GetChangingUserId(&userId);
+    if (mHost->mCurrentUserId != userId) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    AutoPtr<IInterface> obj;
+    mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
+    if (wallpaper != NULL) {
+        String pn;
+        if (wallpaper->mWallpaperComponent != NULL) {
+            wallpaper->mWallpaperComponent->GetPackageName(&pn);
+        }
+
+        if (wallpaper->mWallpaperComponent == NULL || !pn.Equals(packageName)) {
             return E_NULL_POINTER_EXCEPTION;
         }
-        AutoPtr<IInterface> obj;
-        mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        if (wallpaper != NULL) {
-            String pn;
-            if (wallpaper->mWallpaperComponent != NULL) {
-                wallpaper->mWallpaperComponent->GetPackageName(&pn);
-            }
-
-            if (wallpaper->mWallpaperComponent == NULL || !pn.Equals(packageName)) {
-                return E_NULL_POINTER_EXCEPTION;
-            }
-            Boolean result;
-            DoPackagesChangedLocked(TRUE, wallpaper, &result);
-        }
+        Boolean result;
+        DoPackagesChangedLocked(TRUE, wallpaper, &result);
     }
     return NOERROR;
 }
@@ -457,21 +456,20 @@ ECode WallpaperManagerService::MyPackageMonitor::OnPackageUpdateStarted(
     /* [in] */ const String& packageName,
     /* [in] */  Int32 uid)
 {
-    {    AutoLock syncLock(this);
-        Int32 userId;
-        GetChangingUserId(&userId);
-        if (mHost->mCurrentUserId != userId) {
-            return E_NULL_POINTER_EXCEPTION;
-        }
-        AutoPtr<IInterface> obj;
-        mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        if (wallpaper != NULL && wallpaper->mWallpaperComponent != NULL) {
-            String pn;
-            wallpaper->mWallpaperComponent->GetPackageName(&pn);
-            if (pn.Equals(packageName)) {
-                wallpaper->mWallpaperUpdating = TRUE;
-            }
+    AutoLock lock(mHost->mLock);
+    Int32 userId;
+    GetChangingUserId(&userId);
+    if (mHost->mCurrentUserId != userId) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    AutoPtr<IInterface> obj;
+    mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
+    if (wallpaper != NULL && wallpaper->mWallpaperComponent != NULL) {
+        String pn;
+        wallpaper->mWallpaperComponent->GetPackageName(&pn);
+        if (pn.Equals(packageName)) {
+            wallpaper->mWallpaperUpdating = TRUE;
         }
     }
     return NOERROR;
@@ -485,43 +483,41 @@ ECode WallpaperManagerService::MyPackageMonitor::OnHandleForceStop(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    {    AutoLock syncLock(this);
-        Int32 userId;
-        GetChangingUserId(&userId);
-        if (mHost->mCurrentUserId != userId) {
-            *result = FALSE;
-            return NOERROR;
-        }
-        AutoPtr<IInterface> obj;
-        mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        Boolean changed = FALSE;
-        if (wallpaper != NULL) {
-            Boolean res;
-            DoPackagesChangedLocked(doit, wallpaper, &res);
-            changed |= res;
-        }
-        *result = changed;
+
+    AutoLock lock(mHost->mLock);
+    Int32 userId;
+    GetChangingUserId(&userId);
+    if (mHost->mCurrentUserId != userId) {
+        *result = FALSE;
         return NOERROR;
     }
+    AutoPtr<IInterface> obj;
+    mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
+    Boolean changed = FALSE;
+    if (wallpaper != NULL) {
+        Boolean res;
+        DoPackagesChangedLocked(doit, wallpaper, &res);
+        changed |= res;
+    }
+    *result = changed;
     return NOERROR;
 }
 
 ECode WallpaperManagerService::MyPackageMonitor::OnSomePackagesChanged()
 {
-    {    AutoLock syncLock(this);
-        Int32 userId;
-        GetChangingUserId(&userId);
-        if (mHost->mCurrentUserId != userId) {
-            return E_NULL_POINTER_EXCEPTION;
-        }
-        AutoPtr<IInterface> obj;
-        mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
-        if (wallpaper != NULL) {
-            Boolean res;
-            DoPackagesChangedLocked(TRUE, wallpaper, &res);
-        }
+    AutoLock lock(mHost->mLock);
+    Int32 userId;
+    GetChangingUserId(&userId);
+    if (mHost->mCurrentUserId != userId) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    AutoPtr<IInterface> obj;
+    mHost->mWallpaperMap->Get(mHost->mCurrentUserId, (IInterface**)&obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)(IWallpaperData::Probe(obj));
+    if (wallpaper != NULL) {
+        Boolean res;
+        DoPackagesChangedLocked(TRUE, wallpaper, &res);
     }
     return NOERROR;
 }
@@ -784,14 +780,13 @@ ECode WallpaperManagerService::GetName(
         Slogger::E(TAG, "getName() can only be called from the system process");
         return E_RUNTIME_EXCEPTION;
     }
-    {    AutoLock syncLock(this);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(0, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> _wd = (WallpaperData*)wd.Get();
-        *name = _wd->mName;
-        return NOERROR;
-    }
+
+    AutoLock lock(mLock);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(0, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> _wd = (WallpaperData*)wd.Get();
+    *name = _wd->mName;
     return NOERROR;
 }
 
@@ -799,19 +794,19 @@ ECode WallpaperManagerService::OnStoppingUser(
     /* [in] */ Int32 userId)
 {
     if (userId < 1) return E_NULL_POINTER_EXCEPTION;
-    {    AutoLock syncLock(this);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
-        if (wallpaper != NULL) {
-            if (wallpaper->mWallpaperObserver != NULL) {
-                wallpaper->mWallpaperObserver->StopWatching();
-                wallpaper->mWallpaperObserver = NULL;
-            }
-            mWallpaperMap->Remove(userId);
-            mKeyguardWallpaperMap.Erase(userId);
+
+    AutoLock lock(mLock);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    if (wallpaper != NULL) {
+        if (wallpaper->mWallpaperObserver != NULL) {
+            wallpaper->mWallpaperObserver->StopWatching();
+            wallpaper->mWallpaperObserver = NULL;
         }
+        mWallpaperMap->Remove(userId);
+        mKeyguardWallpaperMap.Erase(userId);
     }
     return NOERROR;
 }
@@ -820,24 +815,24 @@ ECode WallpaperManagerService::OnRemoveUser(
     /* [in] */ Int32 userId)
 {
     if (userId < 1) return E_NULL_POINTER_EXCEPTION;
-    {    AutoLock syncLock(this);
-        OnStoppingUser(userId);
-        AutoPtr<IFile> file;
-        GetWallpaperDir(userId, (IFile**)&file);
-        AutoPtr<IFile> wallpaperFile;
-        CFile::New(file, WALLPAPER, (IFile**)&wallpaperFile);
-        wallpaperFile->Delete();
 
-        AutoPtr<IFile> wallpaperInfoFile;
-        CFile::New(file, WALLPAPER_INFO, (IFile**)&wallpaperInfoFile);
-        wallpaperInfoFile->Delete();
-        AutoPtr<IFile> keyguardWallpaperFile;
-        CFile::New(file, KEYGUARD_WALLPAPER, (IFile**)&keyguardWallpaperFile);
-        keyguardWallpaperFile->Delete();
-        AutoPtr<IFile> keyguardWallpaperInfoFile;
-        CFile::New(file, KEYGUARD_WALLPAPER_INFO, (IFile**)&keyguardWallpaperInfoFile);
-        keyguardWallpaperInfoFile->Delete();
-    }
+    AutoLock lock(mLock);
+    OnStoppingUser(userId);
+    AutoPtr<IFile> file;
+    GetWallpaperDir(userId, (IFile**)&file);
+    AutoPtr<IFile> wallpaperFile;
+    CFile::New(file, WALLPAPER, (IFile**)&wallpaperFile);
+    wallpaperFile->Delete();
+
+    AutoPtr<IFile> wallpaperInfoFile;
+    CFile::New(file, WALLPAPER_INFO, (IFile**)&wallpaperInfoFile);
+    wallpaperInfoFile->Delete();
+    AutoPtr<IFile> keyguardWallpaperFile;
+    CFile::New(file, KEYGUARD_WALLPAPER, (IFile**)&keyguardWallpaperFile);
+    keyguardWallpaperFile->Delete();
+    AutoPtr<IFile> keyguardWallpaperInfoFile;
+    CFile::New(file, KEYGUARD_WALLPAPER_INFO, (IFile**)&keyguardWallpaperInfoFile);
+    keyguardWallpaperInfoFile->Delete();
     return NOERROR;
 }
 
@@ -845,35 +840,34 @@ ECode WallpaperManagerService::SwitchUser(
     /* [in] */ Int32 userId,
     /* [in] */ IIRemoteCallback* reply)
 {
-    {    AutoLock syncLock(this);
-        mCurrentUserId = userId;
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    AutoLock lock(mLock);
+    mCurrentUserId = userId;
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
 
-        if (wallpaper == NULL) {
-            wallpaper = new WallpaperData(userId, this);
-            mWallpaperMap->Put(userId, IInterface::Probe((IWallpaperData*)wallpaper));
-            LoadSettingsLocked(userId);
-        }
-        AutoPtr<KeyguardWallpaperData> keyguardWallpaper;
-        HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
-        if (it != mKeyguardWallpaperMap.End()) {
-            keyguardWallpaper = it->mSecond;
-        }
-        if (keyguardWallpaper == NULL) {
-            keyguardWallpaper = new KeyguardWallpaperData(userId, this);
-            mKeyguardWallpaperMap[userId] = keyguardWallpaper;
-            LoadKeyguardSettingsLocked(userId);
-        }
-        // Not started watching yet, in case wallpaper data was loaded for other reasons.
-        if (wallpaper->mWallpaperObserver == NULL) {
-            wallpaper->mWallpaperObserver = new WallpaperObserver(wallpaper, keyguardWallpaper, this);
-            wallpaper->mWallpaperObserver->StartWatching();
-        }
-        SwitchWallpaper((IWallpaperData*)wallpaper, reply);
+    if (wallpaper == NULL) {
+        wallpaper = new WallpaperData(userId, this);
+        mWallpaperMap->Put(userId, IInterface::Probe((IWallpaperData*)wallpaper));
+        LoadSettingsLocked(userId);
     }
+    AutoPtr<KeyguardWallpaperData> keyguardWallpaper;
+    HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
+    if (it != mKeyguardWallpaperMap.End()) {
+        keyguardWallpaper = it->mSecond;
+    }
+    if (keyguardWallpaper == NULL) {
+        keyguardWallpaper = new KeyguardWallpaperData(userId, this);
+        mKeyguardWallpaperMap[userId] = keyguardWallpaper;
+        LoadKeyguardSettingsLocked(userId);
+    }
+    // Not started watching yet, in case wallpaper data was loaded for other reasons.
+    if (wallpaper->mWallpaperObserver == NULL) {
+        wallpaper->mWallpaperObserver = new WallpaperObserver(wallpaper, keyguardWallpaper, this);
+        wallpaper->mWallpaperObserver->StartWatching();
+    }
+    SwitchWallpaper((IWallpaperData*)wallpaper, reply);
     return NOERROR;
 }
 
@@ -881,37 +875,37 @@ ECode WallpaperManagerService::SwitchWallpaper(
     /* [in] */ IWallpaperData* wallpaper,
     /* [in] */ IIRemoteCallback* reply)
 {
-    {    AutoLock syncLock(this);
-        // RuntimeException e = null;
-        // try {
-        AutoPtr<WallpaperData> _wallpaper = (WallpaperData*)wallpaper;
-        AutoPtr<IComponentName> cname = _wallpaper->mWallpaperComponent != NULL ?
-            _wallpaper->mWallpaperComponent : _wallpaper->mNextWallpaperComponent;
 
-        Boolean isBind;
-        BindWallpaperComponentLocked(cname.Get(), TRUE, FALSE, wallpaper, reply, &isBind);
-        if (isBind) {
-            return E_NULL_POINTER_EXCEPTION;
-        }
-        // } catch (RuntimeException e1) {
-        //     e = e1;
-        // }
-        Slogger::W(TAG, "Failure starting previous wallpaper");
-        ClearWallpaperLocked(FALSE, _wallpaper->mUserId, reply);
+    AutoLock lock(mLock);
+    // RuntimeException e = null;
+    // try {
+    AutoPtr<WallpaperData> _wallpaper = (WallpaperData*)wallpaper;
+    AutoPtr<IComponentName> cname = _wallpaper->mWallpaperComponent != NULL ?
+        _wallpaper->mWallpaperComponent : _wallpaper->mNextWallpaperComponent;
+
+    Boolean isBind;
+    BindWallpaperComponentLocked(cname.Get(), TRUE, FALSE, wallpaper, reply, &isBind);
+    if (isBind) {
+        return E_NULL_POINTER_EXCEPTION;
     }
+    // } catch (RuntimeException e1) {
+    //     e = e1;
+    // }
+    Slogger::W(TAG, "Failure starting previous wallpaper");
+    ClearWallpaperLocked(FALSE, _wallpaper->mUserId, reply);
     return NOERROR;
 }
 
 ECode WallpaperManagerService::ClearWallpaper()
 {
     if (DEBUG) Slogger::V(TAG, "clearWallpaper");
-    {    AutoLock syncLock(this);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
-        ClearWallpaperLocked(FALSE, userId, NULL);
-    }
+
+    AutoLock lock(mLock);
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+    ClearWallpaperLocked(FALSE, userId, NULL);
     return NOERROR;
 }
 
@@ -971,13 +965,13 @@ ECode WallpaperManagerService::ClearWallpaperLocked(
 ECode WallpaperManagerService::ClearKeyguardWallpaper()
 {
     if (DEBUG) Slogger::V(TAG, "clearWallpaper");
-    {    AutoLock syncLock(this);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
-        ClearKeyguardWallpaperLocked(userId, NULL);
-    }
+
+    AutoLock lock(mLock);
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+    ClearKeyguardWallpaperLocked(userId, NULL);
     return NOERROR;
 }
 
@@ -1021,7 +1015,8 @@ ECode WallpaperManagerService::HasNamedWallpaper(
     /* [out] */ Boolean* hasNamedWallpaper)
 {
     VALIDATE_NOT_NULL(hasNamedWallpaper)
-    {    AutoLock syncLock(this);
+    {
+        AutoLock lock(mLock);
         AutoPtr<IBinderHelper> bh;
         CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
         Int64 ident;
@@ -1085,50 +1080,50 @@ ECode WallpaperManagerService::SetDimensionHints(
     /* [in] */ Int32 height)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER_HINTS);
-    {    AutoLock syncLock(this);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
-        if (wallpaper == NULL) {
-            Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        if (width <= 0 || height <= 0) {
-            Slogger::E(TAG, "width and height must be > 0");
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        // Make sure it is at least as large as the display.
-        AutoPtr<IPoint> displaySize;
-        GetDefaultDisplaySize((IPoint**)&displaySize);
-        Int32 x, y;
-        displaySize->GetX(&x);
-        displaySize->GetY(&y);
-        width = Elastos::Core::Math::Max(width, x);
-        height = Elastos::Core::Math::Max(height, y);
 
-        if (width != wallpaper->mWidth || height != wallpaper->mHeight) {
-            wallpaper->mWidth = width;
-            wallpaper->mHeight = height;
-            SaveSettingsLocked(wallpaper);
-            if (mCurrentUserId != userId) return E_NULL_POINTER_EXCEPTION; // Don't change the properties now
-            if (wallpaper->mConnection != NULL) {
-                if (wallpaper->mConnection->mEngine != NULL) {
-                    ECode ec = wallpaper->mConnection->mEngine->SetDesiredSize(width, height);
-                    if (FAILED(ec)) {
-                        return E_REMOTE_EXCEPTION;
-                    }
-                    NotifyCallbacksLocked(wallpaper);
-                } else if (wallpaper->mConnection->mService != NULL) {
-                    // We've attached to the service but the engine hasn't attached back to us
-                    // yet. This means it will be created with the previous dimensions, so we
-                    // need to update it to the new dimensions once it attaches.
-                    wallpaper->mConnection->mDimensionsChanged = TRUE;
+    AutoLock lock(mLock);
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    if (wallpaper == NULL) {
+        Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (width <= 0 || height <= 0) {
+        Slogger::E(TAG, "width and height must be > 0");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    // Make sure it is at least as large as the display.
+    AutoPtr<IPoint> displaySize;
+    GetDefaultDisplaySize((IPoint**)&displaySize);
+    Int32 x, y;
+    displaySize->GetX(&x);
+    displaySize->GetY(&y);
+    width = Elastos::Core::Math::Max(width, x);
+    height = Elastos::Core::Math::Max(height, y);
+
+    if (width != wallpaper->mWidth || height != wallpaper->mHeight) {
+        wallpaper->mWidth = width;
+        wallpaper->mHeight = height;
+        SaveSettingsLocked(wallpaper);
+        if (mCurrentUserId != userId) return E_NULL_POINTER_EXCEPTION; // Don't change the properties now
+        if (wallpaper->mConnection != NULL) {
+            if (wallpaper->mConnection->mEngine != NULL) {
+                ECode ec = wallpaper->mConnection->mEngine->SetDesiredSize(width, height);
+                if (FAILED(ec)) {
+                    return E_REMOTE_EXCEPTION;
                 }
+                NotifyCallbacksLocked(wallpaper);
+            } else if (wallpaper->mConnection->mService != NULL) {
+                // We've attached to the service but the engine hasn't attached back to us
+                // yet. This means it will be created with the previous dimensions, so we
+                // need to update it to the new dimensions once it attaches.
+                wallpaper->mConnection->mDimensionsChanged = TRUE;
             }
         }
     }
@@ -1139,17 +1134,17 @@ ECode WallpaperManagerService::GetWidthHint(
     /* [out] */ Int32* widthHint)
 {
     VALIDATE_NOT_NULL(widthHint)
-    {    AutoLock syncLock(this);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
-        *widthHint = wallpaper->mWidth;
-    }
+
+    AutoLock lock(mLock);
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    *widthHint = wallpaper->mWidth;
     return NOERROR;
 }
 
@@ -1157,17 +1152,17 @@ ECode WallpaperManagerService::GetHeightHint(
     /* [out] */ Int32* heightHint)
 {
     VALIDATE_NOT_NULL(heightHint)
-    {    AutoLock syncLock(this);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
-        *heightHint = wallpaper->mHeight;
-    }
+
+    AutoLock lock(mLock);
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    *heightHint = wallpaper->mHeight;
     return NOERROR;
 }
 
@@ -1175,50 +1170,50 @@ ECode WallpaperManagerService::SetDisplayPadding(
     /* [in] */ IRect* padding)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER_HINTS);
-    {    AutoLock syncLock(this);
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
-        if (wallpaper == NULL) {
-            Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
-        Int32 left, right, top, bottom;
-        padding->GetLeft(&left);
-        padding->GetRight(&right);
-        padding->GetTop(&top);
-        padding->GetBottom(&bottom);
-        if (left < 0 || top < 0 || right < 0 || bottom < 0) {
-            String str;
-            IObject::Probe(padding)->ToString(&str);
-            Slogger::E(TAG, "padding must be positive: %s", str.string());
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
 
-        Boolean isEquals;
-        IObject::Probe(padding)->Equals(IInterface::Probe(wallpaper->mPadding), &isEquals);
-        if (!isEquals) {
-            wallpaper->mPadding->Set(padding);
-            SaveSettingsLocked(wallpaper);
-            if (mCurrentUserId != userId) return E_NULL_POINTER_EXCEPTION; // Don't change the properties now
-            if (wallpaper->mConnection != NULL) {
-                if (wallpaper->mConnection->mEngine != NULL) {
-                    ECode ec = wallpaper->mConnection->mEngine->SetDisplayPadding(padding);
-                    if (FAILED(ec)) {
-                        return E_REMOTE_EXCEPTION;
-                    }
-                    NotifyCallbacksLocked(wallpaper);
-                } else if (wallpaper->mConnection->mService != NULL) {
-                    // We've attached to the service but the engine hasn't attached back to us
-                    // yet. This means it will be created with the previous dimensions, so we
-                    // need to update it to the new dimensions once it attaches.
-                    wallpaper->mConnection->mPaddingChanged = TRUE;
+    AutoLock lock(mLock);
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    if (wallpaper == NULL) {
+        Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    Int32 left, right, top, bottom;
+    padding->GetLeft(&left);
+    padding->GetRight(&right);
+    padding->GetTop(&top);
+    padding->GetBottom(&bottom);
+    if (left < 0 || top < 0 || right < 0 || bottom < 0) {
+        String str;
+        IObject::Probe(padding)->ToString(&str);
+        Slogger::E(TAG, "padding must be positive: %s", str.string());
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Boolean isEquals;
+    IObject::Probe(padding)->Equals(IInterface::Probe(wallpaper->mPadding), &isEquals);
+    if (!isEquals) {
+        wallpaper->mPadding->Set(padding);
+        SaveSettingsLocked(wallpaper);
+        if (mCurrentUserId != userId) return E_NULL_POINTER_EXCEPTION; // Don't change the properties now
+        if (wallpaper->mConnection != NULL) {
+            if (wallpaper->mConnection->mEngine != NULL) {
+                ECode ec = wallpaper->mConnection->mEngine->SetDisplayPadding(padding);
+                if (FAILED(ec)) {
+                    return E_REMOTE_EXCEPTION;
                 }
+                NotifyCallbacksLocked(wallpaper);
+            } else if (wallpaper->mConnection->mService != NULL) {
+                // We've attached to the service but the engine hasn't attached back to us
+                // yet. This means it will be created with the previous dimensions, so we
+                // need to update it to the new dimensions once it attaches.
+                wallpaper->mConnection->mPaddingChanged = TRUE;
             }
         }
     }
@@ -1232,58 +1227,57 @@ ECode WallpaperManagerService::GetWallpaper(
 {
     VALIDATE_NOT_NULL(outParams)
     VALIDATE_NOT_NULL(descriptor)
-    {    AutoLock syncLock(this);
-        // This returns the current user's wallpaper, if called by a system service. Else it
-        // returns the wallpaper for the calling user.
-        AutoPtr<IBinderHelper> bh;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
-        Int32 callingUid;
-        bh->GetCallingUid(&callingUid);
-        Int32 wallpaperUserId = 0;
-        if (callingUid == IProcess::SYSTEM_UID) {
-            wallpaperUserId = mCurrentUserId;
-        } else {
-            AutoPtr<IUserHandleHelper> uhh;
-            CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-            uhh->GetUserId(callingUid, &wallpaperUserId);
-        }
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(wallpaperUserId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
 
-        CBundle::New(outParams);
-        if ((*outParams) != NULL) {
-            (*outParams)->PutInt32(String("width"), wallpaper->mWidth);
-            (*outParams)->PutInt32(String("height"), wallpaper->mHeight);
-        }
-        Boolean isRegister;
-        wallpaper->mCallbacks->Register(IInterface::Probe(cb), &isRegister);
+    AutoLock lock(mLock);
+    // This returns the current user's wallpaper, if called by a system service. Else it
+    // returns the wallpaper for the calling user.
+    AutoPtr<IBinderHelper> bh;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
+    Int32 callingUid;
+    bh->GetCallingUid(&callingUid);
+    Int32 wallpaperUserId = 0;
+    if (callingUid == IProcess::SYSTEM_UID) {
+        wallpaperUserId = mCurrentUserId;
+    } else {
+        AutoPtr<IUserHandleHelper> uhh;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+        uhh->GetUserId(callingUid, &wallpaperUserId);
+    }
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(wallpaperUserId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
 
-        AutoPtr<IFile> file;
-        GetWallpaperDir(wallpaperUserId, (IFile**)&file);
-        AutoPtr<IFile> f;
-        CFile::New(file.Get(), WALLPAPER, (IFile**)&f);
+    CBundle::New(outParams);
+    if ((*outParams) != NULL) {
+        (*outParams)->PutInt32(String("width"), wallpaper->mWidth);
+        (*outParams)->PutInt32(String("height"), wallpaper->mHeight);
+    }
+    Boolean isRegister;
+    wallpaper->mCallbacks->Register(IInterface::Probe(cb), &isRegister);
 
-        Boolean isExist;
-        if (f->Exists(&isExist), !isExist) {
-            *descriptor = NULL;
-            return NOERROR;
-        }
-        AutoPtr<IParcelFileDescriptorHelper> pfdh;
-        CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfdh);
-        ECode ec = pfdh->Open(f, IParcelFileDescriptor::MODE_READ_ONLY, descriptor);
-        if (FAILED(ec)) {
-            /* Shouldn't happen as we check to see if the file exists */
-            Slogger::W(TAG, "Error getting wallpaper");
-            return E_FILE_NOT_FOUND_EXCEPTION;
-        }
-        else {
-            return NOERROR;
-        }
+    AutoPtr<IFile> file;
+    GetWallpaperDir(wallpaperUserId, (IFile**)&file);
+    AutoPtr<IFile> f;
+    CFile::New(file.Get(), WALLPAPER, (IFile**)&f);
+
+    Boolean isExist;
+    if (f->Exists(&isExist), !isExist) {
         *descriptor = NULL;
         return NOERROR;
     }
+    AutoPtr<IParcelFileDescriptorHelper> pfdh;
+    CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfdh);
+    ECode ec = pfdh->Open(f, IParcelFileDescriptor::MODE_READ_ONLY, descriptor);
+    if (FAILED(ec)) {
+        /* Shouldn't happen as we check to see if the file exists */
+        Slogger::W(TAG, "Error getting wallpaper");
+        return E_FILE_NOT_FOUND_EXCEPTION;
+    }
+    else {
+        return NOERROR;
+    }
+    *descriptor = NULL;
     return NOERROR;
 }
 
@@ -1294,37 +1288,37 @@ ECode WallpaperManagerService::GetKeyguardWallpaper(
 {
     VALIDATE_NOT_NULL(descriptor)
     *descriptor = NULL;
-    {    AutoLock syncLock(this);
-        Int32 wallpaperUserId = mCurrentUserId;
-        AutoPtr<KeyguardWallpaperData> wallpaper;
-        HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(wallpaperUserId);
-        if (it != mKeyguardWallpaperMap.End()) {
-            wallpaper = it->mSecond;
-        }
-        // try {
-        CBundle::New(outParams);
-        (*outParams)->PutInt32(String("width"), wallpaper->mWidth);
-        (*outParams)->PutInt32(String("height"), wallpaper->mHeight);
 
-        Boolean result;
-        wallpaper->mCallbacks->Register(cb, &result);
-        AutoPtr<IFile> dir;
-        GetWallpaperDir(wallpaperUserId, (IFile**)&dir);
-        AutoPtr<IFile> f;
-        CFile::New(dir, KEYGUARD_WALLPAPER, (IFile**)&f);
-        Boolean exists;
-        if (f->Exists(&exists), !exists) {
-            return NOERROR;
-        }
-        AutoPtr<IParcelFileDescriptorHelper> helper;
-        CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&helper);
-        helper->Open(f, IParcelFileDescriptor::MODE_READ_ONLY, descriptor);
-        // } catch (FileNotFoundException e) {
-        //     /* Shouldn't happen as we check to see if the file exists */
-        //     Slog.w(TAG, "Error getting wallpaper", e);
-        // }
-        // return null;
+    AutoLock lock(mLock);
+    Int32 wallpaperUserId = mCurrentUserId;
+    AutoPtr<KeyguardWallpaperData> wallpaper;
+    HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(wallpaperUserId);
+    if (it != mKeyguardWallpaperMap.End()) {
+        wallpaper = it->mSecond;
     }
+    // try {
+    CBundle::New(outParams);
+    (*outParams)->PutInt32(String("width"), wallpaper->mWidth);
+    (*outParams)->PutInt32(String("height"), wallpaper->mHeight);
+
+    Boolean result;
+    wallpaper->mCallbacks->Register(cb, &result);
+    AutoPtr<IFile> dir;
+    GetWallpaperDir(wallpaperUserId, (IFile**)&dir);
+    AutoPtr<IFile> f;
+    CFile::New(dir, KEYGUARD_WALLPAPER, (IFile**)&f);
+    Boolean exists;
+    if (f->Exists(&exists), !exists) {
+        return NOERROR;
+    }
+    AutoPtr<IParcelFileDescriptorHelper> helper;
+    CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&helper);
+    helper->Open(f, IParcelFileDescriptor::MODE_READ_ONLY, descriptor);
+    // } catch (FileNotFoundException e) {
+    //     /* Shouldn't happen as we check to see if the file exists */
+    //     Slog.w(TAG, "Error getting wallpaper", e);
+    // }
+    // return null;
     return NOERROR;
 }
 
@@ -1336,19 +1330,19 @@ ECode WallpaperManagerService::GetWallpaperInfo(
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
     Int32 userId;
     uhh->GetCallingUserId(&userId);
-    {    AutoLock syncLock(this);
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
 
-        if (wallpaper->mConnection != NULL) {
-            *info = wallpaper->mConnection->mInfo;
-            REFCOUNT_ADD(*info)
-            return NOERROR;
-        }
-        *info = NULL;
+    AutoLock lock(mLock);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+
+    if (wallpaper->mConnection != NULL) {
+        *info = wallpaper->mConnection->mInfo;
+        REFCOUNT_ADD(*info)
+        return NOERROR;
     }
+    *info = NULL;
     return NOERROR;
 }
 
@@ -1360,14 +1354,14 @@ ECode WallpaperManagerService::IsKeyguardWallpaperSet(
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 userId;
     helper->GetCallingUserId(&userId);
-    {    AutoLock syncLock(this);
-        AutoPtr<KeyguardWallpaperData> data;
-        HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
-        if (it != mKeyguardWallpaperMap.End()) {
-            data = it->mSecond;
-        }
-        data->mWallpaperFile->Exists(result);
+
+    AutoLock lock(mLock);
+    AutoPtr<KeyguardWallpaperData> data;
+    HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
+    if (it != mKeyguardWallpaperMap.End()) {
+        data = it->mSecond;
     }
+    data->mWallpaperFile->Exists(result);
     return NOERROR;
 }
 
@@ -1376,36 +1370,36 @@ ECode WallpaperManagerService::SetWallpaper(
     /* [out] */ IParcelFileDescriptor** descriptor)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER);
-    {    AutoLock syncLock(this);
-        if (DEBUG) Slogger::V(TAG, "setWallpaper");
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
 
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+    AutoLock lock(mLock);
+    if (DEBUG) Slogger::V(TAG, "setWallpaper");
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
 
-        if (wallpaper == NULL) {
-            Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
-        AutoPtr<IBinderHelper> bh;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
-        Int64 _ident;
-        bh->ClearCallingIdentity(&_ident);
-        const Int64 ident = _ident;
-        AutoPtr<IParcelFileDescriptor> pfd;
-        UpdateWallpaperBitmapLocked(name, wallpaper, (IParcelFileDescriptor**)&pfd);
-        if (pfd != NULL) {
-            wallpaper->mImageWallpaperPending = TRUE;
-        }
-        *descriptor = pfd.Get();
-        REFCOUNT_ADD(*descriptor)
-        bh->RestoreCallingIdentity(ident);
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+
+    if (wallpaper == NULL) {
+        Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
+    AutoPtr<IBinderHelper> bh;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
+    Int64 _ident;
+    bh->ClearCallingIdentity(&_ident);
+    const Int64 ident = _ident;
+    AutoPtr<IParcelFileDescriptor> pfd;
+    UpdateWallpaperBitmapLocked(name, wallpaper, (IParcelFileDescriptor**)&pfd);
+    if (pfd != NULL) {
+        wallpaper->mImageWallpaperPending = TRUE;
+    }
+    *descriptor = pfd.Get();
+    REFCOUNT_ADD(*descriptor)
+    bh->RestoreCallingIdentity(ident);
     return NOERROR;
 }
 
@@ -1425,9 +1419,8 @@ ECode WallpaperManagerService::UpdateWallpaperBitmapLocked(
         dir->Mkdir(&isMkdir);
         String path;
         dir->GetPath(&path);
-        //TODO
-        // FileUtils::SetPermissions(
-        //     path, FileUtils::sS_IRWXU | FileUtils::sS_IRWXG | FileUtils::sS_IXOTH, -1, -1);
+        FileUtils::SetPermissions(
+            path, FileUtils::sS_IRWXU | FileUtils::sS_IRWXG | FileUtils::sS_IXOTH, -1, -1);
     }
     AutoPtr<IFile> file;
     CFile::New(dir, WALLPAPER, (IFile**)&file);
@@ -1442,10 +1435,16 @@ ECode WallpaperManagerService::UpdateWallpaperBitmapLocked(
     }
     if (FAILED(ec)) {
         Slogger::W(TAG, "Error setting wallpaper");
+        *descriptor = NULL;
         return E_FILE_NOT_FOUND_EXCEPTION;
     }
     else {
-        wallpaper->mName = name;
+        if (name.IsNull()) {
+            wallpaper->mName = String("");
+        }
+        else {
+            wallpaper->mName = name;
+        }
         *descriptor = fd.Get();
         REFCOUNT_ADD(*descriptor)
         return NOERROR;
@@ -1461,34 +1460,34 @@ ECode WallpaperManagerService::SetKeyguardWallpaper(
     VALIDATE_NOT_NULL(descriptor)
     *descriptor = NULL;
     FAIL_RETURN(CheckPermission(Elastos::Droid::Manifest::permission::SET_KEYGUARD_WALLPAPER))
-    {    AutoLock syncLock(this);
-        if (DEBUG) Slogger::V(TAG, "setKeyguardWallpaper");
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        Int32 userId;
-        helper->GetCallingUserId(&userId);
-        AutoPtr<KeyguardWallpaperData> wallpaper;
-        HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
-        if (it != mKeyguardWallpaperMap.End()) {
-            wallpaper = it->mSecond;
-        }
-        if (wallpaper == NULL) {
-            Slogger::E(TAG, "Keyguard wallpaper not yet initialized for user %d", userId);
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
-        Int64 ident = Binder::ClearCallingIdentity();
-        // try {
-        AutoPtr<IParcelFileDescriptor> pfd = UpdateKeyguardWallpaperBitmapLocked(name, wallpaper);
-        if (pfd != NULL) {
-            wallpaper->mImageWallpaperPending = TRUE;
-        }
-        *descriptor = pfd;
-        REFCOUNT_ADD(*descriptor)
-        Binder::RestoreCallingIdentity(ident);
-        // } finally {
-        //     Binder.restoreCallingIdentity(ident);
-        // }
+
+    AutoLock lock(mLock);
+    if (DEBUG) Slogger::V(TAG, "setKeyguardWallpaper");
+    AutoPtr<IUserHandleHelper> helper;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+    Int32 userId;
+    helper->GetCallingUserId(&userId);
+    AutoPtr<KeyguardWallpaperData> wallpaper;
+    HashMap<Int32, AutoPtr<KeyguardWallpaperData> >::Iterator it = mKeyguardWallpaperMap.Find(userId);
+    if (it != mKeyguardWallpaperMap.End()) {
+        wallpaper = it->mSecond;
     }
+    if (wallpaper == NULL) {
+        Slogger::E(TAG, "Keyguard wallpaper not yet initialized for user %d", userId);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    Int64 ident = Binder::ClearCallingIdentity();
+    // try {
+    AutoPtr<IParcelFileDescriptor> pfd = UpdateKeyguardWallpaperBitmapLocked(name, wallpaper);
+    if (pfd != NULL) {
+        wallpaper->mImageWallpaperPending = TRUE;
+    }
+    *descriptor = pfd;
+    REFCOUNT_ADD(*descriptor)
+    Binder::RestoreCallingIdentity(ident);
+    // } finally {
+    //     Binder.restoreCallingIdentity(ident);
+    // }
     return NOERROR;
 }
 
@@ -1534,36 +1533,36 @@ ECode WallpaperManagerService::SetWallpaperComponent(
     /* [in] */ IComponentName* name)
 {
     CheckPermission(Manifest::permission::SET_WALLPAPER_COMPONENT);
-    {    AutoLock syncLock(this);
-        if (DEBUG) {
-            String str;
-            IObject::Probe(name)->ToString(&str);
-            Slogger::V(TAG, "setWallpaperComponent name=%s", str.string());
-        }
-        AutoPtr<IUserHandleHelper> uhh;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-        Int32 userId;
-        uhh->GetCallingUserId(&userId);
 
-        AutoPtr<IInterface> obj;
-        mWallpaperMap->Get(userId, (IInterface**)&obj);
-        AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
-        AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
-
-        if (wallpaper == NULL) {
-            Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
-            return E_ILLEGAL_STATE_EXCEPTION;
-        }
-        AutoPtr<IBinderHelper> bh;
-        CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
-        Int64 _ident;
-        bh->ClearCallingIdentity(&_ident);
-        const Int64 ident = _ident;
-        wallpaper->mImageWallpaperPending = FALSE;
-        Boolean isBind;
-        BindWallpaperComponentLocked(name, FALSE, TRUE, wallpaper, NULL, &isBind);
-        bh->RestoreCallingIdentity(ident);
+    AutoLock lock(mLock);
+    if (DEBUG) {
+        String str;
+        IObject::Probe(name)->ToString(&str);
+        Slogger::V(TAG, "setWallpaperComponent name=%s", str.string());
     }
+    AutoPtr<IUserHandleHelper> uhh;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
+    Int32 userId;
+    uhh->GetCallingUserId(&userId);
+
+    AutoPtr<IInterface> obj;
+    mWallpaperMap->Get(userId, (IInterface**)&obj);
+    AutoPtr<IWallpaperData> wd = IWallpaperData::Probe(obj);
+    AutoPtr<WallpaperData> wallpaper = (WallpaperData*)wd.Get();
+
+    if (wallpaper == NULL) {
+        Slogger::E(TAG, "Wallpaper not yet initialized for user %d", userId);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    AutoPtr<IBinderHelper> bh;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&bh);
+    Int64 _ident;
+    bh->ClearCallingIdentity(&_ident);
+    const Int64 ident = _ident;
+    wallpaper->mImageWallpaperPending = FALSE;
+    Boolean isBind;
+    BindWallpaperComponentLocked(name, FALSE, TRUE, wallpaper, NULL, &isBind);
+    bh->RestoreCallingIdentity(ident);
     return NOERROR;
 }
 
@@ -1608,8 +1607,9 @@ ECode WallpaperManagerService::BindWallpaperComponentLocked(
 
     // try {
         if (componentName == NULL) {
-            Slogger::E(TAG, "TODO: need CWallpaperManagerHelper::GetDefaultWallpaperComponent");
-            // componentName = CWallpaperManager::GetDefaultWallpaperComponent(mContext);
+            AutoPtr<IWallpaperManagerHelper> helper;
+            CWallpaperManagerHelper::AcquireSingleton((IWallpaperManagerHelper**)&helper);
+            helper->GetDefaultWallpaperComponent(mContext, (IComponentName**)&componentName);
             if (componentName == NULL) {
                 // Fall back to static image wallpaper
                 componentName = mImageWallpaper.Get();
@@ -2356,7 +2356,8 @@ ECode WallpaperManagerService::SettingsRestored()
     if (DEBUG) Slogger::V(TAG, "settingsRestored");
     AutoPtr<IWallpaperData> wallpaper;
     Boolean success = FALSE;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock lock(mLock);
         LoadSettingsLocked(0);
         AutoPtr<IInterface> wallpaperobj;
         mWallpaperMap->Get(0, (IInterface**)&wallpaperobj);
@@ -2406,7 +2407,8 @@ ECode WallpaperManagerService::SettingsRestored()
         f->Delete();
     }
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock lock(mLock);
         SaveSettingsLocked((WallpaperData*)wallpaper.Get());
     }
     return NOERROR;

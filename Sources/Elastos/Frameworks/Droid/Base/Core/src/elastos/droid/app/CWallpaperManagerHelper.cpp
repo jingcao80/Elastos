@@ -32,6 +32,26 @@ ECode CWallpaperManagerHelper::GetInstance(
     return CWallpaperManager::GetInstance(context, manager);
 }
 
+ECode CWallpaperManagerHelper::OpenDefaultWallpaper(
+    /* [in] */ IContext* context,
+    /* [out] */ IInputStream** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = CWallpaperManager::OpenDefaultWallpaper(context);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode CWallpaperManagerHelper::GetDefaultWallpaperComponent(
+    /* [in] */ IContext* context,
+    /* [out] */ IComponentName** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = CWallpaperManager::GetDefaultWallpaperComponent(context);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
 } // namespace App
 } // namespace Droid
 } // namespace Elastos

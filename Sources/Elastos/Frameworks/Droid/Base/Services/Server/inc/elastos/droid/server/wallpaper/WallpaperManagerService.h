@@ -543,7 +543,7 @@ protected:
     const static String TAG;
     const static Boolean DEBUG;
 
-    // final Object mLock = new Object[0];
+    Object mLock;
 
     /**
      * Minimum time between crashes of a wallpaper service for us to consider

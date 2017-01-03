@@ -26,6 +26,7 @@ module
     interface Elastos.Droid.Graphics.IBitmap;
     interface Elastos.Droid.Graphics.IRect;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIntent;
 
@@ -569,6 +570,24 @@ module
         GetInstance(
             [in] IContext* ctx,
             [out] IWallpaperManager** manager);
+
+        /**
+         * Open stream representing the default static image wallpaper.
+         *
+         * @hide
+         */
+        OpenDefaultWallpaper(
+            [in] IContext* context,
+            [out] IInputStream** result);
+
+        /**
+         * Open stream representing the default static image wallpaper.
+         *
+         * @hide
+         */
+        GetDefaultWallpaperComponent(
+            [in] IContext* context,
+            [out] IComponentName** result);
     }
 
     } // namespace App

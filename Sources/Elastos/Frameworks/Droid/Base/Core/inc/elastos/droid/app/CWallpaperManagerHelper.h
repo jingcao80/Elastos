@@ -19,8 +19,11 @@
 
 #include "_Elastos_Droid_App_CWallpaperManagerHelper.h"
 #include <elastos/core/Singleton.h>
+#include <Elastos.CoreLibrary.IO.h>
 
+using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
+using Elastos::IO::IInputStream;
 
 namespace Elastos {
 namespace Droid {
@@ -41,6 +44,24 @@ public:
     CARAPI GetInstance(
         /* [in] */ IContext* context,
         /* [out] */ IWallpaperManager** manager);
+
+    /**
+     * Open stream representing the default static image wallpaper.
+     *
+     * @hide
+     */
+    CARAPI OpenDefaultWallpaper(
+        /* [in] */ IContext* context,
+        /* [out] */ IInputStream** result);
+
+    /**
+     * Open stream representing the default static image wallpaper.
+     *
+     * @hide
+     */
+    CARAPI GetDefaultWallpaperComponent(
+        /* [in] */ IContext* context,
+        /* [out] */ IComponentName** result);
 };
 
 } // namespace App
