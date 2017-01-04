@@ -162,7 +162,6 @@ ECode BatteryStatsImpl::MyHandler::HandleMessage(
 //==============================================================================
 // BatteryStatsImpl::TimeBase
 //==============================================================================
-
 BatteryStatsImpl::TimeBase::TimeBase()
     : mUptime(0)
     , mRealtime(0)
@@ -1569,7 +1568,8 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::Wakelock::ReadT
     /* [in] */ IParcel* in)
 {
     Int32 value;
-    if (in->ReadInt32(&value), value == 0) {
+    in->ReadInt32(&value);
+    if (value == 0) {
         return NULL;
     }
 
@@ -3488,7 +3488,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         wakeStats->GetValueAt(iw, (IInterface**)&value);
-        AutoPtr<Wakelock> wakelock = (Wakelock*)IObject::Probe(value);
+        Wakelock* wakelock = (Wakelock*)IObject::Probe(value);
         wakelock->WriteToParcelLocked(out, elapsedRealtimeUs);
     }
 
@@ -3504,7 +3504,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         syncStats->GetValueAt(is, (IInterface**)&value);
-        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
+        BatteryStatsImpl::StopwatchTimer* timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
         BatteryStatsImpl::Timer::WriteTimerToParcel(out, timer, elapsedRealtimeUs);
     }
 
@@ -3520,7 +3520,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         syncStats->GetValueAt(ij, (IInterface**)&value);
-        AutoPtr<BatteryStatsImpl::StopwatchTimer> timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
+        BatteryStatsImpl::StopwatchTimer* timer = (BatteryStatsImpl::StopwatchTimer*)IObject::Probe(value);
         BatteryStatsImpl::Timer::WriteTimerToParcel(out, timer, elapsedRealtimeUs);
     }
 
@@ -3533,7 +3533,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteInt32(key);
         AutoPtr<IInterface> value;
         mSensorStats->ValueAt(ise, (IInterface**)&value);
-        AutoPtr<Sensor> sensor = (Sensor*)IObject::Probe(value);
+        Sensor* sensor = (Sensor*)IObject::Probe(value);
         sensor->WriteToParcelLocked(out, elapsedRealtimeUs);
     }
 
@@ -3548,7 +3548,7 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
         out->WriteString(key);
         AutoPtr<IInterface> value;
         mProcessStats->GetValueAt(ip, (IInterface**)&value);
-        AutoPtr<Proc> proc = (Proc*)IObject::Probe(value);
+        Proc* proc = (Proc*)IObject::Probe(value);
         proc->WriteToParcelLocked(out);
     }
 
@@ -3563,10 +3563,15 @@ void BatteryStatsImpl::Uid::WriteToParcelLocked(
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> next;
         it->GetNext((IInterface**)&next);
-        AutoPtr<IMapEntry> pkgEntry = IMapEntry::Probe(next);
+        IMapEntry* pkgEntry = IMapEntry::Probe(next);
+        AutoPtr<IInterface> ki;
+        pkgEntry->GetKey((IInterface**)&ki);
+        String key;
+        ICharSequence::Probe(ki)->ToString(&key);
+        out->WriteString(key);
         AutoPtr<IInterface> value;
         pkgEntry->GetValue((IInterface**)&value);
-        AutoPtr<Pkg> pkg = (Pkg*)IObject::Probe(value);
+        Pkg* pkg = (Pkg*)IObject::Probe(value);
         pkg->WriteToParcelLocked(out);
     }
 
@@ -10664,8 +10669,8 @@ void BatteryStatsImpl::WriteToParcelLocked(
 
     Int64 uSecUptime = SystemClock::GetUptimeMillis() * 1000;
     Int64 uSecRealtime = SystemClock::GetElapsedRealtime() * 1000;
-    // Int64 batteryRealtime = mOnBatteryTimeBase->GetRealtime(uSecRealtime);
-    // Int64 batteryScreenOffRealtime = mOnBatteryScreenOffTimeBase->GetRealtime(uSecRealtime);
+    Int64 batteryRealtime = mOnBatteryTimeBase->GetRealtime(uSecRealtime);
+    Int64 batteryScreenOffRealtime = mOnBatteryScreenOffTimeBase->GetRealtime(uSecRealtime);
 
     out->WriteInt32(MAGIC);
 

@@ -207,15 +207,15 @@ public:
 
         virtual ~Counter() {}
 
-        CARAPI_(void) WriteToParcel(
+        virtual CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out);
 
-        CARAPI OnTimeStarted(
+        virtual CARAPI OnTimeStarted(
             /* [in] */ Int64 elapsedRealtime,
             /* [in] */ Int64 baseUptime,
             /* [in] */ Int64 baseRealtime);
 
-        CARAPI OnTimeStopped(
+        virtual CARAPI OnTimeStopped(
             /* [in] */ Int64 elapsedRealtime,
             /* [in] */ Int64 baseUptime,
             /* [in] */ Int64 baseRealtime);
@@ -234,7 +234,7 @@ public:
             /* [in] */ Int32 which,
             /* [out] */ Int32* count);
 
-        CARAPI LogState(
+        virtual CARAPI LogState(
             /* [in] */ IPrinter* pw,
             /* [in] */ const String& prefix);
 
@@ -378,7 +378,7 @@ public:
 
         virtual ~Timer() {}
 
-        CARAPI_(void) WriteToParcel(
+        virtual CARAPI_(void) WriteToParcel(
             /* [in] */ IParcel* out,
             /* [in] */ Int64 elapsedRealtimeUs);
 
