@@ -68,7 +68,7 @@ ProcessCpuTracker::Stats::Stats(
     /* [in] */ Boolean includeThreads)
     : mPid(pid)
     , mUid(0)
-    , mInteresting(TRUE)
+    , mInteresting(FALSE)
     , mNameWidth(0)
     , mVsize(0)
     , mBase_uptime(0)
@@ -89,7 +89,7 @@ ProcessCpuTracker::Stats::Stats(
     if (parentPid < 0) {
         AutoPtr<IFile> procDir, sFile, cFile, tDir;
         CFile::New(String("/proc"), StringUtils::ToString(mPid), (IFile**)&procDir);
-        CFile::New(procDir, String("/proc"), (IFile**)&sFile);
+        CFile::New(procDir, String("stat"), (IFile**)&sFile);
         sFile->ToString(&mStatFile);
         CFile::New(procDir, String("cmdline"), (IFile**)&cFile);
         cFile->ToString(&mCmdlineFile);

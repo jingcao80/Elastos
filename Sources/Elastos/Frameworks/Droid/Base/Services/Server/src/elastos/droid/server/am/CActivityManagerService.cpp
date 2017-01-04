@@ -6859,7 +6859,8 @@ ECode CActivityManagerService::AppNotResponding(
     String cpuInfo;
     if (MONITOR_CPU_USAGE) {
         UpdateCpuStatsNow();
-        {    AutoLock syncLock(mProcessCpuTracker);
+        {
+            AutoLock syncLock(mProcessCpuTracker);
             mProcessCpuTracker->PrintCurrentState(anrTime, &cpuInfo);
         }
         String loadStr;
@@ -17865,7 +17866,8 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
             List<AutoPtr<IProcessCpuTrackerStats> > nativeProcs;
             UpdateCpuStatsNow();
             Int32 findPid = StringUtils::ParseInt32((*args)[opti], 10, -1);
-            {    AutoLock syncLock(mProcessCpuTracker);
+            {
+                AutoLock syncLock(mProcessCpuTracker);
                 Int32 N;
                 mProcessCpuTracker->CountStats(&N);
                 for (Int32 i = 0; i < N; i++) {
@@ -18075,7 +18077,8 @@ ECode CActivityManagerService::DumpApplicationMemoryUsage(
         // If we are showing aggregations, also look for native processes to
         // include so that our aggregations are more accurate.
         UpdateCpuStatsNow();
-        {    AutoLock syncLock(mProcessCpuTracker);
+        {
+            AutoLock syncLock(mProcessCpuTracker);
             Int32 N;
             mProcessCpuTracker->CountStats(&N);
             for (Int32 i = 0; i < N; i++) {

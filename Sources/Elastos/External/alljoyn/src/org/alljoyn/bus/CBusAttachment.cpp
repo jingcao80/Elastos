@@ -769,7 +769,7 @@ ECode CBusAttachment::JoinSession(
         busPtr->mPendingAsyncJoins.PushBack(paj);
     }
     else {
-        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__);
+        Logger::E(TAG, "%s: Exception: status=%08x", __FUNCTION__, status);
         return status;
     }
 

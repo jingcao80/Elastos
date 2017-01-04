@@ -30,13 +30,13 @@
       android:summaryOn="@string/setting_enabled"
       android:summaryOff="@string/setting_disabled"/>
 
-    <CCheckBoxPreference 
-      android:key="@string/setting_prediction_key" 
+    <CCheckBoxPreference
+      android:key="@string/setting_prediction_key"
       android:title="@string/setting_prediction_title"
       android:persistent="true"
       android:summaryOn="@string/setting_enabled"
       android:summaryOff="@string/setting_disabled"/>
-    
+
     <!-- Remove following entry to unbundle Google functionality -->
     <CPreferenceScreen
       android:title="@string/setting_others"
@@ -45,11 +45,11 @@
       <intent android:action="com.android.inputmethod.pinyingoogleservice.SETTINGS" />
     </CPreferenceScreen>
 
-	<CPreference
+  <CPreference
       android:key="@string/setting_switch_key"
       style="?android:preferenceInformationStyle"
       android:title="@string/setting_switch_title"
       android:persistent="false"
       android:summary="@string/setting_switch_shift_space_title"/>
-     
+
 </CPreferenceScreen>
