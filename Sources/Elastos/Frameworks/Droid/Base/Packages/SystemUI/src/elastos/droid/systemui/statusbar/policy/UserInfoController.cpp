@@ -162,7 +162,13 @@ ECode UserInfoController::UserInfoTask::OnPostExecute(
     AutoPtr<IPair> pair = IPair::Probe(result);
     AutoPtr<IInterface> first;
     pair->GetFirst((IInterface**)&first);
-    ICharSequence::Probe(first)->ToString(&mHost->mUserName);
+    AutoPtr<ICharSequence> cs = ICharSequence::Probe(first);
+    if (cs != NULL) {
+        cs->ToString(&mHost->mUserName);
+    }
+    else {
+        mHost->mUserName = NULL;
+    }
 
     AutoPtr<IInterface> second;
     pair->GetSecond((IInterface**)&second);
