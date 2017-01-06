@@ -292,6 +292,7 @@ module
                 [in] WpsResultStatus s);
 
             interface IWpsResult;
+            interface IParcelable;
         }
 
         class CWpsInfo {
@@ -301,6 +302,7 @@ module
                 [in] IWpsInfo* source);
 
             interface IWpsInfo;
+            interface IParcelable;
         }
 
         singleton class CWifiSsidHelper {

@@ -58,7 +58,7 @@ static WpsResultStatus StringToStatus(
     return WpsResultStatus_FAILURE;
 }
 
-CAR_INTERFACE_IMPL(CWpsResult, Object, IWpsResult)
+CAR_INTERFACE_IMPL_2(CWpsResult, Object, IWpsResult, IParcelable)
 
 CAR_OBJECT_IMPL(CWpsResult)
 

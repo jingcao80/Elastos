@@ -24,7 +24,7 @@ namespace Elastos {
 namespace Droid {
 namespace Wifi {
 
-CAR_INTERFACE_IMPL(CWpsInfo, Object, IWpsInfo)
+CAR_INTERFACE_IMPL_2(CWpsInfo, Object, IWpsInfo, IParcelable)
 
 CAR_OBJECT_IMPL(CWpsInfo)
 

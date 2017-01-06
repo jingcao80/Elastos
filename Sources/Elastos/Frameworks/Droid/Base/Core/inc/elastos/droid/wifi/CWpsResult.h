@@ -27,6 +27,7 @@ namespace Wifi {
 CarClass(CWpsResult)
     , public Object
     , public IWpsResult
+    , public IParcelable
 {
     friend class WifiConfigStore;
 public:
