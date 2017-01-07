@@ -1717,7 +1717,7 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::Sensor::ReadTim
         pool = new List<AutoPtr<StopwatchTimer> >();
         mHost->mHost->mSensorTimers[mHandle] = pool;
     }
-    AutoPtr<StopwatchTimer> st;
+    AutoPtr<StopwatchTimer> st = new StopwatchTimer();
     st->constructor(mHost, 0, pool, timeBase, in);
     return st;
 }
@@ -9163,7 +9163,7 @@ ECode BatteryStatsImpl::GetLowDischargeAmountSinceCharge(
     AutoLock lock(this);
     Int32 val = mLowDischargeAmountSinceCharge;
     if (mOnBattery && mDischargeCurrentLevel < mDischargeUnplugLevel) {
-        val += mDischargeUnplugLevel - mDischargeCurrentLevel-1;
+        val += mDischargeUnplugLevel - mDischargeCurrentLevel - 1;
     }
     *result = val;
     return NOERROR;

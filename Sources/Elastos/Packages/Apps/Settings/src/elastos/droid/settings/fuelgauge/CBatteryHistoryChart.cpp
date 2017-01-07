@@ -98,8 +98,8 @@ void CBatteryHistoryChart::ChartData::SetColors(
         AutoPtr<IPaint> paint;
         CPaint::New((IPaint**)&paint);
         mPaints->Set(i, paint);
-        (*mPaints)[i]->SetColor((*colors)[i]);
-        (*mPaints)[i]->SetStyle(PaintStyle_FILL);
+        paint->SetColor((*colors)[i]);
+        paint->SetStyle(PaintStyle_FILL);
     }
 }
 
@@ -1108,7 +1108,7 @@ ECode CBatteryHistoryChart::OnSizeChanged(
                     }
 
                     Int32 states2;
-                    rec->GetStates(&states2);
+                    rec->GetStates2(&states2);
                     const Int32 wifiSupplState =
                         ((states2&IBatteryStatsHistoryItem::STATE2_WIFI_SUPPL_STATE_MASK)
                                 >> IBatteryStatsHistoryItem::STATE2_WIFI_SUPPL_STATE_SHIFT);
