@@ -3126,33 +3126,37 @@ ECode LauncherModel::GetItemsInLocalCoordinates(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     AutoPtr<IUserManager> um = IUserManager::Probe(obj);
-    //try {
-    Boolean res;
-    while (c->MoveToNext(&res), res) {
-        AutoPtr<IItemInfo> item = new ItemInfo();
-        ItemInfo* _item = (ItemInfo*)item.Get();
-        FAIL_GOTO(c->GetInt32(cellXIndex, &(_item->mCellX)), EXIT)
-        FAIL_GOTO(c->GetInt32(cellYIndex, &(_item->mCellY)), EXIT)
-        FAIL_GOTO(c->GetInt32(spanXIndex, &(_item->mSpanX)), EXIT)
-        FAIL_GOTO(c->GetInt32(spanYIndex, &(_item->mSpanY)), EXIT)
-        Int32 tmp;
-        FAIL_GOTO(c->GetInt32(containerIndex, &tmp), EXIT)
-        _item->mContainer = tmp;
-        FAIL_GOTO(c->GetInt32(itemTypeIndex, &(_item->mItemType)), EXIT)
-        FAIL_GOTO(c->GetInt32(screenIndex, &(_item->mScreen)), EXIT)
-        Int32 serialNumber;
-        FAIL_GOTO(c->GetInt32(profileIdIndex, &serialNumber), EXIT)
-        FAIL_GOTO(um->GetUserForSerialNumber(serialNumber,
-                (IUserHandle**)&(_item->mUser)), EXIT)
-        // If the user no longer exists, skip this item
-        if (_item->mUser != NULL) {
-            FAIL_GOTO(items->Add(TO_IINTERFACE(item)), EXIT)
+
+    //try
+    ECode ec = NOERROR;
+    {
+        Boolean res;
+        while (c->MoveToNext(&res), res) {
+            AutoPtr<IItemInfo> item = new ItemInfo();
+            ItemInfo* _item = (ItemInfo*)item.Get();
+            FAIL_GOTO(ec = c->GetInt32(cellXIndex, &(_item->mCellX)), EXIT)
+            FAIL_GOTO(ec = c->GetInt32(cellYIndex, &(_item->mCellY)), EXIT)
+            FAIL_GOTO(ec = c->GetInt32(spanXIndex, &(_item->mSpanX)), EXIT)
+            FAIL_GOTO(ec = c->GetInt32(spanYIndex, &(_item->mSpanY)), EXIT)
+            Int32 tmp;
+            FAIL_GOTO(ec = c->GetInt32(containerIndex, &tmp), EXIT)
+            _item->mContainer = tmp;
+            FAIL_GOTO(ec = c->GetInt32(itemTypeIndex, &(_item->mItemType)), EXIT)
+            FAIL_GOTO(ec = c->GetInt32(screenIndex, &(_item->mScreen)), EXIT)
+            Int32 serialNumber;
+            FAIL_GOTO(ec = c->GetInt32(profileIdIndex, &serialNumber), EXIT)
+            FAIL_GOTO(ec = um->GetUserForSerialNumber(serialNumber,
+                    (IUserHandle**)&(_item->mUser)), EXIT)
+            // If the user no longer exists, skip this item
+            if (_item->mUser != NULL) {
+                FAIL_GOTO(ec = items->Add(TO_IINTERFACE(item)), EXIT)
+            }
         }
-    }
-    //} catch (Exception e) {
+    } //catch (Exception e) {
 EXIT:
-    items->Clear();
-    //} finally {
+    if (ec != NOERROR) {
+        items->Clear();
+    } //finally {
     ICloseable::Probe(c)->Close();
     //}
 
