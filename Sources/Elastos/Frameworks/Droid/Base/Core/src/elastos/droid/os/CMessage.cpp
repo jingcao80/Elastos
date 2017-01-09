@@ -193,12 +193,15 @@ AutoPtr<IMessage> CMessage::Obtain(
 ECode CMessage::SetSendingUid(
     /* [in] */ Int32 uid)
 {
+    mSendingUid = uid;
     return NOERROR;
 }
 
 ECode CMessage::GetSendingUid(
     /* [out] */ Int32* uid)
 {
+    VALIDATE_NOT_NULL(uid)
+    *uid = mSendingUid;
     return NOERROR;
 }
 

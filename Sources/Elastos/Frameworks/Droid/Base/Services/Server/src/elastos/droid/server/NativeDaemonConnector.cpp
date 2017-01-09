@@ -101,6 +101,7 @@ NativeDaemonConnector::ResponseQueue::PendingCmd::PendingCmd(
     /* [in] */ const String& r)
     : mCmdNum(c)
     , mLogCmd(r)
+    , mAvailableResponseCount(0)
 {
     CArrayBlockingQueue::New(10, (IBlockingQueue**)&mResponses);
 }
@@ -152,7 +153,6 @@ void NativeDaemonConnector::ResponseQueue::Add(
         if (found->mAvailableResponseCount == 0) mPendingCmds.Remove(found);
     }
 //    try {
-    AutoLock lock(found->mResponses);
     found->mResponses->Put(TO_IINTERFACE(response));
 //    } catch (InterruptedException e) { }
 }

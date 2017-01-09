@@ -3533,7 +3533,6 @@ ECode WifiStateMachine::ConnectedState::ProcessMessage(
             Int32 arg2;
             message->GetArg2(&arg2);
             Int32 autoJoinStatus;
-            config->GetAutoJoinStatus(&autoJoinStatus);
             Int32 freq;
             mHost->mWifiInfo->GetFrequency(&freq);
             Int32 rssi;
@@ -3542,14 +3541,14 @@ ECode WifiStateMachine::ConnectedState::ProcessMessage(
             AutoPtr<IScanResultHelper> helper;
             CScanResultHelper::AcquireSingleton((IScanResultHelper**)&helper);
             Boolean b1, b2, b3;
-            mHost->mWifiConfigStore->IsLastSelectedConfiguration(config, &b1);
             helper->Is24GHz(freq, &b2);
             helper->Is5GHz(freq, &b3);
             if (mHost->mScreenOn
                     && !mHost->linkDebouncing
                     && config != NULL
-                    && autoJoinStatus == IWifiConfiguration::AUTO_JOIN_ENABLED
-                    && !b1
+                    && (config->GetAutoJoinStatus(&autoJoinStatus),
+                        autoJoinStatus == IWifiConfiguration::AUTO_JOIN_ENABLED)
+                    && (mHost->mWifiConfigStore->IsLastSelectedConfiguration(config, &b1), !b1)
                     && (arg2 != 3 /* reason cannot be 3, i.e. locally generated */
                         || (lastRoam > 0 && lastRoam < 2000) /* unless driver is roaming */)
                     && ((b2 && rssi > IWifiConfiguration::BAD_RSSI_24)
