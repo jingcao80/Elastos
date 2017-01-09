@@ -94,12 +94,10 @@ ECode CWifiP2pManager::DiscoverPeers(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel;// TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(DISCOVER_PEERS, 0, val);
     return NOERROR;
 }
@@ -112,12 +110,10 @@ ECode CWifiP2pManager::StopPeerDiscovery(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel;// TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(STOP_DISCOVERY, 0, val);
     return NOERROR;
 }
@@ -129,9 +125,7 @@ ECode CWifiP2pManager::Connect(
 {
     if (DBG)  {
         String info;
-        assert(0);
-        // TODO
-        // if (config) config->ToString(&info);
+        if (config) IObject::Probe(config)->ToString(&info);
         Slogger::E(TAG, "Connect %s", info.string());
     }
 
@@ -139,12 +133,10 @@ ECode CWifiP2pManager::Connect(
     FAIL_RETURN(CheckP2pConfig(config));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(CONNECT, 0, val,
         config ? IInterface::Probe(config) : NULL);
 
@@ -159,12 +151,10 @@ ECode CWifiP2pManager::CancelConnect(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(CANCEL_CONNECT, 0, val);
     return NOERROR;
 }
@@ -177,12 +167,10 @@ ECode CWifiP2pManager::CreateGroup(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(CREATE_GROUP, IWifiP2pGroup::PERSISTENT_NET_ID, val);
     return NOERROR;
 }
@@ -198,9 +186,7 @@ ECode CWifiP2pManager::RemoveGroup(
     AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     return asyncChannel->SendMessage(REMOVE_GROUP, 0, val);
 }
 
@@ -262,9 +248,7 @@ ECode CWifiP2pManager::AddLocalService(
     AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(ADD_LOCAL_SERVICE, 0, val,
         servInfo ? IInterface::Probe(servInfo) : NULL);
     return NOERROR;
@@ -280,12 +264,10 @@ ECode CWifiP2pManager::RemoveLocalService(
     FAIL_RETURN(CheckServiceInfo(servInfo));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(REMOVE_LOCAL_SERVICE, 0, val,
         servInfo ? IInterface::Probe(servInfo) : NULL);
     return NOERROR;
@@ -299,12 +281,10 @@ ECode CWifiP2pManager::ClearLocalServices(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(CLEAR_LOCAL_SERVICES, 0, val);
     return NOERROR;
 }
@@ -314,10 +294,8 @@ ECode CWifiP2pManager::SetServiceResponseListener(
     /* [in] */ IWifiP2pManagerServiceResponseListener* listener)
 {
     FAIL_RETURN(CheckChannel(c));
-    assert(0);
-    // TODO
-    // return c->SetServRspListener(listener);
-    return E_NOT_IMPLEMENTED;
+    CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
+    return wpmc->SetServRspListener(listener);
 }
 
 ECode CWifiP2pManager::SetDnsSdResponseListeners(
@@ -326,10 +304,9 @@ ECode CWifiP2pManager::SetDnsSdResponseListeners(
     /* [in] */ IWifiP2pManagerDnsSdTxtRecordListener* txtListener)
 {
     FAIL_RETURN(CheckChannel(c));
-    assert(0);
-    // TODO
-    // c->SetDnsSdServRspListener(servListener);
-    // c->SetDnsSdTxtListener(txtListener);
+    CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
+    wpmc->SetDnsSdServRspListener(servListener);
+    wpmc->SetDnsSdTxtListener(txtListener);
     return NOERROR;
 }
 
@@ -338,10 +315,8 @@ ECode CWifiP2pManager::SetUpnpServiceResponseListener(
     /* [in] */ IWifiP2pManagerUpnpServiceResponseListener* listener)
 {
     FAIL_RETURN(CheckChannel(c));
-    assert(0);
-    // TODO
-    // return c->SetUpnpServRspListener(listener);
-    return E_NOT_IMPLEMENTED;
+    CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
+    return wpmc->SetUpnpServRspListener(listener);
 }
 
 ECode CWifiP2pManager::DiscoverServices(
@@ -352,12 +327,10 @@ ECode CWifiP2pManager::DiscoverServices(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(DISCOVER_SERVICES, 0, val);
     return NOERROR;
 }
@@ -372,12 +345,10 @@ ECode CWifiP2pManager::AddServiceRequest(
     FAIL_RETURN(CheckServiceRequest(req));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(ADD_SERVICE_REQUEST, 0, val,
         req ? IInterface::Probe(req) : req);
     return NOERROR;
@@ -393,12 +364,10 @@ ECode CWifiP2pManager::RemoveServiceRequest(
     FAIL_RETURN(CheckServiceRequest(req));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(REMOVE_SERVICE_REQUEST, 0, val,
         req ? IInterface::Probe(req) : req);
     return NOERROR;
@@ -412,12 +381,10 @@ ECode CWifiP2pManager::ClearServiceRequests(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(CLEAR_SERVICE_REQUESTS, 0, val);
     return NOERROR;
 }
@@ -430,12 +397,10 @@ ECode CWifiP2pManager::RequestPeers(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(REQUEST_PEERS, 0, val);
     return NOERROR;
 }
@@ -448,12 +413,10 @@ ECode CWifiP2pManager::RequestConnectionInfo(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(REQUEST_CONNECTION_INFO, 0, val);
     return NOERROR;
 }
@@ -466,12 +429,10 @@ ECode CWifiP2pManager::RequestGroupInfo(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(REQUEST_GROUP_INFO, 0, val);
     return NOERROR;
 }
@@ -489,12 +450,10 @@ ECode CWifiP2pManager::SetDeviceName(
     d->SetDeviceName(devName);
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(SET_DEVICE_NAME, 0, val, IInterface::Probe(d));
     return NOERROR;
 }
@@ -507,20 +466,16 @@ ECode CWifiP2pManager::SetWFDInfo(
 {
     if (DBG) {
         String info;
-        assert(0);
-        // TODO
-        // if (wfdInfo) wfdInfo->ToString(&info);
+        if (wfdInfo) IObject::Probe(wfdInfo)->ToString(&info);
         Slogger::D(TAG, "SetWFDInfo: \n", info.string());
     }
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(SET_WFD_INFO, 0, val,
         wfdInfo ? IInterface::Probe(wfdInfo) : NULL);
     return NOERROR;
@@ -539,12 +494,10 @@ ECode CWifiP2pManager::SetGroupOwnerPsk(
     d->SetDeviceName(psk);
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     // asyncChannel->SendMessage(SET_GO_PSK, 0, val,
     //     d ? d->Probe(EIID_IInterface) : NULL);
     return NOERROR;
@@ -558,12 +511,10 @@ ECode CWifiP2pManager::DeletePersistentGroup(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(DELETE_PERSISTENT_GROUP, netId, val);
     return NOERROR;
 }
@@ -575,12 +526,10 @@ ECode CWifiP2pManager::RequestPersistentGroupInfo(
     FAIL_RETURN(CheckChannel(c));
 
     CWifiP2pManagerChannel* wpmc = (CWifiP2pManagerChannel*)c;
-    AutoPtr<AsyncChannel> asyncChannel; // TODO = wpmc->mAsyncChannel;
+    AutoPtr<AsyncChannel> asyncChannel = wpmc->mAsyncChannel;
 
     Int32 val;
-    assert(0);
-    // TODO
-    // c->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
+    wpmc->PutListener(listener ? listener->Probe(EIID_IInterface) : NULL, &val);
     asyncChannel->SendMessage(REQUEST_PERSISTENT_GROUP_INFO, 0, val);
     return NOERROR;
 }

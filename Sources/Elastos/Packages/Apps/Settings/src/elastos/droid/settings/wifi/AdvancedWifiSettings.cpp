@@ -437,13 +437,13 @@ ECode AdvancedWifiSettings::OnPreferenceTreeClick(
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
 
     Boolean res;
-    ITwoStatePreference::Probe(preference)->IsChecked(&res);
-
     if (KEY_NOTIFY_OPEN_NETWORKS.Equals(key)) {
+        ITwoStatePreference::Probe(preference)->IsChecked(&res);
         global->PutInt32(resolver,
                 ISettingsGlobal::WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, res ? 1 : 0, &res);
     }
     else if (KEY_SCAN_ALWAYS_AVAILABLE.Equals(key)) {
+        ITwoStatePreference::Probe(preference)->IsChecked(&res);
         global->PutInt32(resolver,
                 ISettingsGlobal::WIFI_SCAN_ALWAYS_AVAILABLE, res ? 1 : 0, &res);
     }

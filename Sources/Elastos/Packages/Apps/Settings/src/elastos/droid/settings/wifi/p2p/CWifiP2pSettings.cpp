@@ -371,7 +371,7 @@ CWifiP2pSettings::~CWifiP2pSettings()
 ECode CWifiP2pSettings::constructor()
 {
     if (DBG) Logger::D(TAG, "Creating CWifiP2pSettings ...");
-    return NOERROR;
+    return SettingsPreferenceFragment::constructor();
 }
 
 ECode CWifiP2pSettings::OnActivityCreated(
