@@ -42,9 +42,7 @@ ECode CWifiP2pDeviceList::constructor(
 {
     if (source != NULL) {
         AutoPtr<ArrayOf<IWifiP2pDevice*> > array;
-        assert(0);
-        // TODO
-        // FAIL_RETURN(source->GetDeviceList((ArrayOf<IWifiP2pDevice*>**)&array));
+        FAIL_RETURN(((CWifiP2pDeviceList*)source)->GetDeviceList((ArrayOf<IWifiP2pDevice*>**)&array));
 
         if (array != NULL) {
             String temp;
@@ -218,11 +216,20 @@ ECode CWifiP2pDeviceList::Remove(
     /* [out] */ IWifiP2pDevice** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     ValidateDeviceAddress(deviceAddress);
-    assert(0);
-    // TODO
-    // return mDevices.Remove(deviceAddress, result);
-    return E_NOT_IMPLEMENTED;
+    HashMap<String, AutoPtr<IWifiP2pDevice> >::Iterator it = mDevices.Find(deviceAddress);
+
+    AutoPtr<IWifiP2pDevice> dev;
+    if (it != mDevices.End()) {
+        dev = it->mSecond;
+        mDevices.Erase(it);
+        *result = dev;
+        REFCOUNT_ADD(*result)
+    }
+
+    return NOERROR;
 }
 
 ECode CWifiP2pDeviceList::Remove(
@@ -233,9 +240,7 @@ ECode CWifiP2pDeviceList::Remove(
     *ret = FALSE;
 
     AutoPtr<ArrayOf<IWifiP2pDevice*> > array;
-    assert(0);
-    // TODO
-    // FAIL_RETURN(list->GetDeviceList((ArrayOf<IWifiP2pDevice*>**)&array));
+    FAIL_RETURN(((CWifiP2pDeviceList*)list)->GetDeviceList((ArrayOf<IWifiP2pDevice*>**)&array));
 
     if (array != NULL) {
         Boolean temp;
@@ -309,9 +314,7 @@ ECode CWifiP2pDeviceList::ToString(
     if (array != NULL) {
         String temp;
         for (Int32 i = 0; i < array->GetLength(); ++i) {
-            assert(0);
-            // TODO
-            // FAIL_RETURN((*array)[i]->ToString(&temp));
+            FAIL_RETURN(IObject::Probe((*array)[i])->ToString(&temp));
             sb += "\n ";
             sb += temp;
         }

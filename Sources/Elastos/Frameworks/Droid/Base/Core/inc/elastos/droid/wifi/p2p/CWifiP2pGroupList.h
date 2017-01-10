@@ -35,6 +35,7 @@ namespace P2p {
 CarClass(CWifiP2pGroupList)
     , public Object
     , public IWifiP2pGroupList
+    , public IParcelable
 {
 private:
     class GroupLruCache
