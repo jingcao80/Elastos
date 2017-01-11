@@ -879,10 +879,10 @@ void CBatteryService::ProcessValuesLocked(
     if (mBatteryProps->GetChargerAcOnline(&bval), bval) {
         mPlugType = IBatteryManager::BATTERY_PLUGGED_AC;
     }
-    if (mBatteryProps->GetChargerUsbOnline(&bval), bval) {
+    else if (mBatteryProps->GetChargerUsbOnline(&bval), bval) {
         mPlugType = IBatteryManager::BATTERY_PLUGGED_USB;
     }
-    if (mBatteryProps->GetChargerWirelessOnline(&bval), bval) {
+    else if (mBatteryProps->GetChargerWirelessOnline(&bval), bval) {
         mPlugType = IBatteryManager::BATTERY_PLUGGED_WIRELESS;
     }
     else {
