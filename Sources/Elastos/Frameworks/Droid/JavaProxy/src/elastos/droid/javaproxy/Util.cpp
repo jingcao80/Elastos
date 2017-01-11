@@ -1976,7 +1976,7 @@ Boolean Util::GetElBitmap(
     CParcel::New((IParcel**)&parcel);
 
     android::Parcel* dest;
-    parcel->GetElementPayload((Handle32*)&dest);
+    parcel->GetDataPayload((Handle32*)&dest);
 
     dest->appendFrom(source, 0, source->dataSize());
     dest->setDataPosition(0);
@@ -2006,7 +2006,7 @@ jobject Util::ToJavaBitmap(
     IParcelable::Probe(bitmap)->ReadFromParcel(parcel);
     parcel->SetDataPosition(0);
     Handle32 source;
-    parcel->GetElementPayload(&source);
+    parcel->GetDataPayload(&source);
 
     jclass parcelClass = env->FindClass("android/os/Parcel");
     CheckErrorAndLog(env, "FindClass: Parcel : %d!\n", __LINE__);
@@ -4762,7 +4762,7 @@ jobject Util::ToJavaInputChannel(
     IParcelable::Probe(channel)->WriteToParcel(parcel);
     parcel->SetDataPosition(0);
     Handle32 source;
-    parcel->GetElementPayload(&source);
+    parcel->GetDataPayload(&source);
 
     jclass parcelClass = env->FindClass("android/os/Parcel");
     CheckErrorAndLog(env, "FindClass: Parcel : %d!\n", __LINE__);

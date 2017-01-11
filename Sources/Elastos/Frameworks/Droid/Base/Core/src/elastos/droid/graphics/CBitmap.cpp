@@ -1961,7 +1961,7 @@ ECode CBitmap::NativeCreateFromParcel(
     }
 
     android::Parcel* p;
-    parcel->GetElementPayload((Handle32*)&p);
+    parcel->GetDataPayload((Handle32*)&p);
 
     const bool        isMutable = p->readInt32() != 0;
     const SkColorType colorType = (SkColorType)p->readInt32();
@@ -2054,7 +2054,7 @@ Boolean CBitmap::NativeWriteToParcel(
     const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(nativeBitmap);
 
     android::Parcel* p;
-    parcel->GetElementPayload((Handle32*)&p);
+    parcel->GetDataPayload((Handle32*)&p);
 
     p->writeInt32(isMutable);
     p->writeInt32(bitmap->colorType());

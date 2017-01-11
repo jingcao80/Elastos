@@ -165,7 +165,7 @@ ECode CRemoteParcel::AppendFrom(
     /* [in] */ Int32 length)
 {
     android::Parcel* parcelObj;
-    parcel->GetElementPayload((Handle32*)&parcelObj);
+    parcel->GetDataPayload((Handle32*)&parcelObj);
     if (parcelObj == NULL) return E_INVALID_ARGUMENT;
     mData->appendFrom(parcelObj, offset, length);
     return NOERROR;
@@ -871,17 +871,40 @@ ECode CRemoteParcel::SetDataPosition(
     return NOERROR;
 }
 
-ECode CRemoteParcel::GetElementPayload(
+ECode CRemoteParcel::GetDataPayload(
     /* [out] */ Handle32* buffer)
 {
     *buffer = (Handle32)mData;
     return NOERROR;
 }
 
-ECode CRemoteParcel::GetElementSize(
+ECode CRemoteParcel::GetDataSize(
     /* [in] */ Int32* size)
 {
     *size = (Int32)mData->dataSize();
+    return NOERROR;
+}
+
+ECode CRemoteParcel::SetDataSize(
+    /* [in] */ Int32 size)
+{
+    mData->setDataSize(size);
+    return NOERROR;
+}
+
+ECode CRemoteParcel::GetDataCapacity(
+    /* [out] */ Int32* capacity)
+{
+    if (capacity == NULL) return E_NOT_IMPLEMENTED;
+
+    *capacity = mData->dataCapacity();
+    return NOERROR;
+}
+
+ECode CRemoteParcel::SetDataCapacity(
+    /* [in] */ Int32 capacity)
+{
+    mData->setDataCapacity(capacity);
     return NOERROR;
 }
 

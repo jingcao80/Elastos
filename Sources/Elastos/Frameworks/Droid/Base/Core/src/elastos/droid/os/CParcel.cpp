@@ -291,16 +291,34 @@ ECode CParcel::SetDataPosition(
     return mData->SetDataPosition(position);
 }
 
-ECode CParcel::GetElementPayload(
+ECode CParcel::GetDataPayload(
     /* [out] */ Handle32* buffer)
 {
-    return mData->GetElementPayload(buffer);
+    return mData->GetDataPayload(buffer);
 }
 
-ECode CParcel::GetElementSize(
+ECode CParcel::GetDataSize(
     /* [out] */ Int32* size)
 {
-    return mData->GetElementSize(size);
+    return mData->GetDataSize(size);
+}
+
+ECode CParcel::SetDataSize(
+    /* [in] */ Int32 size)
+{
+    return mData->SetDataSize(size);
+}
+
+ECode CParcel::GetDataCapacity(
+    /* [out] */ Int32* capacity)
+{
+    return mData->GetDataCapacity(capacity);
+}
+
+ECode CParcel::SetDataCapacity(
+    /* [in] */ Int32 capacity)
+{
+    return mData->SetDataCapacity(capacity);
 }
 
 ECode CParcel::OpenFileDescriptor(

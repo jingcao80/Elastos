@@ -91,7 +91,7 @@ ECode CServiceNative::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     Handle32 parcel;
-    source->GetElementPayload(&parcel);
+    source->GetDataPayload(&parcel);
     mibinder = ((android::Parcel*)parcel)->readStrongBinder();
     // LOGGERD(TAG, "CServiceNative::ReadFromParcel(), mibinder = %p", mibinder.get());
     return NOERROR;
@@ -127,7 +127,7 @@ ECode CServiceNative::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     Handle32 parcel;
-    dest->GetElementPayload(&parcel);
+    dest->GetDataPayload(&parcel);
 
     if (mJVM == NULL) {
         if(mibinder.get() != NULL) {

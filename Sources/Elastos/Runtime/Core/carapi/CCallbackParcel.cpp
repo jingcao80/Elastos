@@ -745,7 +745,7 @@ ECode CCallbackParcel::SetDataPosition(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CCallbackParcel::GetElementPayload(
+ECode CCallbackParcel::GetDataPayload(
     /* [out] */ Handle32* buffer)
 {
     if (NULL == buffer) return E_INVALID_ARGUMENT;
@@ -755,7 +755,7 @@ ECode CCallbackParcel::GetElementPayload(
     return NOERROR;
 }
 
-ECode CCallbackParcel::GetElementSize(
+ECode CCallbackParcel::GetDataSize(
     /* [in] */ Int32* size)
 {
     if (NULL == size) return E_INVALID_ARGUMENT;
@@ -763,6 +763,24 @@ ECode CCallbackParcel::GetElementSize(
     *size = (Int32)(mElemPtr - mElemBuf);
 
     return NOERROR;
+}
+
+ECode CCallbackParcel::SetDataSize(
+    /* [in] */ Int32 size)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCallbackParcel::GetDataCapacity(
+    /* [out] */ Int32* capacity)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCallbackParcel::SetDataCapacity(
+    /* [in] */ Int32 capacity)
+{
+    return E_NOT_IMPLEMENTED;
 }
 
 _ELASTOS_NAMESPACE_END

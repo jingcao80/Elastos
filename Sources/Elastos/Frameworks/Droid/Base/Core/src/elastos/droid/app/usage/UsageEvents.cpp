@@ -236,7 +236,7 @@ ECode UsageEvents::WriteToParcel(
         else if (mParcel != NULL) {
             // Write the total length of the data.
             Int32 size, position;
-            mParcel->GetElementSize(&size);
+            mParcel->GetDataSize(&size);
             mParcel->GetDataPosition(&position);
             dest->WriteInt32(size);
 
@@ -274,7 +274,7 @@ ECode UsageEvents::ReadFromParcel(
         mParcel->GetDataPosition(&position);
 
         android::Parcel* parcelObj;
-        mParcel->GetElementPayload((Handle32*)&parcelObj);
+        mParcel->GetDataPayload((Handle32*)&parcelObj);
         parcelObj->setDataSize(position);
         parcelObj->setDataPosition(positionInParcel);
     }

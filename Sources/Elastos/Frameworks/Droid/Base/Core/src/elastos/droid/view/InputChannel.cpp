@@ -231,7 +231,7 @@ ECode InputChannel::NativeReadFromParcel(
 
     if (in != NULL) {
         android::Parcel* parcel;
-        in->GetElementPayload((Handle32*)&parcel);
+        in->GetDataPayload((Handle32*)&parcel);
         Boolean isInitialized = parcel->readInt32();
         if (isInitialized) {
             String8 name = parcel->readString8();
@@ -256,7 +256,7 @@ ECode InputChannel::NativeWriteToParcel(
 {
     if (dest) {
         android::Parcel* parcel;
-        dest->GetElementPayload((Handle32*)&parcel);
+        dest->GetDataPayload((Handle32*)&parcel);
         if (0 != mNative) {
             NativeInputChannel* pNative = reinterpret_cast<NativeInputChannel*>(mNative);
             android::sp<android::InputChannel> inputChannel = pNative->getInputChannel();

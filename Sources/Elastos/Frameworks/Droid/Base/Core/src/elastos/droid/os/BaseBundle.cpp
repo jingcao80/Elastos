@@ -155,7 +155,7 @@ ECode BaseBundle::constructor(
         else {
             CParcel::New((IParcel**)&mParcelledData);
             Int32 size;
-            b->mParcelledData->GetElementSize(&size);
+            b->mParcelledData->GetDataSize(&size);
             mParcelledData->AppendFrom(b->mParcelledData, 0, size);
             mParcelledData->SetDataPosition(0);
         }
@@ -1829,7 +1829,7 @@ ECode BaseBundle::WriteToParcelInner(
             dest->WriteInt32(0);
         }
         else {
-            mParcelledData->GetElementSize(&length);
+            mParcelledData->GetDataSize(&length);
             dest->WriteInt32(length);
             dest->WriteInt32(BUNDLE_MAGIC); // 'B' 'N' 'D' 'L'
             dest->AppendFrom(mParcelledData, 0, length);
@@ -1901,7 +1901,7 @@ ECode BaseBundle::ReadFromParcelInner(
     }
 
     android::Parcel* parcel;
-    source->GetElementPayload((Handle32*)&parcel);
+    source->GetDataPayload((Handle32*)&parcel);
 
     Int32 magic;
     source->ReadInt32(&magic);

@@ -5289,7 +5289,7 @@ void BatteryStatsImpl::AddHistoryBufferLocked(
     }
 
     Int32 dataSize;
-    mHistoryBuffer->GetElementSize(&dataSize);
+    mHistoryBuffer->GetDataSize(&dataSize);
     if (dataSize >= MAX_HISTORY_BUFFER) {
         if (!mHistoryOverflow) {
             mHistoryOverflow = TRUE;
@@ -5348,7 +5348,7 @@ ECode BatteryStatsImpl::AddHistoryBufferLocked(
     cur->mEventTag = NULL;
     if (DEBUG_HISTORY) {
         Int32 size;
-        mHistoryBuffer->GetElementSize(&size);
+        mHistoryBuffer->GetDataSize(&size);
         Slogger::I(TAG, "Writing history buffer: was %d now %d size is now %d",
                 mHistoryBufferLastPos, mHistoryBufferLastPos, size);
     }
@@ -7899,7 +7899,7 @@ ECode BatteryStatsImpl::StartIteratingOldHistoryLocked(
 
     if (DEBUG_HISTORY) {
         Int32 size, pos;
-        mHistoryBuffer->GetElementSize(&size);
+        mHistoryBuffer->GetDataSize(&size);
         mHistoryBuffer->GetDataPosition(&pos);
         Slogger::I(TAG, "ITERATING: buff size=%d pos=%d", size, pos);
     }
@@ -7923,7 +7923,7 @@ ECode BatteryStatsImpl::GetNextOldHistoryLocked(
 
     Int32 pos, size;
     mHistoryBuffer->GetDataPosition(&pos);
-    mHistoryBuffer->GetElementSize(&size);
+    mHistoryBuffer->GetDataSize(&size);
     Boolean end = pos >= size;
     if (!end) {
         ReadHistoryDelta(mHistoryBuffer, mHistoryReadTmp);
@@ -7973,7 +7973,7 @@ ECode BatteryStatsImpl::GetHistoryUsedSize(
     /* [out] */ Int32* size)
 {
     VALIDATE_NOT_NULL(size)
-    mHistoryBuffer->GetElementSize(size);
+    mHistoryBuffer->GetDataSize(size);
     return NOERROR;
 }
 
@@ -7981,7 +7981,7 @@ ECode BatteryStatsImpl::FinishIteratingOldHistoryLocked()
 {
     mIteratingHistory = FALSE;
     Int32 size;
-    mHistoryBuffer->GetElementSize(&size);
+    mHistoryBuffer->GetDataSize(&size);
     mHistoryBuffer->SetDataPosition(size);
     return NOERROR;
 }
@@ -7991,7 +7991,7 @@ ECode BatteryStatsImpl::StartIteratingHistoryLocked(
 {
     VALIDATE_NOT_NULL(result)
     Int32 size;
-    mHistoryBuffer->GetElementSize(&size);
+    mHistoryBuffer->GetDataSize(&size);
     if (DEBUG_HISTORY) {
         Int32 pos;
         mHistoryBuffer->GetDataPosition(&pos);
@@ -8069,7 +8069,7 @@ ECode BatteryStatsImpl::GetNextHistoryLocked(
         out->Clear();
     }
     Int32 size;
-    mHistoryBuffer->GetElementSize(&size);
+    mHistoryBuffer->GetDataSize(&size);
     Boolean end = pos >= size;
     if (end) {
         *result = FALSE;
@@ -8091,7 +8091,7 @@ ECode BatteryStatsImpl::FinishIteratingHistoryLocked()
 {
     mIteratingHistory = FALSE;
     Int32 size;
-    mHistoryBuffer->GetElementSize(&size);
+    mHistoryBuffer->GetDataSize(&size);
     mHistoryBuffer->SetDataPosition(size);
     mReadHistoryStrings = NULL;
     return NOERROR;
@@ -8389,7 +8389,7 @@ void BatteryStatsImpl::SetOnBatteryLocked(
             || level >= 90
             || (mDischargeCurrentLevel < 20 && level >= 80)
             || ((GetHighDischargeAmountSinceCharge(&high), high >= 200)
-                && (mHistoryBuffer->GetElementSize(&eleSize), eleSize >= MAX_HISTORY_BUFFER)))) {
+                && (mHistoryBuffer->GetDataSize(&eleSize), eleSize >= MAX_HISTORY_BUFFER)))) {
             Int32 low;
             GetLowDischargeAmountSinceCharge(&low);
             Slogger::I(TAG, "Resetting battery stats: level=%d status=%d dischargeLevel=%d lowAmount=%d highAmount=%d",
@@ -9636,7 +9636,7 @@ void BatteryStatsImpl::ReadOldHistory(
     mHistory = mHistoryEnd = mHistoryCache = NULL;
     Int32 pos, size;
     in->GetDataPosition(&pos);
-    in->GetElementSize(&size);
+    in->GetDataSize(&size);
     Int64 time;
     while (size - pos > 0 && (in->ReadInt64(&time), time >= 0)) {
         AutoPtr<HistoryItem> rec = new HistoryItem();
@@ -9675,7 +9675,7 @@ void BatteryStatsImpl::WriteHistory(
         out->WriteInt32(tag->mUid);
     }
     Int32 size;
-    mHistoryBuffer->GetElementSize(&size);
+    mHistoryBuffer->GetDataSize(&size);
     out->WriteInt32(size);
     if (DEBUG_HISTORY) {
         Int32 pos;

@@ -2149,7 +2149,7 @@ ECode CameraMetadataNative::NativeWriteToParcel(
     }
 
     android::Parcel* parcelNative;
-    parcel->GetElementPayload((Handle32*)&parcelNative);
+    parcel->GetDataPayload((Handle32*)&parcelNative);
     if (parcelNative == NULL) {
         Logger::E(TAG, "NativeWriteToParcel: parcel is null.");
         return E_NULL_POINTER_EXCEPTION;
@@ -2175,7 +2175,7 @@ ECode CameraMetadataNative::NativeReadFromParcel(
     }
 
     android::Parcel* parcelNative;
-    source->GetElementPayload((Handle32*)&parcelNative);
+    source->GetDataPayload((Handle32*)&parcelNative);
     if (parcelNative == NULL) {
         Logger::E(TAG, "NativeReadFromParcel: parcel is null.");
         return E_NULL_POINTER_EXCEPTION;

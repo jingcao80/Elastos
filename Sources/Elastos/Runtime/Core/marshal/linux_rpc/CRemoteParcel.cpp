@@ -127,7 +127,7 @@ UInt32 CRemoteParcel::DataCapacity() const
 }
 
 ECode CRemoteParcel::SetDataSize(
-    /* [in] */ UInt32 size)
+    /* [in] */ Int32 size)
 {
     ECode ec = ContinueWrite(size);
     if (SUCCEEDED(ec)) {
@@ -144,10 +144,18 @@ void CRemoteParcel::SetDataPositionInner(
     mNextObjectHint = 0;
 }
 
-ECode CRemoteParcel::SetDataCapacity(
-    /* [in] */ UInt32 size)
+ECode CRemoteParcel::GetDataCapacity(
+    /* [out] */ Int32* capacity)
 {
-    if (size > mDataCapacity) return ContinueWrite(size);
+    if (capacity == NULL) return E_INVALID_ARGUMENT;
+    *capacity = mDataCapacity;
+    return NOERROR;
+}
+
+ECode CRemoteParcel::SetDataCapacity(
+    /* [in] */ Int32 capacity)
+{
+    if ((UInt32)capacity > mDataCapacity) return ContinueWrite(capacity);
     return NOERROR;
 }
 
@@ -1209,7 +1217,7 @@ ECode CRemoteParcel::Clone(
 ECode CRemoteParcel::GetDataPosition(
     /* [out] */ Int32* position)
 {
-    if (position == NULL) return E_NOT_IMPLEMENTED;
+    if (position == NULL) return E_INVALID_ARGUMENT;
 
     *position = DataPosition();
     return NOERROR;
@@ -1222,14 +1230,14 @@ ECode CRemoteParcel::SetDataPosition(
     return NOERROR;
 }
 
-ECode CRemoteParcel::GetElementPayload(
+ECode CRemoteParcel::GetDataPayload(
     /* [out] */ Handle32* buffer)
 {
     *buffer = (Handle32)mData;
     return NOERROR;
 }
 
-ECode CRemoteParcel::GetElementSize(
+ECode CRemoteParcel::GetDataSize(
     /* [in] */ Int32* size)
 {
     *size = (Int32)DataSize();

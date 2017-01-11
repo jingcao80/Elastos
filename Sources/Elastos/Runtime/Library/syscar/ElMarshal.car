@@ -173,11 +173,20 @@ library
         SetDataPosition(
             [in] Int32 position);
 
-        GetElementPayload(
+        GetDataPayload(
             [out] Handle32* buffer);
 
-        GetElementSize(
+        GetDataSize(
             [out] Int32* size);
+
+        SetDataSize(
+            [in] Int32 size);
+
+        GetDataCapacity(
+            [out] Int32* capacity);
+
+        SetDataCapacity(
+            [in] Int32 size);
     }
 
     interface IParcelable {
@@ -190,7 +199,7 @@ library
          * may want to release resources at this point.
          */
         const Int32 PARCELABLE_WRITE_RETURN_VALUE = 0x0001;
-        
+
         /**
          * Bit masks for use with {@link #describeContents}: each bit represents a
          * kind of object considered to have potential special significance when

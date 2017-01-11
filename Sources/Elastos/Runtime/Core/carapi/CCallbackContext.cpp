@@ -220,9 +220,9 @@ ECode CCallbackContext::PostCallbackEvent(
 
                     if ((NULL != callbackEvent->mParameters)
                         && (NULL != prevCBEvent->mParameters)) {
-                        callbackEvent->mParameters->GetElementSize(&size);
-                        callbackEvent->mParameters->GetElementPayload((Handle32*)&newBuf);
-                        prevCBEvent->mParameters->GetElementPayload((Handle32*)&oldBuf);
+                        callbackEvent->mParameters->GetDataSize(&size);
+                        callbackEvent->mParameters->GetDataPayload((Handle32*)&newBuf);
+                        prevCBEvent->mParameters->GetDataPayload((Handle32*)&oldBuf);
                     }
 
                     ec = invokeCoalescer(userFunc, oldBuf, newBuf, size);
@@ -662,8 +662,8 @@ Int32 CCallbackContext::HandleCallbackEvents(
                     Byte* buf = NULL;
 
                     if (callbackEvent->mParameters != NULL) {
-                        callbackEvent->mParameters->GetElementPayload((Handle32*)&buf);
-                        callbackEvent->mParameters->GetElementSize(&size);
+                        callbackEvent->mParameters->GetDataPayload((Handle32*)&buf);
+                        callbackEvent->mParameters->GetDataSize(&size);
                     }
 
                     CallbackEventFlags flags = callbackEvent->mFlags;

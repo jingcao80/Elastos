@@ -452,7 +452,7 @@ ECode GraphicBuffer::nWriteGraphicBufferToParcel(
 {
     GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
     android::Parcel* parcel;
-    dest->GetElementPayload((Handle32*)&parcel);
+    dest->GetDataPayload((Handle32*)&parcel);
     if (parcel) {
         parcel->write(*wrapper->buffer);
     }
@@ -472,7 +472,7 @@ ECode GraphicBuffer::nReadGraphicBufferFromParcel(
 
     }
     android::Parcel* parcel;
-    source->GetElementPayload((Handle32*)&parcel);
+    source->GetDataPayload((Handle32*)&parcel);
 
     if (parcel) {
         sp<android::GraphicBuffer> buffer = new android::GraphicBuffer();

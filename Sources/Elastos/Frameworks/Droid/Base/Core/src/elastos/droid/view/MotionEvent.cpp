@@ -2887,7 +2887,7 @@ ECode MotionEvent::NativeReadFromParcel(
     }
 
     android::Parcel* parcel;
-    parcelObj->GetElementPayload((Handle32*)&parcel);
+    parcelObj->GetDataPayload((Handle32*)&parcel);
 
     android::status_t status = event->readFromParcel(parcel);
     if (status) {
@@ -2907,7 +2907,7 @@ ECode MotionEvent::NativeWriteToParcel(
 {
     android::MotionEvent* event = reinterpret_cast<android::MotionEvent*>(nativePtr);
     android::Parcel* parcel;
-    parcelObj->GetElementPayload((Handle32*)&parcel);
+    parcelObj->GetDataPayload((Handle32*)&parcel);
 
     android::status_t status = event->writeToParcel(parcel);
     if (status) {

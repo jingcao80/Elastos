@@ -33,17 +33,20 @@ namespace Droid {
 namespace Database {
 
 NativeCursorWindow::NativeCursorWindow(const String& name, int ashmemFd,
-        void* data, size_t size, bool readOnly) :
-        mName(name), mAshmemFd(ashmemFd), mData(data), mSize(size), mReadOnly(readOnly) {
+    void* data, size_t size, bool readOnly) :
+    mName(name), mAshmemFd(ashmemFd), mData(data), mSize(size), mReadOnly(readOnly)
+{
     mHeader = static_cast<Header*>(mData);
 }
 
-NativeCursorWindow::~NativeCursorWindow() {
+NativeCursorWindow::~NativeCursorWindow()
+{
     ::munmap(mData, mSize);
     ::close(mAshmemFd);
 }
 
-android::status_t NativeCursorWindow::create(const String& name, size_t size, NativeCursorWindow** outCursorWindow) {
+android::status_t NativeCursorWindow::create(const String& name, size_t size, NativeCursorWindow** outCursorWindow)
+{
     String ashmemName("NativeCursorWindow: ");
     ashmemName.Append(name);
 
@@ -84,9 +87,10 @@ android::status_t NativeCursorWindow::create(const String& name, size_t size, Na
     return result;
 }
 
-android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCursorWindow** outCursorWindow) {
+android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCursorWindow** outCursorWindow)
+{
     android::Parcel* p;
-    parcel->GetElementPayload((Handle32*)&p);
+    parcel->GetDataPayload((Handle32*)&p);
 
     android::String8 str8(p->readString8());
     String name(str8.string());
@@ -127,9 +131,10 @@ android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCu
     return result;
 }
 
-android::status_t NativeCursorWindow::writeToParcel(IParcel* parcel) {
+android::status_t NativeCursorWindow::writeToParcel(IParcel* parcel)
+{
     android::Parcel* p;
-    parcel->GetElementPayload((Handle32*)&p);
+    parcel->GetDataPayload((Handle32*)&p);
 
     android::String8 name(mName.string());
     android::status_t status = p->writeString8(name);
@@ -139,7 +144,8 @@ android::status_t NativeCursorWindow::writeToParcel(IParcel* parcel) {
     return status;
 }
 
-android::status_t NativeCursorWindow::clear() {
+android::status_t NativeCursorWindow::clear()
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -154,7 +160,8 @@ android::status_t NativeCursorWindow::clear() {
     return android::OK;
 }
 
-android::status_t NativeCursorWindow::setNumColumns(uint32_t numColumns) {
+android::status_t NativeCursorWindow::setNumColumns(uint32_t numColumns)
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -168,7 +175,8 @@ android::status_t NativeCursorWindow::setNumColumns(uint32_t numColumns) {
     return android::OK;
 }
 
-android::status_t NativeCursorWindow::allocRow() {
+android::status_t NativeCursorWindow::allocRow()
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -197,7 +205,8 @@ android::status_t NativeCursorWindow::allocRow() {
     return android::OK;
 }
 
-android::status_t NativeCursorWindow::freeLastRow() {
+android::status_t NativeCursorWindow::freeLastRow()
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -208,7 +217,8 @@ android::status_t NativeCursorWindow::freeLastRow() {
     return android::OK;
 }
 
-uint32_t NativeCursorWindow::alloc(size_t size, bool aligned) {
+uint32_t NativeCursorWindow::alloc(size_t size, bool aligned)
+{
     uint32_t padding;
     if (aligned) {
         // 4 byte alignment
@@ -230,7 +240,8 @@ uint32_t NativeCursorWindow::alloc(size_t size, bool aligned) {
     return offset;
 }
 
-NativeCursorWindow::RowSlot* NativeCursorWindow::getRowSlot(uint32_t row) {
+NativeCursorWindow::RowSlot* NativeCursorWindow::getRowSlot(uint32_t row)
+{
     uint32_t chunkPos = row;
     RowSlotChunk* chunk = static_cast<RowSlotChunk*>(
             offsetToPtr(mHeader->firstChunkOffset));
@@ -241,7 +252,8 @@ NativeCursorWindow::RowSlot* NativeCursorWindow::getRowSlot(uint32_t row) {
     return &chunk->slots[chunkPos];
 }
 
-NativeCursorWindow::RowSlot* NativeCursorWindow::allocRowSlot() {
+NativeCursorWindow::RowSlot* NativeCursorWindow::allocRowSlot()
+{
     uint32_t chunkPos = mHeader->numRows;
     RowSlotChunk* chunk = static_cast<RowSlotChunk*>(
             offsetToPtr(mHeader->firstChunkOffset));
@@ -264,7 +276,8 @@ NativeCursorWindow::RowSlot* NativeCursorWindow::allocRowSlot() {
     return &chunk->slots[chunkPos];
 }
 
-NativeCursorWindow::FieldSlot* NativeCursorWindow::getFieldSlot(uint32_t row, uint32_t column) {
+NativeCursorWindow::FieldSlot* NativeCursorWindow::getFieldSlot(uint32_t row, uint32_t column)
+{
     if (row >= mHeader->numRows || column >= mHeader->numColumns) {
         ALOGE("Failed to read row %d, column %d from a NativeCursorWindow which "
                 "has %d rows, %d columns.",
@@ -280,17 +293,20 @@ NativeCursorWindow::FieldSlot* NativeCursorWindow::getFieldSlot(uint32_t row, ui
     return &fieldDir[column];
 }
 
-android::status_t NativeCursorWindow::putBlob(uint32_t row, uint32_t column, const void* value, size_t size) {
+android::status_t NativeCursorWindow::putBlob(uint32_t row, uint32_t column, const void* value, size_t size)
+{
     return putBlobOrString(row, column, value, size, FIELD_TYPE_BLOB);
 }
 
 android::status_t NativeCursorWindow::putString(uint32_t row, uint32_t column, const char* value,
-        size_t sizeIncludingNull) {
+    size_t sizeIncludingNull)
+{
     return putBlobOrString(row, column, value, sizeIncludingNull, FIELD_TYPE_STRING);
 }
 
 android::status_t NativeCursorWindow::putBlobOrString(uint32_t row, uint32_t column,
-        const void* value, size_t size, int32_t type) {
+    const void* value, size_t size, int32_t type)
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -313,7 +329,8 @@ android::status_t NativeCursorWindow::putBlobOrString(uint32_t row, uint32_t col
     return android::OK;
 }
 
-android::status_t NativeCursorWindow::putLong(uint32_t row, uint32_t column, int64_t value) {
+android::status_t NativeCursorWindow::putLong(uint32_t row, uint32_t column, int64_t value)
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -328,7 +345,8 @@ android::status_t NativeCursorWindow::putLong(uint32_t row, uint32_t column, int
     return android::OK;
 }
 
-android::status_t NativeCursorWindow::putDouble(uint32_t row, uint32_t column, double value) {
+android::status_t NativeCursorWindow::putDouble(uint32_t row, uint32_t column, double value)
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }
@@ -343,7 +361,8 @@ android::status_t NativeCursorWindow::putDouble(uint32_t row, uint32_t column, d
     return android::OK;
 }
 
-android::status_t NativeCursorWindow::putNull(uint32_t row, uint32_t column) {
+android::status_t NativeCursorWindow::putNull(uint32_t row, uint32_t column)
+{
     if (mReadOnly) {
         return android::INVALID_OPERATION;
     }

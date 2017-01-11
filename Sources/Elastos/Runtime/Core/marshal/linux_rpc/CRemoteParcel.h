@@ -174,10 +174,19 @@ public:
     CARAPI SetDataPosition(
         /* [in] */ Int32 position);
 
-    CARAPI GetElementSize(
+    CARAPI GetDataSize(
         /* [out] */ Int32* size);
 
-    CARAPI GetElementPayload(
+    CARAPI SetDataSize(
+        /* [in] */ Int32 size);
+
+    CARAPI GetDataCapacity(
+        /* [out] */ Int32* capacity);
+
+    CARAPI SetDataCapacity(
+        /* [in] */ Int32 capacity);
+
+    CARAPI GetDataPayload(
         /* [ouy] */ Handle32* buffer);
 
     CARAPI_(MarshalHeader*) GetMarshalHeader();
@@ -192,14 +201,8 @@ public:
 
     CARAPI_(UInt32) DataCapacity() const;
 
-    CARAPI SetDataSize(
-        /* [in] */ UInt32 size);
-
     CARAPI_(void) SetDataPositionInner(
         /* [in] */ UInt32 pos) const;
-
-    CARAPI SetDataCapacity(
-        /* [in] */ UInt32 size);
 
     CARAPI SetData(
         /* [in] */ const UInt8* buffer,

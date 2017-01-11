@@ -2274,7 +2274,7 @@ ECode CMediaPlayer::NativeSetParameter(
     }
 
     android::Parcel *request;
-    value->GetElementPayload((Handle32*)&request);
+    value->GetDataPayload((Handle32*)&request);
     android::status_t UNUSED(err) = mp->setParameter(key, *request);
     return NOERROR;
 }
@@ -2423,9 +2423,9 @@ ECode CMediaPlayer::NativeInvoke(
     }
 
     android::Parcel* _request;
-    request->GetElementPayload((Handle32*)&_request);
+    request->GetDataPayload((Handle32*)&_request);
     android::Parcel* _reply;
-    reply->GetElementPayload((Handle32*)&_reply);
+    reply->GetDataPayload((Handle32*)&_reply);
 
     // Don't use process_media_player_call which use the async loop to
     // report errors, instead returns the status.
@@ -2448,7 +2448,7 @@ ECode CMediaPlayer::NativeGetMetadata(
     }
 
     android::Parcel* metadata;
-    reply->GetElementPayload((Handle32*)&metadata);
+    reply->GetDataPayload((Handle32*)&metadata);
     if (metadata == NULL ) {
         Logger::E(TAG, "Reply parcel is NULL");
         return E_FAIL;
@@ -2472,7 +2472,7 @@ ECode CMediaPlayer::NativeSetMetadataFilter(
     }
 
     android::Parcel* filter;
-    request->GetElementPayload((Handle32*)&filter);
+    request->GetDataPayload((Handle32*)&filter);
 
     if (filter == NULL ) {
         Logger::E(TAG, "Filter is NULL.");

@@ -724,7 +724,7 @@ void CBatteryHistoryChart::SetStats(
                 rec->GetCurrentTime(&currentTime);
                 rec->GetTime(&time);
                 if (currentTime > (lastWallTime+(180*24*60*60*1000LL))
-                        || time < (mHistStart+(5*60*1000L))) {
+                        || time < (mHistStart+(5*60*1000LL))) {
                     mStartWallTime = 0;
                 }
                 lastWallTime = currentTime;

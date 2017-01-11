@@ -54,7 +54,7 @@ ECode CParceledListSliceBinder::Transact(
     if (CParceledListSlice::DEBUG) {
         Logger::D(CParceledListSlice::TAG, "Writing more @%d of %d", i, mN);
     }
-    reply->GetElementSize(&dataSize);
+    reply->GetDataSize(&dataSize);
     while (i < mN && dataSize < CParceledListSlice::MAX_IPC_SIZE) {
         reply->WriteInt32(1);
         AutoPtr<IInterface> parcelable;

@@ -213,7 +213,7 @@ ECode CParceledListSlice::WriteToParcel(
         dest->WriteInterfacePtr(IParcelable::Probe(obj));
 
         Int32 i = 0, dataSize = 0;
-        dest->GetElementSize(&dataSize);
+        dest->GetDataSize(&dataSize);
         while (i < N && dataSize < MAX_FIRST_IPC_SIZE) {
             dest->WriteInt32(1);
 

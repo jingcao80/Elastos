@@ -626,7 +626,7 @@ ECode CBundle::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     android::Parcel* p;
-    parcel->GetElementPayload((Handle32*)&p);
+    parcel->GetDataPayload((Handle32*)&p);
     Boolean oldAllowFds = p->pushAllowFds(mAllowFds);
     ECode ec = BaseBundle::WriteToParcelInner(parcel);
     p->restoreAllowFds(oldAllowFds);
@@ -645,7 +645,7 @@ ECode CBundle::ToString(
         }
         else {
             Int32 length;
-            mParcelledData->GetElementSize(&length);
+            mParcelledData->GetDataSize(&length);
             StringBuilder sb("Bundle[mParcelledData.dataSize=");
             sb.Append(length);
             sb.Append("]");

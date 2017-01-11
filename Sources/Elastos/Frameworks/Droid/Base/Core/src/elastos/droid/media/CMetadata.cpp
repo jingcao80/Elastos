@@ -94,7 +94,7 @@ ECode CMetadata::Parse(
     *result = FALSE;
 
     Int32 avail;
-    parcel->GetElementSize(&avail);
+    parcel->GetDataSize(&avail);
     if (avail < kMetaHeaderSize) {
         Slogger::E(TAG, "Not enough data %s", StringUtils::ToString(avail).string());
         return NOERROR;

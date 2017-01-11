@@ -742,7 +742,7 @@ Int64 KeyCharacterMap::NativeReadFromParcel(
     /* [in] */ IParcel* in)
 {
     Handle32 data;
-    in->GetElementPayload(&data);
+    in->GetDataPayload(&data);
     android::Parcel* parcel = reinterpret_cast<android::Parcel*>(data);
     if (!parcel) {
         return 0;
@@ -770,7 +770,7 @@ void KeyCharacterMap::NativeWriteToParcel(
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
 
     Handle32 data;
-    out->GetElementPayload(&data);
+    out->GetDataPayload(&data);
     android::Parcel* parcel = reinterpret_cast<android::Parcel*>(data);
     if (parcel) {
         parcel->writeInt32(map->getDeviceId());

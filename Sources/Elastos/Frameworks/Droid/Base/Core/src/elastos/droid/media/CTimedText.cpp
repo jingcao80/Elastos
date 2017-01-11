@@ -251,7 +251,7 @@ Boolean CTimedText::ParseParcel(
     parcel->SetDataPosition(0);
 
     Int32 size;
-    parcel->GetElementSize(&size);
+    parcel->GetDataSize(&size);
     if (size == 0) {
         return FALSE;
     }
@@ -291,7 +291,7 @@ Boolean CTimedText::ParseParcel(
     }
 
     Int32 key;
-    while ((parcel->GetElementSize(&size),  size) > 0) {
+    while ((parcel->GetDataSize(&size),  size) > 0) {
         parcel->ReadInt32(&key);
         if (!IsValidKey(key)) {
             Logger::W(TAG, "Invalid timed text key found: %d", key);
@@ -425,7 +425,7 @@ void CTimedText::ReadStyle(
     Int32 colorRGBA = -1;
     Int32 size = 0, key = 0;
 
-    while (!endOfStyle && (parcel->GetElementSize(&size), size) > 0) {
+    while (!endOfStyle && (parcel->GetDataSize(&size), size) > 0) {
         parcel->ReadInt32(&key);
         switch (key) {
             case KEY_START_CHAR:
