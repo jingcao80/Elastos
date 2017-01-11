@@ -213,7 +213,9 @@ ECode DataOutputStream::WriteInt16(
 ECode DataOutputStream::WriteUTF(
     /* [in] */ const String& str)
 {
-    return WriteBytes(str);
+    AutoPtr<ArrayOf<Byte> > bytes = str.GetBytes();
+    WriteInt16(bytes->GetLength());
+    return WriteBytes(bytes);
 }
 
 // Return number of utf8 bytes required for the character.

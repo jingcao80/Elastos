@@ -1602,7 +1602,7 @@ ECode WifiConfigStore::LoadConfiguredNetworks()
         String ssid;
         config->GetSSID(&ssid);
         String psk = ReadNetworkVariableFromSupplicantFile(ssid, String("psk"));
-        if (!psk.IsNull() && psk.Equals(DELETED_CONFIG_PSK)) {
+        if (!psk.IsNull() && psk.Contains(DELETED_CONFIG_PSK)) {
             // This is a config we previously deleted, ignore it
             if (showNetworks) {
                 LocalLog(String("found deleted network ") + ssid);// + " ", config.networkId);
