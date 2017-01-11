@@ -9732,11 +9732,28 @@ ECode BatteryStatsImpl::ReadSummaryFromParcel(
     in->ReadInt32(&mDischargeAmountScreenOnSinceCharge);
     in->ReadInt32(&mDischargeAmountScreenOffSinceCharge);
     in->ReadInt32(&mNumDischargeStepDurations);
-    mDischargeStepDurations = NULL;
-    in->ReadArrayOf((Handle32*)&mDischargeStepDurations);
+    Int32 N;
+    in->ReadInt32(&N);
+    if (N != MAX_LEVEL_STEPS) {
+        Slogger::W(TAG, "bad mDischargeStepDurations array lengths");
+        return NOERROR;
+    }
+    for (Int32 i = 0; i < N; i++) {
+        Int64 value;
+        in->ReadInt64(&value);
+        (*mDischargeStepDurations)[i] = value;
+    }
     in->ReadInt32(&mNumChargeStepDurations);
-    mChargeStepDurations = NULL;
-    in->ReadArrayOf((Handle32*)&mChargeStepDurations);
+    in->ReadInt32(&N);
+    if (N != MAX_LEVEL_STEPS) {
+        Slogger::W(TAG, "bad mChargeStepDurations array lengths");
+        return NOERROR;
+    }
+    for (Int32 i = 0; i < N; i++) {
+        Int64 value;
+        in->ReadInt64(&value);
+        (*mChargeStepDurations)[i] = value;
+    }
 
     mStartCount++;
 
@@ -10069,9 +10086,15 @@ void BatteryStatsImpl::WriteSummaryToParcel(
     GetDischargeAmountScreenOffSinceCharge(&off);
     out->WriteInt32(off);
     out->WriteInt32(mNumDischargeStepDurations);
-    out->WriteArrayOf((Handle32)mDischargeStepDurations.Get());
+    out->WriteInt32(MAX_LEVEL_STEPS);
+    for (Int32 i = 0; i < MAX_LEVEL_STEPS; i++) {
+        out->WriteInt64((*mDischargeStepDurations)[i]);
+    }
     out->WriteInt32(mNumChargeStepDurations);
-    out->WriteArrayOf((Handle32)mChargeStepDurations.Get());
+    out->WriteInt32(MAX_LEVEL_STEPS);
+    for (Int32 i = 0; i < MAX_LEVEL_STEPS; i++) {
+        out->WriteInt64((*mChargeStepDurations)[i]);
+    }
 
     mScreenOnTimer->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
     for (Int32 i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -10573,11 +10596,28 @@ ECode BatteryStatsImpl::ReadFromParcelLocked(
     in->ReadInt32(&mDischargeAmountScreenOff);
     in->ReadInt32(&mDischargeAmountScreenOffSinceCharge);
     in->ReadInt32(&mNumDischargeStepDurations);
-    mDischargeStepDurations = NULL;
-    in->ReadArrayOf((Handle32*)&mDischargeStepDurations);
+    Int32 N;
+    in->ReadInt32(&N);
+    if (N != MAX_LEVEL_STEPS) {
+        Slogger::W(TAG, "bad mDischargeStepDurations array lengths");
+        return NOERROR;
+    }
+    for (Int32 i = 0; i < N; i++) {
+        Int64 value;
+        in->ReadInt64(&value);
+        (*mDischargeStepDurations)[i] = value;
+    }
     in->ReadInt32(&mNumChargeStepDurations);
-    mChargeStepDurations = NULL;
-    in->ReadArrayOf((Handle32*)&mChargeStepDurations);
+    in->ReadInt32(&N);
+    if (N != MAX_LEVEL_STEPS) {
+        Slogger::W(TAG, "bad mChargeStepDurations array lengths");
+        return NOERROR;
+    }
+    for (Int32 i = 0; i < N; i++) {
+        Int64 value;
+        in->ReadInt64(&value);
+        (*mChargeStepDurations)[i] = value;
+    }
     in->ReadInt64(&mLastWriteTime);
 
     in->ReadInt32(&mBluetoothPingCount);
@@ -10738,9 +10778,15 @@ void BatteryStatsImpl::WriteToParcelLocked(
     out->WriteInt32(mDischargeAmountScreenOff);
     out->WriteInt32(mDischargeAmountScreenOffSinceCharge);
     out->WriteInt32(mNumDischargeStepDurations);
-    out->WriteArrayOf((Handle32)mDischargeStepDurations.Get());
+    out->WriteInt32(MAX_LEVEL_STEPS);
+    for (Int32 i = 0; i < MAX_LEVEL_STEPS; i++) {
+        out->WriteInt64((*mDischargeStepDurations)[i]);
+    }
     out->WriteInt32(mNumChargeStepDurations);
-    out->WriteArrayOf((Handle32)mChargeStepDurations.Get());
+    out->WriteInt32(MAX_LEVEL_STEPS);
+    for (Int32 i = 0; i < MAX_LEVEL_STEPS; i++) {
+        out->WriteInt64((*mChargeStepDurations)[i]);
+    }
     out->WriteInt64(mLastWriteTime);
 
     Int32 count;
