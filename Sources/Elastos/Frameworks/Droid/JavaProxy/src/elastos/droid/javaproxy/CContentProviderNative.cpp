@@ -158,7 +158,7 @@ ECode CContentProviderNative::Query(
         ClassID clsid;
         IObject::Probe(cancellationSignal)->GetClassID(&clsid);
         if (clsid == ECLSID_CICancellationSignalNative) {
-            jcancellationSignal = ((CICancellationSignalNative*)cancellationSignal)->mJInstance;
+            jcancellationSignal = env->NewLocalRef(((CICancellationSignalNative*)cancellationSignal)->mJInstance);
         }
         else {
             jclass kclass = env->FindClass("android/os/ElCancellationSignalProxy");
@@ -224,6 +224,7 @@ ECode CContentProviderNative::Query(
     if(jsortOrder){
         env->DeleteLocalRef(jsortOrder);
     }
+    env->DeleteLocalRef(jcancellationSignal);
 
     // LOGGERD(TAG, "- CContentProviderNative::Query()");
     return ec;

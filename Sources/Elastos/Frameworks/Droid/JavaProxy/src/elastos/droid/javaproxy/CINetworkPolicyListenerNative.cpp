@@ -95,6 +95,7 @@ ECode CINetworkPolicyListenerNative::OnMeteredIfacesChanged(
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: onMeteredIfacesChanged %d", __LINE__);
 
     env->DeleteLocalRef(c);
+    env->DeleteLocalRef(jmeteredIfaces);
 
     // LOGGERD(TAG, "- CINetworkPolicyListenerNative::OnMeteredIfacesChanged()");
     return NOERROR;

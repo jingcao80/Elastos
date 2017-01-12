@@ -1617,6 +1617,7 @@ Boolean Util::SetJavaBaseBundle(
                                     jstring jitem = Util::ToJavaString(env, Object::ToString(strObj));
                                     env->SetObjectArrayElement(jarr, i, jitem);
                                     CheckErrorAndLog(env, "Util", "ToJavaBundle, SetObjectArrayElement: String[] failed, %d", __LINE__);
+                                    env->DeleteLocalRef(jitem);
                                 }
                             }
 
@@ -4635,6 +4636,7 @@ jobject Util::ToJavaClipDescription(
     CheckErrorAndLog(env, "ToJavaClipDescription", "NewObject: ClipDescription : %d!\n", __LINE__);
 
     env->DeleteLocalRef(cdKlass);
+    env->DeleteLocalRef(jmimeTypes);
     return jclipDesc;
 }
 
@@ -11454,6 +11456,7 @@ Boolean Util::GetElClipDescription(
         if (!Util::GetElStringArray(env, jmimeTypes, (ArrayOf<String>**)&mimeTypes)) {
             LOGGERE("GetElClipDescription", "GetElStringArray fail!");
         }
+        env->DeleteLocalRef(jmimeTypes);
     }
 
     if (NOERROR != CClipDescription::New(label, mimeTypes, clipDesc)) {
@@ -11712,6 +11715,7 @@ jobject Util::ToJavaContentProviderOperation(
 
     jobject jbuilder = env->NewObject(cpobklass, m, (jint)type, juri);
     CheckErrorAndLog(env, "ToJavaContentProviderOperation NewObject: ContentProviderOperation$Builder : %d!\n", __LINE__);
+    env->DeleteLocalRef(juri);
 
     Int32 tempInt = 0;
     if ((parcel->ReadInt32(&tempInt), tempInt) != 0) {
@@ -11746,6 +11750,7 @@ jobject Util::ToJavaContentProviderOperation(
 
         env->SetObjectField(jbuilder, f, jselectionArgs);
         Util::CheckErrorAndLog(env, "ToJavaContentProviderOperation", "SetObjectField: mSelectionArgs %d", __LINE__);
+        env->DeleteLocalRef(jselectionArgs);
     }
 
     if ((parcel->ReadInt32(&tempInt), tempInt) != 0) {
@@ -11939,6 +11944,7 @@ jobject Util::ToJavaSuggestionsInfo(
     Util::CheckErrorAndLog(env, "ToJavaIvParameterSpec", "NewObject SuggestionsInfo line: %d", __LINE__);
 
     env->DeleteLocalRef(siKlass);
+    env->DeleteLocalRef(jsuggestions);
     return jinfo;
 }
 
@@ -12008,6 +12014,9 @@ jobject Util::ToJavaSentenceSuggestionsInfo(
     Util::CheckErrorAndLog(env, "ToJavaIvParameterSpec", "NewObject SentenceSuggestionsInfo line: %d", __LINE__);
 
     env->DeleteLocalRef(ssiKlass);
+    env->DeleteLocalRef(jsuggestionsInfos);
+    env->DeleteLocalRef(joffsets);
+    env->DeleteLocalRef(jlengths);
     return jinfo;
 }
 

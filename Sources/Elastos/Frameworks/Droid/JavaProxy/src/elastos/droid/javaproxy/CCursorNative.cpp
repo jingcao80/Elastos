@@ -703,6 +703,7 @@ ECode CCursorNative::RegisterContentObserver(
 
     env->CallVoidMethod(mJInstance, m, jobserver);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: registerContentObserver %d", __LINE__);
+    env->DeleteLocalRef(jobserver);
 
     // LOGGERD(TAG, "- CCursorNative::RegisterContentObserver()");
     return NOERROR;
