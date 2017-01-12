@@ -165,7 +165,6 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::ItemExpandedAnimatorUpdate
     AutoPtr<IViewGroupLayoutParams> params;
     mView->GetLayoutParams((IViewGroupLayoutParams**)&params);
     params->SetHeight(fvalue * mDistance + mBaseHeight);
-
     Float z = mHost->mExpandedItemTranslationZ * fvalue;
     mViewHolder->mCallLogEntryView->SetTranslationZ(z);
     mView->SetTranslationZ(z); // WAR
@@ -225,7 +224,7 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
         mObserver->RemoveOnPreDrawListener(this);
     }
     // Calculate some values to help with the animation.
-    AutoPtr<IView> view = IView::Probe(mView);
+    IView* view = IView::Probe(mView);
     Int32 endingHeight;
     view->GetHeight(&endingHeight);
     Int32 distance = Elastos::Core::Math::Abs(endingHeight - mStartingHeight);
@@ -266,7 +265,6 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
     // Set up the animator to animate the expansion and shadow depth.
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-    AutoPtr<IValueAnimator> animator;
     AutoPtr<ArrayOf<Float> > args = ArrayOf<Float>::Alloc(2);
     if (isExpand) {
         (*args)[0] = 0.0;
@@ -276,6 +274,7 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
         (*args)[0] = 1.0;
         (*args)[1] = 0.0;
     }
+    AutoPtr<IValueAnimator> animator;
     helper->OfFloat(args, (IValueAnimator**)&animator);
 
     // Figure out how much scrolling is needed to make the view fully visible.
@@ -305,7 +304,7 @@ ECode CallLogFragment::ItemExpandedOnPreDrawListener::OnPreDraw(
     // Set everything to their final values when the animation's done.
     AutoPtr<IAnimatorListener> adapter = (IAnimatorListener*)new ItemExpandedAnimatorListenerAdapter(
             isExpand, view, mViewHolder);
-    AutoPtr<IAnimator> a = IAnimator::Probe(animator);
+    IAnimator* a = IAnimator::Probe(animator);
     a->AddListener(adapter);
     animator->SetDuration(mHost->mExpandCollapseDuration);
     a->Start();
@@ -898,19 +897,19 @@ void CallLogFragment::MaybeAddFooterView()
 ECode CallLogFragment::OnItemExpanded(
     /* [in] */ ICallLogListItemView* view)
 {
-    AutoPtr<IView> itemView = IView::Probe(view);
+    IView* itemView = IView::Probe(view);
     Int32 startingHeight;
     itemView->GetHeight(&startingHeight);
     AutoPtr<IInterface> temp;
     itemView->GetTag((IInterface**)&temp);
-    AutoPtr<CallLogListItemViews> viewHolder = (CallLogListItemViews*)(IObject*)temp.Get();
+    CallLogListItemViews* viewHolder = (CallLogListItemViews*)IObject::Probe(temp);
 
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
     AutoPtr<IViewTreeObserver> observer;
     IView::Probe(listView)->GetViewTreeObserver((IViewTreeObserver**)&observer);
 
-    AutoPtr<IOnPreDrawListener> listener = (IOnPreDrawListener*)new ItemExpandedOnPreDrawListener(
+    AutoPtr<IOnPreDrawListener> listener = new ItemExpandedOnPreDrawListener(
             view, viewHolder, observer, startingHeight, this);
     observer->AddOnPreDrawListener(listener);
 
