@@ -325,6 +325,7 @@ ECode LocationBasedCountryDetector::QueryCountryCodeRun(
     NotifyListener(mDetectedCountry);
 
     mQueryThread = NULL;
+    return NOERROR;
 }
 
 ECode LocationBasedCountryDetector::TimerTaskRun()
@@ -336,6 +337,7 @@ ECode LocationBasedCountryDetector::TimerTaskRun()
     // known location.
     AutoPtr<ILocation> location = GetLastKnownLocation();
     QueryCountryCode(location);
+    return NOERROR;
 }
 
 ECode LocationBasedCountryDetector::OnLocationChanged(

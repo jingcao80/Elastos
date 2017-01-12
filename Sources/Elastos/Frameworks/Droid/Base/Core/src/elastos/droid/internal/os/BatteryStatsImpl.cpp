@@ -5259,7 +5259,7 @@ void BatteryStatsImpl::AddHistoryBufferLocked(
         // as long as no bit has changed both between now and the last entry, as
         // well as the last entry and the one before it (so we capture any toggles).
         if (DEBUG) Slogger::I(TAG, "ADD: rewinding back to %d", mHistoryBufferLastPos);
-        // mHistoryBuffer->SetDataSize(mHistoryBufferLastPos);
+        mHistoryBuffer->SetDataSize(mHistoryBufferLastPos);
         mHistoryBuffer->SetDataPosition(mHistoryBufferLastPos);
         mHistoryBufferLastPos = -1;
         elapsedRealtimeMs = mHistoryLastWritten->mTime - mHistoryBaseTime;
@@ -5511,9 +5511,9 @@ void BatteryStatsImpl::ClearHistoryLocked()
     mTrackRunningHistoryElapsedRealtime = 0;
     mTrackRunningHistoryUptime = 0;
 
-    // mHistoryBuffer->SetDataSize(0);
+    mHistoryBuffer->SetDataSize(0);
     mHistoryBuffer->SetDataPosition(0);
-    // mHistoryBuffer->SetDataCapacity(MAX_HISTORY_BUFFER / 2);
+    mHistoryBuffer->SetDataCapacity(MAX_HISTORY_BUFFER / 2);
     mHistoryLastLastWritten->Clear();
     mHistoryLastWritten->Clear();
     mHistoryTagPool.Clear();
@@ -9549,7 +9549,7 @@ void BatteryStatsImpl::ReadHistory(
     Int64 historyBaseTime;
     in->ReadInt64(&historyBaseTime);
 
-    // mHistoryBuffer.setDataSize(0);
+    mHistoryBuffer->SetDataSize(0);
     mHistoryBuffer->SetDataPosition(0);
 
     mHistoryTagPool.Clear();

@@ -14491,9 +14491,8 @@ Boolean CActivityManagerService::DeliverPreBootCompleted(
         // to all receivers.
         if (userId == IUserHandle::USER_OWNER) {
             AutoPtr<IList> lastDoneReceivers = ReadLastDonePreBootReceivers();
-            ris->GetSize(&size);
             String packageName, name;
-            for (Int32 i = 0; i < size; i++) {
+            for (Int32 i = 0; i < (ris->GetSize(&size), size); i++) {
                 AutoPtr<IInterface> item;
                 ris->Get(i, (IInterface**)&item);
                 AutoPtr<IActivityInfo> ai;
