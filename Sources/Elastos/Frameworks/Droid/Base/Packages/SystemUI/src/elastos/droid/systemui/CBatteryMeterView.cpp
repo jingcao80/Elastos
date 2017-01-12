@@ -351,7 +351,7 @@ ECode CBatteryMeterView::Draw(
 
     if (level == CBatteryMeterViewBatteryTracker::UNKNOWN_LEVEL) return NOERROR;
 
-    Float drawFrac = (float) level / 100.0f;
+    Float drawFrac = (Float) level / 100.0f;
     Int32 pt = 0;
     GetPaddingTop(&pt);
     Int32 pl = 0;
@@ -434,6 +434,7 @@ ECode CBatteryMeterView::Draw(
         if (bfLeft != bl || bfTop != bt
                 || bfRight != br || bfBottom != bb) {
             mBoltFrame->Set(bl, bt, br, bb);
+            mBoltFrame->Get(&bfLeft, &bfTop, &bfRight, &bfBottom);
             mBoltPath->Reset();
             Float bw, bh;
             mBoltFrame->GetWidth(&bw);

@@ -58,14 +58,14 @@ public:
 private:
     void sendEvent(int event);
 
-    AutoPtr<IWeakReference>     mObject;    // Weak ref to AudioPortEventHandlerDelegate Java object to call on
+    AutoPtr<IWeakReference> mObject;    // Weak ref to AudioPortEventHandlerDelegate Java object to call on
 };
 
 JNIAudioPortCallback::JNIAudioPortCallback(IWeakReference* weak_thiz)
 {
     // We use a weak reference so the SoundTriggerModule object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
-    mObject  = weak_thiz;
+    mObject = weak_thiz;
 }
 
 JNIAudioPortCallback::~JNIAudioPortCallback()
@@ -293,8 +293,11 @@ ECode AudioPortEventHandler::NativeSetup(
 
 ECode AudioPortEventHandler::NativeFinalize()
 {
-    android::sp<JNIAudioPortCallback> callback;
-    android::AudioSystem::setAudioPortCallback(callback);
+    // this function maybe called in AudioPortEventHandler::PostEventFromNative.
+    // so, in order to avoid AudioSystem::gLock dead lock, the following codes
+    // should not be called.
+    // android::sp<JNIAudioPortCallback> callback;
+    // android::AudioSystem::setAudioPortCallback(callback);
     return NOERROR;
 }
 

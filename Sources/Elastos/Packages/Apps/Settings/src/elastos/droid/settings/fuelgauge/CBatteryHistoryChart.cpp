@@ -723,14 +723,14 @@ void CBatteryHistoryChart::SetStats(
                 Int64 currentTime, time;
                 rec->GetCurrentTime(&currentTime);
                 rec->GetTime(&time);
-                if (currentTime > (lastWallTime+(180*24*60*60*1000LL))
-                        || time < (mHistStart+(5*60*1000LL))) {
+                if (currentTime > (lastWallTime + (180*24*60*60*1000LL))
+                        || time < (mHistStart + (5*60*1000LL))) {
                     mStartWallTime = 0;
                 }
                 lastWallTime = currentTime;
                 lastRealtime = time;
                 if (mStartWallTime == 0) {
-                    mStartWallTime = lastWallTime - (lastRealtime-mHistStart);
+                    mStartWallTime = lastWallTime - (lastRealtime - mHistStart);
                 }
             }
             Boolean isDeltaData;
@@ -750,9 +750,9 @@ void CBatteryHistoryChart::SetStats(
             }
         }
     }
-    mHistEnd = mHistDataEnd + (remainingTimeUs/1000);
+    mHistEnd = mHistDataEnd + (remainingTimeUs / 1000);
     mEndDataWallTime = lastWallTime + mHistDataEnd - lastRealtime;
-    mEndWallTime = mEndDataWallTime + (remainingTimeUs/1000);
+    mEndWallTime = mEndDataWallTime + (remainingTimeUs / 1000);
     mNumHist = lastInteresting;
     mHaveGps = (aggrStates&IBatteryStatsHistoryItem::STATE_GPS_ON_FLAG) != 0;
     mHaveWifi = (aggrStates2&IBatteryStatsHistoryItem::STATE2_WIFI_RUNNING_FLAG) != 0
@@ -762,7 +762,7 @@ void CBatteryHistoryChart::SetStats(
     if (!Utils::IsWifiOnly(context)) {
         mHavePhoneSignal = TRUE;
     }
-    if (mHistEnd <= mHistStart) mHistEnd = mHistStart+1;
+    if (mHistEnd <= mHistStart) mHistEnd = mHistStart + 1;
 }
 
 ECode CBatteryHistoryChart::OnMeasure(
@@ -1501,7 +1501,7 @@ void CBatteryHistoryChart::DrawChart(
             }
         }
     }
-    else if (mDurationString != NULL) {
+    else if (!mDurationString.IsNull()) {
         Int32 y = mLevelBottom - mTextAscent + (mThinLineWidth*4);
         textPaint->SetTextAlign(PaintAlign_LEFT);
         canvas->DrawText(mDurationString,
