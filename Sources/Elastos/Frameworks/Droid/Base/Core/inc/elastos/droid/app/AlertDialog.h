@@ -212,7 +212,11 @@ protected:
         /* [in] */ const void* id);
 
 private:
+    CARAPI_(IAlertController*) GetAlertPtr();
+
+private:
     AutoPtr<IAlertController> mAlert;
+    IAlertController* mAlertPtr;
 };
 
 } // namespace App

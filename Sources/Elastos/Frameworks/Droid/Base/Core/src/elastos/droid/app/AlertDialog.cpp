@@ -33,6 +33,7 @@ namespace App {
 CAR_INTERFACE_IMPL(AlertDialog, Dialog, IAlertDialog)
 
 AlertDialog::AlertDialog()
+    : mAlertPtr(NULL)
 {
     Logger::V("AlertDialog", " >> create AlertDialog() %p", this);
 }
@@ -112,38 +113,38 @@ ECode AlertDialog::GetButton(
     /* [in] */ Int32 whichButton,
     /* [out] */ IButton** button)
 {
-    return mAlert->GetButton(whichButton, button);
+    return GetAlertPtr()->GetButton(whichButton, button);
 }
 
 ECode AlertDialog::GetListView(
     /* [out] */ IListView** listView)
 {
-    return mAlert->GetListView(listView);
+    return GetAlertPtr()->GetListView(listView);
 }
 
 ECode AlertDialog::SetTitle(
     /* [in] */ ICharSequence* title)
 {
     Dialog::SetTitle(title);
-    return mAlert->SetTitle(title);
+    return GetAlertPtr()->SetTitle(title);
 }
 
 ECode AlertDialog::SetCustomTitle(
     /* [in] */ IView* customTitleView)
 {
-    return mAlert->SetCustomTitle(customTitleView);
+    return GetAlertPtr()->SetCustomTitle(customTitleView);
 }
 
 ECode AlertDialog::SetMessage(
     /* [in] */ ICharSequence* message)
 {
-    return mAlert->SetMessage(message);
+    return GetAlertPtr()->SetMessage(message);
 }
 
 ECode AlertDialog::SetView(
     /* [in] */ IView* view)
 {
-    return mAlert->SetView(view);
+    return GetAlertPtr()->SetView(view);
 }
 
 ECode AlertDialog::SetView(
@@ -153,7 +154,7 @@ ECode AlertDialog::SetView(
     /* [in] */ Int32 viewSpacingRight,
     /* [in] */ Int32 viewSpacingBottom)
 {
-    return mAlert->SetView(view,
+    return GetAlertPtr()->SetView(view,
             viewSpacingLeft, viewSpacingTop,
             viewSpacingRight, viewSpacingBottom);
 }
@@ -161,7 +162,7 @@ ECode AlertDialog::SetView(
 ECode AlertDialog::SetButtonPanelLayoutHint(
     /* [in] */ Int32 layoutHint)
 {
-    return mAlert->SetButtonPanelLayoutHint(layoutHint);
+    return GetAlertPtr()->SetButtonPanelLayoutHint(layoutHint);
 }
 
 ECode AlertDialog::SetButton(
@@ -169,7 +170,7 @@ ECode AlertDialog::SetButton(
     /* [in] */ ICharSequence* text,
     /* [in] */ IMessage* msg)
 {
-    return mAlert->SetButton(whichButton, text, NULL, msg);
+    return GetAlertPtr()->SetButton(whichButton, text, NULL, msg);
 }
 
 ECode AlertDialog::SetButton(
@@ -177,32 +178,32 @@ ECode AlertDialog::SetButton(
     /* [in] */ ICharSequence* text,
     /* [in] */ IDialogInterfaceOnClickListener* listener)
 {
-    return mAlert->SetButton(whichButton, text, listener, NULL);
+    return GetAlertPtr()->SetButton(whichButton, text, listener, NULL);
 }
 
 ECode AlertDialog::SetIcon(
     /* [in] */ Int32 resId)
 {
-    return mAlert->SetIcon(resId);
+    return GetAlertPtr()->SetIcon(resId);
 }
 
 ECode AlertDialog::SetIcon(
     /* [in] */ IDrawable* icon)
 {
-    return mAlert->SetIcon(icon);
+    return GetAlertPtr()->SetIcon(icon);
 }
 
 ECode AlertDialog::SetIconAttribute(
     /* [in] */ Int32 attrId)
 {
     Int32 resourceId = GetResourceId(mContext, attrId);
-    return mAlert->SetIcon(resourceId);
+    return GetAlertPtr()->SetIcon(resourceId);
 }
 
 ECode AlertDialog::SetInverseBackgroundForced(
     /* [in] */ Boolean forceInverseBackground)
 {
-    return mAlert->SetInverseBackgroundForced(forceInverseBackground);
+    return GetAlertPtr()->SetInverseBackgroundForced(forceInverseBackground);
 }
 
 
@@ -210,7 +211,7 @@ ECode AlertDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Dialog::OnCreate(savedInstanceState);
-    mAlert->InstallContent();
+    GetAlertPtr()->InstallContent();
     return NOERROR;
 }
 
@@ -220,9 +221,8 @@ ECode AlertDialog::OnKeyDown(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-
     Boolean bval;
-    mAlert->OnKeyDown(keyCode, event, &bval);
+    GetAlertPtr()->OnKeyDown(keyCode, event, &bval);
     if (bval) {
         *result = TRUE;
         return NOERROR;
@@ -238,7 +238,7 @@ ECode AlertDialog::OnKeyUp(
 {
     VALIDATE_NOT_NULL(result)
     Boolean bval;
-    mAlert->OnKeyUp(keyCode, event, &bval);
+    GetAlertPtr()->OnKeyUp(keyCode, event, &bval);
     if (bval) {
         *result = TRUE;
         return NOERROR;
@@ -275,6 +275,7 @@ void AlertDialog::OnLastStrongRef(
     GetWeakRefs()->AttemptIncStrong(NULL);
     ac->HoldDialogInterface();
     ExtendObjectLifetime(OBJECT_LIFETIME_STRONG);
+    mAlertPtr = mAlert;
     mAlert = NULL;
 }
 
@@ -283,6 +284,13 @@ Boolean AlertDialog::OnIncStrongAttempted(
     /* [in] */ const void* id)
 {
     return TRUE;
+}
+
+IAlertController* AlertDialog::GetAlertPtr()
+{
+    IAlertController* alert = mAlert ? mAlert.Get() : mAlertPtr;
+    assert(alert);
+    return alert;
 }
 
 } // namespace App
