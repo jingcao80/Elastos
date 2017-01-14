@@ -147,35 +147,6 @@ ELAPI _CObject_ReflectInterfaceInfo(
     }
     CModuleInfo* moduleInfo = (CModuleInfo*)obj.Get();
 
-    ClassDirEntry* classDir = NULL;
-    ClassDescriptor* clsDesc = NULL;
-    ClassInterface* cifDir = NULL;
-    InterfaceDirEntry* ifDir = NULL;
-    InterfaceDescriptor* ifDesc = NULL;
-    UInt16 index = 0;
-    Int32 base = moduleInfo->mClsModule->mBase;
-
     *interfaceInfo = NULL;
-    for (Int32 i = 0; i < moduleInfo->mClsMod->mClassCount; i++) {
-        classDir = getClassDirAddr(base, moduleInfo->mClsMod->mClassDirs, i);
-        clsDesc = adjustClassDescAddr(base, classDir->mDesc);
-        //find the class
-        if (clsDesc->mClsid == clsid.mClsid) {
-            for (Int32 j = 0; j < clsDesc->mInterfaceCount; j++) {
-                cifDir = getCIFAddr(base, clsDesc->mInterfaces, j);
-                index = cifDir->mIndex;
-                ifDir = getInterfaceDirAddr(base,
-                        moduleInfo->mClsMod->mInterfaceDirs, index);
-                ifDesc = adjustInterfaceDescAddr(base, ifDir->mDesc);
-                //find the interface
-                if (ifDesc->mIID == iid) {
-                    ec = g_objInfoList.AcquireInterfaceInfo(
-                            moduleInfo->mClsModule, index, (IInterface **)interfaceInfo);
-                    return ec;
-                }
-            }
-        }
-    }
-
-    return E_DOES_NOT_EXIST;
+    return g_objInfoList.AcquireInterfaceInfo(moduleInfo->mClsModule, clsid, iid, (IInterface **)interfaceInfo);
 }

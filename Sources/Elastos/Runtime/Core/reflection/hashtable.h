@@ -90,7 +90,7 @@ HashTable<T, type>::HashTable(
     , mCapacity(0)
     , mCount(0)
     , mThreshold(0)
-    ,mLoadFactor(0)
+    , mLoadFactor(0)
     , mModCount(0)
 {
     if (initialCapacity <= 0) {
@@ -238,6 +238,12 @@ template <class T, CARDataType type>
 T* HashTable<T, type>::operator[](
     /* [in] */ PVoid key)
 {
+    T* value = Get(key);
+    if (value) return value;
+
+    T temp;
+    if (!Put(key, &temp)) return NULL;
+
     return Get(key);
 }
 

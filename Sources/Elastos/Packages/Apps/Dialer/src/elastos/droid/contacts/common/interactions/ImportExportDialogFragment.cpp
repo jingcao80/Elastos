@@ -391,6 +391,7 @@ ECode ImportExportDialogFragment::OnAccountChosen(
     // At this point the dialog is still showing (which is why we can use getActivity() above)
     // So close it.
     Dismiss();
+    return NOERROR;
 }
 
 ECode ImportExportDialogFragment::OnAccountSelectorCancelled()

@@ -96,6 +96,12 @@ public:
 
     CARAPI AcquireInterfaceInfo(
         /* [in] */ CClsModule* clsModule,
+        /* [in] */ const ClassID& clsId,
+        /* [in] */ const InterfaceID& iid,
+        /* [in, out] */ IInterface** object);
+
+    CARAPI AcquireInterfaceInfo(
+        /* [in] */ CClsModule* clsModule,
         /* [in] */ UInt32 index,
         /* [in, out] */ IInterface** object);
 
@@ -208,7 +214,7 @@ private:
     HashTable<IInterface *, Type_UInt64> mLocalPtrInfos;
     HashTable<IModuleInfo *, Type_String> mModInfos;
     HashTable<CClsModule *, Type_String> mClsModule;
-    HashTable< HashTable<ClassDirEntry *, Type_EMuid> *> mClassIds;
+    HashTable< HashTable<ClassDirEntry *, Type_EMuid> > mClassIds;
 
     pthread_mutex_t     mLockTypeAlias;
     pthread_mutex_t     mLockEnum;

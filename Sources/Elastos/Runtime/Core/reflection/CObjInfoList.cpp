@@ -423,23 +423,14 @@ ECode CObjInfoList::AcquireClassInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    HashTable<ClassDirEntry *, Type_EMuid>* entries = NULL;
-
     LockHashTable(EntryType_ClassId);
-    HashTable<ClassDirEntry *, Type_EMuid>** clsEntries = mClassIds.Get(&clsModule);
+    HashTable<ClassDirEntry *, Type_EMuid>* clsEntries = mClassIds[&clsModule];
     if (!clsEntries) {
-        entries = new HashTable<ClassDirEntry *, Type_EMuid>();
-        if (entries == NULL) {
-            UnlockHashTable(EntryType_ClassId);
-            return E_OUT_OF_MEMORY;
-        }
-        mClassIds.Put(&clsModule, &entries);
-    }
-    else {
-        entries = *clsEntries;
+        UnlockHashTable(EntryType_ClassId);
+        return E_OUT_OF_MEMORY;
     }
 
-    ClassDirEntry** clsDirEntry = entries->Get((PVoid)&(clsId.mClsid));
+    ClassDirEntry** clsDirEntry = clsEntries->Get((PVoid)&(clsId.mClsid));
     if (!clsDirEntry) {
         Int32 base = clsModule->mBase;
         for (Int32 i = 0; i < clsModule->mClsMod->mClassCount; i++) {
@@ -447,7 +438,7 @@ ECode CObjInfoList::AcquireClassInfo(
             ClassDescriptor* clsDesc = adjustClassDescAddr(base, classDir->mDesc);
             if (clsDesc->mClsid == clsId.mClsid) {
                 clsDirEntry = &classDir;
-                entries->Put((PVoid)&(clsId.mClsid), clsDirEntry);
+                clsEntries->Put((PVoid)&(clsId.mClsid), clsDirEntry);
                 break;
             }
         }
@@ -856,6 +847,58 @@ ECode CObjInfoList::RemoveTypeAliasInfo(
 
     mTypeAliasInfos.Remove(&aliasDirEntry);
     return NOERROR;
+}
+
+ECode CObjInfoList::AcquireInterfaceInfo(
+    /* [in] */ CClsModule* clsModule,
+    /* [in] */ const ClassID& clsId,
+    /* [in] */ const InterfaceID& iid,
+    /* [in, out] */ IInterface** object)
+{
+    if (!clsModule || !object) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    LockHashTable(EntryType_ClassId);
+    HashTable<ClassDirEntry *, Type_EMuid>* clsEntries = mClassIds[&clsModule];
+    if (!clsEntries) {
+        UnlockHashTable(EntryType_ClassId);
+        return E_OUT_OF_MEMORY;
+    }
+
+    Int32 base = clsModule->mBase;
+
+    ClassDescriptor* clsDesc = NULL;
+    ClassDirEntry** clsDirEntry = clsEntries->Get((PVoid)&(clsId.mClsid));
+    if (!clsDirEntry) {
+        for (Int32 i = 0; i < clsModule->mClsMod->mClassCount; i++) {
+            ClassDirEntry* classDir = getClassDirAddr(base, clsModule->mClsMod->mClassDirs, i);
+            clsDesc = adjustClassDescAddr(base, classDir->mDesc);
+            if (clsDesc->mClsid == clsId.mClsid) {
+                clsDirEntry = &classDir;
+                clsEntries->Put((PVoid)&(clsId.mClsid), clsDirEntry);
+                break;
+            }
+        }
+    }
+    UnlockHashTable(EntryType_ClassId);
+
+    if (!clsDirEntry) return E_DOES_NOT_EXIST;
+
+    for (Int32 j = 0; j < clsDesc->mInterfaceCount; j++) {
+        ClassInterface* cifDir = getCIFAddr(base, clsDesc->mInterfaces, j);
+        UInt32 index = cifDir->mIndex;
+        InterfaceDirEntry* ifDir = getInterfaceDirAddr(base,
+                clsModule->mClsMod->mInterfaceDirs, index);
+        InterfaceDescriptor* ifDesc = adjustInterfaceDescAddr(base, ifDir->mDesc);
+        //find the interface
+        if (ifDesc->mIID == iid) {
+            return g_objInfoList.AcquireInterfaceInfo(
+                    clsModule, index, object);
+        }
+    }
+
+    return E_DOES_NOT_EXIST;
 }
 
 ECode CObjInfoList::AcquireInterfaceInfo(
