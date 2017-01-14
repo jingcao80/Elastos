@@ -691,7 +691,7 @@ ECode AnimatorSet::SetDuration(
 ECode AnimatorSet::SetupStartValues()
 {
     List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-    for (; it != mNodes.End(); it++) {
+    for (; it != mNodes.End(); ++it) {
         (*it)->mAnimation->SetupStartValues();
     }
     return NOERROR;
@@ -700,7 +700,7 @@ ECode AnimatorSet::SetupStartValues()
 ECode AnimatorSet::SetupEndValues()
 {
     List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-    for (; it != mNodes.End(); it++) {
+    for (; it != mNodes.End(); ++it) {
         (*it)->mAnimation->SetupEndValues();
     }
     return NOERROR;
@@ -716,7 +716,7 @@ ECode AnimatorSet::Pause()
         }
         else {
             List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-            for (; it != mNodes.End(); it++) {
+            for (; it != mNodes.End(); ++it) {
                 (*it)->mAnimation->Pause();
             }
         }
@@ -734,7 +734,7 @@ ECode AnimatorSet::Resume()
         }
         else {
             List<AutoPtr<Node> >::Iterator it = mNodes.Begin();
-            for (; it != mNodes.End(); it++) {
+            for (; it != mNodes.End(); ++it) {
                 (*it)->mAnimation->Resume();
             }
         }

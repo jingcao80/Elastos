@@ -44,8 +44,13 @@ public:
 
     CARAPI AcquireClassInfo(
         /* [in] */ CClsModule* clsModule,
+        /* [in] */ const ClassID& clsId,
+        /* [in, out] */ IInterface** object);
+
+    CARAPI AcquireClassInfo(
+        /* [in] */ CClsModule* clsModule,
         /* [in] */ ClassDirEntry* clsDirEntry,
-        /* [[in, out] */ IInterface** object);
+        /* [in, out] */ IInterface** object);
 
     CARAPI RemoveClassInfo(
         /* [in] */ ClassDirEntry* clsDirEntry);
@@ -203,6 +208,7 @@ private:
     HashTable<IInterface *, Type_UInt64> mLocalPtrInfos;
     HashTable<IModuleInfo *, Type_String> mModInfos;
     HashTable<CClsModule *, Type_String> mClsModule;
+    HashTable< HashTable<ClassDirEntry *, Type_EMuid> *> mClassIds;
 
     pthread_mutex_t     mLockTypeAlias;
     pthread_mutex_t     mLockEnum;
@@ -214,6 +220,7 @@ private:
     pthread_mutex_t     mLockDataType;
     pthread_mutex_t     mLockLocal;
     pthread_mutex_t     mLockClsModule;
+    pthread_mutex_t     mLockClassId;
 
     Boolean     mIsLockTypeAlias;
     Boolean     mIsLockEnum;
@@ -225,6 +232,7 @@ private:
     Boolean     mIsLockDataType;
     Boolean     mIsLockLocal;
     Boolean     mIsLockClsModule;
+    Boolean     mIsLockClassId;
 
     IDataTypeInfo*      mDataTypeInfos[MAX_ITEM_COUNT];
     IDataTypeInfo*      mLocalTypeInfos[MAX_ITEM_COUNT];

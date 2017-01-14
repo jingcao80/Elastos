@@ -897,7 +897,6 @@ void CLayoutTransition::RunChangeTransition(
 
     AutoPtr<IOnPreDrawListener> listener = new _OnPreDrawListener(this, parent);
     observer->AddOnPreDrawListener(listener);
-
 }
 
 ECode CLayoutTransition::SetAnimateParentHierarchy(
@@ -919,7 +918,9 @@ void CLayoutTransition::SetupChangeAnimation(
     // changing animation we need. Multiple calls for a child may occur when several
     // add/remove operations are run at once on a container; each one will trigger
     // changes for the existing children in the container.
-    if (mLayoutChangeListenerMap[child] != NULL) {
+    HashMap<AutoPtr<IView>, AutoPtr<IViewOnLayoutChangeListener> >::Iterator it =
+            mLayoutChangeListenerMap.Find(child);
+    if (it != mLayoutChangeListenerMap.End()) {
         return;
     }
 
@@ -946,13 +947,16 @@ void CLayoutTransition::SetupChangeAnimation(
     anim->SetupStartValues();
 
     // If there's an animation running on this view already, cancel it
-    AutoPtr<IAnimator> currentAnimation = mPendingAnimations[child];
+    AutoPtr<IAnimator> currentAnimation;
+    HashMap<AutoPtr<IView>, AutoPtr<IAnimator> >::Iterator it2 =
+            mPendingAnimations.Find(child);
+    if (it2 != mPendingAnimations.End()) {
+        currentAnimation = it2->mSecond;
+    }
     if (currentAnimation != NULL) {
         currentAnimation->Cancel();
-        AutoPtr<IView> hashTemp(child);
-        mPendingAnimations.Erase(hashTemp);
+        mPendingAnimations.Erase(it2);
     }
-
     // Cache the animation in case we need to cancel it later
     mPendingAnimations[child] = anim;
 
@@ -968,17 +972,17 @@ void CLayoutTransition::SetupChangeAnimation(
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
     AutoPtr<IValueAnimator> pendingAnimRemover;
     helper->OfFloat(params, (IValueAnimator**)&pendingAnimRemover);
-    IAnimator::Probe(pendingAnimRemover)->SetDuration(duration + 100);
+    IAnimator* animator = IAnimator::Probe(pendingAnimRemover);
+    animator->SetDuration(duration + 100);
     AutoPtr<IAnimatorListener> adapter = new _AnimatorListenerAdapter(this, child);
-    IAnimator::Probe(pendingAnimRemover)->AddListener(adapter);
-    IAnimator::Probe(pendingAnimRemover)->Start();
+    animator->AddListener(adapter);
+    animator->Start();
 
     // Add a listener to track layout changes on this view. If we don't get a callback,
     // then there's nothing to animate.
     AutoPtr<IViewOnLayoutChangeListener> listener = new ViewOnLayoutChangeListener(this, changeReason, duration, child, parent, anim);
 
     // Remove the animation from the cache when it ends
-    adapter = NULL;
     adapter = new _AnimatorListenerAdapterEx(this, child, parent, changeReason, listener);
     anim->AddListener(adapter);
 

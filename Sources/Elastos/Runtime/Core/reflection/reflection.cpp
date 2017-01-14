@@ -117,22 +117,8 @@ ELAPI _CObject_ReflectClassInfo(
 
     CModuleInfo* moduleInfo = (CModuleInfo*)iModuleInfo.Get();
 
-    ClassDirEntry* classDir = NULL;
-    ClassDescriptor* clsDesc = NULL;
-    Int32 base = moduleInfo->mClsModule->mBase;
-
     *classInfo = NULL;
-    for (Int32 i = 0; i < moduleInfo->mClsMod->mClassCount; i++) {
-        classDir = getClassDirAddr(base, moduleInfo->mClsMod->mClassDirs, i);
-        clsDesc = adjustClassDescAddr(base, classDir->mDesc);
-        if (clsDesc->mClsid == clsid.mClsid) {
-            ec = g_objInfoList.AcquireClassInfo(moduleInfo->mClsModule,
-                    classDir, (IInterface **)classInfo);
-            return ec;
-        }
-    }
-
-    return E_DOES_NOT_EXIST;
+    return g_objInfoList.AcquireClassInfo(moduleInfo->mClsModule, clsid, (IInterface **)classInfo);
 }
 
 ELAPI _CObject_ReflectInterfaceInfo(
