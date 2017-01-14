@@ -107,6 +107,10 @@ CObjInfoList::CObjInfoList()
     if (ret) mIsLockClsModule = FALSE;
     else mIsLockClsModule = TRUE;
 
+    ret = pthread_mutex_init(&mLockClassId, &recursiveAttr);
+    if (ret) mIsLockClassId = FALSE;
+    else mIsLockClassId = TRUE;
+
     pthread_mutexattr_destroy(&recursiveAttr);
 
     memset(mDataTypeInfos, 0, sizeof(IInterface *) * MAX_ITEM_COUNT);
@@ -142,6 +146,7 @@ CObjInfoList::~CObjInfoList()
     mModInfos.Clear();
     mLocalPtrInfos.Clear();
     mClsModule.Clear();
+    mClassIds.Clear();
 
     pthread_mutex_destroy(&mLockTypeAlias);
     pthread_mutex_destroy(&mLockEnum);
@@ -215,6 +220,9 @@ ECode CObjInfoList::LockHashTable(
             if (mIsLockClsModule)
                 pthread_mutex_lock(&mLockClsModule);
             break;
+        case EntryType_ClassId:
+            if (mIsLockClassId)
+                pthread_mutex_lock(&mLockClassId);
 
         default:
             break;
@@ -273,6 +281,9 @@ ECode CObjInfoList::UnlockHashTable(
             if (mIsLockClsModule)
                 pthread_mutex_unlock(&mLockClsModule);
             break;
+        case EntryType_ClassId:
+            if (mIsLockClassId)
+                pthread_mutex_unlock(&mLockClassId);
 
         default:
             return E_INVALID_ARGUMENT;
@@ -289,7 +300,14 @@ ECode CObjInfoList::AcquireModuleInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    ECode ec = NOERROR;
+    LockHashTable(EntryType_Module);
+    IModuleInfo** modInfo = mModInfos.Get(const_cast<char*>(name.string()));
+    if (modInfo) {
+        *moduleInfo = *modInfo;
+        (*moduleInfo)->AddRef();
+        UnlockHashTable(EntryType_Module);
+        return NOERROR;
+    }
 
 #ifdef _DEBUG
     void* module = dlopen(name.string(), RTLD_NOW);
@@ -302,16 +320,7 @@ ECode CObjInfoList::AcquireModuleInfo(
         return E_FILE_NOT_FOUND;
     }
 
-    LockHashTable(EntryType_Module);
-    IModuleInfo** modInfo = mModInfos.Get(const_cast<char*>(name.string()));
-    if (modInfo) {
-        dlclose(module);
-        *moduleInfo = *modInfo;
-        (*moduleInfo)->AddRef();
-        UnlockHashTable(EntryType_Module);
-        return NOERROR;
-    }
-
+    ECode ec = NOERROR;
     AutoPtr<CModuleInfo> modInfoObj;
     CClsModule* clsModule = NULL;
     IModuleInfo* iModInfo = NULL;
@@ -378,8 +387,6 @@ ECode CObjInfoList::AcquireModuleInfo(
     *moduleInfo = iModInfo;
     (*moduleInfo)->AddRef();
 
-    ec = NOERROR;
-
 Exit:
     UnlockHashTable(EntryType_ClsModule);
     UnlockHashTable(EntryType_Module);
@@ -405,6 +412,51 @@ ECode CObjInfoList:: RemoveClsModule(
     }
     mClsModule.Remove((PVoid)path.string());
     return NOERROR;
+}
+
+ECode CObjInfoList::AcquireClassInfo(
+    /* [in] */ CClsModule* clsModule,
+    /* [in] */ const ClassID& clsId,
+    /* [in, out] */ IInterface** object)
+{
+    if (!clsModule || !object) {
+        return E_INVALID_ARGUMENT;
+    }
+
+    HashTable<ClassDirEntry *, Type_EMuid>* entries = NULL;
+
+    LockHashTable(EntryType_ClassId);
+    HashTable<ClassDirEntry *, Type_EMuid>** clsEntries = mClassIds.Get(&clsModule);
+    if (!clsEntries) {
+        entries = new HashTable<ClassDirEntry *, Type_EMuid>();
+        if (entries == NULL) {
+            UnlockHashTable(EntryType_ClassId);
+            return E_OUT_OF_MEMORY;
+        }
+        mClassIds.Put(&clsModule, &entries);
+    }
+    else {
+        entries = *clsEntries;
+    }
+
+    ClassDirEntry** clsDirEntry = entries->Get((PVoid)&(clsId.mClsid));
+    if (!clsDirEntry) {
+        Int32 base = clsModule->mBase;
+        for (Int32 i = 0; i < clsModule->mClsMod->mClassCount; i++) {
+            ClassDirEntry* classDir = getClassDirAddr(base, clsModule->mClsMod->mClassDirs, i);
+            ClassDescriptor* clsDesc = adjustClassDescAddr(base, classDir->mDesc);
+            if (clsDesc->mClsid == clsId.mClsid) {
+                clsDirEntry = &classDir;
+                entries->Put((PVoid)&(clsId.mClsid), clsDirEntry);
+                break;
+            }
+        }
+    }
+    UnlockHashTable(EntryType_ClassId);
+
+    if (!clsDirEntry) return E_DOES_NOT_EXIST;
+
+    return AcquireClassInfo(clsModule, *clsDirEntry, object);
 }
 
 ECode CObjInfoList::AcquireClassInfo(

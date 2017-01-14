@@ -90,6 +90,7 @@ typedef enum EntryType {
     EntryType_DataType,
     EntryType_Local,
     EntryType_ClsModule,
+    EntryType_ClassId,
 } EntryType;
 
 struct InfoLinkNode

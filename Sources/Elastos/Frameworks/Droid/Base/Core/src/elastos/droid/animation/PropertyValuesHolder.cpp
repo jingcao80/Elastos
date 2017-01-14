@@ -1059,15 +1059,6 @@ AutoPtr<IClassInfo> PropertyValuesHolder::GetClassInfo(
     return klass;
 }
 
-// if (valueType == ECLSID_CPointF) {
-//     length = 1;
-//     signature = "(LElastos/Droid/Graphics/IPointF;)E";
-// }
-// else {
-//     length = 0;
-//     assert(0 && "TODO");
-// }
-
 AutoPtr<IMethodInfo> PropertyValuesHolder::GetMethodInfo(
     /* [in] */ IClassInfo* targetClass,
     /* [in] */ const String& method,
