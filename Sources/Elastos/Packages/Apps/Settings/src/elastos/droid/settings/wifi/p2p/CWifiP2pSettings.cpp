@@ -610,17 +610,17 @@ ECode CWifiP2pSettings::OnCreateDialog(
     VALIDATE_NOT_NULL(resultDialog)
     *resultDialog = NULL;
 
-    String deviceName0;
-    mSelectedWifiPeer->mDevice->GetDeviceName(&deviceName0);
-    String deviceAddress;
-    mSelectedWifiPeer->mDevice->GetDeviceAddress(&deviceAddress);
-
     AutoPtr<IActivity> _activity;
     GetActivity((IActivity**)&_activity);
 
     IContext* activity = IContext::Probe(_activity);
 
     if (id == DIALOG_DISCONNECT) {
+        String deviceName0;
+        mSelectedWifiPeer->mDevice->GetDeviceName(&deviceName0);
+        String deviceAddress;
+        mSelectedWifiPeer->mDevice->GetDeviceAddress(&deviceAddress);
+
         String deviceName = TextUtils::IsEmpty(deviceName0) ? deviceAddress : deviceName0;
         String msg;
         if (mConnectedDevices > 1) {
@@ -650,6 +650,11 @@ ECode CWifiP2pSettings::OnCreateDialog(
         return NOERROR;
     }
     else if (id == DIALOG_CANCEL_CONNECT) {
+        String deviceName0;
+        mSelectedWifiPeer->mDevice->GetDeviceName(&deviceName0);
+        String deviceAddress;
+        mSelectedWifiPeer->mDevice->GetDeviceAddress(&deviceAddress);
+
         Int32 stringId = R::string::wifi_p2p_cancel_connect_message;
         String deviceName = TextUtils::IsEmpty(deviceName0) ? deviceAddress : deviceName0;
 

@@ -200,6 +200,10 @@ ECode CConnectionSettings::ProcessOverride(
             break;
         }
         case PROFILE_CONNECTION_BLUETOOTH: {
+            // TODO: delete below code, if we support Bluetooth
+            if (bta == NULL) {
+                break;
+            }
             Int32 btstate;
             bta->GetState(&btstate);
             if (forcedState && (btstate == IBluetoothAdapter::STATE_OFF

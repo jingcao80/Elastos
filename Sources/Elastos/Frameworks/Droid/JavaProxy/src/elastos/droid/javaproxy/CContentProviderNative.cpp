@@ -221,6 +221,10 @@ ECode CContentProviderNative::Query(
         env->DeleteLocalRef(jselection);
     }
 
+    if(jselectionArgs){
+        env->DeleteLocalRef(jselectionArgs);
+    }
+
     if(jsortOrder){
         env->DeleteLocalRef(jsortOrder);
     }

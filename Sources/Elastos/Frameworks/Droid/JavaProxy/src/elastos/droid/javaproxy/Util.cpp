@@ -1624,6 +1624,7 @@ Boolean Util::SetJavaBaseBundle(
                             jmethodID m = env->GetMethodID(bundleKlass, "putStringArray", "(Ljava/lang/String;[Ljava/lang/String;)V");
                             Util::CheckErrorAndLog(env, "ToJavaBundle", "Fail GetMethodID: putStringArray %d", __LINE__);
                             env->CallVoidMethod(jbundle, m, jKey, jarr);
+                            env->DeleteLocalRef(stringKlass);
                             env->DeleteLocalRef(jarr);
                             Logger::D("ToJavaBundle", "ToJavaBundle() string array set into bundle for key:%s", keyStr.string());
                         }
