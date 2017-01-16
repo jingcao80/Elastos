@@ -45,6 +45,27 @@ class LiveDisplayController
     : public Object
 {
 private:
+    class LowPowerModeListener
+        : public Object
+        , public ILowPowerModeListener
+    {
+    public:
+        TO_STRING_IMPL("LiveDisplayController::LowPowerModeListener")
+
+        CAR_INTERFACE_DECL()
+
+        LowPowerModeListener(
+            /* [in] */ LiveDisplayController* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnLowPowerModeChanged(
+            /* [in] */ Boolean enabled);
+
+    private:
+        LiveDisplayController* mHost;
+    };
+
     class SettingsObserver : public ContentObserver
     {
     public:

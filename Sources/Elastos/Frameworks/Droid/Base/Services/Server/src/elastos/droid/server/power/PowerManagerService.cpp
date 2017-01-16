@@ -1414,10 +1414,9 @@ ECode PowerManagerService::UpdateLowPowerModeLockedRunnable::Run()
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IPowerManager::ACTION_POWER_SAVE_MODE_CHANGING, (IIntent**)&intent);
-    intent->PutExtra(IPowerManager::EXTRA_POWER_SAVE_MODE, mHost->mLowPowerModeEnabled);
+    intent->PutBooleanExtra(IPowerManager::EXTRA_POWER_SAVE_MODE, mHost->mLowPowerModeEnabled);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY);
     mHost->mContext->SendBroadcast(intent);
-    // ArrayList<ILowPowerModeListener> listeners;
     AutoPtr<IArrayList> listeners;
     {
         AutoLock syncLock(mHost->mLock);
@@ -1425,7 +1424,7 @@ ECode PowerManagerService::UpdateLowPowerModeLockedRunnable::Run()
     }
     Int32 size;
     listeners->GetSize(&size);
-    for (Int32 i=0; i < size; i++) {
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         listeners->Get(i, (IInterface**)&obj);
         AutoPtr<ILowPowerModeListener> listener = ILowPowerModeListener::Probe(obj);

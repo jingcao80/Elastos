@@ -52,6 +52,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IPowerManagerInternal;
 using Elastos::Droid::Os::EIID_IPowerManagerInternal;
+using Elastos::Droid::Os::EIID_ILowPowerModeListener;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IUserHandleHelper;
@@ -82,6 +83,21 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Display {
+
+//==============================================================================
+//            LiveDisplayController::LowPowerModeListener
+//==============================================================================
+
+CAR_INTERFACE_IMPL(LiveDisplayController::LowPowerModeListener, Object, ILowPowerModeListener)
+
+ECode LiveDisplayController::LowPowerModeListener::OnLowPowerModeChanged(
+    /* [in] */ Boolean enabled)
+{
+    mHost->mLowPerformance = enabled;
+    mHost->UpdateLiveDisplay(mHost->mCurrentLux);
+    return NOERROR;
+}
+
 
 //==============================================================================
 //            LiveDisplayController::SettingsObserver
@@ -471,6 +487,9 @@ LiveDisplayController::LiveDisplayController(
 
     mObserver = new SettingsObserver();
     mObserver->constructor(this);
+
+    mLowPowerModeListener = new LowPowerModeListener(this);
+
     mTwilightListener = new TwilightListener(this);
 
     mContext = context;
