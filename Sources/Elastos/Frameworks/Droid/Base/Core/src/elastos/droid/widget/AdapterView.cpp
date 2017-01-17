@@ -324,15 +324,13 @@ ECode AdapterView::PerformItemClick(
     /* [in] */ Int64 id,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(view);
     VALIDATE_NOT_NULL(result);
 
     if (mOnItemClickListener != NULL) {
         PlaySoundEffect(SoundEffectConstants::CLICK);
         mOnItemClickListener->OnItemClick(this, view, position, id);
         if (view != NULL) {
-           IAccessibilityEventSource* temp = IAccessibilityEventSource::Probe(view);
-           temp->SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_CLICKED);
+            view->SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_CLICKED);
         }
         *result = TRUE;
         return NOERROR;

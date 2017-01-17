@@ -1332,7 +1332,7 @@ ECode PopupWindow::Dismiss()
 
         if (mPopupView != mContentView &&
                 IViewGroup::Probe(mPopupView) != NULL) {
-            IViewGroup::Probe(mPopupView)->RemoveViewInLayout(mContentView);
+            IViewGroup::Probe(mPopupView)->RemoveView(mContentView);
         }
         mPopupView = NULL;
 
