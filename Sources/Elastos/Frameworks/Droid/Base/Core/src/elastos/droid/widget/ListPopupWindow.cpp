@@ -1695,7 +1695,7 @@ ECode ListPopupWindow::RemovePromptView()
         mPromptView->GetParent((IViewParent**)&parent);
         IViewGroup* group = IViewGroup::Probe(parent);
         if (group) {
-            group->RemoveViewInLayout(mPromptView);
+            group->RemoveView(mPromptView);
         }
     }
     return NOERROR;
