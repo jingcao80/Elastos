@@ -1152,6 +1152,7 @@ ECode CAppOpsService::ResetAllModes()
             AutoPtr<ISet> set;
             packages->GetEntrySet((ISet**)&set);
             AutoPtr<IIterator> it;
+            set->GetIterator((IIterator**)&it);
             Boolean hasNext;
             while (it->HasNext(&hasNext), hasNext) {
                 AutoPtr<IInterface> meObj, keyObj, valueObj;
