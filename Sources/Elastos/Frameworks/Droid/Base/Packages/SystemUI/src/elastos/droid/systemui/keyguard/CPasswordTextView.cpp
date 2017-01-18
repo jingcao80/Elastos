@@ -66,6 +66,7 @@ ECode CPasswordTextView::CharState::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (!mCancelled) {
+        AutoPtr<CharState> inHost = mInHost; // hold mInHost's reference
         mOutHost->mTextChars->Remove(TO_IINTERFACE(mInHost));
         mOutHost->mCharPool->Push(TO_IINTERFACE(mInHost));
         mInHost->Reset();
@@ -494,8 +495,9 @@ ECode CPasswordTextView::CharState::Draw(
         Float centerX = currentDrawPosition + charWidth / 2;
         canvas->Translate(centerX, currYPosition);
         canvas->Scale(mCurrentTextSizeFactor, mCurrentTextSizeFactor);
-        canvas->DrawText(StringUtils::ToString((Int32)mWhichChar),
-                0, 0, mHost->mDrawPaint);
+        String text;
+        text.Append(mWhichChar);
+        canvas->DrawText(text, 0, 0, mHost->mDrawPaint);
         canvas->Restore();
     }
     if (dotVisible) {
@@ -526,6 +528,7 @@ const Int64 CPasswordTextView::TEXT_VISIBILITY_DURATION = 1300;
 
 const Float CPasswordTextView::OVERSHOOT_TIME_POSITION = 0.5f;
 
+CAR_INTERFACE_IMPL(CPasswordTextView, View, IPasswordTextView)
 CAR_OBJECT_IMPL(CPasswordTextView)
 
 CPasswordTextView::CPasswordTextView()
@@ -716,7 +719,7 @@ ECode CPasswordTextView::Append(
 {
     Int32 visibleChars;
     mTextChars->GetSize(&visibleChars);
-    mText = mText + c;
+    mText.Append(c);
     Int32 newLength = mText.GetLength();
     AutoPtr<CharState> charState;
     if (newLength > visibleChars) {

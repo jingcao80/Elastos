@@ -1407,6 +1407,7 @@ module
                 [in] Int32 defStyleAttr,
                 [in] Int32 defStyleRes);
 
+            interface IPasswordTextView;
             interface IView;
             interface IDrawableCallback;
             interface IKeyEventCallback;

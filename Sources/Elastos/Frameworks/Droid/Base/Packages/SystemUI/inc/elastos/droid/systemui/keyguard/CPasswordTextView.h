@@ -53,6 +53,7 @@ namespace Keyguard {
  */
 CarClass(CPasswordTextView)
     , public Elastos::Droid::View::View
+    , public IPasswordTextView
 {
 private:
     class CharState
@@ -379,6 +380,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     CAR_OBJECT_DECL()
 
     CPasswordTextView();
