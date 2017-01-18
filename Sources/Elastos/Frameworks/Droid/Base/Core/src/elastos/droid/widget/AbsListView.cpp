@@ -3213,7 +3213,7 @@ ECode AbsListView::PerformItemClick(
                 }
                 mCheckedItemCount = 1;
             }
-            else if ((mCheckStates->GetSize(&size), size) = 0
+            else if ((mCheckStates->GetSize(&size), size) == 0
                     || (mCheckStates->ValueAt(0, &res), !res)) {
                 mCheckedItemCount = 0;
             }

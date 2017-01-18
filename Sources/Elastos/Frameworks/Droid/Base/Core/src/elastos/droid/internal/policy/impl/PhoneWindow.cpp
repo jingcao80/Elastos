@@ -2853,10 +2853,11 @@ ECode PhoneWindow::ActionMenuPresenterCallback::OnCloseMenu(
 {
     AutoPtr<IPhoneWindow> w;
     mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
-    if (w == NULL)
+    if (w == NULL) {
         return NOERROR;
+    }
 
-    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
+    PhoneWindow* mHost = (PhoneWindow*)w.Get();
     mHost->CheckCloseActionMenu(IMenu::Probe(menu));
     return NOERROR;
 }
@@ -3911,14 +3912,6 @@ ECode PhoneWindow::ClosePanel(
         mPreparedPanel = NULL;
         mPanelChordingKey = 0;
     }
-    // add by xihao: there are several circular references
-    // PhoneWindow->PanelFeatureState->CMenuBuilder->Activity->PhoneWindow
-    // PhoneWindow->PanelFeatureState->DecorView->PhoneWindow
-    // PhoneWindow->CListMenuPresenter->Activity->PhoneWindow
-    // CMenuBuilder->CListMenuPresenter->CMenuBuilder, and so on
-    //
-    st->SetMenu(NULL);
-    mPanels->Set(st->mFeatureId, NULL);
     return NOERROR;
 }
 
