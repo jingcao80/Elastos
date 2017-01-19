@@ -50,6 +50,7 @@ using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::IInt64SparseArray;
 using Elastos::Droid::Utility::ISparseBooleanArray;
 using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::View::IActionModeCallback;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
 using Elastos::Droid::View::InputMethod::ICorrectionInfo;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
@@ -288,6 +289,7 @@ protected:
     class MultiChoiceModeWrapper
         : public Object
         , public IMultiChoiceModeListener
+        , public IActionModeCallback
     {
     public:
         CAR_INTERFACE_DECL()

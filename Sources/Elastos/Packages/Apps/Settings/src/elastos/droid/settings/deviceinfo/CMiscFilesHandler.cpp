@@ -28,6 +28,7 @@ using Elastos::Droid::Os::Storage::IStorageVolume;
 using Elastos::Droid::Text::Format::Formatter;
 using Elastos::Droid::Utility::ISparseBooleanArray;
 using Elastos::Droid::View::IMenuInflater;
+using Elastos::Droid::View::EIID_IActionModeCallback;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::Widget::EIID_ICompoundButtonOnCheckedChangeListener;
@@ -275,7 +276,7 @@ ECode CMiscFilesHandler::MemoryMearurementAdapter::GetView(
 //                  CMiscFilesHandler::ModeCallback
 //===============================================================================
 
-CAR_INTERFACE_IMPL(CMiscFilesHandler::ModeCallback, Object, IMultiChoiceModeListener)
+CAR_INTERFACE_IMPL_2(CMiscFilesHandler::ModeCallback, Object, IMultiChoiceModeListener, IActionModeCallback)
 
 CMiscFilesHandler::ModeCallback::ModeCallback(
     /* [in] */ IContext* context,
