@@ -87,6 +87,7 @@ using Elastos::Droid::View::MotionEvent;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::EIID_IActionModeCallback;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::EIID_IViewGroup;
 using Elastos::Droid::View::EIID_IOnTouchModeChangeListener;
@@ -563,7 +564,7 @@ ECode AbsListView::AdapterDataSetObserver::OnInvalidated()
 //          AbsListView::MultiChoiceModeWrapper
 //==============================================================================
 
-CAR_INTERFACE_IMPL(AbsListView::MultiChoiceModeWrapper, Object, IMultiChoiceModeListener);
+CAR_INTERFACE_IMPL_2(AbsListView::MultiChoiceModeWrapper, Object, IMultiChoiceModeListener, IActionModeCallback);
 
 AbsListView::MultiChoiceModeWrapper::MultiChoiceModeWrapper(
     /* [in] */ AbsListView* host)

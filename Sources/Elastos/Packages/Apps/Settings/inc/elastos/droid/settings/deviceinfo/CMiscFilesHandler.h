@@ -183,6 +183,7 @@ private:
     class ModeCallback
         : public Object
         , public IMultiChoiceModeListener
+        , public IActionModeCallback
     {
     public:
         TO_STRING_IMPL("CMiscFilesHandler::ModeCallback")
