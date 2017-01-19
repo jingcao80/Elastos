@@ -317,6 +317,10 @@ private:
         CARAPI HasFocus(
             /* [out] */ Boolean* result);
 
+    protected:
+        // @Override
+        CARAPI OnDetachedFromWindow();
+
     private:
         /**
           * Starts an alpha animation on the selector. When the animation ends,

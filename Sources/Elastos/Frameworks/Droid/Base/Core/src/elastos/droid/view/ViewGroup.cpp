@@ -3135,8 +3135,9 @@ ECode ViewGroup::DispatchTouchEvent(
                 }
                 else {
                     Boolean cancelChild = ResetCancelNextUpFlag(target->mChild) || intercepted;
+                    AutoPtr<IView> child = target->mChild; // hold child's reference
                     if (DispatchTransformedTouchEvent(ev, cancelChild,
-                            target->mChild, target->mPointerIdBits)) {
+                            child, target->mPointerIdBits)) {
                         handled = TRUE;
                     }
                     if (cancelChild) {

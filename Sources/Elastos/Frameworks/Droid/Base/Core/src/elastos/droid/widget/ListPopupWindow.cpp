@@ -632,6 +632,12 @@ void ListPopupWindow::DropDownListView::SetPressedItem(
     }
 }
 
+ECode ListPopupWindow::DropDownListView::OnDetachedFromWindow()
+{
+    ListView::OnDetachedFromWindow();
+    mScrollHelper = NULL;
+    return NOERROR;
+}
 
 //=====================================================================
 //                  ListPopupWindow::InnerInt32Property
