@@ -4691,14 +4691,14 @@ ECode Activity::StartActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ IBundle* options)
 {
-     if (options != NULL) {
-         return StartActivityForResult(intent, -1, options);
-     }
-     else {
-         // Note we want to go through this call for compatibility with
-         // applications that may have overridden the method.
-         return StartActivityForResult(intent, -1);
-     }
+    if (options != NULL) {
+        return StartActivityForResult(intent, -1, options);
+    }
+    else {
+        // Note we want to go through this call for compatibility with
+        // applications that may have overridden the method.
+        return StartActivityForResult(intent, -1);
+    }
 }
 
 //    @Override

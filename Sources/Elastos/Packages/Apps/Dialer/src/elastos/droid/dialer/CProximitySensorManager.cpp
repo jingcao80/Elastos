@@ -102,7 +102,7 @@ ECode CProximitySensorManager::ProximitySensorEventListener::OnAccuracyChanged(
 IProximitySensorManager::State CProximitySensorManager::ProximitySensorEventListener::GetStateFromValue(
     /* [in] */ Float value)
 {
-     // Determine if the current value corresponds to the NEAR or FAR state.
+    // Determine if the current value corresponds to the NEAR or FAR state.
     // Take case of the case where the proximity sensor is binary: if the current value is
     // equal to the maximum, we are always in the FAR state.
     return (value > FAR_THRESHOLD || value == mMaxValue)

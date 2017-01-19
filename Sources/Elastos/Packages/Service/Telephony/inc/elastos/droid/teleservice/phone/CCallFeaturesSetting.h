@@ -39,6 +39,7 @@ using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::TeleService::Phone::Settings::IAccountSelectionPreference;
 using Elastos::Droid::Preference::ICheckBoxPreference;
+using Elastos::Droid::Preference::ISwitchPreference;
 using Elastos::Droid::Preference::IListPreference;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceScreen;
@@ -636,7 +637,7 @@ private:
     AutoPtr<IPreferenceScreen> mVoicemailSettingsScreen;
     AutoPtr<IPreferenceScreen> mVoicemailSettings;
     AutoPtr<IPreference> mVoicemailNotificationRingtone;
-    AutoPtr<ICheckBoxPreference> mVoicemailNotificationVibrate;
+    AutoPtr<ISwitchPreference> mVoicemailNotificationVibrate;
     AutoPtr<IAccountSelectionPreference> mDefaultOutgoingAccount;
 
     /**

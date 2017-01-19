@@ -72,6 +72,7 @@ using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Telecom::CTelecomManagerHelper;
 using Elastos::Droid::Telecom::ITelecomManagerHelper;
 using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::TeleService::Services::Telephony::Sip::SipUtil;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::IAdapter;
@@ -1675,13 +1676,12 @@ void CCallFeaturesSetting::InitPhoneAccountPreferences()
     telecomManager->GetSimCallManagers((IList**)&l);
     Boolean b = FALSE;
     l->IsEmpty(&b);
-    assert(0 && "TODO Need SipUtil");
-    // if (count <= 1 && b && !SipUtil::IsVoipSupported((IContext*)this)) {
-    //     AutoPtr<IPreferenceScreen> screen;
-    //     GetPreferenceScreen((IPreferenceScreen**)&screen);
-    //     Boolean tmp = FALSE;
-    //     IPreferenceGroup::Probe(screen)->RemovePreference(mPhoneAccountSettingsPreference, &tmp);
-    // }
+    if (count <= 1 && b && !SipUtil::IsVoipSupported((IContext*)this)) {
+        AutoPtr<IPreferenceScreen> screen;
+        GetPreferenceScreen((IPreferenceScreen**)&screen);
+        Boolean tmp = FALSE;
+        IPreferenceGroup::Probe(screen)->RemovePreference(mPhoneAccountSettingsPreference, &tmp);
+    }
 }
 
 Boolean CCallFeaturesSetting::CanLaunchIntent(
@@ -1758,7 +1758,7 @@ ECode CCallFeaturesSetting::OnResume()
 
         AutoPtr<IPreference> preference9;
         FindPreference(BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, (IPreference**)&preference9);
-        mVoicemailNotificationVibrate = ICheckBoxPreference::Probe(preference9);
+        mVoicemailNotificationVibrate = ISwitchPreference::Probe(preference9);
 
         InitVoiceMailProviders();
     }

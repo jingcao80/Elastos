@@ -17,16 +17,23 @@
 #include "elastos/droid/dialer/settings/GeneralSettingsFragment.h"
 #include "R.h"
 #include "Elastos.Droid.Provider.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Preference::IPreferenceCategory;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::ITwoStatePreference;
+using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceChangeListener;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IThread;
 using Elastos::Core::CThread;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -47,12 +54,21 @@ ECode GeneralSettingsFragment::RingtoneLookupCompleteHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case MSG_UPDATE_RINGTONE_SUMMARY:
+        case 1: {        //MSG_UPDATE_RINGTONE_SUMMARY:
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             mHost->mRingtonePreference->SetSummary(ICharSequence::Probe(obj));
             break;
+        }
     }
+    return NOERROR;
+}
+
+ECode GeneralSettingsFragment::RingtoneLookupCompleteHandler::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    Object::ToString(str);
     return NOERROR;
 }
 
@@ -67,7 +83,8 @@ GeneralSettingsFragment::RingtoneLookupRunnable::RingtoneLookupRunnable(
 ECode GeneralSettingsFragment::RingtoneLookupRunnable::Run()
 {
     if (mHost->mRingtonePreference != NULL) {
-        assert(0 && "TODO");
+        // TODO
+        Logger::I("GeneralSettingsFragment::RingtoneLookupRunnable", "TODO Run");
         // SettingsUtil.updateRingtoneName(
         //         mHost->mContext,
         //         mHost->mRingtoneLookupComplete,
@@ -89,12 +106,17 @@ const String GeneralSettingsFragment::BUTTON_RESPOND_VIA_SMS_KEY("button_respond
 
 const Int32 GeneralSettingsFragment::MSG_UPDATE_RINGTONE_SUMMARY = 1;
 
-CAR_INTERFACE_IMPL(GeneralSettingsFragment, PreferenceFragment,
-        IGeneralSettingsFragment, IPreferenceOnPreferenceChangeListener);
+CAR_INTERFACE_IMPL_2(GeneralSettingsFragment, PreferenceFragment, IGeneralSettingsFragment, IPreferenceOnPreferenceChangeListener);
 
 GeneralSettingsFragment::GeneralSettingsFragment()
 {
-    mRingtoneLookupComplete = (IHandler*)new RingtoneLookupCompleteHandler(this);
+    AutoPtr<RingtoneLookupCompleteHandler> p = new RingtoneLookupCompleteHandler(this);
+    mRingtoneLookupComplete = IHandler::Probe(p);
+}
+
+ECode GeneralSettingsFragment::constructor()
+{
+    return PreferenceFragment::constructor();
 }
 
 ECode GeneralSettingsFragment::OnCreate(
@@ -104,39 +126,42 @@ ECode GeneralSettingsFragment::OnCreate(
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    activity->GetApplicationContext((IContext**)&mContext);
+    IContext::Probe(activity)->GetApplicationContext((IContext**)&mContext);
 
     AddPreferencesFromResource(R::xml::general_settings);
 
-    FindPreference(BUTTON_RINGTONE_KEY, (IPreference**)&mRingtonePreference);
+    FindPreference(CoreUtils::Convert(BUTTON_RINGTONE_KEY), (IPreference**)&mRingtonePreference);
     AutoPtr<IPreference> preference;
-    FindPreference(BUTTON_VIBRATE_ON_RING, (IPreference**)&preference);
+    FindPreference(CoreUtils::Convert(BUTTON_VIBRATE_ON_RING), (IPreference**)&preference);
     mVibrateWhenRinging = ICheckBoxPreference::Probe(preference);
     preference = NULL;
-    FindPreference(BUTTON_PLAY_DTMF_TONE, (IPreference**)&preference);
+    FindPreference(CoreUtils::Convert(BUTTON_PLAY_DTMF_TONE), (IPreference**)&preference);
     mPlayDtmfTone = ICheckBoxPreference::Probe(preference);
-    FindPreference(BUTTON_RESPOND_VIA_SMS_KEY, (IPreference**)&mRespondViaSms);
+    FindPreference(CoreUtils::Convert(BUTTON_RESPOND_VIA_SMS_KEY), (IPreference**)&mRespondViaSms);
 
-    AutoPtr<IPreference> soundCategory;
-    FindPreference(CATEGORY_SOUNDS_KEY, (IPreference**)&soundCategory);
+    preference = NULL;
+    FindPreference(CoreUtils::Convert(CATEGORY_SOUNDS_KEY), (IPreference**)&preference);
+    AutoPtr<IPreferenceCategory> soundCategory = IPreferenceCategory::Probe(preference);
     if (mVibrateWhenRinging != NULL) {
         AutoPtr<IInterface> service;
         mContext->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&service);
-        IVibrator* vibrator = IVibrator::Probe(service);
-        Boolean result;
-        if (vibrator != NULL && vibrator->HasVibrator(&result), result) {
-            mVibrateWhenRinging->SetOnPreferenceChangeListener(
-                    (IPreferenceOnPreferenceChangeListener*)this);
+        AutoPtr<IVibrator> vibrator = IVibrator::Probe(service);
+        Boolean result = FALSE;
+        Boolean hasVibrator = vibrator != NULL && (vibrator->HasVibrator(&result), result);
+        if (hasVibrator) {
+            IPreference::Probe(mVibrateWhenRinging)->SetOnPreferenceChangeListener(
+                    IPreferenceOnPreferenceChangeListener::Probe(this));
         }
         else {
-            IPreferenceCategory::Probe(soundCategory)->RemovePreference(mVibrateWhenRinging);
+            Boolean res = FALSE;
+            IPreferenceGroup::Probe(soundCategory)->RemovePreference(IPreference::Probe(mVibrateWhenRinging), &res);
             mVibrateWhenRinging = NULL;
         }
     }
 
     if (mPlayDtmfTone != NULL) {
-        mPlayDtmfTone->SetOnPreferenceChangeListener(
-                (IPreferenceOnPreferenceChangeListener*)this);
+        IPreference::Probe(mPlayDtmfTone)->SetOnPreferenceChangeListener(
+                IPreferenceOnPreferenceChangeListener::Probe(this));
         AutoPtr<IContentResolver> resolver;
         mContext->GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<ISettingsSystem> settingsSys;
@@ -144,10 +169,11 @@ ECode GeneralSettingsFragment::OnCreate(
         Int32 value;
         settingsSys->GetInt32(resolver,
                 ISettingsSystem::DTMF_TONE_WHEN_DIALING, 1, &value);
-        mPlayDtmfTone->SetChecked(value != 0);
+        ITwoStatePreference::Probe(mPlayDtmfTone)->SetChecked(value != 0);
     }
 
-    mRingtoneLookupRunnable = (IRunnable*)new RingtoneLookupRunnable(this);
+    AutoPtr<RingtoneLookupRunnable> run = new RingtoneLookupRunnable(this);
+    mRingtoneLookupRunnable = IRunnable::Probe(run);
     return NOERROR;
 }
 
@@ -159,13 +185,15 @@ ECode GeneralSettingsFragment::OnPreferenceChange(
     VALIDATE_NOT_NULL(result);
     Boolean equals;
     if (IObject::Probe(preference)->Equals(mVibrateWhenRinging, &equals), equals) {
-        Boolean doVibrate = CoreUtils::Unbox(objValue);
+        Boolean doVibrate = FALSE;
+        IBoolean::Probe(objValue)->GetValue(&doVibrate);
         AutoPtr<IContentResolver> resolver;
         mContext->GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<ISettingsSystem> settingsSys;
         CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSys);
+        Boolean res = FALSE;
         settingsSys->PutInt32(resolver,
-                ISettingsSystem::VIBRATE_WHEN_RINGING, doVibrate ? 1 : 0);
+                ISettingsSystem::VIBRATE_WHEN_RINGING, doVibrate ? 1 : 0, &res);
     }
     *result = TRUE;
     return NOERROR;
@@ -177,17 +205,18 @@ ECode GeneralSettingsFragment::OnPreferenceTreeClick(
     /*[out]*/ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (preference == mPlayDtmfTone) {
+    if (Object::Equals(preference, mPlayDtmfTone)) {
         AutoPtr<IContentResolver> resolver;
         mContext->GetContentResolver((IContentResolver**)&resolver);
         AutoPtr<ISettingsSystem> settingsSys;
         CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSys);
-        Boolean isChecked;
+        Boolean isChecked = FALSE, res = FALSE;
         settingsSys->PutInt32(resolver,
                 ISettingsSystem::DTMF_TONE_WHEN_DIALING,
-                mPlayDtmfTone->IsChecked(&isChecked), isChecked ? 1 : 0);
+                (ITwoStatePreference::Probe(mPlayDtmfTone)->IsChecked(&isChecked), isChecked) ? 1 : 0,
+                &res);
     }
-    else if (preference == mRespondViaSms) {
+    else if (Object::Equals(preference, mRespondViaSms)) {
         // Needs to return false for the intent to launch.
         *result = FALSE;
         return NOERROR;
@@ -201,7 +230,8 @@ ECode GeneralSettingsFragment::OnResume()
     PreferenceFragment::OnResume();
 
     if (mVibrateWhenRinging != NULL) {
-        assert(0 && "TODO");
+        // TODO
+        Logger::I("GeneralSettingsFragment", "TODO OnResume mVibrateWhenRinging SetChecked");
         // mVibrateWhenRinging->SetChecked(SettingsUtil::GetVibrateWhenRingingSetting(mContext));
     }
 

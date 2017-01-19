@@ -37,7 +37,6 @@
 #include <elastos/droid/widget/PopupMenu.h>
 #include <elastos/droid/widget/RelativeLayout.h>
 #include "elastos/droid/contacts/common/widget/FloatingActionButtonController.h"
-#include "elastos/droid/phone/common/HapticFeedback.h"
 #include "elastos/droid/phone/common/dialpad/CDialpadView.h"
 #include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>
 
@@ -82,7 +81,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Utility::IHashSet;
 using Elastos::Droid::Contacts::Common::Widget::FloatingActionButtonController;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
-using Elastos::Droid::Phone::Common::HapticFeedback;
+using Elastos::Droid::Phone::Common::IHapticFeedback;
 using Elastos::Droid::Phone::Common::Dialpad::CDialpadView;
 using Elastos::Droid::Phone::Common::Dialpad::IDialpadKeyButtonOnPressedListener;
 
@@ -748,7 +747,7 @@ private:
     Boolean mDTMFToneEnabled;
 
     // Vibration (haptic feedback) for dialer key presses.
-    AutoPtr<HapticFeedback> mHaptic;
+    AutoPtr<IHapticFeedback> mHaptic;
 
     /** Identifier for the "Add Call" intent extra. */
     static const String ADD_CALL_MODE_KEY;

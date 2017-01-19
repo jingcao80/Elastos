@@ -18,7 +18,7 @@
 #define __ELASTOS_DROID_DIALER_SETTINGS_CGENERALSETTINGSFRAGMENT_H__
 
 #include "_Elastos_Droid_Dialer_Settings_CGeneralSettingsFragment.h"
-#include "elastos/apps/dialer/settings/GeneralSettingsFragment.h"
+#include "elastos/droid/dialer/settings/GeneralSettingsFragment.h"
 
 namespace Elastos {
 namespace Droid {

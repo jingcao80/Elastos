@@ -13,40 +13,40 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:phone="http://schemas.android.com/apk/res/Elastos.Droid.TeleService"
     android:title="@string/updating_title">
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="phone_account_settings_preference_screen"
         android:title="@string/phone_accounts">
 
         <intent
-            android:targetPackage="com.android.phone"
-            android:targetClass="com.android.phone.settings.PhoneAccountSettingsActivity"/>
+            android:targetPackage="elastos.droid.teleService.phone"
+            android:targetClass="elastos.droid.teleService.phone.settings.CPhoneAccountSettingsActivity"/>
 
-    </PreferenceScreen>>
+    </CPreferenceScreen>
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_voicemail_category_key"
         android:title="@string/voicemail"
         android:persistent="false">
 
-      <SwitchPreference
+      <CSwitchPreference
             android:defaultValue="false"
             android:key="button_mwi_notification_key"
             android:title="@string/mwi_notification_title"
             android:persistent="false"
             android:summary="@string/mwi_notification_summary" />
 
-        <ListPreference
+        <CListPreference
             android:key="button_voicemail_provider_key"
             android:title="@string/voicemail_provider"
             android:summary="@string/sum_voicemail_choose_provider"
             android:defaultValue=""
             android:persistent="true" />
 
-        <PreferenceScreen
+        <CPreferenceScreen
             android:key="button_voicemail_setting_key"
             android:title="@string/voicemail_settings"
             android:persistent="false">
@@ -60,32 +60,32 @@
                  2. android:autoText
                  3. android:background -->
 
-            <Elastos.Droid.TeleService.Phone.CEditPhoneNumberPreference
+            <!-- Elastos.Droid.TeleService.Phone.CEditPhoneNumberPreference
                 android:key="button_voicemail_key"
                 android:title="@string/voicemail_settings_number_label"
                 android:persistent="false"
                 android:dialogTitle="@string/voicemail"
                 phone:confirmMode="confirm"
                 android:singleLine="true"
-                android:autoText="false" />
+                android:autoText="false" -->
 
-        </PreferenceScreen>
+        </CPreferenceScreen>
 
-        <RingtonePreference
+        <!-- CRingtonePreference
             android:key="button_voicemail_notification_ringtone_key"
             android:title="@string/voicemail_notification_ringtone_title"
             android:persistent="true"
             android:ringtoneType="notification"
-            android:defaultValue="content://settings/system/notification_sound" />
+            android:defaultValue="content://settings/system/notification_sound" -->
 
-        <SwitchPreference
+        <CSwitchPreference
             android:key="button_voicemail_notification_vibrate_key"
             android:title="@string/voicemail_notification_vibrate_when_title"
             android:persistent="true" />
 
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-  <ListPreference
+  <CListPreference
       android:key="call_recording_format"
       android:title="@string/call_recording_format"
       android:summary="%s"
@@ -93,24 +93,24 @@
       android:entryValues="@array/call_recording_encoder_values"
       android:persistent="false" />
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_fdn_key"
         android:title="@string/fdn"
         android:persistent="false">
 
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="com.android.phone"
-            android:targetClass="com.android.phone.FdnSetting" />
+            android:targetPackage="elastos.droid.teleService.phone"
+            android:targetClass="elastos.droid.teleService.phone.CFdnSetting" />
 
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-     <SwitchPreference
+     <CSwitchPreference
         android:key="button_auto_retry_key"
         android:title="@string/auto_retry_mode_title"
         android:persistent="false"
         android:summary="@string/auto_retry_mode_summary"/>
 
-    <ListPreference
+    <CListPreference
         android:key="button_tty_mode_key"
         android:title="@string/tty_mode_option_title"
         android:summary="@string/tty_mode_option_summary"
@@ -118,44 +118,44 @@
         android:entries="@array/tty_mode_entries"
         android:entryValues="@array/tty_mode_values"/>
 
-    <SwitchPreference
+    <CSwitchPreference
         android:key="button_hac_key"
         android:title="@string/hac_mode_title"
         android:persistent="true"
         android:summary="@string/hac_mode_summary"/>
 
-    <ListPreference
+    <CListPreference
         android:key="button_dtmf_settings"
         android:title="@string/dtmf_tones_title"
         android:summary="@string/dtmf_tones_summary"
         android:entries="@array/dtmf_tone_entries"
         android:entryValues="@array/dtmf_tone_values"/>
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_gsm_more_expand_key"
         android:title="@string/labelGSMMore"
         android:summary="@string/sum_gsm_call_settings"
         android:persistent="false">
 
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="com.android.phone"
-            android:targetClass="com.android.phone.GsmUmtsCallOptions"/>
+            android:targetPackage="elastos.droid.teleService.phone"
+            android:targetClass="elastos.droid.teleService.phone.CGsmUmtsCallOptions"/>
 
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_cdma_more_expand_key"
         android:title="@string/labelCDMAMore"
         android:summary="@string/sum_cdma_call_settings"
         android:persistent="false">
 
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="com.android.phone"
-            android:targetClass="com.android.phone.CdmaCallOptions"/>
+            android:targetPackage="elastos.droid.teleService.phone"
+            android:targetClass="elastos.droid.teleService.phone.CCdmaCallOptions"/>
 
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="ims_account_settings_key"
         android:title="@string/ims_accounts_title"
         android:persistent="false">
@@ -163,26 +163,26 @@
         <intent android:action="android.intent.action.MAIN"
             android:targetPackage="com.android.phone"
             android:targetClass="com.android.phone.ims.ImsEditor" />
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_ipprefix_key"
         android:title="@string/ipcall_sub_title"
         android:summary="@string/ipcall_sub_summery"
         android:persistent="false">
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-    <PreferenceCategory
+    <CPreferenceCategory
         android:key="pref_advanced_settings"
         android:title="@string/advanced_settings">
 
-         <PreferenceScreen
+         <CPreferenceScreen
              android:key="button_blacklist"
              android:title="@string/blacklist_title"
              android:persistent="false">
              <intent android:action="android.intent.action.MAIN"
-                 android:targetPackage="com.android.settings"
-                 android:targetClass="com.android.settings.Settings$BlacklistSettingsActivity" />
-         </PreferenceScreen>
-    </PreferenceCategory>
-</PreferenceScreen>
+                 android:targetPackage="elastos.droid.settings"
+                 android:targetClass="elastos.droid.settings.CSettingsBlacklistSettingsActivity" />
+         </CPreferenceScreen>
+    </CPreferenceCategory>
+</CPreferenceScreen>

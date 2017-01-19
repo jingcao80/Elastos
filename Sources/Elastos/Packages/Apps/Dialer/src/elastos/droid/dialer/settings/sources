@@ -19,6 +19,10 @@ TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Ex/Common/inc
+INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Support/V4/inc
+INCLUDES += $(MAKEDIR)/../../../../../../../../Frameworks/Droid/Support/V13/inc
+INCLUDES += $(MAKEDIR)/../../../../../../PhoneCommon/inc/
 INCLUDES += ../../../../../
 
 CAR_FLAGS += -n -u

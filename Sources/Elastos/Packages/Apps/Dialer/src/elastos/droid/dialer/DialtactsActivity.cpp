@@ -94,6 +94,7 @@ using Elastos::Droid::Dialer::List::EIID_ISpeedDialFragmentHostInterface;
 using Elastos::Droid::Dialer::List::ISearchFragment;
 using Elastos::Droid::Dialer::List::IRegularSearchFragment;
 using Elastos::Droid::Dialer::List::ISmartDialSearchFragment;
+using Elastos::Droid::Dialer::Settings::ECLSID_CDialerSettingsActivity;
 using Elastos::Droid::Dialer::Widget::ISearchEditTextLayout;
 using Elastos::Droid::Dialer::Widget::CSearchEditTextLayout;
 using Elastos::Droid::Dialer::Widget::EIID_IActionBarControllerActivityUi;
@@ -727,8 +728,7 @@ ECode DialtactsActivity::OnAttachFragment(
 void DialtactsActivity::HandleMenuSettings()
 {
     AutoPtr<IIntent> intent;
-    // CIntent::New(this, ECLSID_CDialerSettingsActivity, (IIntent**)&intent);
-    assert(0 && "TODO HandleMenuSettings");
+    CIntent::New(this, ECLSID_CDialerSettingsActivity, (IIntent**)&intent);
     StartActivity(intent);
 }
 

@@ -102,9 +102,9 @@ module
     merge("car/elastos/droid/dialer/list/SwipeHelper.car");
     merge("car/elastos/droid/dialer/list/TileInteractionTeaserView.car");
     merge("car/elastos/droid/dialer/service/CachedNumberLookupService.car");
-//    merge("car/elastos/droid/dialer/settings/DefaultRingtonePreference.car");
-//    merge("car/elastos/droid/dialer/settings/DialerSettingsActivity.car");
-//    merge("car/elastos/droid/dialer/settings/GeneralSettingsFragment.car");
+    merge("car/elastos/droid/dialer/settings/DefaultRingtonePreference.car");
+    merge("car/elastos/droid/dialer/settings/DialerSettingsActivity.car");
+    merge("car/elastos/droid/dialer/settings/GeneralSettingsFragment.car");
     merge("car/elastos/droid/dialer/util/AsyncTaskExecutor.car");
     merge("car/elastos/droid/dialer/util/AsyncTaskExecutors.car");
     merge("car/elastos/droid/dialer/util/ExpirableCache.car");
@@ -166,7 +166,7 @@ module
     using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.App.IIntentService;
-//    using interface Elastos.Droid.App.IListActivity;
+    using interface Elastos.Droid.App.IListActivity;
 //    using interface Elastos.Droid.App.Backup.IBackupAgent;
 //    using interface Elastos.Droid.App.Backup.IBackupAgentHelper;
     using interface Elastos.Droid.App.ILoaderManagerLoaderCallbacks;
@@ -195,13 +195,13 @@ module
 //    using interface Elastos.Droid.Text.Method.IKeyListener;
 //    using interface Elastos.Droid.Text.Method.IMetaKeyKeyListener;
 //    using interface Elastos.Droid.Text.Method.INumberKeyListener;
-//    using interface Elastos.Droid.Preference.IPreference;
-//    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
-//    using interface Elastos.Droid.Preference.IPreferenceManagerOnActivityResultListener;
-//    using interface Elastos.Droid.Preference.IRingtonePreference;
-//    using interface Elastos.Droid.Preference.IPreferenceFragment;
-//    using interface Elastos.Droid.Preference.//IPreferenceFragmentOnPreferenceStartFragmentCallback;
-//    using interface Elastos.Droid.Preference.IPreferenceActivity;
+    using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
+    using interface Elastos.Droid.Preference.IPreferenceManagerOnActivityResultListener;
+    using interface Elastos.Droid.Preference.IRingtonePreference;
+    using interface Elastos.Droid.Preference.IPreferenceFragment;
+    using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    using interface Elastos.Droid.Preference.IPreferenceActivity;
 //    using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Telecom.IInCallService;
     using interface Elastos.Droid.Utility.IAttributeSet;
@@ -304,8 +304,8 @@ module
     interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
     interface Elastos.Droid.Dialer.List.ISpeedDialFragmentHostInterface;
 //    interface Elastos.Droid.Dialer.List.IOnDataSetChangedForAnimationListener;
-//    interface Elastos.Droid.Dialer.Settings.IDefaultRingtonePreference;
-//    interface Elastos.Droid.Dialer.Settings.IGeneralSettingsFragment;
+    interface Elastos.Droid.Dialer.Settings.IDefaultRingtonePreference;
+    interface Elastos.Droid.Dialer.Settings.IGeneralSettingsFragment;
 //    interface Elastos.Droid.Dialer.Util.IDialerUtils;
 //    interface Elastos.Droid.Dialer.Util.IOrientationUtil;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailPlaybackPresenterPlaybackView;
@@ -739,62 +739,64 @@ module
     } // Dialer
     } // Droid
     } // Elastos
-//
-//
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace Settings {
-//
-//    [local]
-//    class CDefaultRingtonePreference {
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        interface IPreference;
-//        interface IComparable;
-//        interface IPreferenceManagerOnActivityResultListener;
-//        interface IRingtonePreference;
-//        interface IDefaultRingtonePreference;
-//    }
-//
-//    class CDialerSettingsActivity {
-//        constructor();
-//        interface IListActivity;
-//        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
-//        interface IActivity;
-//        interface IContextThemeWrapper;
-//        interface ILayoutInflaterFactory;
-//        interface ILayoutInflaterFactory2;
-//        interface IWindowCallback;
-//        interface IKeyEventCallback;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IComponentCallbacks2;
-//        interface IComponentCallbacks;
-//        interface IOnWindowDismissedCallback;
-//        interface IContextWrapper;
-//        interface IContext;
-//        interface IPreferenceActivity;
-//        // TODO:
-//        // interface IAnalyticsPreferenceActivity;
-//        interface IDefaultRingtonePreference;
-//    }
-//
-//    class CGeneralSettingsFragment {
-//        interface IFragment;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IPreferenceFragment;
-//        interface IPreferenceOnPreferenceChangeListener;
-//        interface IGeneralSettingsFragment;
-//    }
-//
-//    } // Settings
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
-//
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Settings {
+
+    [local]
+    class CDefaultRingtonePreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IPreference;
+        interface IComparable;
+        interface IPreferenceManagerOnActivityResultListener;
+        interface IRingtonePreference;
+        interface IDefaultRingtonePreference;
+    }
+
+    class CDialerSettingsActivity {
+        constructor();
+        interface IListActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IActivity;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IOnWindowDismissedCallback;
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+        // TODO:
+        // interface IAnalyticsPreferenceActivity;
+        interface IDefaultRingtonePreference;
+    }
+
+    class CGeneralSettingsFragment {
+        constructor();
+        
+        interface IFragment;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IPreferenceFragment;
+        interface IPreferenceOnPreferenceChangeListener;
+        interface IGeneralSettingsFragment;
+    }
+
+    } // Settings
+    } // Dialer
+    } // Droid
+    } // Elastos
+
 //    namespace Elastos {
 //    namespace Droid {
 //    namespace Dialer {

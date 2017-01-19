@@ -16,57 +16,57 @@
   ~ limitations under the License
   -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
+    <CPreferenceCategory
         android:key="dialer_contact_display_options_category_key"
         android:title="@string/contact_display_options_category_title"
         android:persistent="false">
 
-        <com.android.contacts.common.preference.SortOrderPreference
+        <!-- com.android.contacts.common.preference.SortOrderPreference
             android:key="sortOrder"
             android:title="@string/display_options_sort_list_by"
-            android:dialogTitle="@string/display_options_sort_list_by" />
+            android:dialogTitle="@string/display_options_sort_list_by" -->
 
-        <com.android.contacts.common.preference.DisplayOrderPreference
+        <!-- com.android.contacts.common.preference.DisplayOrderPreference
             android:key="displayOrder"
             android:title="@string/display_options_view_names_as"
-            android:dialogTitle="@string/display_options_view_names_as" />
+            android:dialogTitle="@string/display_options_view_names_as" -->
 
-    </PreferenceCategory>
+    </CPreferenceCategory>
 
-    <PreferenceCategory
+    <CPreferenceCategory
         android:key="dialer_general_sounds_category_key"
         android:title="@string/sounds_and_vibrate_category_title"
         android:persistent="false">
 
-        <Elastos.Droid.Dialer.Settings.CDefaultRingtonePreference
+        <!-- elastos.droid.dialer.settings.CDefaultRingtonePreference
             android:key="button_ringtone_key"
             android:title="@string/ringtone_title"
             android:dialogTitle="@string/ringtone_title"
             android:persistent="false"
-            android:ringtoneType="ringtone" />
+            android:ringtoneType="ringtone" -->
 
-        <CheckBoxPreference
+        <CCheckBoxPreference
             android:key="button_play_dtmf_tone"
             android:title="@string/dtmf_tone_enable_title"
             android:persistent="false"
             android:defaultValue="true" />
 
-        <CheckBoxPreference
+        <CCheckBoxPreference
             android:key="button_vibrate_on_ring"
             android:title="@string/vibrate_on_ring_title"
             android:persistent="false"
             android:defaultValue="false" />
 
-    </PreferenceCategory>
+    </CPreferenceCategory>
 
-    <PreferenceCategory
+    <CPreferenceCategory
         android:key="dialer_general_other_settings_category_key"
         android:title="@string/other_settings_title"
         android:persistent="false" >
 
-        <PreferenceScreen
+        <CPreferenceScreen
             android:key="button_respond_via_sms_key"
             android:title="@string/respond_via_sms_setting_title"
             android:persistent="false">
@@ -76,8 +76,8 @@
                 android:targetPackage="com.android.server.telecom"
                 android:targetClass="com.android.server.telecom.RespondViaSmsSettings$Settings" />
 
-        </PreferenceScreen>
+        </CPreferenceScreen>
 
-    </PreferenceCategory>
+    </CPreferenceCategory>
 
-</PreferenceScreen>
+</CPreferenceScreen>
