@@ -27,10 +27,12 @@
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/preference/PreferenceActivity.h"
 #include "elastos/droid/widget/ArrayAdapter.h"
+#include "elastos/droid/dialerbind/analytics/AnalyticsPreferenceActivity.h"
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsPreferenceActivity;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Preference::PreferenceActivity;
 using Elastos::Droid::View::ILayoutInflater;
@@ -48,9 +50,7 @@ namespace Dialer {
 namespace Settings {
 
 class DialerSettingsActivity
-    // TODO:
-    /*: public AnalyticsPreferenceActivity*/
-    : public PreferenceActivity
+    : public AnalyticsPreferenceActivity
     , public IDialerSettingsActivity
 {
 private:

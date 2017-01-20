@@ -549,6 +549,7 @@
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/database
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/dialpad
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/list
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/settings
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/util
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/widget
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/calllog

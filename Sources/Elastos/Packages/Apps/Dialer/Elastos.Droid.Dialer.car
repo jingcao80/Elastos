@@ -776,14 +776,13 @@ module
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
-        // TODO:
-        // interface IAnalyticsPreferenceActivity;
-        interface IDefaultRingtonePreference;
+        interface IAnalyticsInterface;
+        interface IDialerSettingsActivity;
     }
 
     class CGeneralSettingsFragment {
         constructor();
-        
+
         interface IFragment;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;

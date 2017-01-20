@@ -24,3 +24,4 @@ SOURCES = AnalyticsActivity.cpp
 SOURCES += AnalyticsFragment.cpp
 SOURCES += AnalyticsListFragment.cpp
 SOURCES += AnalyticsDialogFragment.cpp
+SOURCES += AnalyticsPreferenceActivity.cpp

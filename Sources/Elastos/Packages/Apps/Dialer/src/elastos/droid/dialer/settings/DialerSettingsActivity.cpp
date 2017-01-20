@@ -82,7 +82,7 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
         view = convertView;
         AutoPtr<IInterface> tag;
         view->GetTag((IInterface**)&tag);
-        holder = (HeaderViewHolder*)(IObject*)tag.Get();
+        holder = (HeaderViewHolder*)IObject::Probe(tag);
     }
 
     // All view fields must be updated every time, because the view may be recycled
@@ -117,7 +117,7 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
 const Int32 DialerSettingsActivity::OWNER_HANDLE_ID = 0;
 
 // TODO:
-CAR_INTERFACE_IMPL(DialerSettingsActivity, /*AnalyticsPreferenceActivity*/PreferenceActivity, IDialerSettingsActivity);
+CAR_INTERFACE_IMPL(DialerSettingsActivity, AnalyticsPreferenceActivity, IDialerSettingsActivity);
 
 ECode DialerSettingsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
