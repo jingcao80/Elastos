@@ -36,9 +36,9 @@
 #include "Math.h"
 #include "CSystem.h"
 #include "CDate.h"
-//#include "CNativeDecimalFormat.h"
+#include "CNativeDecimalFormat.h"
 
-//using Libcore::ICU::CNativeDecimalFormat;
+using Libcore::ICU::CNativeDecimalFormat;
 using Libcore::ICU::LocaleData;
 using Libcore::IO::IoUtils;
 using Elastos::Core::EIID_IAppendable;
@@ -119,10 +119,10 @@ Boolean CFormatter::sHaveKey = InitTLS();
 
 AutoPtr<ArrayOf<Char32> > InitZEROS()
 {
-    Int32 len = 9;
-    AutoPtr<ArrayOf<Char32> > zeros = ArrayOf<Char32>::Alloc(len);
-    for (Int32 i = 0; i < len; i++)
+    AutoPtr<ArrayOf<Char32> > zeros = ArrayOf<Char32>::Alloc(9);
+    for (Int32 i = 0; i < 9; i++) {
         (*zeros)[i] = '0';
+    }
 
     return zeros;
 }
@@ -135,28 +135,27 @@ CAR_OBJECT_IMPL(CFormatter)
 CFormatter::CFormatter()
     : mClosed(FALSE)
     , mLastIOException(NOERROR)
-{
-}
+{}
 
 ECode CFormatter::constructor()
 {
     AutoPtr<StringBuilder> strbuild = new StringBuilder();
     AutoPtr<ILocale> deloc = CLocale::GetDefault();
-    return this->constructor((IAppendable*)strbuild->Probe(EIID_IAppendable), deloc);
+    return constructor(IAppendable::Probe(strbuild), deloc);
 }
 
 ECode CFormatter::constructor(
     /* [in] */ IAppendable* a)
 {
     AutoPtr<ILocale> deloc = CLocale::GetDefault();
-    return this->constructor(a, deloc);
+    return constructor(a, deloc);
 }
 
 ECode CFormatter::constructor(
     /* [in] */ ILocale* l)
 {
     AutoPtr<StringBuilder> strbuild = new StringBuilder();
-    return this->constructor((IAppendable*)strbuild->Probe(EIID_IAppendable), l);
+    return constructor(IAppendable::Probe(strbuild), l);
 }
 
 ECode CFormatter::constructor(
@@ -165,7 +164,7 @@ ECode CFormatter::constructor(
 {
     if (a == NULL) {
         AutoPtr<StringBuilder> strbuild = new StringBuilder();
-        mOut = (IAppendable*)strbuild->Probe(EIID_IAppendable);
+        mOut = IAppendable::Probe(strbuild);
     }
     else {
         mOut = a;
@@ -179,7 +178,7 @@ ECode CFormatter::constructor(
 {
     AutoPtr<IFile> file;
     FAIL_RETURN(CFile::New(fileName, (IFile**)&file));
-    return this->constructor(file);
+    return constructor(file);
 }
 
 ECode CFormatter::constructor(
@@ -188,7 +187,7 @@ ECode CFormatter::constructor(
 {
     AutoPtr<IFile> file;
     FAIL_RETURN(CFile::New(fileName, (IFile**)&file));
-    return this->constructor(file, csn);
+    return constructor(file, csn);
 }
 
 ECode CFormatter::constructor(
@@ -198,7 +197,7 @@ ECode CFormatter::constructor(
 {
     AutoPtr<IFile> file;
     FAIL_RETURN(CFile::New(fileName, (IFile**)&file));
-    return this->constructor(file, csn, l);
+    return constructor(file, csn, l);
 }
 
 ECode CFormatter::constructor(
@@ -206,7 +205,7 @@ ECode CFormatter::constructor(
 {
     AutoPtr<IFileOutputStream> ops;
     FAIL_RETURN(CFileOutputStream::New(file, (IFileOutputStream**)&ops));
-    return this->constructor(IOutputStream::Probe(ops));
+    return constructor(IOutputStream::Probe(ops));
 }
 
 ECode CFormatter::constructor(
@@ -214,7 +213,7 @@ ECode CFormatter::constructor(
     /* [in] */ const String& csn)
 {
     AutoPtr<ILocale> deloc = CLocale::GetDefault();
-    return this->constructor(file, csn, deloc);
+    return constructor(file, csn, deloc);
 }
 
 ECode CFormatter::constructor(
@@ -267,7 +266,7 @@ ECode CFormatter::constructor(
     /* [in] */ const String& csn)
 {
     AutoPtr<ILocale> defloc = CLocale::GetDefault();
-    return this->constructor(os, csn, defloc);
+    return constructor(os, csn, defloc);
 }
 
 ECode CFormatter::constructor(
@@ -1750,8 +1749,7 @@ void CFormatter::TransformA(
 //       CFormatter::CachedDecimalFormat
 //==========================================================
 CFormatter::CachedDecimalFormat::CachedDecimalFormat()
-{
-}
+{}
 
 AutoPtr<INativeDecimalFormat> CFormatter::CachedDecimalFormat::Update(
     /* [in] */ ILocaleData* localeData,
@@ -1760,7 +1758,7 @@ AutoPtr<INativeDecimalFormat> CFormatter::CachedDecimalFormat::Update(
     if (mDecimalFormat == NULL) {
         mCurrentPattern = pattern;
         mCurrentLocaleData = localeData;
-//        CNativeDecimalFormat::New(mCurrentPattern, mCurrentLocaleData, (INativeDecimalFormat**)&mDecimalFormat);
+        CNativeDecimalFormat::New(mCurrentPattern, mCurrentLocaleData, (INativeDecimalFormat**)&mDecimalFormat);
     }
     if (!pattern.Equals(mCurrentPattern)) {
         mDecimalFormat->ApplyPattern(pattern);

@@ -68,6 +68,7 @@ using Elastos::Core::CFloat;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
 using Elastos::Core::CString;
+using Elastos::Core::IAppendable;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::EIID_IComparator;
 using Elastos::Utility::IArrayList;
@@ -1468,7 +1469,7 @@ const AutoPtr< ArrayOf<String> > BatteryStats::BLUETOOTH_STATE_NAMES = InitBluet
 BatteryStats::BatteryStats()
 {
     mFormatBuilder = new StringBuilder(32);
-    CFormatter::New(mFormatBuilder->ToString(), (IFormatter**)&mFormatter);
+    CFormatter::New(IAppendable::Probe(mFormatBuilder), (IFormatter**)&mFormatter);
 }
 
 CAR_INTERFACE_IMPL(BatteryStats, Object, IBatteryStats);
@@ -3539,7 +3540,7 @@ void BatteryStats::DumpLocked(
 
                 AutoPtr<IInterface> value;
                 ent->GetValue((IInterface**)&value);
-                IBatteryStatsUidWakelock* wl = IBatteryStatsUidWakelock::Probe(wl);
+                IBatteryStatsUidWakelock* wl = IBatteryStatsUidWakelock::Probe(value);
                 String linePrefix(": ");
                 sb.SetLength(0);
                 sb.Append(prefix);
