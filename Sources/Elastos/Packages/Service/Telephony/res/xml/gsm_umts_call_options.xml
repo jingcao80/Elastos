@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
      xmlns:phone="http://schemas.android.com/apk/res/com.android.phone"
      android:title="@string/labelGSMMore">
 
-    <SwitchPreference
+    <CSwitchPreference
         android:key="button_show_ssn_key"
         android:title="@string/show_ssn_label"
         android:defaultValue="false"
         android:summary="@string/show_ssn_summary" />
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_cf_expand_key"
         android:title="@string/labelCF"
         android:persistent="false">
@@ -17,9 +17,9 @@
         <intent android:action="android.intent.action.MAIN"
             android:targetPackage="com.android.phone"
             android:targetClass="com.android.phone.GsmUmtsCallForwardOptions"/>
-    </PreferenceScreen>
+    </CPreferenceScreen>
 
-    <PreferenceScreen
+    <CPreferenceScreen
         android:key="button_more_expand_key"
         android:title="@string/additional_gsm_call_settings"
         android:persistent="false">
@@ -27,5 +27,5 @@
         <intent android:action="android.intent.action.MAIN"
             android:targetPackage="com.android.phone"
             android:targetClass="com.android.phone.GsmUmtsAdditionalCallOptions"/>
-    </PreferenceScreen>
-</PreferenceScreen>
+    </CPreferenceScreen>
+</CPreferenceScreen>

@@ -18,19 +18,21 @@
 #define __ELASTOS_DROID_DIALER_SETTINGS_DEFAULTSETTINGSACTIVITY_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/droid/app/Activity.h"
-#include "elastos/droid/widget/ArrayAdapter.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
+#include "elastos/droid/widget/ArrayAdapter.h"
 
 using Elastos::Droid::App::Activity;
-using Elastos::Droid::App::ISharedPreferences;
+using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Preference::PreferenceActivity;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IView;
@@ -48,7 +50,7 @@ namespace Settings {
 class DialerSettingsActivity
     // TODO:
     /*: public AnalyticsPreferenceActivity*/
-    : public Activity
+    : public PreferenceActivity
     , public IDialerSettingsActivity
 {
 private:
@@ -65,7 +67,7 @@ private:
         {
         public:
             AutoPtr<ITextView> mTitle;
-            AutoPtr<ITextView> summary;
+            AutoPtr<ITextView> mSummary;
         };
 
     public:
@@ -99,6 +101,7 @@ public:
     // @Override
     CARAPI SetListAdapter(
         /* [in] */ IListAdapter* adapter);
+
 protected:
     // @Override
     CARAPI OnCreate(
@@ -123,7 +126,7 @@ protected:
 private:
     AutoPtr<HeaderAdapter> mHeaderAdapter;
 
-    static const Int32 OWNER_HANDLE_ID; // = 0;
+    static const Int32 OWNER_HANDLE_ID;
 };
 
 } // Settings

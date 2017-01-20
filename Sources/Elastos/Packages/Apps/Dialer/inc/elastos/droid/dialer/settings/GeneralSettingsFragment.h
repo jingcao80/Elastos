@@ -59,9 +59,12 @@ private:
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
+        CARAPI ToString(
+            /* [out] */ String* str);
+
     private:
         GeneralSettingsFragment* mHost;
-    }
+    };
 
     class RingtoneLookupRunnable
         : public Runnable
@@ -81,6 +84,8 @@ public:
     CAR_INTERFACE_DECL();
 
     GeneralSettingsFragment();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI OnCreate(
@@ -111,13 +116,13 @@ public:
     CARAPI OnResume();
 
 private:
-    static const String CATEGORY_SOUNDS_KEY; //    = "dialer_general_sounds_category_key";
-    static const String BUTTON_RINGTONE_KEY; //    = "button_ringtone_key";
-    static const String BUTTON_VIBRATE_ON_RING; // = "button_vibrate_on_ring";
-    static const String BUTTON_PLAY_DTMF_TONE; //  = "button_play_dtmf_tone";
-    static const String BUTTON_RESPOND_VIA_SMS_KEY; // = "button_respond_via_sms_key";
+    static const String CATEGORY_SOUNDS_KEY;
+    static const String BUTTON_RINGTONE_KEY;
+    static const String BUTTON_VIBRATE_ON_RING;
+    static const String BUTTON_PLAY_DTMF_TONE;
+    static const String BUTTON_RESPOND_VIA_SMS_KEY;
 
-    static const Int32 MSG_UPDATE_RINGTONE_SUMMARY; // = 1;
+    static const Int32 MSG_UPDATE_RINGTONE_SUMMARY;
 
     AutoPtr<IContext> mContext;
 

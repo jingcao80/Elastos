@@ -55,9 +55,9 @@ Boolean SipUtil::IsVoipSupported(
     Boolean res1, res2;
     resources->GetBoolean(Elastos::Droid::R::bool_::config_built_in_sip_phone, &res1);
     resources->GetBoolean(Elastos::Droid::R::bool_::config_voice_capable, &res2);
-    assert(0);
+    // TODO
     //return SipManager.isVoipSupported(context) && res1 && res2;
-    return FALSE;
+    return res1 && res2;;
 }
 
 AutoPtr<IPendingIntent> SipUtil::CreateIncomingCallPendingIntent(

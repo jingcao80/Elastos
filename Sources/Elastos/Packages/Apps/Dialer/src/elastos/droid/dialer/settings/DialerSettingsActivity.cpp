@@ -16,16 +16,26 @@
 
 #include "elastos/droid/dialer/settings/DialerSettingsActivity.h"
 #include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Text.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/DialtactsActivity.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "R.h"
 
-using Elastos::Droid::Os::IUserHanlde;
+using Elastos::Droid::Dialer::DialtactsActivity;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Preference::IPreferenceActivityHeader;
 using Elastos::Droid::Preference::CPreferenceActivityHeader;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Core::ICharSequence;
-using Elastos::Core::CArrayList;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -66,19 +76,19 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
         temp = NULL;
         view->FindViewById(R::id::summary, (IView**)&temp);
         holder->mSummary = ITextView::Probe(temp);
-        view->SetTag(holder);
+        view->SetTag(TO_IINTERFACE(holder));
     }
     else {
         view = convertView;
         AutoPtr<IInterface> tag;
         view->GetTag((IInterface**)&tag);
-        holder = (HeaderViewHolder*)tag;
+        holder = (HeaderViewHolder*)(IObject*)tag.Get();
     }
 
     // All view fields must be updated every time, because the view may be recycled
     AutoPtr<IInterface> item;
     GetItem(position, (IInterface**)&item);
-    IPreferenceActivityHeader* header = IPreferenceActivityHeader::Probe(item);
+    AutoPtr<IPreferenceActivityHeader> header = IPreferenceActivityHeader::Probe(item);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
@@ -88,13 +98,13 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
     header->GetTitle(res, (ICharSequence**)&title);
     holder->mTitle->SetText(title);
     AutoPtr<ICharSequence> summary;
-    header->GetSummary(res);
+    header->GetSummary(res, (ICharSequence**)&summary);
     if (!TextUtils::IsEmpty(summary)) {
-        holder->mSummary->SetVisibility(IView::VISIBLE);
+        IView::Probe(holder->mSummary)->SetVisibility(IView::VISIBLE);
         holder->mSummary->SetText(summary);
     }
     else {
-        holder->mSummary->SetVisibility(IView::GONE);
+        IView::Probe(holder->mSummary)->SetVisibility(IView::GONE);
     }
     *result = view;
     REFCOUNT_ADD(*result)
@@ -104,17 +114,18 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
 //=================================================================
 // DialerSettingsActivity
 //=================================================================
+const Int32 DialerSettingsActivity::OWNER_HANDLE_ID = 0;
+
 // TODO:
-CAR_INTERFACE_IMPL(DialerSettingsActivity, /*AnalyticsPreferenceActivity*/Activity, IDialerSettingsActivity);
+CAR_INTERFACE_IMPL(DialerSettingsActivity, /*AnalyticsPreferenceActivity*/PreferenceActivity, IDialerSettingsActivity);
 
 ECode DialerSettingsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    assert(0 && "TODO");
-    // AnalyticsPreferenceActivity::OnCreate(savedInstanceState);
+    PreferenceActivity::OnCreate(savedInstanceState);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
-    helper->GetDefaultSharedPreferences(this, (ISharedPreferences**)&mPreferences);
+    helper->GetDefaultSharedPreferences(IContext::Probe(this), (ISharedPreferences**)&mPreferences);
     return NOERROR;
 }
 
@@ -125,8 +136,8 @@ ECode DialerSettingsActivity::OnBuildHeaders(
     CPreferenceActivityHeader::New((IPreferenceActivityHeader**)&generalSettingsHeader);
     generalSettingsHeader->SetTitleRes(R::string::general_settings_label);
     generalSettingsHeader->SetSummaryRes(R::string::general_settings_description);
-    generalSettingsHeader->SetFragment(String("GeneralSettingsFragment"));
-    target->Sdd(generalSettingsHeader);
+    generalSettingsHeader->SetFragment(String("Elastos.Droid.Dialer.Settings.CGeneralSettingsFragment"));
+    target->Add(generalSettingsHeader);
 
     // Only add the call settings header if the current user is the primary/owner user.
     if (IsPrimaryUser()) {
@@ -134,13 +145,14 @@ ECode DialerSettingsActivity::OnBuildHeaders(
         CPreferenceActivityHeader::New((IPreferenceActivityHeader**)&callSettingHeader);
         callSettingHeader->SetTitleRes(R::string::call_settings_label);
         callSettingHeader->SetSummaryRes(R::string::call_settings_description);
-        assert(0 && "TODO");
-        // callSettingHeader->SetIntent(DialtactsActivity::GetCallSettingsIntent());
+        callSettingHeader->SetIntent(DialtactsActivity::GetCallSettingsIntent());
         target->Add(callSettingHeader);
     }
 
     return NOERROR;
 }
+
+#include "elastos/droid/R.h"
 
 ECode DialerSettingsActivity::OnOptionsItemSelected(
     /* [in] */ IMenuItem* item,
@@ -148,7 +160,7 @@ ECode DialerSettingsActivity::OnOptionsItemSelected(
 {
     VALIDATE_NOT_NULL(result);
     Int32 id;
-    if (item->GetItemId(&id), id == Elastos::R::id::home) {
+    if (item->GetItemId(&id), id == Elastos::Droid::R::id::home) {
         OnBackPressed();
         *result = TRUE;
         return NOERROR;
@@ -170,25 +182,27 @@ ECode DialerSettingsActivity::SetListAdapter(
     /* [in] */ IListAdapter* adapter)
 {
     if (adapter == NULL) {
-        assert(0 && "TODO");
+        //TODO
+        PreferenceActivity::SetListAdapter(NULL);
         // AnalyticsPreferenceActivity::SetListAdapter(NULL);
     }
     else {
         // We don't have access to the hidden getHeaders() method, so grab the headers from
         // the intended adapter and then replace it with our own.
-        Int32 headerCount;
-        adapter->GetCount(&headerCount);
+        Int32 headerCount = 0;
+        IAdapter::Probe(adapter)->GetCount(&headerCount);
         AutoPtr<IList> headers;
         CArrayList::New((IList**)&headers);
-        for (int i = 0; i < headerCount; i++) {
+        for (Int32 i = 0; i < headerCount; i++) {
             AutoPtr<IInterface> item;
-            adapter->GetItem(i, (IInterface**)&item);
+            IAdapter::Probe(adapter)->GetItem(i, (IInterface**)&item);
             headers->Add(item);
         }
         mHeaderAdapter = new HeaderAdapter();
-        mHeaderAdapter->constructor((IContext*)this, headers);
+        mHeaderAdapter->constructor(IContext::Probe(this), headers);
 
-        assert(0 && "TODO");
+        // TODO
+        PreferenceActivity::SetListAdapter(mHeaderAdapter);
         // AnalyticsPreferenceActivity::SetListAdapter(mHeaderAdapter);
     }
     return NOERROR;
@@ -198,7 +212,7 @@ Boolean DialerSettingsActivity::IsPrimaryUser()
 {
     AutoPtr<IInterface> service;
     GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
-    IUserManager* userManager = IUserManager::Probe(service);
+    AutoPtr<IUserManager> userManager = IUserManager::Probe(service);
     AutoPtr<IList> userHandles;
     userManager->GetUserProfiles((IList**)&userHandles);
     Int32 size;
@@ -206,9 +220,9 @@ Boolean DialerSettingsActivity::IsPrimaryUser()
     for (Int32 i = 0; i < size; i++){
         AutoPtr<IInterface> item;
         userHandles->Get(i, (IInterface**)&item);
-        Int32 id;
-        IUserHanlde::Probe(item)->GetMyUserId(&id);
-        if (id == OWNER_HANDLE_ID) {
+        // TODO
+        // userHandles.get(i).myUserId()
+        if (UserHandle::GetMyUserId() == OWNER_HANDLE_ID) {
             return TRUE;
         }
     }

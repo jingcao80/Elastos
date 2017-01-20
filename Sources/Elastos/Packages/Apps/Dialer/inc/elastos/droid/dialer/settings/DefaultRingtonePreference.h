@@ -18,7 +18,7 @@
 #define __ELASTOS_DROID_DIALER_SETTINGS_DEFAULTRINGTONEPREFERENCE_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include "elastos/droid/prefernece.RingtonePreference.h"
+#include "elastos/droid/preference/RingtonePreference.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Utility.h"

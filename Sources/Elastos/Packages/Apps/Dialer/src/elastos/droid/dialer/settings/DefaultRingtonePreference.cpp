@@ -30,15 +30,15 @@ CAR_INTERFACE_IMPL(DefaultRingtonePreference, RingtonePreference, IDefaultRingto
 
 ECode DefaultRingtonePreference::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ AttributeSet attrs)
+    /* [in] */ IAttributeSet* attrs)
 {
-    return DefaultRingtonePreference::constructor(context, attrs);
+    return RingtonePreference::constructor(context, attrs);
 }
 
 ECode DefaultRingtonePreference::OnPrepareRingtonePickerIntent(
     /* [in] */ IIntent* ringtonePickerIntent)
 {
-    DefaultRingtonePreference::OnPrepareRingtonePickerIntent(ringtonePickerIntent);
+    RingtonePreference::OnPrepareRingtonePickerIntent(ringtonePickerIntent);
 
     /*
      * Since this preference is for choosing the default ringtone, it

@@ -25,6 +25,7 @@
 #include "elastos/droid/dialer/DialtactsActivity.h"
 // #include "elastos/droid/dialer/SpecialCharSequenceMgr.h"
 #include "elastos/droid/phone/common/animation/AnimUtils.h"
+#include "elastos/droid/phone/common/CHapticFeedback.h"
 #include <elastos/droid/provider/Settings.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/view/LayoutInflater.h>
@@ -52,6 +53,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Phone::Common::CHapticFeedback;
 using Elastos::Droid::Provider::IContactsPeople;
 using Elastos::Droid::Provider::IContactsPhones;
 using Elastos::Droid::Provider::IContactsPhonesColumns;
@@ -565,7 +567,7 @@ ECode DialpadFragment::constructor()
     CHashSet::New(12, (IHashSet**)&mPressedDialpadKeys);
     // TODO:
     // CCallLogAsync::New((ICallLogAsync**)&mCallLog);
-    mHaptic = new HapticFeedback();
+    CHapticFeedback::New((IHapticFeedback**)&mHaptic);
     mPhoneStateListener = new DialpadPhoneStateListener();
     mPhoneStateListener->constructor(this);
     mInnerListener = new InnerListener(this);
@@ -1023,7 +1025,7 @@ ECode DialpadFragment::OnResume()
 
     // retrieve the DTMF tone play back setting.
     Int32 value;
-    Settings::System::GetInt32(contentResolver,
+    Elastos::Droid::Provider::Settings::System::GetInt32(contentResolver,
             ISettingsSystem::DTMF_TONE_WHEN_DIALING, 1, &value);
     mDTMFToneEnabled = value == 1;
 
@@ -1418,7 +1420,7 @@ ECode DialpadFragment::OnLongClick(
                     AutoPtr<IContentResolver> resolver;
                     IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
                     Int32 value;
-                    Settings::System::GetInt32(resolver,
+                    Elastos::Droid::Provider::Settings::System::GetInt32(resolver,
                             ISettingsSystem::AIRPLANE_MODE_ON, 0, &value);
                     Boolean isAirplaneModeOn = value != 0;
                     if (isAirplaneModeOn) {

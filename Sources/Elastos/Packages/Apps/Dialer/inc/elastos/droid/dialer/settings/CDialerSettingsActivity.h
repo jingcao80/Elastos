@@ -18,7 +18,7 @@
 #define __ELASTOS_DROID_DIALER_SETTINGS_CDEFAULTSETTINGSACTIVITY_H__
 
 #include "_Elastos_Droid_Dialer_Settings_CDialerSettingsActivity.h"
-#include "elastos/apps/dialer/settings/DialerSettingsActivity.h"
+#include "elastos/droid/dialer/settings/DialerSettingsActivity.h"
 
 namespace Elastos {
 namespace Droid {
