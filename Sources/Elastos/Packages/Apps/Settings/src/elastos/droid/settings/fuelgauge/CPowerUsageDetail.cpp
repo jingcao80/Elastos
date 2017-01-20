@@ -234,8 +234,7 @@ void CPowerUsageDetail::StartBatteryDetailPage(
     }
     BatterySipperDrainType drainType;
     entry->mSipper->GetDrainType(&drainType);
-    assert(0 && "TODO");
-    // args->PutSerializable(CPowerUsageDetail::EXTRA_DRAIN_TYPE, drainType);
+    args->PutInt32(CPowerUsageDetail::EXTRA_DRAIN_TYPE, drainType);
     args->PutBoolean(CPowerUsageDetail::EXTRA_SHOW_LOCATION_BUTTON, showLocationButton);
 
     Int32 userId = UserHandle::GetMyUserId();
@@ -521,10 +520,7 @@ void CPowerUsageDetail::CreateDetails()
     args->GetInt32(EXTRA_GAUGE, 1, &gaugeValue);
     args->GetInt32(EXTRA_USAGE_SINCE, USAGE_SINCE_UNPLUGGED, &mUsageSince);
     args->GetInt32(EXTRA_UID, 0, &mUid);
-    AutoPtr<ISerializable> serializable;
-    args->GetSerializable(EXTRA_DRAIN_TYPE, (ISerializable**)&serializable);
-    assert(0 && "TODO");
-    // mDrainType = (BatterySipperDrainType)serializable;
+    args->GetInt32(EXTRA_DRAIN_TYPE, &mDrainType);
     args->GetDouble(EXTRA_NO_COVERAGE, 0, &mNoCoverage);
     String iconPackage;
     args->GetString(EXTRA_ICON_PACKAGE, &iconPackage);
@@ -1086,8 +1082,7 @@ String CPowerUsageDetail::GetDescriptionForDrainType()
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     String str;
-    assert(0 && "TODO");
-    // resources->GetString((*sDrainTypeDesciptions)[mDrainType->Ordinal()], &str);
+    resources->GetString((*sDrainTypeDesciptions)[mDrainType], &str);
     return str;
 }
 
