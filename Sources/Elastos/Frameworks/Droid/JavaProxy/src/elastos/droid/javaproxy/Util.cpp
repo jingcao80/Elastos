@@ -1820,7 +1820,8 @@ Boolean Util::SetJavaBaseBundle(
                             env->CallBooleanMethod(jlist, mAdd, jitem);
                             CheckErrorAndLog(env, "GetJavaInputDevice Fail CallObjectMethod: mAdd : %d!\n", __LINE__);
                             env->DeleteLocalRef(jitem);
-                        } else if (ECLSID_CIParcelableNative == clsid) {
+                        }
+                        else if (ECLSID_CIParcelableNative == clsid) {
                             jobject jitem = Util::ToJavaParcelable(env, IParcelable::Probe(item));
                             if (jitem != NULL) {
                                 env->CallBooleanMethod(jlist, mAdd, jitem);
@@ -1828,10 +1829,12 @@ Boolean Util::SetJavaBaseBundle(
 
                                 env->DeleteLocalRef(jitem);
                             }
+
                             else {
                                 LOGGERE("ToJavaBundle", "IObjectContainer Unknown type!");
                             }
-                        } else {
+                        }
+                        else {
                             LOGGERE("ToJavaBundle", "IObjectContainer ToJavaParcelable fail!");
                         }
                     }
@@ -1841,10 +1844,9 @@ Boolean Util::SetJavaBaseBundle(
 
                     env->CallVoidMethod(jbundle, m, jKey, jlist);
                     Util::CheckErrorAndLog(env, "ToJavaBundle", "CallVoidMethod: putParcelableArrayList %d", __LINE__);
-
-                    env->DeleteLocalRef(listKlass);
-                    env->DeleteLocalRef(jlist);
                 }
+                env->DeleteLocalRef(listKlass);
+                env->DeleteLocalRef(jlist);
             }
             else if (ISerializable::Probe(value) != NULL) {
                 ClassID clsid;
@@ -2277,7 +2279,8 @@ jobject Util::ToJavaLocale(
     else if ((localeHelp->GetUS((ILocale**)&slocale), slocale->Equals(locale, &result), result)) {
         f = env->GetStaticFieldID(localKlass, "US", "Ljava/util/Locale;");
         Util::CheckErrorAndLog(env, "ToJavaLocale", "Fail GetStaticFieldID: US : %d", __LINE__);
-    }  else if ((localeHelp->GetUK((ILocale**)&slocale), slocale->Equals(locale, &result), result)) {
+    }
+    else if ((localeHelp->GetUK((ILocale**)&slocale), slocale->Equals(locale, &result), result)) {
         f = env->GetStaticFieldID(localKlass, "UK", "Ljava/util/Locale;");
         Util::CheckErrorAndLog(env, "ToJavaLocale", "Fail GetStaticFieldID: UK : %d", __LINE__);
     }
@@ -5600,7 +5603,8 @@ String Util::GetClassName(
     /* [in] */ JNIEnv* env,
     /* [in] */ jobject obj)
 {
-    jclass cls, clsobj;
+    jclass cls;
+    jclass clsobj;
     jmethodID getName;
     jstring jstr;
     String className;
@@ -7220,14 +7224,14 @@ Boolean Util::GetElRemoteViews(
                         Util::CheckErrorAndLog(env, "GetObjectField: filterMode : %d!\n", __LINE__);
 
                         Int32 mode = -1;
-                        if (jmode != NULL){
+                        if (jmode != NULL) {
                             jclass c = env->GetObjectClass(jmode);
                             mode = GetJavaIntField(env, c, jmode, "nativeInt", "GetElRemoteViews");
                             env->DeleteLocalRef(c);
                             env->DeleteLocalRef(jmode);
                             LOGGERE(TAG, "GetElRemoteViews, SetDrawableParameters, PorterDuff.Mode mode = %d", mode);
                         }
-                        else{
+                        else {
                             LOGGERE(TAG, "GetElRemoteViews, SetDrawableParameters, PorterDuff.Mode mode = NULL");
                         }
 
@@ -7359,13 +7363,15 @@ Boolean Util::GetElRemoteViews(
                         if (jnestedViews != NULL){
                             GetElRemoteViews(env, jnestedViews, (IRemoteViews**)&nestedViews);
                             env->DeleteLocalRef(jnestedViews);
-                        }else{
+                        }
+                        else {
                             LOGGERW(TAG, "GetElRemoteViews: found a ViewGroupAction action. jnestedViews is null");
                         }
 
                         if (nestedViews == NULL){
                             (*remoteview)->RemoveAllViews(viewId);
-                        }else{
+                        }
+                        else {
                             (*remoteview)->AddView(viewId, nestedViews);
                         }
                         break;
@@ -7380,7 +7386,8 @@ Boolean Util::GetElRemoteViews(
 
                         if (methodName.Equals(String("ShowNext"))){
                             (*remoteview)->ShowNext(viewId);
-                        }else if (methodName.Equals(String("ShowPrevious"))){
+                        }
+                        else if (methodName.Equals(String("ShowPrevious"))){
                             (*remoteview)->ShowPrevious(viewId);
                         }
 
@@ -7443,7 +7450,8 @@ Boolean Util::GetElRemoteViews(
 
                         if (isRelative){
                             (*remoteview)->SetTextViewCompoundDrawablesRelative(viewId, d1, d2, d3, d4);
-                        }else{
+                        }
+                        else{
                             (*remoteview)->SetTextViewCompoundDrawables(viewId, d1, d2, d3, d4);
                         }
                         break;
@@ -7498,8 +7506,9 @@ Boolean Util::GetElRemoteViews(
                         if (jlist != NULL){
                             jint jsize = env->CallIntMethod(jlist, mSize);
                             CheckErrorAndLog(env, "CallIntMethod: list : %d!\n", __LINE__);
-                            if (jsize > 0)
+                            if (jsize > 0) {
                                 CArrayList::New((IArrayList**)&list);
+                            }
                             for (jint j = 0; j < jsize; j++) {
                                 jobject jitem = env->CallObjectMethod(jlist, mGet, j);
                                 CheckErrorAndLog(env, "CallObjectMethod: get : %d!\n", __LINE__);
@@ -8034,7 +8043,8 @@ jobject Util::ToJavaRemoteViews(
                     if (isRelative){
                         method = env->GetMethodID(klass, "setTextViewCompoundDrawablesRelative", "(IIIII)V");
                         CheckErrorAndLog(env, "Util::ToJavaRemoteViews()", "ToJavaRemoteViews(): FindMethod: setTextViewCompoundDrawablesRelative: %d!\n", __LINE__);
-                    }else{
+                    }
+                    else{
                         method = env->GetMethodID(klass, "setTextViewCompoundDrawables", "(IIIII)V");
                         CheckErrorAndLog(env, "Util::ToJavaRemoteViews()", "ToJavaRemoteViews(): FindMethod: setTextViewCompoundDrawables: %d!\n", __LINE__);
                     }
@@ -8109,10 +8119,12 @@ jobject Util::ToJavaRemoteViews(
 
                             env->DeleteLocalRef(jbitmap);
                             env->DeleteLocalRef(jmethodName);
-                        }else{
+                        }
+                        else{
                             LOGGERE("Util::ToJavaRemoteViews()", "ToJavaRemoteViews(), read BitmapReflectionAction action, did not found bitmap in bitmapCache");
                         }
-                    }else{
+                    }
+                    else{
                         LOGGERE("Util::ToJavaRemoteViews()", "ToJavaRemoteViews(), read BitmapReflectionAction action, But bitmapCache is null");
                     }
 
@@ -11320,7 +11332,8 @@ Boolean Util::GetElClipData(
     AutoPtr<IParcelable> clipParcel = IParcelable::Probe(*clip);
     if (clipParcel != NULL) {
         clipParcel->ReadFromParcel(source);
-    }else {
+    }
+    else {
         LOGGERE("GetElClipData", "Get IParcelable  from IClipData failed!");
         return FALSE;
     }

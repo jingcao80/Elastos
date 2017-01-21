@@ -152,7 +152,8 @@ ECode CIILocationProviderNative::GetProperties(
             Logger::E(TAG, "GetProperties() GetElProviderProperties fail!");
         }
         env->DeleteLocalRef(jproperties);
-    } else {
+    }
+    else {
         *properties = NULL;
     }
 
@@ -192,13 +193,15 @@ ECode CIILocationProviderNative::GetStatus(
             if (!Util::GetElBundle(env, jextras, *extras)) {
                 Logger::E(TAG, "GetStatus() GetElBundle fail!");
             }
-        } else {
+        }
+        else {
             if (!Util::GetElBundle(env, jextras, extras)) {
                 Logger::E(TAG, "GetStatus() GetElBundle fail!");
             }
         }
         env->DeleteLocalRef(jextras);
-    } else {
+    }
+    else {
         Logger::E(TAG, "CIILocationProviderNative::GetStatus() jextras is NULL");
     }
 

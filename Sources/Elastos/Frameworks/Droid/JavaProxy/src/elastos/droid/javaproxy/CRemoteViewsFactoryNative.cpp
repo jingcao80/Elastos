@@ -181,7 +181,8 @@ ECode CRemoteViewsFactoryNative::GetViewAt(
     if(remoteViews != NULL){
         *views = IParcelable::Probe(remoteViews.Get());
         if (*views) (*views)->AddRef();
-    }else{
+    }
+    else{
         Logger::E(TAG, "CRemoteViewsFactoryNative::GetViewAt(), got remoteViews null");
     }
 

@@ -705,6 +705,8 @@ ECode CCursorNative::RegisterContentObserver(
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: registerContentObserver %d", __LINE__);
     env->DeleteLocalRef(jobserver);
 
+    env->DeleteLocalRef(c);
+
     // LOGGERD(TAG, "- CCursorNative::RegisterContentObserver()");
     return NOERROR;
 }
@@ -977,6 +979,8 @@ ECode CCursorNative::RegisterDataSetObserver(
 
     env->CallVoidMethod(mJInstance, m, jobserver);
     Util::CheckErrorAndLog(env, TAG, "CallVoidMethod: registerDataSetObserver %d", __LINE__);
+
+    env->DeleteLocalRef(c);
 
     // LOGGERD(TAG, "- CCursorNative::RegisterDataSetObserver()");
     return NOERROR;

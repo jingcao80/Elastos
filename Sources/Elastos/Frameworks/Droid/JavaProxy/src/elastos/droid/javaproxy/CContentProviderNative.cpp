@@ -238,7 +238,8 @@ static String GetJavaClassName(
     /* [in] */ JNIEnv* env,
     /* [in] */ jobject obj)
 {
-    jclass cls, clsobj;
+    jclass cls;
+    jclass clsobj;
     jmethodID getName;
     jstring jstr;
     String className;
@@ -604,9 +605,7 @@ ECode CContentProviderNative::Delete(
     *rowsAffected = env->CallIntMethod(mJInstance, m, jcallingPkg, juri, jselection, jselectionArgs);
     ECode ec = Util::CheckErrorAndLog(env, TAG, "CallIntMethod: Delete Line: %d", __LINE__);
 
-    if (NULL != c) {
-        env->DeleteLocalRef(c);
-    }
+    env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcallingPkg);
 
     if (NULL != juri) {
@@ -669,9 +668,7 @@ ECode CContentProviderNative::Update(
     *rowsAffected = env->CallIntMethod(mJInstance, m, jcallingPkg, juri, jInitialValues, jselection, jselectionArgs);
     ECode ec = Util::CheckErrorAndLog(env, TAG, "CallIntMethod: Update Line: %d", __LINE__);
 
-    if (NULL != c) {
-        env->DeleteLocalRef(c);
-    }
+    env->DeleteLocalRef(c);
     env->DeleteLocalRef(jcallingPkg);
 
     if (NULL != juri) {
