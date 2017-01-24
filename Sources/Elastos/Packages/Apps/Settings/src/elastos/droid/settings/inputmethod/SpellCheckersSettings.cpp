@@ -344,6 +344,9 @@ void SpellCheckersSettings::ShowChooseLanguageDialog()
     }
     AutoPtr<ISpellCheckerInfo> currentSci;
     mTsm->GetCurrentSpellChecker((ISpellCheckerInfo**)&currentSci);
+    if (currentSci == NULL) {
+        return;
+    }
     AutoPtr<ISpellCheckerSubtype> currentScs;
     mTsm->GetCurrentSpellCheckerSubtype(
             FALSE /* allowImplicitlySelectedSubtype */, (ISpellCheckerSubtype**)&currentScs);
