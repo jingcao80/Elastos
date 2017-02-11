@@ -159,6 +159,7 @@ Int32 Utils::BinarySearchDistinctRanges(
     /* [in] */ IInterface* value)
 {
     assert(0 && "TODO");
+    return -1;
 }
 
 Int32 Utils::Gcd(
