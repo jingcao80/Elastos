@@ -54,7 +54,7 @@
 Elastos是面向智能终端的通用操作系统，基于Android的开放资源，采用CAR构件技术开发。Elastos操作系统具有类似WinRT(Windows Runtime)的系统架构，以一致的应用模型支持C++、Java以及JavaScript应用开发。Elastos的系统架构如下图所示。
 ![Elastos系统架构图](./elastos_arch.png)
 
-本文档并不包括对CAR构件技术的完整介绍，文档所涉及CAR的内容是对在开发Elastos过程中对CAR构件技术所做的改进的论述，是对 __《CAR构件技术》__ 的修改和补充。
+本文档并不包括对CAR构件技术的完整介绍，文档所涉及CAR的内容是对在开发Elastos过程中对CAR构件技术所做的改进的论述，是对 __《CAR构件与编程模型技术文档》__ 的修改和补充。
 
 本文档使用 [Markdown](http://wowubuntu.com/markdown/) 编写而成。
 
@@ -488,7 +488,7 @@ class CPKIXBuilderParameters {
 }
 ```
 
-控件类的CAR构造方法的参数命名有特殊的规则，为了支持通过反射从xml中解析出来控件类名称创建出对应的控件，所有实现 __IView__ 或者 __IActionProvider__ 接口的CAR类的构造方法 __constructor__ 的第一个参数若为 __IContext*__类型则参数名应为 __ctx__；第二个参数若为 __IAttributeSet*__ 类型则参数名应为 __attrs__。例如：
+控件类的CAR构造方法的参数命名有特殊的规则，为了支持通过反射从xml中解析出来控件类名称创建出对应的控件，所有实现 __IView__ 或者 __IActionProvider__ 接口的CAR类的构造方法 __constructor__ 的第一个参数若为 __IContext\*__ 类型则参数名应为 __ctx__；第二个参数若为 __IAttributeSet\*__ 类型则参数名应为 __attrs__。例如：
 
 ```
 // Elastos/Framework/Droid/Base/Core/car/elastos/droid/view.car
@@ -593,15 +593,16 @@ Elastos5.0中CButton控件的继承关系为 __CButton-->Button-->TextView-->Vie
 <span id="declareanddefine"></span>
 ### 类成员声明及定义
 不论是C++类还是CAR类，类成员的声明顺序做如下规定(标号顺序表明声明顺序)：
-1.public修饰的内部类
-2.protected修饰的内部类
-3.private修饰的内部类
-4.public修饰的方法
-5.protected修饰的方法
-6.private修饰的方法
-7.public修饰的成员变量
-8.protected修饰的成员变量
-9.private修饰的成员变量
+
+1. public修饰的内部类
+2. protected修饰的内部类
+3. private修饰的内部类
+4. public修饰的方法
+5. protected修饰的方法
+6. private修饰的方法
+7. public修饰的成员变量
+8. protected修饰的成员变量
+9. private修饰的成员变量
 
 .cpp中类成员的定义顺序做如下规定：
 * 首先是内部类的定义。
@@ -716,7 +717,7 @@ Object类实现了 __ISynchronize__ 接口，具有锁的功能，支持递归�
 
 <span id="implementicloneable"></span>
 ### 实现ICloneable接口
-__ICloneable__ 接口的实现需要特殊处理，由于Java程序中子类通常会调用父类的<code>Clone()</code>来克隆父类的成员．在Elastos程序中，我们可以使用如下机制来实现：
+__ICloneable__ 接口的实现需要特殊处理，由于Java程序中子类通常会调用父类的<code>Clone()</code>来克隆父类的成员。在Elastos程序中，我们可以使用如下机制来实现：
 
 ``` cpp
     // Locale.h
@@ -779,7 +780,7 @@ __ICloneable__ 接口的实现需要特殊处理，由于Java程序中子类通�
 ### 循环引用场景
 程序中容易导致对象间循环引用产生的场景包括以下几种：
 
-* 内部类与外部类之间
+* 内部类与外部类之间。
 * 下例程序结构很可能存在循环引用(A与mView之间)：
 
     ``` cpp
@@ -852,7 +853,7 @@ Elastos预定义了若干宏以方便开发，说明如下：
 
 <span id="filegeneration"></span>
 ### 生成文件
-后台生成的文件名包含命名空间前缀，如CBoolean类的生成文件名为：__\_Elastos_Core_CBoolean.h__ 。
+后台生成的文件名包含命名空间前缀，如CBoolean类的生成文件名为 __\_Elastos_Core_CBoolean.h__ 。
 
 <span id="submodulecompile"></span>
 ### 子模块编译
@@ -1187,6 +1188,7 @@ adb pull /data/debug/1.txt 1.txt
 HelloCar包括两个部分：Elastos.HelloCar.eco和使用这个eco的可执行程序，请阅读代码与注释了解细节。下面将讲解一下其中的要点。
 
 * HelloCar/eco/elastos/hellocar/IDog.car
+
 ``` cpp
 module
 {
