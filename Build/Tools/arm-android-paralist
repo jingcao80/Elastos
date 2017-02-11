@@ -141,10 +141,6 @@
 
 # ==== buid External ====
   Elastos/External/conscrypt/src/org/conscrypt
-  Elastos/External/alljoyn/inc
-  Elastos/External/alljoyn/src/org/alljoyn/bus Org.Alljoyn.Bus.car
-  Elastos/External/alljoyn/src/org/alljoyn/bus/alljoyn
-> Elastos/External/alljoyn/src/org/alljoyn/bus
 
 # ==== buid Framework ====
 > Elastos/Frameworks/Droid/ServiceManager
@@ -588,11 +584,19 @@
   Elastos/Frameworks/Droid/DevSamples/SecurityDemo Elastos.DevSamples.SecurityDemo.car
   Elastos/Frameworks/Droid/DevSamples/SecurityDemo R.cpp
 < Elastos/Frameworks/Droid/DevSamples/SecurityDemo
-  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/client Elastos.DevSamples.DFBasicDemo.BasicClient.car
-  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/client R.cpp
-< Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/client
-  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/server Elastos.DevSamples.DFBasicDemo.BasicService.car
-  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/server R.cpp
-  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/server
+
+# ==== buid d-framework ====
+  Elastos/External/alljoyn/inc
+  Elastos/External/alljoyn/src/org/alljoyn/bus Org.Alljoyn.Bus.car
+  Elastos/External/alljoyn/src/org/alljoyn/bus/alljoyn
+> Elastos/External/alljoyn/src/org/alljoyn/bus
+
+## ==== build d-framework samples ====
+#  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/client Elastos.DevSamples.DFBasicDemo.BasicClient.car
+#  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/client R.cpp
+#< Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/client
+#  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/server Elastos.DevSamples.DFBasicDemo.BasicService.car
+#  Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/server R.cpp
+#< Elastos/Frameworks/Droid/DevSamples/DFBasicDemo/server
 
 > Elastos
