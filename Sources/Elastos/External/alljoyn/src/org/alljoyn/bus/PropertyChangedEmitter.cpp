@@ -177,7 +177,7 @@ ECode PropertyChangedEmitter::PropertiesChanged(
     AutoPtr<ArrayOf<String> > propArray = ArrayOf<String>::Alloc(invalidatedProps.GetSize());
     List<String>::Iterator it;
     Int32 i = 0;
-    for (it == invalidatedProps.Begin(); it != invalidatedProps.End(); ++it) {
+    for (it = invalidatedProps.Begin(); it != invalidatedProps.End(); ++it) {
         propArray->Set(i++, *it);
     }
     mProps->PropertiesChanged(ifaceName, changedProps, propArray);

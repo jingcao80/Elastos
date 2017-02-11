@@ -23,3 +23,6 @@ Elastos.DevSamples.ImageDemo            /system/app
 Elastos.DevSamples.TabHostDemo          /system/app
 Elastos.DevSamples.TextViewDemo         /system/app
 Elastos.DevSamples.SecurityDemo         /system/app
+
+Elastos.DevSamples.DFBasicDemo.BasicService /data/app
+Elastos.DevSamples.DFBasicDemo.BasicClient  /data/app
