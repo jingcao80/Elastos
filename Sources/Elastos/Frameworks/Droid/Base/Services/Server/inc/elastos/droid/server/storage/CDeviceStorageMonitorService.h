@@ -77,8 +77,6 @@ public:
 
         CAR_INTERFACE_DECL()
 
-        CachePackageDataObserver();
-
         CARAPI constructor(
             /* [in] */ ISystemService* host);
 
@@ -97,8 +95,6 @@ private:
     public:
         TO_STRING_IMPL("CDeviceStorageMonitorService::CacheFileDeletedObserver")
 
-        CacheFileDeletedObserver();
-
         CARAPI constructor();
 
         //@Override
@@ -107,16 +103,14 @@ private:
             /* [in] */ const String& path);
     };
 
-    class InitHandler
+    class MyHandler
         : public Handler
     {
     public:
-        TO_STRING_IMPL("CDeviceStorageMonitorService::InitHandler")
+        TO_STRING_IMPL("CDeviceStorageMonitorService::MyHandler")
 
-        InitHandler(
+        CARAPI constructor(
             /* [in] */ CDeviceStorageMonitorService* host);
-
-        CARAPI constructor();
 
         //@Override
         CARAPI HandleMessage(
@@ -126,16 +120,16 @@ private:
         CDeviceStorageMonitorService* mHost;
     };
 
-    class InitDeviceStorageMonitorInternal
+    class MyDeviceStorageMonitorInternal
         : public Object
         , public IDeviceStorageMonitorInternal
     {
     public:
-        TO_STRING_IMPL("CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal")
+        TO_STRING_IMPL("CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal")
 
         CAR_INTERFACE_DECL()
 
-        InitDeviceStorageMonitorInternal(
+        MyDeviceStorageMonitorInternal(
             /* [in] */ CDeviceStorageMonitorService* host);
 
         //@Override
@@ -261,7 +255,7 @@ private:
     AutoPtr<IIntent> mStorageOkIntent;
     AutoPtr<IIntent> mStorageFullIntent;
     AutoPtr<IIntent> mStorageNotFullIntent;
-    AutoPtr<IIPackageDataObserver> /*CachePackageDataObserver*/ mClearCacheObserver;
+    AutoPtr<IIPackageDataObserver> mClearCacheObserver;
     AutoPtr<CacheFileDeletedObserver> mCacheFileDeletedObserver;
     static const Int32 _TRUE;
     static const Int32 _FALSE;
@@ -281,10 +275,11 @@ private:
     * Handler that checks the amount of disk space on the device and sends a
     * notification if the device runs low on disk space
     */
-    AutoPtr<InitHandler> mHandler;
+    AutoPtr<MyHandler> mHandler;
 
     AutoPtr<IDeviceStorageMonitorInternal> mLocalService;
 
+    // TODO:
     // IBinder mRemoteService = new Binder() {
     //     //@Override
     //     protected void Dump(FileDescriptor fd, PrintWriter pw, String[] args) {

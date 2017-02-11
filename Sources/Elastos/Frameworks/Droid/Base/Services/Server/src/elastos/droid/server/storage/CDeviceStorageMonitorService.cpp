@@ -18,7 +18,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/server/storage/CDeviceStorageMonitorService.h"
-#include "elastos/droid/server/storage/CDeviceStorageMonitorServiceCachePackageDataObserver.h"
+#include "elastos/droid/server/storage/CCachePackageDataObserver.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/text/format/Formatter.h"
@@ -74,11 +74,7 @@ namespace Storage {
 //===============================================================================
 //                  CDeviceStorageMonitorService::CachePackageDataObserver
 //===============================================================================
-
 CAR_INTERFACE_IMPL_2(CDeviceStorageMonitorService::CachePackageDataObserver, Object, IIPackageDataObserver, IBinder)
-
-CDeviceStorageMonitorService::CachePackageDataObserver::CachePackageDataObserver()
-{}
 
 ECode CDeviceStorageMonitorService::CachePackageDataObserver::constructor(
     /* [in] */ ISystemService* host)
@@ -101,13 +97,10 @@ ECode CDeviceStorageMonitorService::CachePackageDataObserver::OnRemoveCompleted(
     return NOERROR;
 }
 
+
 //===============================================================================
 //                  CDeviceStorageMonitorService::CacheFileDeletedObserver
 //===============================================================================
-
-CDeviceStorageMonitorService::CacheFileDeletedObserver::CacheFileDeletedObserver()
-{}
-
 ECode CDeviceStorageMonitorService::CacheFileDeletedObserver::constructor()
 {
     AutoPtr<IEnvironment> environment;
@@ -128,21 +121,18 @@ ECode CDeviceStorageMonitorService::CacheFileDeletedObserver::OnEvent(
     return E_NOT_IMPLEMENTED;
 }
 
-//===============================================================================
-//                  CDeviceStorageMonitorService::InitHandler
-//===============================================================================
 
-CDeviceStorageMonitorService::InitHandler::InitHandler(
+//===============================================================================
+//                  CDeviceStorageMonitorService::MyHandler
+//===============================================================================
+ECode CDeviceStorageMonitorService::MyHandler::constructor(
     /* [in] */ CDeviceStorageMonitorService* host)
-    : mHost(host)
-{}
-
-ECode CDeviceStorageMonitorService::InitHandler::constructor()
 {
+    mHost = host;
     return Handler::constructor();
 }
 
-ECode CDeviceStorageMonitorService::InitHandler::HandleMessage(
+ECode CDeviceStorageMonitorService::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     //don't handle an invalid message
@@ -158,25 +148,25 @@ ECode CDeviceStorageMonitorService::InitHandler::HandleMessage(
     return NOERROR;
 }
 
-//===============================================================================
-//                  CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal
-//===============================================================================
 
-CAR_INTERFACE_IMPL(CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal, Object, IDeviceStorageMonitorInternal)
+//===============================================================================
+//                  CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal
+//===============================================================================
+CAR_INTERFACE_IMPL(CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal, Object, IDeviceStorageMonitorInternal)
 
-CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal::InitDeviceStorageMonitorInternal(
+CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal::MyDeviceStorageMonitorInternal(
     /* [in] */ CDeviceStorageMonitorService* host)
     : mHost(host)
 {}
 
-ECode CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal::CheckMemory()
+ECode CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal::CheckMemory()
 {
     // force an early check
     mHost->PostCheckMemoryMsg(TRUE, 0);
     return NOERROR;
 }
 
-ECode CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal::IsMemoryLow(
+ECode CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal::IsMemoryLow(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -184,7 +174,7 @@ ECode CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal::IsMemoryLo
     return NOERROR;
 }
 
-ECode CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal::GetMemoryLowThreshold(
+ECode CDeviceStorageMonitorService::MyDeviceStorageMonitorInternal::GetMemoryLowThreshold(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -192,10 +182,10 @@ ECode CDeviceStorageMonitorService::InitDeviceStorageMonitorInternal::GetMemoryL
     return NOERROR;
 }
 
+
 //===============================================================================
 //                  CDeviceStorageMonitorService
 //===============================================================================
-
 const String CDeviceStorageMonitorService::TAG("CDeviceStorageMonitorService");
 
 const Boolean CDeviceStorageMonitorService::DEBUG = FALSE;
@@ -263,10 +253,10 @@ ECode CDeviceStorageMonitorService::constructor(
 {
     SystemService::constructor(context);
 
-    mHandler = new InitHandler(this);
-    mHandler->constructor();
+    mHandler = new MyHandler();
+    mHandler->constructor(this);
 
-    mLocalService = new InitDeviceStorageMonitorInternal(this);
+    mLocalService = new MyDeviceStorageMonitorInternal(this);
 
     // mRemoteService = ?
 
@@ -302,11 +292,13 @@ void CDeviceStorageMonitorService::RestatDataDir()
     // try {
     String path;
     DATA_PATH->GetAbsolutePath(&path);
-    mDataFileStats->Restat(path);
-    Int64 blocks, size;
-    mDataFileStats->GetAvailableBlocks(&blocks);
-    mDataFileStats->GetBlockSize(&size);
-    mFreeMem = (Int64) blocks * size;
+    ECode ec = mDataFileStats->Restat(path);
+    if (SUCCEEDED(ec)) {
+        Int64 blocks, size;
+        mDataFileStats->GetAvailableBlocks(&blocks);
+        mDataFileStats->GetBlockSize(&size);
+        mFreeMem = (Int64) blocks * size;
+    }
     // } catch (IllegalArgumentException e) {
     //     // use the old value of mFreeMem
     // }
@@ -333,19 +325,25 @@ void CDeviceStorageMonitorService::RestatDataDir()
         Int64 mFreeSystem = -1, mFreeCache = -1;
         // try {
         SYSTEM_PATH->GetAbsolutePath(&path);
-        mSystemFileStats->Restat(path);
-        mSystemFileStats->GetAvailableBlocks(&blocks);
-        mSystemFileStats->GetBlockSize(&size);
-        mFreeSystem = (Int64) blocks * size;
+        ec = mSystemFileStats->Restat(path);
+        if (SUCCEEDED(ec)) {
+            Int64 blocks, size;
+            mSystemFileStats->GetAvailableBlocks(&blocks);
+            mSystemFileStats->GetBlockSize(&size);
+            mFreeSystem = (Int64) blocks * size;
+        }
         // } catch (IllegalArgumentException e) {
         //     // ignore; report -1
         // }
         // try {
         CACHE_PATH->GetAbsolutePath(&path);
-        mCacheFileStats->Restat(path);
-        mCacheFileStats->GetAvailableBlocks(&blocks);
-        mCacheFileStats->GetBlockSize(&size);
-        mFreeCache = (Int64) blocks * size;
+        ec = mCacheFileStats->Restat(path);
+        if (SUCCEEDED(ec)) {
+            Int64 blocks, size;
+            mCacheFileStats->GetAvailableBlocks(&blocks);
+            mCacheFileStats->GetBlockSize(&size);
+            mFreeCache = (Int64) blocks * size;
+        }
         // } catch (IllegalArgumentException e) {
         //     // ignore; report -1
         // }
@@ -370,7 +368,7 @@ void CDeviceStorageMonitorService::ClearCache()
 {
     if (mClearCacheObserver == NULL) {
         // Lazy instantiation
-        CDeviceStorageMonitorServiceCachePackageDataObserver::New((ISystemService*)this, (IIPackageDataObserver**)&mClearCacheObserver);
+        CCachePackageDataObserver::New((ISystemService*)this, (IIPackageDataObserver**)&mClearCacheObserver);
     }
     mClearingCache = TRUE;
     if (localLOGV) Slogger::I(TAG, "Clearing cache");
@@ -422,7 +420,7 @@ void CDeviceStorageMonitorService::CheckMemory(
                 if (mFreeMem < mMemCacheStartTrimThreshold) {
                     // We only clear the cache if the free storage has changed
                     // a significant amount since the last time.
-                    if ((mFreeMemAfterLastCacheClear-mFreeMem)
+                    if ((mFreeMemAfterLastCacheClear - mFreeMem)
                             >= ((mMemLowThreshold-mMemCacheStartTrimThreshold)/4)) {
                         // See if clearing cache helps
                         // Note that clearing cache is asynchronous and so we do a
@@ -522,7 +520,7 @@ ECode CDeviceStorageMonitorService::OnStart()
     sm->GetStorageLowBytes(DATA_PATH, &mMemLowThreshold);
     sm->GetStorageFullBytes(DATA_PATH, &mMemFullThreshold);
 
-    mMemCacheStartTrimThreshold = ((mMemLowThreshold * 3) + mMemFullThreshold)/4;
+    mMemCacheStartTrimThreshold = ((mMemLowThreshold * 3) + mMemFullThreshold) / 4;
     mMemCacheTrimToThreshold = mMemLowThreshold
             + ((mMemLowThreshold-mMemCacheStartTrimThreshold) * 2);
     mFreeMemAfterLastCacheClear = mTotalMemory;

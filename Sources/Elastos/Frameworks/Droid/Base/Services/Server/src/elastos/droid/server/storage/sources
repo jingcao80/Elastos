@@ -25,4 +25,4 @@ C_DEFINES += -DDROID_SERVER
 include $(MAKEDIR)/../../../../../../../../sources.inc
 
 SOURCES += CDeviceStorageMonitorService.cpp
-SOURCES += CDeviceStorageMonitorServiceCachePackageDataObserver.cpp
+SOURCES += CCachePackageDataObserver.cpp

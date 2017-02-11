@@ -14,16 +14,27 @@
 // limitations under the License.
 //=========================================================================
 
-#include "elastos/droid/server/storage/CDeviceStorageMonitorServiceCachePackageDataObserver.h"
+#ifndef __ELASTOS_DROID_SERVER_STORAGE_CCACHEPACKAGEDATAOBSERVER_H__
+#define __ELASTOS_DROID_SERVER_STORAGE_CCACHEPACKAGEDATAOBSERVER_H__
+
+#include "_Elastos_Droid_Server_Storage_CCachePackageDataObserver.h"
+#include "elastos/droid/server/storage/CDeviceStorageMonitorService.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Storage {
 
-CAR_OBJECT_IMPL(CDeviceStorageMonitorServiceCachePackageDataObserver)
+CarClass(CCachePackageDataObserver)
+    , public CDeviceStorageMonitorService::CachePackageDataObserver
+{
+public:
+    CAR_OBJECT_DECL()
+};
 
 }//namespace Storage
 }//namespace Server
 }//namespace Droid
 }//namespace Elastos
+
+#endif //__ELASTOS_DROID_SERVER_STORAGE_CCACHEPACKAGEDATAOBSERVER_H__

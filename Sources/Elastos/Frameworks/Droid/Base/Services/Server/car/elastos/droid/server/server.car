@@ -2242,7 +2242,7 @@ module
     }
 
     [local]
-    class CDeviceStorageMonitorServiceCachePackageDataObserver {
+    class CCachePackageDataObserver {
         constructor(
             [in] ISystemService* host);
 
