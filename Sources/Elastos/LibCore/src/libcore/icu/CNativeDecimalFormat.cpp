@@ -1522,19 +1522,19 @@ static inline String GetValue(P_FUN_GET_INT32 fun, CNativeDecimalFormat* pObj)
 ECode CNativeDecimalFormat::ToString(
     /* [out] */ String* rev)
 {
-    *rev = String("CNativeDecimalFormat") + "[\"" + GetValue(ToPattern, this) + "\"" +
-        ",isDecimalSeparatorAlwaysShown=" + GetValue(IsDecimalSeparatorAlwaysShown, this) +
-        ",groupingSize=" + GetValue(GetGroupingSize, this) +
-        ",multiplier=" + GetValue(GetMultiplier, this) +
-        ",negativePrefix=" + GetValue(GetNegativePrefix, this) +
-        ",negativeSuffix=" + GetValue(GetNegativeSuffix, this) +
-        ",positivePrefix=" + GetValue(GetPositivePrefix, this) +
-        ",positiveSuffix=" + GetValue(GetPositiveSuffix, this) +
-        ",maxIntegerDigits=" + GetValue(GetMaximumIntegerDigits, this) +
-        ",maxFractionDigits=" + GetValue(GetMaximumFractionDigits, this) +
-        ",minIntegerDigits=" + GetValue(GetMinimumIntegerDigits, this) +
-        ",minFractionDigits=" + GetValue(GetMinimumFractionDigits, this) +
-        ",grouping=" + GetValue(IsGroupingUsed, this) +
+    *rev = String("CNativeDecimalFormat") + "[\"" + GetValue(&CNativeDecimalFormat::ToPattern, this) + "\"" +
+        ",isDecimalSeparatorAlwaysShown=" + GetValue(&CNativeDecimalFormat::IsDecimalSeparatorAlwaysShown, this) +
+        ",groupingSize=" + GetValue(&CNativeDecimalFormat::GetGroupingSize, this) +
+        ",multiplier=" + GetValue(&CNativeDecimalFormat::GetMultiplier, this) +
+        ",negativePrefix=" + GetValue(&CNativeDecimalFormat::GetNegativePrefix, this) +
+        ",negativeSuffix=" + GetValue(&CNativeDecimalFormat::GetNegativeSuffix, this) +
+        ",positivePrefix=" + GetValue(&CNativeDecimalFormat::GetPositivePrefix, this) +
+        ",positiveSuffix=" + GetValue(&CNativeDecimalFormat::GetPositiveSuffix, this) +
+        ",maxIntegerDigits=" + GetValue(&CNativeDecimalFormat::GetMaximumIntegerDigits, this) +
+        ",maxFractionDigits=" + GetValue(&CNativeDecimalFormat::GetMaximumFractionDigits, this) +
+        ",minIntegerDigits=" + GetValue(&CNativeDecimalFormat::GetMinimumIntegerDigits, this) +
+        ",minFractionDigits=" + GetValue(&CNativeDecimalFormat::GetMinimumFractionDigits, this) +
+        ",grouping=" + GetValue(&CNativeDecimalFormat::IsGroupingUsed, this) +
         "]";
     return NOERROR;
 }
