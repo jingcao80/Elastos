@@ -37,7 +37,7 @@ module
         /**
          * A socket named with a normal filesystem path.
          */
-        LocalSocketAddressNamespace_FILESYSTEM= 2
+        LocalSocketAddressNamespace_FILESYSTEM = 2
     }
 
     interface ILocalSocketAddress {

@@ -31,8 +31,7 @@ namespace MemoryDumper {
 class CMemoryDumper
 {
 public:
-    static CARAPI DumpMemory(
-        /* [in] */ Int32 fd);
+    static CARAPI SendDumpRequest();
 
     static CARAPI OutputBackTrace(
         /* [in] */ const String& diffFile,
@@ -88,4 +87,3 @@ private:
 }
 
 #endif // __ELASTOS_MEMORYDEUMPER_CMEMORYDUMPER_H__
-

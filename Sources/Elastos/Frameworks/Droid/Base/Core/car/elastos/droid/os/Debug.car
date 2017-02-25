@@ -267,6 +267,9 @@ module
         DumpNativeBacktraceToFile(
             [in] Int32 pid,
             [in] String file);
+
+        DumpHeap(
+            [in] IFileDescriptor* fd);
     }
 
     } // namespace Os

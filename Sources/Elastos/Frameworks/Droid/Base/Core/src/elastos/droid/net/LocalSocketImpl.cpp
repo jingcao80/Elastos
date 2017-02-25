@@ -36,12 +36,11 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::System::Os;
 using Elastos::Droid::System::OsConstants;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;
@@ -488,7 +487,6 @@ ECode LocalSocketImpl::NativeAvailable(
 
     // If this were a non-socket fd, there would be other cases to worry
     // about...
-
     if (ret < 0) {
         //jniThrowIOException(env, errno);
         *result = 0;
@@ -674,7 +672,6 @@ ECode LocalSocketImpl::ConnectLocal(
 
     fileDescriptor->GetDescriptor(&fd);
 
-    // ScopedUtfChars nameUtf8(env, name);
     const char * nameUtf8 = name.string();
 
     ret = socket_local_client_connect(
@@ -703,7 +700,6 @@ ECode LocalSocketImpl::BindLocal(
 
     fileDescriptor->GetDescriptor(&fd);
 
-    // ScopedUtfChars nameUtf8(env, name);
     const char* nameUtf8 = name.string();
 
     ret = socket_local_server_bind(fd, nameUtf8, namespaceId);
