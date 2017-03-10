@@ -17,6 +17,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
 using namespace Elastos;
 using Elastos::Core::StringUtils;
@@ -284,15 +285,15 @@ void testAppend()
     str1 = String("中文A0字符");
     Char32 ch = str1.GetChar(0);
     printf(" ========== %c, %d\n", ch, ch);
-    str2 += ch;
+    str2.Append(ch);
     assertEquals(String("中文A0字符中"), str2);
 
     ch = str1.GetChar(2);
     printf(" ========== %c\n", ch);
-    str2 += ch;
+    str2.Append(ch);
     assertEquals(String("中文A0字符中A"), str2);
 
-    str2 += 'C';
+    str2.Append('C');
     assertEquals(String("中文A0字符中AC"), str2);
 
     printf("\n============== Append with numOfChars ==============\n");
