@@ -1038,7 +1038,7 @@ ECode Workspace::constructor(
         AutoPtr<IPoint> minDims;
         CPoint::New((IPoint**)&minDims);
         AutoPtr<IPoint> maxDims;
-        CPoint::New((IPoint**)&minDims);
+        CPoint::New((IPoint**)&maxDims);
         AutoPtr<IWindowManager> windowManager;
         IActivity::Probe(mLauncher)->GetWindowManager((IWindowManager**)&windowManager);
         AutoPtr<IDisplay> display;

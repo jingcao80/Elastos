@@ -742,7 +742,8 @@ ECode CMountService::OnDaemonConnectedThread::Run()
         else if (st == VolumeState::Shared) {
             state = IEnvironment::MEDIA_SHARED;
             Slogger::I(CMountService::TAG, String("Media shared on daemon connection"));
-        } else {
+        }
+        else {
             // throw new Exception(String.format("Unexpected state %d", st));
             Slogger::E(CMountService::TAG, "Unexpected state %d", st);
             Slogger::E(TAG, "Error processing initial volume state 0x%08x", ec);
@@ -2001,6 +2002,7 @@ void CMountService::NotifyVolumeStateChange(
     AutoPtr<IStorageVolume> volume;
     String state;
     {
+        AutoLock lock(mVolumesLock);
         AutoPtr<IInterface> value;
         mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
         volume = IStorageVolume::Probe(value);

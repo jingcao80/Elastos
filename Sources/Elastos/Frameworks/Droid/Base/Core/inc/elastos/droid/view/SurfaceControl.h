@@ -403,6 +403,22 @@ private:
         /* [in] */ Int64 nativeObject,
         /* [in] */ Int32 layerStack);
 
+    static CARAPI NativeSetBlur(
+        /* [in] */ Int64 nativeObject,
+        /* [in] */ Float blur);
+
+    static CARAPI NativeSetBlurMaskSurface(
+        /* [in] */ Int64 nativeObject,
+        /* [in] */ Int64 maskLayerNativeObject);
+
+    static CARAPI NativeSetBlurMaskSampling(
+        /* [in] */ Int64 nativeObject,
+        /* [in] */ Int32 blurMaskSampling);
+
+    static CARAPI NativeSetBlurMaskAlphaThreshold(
+        /* [in] */ Int64 nativeObject,
+        /* [in] */ Float alpha);
+
     static CARAPI NativeClearContentFrameStats(
         /* [in] */ Int64 nativeObject,
         /* [out] */ Boolean* resutl);
@@ -418,7 +434,6 @@ private:
     static CARAPI NativeGetAnimationFrameStats(
         /* [in] */ IWindowAnimationFrameStats* outStats,
         /* [out] */ Boolean* resutl);
-
 
     static CARAPI_(AutoPtr<IBinder>) NativeGetBuiltInDisplay(
         /* [in] */ Int32 physicalDisplayId);

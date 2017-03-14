@@ -152,8 +152,7 @@ ECode SurfaceControl::SetLayer(
     /* [in] */ Int32 zorder)
 {
     FAIL_RETURN(CheckNotReleased())
-    FAIL_RETURN(NativeSetLayer(mNativeObject, zorder))
-    return NOERROR;
+    return NativeSetLayer(mNativeObject, zorder);
 }
 
 ECode SurfaceControl::Destroy()
@@ -171,8 +170,7 @@ ECode SurfaceControl::SetPosition(
     /* [in] */ Float y)
 {
     FAIL_RETURN(CheckNotReleased())
-    FAIL_RETURN(NativeSetPosition(mNativeObject, x, y))
-    return NOERROR;
+    return NativeSetPosition(mNativeObject, x, y);
 }
 
 ECode SurfaceControl::SetSize(
@@ -180,60 +178,72 @@ ECode SurfaceControl::SetSize(
     /* [in] */ Int32 h)
 {
     FAIL_RETURN(CheckNotReleased())
-    FAIL_RETURN(NativeSetSize(mNativeObject, w, h))
-    return NOERROR;
+    return NativeSetSize(mNativeObject, w, h);
 }
 
 ECode SurfaceControl::Hide()
 {
     FAIL_RETURN(CheckNotReleased())
-    NativeSetFlags(mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
-    return NOERROR;
+    return NativeSetFlags(mNativeObject, SURFACE_HIDDEN, SURFACE_HIDDEN);
 }
 
 ECode SurfaceControl::SetBlur(
     /* [in] */ Float blur)
 {
-    return NOERROR;
+    FAIL_RETURN(CheckNotReleased())
+    return NativeSetBlur(mNativeObject, blur);
 }
 
 ECode SurfaceControl::SetBlurMaskSurface(
-    /* [in] */ ISurfaceControl* maskSurface)
+    /* [in] */ ISurfaceControl* _maskSurface)
 {
-    return NOERROR;
+    FAIL_RETURN(CheckNotReleased())
+    SurfaceControl* maskSurface = (SurfaceControl*)_maskSurface;
+    if (maskSurface != NULL) {
+        FAIL_RETURN(maskSurface->CheckNotReleased())
+    }
+    return NativeSetBlurMaskSurface(mNativeObject, maskSurface == NULL ? 0 : maskSurface->mNativeObject);
 }
 
 ECode SurfaceControl::SetBlurMaskSampling(
     /* [in] */ Int32 blurMaskSampling)
 {
-    return NOERROR;
+    FAIL_RETURN(CheckNotReleased())
+    return NativeSetBlurMaskSampling(mNativeObject, blurMaskSampling);
 }
 
 ECode SurfaceControl::SetBlurMaskAlphaThreshold(
     /* [in] */ Float alpha)
 {
-    return NOERROR;
+    FAIL_RETURN(CheckNotReleased())
+    return NativeSetBlurMaskAlphaThreshold(mNativeObject, alpha);
 }
 
 ECode SurfaceControl::SetTransparent(
     /* [in] */ Boolean isTransparent)
 {
+    FAIL_RETURN(CheckNotReleased())
+    if (isTransparent) {
+        NativeSetFlags(mNativeObject, SURFACE_TRANSPARENT,
+                SURFACE_TRANSPARENT);
+    }
+    else {
+        NativeSetFlags(mNativeObject, 0, SURFACE_TRANSPARENT);
+    }
     return NOERROR;
 }
 
 ECode SurfaceControl::Show()
 {
     FAIL_RETURN(CheckNotReleased())
-    NativeSetFlags(mNativeObject, 0, SURFACE_HIDDEN);
-    return NOERROR;
+    return NativeSetFlags(mNativeObject, 0, SURFACE_HIDDEN);
 }
 
 ECode SurfaceControl::SetTransparentRegionHint(
     /* [in] */ IRegion* region)
 {
     FAIL_RETURN(CheckNotReleased())
-    FAIL_RETURN(NativeSetTransparentRegionHint(mNativeObject, region))
-    return NOERROR;
+    return NativeSetTransparentRegionHint(mNativeObject, region);
 }
 
 ECode SurfaceControl::ClearContentFrameStats(
@@ -1064,6 +1074,55 @@ ECode SurfaceControl::NativeSetLayerStack(
 {
     android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
     android::status_t err = ctrl->setLayerStack(layerStack);
+    if (err < 0 && err != android::NO_INIT) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode SurfaceControl::NativeSetBlur(
+    /* [in] */ Int64 nativeObject,
+    /* [in] */ Float blur)
+{
+    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
+    android::status_t err = ctrl->setBlur(blur);
+    if (err < 0 && err != android::NO_INIT) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode SurfaceControl::NativeSetBlurMaskSurface(
+    /* [in] */ Int64 nativeObject,
+    /* [in] */ Int64 maskLayerNativeObject)
+{
+    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
+    android::SurfaceControl* const maskLayer = reinterpret_cast<android::SurfaceControl *>(maskLayerNativeObject);
+    android::status_t err = ctrl->setBlurMaskSurface(maskLayer);
+    if (err < 0 && err != android::NO_INIT) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode SurfaceControl::NativeSetBlurMaskSampling(
+    /* [in] */ Int64 nativeObject,
+    /* [in] */ Int32 blurMaskSampling)
+{
+    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
+    android::status_t err = ctrl->setBlurMaskSampling(blurMaskSampling);
+    if (err < 0 && err != android::NO_INIT) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode SurfaceControl::NativeSetBlurMaskAlphaThreshold(
+    /* [in] */ Int64 nativeObject,
+    /* [in] */ Float alpha)
+{
+    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
+    android::status_t err = ctrl->setBlurMaskAlphaThreshold(alpha);
     if (err < 0 && err != android::NO_INIT) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

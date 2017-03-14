@@ -49,8 +49,8 @@ void FgThread::EnsureThreadLocked()
 
 AutoPtr<FgThread> FgThread::Get()
 {
-    Object& lock = UiThread::sLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(UiThread::sLock);
         EnsureThreadLocked();
     }
     return sInstance;
@@ -58,8 +58,8 @@ AutoPtr<FgThread> FgThread::Get()
 
 AutoPtr<IHandler> FgThread::GetHandler()
 {
-    Object& lock = UiThread::sLock;
-    {    AutoLock syncLock(lock);
+    {
+        AutoLock syncLock(UiThread::sLock);
         EnsureThreadLocked();
     }
     return sHandler;
