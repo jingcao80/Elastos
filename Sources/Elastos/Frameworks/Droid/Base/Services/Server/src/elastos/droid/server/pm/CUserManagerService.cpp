@@ -946,7 +946,7 @@ void CUserManagerService::ReadUserListLocked()
     String tag;
     Boolean isExist;
     if (mUserListFile->Exists(&isExist), !isExist) {
-        Slogger::E(TAG, "user list file %s does not exist.");
+        Slogger::E(TAG, "user list file does not exist.");
         FallbackToSingleUserLocked();
         return;
     }
