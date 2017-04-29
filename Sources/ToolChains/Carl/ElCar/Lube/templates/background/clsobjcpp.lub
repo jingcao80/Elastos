@@ -97,6 +97,18 @@ ECode ${name}::GetClassID(
     return NOERROR;
 }
 
+ECode ${name}::GetClassInfo(
+    /* [out] */ IInterface** clsInfo)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ${name}::SetClassInfo(
+    /* [in] */ IInterface *clsInfo)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode ${name}::GetHashCode(
     _ELASTOS Int32 * pHashCode)
 {

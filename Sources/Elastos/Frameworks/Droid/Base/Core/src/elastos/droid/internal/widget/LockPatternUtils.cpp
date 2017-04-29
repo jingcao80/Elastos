@@ -1200,10 +1200,8 @@ ECode LockPatternUtils::PasswordToHash(
     return NOERROR;
 
 EXIT:
-    if (FAILED(ec)) {
-        Slogger::W(TAG, "Failed to encode string because of missing algorithm: %s", algo.string());
-        return NOERROR;
-    }
+    Slogger::W(TAG, "Failed to encode string because of missing algorithm: %s", algo.string());
+    return NOERROR;
 }
 
 String LockPatternUtils::ToHex(

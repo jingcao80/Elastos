@@ -199,24 +199,20 @@ ECode TextUtils::GetChars(
 {
     VALIDATE_NOT_NULL(s)
 
-    IGetChars* gc;
-    IStringBuilder* sbld;
-    IStringBuffer* sbuf = IStringBuffer::Probe(s);
-    if (sbuf) {
-        sbuf->GetChars(start, end, dest, destoff);
+    if (IStringBuffer::Probe(s) != NULL) {
+        IStringBuffer::Probe(s)->GetChars(start, end, dest, destoff);
     }
-    else if (sbld = IStringBuilder::Probe(s), sbld) {
-        sbld->GetChars(start, end, dest, destoff);
+    else if (IStringBuilder::Probe(s) != NULL) {
+        IStringBuilder::Probe(s)->GetChars(start, end, dest, destoff);
     }
-    else if (gc = IGetChars::Probe(s), gc) {
-        gc->GetChars(start, end, dest, destoff);
+    else if (IGetChars::Probe(s) != NULL) {
+        IGetChars::Probe(s)->GetChars(start, end, dest, destoff);
     }
     else {
         String str;
         s->ToString(&str);
-        AutoPtr< ArrayOf<Char32> > chars = str.GetChars(start, end);
-        for (Int32 i = 0; i < chars->GetLength(); i++) {
-            (*dest)[destoff++] = (*chars)[i];
+        for (Int32 i = start; i < end; i++) {
+            (*dest)[destoff++] = str.GetChar(i);
         }
     }
     return NOERROR;

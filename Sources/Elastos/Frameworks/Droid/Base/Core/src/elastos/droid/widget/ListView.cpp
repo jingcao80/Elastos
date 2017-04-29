@@ -816,16 +816,18 @@ AutoPtr<IView> ListView::FillDown(
     AutoPtr<IView> selectedView;
 
     Int32 end = mBottom - mTop;
-    Int32 leftTmp = 0, bottomTmp = 0;
-    mListPadding->GetLeft(&leftTmp);
-    mListPadding->GetBottom(&bottomTmp);
     if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
-        end -= bottomTmp;
+        Int32 bottom;
+        mListPadding->GetBottom(&bottom);
+        end -= bottom;
     }
+
     while (nextTop < end && pos < mItemCount) {
         // is this the selected item?
         Boolean selected = pos == mSelectedPosition;
-        AutoPtr<IView> child = MakeAndAddView(pos , nextTop, TRUE, leftTmp, selected);
+        Int32 left = 0;
+        mListPadding->GetLeft(&left);
+        AutoPtr<IView> child = MakeAndAddView(pos, nextTop, TRUE, left, selected);
 
         child->GetBottom(&nextTop);
         nextTop += mDividerHeight;
@@ -848,17 +850,18 @@ AutoPtr<IView> ListView::FillUp(
     AutoPtr<IView> selectedView ;
 
     Int32 end = 0;
-    Int32 leftTmp = 0, topTmp = 0;
-    mListPadding->GetLeft(&leftTmp);
-    mListPadding->GetTop(&topTmp);
     if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
-        end = topTmp;
+        Int32 top;
+        mListPadding->GetTop(&top);
+        end = top;
     }
 
     while (nextBottom > end && pos >= 0) {
         // is this the selected item?
         Boolean selected = pos == mSelectedPosition;
-        AutoPtr<IView> child = MakeAndAddView(pos , nextBottom, FALSE, leftTmp, selected);
+        Int32 left;
+        mListPadding->GetLeft(&left);
+        AutoPtr<IView> child = MakeAndAddView(pos, nextBottom, FALSE, left, selected);
         child->GetTop(&nextBottom);
         nextBottom -= mDividerHeight;
         if (selected) {
@@ -890,28 +893,31 @@ AutoPtr<IView> ListView::FillFromMiddle(
     /* [in] */ Int32 childrenBottom)
 {
     Int32 height = childrenBottom - childrenTop;
+
     Int32 position = ReconcileSelectedPosition();
 
-    Int32 leftTmp = 0;
-    mListPadding->GetLeft(&leftTmp);
-    AutoPtr<IView> sel = MakeAndAddView(position, childrenTop, TRUE, leftTmp, TRUE);
+    Int32 left;
+    mListPadding->GetLeft(&left);
+    AutoPtr<IView> sel = MakeAndAddView(position, childrenTop, TRUE, left, TRUE);
     mFirstPosition = position;
+
     Int32 selHeight;
     sel->GetMeasuredHeight(&selHeight);
     if (selHeight <= height) {
         sel->OffsetTopAndBottom((height - selHeight) / 2);
     }
+
     FillAboveAndBelow(sel, position);
 
     Int32 childCount;
     GetChildCount(&childCount);
-
     if (!mStackFromBottom) {
         CorrectTooHigh(childCount);
     }
     else {
         CorrectTooLow(childCount);
     }
+
     return sel;
 }
 
@@ -943,33 +949,54 @@ AutoPtr<IView> ListView::FillFromSelection(
     Int32 fadingEdgeLength;
     GetVerticalFadingEdgeLength(&fadingEdgeLength);
     Int32 selectedPosition = mSelectedPosition;
-    AutoPtr<IView> sel = NULL;
-    Int32 topSelectionPixel = GetTopSelectionPixel(childrenTop, fadingEdgeLength, selectedPosition);
-    Int32 bottomSelectionPixel = GetBottomSelectionPixel(childrenBottom, fadingEdgeLength, selectedPosition);
 
-    Int32 leftTmp = 0;
-    mListPadding->GetLeft(&leftTmp);
-    sel = MakeAndAddView(selectedPosition, selectedTop, TRUE, leftTmp, TRUE);
+    AutoPtr<IView> sel;
+
+    Int32 topSelectionPixel = GetTopSelectionPixel(childrenTop,
+            fadingEdgeLength, selectedPosition);
+    Int32 bottomSelectionPixel = GetBottomSelectionPixel(childrenBottom,
+            fadingEdgeLength, selectedPosition);
+
+    Int32 left;
+    mListPadding->GetLeft(&left);
+    sel = MakeAndAddView(selectedPosition, selectedTop, TRUE, left, TRUE);
+
+    // Some of the newly selected item extends below the bottom of the list
     Int32 top, bottom;
     sel->GetTop(&top);
     sel->GetBottom(&bottom);
     if (bottom > bottomSelectionPixel) {
+        // Find space available above the selection into which we can scroll
+        // upwards
         Int32 spaceAbove = top - topSelectionPixel;
+
+        // Find space required to bring the bottom of the selected item
+        // fully into view
         Int32 spaceBelow = bottom - bottomSelectionPixel;
         Int32 offset = Elastos::Core::Math::Min(spaceAbove, spaceBelow);
+
+        // Now offset the selected item to get it into view
         sel->OffsetTopAndBottom(-offset);
     }
     else if (top < topSelectionPixel) {
+        // Find space required to bring the top of the selected item fully
+        // into view
         Int32 spaceAbove = topSelectionPixel - top;
+
+        // Find space available below the selection into which we can scroll
+        // downwards
         Int32 spaceBelow = bottomSelectionPixel - bottom;
         Int32 offset = Elastos::Core::Math::Min(spaceAbove, spaceBelow);
+
+        // Offset the selected item to get it into view
         sel->OffsetTopAndBottom(offset);
     }
+
+    // Fill in views above and below
     FillAboveAndBelow(sel, selectedPosition);
 
     Int32 childCount;
     GetChildCount(&childCount);
-
     if (!mStackFromBottom) {
         CorrectTooHigh(childCount);
     }
@@ -1025,37 +1052,74 @@ AutoPtr<IView> ListView::MoveSelection(
     Int32 fadingEdgeLength;
     GetVerticalFadingEdgeLength(&fadingEdgeLength);
     Int32 selectedPosition = mSelectedPosition;
-    AutoPtr<IView> sel = NULL;
-    Int32 topSelectionPixel = GetTopSelectionPixel(childrenTop, fadingEdgeLength, selectedPosition);
-    Int32 bottomSelectionPixel = GetBottomSelectionPixel(childrenTop, fadingEdgeLength, selectedPosition);
-    Int32 oldTop, oldBottom, selTop, selBottom, newTop, newBottom;
-    oldSel->GetTop(&oldTop);
-    oldSel->GetBottom(&oldBottom);
-    sel->GetTop(&selTop);
-    sel->GetBottom(&selBottom);
-    newSel->GetTop(&newTop);
-    newSel->GetBottom(&newBottom);
 
-    Int32 leftTmp = 0;
-    mListPadding->GetLeft(&leftTmp);
+    AutoPtr<IView> sel;
 
+    Int32 topSelectionPixel = GetTopSelectionPixel(childrenTop,
+            fadingEdgeLength, selectedPosition);
+    Int32 bottomSelectionPixel = GetBottomSelectionPixel(childrenTop,
+            fadingEdgeLength, selectedPosition);
+
+    Int32 left;
+    mListPadding->GetLeft(&left);
     if (delta > 0) {
-        oldSel = MakeAndAddView(selectedPosition - 1, oldTop, TRUE, leftTmp, FALSE);
+        /*
+         * Case 1: Scrolling down.
+         */
+
+        /*
+         *     Before           After
+         *    |       |        |       |
+         *    +-------+        +-------+
+         *    |   A   |        |   A   |
+         *    |   1   |   =>   +-------+
+         *    +-------+        |   B   |
+         *    |   B   |        |   2   |
+         *    +-------+        +-------+
+         *    |       |        |       |
+         *
+         *    Try to keep the top of the previously selected item where it was.
+         *    oldSel = A
+         *    sel = B
+         */
+
+        // Put oldSel (A) where it belongs
+        Int32 oldTop;
+        oldSel->GetTop(&oldTop);
+        oldSel = MakeAndAddView(selectedPosition - 1, oldTop, TRUE, left, FALSE);
+
         Int32 dividerHeight = mDividerHeight;
-        sel = MakeAndAddView(selectedPosition, oldBottom + dividerHeight, TRUE, leftTmp, TRUE);
+
+        // Now put the new selection (B) below that
+        Int32 oldBottom;
+        oldSel->GetBottom(&oldBottom);
+        sel = MakeAndAddView(selectedPosition, oldBottom + dividerHeight, TRUE,
+                left, TRUE);
+
+        // Some of the newly selected item extends below the bottom of the list
+        Int32 selTop, selBottom;
+        sel->GetTop(&selTop);
+        sel->GetBottom(&selBottom);
         if (selBottom > bottomSelectionPixel) {
-            Int32 spaceAbove, spaceBelow;
-            sel->GetTop(&spaceAbove);
-            spaceAbove -= topSelectionPixel;
-            sel->GetBottom(&spaceBelow);
-            spaceBelow -= bottomSelectionPixel;
+
+            // Find space available above the selection into which we can scroll upwards
+            Int32 spaceAbove = selTop - topSelectionPixel;
+
+            // Find space required to bring the bottom of the selected item fully into view
+            Int32 spaceBelow = selBottom - bottomSelectionPixel;
+
+            // Don't scroll more than half the height of the list
             Int32 halfVerticalSpace = (childrenBottom - childrenTop) / 2;
             Int32 offset = Elastos::Core::Math::Min(spaceAbove, spaceBelow);
             offset = Elastos::Core::Math::Min(offset, halfVerticalSpace);
+
+            // We placed oldSel, so offset that item
             oldSel->OffsetTopAndBottom(-offset);
+            // Now offset the selected item to get it into view
             sel->OffsetTopAndBottom(-offset);
         }
 
+        // Fill in views above and below
         if (!mStackFromBottom) {
             FillUp(mSelectedPosition - 2, selTop - dividerHeight);
             AdjustViewsUpOrDown();
@@ -1068,29 +1132,87 @@ AutoPtr<IView> ListView::MoveSelection(
         }
     }
     else if (delta < 0) {
+        /*
+         * Case 2: Scrolling up.
+         */
+
+        /*
+         *     Before           After
+         *    |       |        |       |
+         *    +-------+        +-------+
+         *    |   A   |        |   A   |
+         *    +-------+   =>   |   1   |
+         *    |   B   |        +-------+
+         *    |   2   |        |   B   |
+         *    +-------+        +-------+
+         *    |       |        |       |
+         *
+         *    Try to keep the top of the item about to become selected where it was.
+         *    newSel = A
+         *    olSel = B
+         */
+
         if (newSel != NULL) {
-            sel = MakeAndAddView(selectedPosition, newTop, TRUE, leftTmp, TRUE);
+            // Try to position the top of newSel (A) where it was before it was selected
+            Int32 newTop;
+            newSel->GetTop(&newTop);
+            sel = MakeAndAddView(selectedPosition, newTop, TRUE, left, TRUE);
         }
         else {
-            sel = MakeAndAddView(selectedPosition, oldTop, FALSE, leftTmp, TRUE);
+            // If (A) was not on screen and so did not have a view, position
+            // it above the oldSel (B)
+            Int32 oldTop;
+            oldSel->GetTop(&oldTop);
+            sel = MakeAndAddView(selectedPosition, oldTop, FALSE, left, TRUE);
         }
+
+        // Some of the newly selected item extends above the top of the list
+        Int32 selTop, selBottom;
+        sel->GetTop(&selTop);
+        sel->GetBottom(&selBottom);
         if (selTop < topSelectionPixel) {
+            // Find space required to bring the top of the selected item fully into view
             Int32 spaceAbove = topSelectionPixel - selTop;
+
+            // Find space available below the selection into which we can scroll downwards
             Int32 spaceBelow = bottomSelectionPixel - selBottom;
+
+            // Don't scroll more than half the height of the list
             Int32 halfVerticalSpace = (childrenBottom - childrenTop) / 2;
             Int32 offset = Elastos::Core::Math::Min(spaceAbove, spaceBelow);
             offset = Elastos::Core::Math::Min(offset, halfVerticalSpace);
+
+            // Offset the selected item to get it into view
             sel->OffsetTopAndBottom(offset);
         }
+
+        // Fill in views above and below
         FillAboveAndBelow(sel, selectedPosition);
     }
     else {
-        sel = MakeAndAddView(selectedPosition, oldTop, TRUE, leftTmp, TRUE);
+        Int32 oldTop;
+        oldSel->GetTop(&oldTop);
+
+        /*
+         * Case 3: Staying still
+         */
+        sel = MakeAndAddView(selectedPosition, oldTop, TRUE, left, TRUE);
+
+        // We're staying still...
         if (oldTop < childrenTop) {
-            if (selBottom < childrenTop + 20) {
+            // ... but the top of the old selection was off screen.
+            // (This can happen if the data changes size out from under us)
+            Int32 newBottom;
+            sel->GetBottom(&newBottom);
+            if (newBottom < childrenTop + 20) {
+                // Not enough visible -- bring it onscreen
+                Int32 selTop;
+                sel->GetTop(&selTop);
                 sel->OffsetTopAndBottom(childrenTop - selTop);
             }
         }
+
+        // Fill in views above and below
         FillAboveAndBelow(sel, selectedPosition);
     }
     return sel;
@@ -1337,17 +1459,22 @@ AutoPtr<IView> ListView::FillSpecific(
     /* [in] */ Int32 top)
 {
     Boolean tempIsSelected = position == mSelectedPosition;
-    AutoPtr<IView> temp = MakeAndAddView(position, top, TRUE, TO_CRECT(mListPadding)->mLeft, tempIsSelected);
+    Int32 left;
+    mListPadding->GetLeft(&left);
+    AutoPtr<IView> temp = MakeAndAddView(position, top, TRUE, left, tempIsSelected);
+    // Possibly changed again in fillUp if we add rows above this one.
     mFirstPosition = position;
 
     AutoPtr<IView> above;
     AutoPtr<IView> below;
+
     Int32 dividerHeight = mDividerHeight;
     Int32 tempTop, tempBottom;
     temp->GetTop(&tempTop);
     temp->GetBottom(&tempBottom);
     if (!mStackFromBottom) {
         above = FillUp(position - 1, tempTop - dividerHeight);
+        // This will correct for the top of the first view not touching the top of the list
         AdjustViewsUpOrDown();
         below = FillDown(position + 1, tempBottom + dividerHeight);
         Int32 childCount;
@@ -1358,6 +1485,7 @@ AutoPtr<IView> ListView::FillSpecific(
     }
     else {
         below = FillDown(position + 1, tempBottom + dividerHeight);
+        // This will correct for the bottom of the last view not touching the bottom of the list
         AdjustViewsUpOrDown();
         above = FillUp(position - 1, tempTop - dividerHeight);
         Int32 childCount;
@@ -1911,17 +2039,15 @@ void ListView::SetupChild(
     Boolean updateChildPressed = isPressed != (child->IsPressed(&res), res);
     Boolean needToMeasure = !recycled || updateChildSelected || (child->IsLayoutRequested(&res), res);
 
+    // Respect layout params that are already in the view. Otherwise make some up...
+    // noinspection unchecked
     AutoPtr<IViewGroupLayoutParams> p;
     child->GetLayoutParams((IViewGroupLayoutParams**)&p);
-    AutoPtr<CAbsListViewLayoutParams> cp;
-    if (p != NULL) {
-        cp = (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(p);
-    }
-    else {
+    if (p == NULL) {
         GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&p);
-        cp = (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(p.Get());
     }
-
+    CAbsListViewLayoutParams* cp = (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(p);
+    assert(cp != NULL);
     IAdapter::Probe(mAdapter)->GetItemViewType(position, &(cp->mViewType));
 
     if ((recycled && !cp->mForceAdd) || (cp->mRecycledHeaderFooter &&
@@ -1935,6 +2061,7 @@ void ListView::SetupChild(
         }
         AddViewInLayout(child, flowDown ? -1 : 0, p, TRUE);
     }
+
     if (updateChildSelected) {
         child->SetSelected(isSelected);
     }
@@ -1955,8 +2082,9 @@ void ListView::SetupChild(
             GetContext((IContext**)&context);
             AutoPtr<IApplicationInfo> info;
             context->GetApplicationInfo((IApplicationInfo**)&info);
-            AutoPtr<CApplicationInfo> cInfo = (CApplicationInfo*)info.Get();
-            if (cInfo->mTargetSdkVersion >= Build::VERSION_CODES::HONEYCOMB) {
+            Int32 version;
+            info->GetTargetSdkVersion(&version);
+            if (version >= Build::VERSION_CODES::HONEYCOMB) {
                 Boolean value;
                 mCheckStates->Get(position, &value);
                 child->SetActivated(value);
@@ -2008,7 +2136,7 @@ void ListView::SetupChild(
     if (recycled) {
         AutoPtr<IViewGroupLayoutParams> layoutParams;
         child->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-        AutoPtr<CAbsListViewLayoutParams> params =
+        CAbsListViewLayoutParams* params =
             (CAbsListViewLayoutParams*)IAbsListViewLayoutParams::Probe(layoutParams);
         if (params->mScrappedFromPosition != position) {
             child->JumpDrawablesToCurrentState();

@@ -138,14 +138,13 @@ ECode TextLine::Set(
         Logger::E("TextLine", "Directions cannot be null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-
     mHasTabs = hasTabs;
     mSpanned = NULL;
 
     Boolean hasReplacement = FALSE;
-    if (text != NULL && ISpanned::Probe(text) != NULL) {
+    if (ISpanned::Probe(text) != NULL) {
         mSpanned = ISpanned::Probe(text);
-        mReplacementSpanSpanSet->Init(mSpanned.Get(), start, limit);
+        mReplacementSpanSpanSet->Init(mSpanned, start, limit);
         hasReplacement = mReplacementSpanSpanSet->mNumberOfSpans > 0;
     }
 
@@ -155,7 +154,6 @@ ECode TextLine::Set(
         if (mChars == NULL || mChars->GetLength() < mLen) {
             mChars = ArrayUtils::NewUnpaddedChar32Array(mLen);
         }
-
         TextUtils::GetChars(text, start, limit, mChars, 0);
         if (hasReplacement) {
             // Handle these all at once so we don't have to do it as we go.
@@ -300,7 +298,6 @@ Float TextLine::Measure(
         if (runLimit > mLen) {
             runLimit = mLen;
         }
-
         Boolean runIsRtl = ((*runs)[i+1] & ILayout::RUN_RTL_FLAG) != 0;
 
         Int32 segstart = runStart;
@@ -311,8 +308,6 @@ Float TextLine::Measure(
             if (mHasTabs && j < runLimit) {
                 codept = (*chars)[j];
                 if (codept >= 0xd800 && codept < 0xdc00 && j + 1 < runLimit) {
-                    assert(0 && "TODO");
-                    // codept = Character::CodePointAt(chars, j);
                     if (codept >= Layout::MIN_EMOJI && codept <= Layout::MAX_EMOJI) {
                         Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept, (IBitmap**)&bm);
                     }
@@ -770,7 +765,7 @@ Float TextLine::HandleText(
     Int32 runLen = end - start;
     // No need to do anything if the run width is "0"
     if (runLen == 0) {
-        return /*0f*/0.0;
+        return 0;
     }
 
     Float ret = 0;
@@ -778,9 +773,8 @@ Float TextLine::HandleText(
     IPaint* p = IPaint::Probe(wp);
     Int32 contextLen = contextEnd - contextStart;
     Int32 bgColor, underlineColor;
-    wp->GetBgColor(&bgColor);
-    wp->GetUnderlineColor(&underlineColor);
-    if (needWidth || (c != NULL && (bgColor != 0 || underlineColor != 0 || runIsRtl))) {
+    if (needWidth || (c != NULL && ((wp->GetBgColor(&bgColor), bgColor != 0) ||
+            (wp->GetUnderlineColor(&underlineColor), underlineColor != 0) || runIsRtl))) {
         if (mCharsValid) {
             p->GetTextRunAdvances(mChars, start, runLen,
                     contextStart, contextLen, runIsRtl, NULL, 0, &ret);
@@ -797,7 +791,7 @@ Float TextLine::HandleText(
             x -= ret;
         }
 
-        if (bgColor != 0) {
+        if (wp->GetBgColor(&bgColor), bgColor != 0) {
             Int32 previousColor;
             p->GetColor(&previousColor);
             PaintStyle previousStyle;
@@ -812,12 +806,11 @@ Float TextLine::HandleText(
         }
 
         Int32 underlineColor;
-        wp->GetUnderlineColor(&underlineColor);
-        if (underlineColor != 0) {
+        if (wp->GetUnderlineColor(&underlineColor), underlineColor != 0) {
             // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
             Int32 baselineShift;
-            Float textSize;
             wp->GetBaselineShift(&baselineShift);
+            Float textSize;
             p->GetTextSize(&textSize);
             Float underlineTop = y + baselineShift + (1.0f / 9.0f) * textSize;
 
@@ -832,9 +825,9 @@ Float TextLine::HandleText(
             p->SetAntiAlias(TRUE);
 
             Int32 underlineColor;
-            Float underlineThickness;
             wp->GetUnderlineColor(&underlineColor);
             p->SetColor(underlineColor);
+            Float underlineThickness;
             wp->GetUnderlineThickness(&underlineThickness);
             c->DrawRect(x, underlineTop, x + ret, underlineTop + underlineThickness, p);
 
@@ -932,7 +925,7 @@ Float TextLine::HandleRun(
         if (fmi != NULL) {
             ExpandMetricsFromPaint(fmi, wp);
         }
-        return /*0f*/0.0;
+        return 0;
     }
 
     if (mSpanned == NULL) {
@@ -956,13 +949,13 @@ Float TextLine::HandleRun(
         AutoPtr<ITextPaint> wp = mWorkPaint;
         wp->Set(mPaint);
 
-        Int32 temp = mMetricAffectingSpanSpanSet->GetNextTransition(mStart + i, mStart + limit);
-        inext = temp - mStart;
+        inext = mMetricAffectingSpanSpanSet->GetNextTransition(mStart + i, mStart + limit) -
+                mStart;
         Int32 mlimit = Elastos::Core::Math::Min(inext, measureLimit);
 
         AutoPtr<IReplacementSpan> replacement;
-        Int32 numberOfSpans = mMetricAffectingSpanSpanSet->mNumberOfSpans;
-        for (Int32 j = 0; j < numberOfSpans; j++) {
+
+        for (Int32 j = 0; j < mMetricAffectingSpanSpanSet->mNumberOfSpans; j++) {
             // Both intervals [spanStarts..spanEnds] and [mStart + i..mStart + mlimit] are NOT
             // empty by construction. This special case in getSpans() explains the >= & <= tests
             if (((*mMetricAffectingSpanSpanSet->mSpanStarts)[j] >= mStart + mlimit) ||
@@ -983,9 +976,10 @@ Float TextLine::HandleRun(
             continue;
         }
 
-        for (Int32 j = i, jnext = 0; j < mlimit; j = jnext) {
-            Int32 temp = mCharacterStyleSpanSet->GetNextTransition(mStart + j, mStart + mlimit);
-            jnext = temp - mStart;
+        for (Int32 j = i, jnext; j < mlimit; j = jnext) {
+            jnext = mCharacterStyleSpanSet->GetNextTransition(mStart + j, mStart + mlimit) -
+                    mStart;
+
             wp->Set(mPaint);
             for (Int32 k = 0; k < mCharacterStyleSpanSet->mNumberOfSpans; k++) {
                 // Intentionally using >= and <= as explained above

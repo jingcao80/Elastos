@@ -70,7 +70,7 @@ AutoPtr<MeasuredText> MeasuredText::Obtain()
         }
     }
     mt = new MeasuredText();
-    if(localLOGV) {
+    if (localLOGV) {
         Logger::V("MEAS", String("new: ")/* + mt*/ + String("\n"));
     }
     return mt;

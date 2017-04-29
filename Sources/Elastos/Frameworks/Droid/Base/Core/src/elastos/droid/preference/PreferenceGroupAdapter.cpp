@@ -193,6 +193,8 @@ AutoPtr<IViewGroupLayoutParams> PreferenceGroupAdapter::sWrapperLayoutParams = i
 
 const String PreferenceGroupAdapter::TAG("PreferenceGroupAdapter");
 
+AutoPtr<ICollections> PreferenceGroupAdapter::sCollections;
+
 CAR_INTERFACE_IMPL(PreferenceGroupAdapter, BaseAdapter, IPreferenceGroupAdapter)
 
 PreferenceGroupAdapter::PreferenceGroupAdapter()
@@ -290,9 +292,7 @@ AutoPtr<IPreferenceLayout> PreferenceGroupAdapter::CreatePreferenceLayout(
     /* [in] */ IPreferenceLayout* in)
 {
     AutoPtr<IPreferenceLayout> pl = in != NULL ? in : new PreferenceLayout();
-
     pl->SetName(Object::GetFullClassName(preference));
-
     Int32 resId, widgetResId;
     preference->GetLayoutResource(&resId);
     pl->SetResId(resId);
@@ -301,7 +301,6 @@ AutoPtr<IPreferenceLayout> PreferenceGroupAdapter::CreatePreferenceLayout(
     return pl;
 }
 
-AutoPtr<ICollections> PreferenceGroupAdapter::sCollections;
 AutoPtr<ICollections> PreferenceGroupAdapter::GetCollections()
 {
     if (sCollections == NULL) {
@@ -388,7 +387,7 @@ ECode PreferenceGroupAdapter::GetView(
 
     AutoPtr<IInterface> obj;
     GetItem(position, (IInterface**)&obj);
-    AutoPtr<IPreference> preference = IPreference::Probe(obj);
+    IPreference* preference = IPreference::Probe(obj);
     // Build a PreferenceLayout to compare with known ones that are cacheable.
     mTempPreferenceLayout = CreatePreferenceLayout(preference, mTempPreferenceLayout);
 
@@ -396,7 +395,7 @@ ECode PreferenceGroupAdapter::GetView(
     // the layout gets re-created by the Preference.
     Int32 index, type, viewType;
     if ((GetCollections()->BinarySearch(mPreferenceLayouts, mTempPreferenceLayout, &index), index < 0) ||
-        (GetItemViewType(position, &type),  GetHighlightItemViewType(&viewType), type == viewType)) {
+        (GetItemViewType(position, &type), GetHighlightItemViewType(&viewType), type == viewType)) {
         convertView = NULL;
     }
     AutoPtr<IView> result;
@@ -406,7 +405,7 @@ ECode PreferenceGroupAdapter::GetView(
         IView::Probe(parent)->GetContext((IContext**)&ctx);
         AutoPtr<IViewGroup> wrapper;
         CFrameLayout::New(ctx, (IViewGroup**)&wrapper);
-        AutoPtr<IView> vwrapper = IView::Probe(wrapper);
+        IView* vwrapper = IView::Probe(wrapper);
         vwrapper->SetLayoutParams(sWrapperLayoutParams);
         vwrapper->SetBackgroundDrawable(mHighlightedDrawable);
         wrapper->AddView(result);
@@ -487,7 +486,7 @@ ECode PreferenceGroupAdapter::GetItemViewType(
 
     AutoPtr<IInterface> obj;
     GetItem(position, (IInterface**)&obj);
-    AutoPtr<IPreference> preference = IPreference::Probe(obj);
+    IPreference* preference = IPreference::Probe(obj);
     Boolean canRecycleLayout;
     if (preference->CanRecycleLayout(&canRecycleLayout), !canRecycleLayout) {
         *type = IAdapter::IGNORE_ITEM_VIEW_TYPE;

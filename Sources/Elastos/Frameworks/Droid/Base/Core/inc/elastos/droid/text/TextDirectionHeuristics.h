@@ -81,7 +81,7 @@ private:
 
     private:
         CARAPI_(Boolean) DoCheck(
-            /* [in] */ ICharSequence* chars,
+            /* [in] */ ArrayOf<Char32>* chars,
             /* [in] */ Int32 start,
             /* [in] */ Int32 count);
 
@@ -118,7 +118,7 @@ private:
 
         //@Override
         CARAPI CheckRtl(
-            /* [in] */ ICharSequence* text,
+            /* [in] */ ArrayOf<Char32>* chars,
             /* [in] */ Int32 start,
             /* [in] */ Int32 count,
             /* [out] */ Int32* result);
@@ -147,7 +147,7 @@ private:
 
         //@Override
         CARAPI CheckRtl(
-            /* [in] */ ICharSequence* text,
+            /* [in] */ ArrayOf<Char32>* chars,
             /* [in] */ Int32 start,
             /* [in] */ Int32 count,
             /* [out] */ Int32* result);

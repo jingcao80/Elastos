@@ -113,6 +113,22 @@ ECode Object::GetClassID(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode Object::GetClassInfo(
+    /* [out] */ IInterface** clsInfo)
+{
+    VALIDATE_NOT_NULL(clsInfo);
+    *clsInfo = mClassInfo;
+    REFCOUNT_ADD(*clsInfo);
+    return NOERROR;
+}
+
+ECode Object::SetClassInfo(
+    /* [in] */ IInterface *clsInfo)
+{
+    mClassInfo = IClassInfo::Probe(clsInfo);
+    return NOERROR;
+}
+
 ECode Object::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
@@ -134,8 +150,7 @@ ECode Object::ToString(
     /* [out] */ String* info)
 {
     VALIDATE_NOT_NULL(info);
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(TO_IINTERFACE(this), (IClassInfo**)&classInfo);
+    AutoPtr<IClassInfo> classInfo = GetClassInfo((IObject*)this);
     String className("--");
     if (classInfo != NULL) {
         classInfo->GetName(&className);
@@ -200,74 +215,73 @@ ECode Object::GetWeakReference(
 AutoPtr<IClassInfo> Object::GetClassInfo(
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
-    if (classInfo == NULL) {
-        if (DEBUG) ALOGD("error: failed to GetClassInfo with %s. It is not a Car class.", TO_CSTR(obj));
+    IObject* iObject = IObject::Probe(obj);
+    if (iObject == NULL) {
+        if (DEBUG) ALOGD("error: failed to get class info of Object[0x%08x]. It is not a Car class.", obj);
+        return NULL;
     }
+
+    AutoPtr<IClassInfo> classInfo;
+    iObject->GetClassInfo((IInterface**)&classInfo);
+    if (classInfo == NULL) {
+        _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+        if (classInfo == NULL) {
+            if (DEBUG) ALOGD("error: failed to get class info of Object[0x%08x]. It is not a Car class.", obj);
+            return NULL;
+        }
+        iObject->SetClassInfo(classInfo);
+    }
+
     return classInfo;
 }
 
 AutoPtr<IClassLoader> Object::GetClassLoader(
     /* [in] */ IInterface* obj)
 {
+    AutoPtr<IClassInfo> classInfo = GetClassInfo(obj);
+    if (classInfo == NULL) return NULL;
+
     AutoPtr<IClassLoader> classLoader;
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
-    if (classInfo) {
-        classLoader = ClassLoader::GetClassLoader(classInfo);
-    }
-    else {
-        if (DEBUG) ALOGW("error: Object::GetClassLoader failed to GetClassLoader with %s. It is not a Car class.", TO_CSTR(obj));
-    }
+    classLoader = ClassLoader::GetClassLoader(classInfo);
     return classLoader;
 }
 
 String Object::GetClassName(
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     String className;
-    if (classInfo != NULL) {
-        classInfo->GetName(&className);
-    }
-    else {
-        if (DEBUG) ALOGD("error: failed to GetClassName with %s. It is not a Car class.", TO_CSTR(obj));
-    }
+
+    AutoPtr<IClassInfo> classInfo = GetClassInfo(obj);
+    if (classInfo == NULL) return className;
+
+    classInfo->GetName(&className);
     return className;
 }
 
 String Object::GetFullClassName(
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     String fullClassName;
-    if (classInfo != NULL) {
-        String className, ns;
-        classInfo->GetName(&className);
-        classInfo->GetNamespace(&ns);
-        fullClassName = ns + String(".") + className;
-    }
-    else {
-        if (DEBUG) ALOGD("error: failed to GetFullClassName with %s. It is not a Car class.", TO_CSTR(obj));
-    }
+
+    AutoPtr<IClassInfo> classInfo = GetClassInfo(obj);
+    if (classInfo == NULL) return fullClassName;
+
+    String className, ns;
+    classInfo->GetName(&className);
+    classInfo->GetNamespace(&ns);
+    fullClassName = ns + String(".") + className;
     return fullClassName;
 }
 
 String Object::GetNamespace(
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<IClassInfo> classInfo;
-    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     String ns;
-    if (classInfo != NULL) {
-        classInfo->GetNamespace(&ns);
-    }
-    else {
-        if (DEBUG) ALOGD("error: failed to GetNamespace with %s. It is not a Car class.", TO_CSTR(obj));
-    }
+
+    AutoPtr<IClassInfo> classInfo = GetClassInfo(obj);
+    if (classInfo == NULL) return ns;
+
+    classInfo->GetNamespace(&ns);
     return ns;
 }
 

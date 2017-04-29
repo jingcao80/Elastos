@@ -58,13 +58,14 @@ module
      * Interface for an algorithm to guess the direction of a paragraph of text.
      *
      */
+    [deprecated]
     interface ITextDirectionAlgorithm {
         /**
          * Returns whether the range of text is RTL according to the algorithm.
          *
          */
         CheckRtl(
-            [in] ICharSequence* text,
+            [in] ArrayOf<Char32>* chars,
             [in] Int32 start,
             [in] Int32 count,
             [out] Int32* result);

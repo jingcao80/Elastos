@@ -1160,25 +1160,24 @@ AutoPtr<IView> AbsListView::RecycleBin::RetrieveFromScrap(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             scrapViews->Get(i, (IInterface**)&obj);
-            AutoPtr<IView> view = IView::Probe(obj);
+            IView* view = IView::Probe(obj);
             AutoPtr<IViewGroupLayoutParams> lp;
             view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-            AutoPtr<IAbsListViewLayoutParams> params = IAbsListViewLayoutParams::Probe(lp);
+            IAbsListViewLayoutParams* params = IAbsListViewLayoutParams::Probe(lp);
 
-            Int64 itemId;
-            params->GetItemId(&itemId);
             Int32 pos;
-            params->GetScrappedFromPosition(&pos);
             if (mHost->mAdapterHasStableIds) {
                 Int64 id;
                 IAdapter::Probe(mHost->mAdapter)->GetItemId(position, &id);
+                Int64 itemId;
+                params->GetItemId(&itemId);
                 if (id == itemId) {
                     AutoPtr<IInterface> obj;
                     scrapViews->Remove(i, (IInterface**)&obj);
                     return IView::Probe(obj);
                 }
             }
-            else if (pos == position) {
+            else if (params->GetScrappedFromPosition(&pos), pos == position) {
                 AutoPtr<IInterface> obj;
                 scrapViews->Remove(i, (IInterface**)&obj);
                 AutoPtr<IView> scrap = IView::Probe(obj);
@@ -4450,10 +4449,10 @@ AutoPtr<IView> AbsListView::ObtainView(
     /* [in] */ Int32 position,
     /* [in] */ ArrayOf<Boolean>* isScrap)
 {
-    // Trace.traceBegin(Trace.TRACE_TAG_VIEW, "obtainView");
+    IAdapter* adapter = IAdapter::Probe(mAdapter);
 
+    // Trace.traceBegin(Trace.TRACE_TAG_VIEW, "obtainView");
     (*isScrap)[0] = FALSE;
-    AutoPtr<IAdapter> adapter = IAdapter::Probe(mAdapter);
 
     // Check whether we have a transient state view. Attempt to re-bind the
     // data and discard the view if we fail.
@@ -4461,7 +4460,7 @@ AutoPtr<IView> AbsListView::ObtainView(
     if (transientView != NULL) {
         AutoPtr<IViewGroupLayoutParams> layoutParams;
         transientView->GetLayoutParams((IViewGroupLayoutParams**)&layoutParams);
-        AutoPtr<IAbsListViewLayoutParams> params = IAbsListViewLayoutParams::Probe(layoutParams);
+        IAbsListViewLayoutParams* params = IAbsListViewLayoutParams::Probe(layoutParams);
 
         // If the view type hasn't changed, attempt to re-bind the data.
         Int32 viewType1, viewType2;
@@ -5531,9 +5530,9 @@ void AbsListView::ScrollIfNeeded(
                 motionIndex = count / 2;
             }
 
+            Int32 motionViewPrevTop = 0;
             AutoPtr<IView> motionView;
             GetChildAt(motionIndex, (IView**)&motionView);
-            Int32 motionViewPrevTop = 0;
             if (motionView != NULL) {
                 motionView->GetTop(&motionViewPrevTop);
             }
@@ -5598,7 +5597,6 @@ void AbsListView::ScrollIfNeeded(
                                 GetPaddingTop(&top);
                                 Int32 maxH;
                                 mEdgeGlowTop->GetMaxHeight(&maxH);
-                                GetHeight(&height);
                                 GetWidth(&width);
                                 Invalidate(0, 0, width, maxH + top);
                             }
@@ -5669,6 +5667,7 @@ void AbsListView::ScrollIfNeeded(
                         GetPaddingTop(&top);
                         Int32 maxH;
                         mEdgeGlowTop->GetMaxHeight(&maxH);
+                        GetWidth(&width);
                         Invalidate(0, 0, width, maxH + top);
                     }
                     else if (rawDeltaY < 0) {
@@ -6986,13 +6985,13 @@ Boolean AbsListView::TrackMotionScroll(
     Int32 lastBottom;
     view->GetBottom(&lastBottom);
 
+    CRect* listPadding = (CRect*)mListPadding.Get();
+
     // "effective padding" In this case is the amount of padding that affects
     // how much space should not be filled by items. If we don't clip to padding
     // there is no effective padding.
     Int32 effectivePaddingTop = 0;
     Int32 effectivePaddingBottom = 0;
-
-    CRect* listPadding = (CRect*)mListPadding.Get();
     if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
         effectivePaddingTop = listPadding->mTop;
         effectivePaddingBottom = listPadding->mBottom;
@@ -7032,7 +7031,6 @@ Boolean AbsListView::TrackMotionScroll(
     else {
         mFirstPositionDistanceGuess += incrementalDeltaY;
     }
-
     if (firstPosition + childCount == mItemCount) {
         mLastPositionDistanceGuess = lastBottom + listPadding->mBottom;
     }

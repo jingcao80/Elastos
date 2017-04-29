@@ -5439,8 +5439,8 @@ ECode View::NotifySubtreeAccessibilityStateChangedIfNeeded()
     if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
         mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
         //try {
-            ECode ec = mParent->NotifySubtreeAccessibilityStateChanged(
-                    this, this, IAccessibilityEvent::CONTENT_CHANGE_TYPE_SUBTREE);
+        ECode ec = mParent->NotifySubtreeAccessibilityStateChanged(
+                this, this, IAccessibilityEvent::CONTENT_CHANGE_TYPE_SUBTREE);
         //} catch (AbstractMethodError e) {
         //    Log.e(TAG, mParent.getClass().getSimpleName() +
         //            " does not fully implement ViewParent", e);
@@ -13586,8 +13586,7 @@ Boolean View::IsLayoutModeOptical(
 {
     IViewGroup* vgObj = IViewGroup::Probe(o);
     if (vgObj) {
-        Boolean isLayoutModeOptical;
-        isLayoutModeOptical = ((ViewGroup*)vgObj)->IsLayoutModeOptical();
+        Boolean isLayoutModeOptical = ((ViewGroup*)vgObj)->IsLayoutModeOptical();
         if (isLayoutModeOptical) {
             return TRUE;
         }
@@ -13661,18 +13660,11 @@ ECode View::Layout(
         mPrivateFlags &= ~PFLAG_LAYOUT_REQUIRED;
 
         AutoPtr<ListenerInfo> li = mListenerInfo;
-        if (li != NULL && li->mOnLayoutChangeListeners.IsEmpty() == FALSE) {
-            //TODO : clone
-            // ArrayList<OnLayoutChangeListener> listenersCopy =
-            //         (ArrayList<OnLayoutChangeListener>)li.mOnLayoutChangeListeners.clone();
-            // int numListeners = listenersCopy.size();
-            // for (int i = 0; i < numListeners; ++i) {
-            //     listenersCopy.get(i).onLayoutChange(this, l, t, r, b, oldL, oldT, oldR, oldB);
-            // }
-
-            Int32 numListeners = li->mOnLayoutChangeListeners.GetSize();
-            for (Int32 i = 0; i < numListeners; ++i) {
-                li->mOnLayoutChangeListeners[i]->OnLayoutChange(this,
+        if (li != NULL && !li->mOnLayoutChangeListeners.IsEmpty()) {
+            List<AutoPtr<IViewOnLayoutChangeListener> > listenersCopy(li->mOnLayoutChangeListeners);
+            List<AutoPtr<IViewOnLayoutChangeListener> >::Iterator it;
+            for (it = listenersCopy.Begin(); it != listenersCopy.End(); ++it) {
+                (*it)->OnLayoutChange(this,
                         l, t, r, b, oldL, oldT, oldR, oldB);
             }
         }

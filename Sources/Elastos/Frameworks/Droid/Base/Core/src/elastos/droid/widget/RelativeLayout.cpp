@@ -1206,9 +1206,10 @@ ECode RelativeLayout::OnMeasure(
                 AutoPtr<IViewGroupLayoutParams> vglp;
                 child->GetLayoutParams((IViewGroupLayoutParams**)&vglp);
 
-                AutoPtr<IRelativeLayoutLayoutParams> params = IRelativeLayoutLayoutParams::Probe(vglp);
-                ((RelativeLayoutLayoutParams*)params.Get())->mLeft -= offsetWidth;
-                ((RelativeLayoutLayoutParams*)params.Get())->mRight -= offsetWidth;
+                IRelativeLayoutLayoutParams* params = IRelativeLayoutLayoutParams::Probe(vglp);
+                RelativeLayoutLayoutParams* lp = (RelativeLayoutLayoutParams*)params;
+                lp->mLeft -= offsetWidth;
+                lp->mRight -= offsetWidth;
             }
         }
     }

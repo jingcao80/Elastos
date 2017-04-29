@@ -5713,13 +5713,13 @@ ECode ViewGroup::InvalidateChild(
         // be invalidating their old position and need the parent to paint behind them.
         AutoPtr<IMatrix> childMatrix;
         v->GetMatrix((IMatrix**)&childMatrix);
-        Boolean isIdentity = FALSE;
-        childMatrix->IsIdentity(&isIdentity);
         Boolean isOpaque;
         v->IsOpaque(&isOpaque);
         AutoPtr<IAnimation> animation;
-        v->GetAnimation((IAnimation**)&animation);
-        isOpaque = isOpaque && !drawAnimation && animation == NULL && isIdentity;
+        Boolean isIdentity;
+        isOpaque = isOpaque && !drawAnimation &&
+            (v->GetAnimation((IAnimation**)&animation), animation == NULL) &&
+            (childMatrix->IsIdentity(&isIdentity), isIdentity);
         // Mark the child as dirty, using the appropriate flag
         // Make sure we do not set both flags at the same time
         Int32 opaqueFlag = isOpaque ? PFLAG_DIRTY_OPAQUE : PFLAG_DIRTY;
@@ -5732,6 +5732,7 @@ ECode ViewGroup::InvalidateChild(
         AutoPtr<ArrayOf<Int32> > location = ArrayOf<Int32>::Alloc(2);
         (*location)[CHILD_LEFT_INDEX] = v->mLeft;
         (*location)[CHILD_TOP_INDEX] = v->mTop;
+        childMatrix->IsIdentity(&isIdentity);
         if (!isIdentity || (mGroupFlags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
             AutoPtr<IRectF> boundingRect = attachInfo->mTmpTransformRect;
             boundingRect->Set(dirty);
@@ -5793,8 +5794,8 @@ ECode ViewGroup::InvalidateChild(
             // flag coming from the child that initiated the invalidate
             if (view != NULL) {
                 Int32 solidColor;
-                view->GetSolidColor(&solidColor);
-                if ((view->mViewFlags & FADING_EDGE_MASK) != 0 && solidColor == 0) {
+                if ((view->mViewFlags & FADING_EDGE_MASK) != 0 &&
+                    (view->GetSolidColor(&solidColor), solidColor == 0)) {
                     opaqueFlag = PFLAG_DIRTY;
                 }
                 if ((view->mPrivateFlags & PFLAG_DIRTY_MASK) != PFLAG_DIRTY) {
@@ -5854,7 +5855,7 @@ ECode ViewGroup::InvalidateChildInParent(
 
             if ((mGroupFlags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
                 Boolean tmp = FALSE;
-                if (!(dirty->Intersect(0, 0, mRight - left, mBottom - top, &tmp), tmp)) {
+                if (dirty->Intersect(0, 0, mRight - left, mBottom - top, &tmp), !tmp) {
                     dirty->SetEmpty();
                 }
             }

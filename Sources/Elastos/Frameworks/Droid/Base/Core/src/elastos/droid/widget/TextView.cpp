@@ -7374,12 +7374,11 @@ LayoutAlignment TextView::GetLayoutAlignment()
 void TextView::MakeNewLayout(
     /* [in] */ Int32 wantWidth,
     /* [in] */ Int32 hintWidth,
-    /* [in] */ IBoringLayoutMetrics* _boring,
+    /* [in] */ IBoringLayoutMetrics* boring,
     /* [in] */ IBoringLayoutMetrics* _hintBoring,
     /* [in] */ Int32 ellipsisWidth,
     /* [in] */ Boolean bringIntoView)
 {
-    AutoPtr<IBoringLayoutMetrics> boring = _boring;
     AutoPtr<IBoringLayoutMetrics> hintBoring = _hintBoring;
     StopMarquee();
 
@@ -7397,7 +7396,6 @@ void TextView::MakeNewLayout(
     }
 
     LayoutAlignment alignment = GetLayoutAlignment();
-
     Boolean testDirChange = mSingleLine && mLayout != NULL &&
         (alignment == Elastos::Droid::Text::ALIGN_NORMAL
         || alignment == Elastos::Droid::Text::ALIGN_OPPOSITE);
@@ -7405,11 +7403,10 @@ void TextView::MakeNewLayout(
     if (testDirChange) mLayout->GetParagraphDirection(0, &oldDir);
 
     AutoPtr<IKeyListener> keyListener;
-    GetKeyListener((IKeyListener**)&keyListener);
-    Boolean shouldEllipsize = mEllipsize !=
-        TextUtilsTruncateAt_NONE && keyListener == NULL;
+    Boolean shouldEllipsize = mEllipsize != TextUtilsTruncateAt_NONE
+            && (GetKeyListener((IKeyListener**)&keyListener), keyListener == NULL);
     Boolean switchEllipsize = mEllipsize == TextUtilsTruncateAt_MARQUEE &&
-        mMarqueeFadeMode != MARQUEE_FADE_NORMAL;
+            mMarqueeFadeMode != MARQUEE_FADE_NORMAL;
     TextUtilsTruncateAt effectiveEllipsize = mEllipsize;
     if (mEllipsize == TextUtilsTruncateAt_MARQUEE &&
         mMarqueeFadeMode == MARQUEE_FADE_SWITCH_SHOW_ELLIPSIS) {
@@ -7421,13 +7418,13 @@ void TextView::MakeNewLayout(
     }
 
     mLayout = MakeSingleLayout(wantWidth, boring, ellipsisWidth, alignment, shouldEllipsize,
-        effectiveEllipsize, effectiveEllipsize == mEllipsize);
+            effectiveEllipsize, effectiveEllipsize == mEllipsize);
     if (switchEllipsize) {
         TextUtilsTruncateAt oppositeEllipsize = effectiveEllipsize ==
-            TextUtilsTruncateAt_MARQUEE ?
-            TextUtilsTruncateAt_END : TextUtilsTruncateAt_MARQUEE;
+                TextUtilsTruncateAt_MARQUEE ?
+                TextUtilsTruncateAt_END : TextUtilsTruncateAt_MARQUEE;
         mSavedMarqueeModeLayout = MakeSingleLayout(wantWidth, boring, ellipsisWidth, alignment,
-            shouldEllipsize, oppositeEllipsize, effectiveEllipsize != mEllipsize);
+                shouldEllipsize, oppositeEllipsize, effectiveEllipsize != mEllipsize);
     }
 
     shouldEllipsize = mEllipsize != TextUtilsTruncateAt_NONE;
@@ -7435,6 +7432,7 @@ void TextView::MakeNewLayout(
 
     if (mHint != NULL) {
         if (shouldEllipsize) hintWidth = wantWidth;
+
         if (hintBoring == UNKNOWN_BORING) {
             hintBoring = BoringLayout::IsBoring(mHint, mTextPaint, mTextDir, mHintBoring);
 
@@ -7493,7 +7491,7 @@ void TextView::MakeNewLayout(
             else {
                 AutoPtr<IStaticLayout> slObj;
                 ASSERT_SUCCEEDED(CStaticLayout::New(
-                    mHint, mTextPaint, hintWidth, alignment, mTextDir,mSpacingMult,
+                    mHint, mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
                     mSpacingAdd, mIncludePad, (IStaticLayout**)&slObj));
                 mHintLayout = ILayout::Probe(slObj);
             }
@@ -7503,7 +7501,7 @@ void TextView::MakeNewLayout(
             mHint->GetLength(&length);
             AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(
-                mHint, 0, length, mTextPaint, hintWidth, alignment,mTextDir,
+                mHint, 0, length, mTextPaint, hintWidth, alignment, mTextDir,
                 mSpacingMult, mSpacingAdd, mIncludePad, mEllipsize,
                 ellipsisWidth, mMaxMode == LINES ? mMaximum : Elastos::Core::Math::INT32_MAX_VALUE,
                 (IStaticLayout**)&slObj));
@@ -7512,15 +7510,15 @@ void TextView::MakeNewLayout(
         else {
             AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(
-                mHint, mTextPaint, hintWidth, alignment, mTextDir,mSpacingMult,
+                mHint, mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
                 mSpacingAdd, mIncludePad, (IStaticLayout**)&slObj));
             mHintLayout = ILayout::Probe(slObj);
         }
     }
 
     Int32 paragraphDirection;
-    mLayout->GetParagraphDirection(0, &paragraphDirection);
-    if (bringIntoView || (testDirChange && oldDir != paragraphDirection)) {
+    if (bringIntoView || (testDirChange &&
+            (mLayout->GetParagraphDirection(0, &paragraphDirection), oldDir != paragraphDirection))) {
         RegisterForPreDraw();
     }
     if (mEllipsize == TextUtilsTruncateAt_MARQUEE) {
@@ -7542,7 +7540,6 @@ void TextView::MakeNewLayout(
 
     // CursorControllers need a non-NULL mLayout
     if (mEditor != NULL) TO_EDITOR(mEditor)->PrepareCursorControllers();
-
 }
 
 AutoPtr<ILayout> TextView::MakeSingleLayout(
@@ -7561,9 +7558,9 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
         GetKeyListener((IKeyListener**)&keyListener);
         AutoPtr<IDynamicLayout> dlObj;
         ASSERT_SUCCEEDED(CDynamicLayout::New(mText, mTransformed, mTextPaint, wantWidth,
-            alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
-            keyListener == NULL ? effectiveEllipsize : TextUtilsTruncateAt_NONE,
-            ellipsisWidth, (IDynamicLayout**)&dlObj));
+                alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
+                keyListener == NULL ? effectiveEllipsize : TextUtilsTruncateAt_NONE,
+                ellipsisWidth, (IDynamicLayout**)&dlObj));
         result = ILayout::Probe(dlObj);
     }
     else {
@@ -7573,8 +7570,7 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
                 mBoring = boring;
             }
         }
-        Int32 tlen;
-        mTransformed->GetLength(&tlen);
+
         if (boring != NULL) {
             Int32 bwidth;
             boring->GetWidth(&bwidth);
@@ -7587,7 +7583,6 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
                             wantWidth, alignment, mSpacingMult, mSpacingAdd,
                             boring, mIncludePad, (IBoringLayout**)&temp);
                         result = ILayout::Probe(temp);
-
                     }
                     else {
                         result = ILayout::Probe(BoringLayout::Make(mTransformed, mTextPaint,
@@ -7615,6 +7610,8 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
                 }
             }
             else if (shouldEllipsize) {
+                Int32 tlen;
+                mTransformed->GetLength(&tlen);
                 AutoPtr<IStaticLayout> slObj;
                 ASSERT_SUCCEEDED(CStaticLayout::New(mTransformed,
                     0, tlen,
@@ -7633,6 +7630,8 @@ AutoPtr<ILayout> TextView::MakeSingleLayout(
             }
         }
         else if (shouldEllipsize) {
+            Int32 tlen;
+            mTransformed->GetLength(&tlen);
             AutoPtr<IStaticLayout> slObj;
             ASSERT_SUCCEEDED(CStaticLayout::New(mTransformed,
                 0, tlen,
@@ -7852,17 +7851,21 @@ ECode TextView::OnMeasure(
             width = Math::Min(widthSize, width);
         }
     }
+
     Int32 compoundPaddingLeft, compoundPaddingRight;
     GetCompoundPaddingLeft(&compoundPaddingLeft);
     GetCompoundPaddingRight(&compoundPaddingRight);
     Int32 want = width - compoundPaddingLeft - compoundPaddingRight;
     Int32 unpaddedWidth = want;
+
     if (mHorizontallyScrolling) want = VERY_WIDE;
+
     Int32 hintWant = want;
     Int32 hintWidth = hintWant;
     if (mHintLayout != NULL) {
         mHintLayout->GetWidth(&hintWidth);
     }
+
     if (mLayout == NULL) {
         Int32 compoundPaddingLeft, compoundPaddingRight;
         GetCompoundPaddingLeft(&compoundPaddingLeft);
@@ -7884,7 +7887,9 @@ ECode TextView::OnMeasure(
             (mEllipsize == TextUtilsTruncateAt_NONE) &&
             (want > layoutWidth) &&
             (IBoringLayout::Probe(mLayout) || (fromexisting && des >= 0 && des <= want));
+
         Boolean maximumChanged = (mMaxMode != mOldMaxMode) || (mMaximum != mOldMaximum);
+
         if (layoutChanged || maximumChanged) {
             if (!maximumChanged && widthChanged) {
                 mLayout->IncreaseWidthTo(want);
@@ -7901,6 +7906,7 @@ ECode TextView::OnMeasure(
             // Nothing has changed
         }
     }
+
     if (heightMode == View::MeasureSpec::EXACTLY) {
         // Parent has told us how big to be. So be it.
         height = heightSize;
@@ -7917,32 +7923,30 @@ ECode TextView::OnMeasure(
         }
     }
 
-    if (mAttachInfo != NULL) {
-        Int32 count;
-        mLayout->GetLineCount(&count);
-        Int32 compoundPaddingTop, compoundPaddingBottom;
-        GetCompoundPaddingTop(&compoundPaddingTop);
-        GetCompoundPaddingBottom(&compoundPaddingBottom);
-        Int32 unpaddedHeight = height - compoundPaddingTop - compoundPaddingBottom;
-        if (mMaxMode == LINES && count > mMaximum) {
-            Int32 pos;
-            mLayout->GetLineTop(mMaximum, &pos);
-            unpaddedHeight = Math::Min(unpaddedHeight, pos);
-        }
-        /*
-         * We didn't let MakeNewLayout() register to bring the cursor into view,
-         * so do it here if there is any possibility that it is needed.
-         */
-        Int32 w, h;
-        if (mMovement != NULL ||
-            (mLayout->GetWidth(&w), w) > unpaddedWidth ||
-            (mLayout->GetHeight(&h), h) > unpaddedHeight) {
-            RegisterForPreDraw();
-        }
-        else {
-            ScrollTo(0, 0);
-        }
+    Int32 compoundPaddingTop, compoundPaddingBottom;
+    GetCompoundPaddingTop(&compoundPaddingTop);
+    GetCompoundPaddingBottom(&compoundPaddingBottom);
+    Int32 unpaddedHeight = height - compoundPaddingTop - compoundPaddingBottom;
+    Int32 count;
+    if (mMaxMode == LINES && (mLayout->GetLineCount(&count), count > mMaximum)) {
+        Int32 pos;
+        mLayout->GetLineTop(mMaximum, &pos);
+        unpaddedHeight = Math::Min(unpaddedHeight, pos);
     }
+    /*
+     * We didn't let MakeNewLayout() register to bring the cursor into view,
+     * so do it here if there is any possibility that it is needed.
+     */
+    Int32 w, h;
+    if (mMovement != NULL ||
+        (mLayout->GetWidth(&w), w) > unpaddedWidth ||
+        (mLayout->GetHeight(&h), h) > unpaddedHeight) {
+        RegisterForPreDraw();
+    }
+    else {
+        ScrollTo(0, 0);
+    }
+
     SetMeasuredDimension(width, height);
     return NOERROR;
 }

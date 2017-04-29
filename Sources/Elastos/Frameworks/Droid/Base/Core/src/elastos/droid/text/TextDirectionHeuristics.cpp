@@ -87,12 +87,19 @@ ECode TextDirectionHeuristics::TextDirectionHeuristicImpl::IsRtl(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
-    AutoPtr<ICharBufferHelper> charBuffer;
-    CCharBufferHelper::AcquireSingleton((ICharBufferHelper**)&charBuffer);
-    AutoPtr<ICharBuffer> cb;
-    charBuffer->Wrap(array, (ICharBuffer**)&cb);
-    return IsRtl(ICharSequence::Probe(cb), start, count, result);
+    if (array == NULL || start < 0 || count < 0 || array->GetLength() - count < start) {
+//                throw new IllegalArgumentException();
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (mAlgorithm == NULL) {
+        *result = DefaultIsRtl();
+        return NOERROR;
+    }
+    *result = DoCheck(array, start, count);
+    return NOERROR;
 }
 
 ECode TextDirectionHeuristics::TextDirectionHeuristicImpl::IsRtl(
@@ -121,13 +128,15 @@ ECode TextDirectionHeuristics::TextDirectionHeuristicImpl::IsRtl(
         return NOERROR;
     }
 
-    *result = DoCheck(cs, start, count);
+
+    AutoPtr< ArrayOf<Char32> > chars = CoreUtils::Unbox(cs).GetChars();
+    *result = DoCheck(chars, start, count);
 
     return NOERROR;
 }
 
 Boolean TextDirectionHeuristics::TextDirectionHeuristicImpl::DoCheck(
-    /* [in] */ ICharSequence* chars,
+    /* [in] */ ArrayOf<Char32>* chars,
     /* [in] */ Int32 start,
     /* [in] */ Int32 count)
 {
@@ -175,14 +184,13 @@ TextDirectionHeuristics::FirstStrong::~FirstStrong()
 {}
 
 ECode TextDirectionHeuristics::FirstStrong::CheckRtl(
-    /* [in] */ ICharSequence* text,
+    /* [in] */ ArrayOf<Char32>* chars,
     /* [in] */ Int32 start,
     /* [in] */ Int32 count,
     /* [out] */ Int32* res)
 {
     VALIDATE_NOT_NULL(res)
     Int32 result = TextDirectionHeuristics::STATE_UNKNOWN;
-    AutoPtr<ArrayOf<Char32> > chars = CoreUtils::Unbox(text).GetChars();
     for (Int32 i = start, e = start + count; i < e && result == TextDirectionHeuristics::STATE_UNKNOWN; ++i) {
         result = IsRtlTextOrFormat(Character::GetDirectionality((*chars)[i]));
     }
@@ -205,14 +213,13 @@ TextDirectionHeuristics::AnyStrong::~AnyStrong()
 {}
 
 ECode TextDirectionHeuristics::AnyStrong::CheckRtl(
-    /* [in] */ ICharSequence* text,
+    /* [in] */ ArrayOf<Char32>* chars,
     /* [in] */ Int32 start,
     /* [in] */ Int32 count,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<ArrayOf<Char32> > chars = CoreUtils::Unbox(text).GetChars();
     Boolean haveUnlookedFor = FALSE;
     for (Int32 i = start, e = start + count; i < e; ++i) {
         switch (IsRtlText(Character::GetDirectionality((*chars)[i]))) {

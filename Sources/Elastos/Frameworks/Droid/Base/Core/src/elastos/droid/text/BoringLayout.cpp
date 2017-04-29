@@ -225,10 +225,11 @@ ECode BoringLayout::Init(
     VALIDATE_NOT_NULL(source)
     Int32 spacing;
 
-    mDirect = String(NULL);
-
     if (IString::Probe(source) != NULL && align == Elastos::Droid::Text::ALIGN_NORMAL) {
         source->ToString(&mDirect);
+    }
+    else {
+        mDirect = NULL;
     }
 
     mPaint = IPaint::Probe(paint);
@@ -282,8 +283,7 @@ AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
     /* [in] */ ICharSequence* text,
     /* [in] */ ITextPaint* paint)
 {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::FIRSTSTRONG_LTR;
-    return IsBoring(text, paint, ltr, NULL);
+    return IsBoring(text, paint, TextDirectionHeuristics::FIRSTSTRONG_LTR, NULL);
 }
 
 AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
@@ -299,8 +299,7 @@ AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
     /* [in] */ ITextPaint* paint,
     /* [in] */ IBoringLayoutMetrics* metrics)
 {
-    AutoPtr<ITextDirectionHeuristic> ltr = TextDirectionHeuristics::FIRSTSTRONG_LTR;
-    return IsBoring(text, paint, ltr, metrics);
+    return IsBoring(text, paint, TextDirectionHeuristics::FIRSTSTRONG_LTR, metrics);
 }
 
 AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
@@ -310,8 +309,7 @@ AutoPtr<IBoringLayoutMetrics> BoringLayout::IsBoring(
     /* [in] */ IBoringLayoutMetrics* metrics)
 {
     assert(text != NULL);
-    //char[] temp = TextUtils.obtain(500);
-    AutoPtr< ArrayOf<Char32> > temp = TextUtils::Obtain(4 * 500);
+    AutoPtr< ArrayOf<Char32> > temp = TextUtils::Obtain(500);
     Int32 length;
     text->GetLength(&length);
     Boolean boring = TRUE;
@@ -359,14 +357,14 @@ outer:
         if (fm == NULL) {
             CBoringLayoutMetrics::New((IBoringLayoutMetrics**)&fm);
         }
+
         AutoPtr<TextLine> line = TextLine::Obtain();
-        assert(line);
         line->Set(paint, text, 0, length, ILayout::DIR_LEFT_TO_RIGHT,
                 Layout::DIRS_ALL_LEFT_TO_RIGHT, FALSE, NULL);
         Int32 wid = (Int32) Elastos::Core::Math::Ceil(line->Metrics(IPaintFontMetricsInt::Probe(fm)));
-        assert(fm != NULL);
         fm->SetWidth(wid);
         TextLine::Recycle(line);
+
         return fm;
     } else {
         return NULL;

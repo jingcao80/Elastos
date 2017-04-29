@@ -4463,7 +4463,7 @@ ECode Collections::BinarySearch(
     ICollection* collection = ICollection::Probe(list);
 
     Boolean b;
-    if ((collection->IsEmpty(&b), b)) {
+    if (collection->IsEmpty(&b), b) {
         *index = -1;
         return NOERROR;
     }
@@ -4473,11 +4473,12 @@ ECode Collections::BinarySearch(
         list->GetListIterator((IListIterator**)&lit);
         IIterator* it = IIterator::Probe(lit);
         Boolean b;
-        while ((it->HasNext(&b), b)) {
+        while (it->HasNext(&b), b) {
             Int32 result;
             AutoPtr<IInterface> o;
             it->GetNext((IInterface**)&o);
-            AutoPtr<IComparable> com = IComparable::Probe(o);
+            IComparable* com = IComparable::Probe(o);
+            assert(com != NULL);
             com->CompareTo(object, &result);
             result = -result;
             if (result <= 0) {
@@ -4503,7 +4504,7 @@ ECode Collections::BinarySearch(
         mid = (UInt32(low + high)) >> 1;
         AutoPtr<IInterface> o;
         list->Get(mid, (IInterface**)&o);
-        AutoPtr<IComparable> com = IComparable::Probe(o);
+        IComparable* com = IComparable::Probe(o);
         assert(com != NULL);
         com->CompareTo(object, &result);
         result = -result;

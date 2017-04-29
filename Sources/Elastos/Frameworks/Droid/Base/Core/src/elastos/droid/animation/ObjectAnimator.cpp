@@ -142,8 +142,8 @@ ECode ObjectAnimator::constructor(
 static ECode CheckIsCarObject(
     /* [in] */ IInterface* target)
 {
-#if defined(_DEBUG)
     ECode ec = NOERROR;
+#if defined(_DEBUG)
     if (target != NULL) {
         ClassID objId;
         if (IObject::Probe(target) == NULL ||
@@ -152,8 +152,8 @@ static ECode CheckIsCarObject(
             assert(0 && "Target object is not a CAR object!");
         }
     }
-    return ec;
 #endif
+    return ec;
 }
 
 AutoPtr<IObjectAnimator> ObjectAnimator::OfInt32(

@@ -1491,6 +1491,7 @@ AutoPtr<IDrawable> ContactPhotoManagerImpl::GetDrawableForBitmap(
         // drawable.setAntiAlias(true);
         // drawable.setCornerRadius(bitmap.getHeight() / 2);
         // return drawable;
+        return NULL;
     }
     else {
         AutoPtr<IDrawable> drawable;
