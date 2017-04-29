@@ -1214,7 +1214,7 @@ ECode CClassInfo::AcquireAnnotationInfos()
     if (mAnnotationInfos == NULL && mDesc->mAnnotationCount > 0) {
         mAnnotationInfos = ArrayOf<IAnnotationInfo*>::Alloc(mDesc->mAnnotationCount);
         for (Int32 i = 0; i < mDesc->mAnnotationCount; i++) {
-            CAnnotationInfo* info = new CAnnotationInfo(mDesc->mAnnotations[i]);
+            CAnnotationInfo* info = new CAnnotationInfo(mClsModule, getAnnotationDescAddr(mBase, mDesc->mAnnotations, i));
             mAnnotationInfos->Set(i, (IAnnotationInfo*)info);
         }
     }

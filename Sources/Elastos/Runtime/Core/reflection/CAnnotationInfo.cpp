@@ -16,9 +16,20 @@
 
 #include "CAnnotationInfo.h"
 
+inline KeyValuePair* getKeyValuePairAddr(
+    /* [in] */ Int32 base,
+    /* [in] */ KeyValuePair** desc,
+    /* [in] */ Int32 index)
+{
+    desc = (KeyValuePair**)((Int32)desc + base);
+    return (KeyValuePair*)((Int32)desc[index] + base);
+}
+
 CAnnotationInfo::CAnnotationInfo(
+    /* [in] */ CClsModule* clsModule,
     /* [in] */ AnnotationDescriptor* annoDesc)
     : mAnnotationDescriptor(annoDesc)
+    , mBase(clsModule->mBase)
 {}
 
 CAnnotationInfo::~CAnnotationInfo()
@@ -70,7 +81,7 @@ ECode CAnnotationInfo::GetName(
         return E_INVALID_ARGUMENT;
     }
 
-    *name = mAnnotationDescriptor->mName;
+    *name = adjustNameAddr(mBase, mAnnotationDescriptor->mName);
     return NOERROR;
 }
 
@@ -81,7 +92,7 @@ ECode CAnnotationInfo::GetNamespace(
         return E_INVALID_ARGUMENT;
     }
 
-    *ns = mAnnotationDescriptor->mNameSpace;
+    *ns = adjustNameAddr(mBase, mAnnotationDescriptor->mNameSpace);
     return NOERROR;
 }
 
@@ -155,7 +166,8 @@ void CAnnotationInfo::AcquireKeys()
         Int32 size = mAnnotationDescriptor->mKeyValuePairCount;
         mKeys = ArrayOf<String>::Alloc(size);
         for (Int32 i = 0; i < size; i++) {
-            (*mKeys)[i] = mAnnotationDescriptor->mKeyValuePairs[i]->mKey;
+            KeyValuePair* kv = getKeyValuePairAddr(mBase, mAnnotationDescriptor->mKeyValuePairs, i);
+            (*mKeys)[i] = adjustNameAddr(mBase, kv->mKey);
         }
     }
 }
@@ -166,7 +178,8 @@ void CAnnotationInfo::AcquireValues()
         Int32 size = mAnnotationDescriptor->mKeyValuePairCount;
         mValues = ArrayOf<String>::Alloc(size);
         for (Int32 i = 0; i < size; i++) {
-            (*mValues)[i] = mAnnotationDescriptor->mKeyValuePairs[i]->mValue;
+            KeyValuePair* kv = getKeyValuePairAddr(mBase, mAnnotationDescriptor->mKeyValuePairs, i);
+            (*mValues)[i] = adjustNameAddr(mBase, kv->mValue);
         }
     }
 }

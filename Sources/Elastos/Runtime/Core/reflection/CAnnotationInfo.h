@@ -25,6 +25,7 @@ class CAnnotationInfo
 {
 public:
     CAnnotationInfo(
+        /* [in] */ CClsModule* clsModule,
         /* [in] */ AnnotationDescriptor* annoDesc);
 
     virtual ~CAnnotationInfo();
@@ -68,6 +69,8 @@ private:
     AnnotationDescriptor* mAnnotationDescriptor;
     AutoPtr< ArrayOf<String> > mKeys;
     AutoPtr< ArrayOf<String> > mValues;
+
+    Int32 mBase;
 };
 
 #endif // __CANNOTATIONINFO_H__

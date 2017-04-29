@@ -532,7 +532,7 @@ ECode CMethodInfo::AcquireAnnotationInfos()
     if (mAnnotationInfos == NULL && mMethodDescriptor->mAnnotationCount > 0) {
         mAnnotationInfos = ArrayOf<IAnnotationInfo*>::Alloc(mMethodDescriptor->mAnnotationCount);
         for (Int32 i = 0; i < mMethodDescriptor->mAnnotationCount; i++) {
-            CAnnotationInfo* info = new CAnnotationInfo(mMethodDescriptor->mAnnotations[i]);
+            CAnnotationInfo* info = new CAnnotationInfo(mClsModule, getAnnotationDescAddr(mBase, mMethodDescriptor->mAnnotations, i));
             mAnnotationInfos->Set(i, (IAnnotationInfo*)info);
         }
     }
