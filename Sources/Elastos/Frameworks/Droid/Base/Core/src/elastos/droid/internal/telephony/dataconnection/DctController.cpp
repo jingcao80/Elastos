@@ -425,7 +425,7 @@ ECode DctController::DdsSwitchSerializerHandler::HandleMessage(
     if (msgWhat == EVENT_START_DDS_SWITCH) {
         Logger::D(TAG, "EVENT_START_DDS_SWITCH");
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             AutoLock lock(this);
             while (!mHost->mIsDdsSwitchCompleted) {

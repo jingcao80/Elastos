@@ -762,12 +762,6 @@ ECode CObjectProxy::GetClassInfo(
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CObjectProxy::SetClassInfo(
-    /* [in] */ IInterface *clsInfo)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
 ECode CObjectProxy::GetHashCode(
     /* [out] */ Int32* hashCode)
 {

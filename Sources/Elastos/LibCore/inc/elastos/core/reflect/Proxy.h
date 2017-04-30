@@ -150,9 +150,6 @@ public:
     CARAPI GetClassInfo(
         /* [out] */ IInterface** clsInfo);
 
-    CARAPI SetClassInfo(
-        /* [in] */ IInterface *clsInfo);
-
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
 

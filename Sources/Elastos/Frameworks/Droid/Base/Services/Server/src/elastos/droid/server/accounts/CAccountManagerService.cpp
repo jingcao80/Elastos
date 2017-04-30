@@ -3301,7 +3301,7 @@ ECode CAccountManagerService::InvalidateAuthTokenLocked(
                     + TABLE_ACCOUNTS + String(".") + ACCOUNTS_TYPE + String(" = ?"),
             params, (ICursor**)&cursor);
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     Boolean result;
     while (cursor->MoveToNext(&result), result) {
         Int64 authTokenId;
@@ -3736,7 +3736,7 @@ ECode CAccountManagerService::GetAuthToken(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         if (account == NULL) {
             Slogger::W(TAG, "getAuthToken called with null account");
@@ -4806,7 +4806,7 @@ ECode CAccountManagerService::GetExtrasIdLocked(
             + String(" AND ") + EXTRAS_KEY + String("=?"),
             ss2, nullStr, nullStr, nullStr, (ICursor**)&cursor))
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         Boolean isMoveToNextOk;
         cursor->MoveToNext(&isMoveToNextOk);
@@ -4966,7 +4966,7 @@ ECode CAccountManagerService::DoNotification(
 {
     Int64 identityToken = Binder::ClearCallingIdentity();
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
             Logger::V(TAG, "doNotification: %s intent:%s", TO_CSTR(message), TO_CSTR(intent));
@@ -5387,7 +5387,7 @@ ECode CAccountManagerService::GrantAppPermission(
         FAIL_RETURN(accounts->mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db))
         db->BeginTransaction();
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             Int64 accountId;
             GetAccountIdLocked(db, account, &accountId);
@@ -5441,7 +5441,7 @@ ECode CAccountManagerService::RevokeAppPermission(
         FAIL_RETURN(accounts->mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db))
         db->BeginTransaction();
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             Int64 accountId;
             GetAccountIdLocked(db, account, &accountId);
@@ -5882,7 +5882,7 @@ ECode CAccountManagerService::ReadUserDataForAccountFromDatabaseLocked(
             SELECTION_USERDATA_BY_ACCOUNT, args,
             nullStr, nullStr, nullStr, (ICursor**)&cursor))
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         Boolean isMoveToNextOk;
         while (cursor->MoveToNext(&isMoveToNextOk), isMoveToNextOk) {
@@ -5926,7 +5926,7 @@ ECode CAccountManagerService::ReadAuthTokensForAccountFromDatabaseLocked(
             params, SELECTION_AUTHTOKENS_BY_ACCOUNT, args,
             nullStr, nullStr, nullStr, (ICursor**)&cursor))
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         Boolean isMoveToNextOk;
         while (cursor->MoveToNext(&isMoveToNextOk), isMoveToNextOk) {

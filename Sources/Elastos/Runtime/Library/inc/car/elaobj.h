@@ -108,9 +108,6 @@ IObject : public IInterface
     virtual GetClassInfo(
         /* [out] */ IInterface** clsInfo) = 0;
 
-    virtual SetClassInfo(
-        /* [in] */ IInterface *clsInfo) = 0;
-
     virtual CARAPI Equals(
         /* [in] */ IInterface* object,
         /* [out] */ _ELASTOS Boolean* equals) = 0;

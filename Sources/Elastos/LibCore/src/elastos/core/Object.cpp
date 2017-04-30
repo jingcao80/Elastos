@@ -117,15 +117,17 @@ ECode Object::GetClassInfo(
     /* [out] */ IInterface** clsInfo)
 {
     VALIDATE_NOT_NULL(clsInfo);
+
+    if (mClassInfo == NULL) {
+        _CObject_ReflectClassInfo((IObject*)this, (IClassInfo**)&mClassInfo);
+        if (mClassInfo == NULL) {
+            if (DEBUG) ALOGD("error: failed to get class info of Object[0x%08x]."
+                    " It is not a Car class.", this);
+        }
+    }
+
     *clsInfo = mClassInfo;
     REFCOUNT_ADD(*clsInfo);
-    return NOERROR;
-}
-
-ECode Object::SetClassInfo(
-    /* [in] */ IInterface *clsInfo)
-{
-    mClassInfo = IClassInfo::Probe(clsInfo);
     return NOERROR;
 }
 
@@ -223,15 +225,6 @@ AutoPtr<IClassInfo> Object::GetClassInfo(
 
     AutoPtr<IClassInfo> classInfo;
     iObject->GetClassInfo((IInterface**)&classInfo);
-    if (classInfo == NULL) {
-        _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
-        if (classInfo == NULL) {
-            if (DEBUG) ALOGD("error: failed to get class info of Object[0x%08x]. It is not a Car class.", obj);
-            return NULL;
-        }
-        iObject->SetClassInfo(classInfo);
-    }
-
     return classInfo;
 }
 
