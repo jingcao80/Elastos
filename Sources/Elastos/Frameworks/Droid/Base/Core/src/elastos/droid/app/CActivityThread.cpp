@@ -1678,7 +1678,8 @@ ECode CActivityThread::GetSystemContext(
 {
     VALIDATE_NOT_NULL(ctx);
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mSystemContext == NULL) {
             mSystemContext = CContextImpl::CreateSystemContext(this);
         }
@@ -5066,7 +5067,7 @@ ECode CActivityThread::HandleBindApplication(
     // serialized executor as the default. This has to happen in the
     // main thread so the main looper is set right.
     Int32 targetSdkVersion;
-    FAIL_RETURN(data->mAppInfo->GetTargetSdkVersion(&targetSdkVersion));
+    data->mAppInfo->GetTargetSdkVersion(&targetSdkVersion);
     if (targetSdkVersion <= Build::VERSION_CODES::HONEYCOMB_MR1) {
         AsyncTask::SetDefaultExecutor(AsyncTask::THREAD_POOL_EXECUTOR);
     }
@@ -5217,6 +5218,7 @@ ECode CActivityThread::HandleBindApplication(
         // In pre-boot mode (doing initial launch to collect password), not
         // all system is up.  This includes the connectivity service, so don't
         // crash if we can't get it.
+        // TODO
 //         IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
 //         try {
                 // ProxyInfo proxyInfo = service.getProxy();
@@ -6035,12 +6037,12 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
             c = IContext::Probe(mInitialApplication);
         }
         else {
-            context->CreatePackageContext(appPkgName, IContext::CONTEXT_INCLUDE_CODE, (IContext**)&c);
+            context->CreatePackageContext(appPkgName,
+                    IContext::CONTEXT_INCLUDE_CODE, (IContext**)&c);
         }
-
         if (c == NULL) {
             Slogger::W(TAG, "Unable to get context for package %s while loading content provider %s",
-                appPkgName.string(), name.string());
+                    appPkgName.string(), name.string());
             return NULL;
         }
 

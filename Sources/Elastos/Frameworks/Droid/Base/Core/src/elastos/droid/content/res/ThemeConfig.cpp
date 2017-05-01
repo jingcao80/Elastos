@@ -20,7 +20,7 @@
 #include "elastos/droid/content/res/CSystemThemeConfig.h"
 #include "elastos/droid/content/res/CSystemAppTheme.h"
 #include "elastos/droid/content/res/CThemeConfigBuilder.h"
-#include "elastos/droid/provider/CSettingsSecure.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CJsonReader.h"
 #include "elastos/droid/utility/CJsonWriter.h"
@@ -29,8 +29,7 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Utility::CJsonReader;
 using Elastos::Droid::Utility::CJsonWriter;
 using Elastos::Droid::Utility::JsonToken;
@@ -603,46 +602,55 @@ ECode ThemeConfig::GetBootThemeForUser(
 
     AutoPtr<IThemeConfig> bootTheme = GetSystemTheme();
     // try {
-    AutoPtr<ISettingsSecure> settingSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingSecure);
     String json;
-    ECode ec = settingSecure->GetStringForUser(resolver,
+    ECode ec = Settings::Secure::GetStringForUser(resolver,
             IConfiguration::THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY,
             userHandle, &json);
-    if (SUCCEEDED(ec)) {
-        bootTheme = ThemeConfig::FromJson(json);
-
-        // Handle upgrade Case: Previously the theme configuration was in separate fields
-        if (bootTheme == NULL) {
-            AutoPtr<IThemeConfigBuilder> builder;
-            CThemeConfigBuilder::New((IThemeConfigBuilder**)&builder);
-            String overlayPkgName, iconPackPkgName, fontPkgName;
-            ec = settingSecure->GetStringForUser(resolver,
-                    IConfiguration::THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY,
-                    userHandle, &overlayPkgName);
-            FAIL_GOTO(ec, _EXIT_)
-            ec = settingSecure->GetStringForUser(resolver,
-                    IConfiguration::THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY,
-                    userHandle, &iconPackPkgName);
-            FAIL_GOTO(ec, _EXIT_)
-            ec = settingSecure->GetStringForUser(resolver,
-                    IConfiguration::THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY,
-                    userHandle, &fontPkgName);
-            FAIL_GOTO(ec, _EXIT_)
-
-            builder->DefaultOverlay(overlayPkgName);
-            builder->DefaultIcon(iconPackPkgName);
-            builder->DefaultFont(fontPkgName);
-            builder->Build((IThemeConfig**)&bootTheme);
-            Slogger::I(TAG, "GetBootThemeForUser:%d, overlayPkgName:%s, iconPkgName:%s, fontPkgName:%s",
-                userHandle, overlayPkgName.string(), iconPackPkgName.string(), fontPkgName.string());
-        }
-    }
-    else {
+    if (FAILED(ec)) {
         Slogger::E(TAG, "Could not get boot theme, ec=%08x", ec);
+        *theme = bootTheme;
+        REFCOUNT_ADD(*theme);
+        return NOERROR;
+    }
+    bootTheme = ThemeConfig::FromJson(json);
+
+    // Handle upgrade Case: Previously the theme configuration was in separate fields
+    if (bootTheme == NULL) {
+        String overlayPkgName;
+        ec = Settings::Secure::GetStringForUser(resolver,
+                IConfiguration::THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY,
+                userHandle, &overlayPkgName);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "Could not get boot theme, ec=%08x", ec);
+            return NOERROR;
+        }
+        String iconPackPkgName;
+        ec = Settings::Secure::GetStringForUser(resolver,
+                IConfiguration::THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY,
+                userHandle, &iconPackPkgName);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "Could not get boot theme, ec=%08x", ec);
+            return NOERROR;
+        }
+        String fontPkgName;
+        ec = Settings::Secure::GetStringForUser(resolver,
+                IConfiguration::THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY,
+                userHandle, &fontPkgName);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "Could not get boot theme, ec=%08x", ec);
+            return NOERROR;
+        }
+
+        AutoPtr<IThemeConfigBuilder> builder;
+        CThemeConfigBuilder::New((IThemeConfigBuilder**)&builder);
+        builder->DefaultOverlay(overlayPkgName);
+        builder->DefaultIcon(iconPackPkgName);
+        builder->DefaultFont(fontPkgName);
+        builder->Build((IThemeConfig**)&bootTheme);
+        // Slogger::I(TAG, "GetBootThemeForUser:%d, overlayPkgName:%s, iconPkgName:%s, fontPkgName:%s",
+        //     userHandle, overlayPkgName.string(), iconPackPkgName.string(), fontPkgName.string());
     }
 
-_EXIT_:
     *theme = bootTheme;
     REFCOUNT_ADD(*theme);
     return NOERROR;

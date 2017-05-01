@@ -994,7 +994,7 @@ Int32 ContentProvider::GetUserIdFromAuthority(
     /* [in] */ const String& auth,
     /* [in] */ Int32 defaultUserId)
 {
-    if (auth == NULL) return defaultUserId;
+    if (auth.IsNull()) return defaultUserId;
     Int32 end = auth.LastIndexOf('@');
     if (end == -1) return defaultUserId;
     String userIdString = auth.Substring(0, end);
@@ -1032,7 +1032,7 @@ Int32 ContentProvider::GetUserIdFromUri(
 String ContentProvider::GetAuthorityWithoutUserId(
     /* [in] */ const String& auth)
 {
-    if (auth == NULL) return String(NULL);
+    if (auth.IsNull()) return String(NULL);
     Int32 end = auth.LastIndexOf('@');
     return auth.Substring(end + 1);
 }

@@ -158,10 +158,8 @@ ECode Settings::NameValueCache::LazyGetProvider(
 {
     VALIDATE_NOT_NULL(provider);
     *provider = NULL;
-    VALIDATE_NOT_NULL(cr);
 
     AutoPtr<IIContentProvider> cp;
-
     {
         AutoLock syncLock(this);
         cp = mContentProvider;
@@ -250,7 +248,7 @@ ECode Settings::NameValueCache::GetStringForUser(
             if (flag) {
                 AutoPtr<IInterface> interf;
                 mValues->Get(CoreUtils::Convert(name), (IInterface**)&interf);
-                AutoPtr<ICharSequence> cs = ICharSequence::Probe(interf);
+                ICharSequence* cs = ICharSequence::Probe(interf);
                 return cs != NULL ? cs->ToString(value) : NOERROR; // Could be null, that's OK -- negative caching
             }
         }
@@ -282,17 +280,19 @@ ECode Settings::NameValueCache::GetStringForUser(
         String package;
         cr->GetPackageName(&package);
         AutoPtr<IBundle> b;
-        ec = cp->Call(package, mCallGetCommand, name, args, (IBundle**)&b);
-        if (SUCCEEDED(ec) && b != NULL) {
+        cp->Call(package, mCallGetCommand, name, args, (IBundle**)&b);
+        if (b != NULL) {
             String _value;
             IBaseBundle::Probe(b)->GetPairValue(&_value);
             // Don't update our cache for reads of other users' data
             if (isSelf) {
                 AutoLock lock(sLock);
                 mValues->Put(CoreUtils::Convert(name), CoreUtils::Convert(_value));
-            } else {
+            }
+            else {
                 if (LOCAL_LOGV)
-                    Slogger::I(TAG, "call-query of user %d by %d so not updating cache", userHandle, UserHandle::GetMyUserId());
+                    Slogger::I(TAG, "call-query of user %d by %d so not updating cache",
+                            userHandle, UserHandle::GetMyUserId());
             }
             *value = _value;
             return NOERROR;
@@ -319,12 +319,11 @@ ECode Settings::NameValueCache::GetStringForUser(
         if (c != NULL) {
             ICloseable::Probe(c)->Close();
         }
-        *value = String(NULL);  // Return null, but don't cache it.
+        // Return null, but don't cache it.
         return NOERROR;
     }
     if (c == NULL) {
         Slogger::W(TAG, "Can't get key %s from %s", name.string(), TO_CSTR(mUri));
-        *value = String(NULL);
         return NOERROR;
     }
 

@@ -33,10 +33,10 @@
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
+#include <elastos/core/AutoLock.h>
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CContextImpl;
 using Elastos::Droid::Content::IContentResolver;
@@ -51,6 +51,7 @@ using Elastos::Droid::Content::Res::CThemeConfig;
 using Elastos::Droid::Content::Res::IThemeConfigBuilder;
 using Elastos::Droid::Content::Res::CThemeConfigBuilder;
 using Elastos::Droid::Content::Res::ResourcesKey;
+using Elastos::Droid::Content::Res::EIID_IResources;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Text::TextUtils;
@@ -254,48 +255,42 @@ ECode CResourcesManager::GetTopLevelResources(
     AutoPtr<IThemeConfig> themeConfig = GetThemeConfig();
     AutoPtr<IResourcesKey> key = new ResourcesKey(resDir, displayId,
             overrideConfiguration, scale, isThemeable, themeConfig, token);
-    IInterface* keyObj = TO_IINTERFACE(key);
     AutoPtr<IResources> r;
     {
         AutoLock syncLock(this);
         // Resources is app scale dependent.
-        AutoPtr<IInterface> obj, resObj;
-        mActiveResources->Get(keyObj, (IInterface**)&obj);
-        if (obj != NULL) {
-            IWeakReference* wr = IWeakReference::Probe(obj);
-            wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
-            if (resObj != NULL) {
-                r = IResources::Probe(resObj);
-                if (r != NULL) {
-                    AutoPtr<IAssetManager> assets;
-                    r->GetAssets((IAssetManager**)&assets);
-                    Boolean bval;
-                    assets->IsUpToDate(&bval);
-                    if (bval) {
-                        if (FALSE) {
-                            AutoPtr<ICompatibilityInfo> ci;
-                            r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
-                            Float applicationScale;
-                            ci->GetApplicationScale(&applicationScale);
-                            Logger::I(TAG, "Returning cached resources: dir:%s resource:%s, appScale=%f",
-                                resDir.string(), TO_CSTR(r), applicationScale);
-                        }
-                        *result = r;
-                        REFCOUNT_ADD(*result)
-                        return NOERROR;
-                    }
-                }
-            }
-        }
-        else {
+        if (FALSE) {
             // Logger::W(TAG, "GetTopLevelResources: %s, scale: %.2f", resDir.string(), scale);
         }
+        AutoPtr<IInterface> obj;
+        mActiveResources->Get(key.Get(), (IInterface**)&obj);
+        if (obj != NULL) {
+            IWeakReference::Probe(obj)->Resolve(EIID_IResources, (IInterface**)&r);
+        }
+        if (r != NULL) {
+            AutoPtr<IAssetManager> assets;
+            r->GetAssets((IAssetManager**)&assets);
+            Boolean bval;
+            assets->IsUpToDate(&bval);
+            if (bval) {
+                if (FALSE) {
+                    AutoPtr<ICompatibilityInfo> ci;
+                    r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
+                    Float applicationScale;
+                    ci->GetApplicationScale(&applicationScale);
+                    Logger::I(TAG, "Returning cached resources: dir:%s resource:%s, appScale=%f",
+                        resDir.string(), TO_CSTR(r), applicationScale);
+                }
+                *result = r;
+                REFCOUNT_ADD(*result)
+                return NOERROR;
+            }
+        }
     }
 
-    if (r != NULL) {
-        Logger::W(TAG, "Throwing away out-of-date resources!!!! %s %s", TO_CSTR(r), resDir.string());
-    }
-
+    // if (r != NULL) {
+    //     Logger::W(TAG, "Throwing away out-of-date resources!!!! %s %s", TO_CSTR(r), resDir.string());
+    // }
     AutoPtr<IAssetManager> assets;
     CAssetManager::New((IAssetManager**)&assets);
     assets->SetAppName(packageName);
@@ -410,33 +405,31 @@ ECode CResourcesManager::GetTopLevelResources(
 
     {
         AutoLock syncLock(this);
-        AutoPtr<IInterface> obj, resObj;
-        mActiveResources->Get(keyObj, (IInterface**)&obj);
+        AutoPtr<IInterface> obj;
+        mActiveResources->Get(key.Get(), (IInterface**)&obj);
+        AutoPtr<IResources> existing;
         if (obj != NULL) {
-            IWeakReference* wr = IWeakReference::Probe(obj);
-            wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
-            if (resObj != NULL) {
-                AutoPtr<IResources> existing = IResources::Probe(resObj);
-                AutoPtr<IAssetManager> assets;
-                existing->GetAssets((IAssetManager**)&assets);
-                Boolean bval;
-                assets->IsUpToDate(&bval);
-                 if (bval) {
-                    // Someone else already created the resources while we were
-                    // unlocked; go ahead and use theirs.
-                    assets->Close();
-                    *result = existing;
-                    REFCOUNT_ADD(*result)
-                    return NOERROR;
-                }
+            IWeakReference::Probe(obj)->Resolve(EIID_IResources, (IInterface**)&existing);
+        }
+        if (existing != NULL) {
+            AutoPtr<IAssetManager> assets;
+            existing->GetAssets((IAssetManager**)&assets);
+            Boolean bval;
+            assets->IsUpToDate(&bval);
+            if (bval) {
+                // Someone else already created the resources while we were
+                // unlocked; go ahead and use theirs.
+                assets->Close();
+                *result = existing;
+                REFCOUNT_ADD(*result)
+                return NOERROR;
             }
         }
 
         // XXX need to remove entries when weak references go away
-        IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(r);
         AutoPtr<IWeakReference> wr;
-        wrs->GetWeakReference((IWeakReference**)&wr);
-        mActiveResources->Put(keyObj, TO_IINTERFACE(wr));
+        IWeakReferenceSource::Probe(r)->GetWeakReference((IWeakReference**)&wr);
+        mActiveResources->Put(key.Get(), wr.Get());
         *result = r;
         REFCOUNT_ADD(*result)
     }

@@ -1026,24 +1026,25 @@ ECode CAssetManager::AddOverlayPath(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    {    AutoLock syncLock(this);
-        if(idmapPath.IsNull()) {
+    {
+        AutoLock syncLock(this);
+        if (idmapPath.IsNull()) {
             return NOERROR;
         }
 
-        if(themeApkPath.IsNull()) {
+        if (themeApkPath.IsNull()) {
             return NOERROR;
         }
 
-        if(resApkPath.IsNull()) {
+        if (resApkPath.IsNull()) {
             return NOERROR;
         }
 
-        if(targetPkgPath.IsNull()) {
+        if (targetPkgPath.IsNull()) {
             return NOERROR;
         }
 
-        if(prefixPath.IsNull()) {
+        if (prefixPath.IsNull()) {
             return NOERROR;
         }
 
@@ -1076,7 +1077,8 @@ ECode CAssetManager::AddCommonOverlayPath(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IFile> file;
         CFile::New(themeApkPath, (IFile**)&file);
         Boolean exists;
@@ -1126,16 +1128,17 @@ ECode CAssetManager::AddIconPath(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    {    AutoLock syncLock(this);
-        if(idmapPath.IsNull()) {
+    {
+        AutoLock syncLock(this);
+        if (idmapPath.IsNull()) {
             return NOERROR;
         }
 
-        if(resApkPath.IsNull()) {
+        if (resApkPath.IsNull()) {
             return NOERROR;
         }
 
-        if(prefixPath.IsNull()) {
+        if (prefixPath.IsNull()) {
             return NOERROR;
         }
 
@@ -1164,7 +1167,8 @@ ECode CAssetManager::RemoveOverlayPath(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (packageName.IsNull()) {
             return E_NULL_POINTER_EXCEPTION;
         }
