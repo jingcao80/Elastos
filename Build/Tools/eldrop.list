@@ -14,6 +14,7 @@ ElApp_process
 pm
 Elastos.Droid.Commands.Pm.eco
 Org.Conscrypt.eco
+Org.Alljoyn.Bus.eco
 ;Elastos.Droid.Commands.Monkey.eco
 ;Elastos.Droid.Commands.Am.eco
 ;Eunit.eco

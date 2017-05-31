@@ -317,6 +317,7 @@ ECode CObjInfoList::AcquireModuleInfo(
     if(NULL == module){
         ALOGE("<%s, %d> dlopen '%s' failed.\n", __FILE__, __LINE__, name.string());
         ALOGE("error: %s\n", dlerror());
+        UnlockHashTable(EntryType_Module);
         return E_FILE_NOT_FOUND;
     }
 

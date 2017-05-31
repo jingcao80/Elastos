@@ -11,6 +11,7 @@ libandroid_runtime.so   /system/lib
 libmedia_jni.so         /system/lib
 ../Linux/usr/lib/libelwebviewchromium.so        /system/lib
 ../Linux/usr/lib/libcamera_client.so            /system/lib
+../Linux/usr/lib/libgnustl_shared.so            /system/lib
 bootanimation.zip       /system/media
 DownloadProvider        /system/priv-app     dir
 AMapNetworkLocation     /system/priv-app     dir
