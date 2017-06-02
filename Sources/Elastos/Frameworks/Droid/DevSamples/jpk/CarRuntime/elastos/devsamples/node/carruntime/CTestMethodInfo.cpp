@@ -19,11 +19,11 @@ ECode CTestMethodInfo::GetName(
     return mMethodInfo->GetName(pName);
 }
 
-ECode CTestMethodInfo::GetAnnotation(
-    /* [out] */ String * pName)
-{
-    return mMethodInfo->GetAnnotation(pName);
-}
+// ECode CTestMethodInfo::GetAnnotation(
+//     /* [out] */ String * pName)
+// {
+//     return mMethodInfo->GetAnnotation(pName);
+// }
 
 ECode CTestMethodInfo::GetParamCount(
     /* [out] */ Int32 * pCount)

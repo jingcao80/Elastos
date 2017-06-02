@@ -8,6 +8,8 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 
+#include <cutils/log.h>
+
 using Elastos::Core::Thread;
 
 namespace Elastos {

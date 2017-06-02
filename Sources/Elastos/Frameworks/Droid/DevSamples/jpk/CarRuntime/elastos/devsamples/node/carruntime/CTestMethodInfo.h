@@ -7,6 +7,8 @@
 #include <elastos/droid/ext/frameworkdef.h>
 #include <elastos/core/Object.h>
 
+#include <cutils/log.h>
+
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
@@ -24,8 +26,8 @@ public:
     CARAPI GetName(
         /* [out] */ String * pName);
 
-    CARAPI GetAnnotation(
-        /* [out] */ String * pAnnotation);
+    //CARAPI GetAnnotation(
+    //    /* [out] */ String * pAnnotation);
 
     CARAPI GetParamCount(
         /* [out] */ Int32 * pCount);

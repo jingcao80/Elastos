@@ -567,8 +567,8 @@ module
 
     [deprecated]
     interface ITestMethodInfo extends ITestFunctionInfo {
-        GetAnnotation(
-            [out] String* annotation);
+        //GetAnnotation(
+        //    [out] String* annotation);
 
         CreateArgumentList(
             [out] ITestArgumentList** argumentList);
@@ -1518,8 +1518,8 @@ module
 
     [deprecated]
     interface ITestConstructorInfo extends ITestFunctionInfo {
-        GetAnnotation(
-            [out] String* annotation);
+        //GetAnnotation(
+        //    [out] String* annotation);
 
         CreateArgumentList(
             [out] ITestArgumentList** argumentList);

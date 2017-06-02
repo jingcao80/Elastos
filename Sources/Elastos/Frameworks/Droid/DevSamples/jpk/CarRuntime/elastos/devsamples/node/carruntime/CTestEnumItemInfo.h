@@ -7,6 +7,8 @@
 #include <elastos/droid/ext/frameworkdef.h>
 #include <elastos/core/Object.h>
 
+#include <cutils/log.h>
+
 namespace Elastos {
 namespace DevSamples {
 namespace Node {

@@ -26,11 +26,11 @@ ECode CTestConstructorInfo::GetName(
     return mConstructorInfo->GetName(pName);
 }
 
-ECode CTestConstructorInfo::GetAnnotation(
-    /* [out] */ String * pName)
-{
-    return mConstructorInfo->GetAnnotation(pName);
-}
+// ECode CTestConstructorInfo::GetAnnotation(
+//     /* [out] */ String * pName)
+// {
+//     return mConstructorInfo->GetAnnotation(pName);
+// }
 
 ECode CTestConstructorInfo::GetParamCount(
     /* [out] */ Int32 * pCount)

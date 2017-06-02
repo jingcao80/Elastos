@@ -466,11 +466,11 @@ CreateView(name, inPrefix, attrs) {
     var prefix = inPrefix;
     if(!prefix)prefix = "Elastos.Droid.View.";
 
-    // if(name=="LinearLayout")prefix = "Elastos.Droid.Widget.";
-    if(name=="LinearLayout") {
-        name = "Elastos.DevSamples.Node.JSCalculator.CNodeLinearLayout";
-        prefix = "";
-    }
+    if(name=="LinearLayout")prefix = "Elastos.Droid.Widget.";
+    // if(name=="LinearLayout") {
+    //     name = "Elastos.DevSamples.Node.JSCalculator.CNodeLinearLayout";
+    //     prefix = "";
+    // }
     if(name=="RelativeLayout")prefix = "Elastos.Droid.Widget.";
     if(name=="Button")prefix = "Elastos.Droid.Widget.";
 
@@ -573,10 +573,10 @@ CreateView(name, inPrefix, attrs) {
     elog("====STC::CreateView====attrs====className:"+attrs.getClass().GetName());
 
     var bCustomControl = false;
-    bCustomControl = bCustomControl || reflectionClassName.indexOf("CalculatorEditText") > -1;
-    bCustomControl = bCustomControl || reflectionClassName.indexOf("CalculatorPadViewPager") > -1;
-    bCustomControl = bCustomControl || reflectionClassName.indexOf("CalculatorPadLayout") > -1;
-    bCustomControl = bCustomControl || reflectionClassName.indexOf("NodeLinearLayout") > -1;
+    // bCustomControl = bCustomControl || reflectionClassName.indexOf("CalculatorEditText") > -1;
+    // bCustomControl = bCustomControl || reflectionClassName.indexOf("CalculatorPadViewPager") > -1;
+    // bCustomControl = bCustomControl || reflectionClassName.indexOf("CalculatorPadLayout") > -1;
+    // bCustomControl = bCustomControl || reflectionClassName.indexOf("NodeLinearLayout") > -1;
     if (bCustomControl) {
         view = CObject.New("/data/elastos/Elastos.DevSamples.Node.JSCalculator.eco", reflectionClassName, oActivity, attrs);
     }

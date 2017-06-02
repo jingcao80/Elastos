@@ -24,8 +24,8 @@ public:
     CARAPI GetName(
         /* [out] */ String * pName);
 
-    CARAPI GetAnnotation(
-        /* [out] */ String * pAnnotation);
+    //CARAPI GetAnnotation(
+    //    /* [out] */ String * pAnnotation);
 
     CARAPI GetParamCount(
         /* [out] */ Int32 * pCount);
