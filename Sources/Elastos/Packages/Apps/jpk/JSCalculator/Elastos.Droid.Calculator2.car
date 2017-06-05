@@ -1,0 +1,209 @@
+//=========================================================================
+// Copyright (C) 2012 The Elastos Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//=========================================================================
+
+module
+{
+    importlib("Org.Javia.Arity.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/droid/calculator2/calculatorEditText.car");
+    merge("car/elastos/droid/calculator2/calculatorExpressionEvaluator.car");
+    merge("car/elastos/droid/calculator2/calculator.car");
+    merge("car/elastos/droid/calculator2/calculatorExpressionBuilder.car");
+    merge("car/elastos/droid/calculator2/calculatorExpressionTokenizer.car");
+    merge("car/elastos/droid/calculator2/calculatorPadLayout.car");
+    merge("car/elastos/droid/calculator2/calculatorPadViewPager.car");
+
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
+    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
+
+    interface Elastos.Droid.Calculator2.ICalculator;
+    interface Elastos.Droid.Calculator2.ICalculatorEditText;
+    interface Elastos.Droid.Calculator2.IEvaluateCallback;
+    interface Elastos.Droid.Calculator2.IOnTextSizeChangeListener;
+    interface Elastos.Droid.Calculator2.ICalculatorExpressionTokenizer;
+    interface Elastos.Droid.Calculator2.ICalculatorExpressionEvaluator;
+    interface Elastos.Droid.Calculator2.ICalculatorPadLayout;
+    interface Elastos.Droid.Calculator2.ICalculatorPadViewPager;
+    interface Elastos.Droid.Support.V4.View.IViewPager;
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Text.ISpannableStringBuilder;
+    using interface Elastos.Droid.Text.IGetChars;
+    using interface Elastos.Droid.Text.ISpannable;
+    using interface Elastos.Droid.Text.IEditable;
+    using interface Elastos.Droid.Text.IGraphicsOperations;
+    using interface Elastos.Droid.Text.ISpanned;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IOnPreDrawListener;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.Widget.IEditText;
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Core.IAppendable;
+    using interface Elastos.Core.ICharSequence;
+
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Calculator2 {
+
+    class CCalculator
+    {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IEvaluateCallback;
+        interface ICalculator;
+    }
+
+    [local]
+    class CCalculatorEditText
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IEditText;
+        interface ITextView;
+        interface IOnPreDrawListener;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface ICalculatorEditText;
+    }
+
+    class CCalculatorExpressionBuilder
+    {
+        constructor(
+            [in] ICharSequence* text,
+            [in] ICalculatorExpressionTokenizer* tokenizer,
+            [in] Boolean isEdited);
+
+        interface ICalculatorExpressionBuilder;
+        interface ISpannableStringBuilder;
+        interface ICharSequence;
+        interface IGetChars;
+        interface ISpannable;
+        interface ISpanned;
+        interface IEditable;
+        interface IAppendable;
+        interface IGraphicsOperations;
+    }
+
+    class CCalculatorExpressionEvaluator
+    {
+        constructor(
+            [in] ICalculatorExpressionTokenizer* tokenizer);
+
+        interface ICalculatorExpressionEvaluator;
+    }
+
+    [local]
+    class CCalculatorExpressionTokenizer
+    {
+        constructor(
+            [in] IContext* context);
+
+        interface ICalculatorExpressionTokenizer;
+    }
+
+    [local]
+    class CCalculatorPadLayout
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface ICalculatorPadLayout;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CCalculatorPadViewPager
+    {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ICalculatorPadViewPager;
+        interface IViewPager;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    } // namespace Calculator2
+    } // namespace Droid
+    } // namespace Elastos
+}

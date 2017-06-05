@@ -1,0 +1,62 @@
+#=========================================================================
+# Copyright (C) 2012 The Elastos Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#=========================================================================
+
+TARGET_NAME = Elastos.Droid.Calculator2
+TARGET_TYPE = eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+INCLUDES += $(MAKEDIR)/../../Arity/inc
+INCLUDES += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/inc
+
+VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
+VPATH += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/src/elastos/droid/support/v4/view/
+
+SOURCES += Elastos.Droid.Calculator2.car
+SOURCES += R.cpp
+SOURCES += Calculator.cpp
+SOURCES += CalculatorEditText.cpp
+SOURCES += CalculatorExpressionBuilder.cpp
+SOURCES += CalculatorExpressionEvaluator.cpp
+SOURCES += CalculatorExpressionTokenizer.cpp
+SOURCES += CalculatorPadLayout.cpp
+SOURCES += CalculatorPadViewPager.cpp
+SOURCES += calculator.cpp
+SOURCES += ViewPager.cpp
+SOURCES += PagerAdapter.cpp
+SOURCES += CViewPager.cpp
+SOURCES += CViewPagerSavedState.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Org.Javia.Arity.cpp
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_TARGETS)/Org.Javia.Arity.eco
+LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
+
+APPPACK = 1
+APP_PACKAGE_NAME = Elastos.Droid.Calculator2
+RES_NAMESPACE = Elastos.Droid.Calculator2
+DIRRESOURCES += $(MAKEDIR)/res;
+TARGET_CPU_ABI = armeabi-v7a
+LIBRESOURCES = $(XDK_TARGETS)/Org.Javia.Arity.eco
+APP_DIR_NAME = Calculator2
