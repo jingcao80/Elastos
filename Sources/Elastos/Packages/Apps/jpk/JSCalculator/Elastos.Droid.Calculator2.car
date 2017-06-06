@@ -27,8 +27,8 @@ module
     merge("car/elastos/droid/calculator2/calculatorPadLayout.car");
     merge("car/elastos/droid/calculator2/calculatorPadViewPager.car");
 
-    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
-    merge("../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
+    merge("../../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
+    merge("../../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
 
     interface Elastos.Droid.Calculator2.ICalculator;
     interface Elastos.Droid.Calculator2.ICalculatorEditText;
