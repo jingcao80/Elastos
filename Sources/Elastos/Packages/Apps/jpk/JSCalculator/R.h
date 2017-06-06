@@ -5,12 +5,12 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Droid_Calculator2_R_H__
-#define __Elastos_Droid_Calculator2_R_H__
+#ifndef __Elastos_Droid_Calculator3_R_H__
+#define __Elastos_Droid_Calculator3_R_H__
 #include <elatypes.h>
 namespace Elastos {
 namespace Droid {
-namespace Calculator2 {
+namespace Calculator3 {
 class ECO_PUBLIC R {
     public: class array {
         public: static const int operatorDescs = 0x7f080000;
@@ -379,9 +379,9 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #CalculatorEditText_maxTextSize Elastos.Droid.Calculator2:maxTextSize}</code></td><td></td></tr>
-           <tr><td><code>{@link #CalculatorEditText_minTextSize Elastos.Droid.Calculator2:minTextSize}</code></td><td></td></tr>
-           <tr><td><code>{@link #CalculatorEditText_stepTextSize Elastos.Droid.Calculator2:stepTextSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #CalculatorEditText_maxTextSize Elastos.Droid.Calculator3:maxTextSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #CalculatorEditText_minTextSize Elastos.Droid.Calculator3:minTextSize}</code></td><td></td></tr>
+           <tr><td><code>{@link #CalculatorEditText_stepTextSize Elastos.Droid.Calculator3:stepTextSize}</code></td><td></td></tr>
            </table>
            @see #CalculatorEditText_maxTextSize
            @see #CalculatorEditText_minTextSize
@@ -389,7 +389,7 @@ containing a value of this type.
          */
         public: static const int CalculatorEditText[3];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Droid.Calculator2.R.attr#maxTextSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Calculator3.R.attr#maxTextSize}
           attribute's value can be found in the {@link #CalculatorEditText} array.
 
 
@@ -405,7 +405,7 @@ containing a value of this type.
         */
         public: static const int CalculatorEditText_maxTextSize = 1;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Droid.Calculator2.R.attr#minTextSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Calculator3.R.attr#minTextSize}
           attribute's value can be found in the {@link #CalculatorEditText} array.
 
 
@@ -421,7 +421,7 @@ containing a value of this type.
         */
         public: static const int CalculatorEditText_minTextSize = 0;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Droid.Calculator2.R.attr#stepTextSize}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Calculator3.R.attr#stepTextSize}
           attribute's value can be found in the {@link #CalculatorEditText} array.
 
 
@@ -442,4 +442,4 @@ containing a value of this type.
 };
 };
 
-#endif // __Elastos_Droid_Calculator2_R_H__
+#endif // __Elastos_Droid_Calculator3_R_H__

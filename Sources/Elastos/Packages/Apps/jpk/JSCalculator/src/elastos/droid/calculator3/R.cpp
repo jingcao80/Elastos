@@ -2,7 +2,7 @@
 namespace Elastos {
 namespace Droid {
 namespace Calculator3 {
- 
+
 const int R::array::operatorDescs;
 const int R::attr::maxTextSize;
 const int R::attr::minTextSize;

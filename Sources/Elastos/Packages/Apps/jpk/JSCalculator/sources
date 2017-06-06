@@ -14,7 +14,7 @@
 # limitations under the License.
 #=========================================================================
 
-TARGET_NAME = Elastos.Droid.Calculator2
+TARGET_NAME = Elastos.Droid.Calculator3
 TARGET_TYPE = eco
 
 CAR_FLAGS += -n -u
@@ -25,10 +25,10 @@ INCLUDES += $(MAKEDIR)/src
 INCLUDES += $(MAKEDIR)/../../Arity/inc
 INCLUDES += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/inc
 
-VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
+VPATH += $(MAKEDIR)/src/elastos/droid/calculator3
 VPATH += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/src/elastos/droid/support/v4/view/
 
-SOURCES += Elastos.Droid.Calculator2.car
+SOURCES += Elastos.Droid.Calculator3.car
 SOURCES += R.cpp
 SOURCES += Calculator.cpp
 SOURCES += CalculatorEditText.cpp
@@ -54,9 +54,9 @@ LIBRARIES += $(XDK_TARGETS)/Org.Javia.Arity.eco
 LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
 
 APPPACK = 1
-APP_PACKAGE_NAME = Elastos.Droid.Calculator2
-RES_NAMESPACE = Elastos.Droid.Calculator2
+APP_PACKAGE_NAME = Elastos.Droid.Calculator3
+RES_NAMESPACE = Elastos.Droid.Calculator3
 DIRRESOURCES += $(MAKEDIR)/res;
 TARGET_CPU_ABI = armeabi-v7a
 LIBRESOURCES = $(XDK_TARGETS)/Org.Javia.Arity.eco
-APP_DIR_NAME = Calculator2
+APP_DIR_NAME = Calculator3

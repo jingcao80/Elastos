@@ -15,7 +15,7 @@
   limitations under the License.
   -->
 
-<Elastos.Droid.Calculator2.CCalculatorPadLayout
+<Elastos.Droid.Calculator3.CCalculatorPadLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/pad_advanced"
     style="@style/PadLayoutStyle.Advanced"
@@ -105,4 +105,4 @@
         android:onClick="OnButtonClick"
         android:text="@string/op_sqrt" />
 
-</Elastos.Droid.Calculator2.CCalculatorPadLayout>
+</Elastos.Droid.Calculator3.CCalculatorPadLayout>

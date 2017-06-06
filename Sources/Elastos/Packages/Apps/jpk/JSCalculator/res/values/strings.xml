@@ -18,7 +18,7 @@
 <resources>
 
     <!-- Name of the application. [CHAR_LIMIT=NONE] -->
-    <string name="app_name">Calculator</string>
+    <string name="app_name">JSCalculator</string>
 
     <!-- Error displayed when expression evaluates to NaN. [CHAR_LIMIT=14] -->
     <string name="error_nan">Not a number</string>
