@@ -22,6 +22,7 @@ module
     merge("car/elastos/droid/calculator3/calculatorEditText.car");
     merge("car/elastos/droid/calculator3/calculatorExpressionEvaluator.car");
     merge("car/elastos/droid/calculator3/calculator.car");
+    merge("car/elastos/droid/calculator3/calculatorApplication.car");
     merge("car/elastos/droid/calculator3/calculatorExpressionBuilder.car");
     merge("car/elastos/droid/calculator3/calculatorExpressionTokenizer.car");
     merge("car/elastos/droid/calculator3/calculatorPadLayout.car");
@@ -31,6 +32,7 @@ module
     merge("../../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
 
     interface Elastos.Droid.Calculator3.ICalculator;
+    interface Elastos.Droid.Calculator3.ICalculatorApplication;
     interface Elastos.Droid.Calculator3.ICalculatorEditText;
     interface Elastos.Droid.Calculator3.IEvaluateCallback;
     interface Elastos.Droid.Calculator3.IOnTextSizeChangeListener;
@@ -41,6 +43,7 @@ module
     interface Elastos.Droid.Support.V4.View.IViewPager;
 
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IComponentCallbacks;
@@ -72,10 +75,21 @@ module
     using interface Elastos.Core.IAppendable;
     using interface Elastos.Core.ICharSequence;
 
-
     namespace Elastos{
     namespace Droid {
     namespace Calculator3 {
+
+    class CCalculatorApplication {
+        constructor();
+
+        interface IApplication;
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+
+        interface ICalculatorApplication;
+    }
 
     class CCalculator
     {

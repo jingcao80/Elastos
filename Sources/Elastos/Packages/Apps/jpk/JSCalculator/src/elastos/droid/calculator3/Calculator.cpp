@@ -320,7 +320,6 @@ ECode Calculator::InnerListener::OnTextSizeChanged(
     return mHost->OnTextSizeChanged(textView, oldSize);
 }
 
-
 //----------------------------------------------------------------
 //           Calculator
 //----------------------------------------------------------------

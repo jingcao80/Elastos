@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include "elastos/droid/calculator3/CCalculator.h"
+#include "elastos/droid/calculator3/CCalculatorApplication.h"
 #include "elastos/droid/calculator3/CCalculatorEditText.h"
 #include "elastos/droid/calculator3/CCalculatorExpressionBuilder.h"
 #include "elastos/droid/calculator3/CCalculatorExpressionEvaluator.h"
@@ -27,6 +28,7 @@ namespace Droid {
 namespace Calculator3 {
 
 CAR_OBJECT_IMPL(CCalculator)
+CAR_OBJECT_IMPL(CCalculatorApplication)
 CAR_OBJECT_IMPL(CCalculatorEditText)
 CAR_OBJECT_IMPL(CCalculatorExpressionBuilder)
 CAR_OBJECT_IMPL(CCalculatorExpressionEvaluator)
