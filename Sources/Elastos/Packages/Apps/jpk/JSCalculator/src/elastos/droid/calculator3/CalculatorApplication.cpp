@@ -16,6 +16,8 @@
 
 #include "elastos/droid/calculator3/CalculatorApplication.h"
 
+#include <cutils/log.h>
+
 //----------------------------------------------------------------
 //           CalculatorApplication
 //----------------------------------------------------------------
@@ -36,6 +38,12 @@ CalculatorApplication::~CalculatorApplication()
 ECode CalculatorApplication::constructor()
 {
     return Application::constructor();
+}
+
+ECode CalculatorApplication::OnCreate()
+{
+    ALOGD("CalculatorApplication::OnCreate====begin====");
+    return NOERROR;
 }
 
 ECode CalculatorApplication::OnTest()

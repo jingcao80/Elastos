@@ -21,6 +21,7 @@
     package="Elastos.Droid.Calculator3">
 
     <application
+        android:name=".CCalculatorApplication"
         android:icon="@mipmap/ic_launcher_calculator"
         android:label="@string/app_name"
         android:theme="@style/CalculatorTheme">

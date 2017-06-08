@@ -50,6 +50,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI OnCreate();
+
     CARAPI OnTest();
 };
 

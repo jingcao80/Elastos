@@ -31,6 +31,10 @@ module
     merge("../../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/PagerAdapter.car");
     merge("../../../../Frameworks/Droid/Support/V4/car/elastos/droid/support/v4/view/ViewPager.car");
 
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBundle;
+
     interface Elastos.Droid.Calculator3.ICalculator;
     interface Elastos.Droid.Calculator3.ICalculatorApplication;
     interface Elastos.Droid.Calculator3.ICalculatorEditText;
@@ -79,6 +83,65 @@ module
     namespace Droid {
     namespace Calculator3 {
 
+    interface IActivityListener;
+
+    [deprecated]
+    interface INodeBridgeListener {
+        OnRegisterActivity(
+            [in] String packageName,
+            [in] String activityName,
+            [in] IInterface* activityInstance,
+            [in] Int32 activityListener,    //IActivityListener**
+            [in] IHandler* activityHandler,
+            [out] Boolean* result);
+    }
+
+    [deprecated]
+    interface INodeListener {
+        OnNodeEvent(
+            [in] Int32 eventId);
+
+        GetEnqueueUIMessagePtr(
+            [out] Int32* outPtr);
+
+        Sleep(
+            [in] Int32 interval);
+
+        Lock();
+
+        Unlock();
+
+        SetActivityListener(
+            [in] Int32 activityListener,    //IActivityListener**
+            [in] IActivityListener* jsActivityListener);
+
+        SetNodeBridgeListener(
+            [in] INodeBridgeListener* nodeBridgeListener);
+
+        SetNodeBridge(
+            [in] Int32 from,
+            [in] Int32 threadIndex);
+    }
+
+    [local]
+    interface IActivityListener {
+        OnCreate(
+            [in] IContext* ctx,
+            [in] IBundle* savedInstanceState);
+    }
+
+    [local]
+    interface ICallbackRunnable {
+        GetInstance(
+            [out] IInterface** instance);
+    }
+/*
+    class CNodeListener {
+        constructor();
+
+        interface INodeListener;
+    }
+*/
     class CCalculatorApplication {
         constructor();
 

@@ -22,14 +22,19 @@ LUBE_FLAGS += -n -u
 
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
+//INCLUDES += $(MAKEDIR)/com
 INCLUDES += $(MAKEDIR)/../../Arity/inc
 INCLUDES += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/inc
 
+//VPATH += $(MAKEDIR)/com
 VPATH += $(MAKEDIR)/src/elastos/droid/calculator3
 VPATH += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/src/elastos/droid/support/v4/view/
 
 SOURCES += Elastos.Droid.Calculator3.car
 SOURCES += R.cpp
+
+//SOURCES += CNodeListener.cpp
+
 SOURCES += Calculator.cpp
 SOURCES += CalculatorApplication.cpp
 SOURCES += CalculatorEditText.cpp

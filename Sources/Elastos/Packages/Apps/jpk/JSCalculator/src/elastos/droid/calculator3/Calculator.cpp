@@ -31,6 +31,8 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <cutils/log.h>
+
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Animation::CAnimatorSet;
 using Elastos::Droid::Animation::CArgbEvaluator;
@@ -343,6 +345,8 @@ ECode Calculator::constructor()
 ECode Calculator::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    ALOGD("Calculator::OnCreate====begin====");
+
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::activity_calculator);
 
@@ -395,7 +399,11 @@ ECode Calculator::OnCreate(
     IView::Probe(mFormulaEditText)->SetOnKeyListener(mFormulaOnKeyListener);
     AutoPtr<InnerListener> listener = new InnerListener(this);
     mFormulaEditText->SetOnTextSizeChangeListener(listener);
-    return mDeleteButton->SetOnLongClickListener(listener);
+    //return mDeleteButton->SetOnLongClickListener(listener);
+    ECode ec = mDeleteButton->SetOnLongClickListener(listener);
+
+    ALOGD("Calculator::OnCreate====end====");
+    return ec;
 }
 
 ECode Calculator::OnSaveInstanceState(
