@@ -101,21 +101,17 @@ public:
         AutoPtr<IRunnable> runnable;
         msg->GetCallback((IRunnable**)&runnable);
 
-        IInterface* _interface = runnable->Probe(EIID_IInterface);
-        //IInterface* _object = runnable->Probe(EIID_IObject);
-        //CallbackRunnable* callback = (CallbackRunnable*)_interface;
-        CallbackRunnable* callback = *(CallbackRunnable**)&_interface;
-        //CallbackRunnable* callback = *(CallbackRunnable**)&runnable;
-
+        //IInterface* _interface = runnable->Probe(EIID_IInterface);
+        //CallbackRunnable* callback = *(CallbackRunnable**)&_interface;
 
         ICallbackRunnable* _callbackRunnable = (ICallbackRunnable*)runnable->Probe(EIID_ICallbackRunnable);
 
         CallbackRunnable* callback_1;
         _callbackRunnable->GetInstance((IInterface**)&callback_1);
 
-        IMethodInfo* _methodInfo = callback_1->mMethod.Get();
-        IInterface* _object = callback_1->mObject.Get();
-        IArgumentList* _argumentList = callback_1->mArgumentList.Get();
+        //IMethodInfo* _methodInfo = callback_1->mMethod.Get();
+        //IInterface* _object = callback_1->mObject.Get();
+        //IArgumentList* _argumentList = callback_1->mArgumentList.Get();
 
         //ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
         ec = callback_1->mMethod->Invoke(callback_1->mObject, callback_1->mArgumentList);
@@ -135,7 +131,7 @@ public:
 
     static void EnqueueUIMessage(void* obj, void* method, void* params)
     {
-        pthread_t mThread = pthread_self();
+        //pthread_t mThread = pthread_self();
 
         AutoPtr<IMessage> msg;
         CMessage::New((IMessage**)&msg);
@@ -146,6 +142,7 @@ public:
         Int32 MSG_RUNONUITHREAD = 0x0;
         msg->SetWhat(MSG_RUNONUITHREAD);
 
+        //this mutex needn't to be initialize here,it's not used in current thread.
         pthread_mutex_t* mutex;
 
         CallbackRunnable* callback = new CallbackRunnable(
@@ -186,7 +183,7 @@ public:
             : mPackageName(packageName)
         {
             pthread_t ctid = pthread_self();
-            ALOGD("CNodeListener::_Thread============THREAD_MAIN:%d", ctid);
+            ALOGD("CNodeListener::_Thread============THREAD_MAIN:%d", (int)ctid);
 
             Thread::constructor(String("CNodeListener::_Thread"));
         }

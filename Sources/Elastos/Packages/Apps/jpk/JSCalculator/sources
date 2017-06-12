@@ -17,6 +17,8 @@
 TARGET_NAME = Elastos.Droid.Calculator3
 TARGET_TYPE = eco
 
+C_DEFINES += -DHAVE_SYS_UIO_H
+
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
@@ -33,7 +35,7 @@ VPATH += $(MAKEDIR)/../../../../Frameworks/Droid/Support/V4/src/elastos/droid/su
 SOURCES += Elastos.Droid.Calculator3.car
 SOURCES += R.cpp
 
-//SOURCES += CNodeListener.cpp
+SOURCES += CNodeListener.cpp
 
 SOURCES += Calculator.cpp
 SOURCES += CalculatorApplication.cpp

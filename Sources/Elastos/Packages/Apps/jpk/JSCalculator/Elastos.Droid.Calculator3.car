@@ -135,13 +135,13 @@ module
         GetInstance(
             [out] IInterface** instance);
     }
-/*
+
     class CNodeListener {
         constructor();
 
         interface INodeListener;
     }
-*/
+
     class CCalculatorApplication {
         constructor();
 
