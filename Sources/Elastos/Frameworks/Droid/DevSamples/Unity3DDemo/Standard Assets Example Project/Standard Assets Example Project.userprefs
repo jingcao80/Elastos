@@ -1,0 +1,21 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Standard Assets\2D\Scripts\Platformer2DUserControl.cs">
+    <Files>
+      <File FileName="Assets\Standard Assets\CrossPlatformInput\Scripts\PlatformSpecific\MobileInput.cs" Line="1" Column="1" />
+      <File FileName="Assets\Standard Assets\Cameras\Scripts\AutoCam.cs" Line="1" Column="1" />
+      <File FileName="Assets\Standard Assets\CrossPlatformInput\Scripts\MobileControlRig.cs" Line="32" Column="33" />
+      <File FileName="Assets\SampleScenes\Menu\Scripts\MenuSceneLoader.cs" Line="13" Column="7" />
+      <File FileName="Assets\SampleScenes\Menu\Scripts\PauseMenu.cs" Line="39" Column="38" />
+      <File FileName="Assets\Standard Assets\Utility\AlphaButtonClickMask.cs" Line="39" Column="39" />
+      <File FileName="Assets\SampleScenes\Scripts\ParticleSceneControls.cs" Line="1" Column="1" />
+      <File FileName="Assets\Standard Assets\CrossPlatformInput\Scripts\Joystick.cs" Line="50" Column="26" />
+      <File FileName="Assets\Standard Assets\2D\Scripts\Platformer2DUserControl.cs" Line="35" Column="53" />
+      <File FileName="Assets\Standard Assets\2D\Scripts\PlatformerCharacter2D.cs" Line="52" Column="60" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

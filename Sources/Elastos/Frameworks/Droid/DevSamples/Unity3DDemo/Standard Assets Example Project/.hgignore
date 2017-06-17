@@ -1,0 +1,18 @@
+syntax: glob
+Library/*
+Builds/*
+Temp/*
+obj/*
+*.csproj
+*.sln
+*.userprefs
+*.pidb*
+*.suo
+*.cache
+*.unityproj
+*Resharper*
+*.orig
+*ReSharper*
+*.orig.*
+*sln*
+*.orig

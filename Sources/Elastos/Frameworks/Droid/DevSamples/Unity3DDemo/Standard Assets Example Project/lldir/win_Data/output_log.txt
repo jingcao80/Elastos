@@ -1,0 +1,50 @@
+Initialize engine version: 5.5.0f3 (38b4efef76f0)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: Intel(R) HD Graphics 4600 (ID=0x412)
+    Vendor:   Intel
+    VRAM:     1136 MB
+    Driver:   10.18.15.4279
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.PlaymodeTestsRunner.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\UnityEngine.PlaymodeTestsRunner.dll into Unity Child Domain
+- Completed reload, in  0.137 seconds
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Standard Assets Example Project\lldir\win_Data\Managed\System.dll (this message is harmless)
+desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
+<RI> Initializing input.
+XInput1_3.dll not found. Trying XInput9_1_0.dll instead...
+<RI> Input initialized.
+<RI> Initialized touch support.
+UnloadTime: 1.979335 ms
+Unloading 10 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 3.132910 ms
+
+Unloading 133 unused Assets to reduce memory usage. Loaded Objects now: 1713.
+Total: 0.981892 ms (FindLiveObjects: 0.082109 ms CreateObjectMapping: 0.046964 ms MarkObjects: 0.810208 ms  DeleteObjects: 0.041676 ms)
+
+Setting up 1 worker threads for Enlighten.
+  Thread -> id: e94 -> priority: 1 
+Unloading 7 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 2.392059 ms
+
+Unloading 198 unused Assets to reduce memory usage. Loaded Objects now: 1255.
+Total: 1.067111 ms (FindLiveObjects: 0.155821 ms CreateObjectMapping: 0.053495 ms MarkObjects: 0.606801 ms  DeleteObjects: 0.250371 ms)
+
+Unloading 8 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 1.124650 ms
+
+Unloading 7 unused Assets to reduce memory usage. Loaded Objects now: 1338.
+Total: 1.755089 ms (FindLiveObjects: 0.088951 ms CreateObjectMapping: 0.044786 ms MarkObjects: 1.561945 ms  DeleteObjects: 0.057849 ms)
+
