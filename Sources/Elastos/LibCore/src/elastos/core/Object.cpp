@@ -121,7 +121,7 @@ ECode Object::GetClassInfo(
     if (mClassInfo == NULL) {
         _CObject_ReflectClassInfo((IObject*)this, (IClassInfo**)&mClassInfo);
         if (mClassInfo == NULL) {
-            if (DEBUG) ALOGD("error: failed to get class info of Object[0x%08x]."
+            if (DEBUG) ALOGD("error: failed to get class info of Object[%p]."
                     " It is not a Car class.", this);
         }
     }
@@ -219,7 +219,7 @@ AutoPtr<IClassInfo> Object::GetClassInfo(
 {
     IObject* iObject = IObject::Probe(obj);
     if (iObject == NULL) {
-        if (DEBUG) ALOGD("error: failed to get class info of Object[0x%08x]. It is not a Car class.", obj);
+        if (DEBUG) ALOGD("error: failed to get class info of Object[%p]. It is not a Car class.", obj);
         return NULL;
     }
 

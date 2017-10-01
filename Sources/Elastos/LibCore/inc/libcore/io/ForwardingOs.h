@@ -45,6 +45,7 @@ namespace Libcore {
 namespace IO {
 
 EXTERN const _ELASTOS ClassID ECLSID_ForwardingOs;
+
 /**
  * Subclass this if you want to override some {@link Os} methods but otherwise delegate.
  */

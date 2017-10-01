@@ -117,110 +117,110 @@ ECode AbstractSet::RemoveAll(
     return NOERROR;
 }
 
-AbstractSet::GetIterator(
+ECode AbstractSet::GetIterator(
     /* [out] */ IIterator** it)
 {
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
 
-AbstractSet::Add(
+ECode AbstractSet::Add(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* modified)
 {
     return AbstractCollection::Add(object, modified);
 }
 
-AbstractSet::Add(
+ECode AbstractSet::Add(
     /* [in] */ IInterface* object)
 {
     return AbstractCollection::Add(object);
 }
 
-AbstractSet::AddAll(
+ECode AbstractSet::AddAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* modified)
 {
     return AbstractCollection::AddAll(collection, modified);
 }
 
-AbstractSet::AddAll(
+ECode AbstractSet::AddAll(
     /* [in] */ ICollection* collection)
 {
     return AbstractCollection::AddAll(collection);
 }
 
-AbstractSet::Clear()
+ECode AbstractSet::Clear()
 {
     return AbstractCollection::Clear();
 }
 
-AbstractSet::Contains(
+ECode AbstractSet::Contains(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* result)
 {
     return AbstractCollection::Contains(object, result);
 }
 
-AbstractSet::ContainsAll(
+ECode AbstractSet::ContainsAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* result)
 {
     return AbstractCollection::ContainsAll(collection, result);
 }
 
-AbstractSet::IsEmpty(
+ECode AbstractSet::IsEmpty(
     /* [out] */ Boolean* result)
 {
     return AbstractCollection::IsEmpty(result);
 }
 
-AbstractSet::Remove(
+ECode AbstractSet::Remove(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* modified)
 {
     return AbstractCollection::Remove(object, modified);
 }
 
-AbstractSet::Remove(
+ECode AbstractSet::Remove(
     /* [in] */ IInterface* object)
 {
     return AbstractCollection::Remove(object);
 }
 
-AbstractSet::RemoveAll(
+ECode AbstractSet::RemoveAll(
     /* [in] */ ICollection* collection)
 {
     return AbstractCollection::RemoveAll(collection);
 }
 
-AbstractSet::RetainAll(
+ECode AbstractSet::RetainAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* modified)
 {
     return AbstractCollection::RetainAll(collection, modified);
 }
 
-AbstractSet::RetainAll(
+ECode AbstractSet::RetainAll(
     /* [in] */ ICollection* collection)
 {
     return AbstractCollection::RetainAll(collection);
 }
 
-AbstractSet::GetSize(
+ECode AbstractSet::GetSize(
     /* [out] */ Int32* size)
 {
     assert(0);
     return E_NOT_IMPLEMENTED;
 }
 
-AbstractSet::ToArray(
+ECode AbstractSet::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
     return AbstractCollection::ToArray(array);
 }
 
-AbstractSet::ToArray(
+ECode AbstractSet::ToArray(
     /* [in] */ ArrayOf<IInterface*>* inArray,
     /* [out, callee] */ ArrayOf<IInterface*>** outArray)
 {

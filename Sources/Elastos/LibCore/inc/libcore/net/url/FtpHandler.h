@@ -38,6 +38,8 @@ public:
     CARAPI constructor();
 
 protected:
+    using URLStreamHandler::OpenConnection;
+
     CARAPI OpenConnection(
         /* [in] */ IURL* u,
         /* [out] */ IURLConnection** urlConnection);

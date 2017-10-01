@@ -87,6 +87,11 @@ ECode AbstractConnPool::EnableConnectionGC()
     return NOERROR;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 ECode AbstractConnPool::GetEntry(
     /* [in] */ IHttpRoute* route,
     /* [in] */ IObject* state,
@@ -132,6 +137,10 @@ ECode AbstractConnPool::HandleReference(
     return NOERROR;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
 ECode AbstractConnPool::CloseIdleConnections(
     /* [in] */ Int64 idletime,
     /* [in] */ ITimeUnit* tunit)
@@ -165,6 +174,11 @@ ECode AbstractConnPool::CloseExpiredConnections()
     ILock::Probe(mPoolLock)->UnLock();
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
 
 void AbstractConnPool::Shutdown()
 {
@@ -212,6 +226,10 @@ void AbstractConnPool::Shutdown()
     // }
     ILock::Probe(mPoolLock)->UnLock();
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 ECode AbstractConnPool::CloseConnection(
     /* [in] */ IOperatedClientConnection* conn)

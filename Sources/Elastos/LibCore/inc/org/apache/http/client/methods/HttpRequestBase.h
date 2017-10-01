@@ -86,7 +86,7 @@ public:
         /* [out] */ Boolean* isAborted);
 
 protected:
-    virtual CARAPI CloneImpl(
+    CARAPI CloneImpl(
         /* [in] */ HttpRequestBase* clone);
 
 private:

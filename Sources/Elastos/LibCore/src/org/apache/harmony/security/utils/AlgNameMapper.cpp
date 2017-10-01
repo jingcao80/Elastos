@@ -89,8 +89,8 @@ Boolean AlgNameMapper::sInit = InitStatic();
 
 Boolean AlgNameMapper::InitStatic()
 {
-    for (Int32 i = 0; i < 3 /*sKnownAlgMappings.length*/; i++) {
-        String element[2] = sKnownAlgMappings[i];
+    for (Int32 i = 0; i < 19 /*sKnownAlgMappings.length*/; i++) {
+        String element[2] = { sKnownAlgMappings[i][0], sKnownAlgMappings[i][1] };
         String algUC = element[1].ToUpperCase(/*Locale.US*/);
         sAlg2OidMap[algUC] = element[0];
         sOid2AlgMap[element[0]] = algUC;

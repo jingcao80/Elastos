@@ -111,10 +111,10 @@ public:
 
     CAR_OBJECT_DECL()
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ Int32 permits);
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ Int32 permits,
         /* [in] */ Boolean fair);
 

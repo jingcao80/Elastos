@@ -59,8 +59,8 @@ module
         /**
          * The main computation performed by this task.
          */
-         Compute();
-
+        Compute(
+            [out] IInterface** result);
     }
 
     } // namespace Concurrent

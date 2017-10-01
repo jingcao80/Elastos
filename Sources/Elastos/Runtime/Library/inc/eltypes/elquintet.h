@@ -309,7 +309,7 @@ void ReleaseFunc(void const * buf)
 template<class T, Boolean hasMemberAddRefAndRelease>
 struct ReleaseOpImpl
 {
-    void operator()(void const * buf)
+    void operator()(void const *)
     {
     }
 };
@@ -328,7 +328,7 @@ struct ReleaseOpImpl<T, TRUE>
 template<class T, Boolean isClassType, Boolean isPointer>
 struct ReleaseOpWrapper
 {
-    void operator()(void const * buf)
+    void operator()(void const *)
     {
     }
 };

@@ -27,37 +27,34 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-// {62B8CDC7-7E0C-5371-6409-7D49314BBC7A}
-extern "C" const InterfaceID EIID_X509CRL =
-        { 0x62b8cdc7, 0x7e0c, 0x5371, { 0x64, 0x09, 0x7d, 0x49, 0x31, 0x4b, 0xbc, 0x7a } };
-
-CAR_INTERFACE_IMPL(X509CRL, CRL, IX509Extension)
+CAR_INTERFACE_IMPL_2(X509CRL, CRL, IX509CRL, IX509Extension)
 
 ECode X509CRL::Equals(
     /* [in] */ IInterface *other,
     /* [out] */ Boolean *result)
 {
     VALIDATE_NOT_NULL(result)
-    if (reinterpret_cast<X509CRL*>(other->Probe(EIID_X509CRL)) == this) {
+    if (IX509CRL::Probe(other) == (IX509CRL*)this) {
         *result = TRUE;
         return NOERROR;
     }
-    if (other->Probe(EIID_X509CRL)) {
+    if (!IX509CRL::Probe(other)) {
         *result = FALSE;
         return NOERROR;
     }
-    AutoPtr<ArrayOf<Byte> > encode, oEncode;
-    ECode ec;
-    FAIL_GOTO(ec = GetEncoded((ArrayOf<Byte>**)&encode), ERROR_PROCESS)
-    FAIL_GOTO(ec = reinterpret_cast<X509CRL*>(other->Probe(EIID_X509CRL))->GetEncoded((ArrayOf<Byte>**)&oEncode), ERROR_PROCESS)
+    AutoPtr< ArrayOf<Byte> > encode, oEncode;
+    ECode ec = GetEncoded((ArrayOf<Byte>**)&encode);
+    if (FAILED(ec)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    ec = IX509CRL::Probe(other)->GetEncoded((ArrayOf<Byte>**)&oEncode);
+    if (FAILED(ec)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     *result = Arrays::Equals(encode, oEncode);
     return NOERROR;
-ERROR_PROCESS:
-    if ((unsigned Int32)ec == E_CRL_EXCEPTION) {
-        *result = FALSE;
-        return NOERROR;
-    }
-    return ec;
 }
 
 ECode X509CRL::GetHashCode(
@@ -66,19 +63,16 @@ ECode X509CRL::GetHashCode(
     VALIDATE_NOT_NULL(hashCode)
     Int32 res = 0;
     AutoPtr<ArrayOf<Byte> > array;
-    ECode ec;
-    FAIL_GOTO(ec = GetEncoded((ArrayOf<Byte>**)&array), ERROR_PROCESS)
+    ECode ec = GetEncoded((ArrayOf<Byte>**)&array);
+    if (FAILED(ec)) {
+        *hashCode = 0;
+        return NOERROR;
+    }
     for (Int32 i = 0; i < array->GetLength(); i++) {
         res += (*array)[i] & 0xFF;
     }
     *hashCode = res;
     return NOERROR;
-ERROR_PROCESS:
-    if ((unsigned Int32)ec == E_CRL_EXCEPTION) {
-        *hashCode = 0;
-        return NOERROR;
-    }
-    return ec;
 }
 
 ECode X509CRL::GetIssuerX500Principal(
@@ -97,7 +91,7 @@ ECode X509CRL::GetIssuerX500Principal(
     CByteArrayInputStream::New(encode, (IInputStream**)&is);
     AutoPtr<ICRL> crl;
     factory->GenerateCRL(is, (ICRL**)&crl);
-    return reinterpret_cast<X509CRL*>(crl->Probe(EIID_X509CRL))->GetIssuerX500Principal(issuer);
+    return IX509CRL::Probe(crl)->GetIssuerX500Principal(issuer);
 }
 
 ECode X509CRL::GetRevokedCertificateEx(

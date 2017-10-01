@@ -1728,7 +1728,6 @@ ECode Arrays::CopyOfRange(
     }
 
     Int32 resultLength = end - start;
-    Int32 copyLength = Elastos::Core::Math::Min(resultLength, originalLength - start);
     AutoPtr<ArrayOf<U> > array = ArrayOf<U>::Alloc(resultLength);
     for (Int32 i = 0; i < original->GetLength(); ++i) {
         array->Set(i, (U)(*original)[i]); // TODO: only work with primitives

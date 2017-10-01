@@ -684,7 +684,7 @@ ECode CArrayDeque::ToArray(
 
     Int32 size = 0;
     GetSize(&size);
-    AutoPtr<ArrayOf<IInterface*> > a = a->GetLength() < size ?
+    AutoPtr<ArrayOf<IInterface*> > a = _a->GetLength() < size ?
         ArrayOf<IInterface*>::Alloc(size) : _a;
 
     CopyElements(a);

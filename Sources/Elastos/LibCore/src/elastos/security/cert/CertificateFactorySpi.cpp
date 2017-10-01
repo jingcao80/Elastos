@@ -40,14 +40,14 @@ ECode CertificateFactorySpi::EngineGenerateCertPath(
 }
 
 ECode CertificateFactorySpi::EngineGenerateCertPath(
-    /* [in] */ IList** certificates,
+    /* [in] */ IList* certificates,
     /* [out] */ ICertPath** certPath)
 {
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
 ECode CertificateFactorySpi::EngineGetCertPathEncodings(
-    /* [out] */ ICertPath** IIterator)
+    /* [out] */ IIterator** it)
 {
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }

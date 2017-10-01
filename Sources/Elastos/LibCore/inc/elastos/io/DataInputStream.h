@@ -43,6 +43,8 @@ protected:
         /* [out] */ String* str);
 
 public:
+    using FilterInputStream::Read;
+
     /**
      * Reads bytes from this stream into the byte array {@code buffer}. Returns
      * the number of bytes that have been read.

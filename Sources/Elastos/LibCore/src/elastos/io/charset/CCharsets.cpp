@@ -167,7 +167,7 @@ ECode CCharsets::ToUtf8Bytes(
     }
 
     for (Int32 i = offset; i < end; ++i) {
-        char ch = chars[i];
+        Char32 ch = chars[i];
         if (ch < 0x80) {
             // One byte.
             if (!out->Append(ch)) {

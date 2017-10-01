@@ -38,7 +38,7 @@ namespace ICU {
 extern "C" const _ELASTOS ClassID ECLSID_NativeBreakIterator = {
     { 0xf969b4e7, 0xecc2, 0x483a, { 0x94, 0x7e, 0x2d, 0x3b, 0xc4, 0x57, 0x39, 0xf6 } },
     (char *)c_pElastos_CoreLibraryUunm,
-    0xf6f1637e };
+    0xf7796c27 };
 
 const Int32 NativeBreakIterator::BI_CHAR_INSTANCE = 1;
 const Int32 NativeBreakIterator::BI_WORD_INSTANCE = 2;

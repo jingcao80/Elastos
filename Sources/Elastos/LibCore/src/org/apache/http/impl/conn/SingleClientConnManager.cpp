@@ -88,6 +88,11 @@ SingleClientConnManager::ConnAdapter::ConnAdapter(
     entry->mRoute = route;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 PInterface SingleClientConnManager::ConnAdapter::Probe(
     /* [in] */ REIID riid)
 {
@@ -98,6 +103,10 @@ PInterface SingleClientConnManager::ConnAdapter::Probe(
         return AbstractPooledConnAdapter::Probe(riid);
     }
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 
 //==============================================================================
@@ -287,6 +296,11 @@ ECode SingleClientConnManager::GetConnection(
     return NOERROR;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 ECode SingleClientConnManager::ReleaseConnection(
     /* [in] */ IManagedClientConnection* conn,
     /* [in] */ Int64 validDuration,
@@ -373,6 +387,10 @@ ECode SingleClientConnManager::ReleaseConnection(
     }
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 ECode SingleClientConnManager::CloseExpiredConnections()
 {

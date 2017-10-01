@@ -91,6 +91,8 @@ public:
     CARAPI GetOrder(
         /* [out] */ ByteOrder* byteOrder);
 
+    using Int64Buffer::Put;
+
     CARAPI Put(
         /* [in] */ Int64 c);
 

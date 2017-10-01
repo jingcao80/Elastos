@@ -477,6 +477,11 @@ void ConnPoolByRoute::DeleteEntry(
     ILock::Probe(mPoolLock)->UnLock();
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 void ConnPoolByRoute::DeleteLeastUsedEntry()
 {
     // try {
@@ -502,6 +507,10 @@ void ConnPoolByRoute::DeleteLeastUsedEntry()
     // }
     ILock::Probe(mPoolLock)->UnLock();
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 void ConnPoolByRoute::HandleLostEntry(
     /* [in] */ IHttpRoute* route)
@@ -565,6 +574,11 @@ void ConnPoolByRoute::NotifyWaitingThread(
     ILock::Probe(mPoolLock)->UnLock();
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 void ConnPoolByRoute::DeleteClosedConnections()
 {
     ILock::Probe(mPoolLock)->Lock();
@@ -625,6 +639,10 @@ void ConnPoolByRoute::Shutdown()
     // }
     ILock::Probe(mPoolLock)->UnLock();
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 } // namespace Tsccm
 } // namespace Conn

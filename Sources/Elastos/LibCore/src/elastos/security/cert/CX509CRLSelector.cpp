@@ -344,11 +344,11 @@ ECode CX509CRLSelector::Match(
     /* [out] */ Boolean *result)
 {
     VALIDATE_NOT_NULL(result)
-    if (!crl || !crl->Probe(EIID_X509CRL)) {
+    if (!IX509CRL::Probe(crl)) {
         *result = FALSE;
         return NOERROR;
     }
-    AutoPtr<X509CRL> crlist = reinterpret_cast<X509CRL*>(crl->Probe(EIID_X509CRL));
+    AutoPtr<IX509CRL> crlist = IX509CRL::Probe(crl);
     if (mIssuerNames != NULL) {
         // the search speed depends on the class of issuerNames
         AutoPtr<IX500Principal> principal;
@@ -367,7 +367,7 @@ ECode CX509CRLSelector::Match(
         // As specified in rfc 3280 (http://www.ietf.org/rfc/rfc3280.txt)
         // CRL Number Extension's OID is 2.5.29.20 .
         AutoPtr<ArrayOf<Byte> > bytes;
-        crlist->GetExtensionValue(String("2.5.29.20"), (ArrayOf<Byte>**)&bytes);
+        IX509Extension::Probe(crlist)->GetExtensionValue(String("2.5.29.20"), (ArrayOf<Byte>**)&bytes);
         //Apache...Todo later
         /*bytes = (byte[]) ASN1OctetString.getInstance().decode(bytes);
         BigInteger crlNumber = new BigInteger((byte[])

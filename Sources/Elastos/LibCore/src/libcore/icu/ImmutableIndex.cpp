@@ -29,7 +29,7 @@ namespace ICU {
 extern "C" const _ELASTOS ClassID ECLSID_ImmutableIndex = {
     { 0xfd73b454, 0x5192, 0x4d43, { 0x9a, 0x18, 0xc5, 0xc2, 0x70, 0x10, 0x49, 0xa0 } },
     (char *)c_pElastos_CoreLibraryUunm,
-    0xf6f1637e };
+    0xf7796c27 };
 
 CAR_INTERFACE_IMPL(ImmutableIndex, Object, IImmutableIndex)
 

@@ -198,6 +198,11 @@ ECode AbstractHttpClientConnection::ReceiveResponseEntity(
     return NOERROR;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 ECode AbstractHttpClientConnection::IsStale(
     /* [out] */ Boolean* isStale)
 {
@@ -225,6 +230,10 @@ ECode AbstractHttpClientConnection::IsStale(
     //     return true;
     // }
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 ECode AbstractHttpClientConnection::GetMetrics(
     /* [out] */ IHttpConnectionMetrics** metrics)

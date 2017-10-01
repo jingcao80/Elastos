@@ -1791,28 +1791,28 @@ ECode CJDBCDatabaseMetaData::NullPlusNonNullIsNull(
 ECode CJDBCDatabaseMetaData::NullsAreSortedAtEnd(
     /* [out] */ Boolean * isNull)
 {
-    isNull = FALSE;
+    *isNull = FALSE;
     return NOERROR;
 }
 
 ECode CJDBCDatabaseMetaData::NullsAreSortedAtStart(
     /* [out] */ Boolean * isNull)
 {
-    isNull = FALSE;
+    *isNull = FALSE;
     return NOERROR;
 }
 
 ECode CJDBCDatabaseMetaData::NullsAreSortedHigh(
     /* [out] */ Boolean * isNull)
 {
-    isNull = FALSE;
+    *isNull = FALSE;
     return NOERROR;
 }
 
 ECode CJDBCDatabaseMetaData::NullsAreSortedLow(
     /* [out] */ Boolean * isNull)
 {
-    isNull = FALSE;
+    *isNull = FALSE;
     return NOERROR;
 }
 
@@ -2410,7 +2410,7 @@ ECode CJDBCDatabaseMetaData::UpdatesAreDetected(
 ECode CJDBCDatabaseMetaData::UsesLocalFilePerTable(
     /* [out] */ Boolean * isUsed)
 {
-    isUsed = FALSE;
+    *isUsed = FALSE;
     return NOERROR;
 }
 

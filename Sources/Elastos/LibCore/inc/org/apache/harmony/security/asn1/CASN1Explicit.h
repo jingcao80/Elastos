@@ -40,6 +40,8 @@ public:
     CARAPI GetType(
         /* [out] */ IASN1Type** type);
 
+    using ASN1Constructed::Decode;
+
     CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);

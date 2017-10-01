@@ -55,6 +55,8 @@ public:
         /* [in] */ Int32 value,
         /* [out] */ IInterface** fromIntValue);
 
+    using ASN1Primitive::Decode;
+
     CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);

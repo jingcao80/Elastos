@@ -68,6 +68,8 @@ public:
         /* [in] */ ISocketAddress* groupAddress,
         /* [in] */ INetworkInterface* netInterface);
 
+    using DatagramSocket::Send;
+
     CARAPI Send(
         /* [in] */ IDatagramPacket* pack,
         /* [in] */ Byte ttl);

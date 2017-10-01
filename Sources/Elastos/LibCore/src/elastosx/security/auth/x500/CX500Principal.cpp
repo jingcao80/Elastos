@@ -40,7 +40,7 @@ namespace X500 {
 CAR_OBJECT_IMPL(CX500Principal)
 CAR_INTERFACE_IMPL_2(CX500Principal, Object, IX500Principal, IPrincipal)
 
-const Int64 mSerialVersionUID = -500463348111345721L;
+const Int64 CX500Principal::mSerialVersionUID = -500463348111345721LL;
 
 ECode CX500Principal::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte>** encodedName)

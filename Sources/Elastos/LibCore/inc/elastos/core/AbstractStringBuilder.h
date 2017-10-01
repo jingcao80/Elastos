@@ -57,6 +57,8 @@ protected:
     CARAPI SetLength(
         /* [in] */ Int32 length);
 
+    using ICharSequence::GetLength;
+
     ECO_PUBLIC CARAPI_(Int32) GetLength();
 
     ECO_PUBLIC CARAPI_(Int32) GetByteCount();

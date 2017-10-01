@@ -23,7 +23,7 @@ namespace IO {
 extern const _ELASTOS ClassID ECLSID_ForwardingOs = {
     { 0x216d5978, 0x6282, 0x44ec, { 0xaa, 0xd1, 0xeb, 0xe7, 0x9d, 0x89, 0xe5, 0x32 }},
     (char *)c_pElastos_CoreLibraryUunm,
-    0x2d2b67d7 };
+    0xf7796c27 };
 
 CAR_OBJECT_IMPL(ForwardingOs)
 
@@ -33,7 +33,6 @@ ForwardingOs::ForwardingOs(
     /* [in] */ IOs* os)
     : mOs(os)
 {}
-
 
 ECode ForwardingOs::Accept(
     /* [in] */ IFileDescriptor* fd,

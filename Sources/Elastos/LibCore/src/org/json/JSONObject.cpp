@@ -43,7 +43,7 @@ namespace Json {
 
 const AutoPtr<IInterface> JSONObject::Object_NULL = (IObject*)new MyObject();
 
-const Double JSONObject::NEGATIVE_ZERO = -0.0d;
+const Double JSONObject::NEGATIVE_ZERO = -0.0l;
 
 //==============================================================================
 //          JSONObject::MyObject

@@ -238,11 +238,6 @@ ECode EnumSet::Range(
     return NOERROR;
 }
 
-AutoPtr<IEnumSet> EnumSet::Clone()
-{
-    return NULL;
-}
-
 Boolean EnumSet::IsValidType(
     /* [in] */ const InterfaceID& cls)
 {

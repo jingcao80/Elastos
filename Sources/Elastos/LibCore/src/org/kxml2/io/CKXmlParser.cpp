@@ -1914,7 +1914,7 @@ ECode CKXmlParser::SetInput(
 
     if (detectCharset) {
         // read the four bytes looking for an indication of the encoding in use
-        Int32 firstFourBytes = 0;
+        UInt32 firstFourBytes = 0;
         while (mLimit < 4) {
             Int32 i = 0;
             is->Read(&i);

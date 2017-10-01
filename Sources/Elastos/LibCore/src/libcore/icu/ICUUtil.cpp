@@ -1628,6 +1628,11 @@ ECode ICUUtil::UTF16ByteArrayToString(
     return NOERROR;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 ECode ICUUtil::UTF8ByteArrayToUTF16ByteArray(
     /* [in] */ ArrayOf<Byte>* utf8Array,
     /* [out, callee] */ ArrayOf<UInt16>** utf16Array)
@@ -1650,6 +1655,10 @@ ECode ICUUtil::UTF8ByteArrayToUTF16ByteArray(
     REFCOUNT_ADD(*utf16Array);
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 } // namespace ICU
 } // namespace Libcore

@@ -1766,14 +1766,14 @@ ECode DualPivotQuicksort::SortNegZeroAndNaN(
     /*
      * Phase 1: Count negative zeros and move NaNs to end of array
      */
-    const Int64 NEGATIVE_ZERO = Elastos::Core::Math::DoubleToInt64Bits(-0.0d);
+    const Int64 NEGATIVE_ZERO = Elastos::Core::Math::DoubleToInt64Bits(-0.0l);
     Int32 numNegativeZeros = 0;
     Int32 n = right;
 
     for (Int32 k = left; k <= n; k++) {
         Double ak = (*a)[k];
-        if (ak == 0.0d && NEGATIVE_ZERO == Elastos::Core::Math::DoubleToRawInt64Bits(ak)) {
-            (*a)[k] = 0.0d;
+        if (ak == 0.0l && NEGATIVE_ZERO == Elastos::Core::Math::DoubleToRawInt64Bits(ak)) {
+            (*a)[k] = 0.0l;
             numNegativeZeros++;
         }
         else if (ak != ak) { // i.e., ak is NaN
@@ -1797,13 +1797,13 @@ ECode DualPivotQuicksort::SortNegZeroAndNaN(
     // Find first zero element
     Int32 zeroIndex = FindAnyZero(a, left, n);
 
-    for (Int32 i = zeroIndex - 1; i >= left && (*a)[i] == 0.0d; i--) {
+    for (Int32 i = zeroIndex - 1; i >= left && (*a)[i] == 0.0l; i--) {
         zeroIndex = i;
     }
 
     // Turn the right number of positive zeros back into negative zeros
     for (Int32 i = zeroIndex, m = zeroIndex + numNegativeZeros; i < m; i++) {
-        (*a)[i] = -0.0d;
+        (*a)[i] = -0.0l;
     }
     return NOERROR;
 }
@@ -1817,13 +1817,13 @@ Int32 DualPivotQuicksort::FindAnyZero(
         Int32 middle = (UInt32)(low + high) >> 1;
         Double middleValue = (*a)[middle];
 
-        if (middleValue < 0.0d) {
+        if (middleValue < 0.0l) {
             low = middle + 1;
         }
-        else if (middleValue > 0.0d) {
+        else if (middleValue > 0.0l) {
             high = middle - 1;
         }
-        else { // middleValue == 0.0d
+        else { // middleValue == 0.0l
             return middle;
         }
     }

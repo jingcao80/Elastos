@@ -390,7 +390,7 @@ ECode CCallbackContext::RequestToFinish(
 ECode CCallbackContext::CancelAllPendingCallbacks(
     /* [in] */ PInterface sender)
 {
-    register PCallbackEvent cbEvent;
+    PCallbackEvent cbEvent;
     PCallbackEvent cancelingCBEvent;
 
     pthread_mutex_lock(&mQueueLock);
@@ -417,7 +417,7 @@ ECode CCallbackContext::CancelPendingCallback(
     /* [in] */ PInterface sender,
     /* [in] */ CallbackEventId id)
 {
-    register PCallbackEvent cbEvent;
+    PCallbackEvent cbEvent;
     PCallbackEvent cancelingCBEvent;
 
     pthread_mutex_lock(&mQueueLock);
@@ -447,7 +447,7 @@ ECode CCallbackContext::CancelCallbackEvents(
     /* [in] */ PVoid handlerThis,
     /* [in] */ PVoid handlerFunc)
 {
-    register PCallbackEvent cbEvent;
+    PCallbackEvent cbEvent;
     PCallbackEvent cancelingCBEvent;
 
     pthread_mutex_lock(&mQueueLock);

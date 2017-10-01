@@ -27,6 +27,8 @@ class StringBuilder;
 class RealToString : public Object
 {
 public:
+    using Object::ToString;
+
     ECO_PUBLIC static RealToString* GetInstance();
 
     ECO_PUBLIC CARAPI_(String) ToString(Double d);

@@ -38,11 +38,6 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-//{1024033A-F65A-26E1-C4C9-6005CBA3600A}
-extern "C" const InterfaceID EIID_CertPath =
-    { 0x1024033A, 0xF65A, 0x26E1, { 0xC4, 0xC9, 0x60, 0x05, 0xCB, 0xA3, 0x60, 0x0A } };
-static const Int64 sSerialVersionUID = 6068470306649138683L;
-
 CAR_INTERFACE_IMPL_2(CertPath, Object, ICertPath, ISerializable)
 CertPath::CertPath(
     /* [in] */ const String& type)
@@ -62,7 +57,7 @@ ECode CertPath::Equals(
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (this == reinterpret_cast<CertPath*>(other->Probe(EIID_CertPath))) {
+    if ((ICertPath*)this == ICertPath::Probe(other)) {
         *isEqual = TRUE;
         return NOERROR;
     }

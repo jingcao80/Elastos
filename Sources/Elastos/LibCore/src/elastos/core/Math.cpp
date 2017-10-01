@@ -1136,7 +1136,7 @@ Int32 Math::Compare(
     if (double2 > double1) {
         return -1;
     }
-    if (double1 == double2 && 0.0d != double1) {
+    if (double1 == double2 && 0.0l != double1) {
         return 0;
     }
 

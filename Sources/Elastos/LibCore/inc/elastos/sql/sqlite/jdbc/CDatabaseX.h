@@ -55,6 +55,8 @@ public:
         /* [in] */ ITableResult * tbl);
 
 protected:
+    using Object::Wait;
+
     CARAPI_(void) Wait(Int32 ms);
 
 private:

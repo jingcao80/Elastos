@@ -538,7 +538,11 @@ public:
         /* [in] */ ILocale* locale,
         /* [out] */ IMap** array);
 
+    using Object::GetHashCode;
+
     CARAPI_(Int32) GetHashCode();
+
+    using Object::ToString;
 
     CARAPI_(String) ToString();
 

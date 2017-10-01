@@ -760,7 +760,7 @@ AutoPtr<NodeImpl> NodeImpl::GetNamespacingElement()
             //        "Unsupported node type " + getNodeType());
             Logger::E("NodeImpl", "GetNamespacingElement, DOMException");
             assert(0);
-            return NOERROR;
+            return NULL;
     }
 }
 

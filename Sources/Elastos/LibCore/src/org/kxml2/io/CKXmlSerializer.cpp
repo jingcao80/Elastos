@@ -276,7 +276,7 @@ ECode CKXmlSerializer::GetPrefix(
     }
     else {
         do {
-            _prefix = "n" + (mAuto++);
+            _prefix = String::Format("n%d", (mAuto++));
             for (Int32 i = (*mNspCounts)[mDepth + 1] * 2 - 2; i >= 0; i -= 2) {
                 if (_prefix.Equals((*mNspStack)[i])) {
                     _prefix = NULL;

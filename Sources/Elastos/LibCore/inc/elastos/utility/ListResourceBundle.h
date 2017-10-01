@@ -87,7 +87,8 @@ public:
         /* [out] */ IInterface** outface);
 
 protected:
-    CARAPI_(AutoPtr<ISet>) HandleKeySet();
+    CARAPI HandleKeySet(
+        /* [out] */ ISet** outset);
 
     virtual CARAPI_(AutoPtr< ArrayOf< AutoPtr< ArrayOf<IInterface*> > > >) GetContents() = 0;
 

@@ -84,6 +84,8 @@ public:
     virtual CARAPI GetDateFormatSymbols(
         /* [out] */ IDateFormatSymbols** symbols);
 
+    using DateFormat::Parse;
+
     //@Override
     CARAPI Parse(
         /* [in] */ const String& string,

@@ -63,6 +63,8 @@ public:
         /* [in] */ IJDBCConnection * pConn,
         /* [in] */ const String& sql);
 
+    using JDBCStatement::AddBatch;
+
     CARAPI AddBatch();
 
     CARAPI ExecuteBatch(
@@ -74,11 +76,17 @@ public:
 
     CARAPI ClearParameters();
 
+    using JDBCStatement::Execute;
+
     CARAPI Execute(
         /* [out] */ Boolean * value);
 
+    using JDBCStatement::ExecuteQuery;
+
     CARAPI ExecuteQuery(
         /* [out] */ IResultSet ** resultset);
+
+    using JDBCStatement::ExecuteUpdate;
 
     CARAPI ExecuteUpdate(
         /* [out] */ Int32 * value);

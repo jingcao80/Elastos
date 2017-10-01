@@ -2657,7 +2657,7 @@ ECode CBigDecimal::DoubleValue(
 
     if ((powerOfTwo < -1074) || (sign == 0)) {
         // Cases which 'this' is very small
-        *result = (sign * 0.0d);
+        *result = (sign * 0.0l);
         return NOERROR;
     }
     else if (powerOfTwo > 1025) {
@@ -2762,7 +2762,7 @@ ECode CBigDecimal::DoubleValue(
     else if (exponent <= 0) {// (exponent - bias <= -1023)
         // Denormalized numbers (having exponent == 0)
         if (exponent < -53) {// exponent - bias < -1076
-            *result = (sign * 0.0d);
+            *result = (sign * 0.0l);
             return NOERROR;
         }
 

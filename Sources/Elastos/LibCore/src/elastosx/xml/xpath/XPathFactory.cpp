@@ -24,8 +24,10 @@ const String XPathFactory::DEFAULT_PROPERTY_NAME = String("javax.xml.xpath.XPath
 const String XPathFactory::DEFAULT_OBJECT_MODEL_URI = String("http://java.sun.com/jaxp/xpath/dom");
 
 // {129b344c-aeac-4f57-936a-e58637cd4052}
-extern const _ELASTOS ClassID ECLSID_XPathFactory =
-        { 0x129b344c, 0xaeac, 0x4f57, { 0x93, 0x6a, 0xe5, 0x86, 0x37, 0xcd, 0x40, 0x52 } };
+extern const _ELASTOS ClassID ECLSID_XPathFactory = {
+        { 0x129b344c, 0xaeac, 0x4f57, { 0x93, 0x6a, 0xe5, 0x86, 0x37, 0xcd, 0x40, 0x52 }},
+        (char *)c_pElastos_CoreLibraryUunm,
+        0xf7796c27 };
 
 CAR_INTERFACE_IMPL(XPathFactory, Object, IXPathFactory)
 

@@ -44,6 +44,11 @@ BasicPoolEntry::BasicPoolEntry(
     mReference = new BasicPoolEntryRef(this, queue);
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 PInterface BasicPoolEntry::Probe(
     /* [in] */ REIID riid)
 {
@@ -54,6 +59,10 @@ PInterface BasicPoolEntry::Probe(
         return AbstractPoolEntry::Probe(riid);
     }
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 AutoPtr<IOperatedClientConnection> BasicPoolEntry::GetConnection()
 {

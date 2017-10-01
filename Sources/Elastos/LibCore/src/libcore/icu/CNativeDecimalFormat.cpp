@@ -927,7 +927,8 @@ static U_ICU_NAMESPACE::DecimalFormatSymbols* makeDecimalFormatSymbols(
     /* [in] */ Char32 perMill,
     /* [in] */ Char32 zeroDigit)
 {
-    U_ICU_NAMESPACE::DecimalFormatSymbols* result = new U_ICU_NAMESPACE::DecimalFormatSymbols;
+    UErrorCode status = U_ZERO_ERROR;
+    U_ICU_NAMESPACE::DecimalFormatSymbols* result = new U_ICU_NAMESPACE::DecimalFormatSymbols(status);
 
 
     // result->setSymbol(DecimalFormatSymbols::kZeroDigitSymbol, UnicodeString(zeroDigit + 0));

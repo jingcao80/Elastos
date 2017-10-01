@@ -138,7 +138,7 @@ AutoPtr< ArrayOf<IInterface*> > Enum::GetSharedConstants(
     /* [in] */ InterfaceID enumType)
 {
     // return (T[]) sharedConstantsCache.get(enumType);
-    return NOERROR;
+    return NULL;
 }
 
 Enum::Enum(

@@ -369,7 +369,8 @@ private:
              * checks set state, and security permission to modify set before
              * removing current element
              */
-            Remove();
+            CARAPI Remove();
+
             SecureIterator(
                 /* [in] */ IIterator *iterator,
                 /* [in] */ Handle32 host);

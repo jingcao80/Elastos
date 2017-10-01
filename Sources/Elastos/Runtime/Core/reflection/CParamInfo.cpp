@@ -26,6 +26,9 @@ CParamInfo::CParamInfo(
     /* [in] */ ParamDescriptor* paramDescriptor,
     /* [in] */ Int32 index)
 {
+    mTypeDescriptor = NULL;
+    mMethodDescriptor = NULL;
+    mPointer = 0;
     mClsModule = clsModule;
     mMethodInfo = methodInfo;
     mParmElement = parmElement;

@@ -174,43 +174,6 @@ public:
     static CARAPI GetDefaultSSLSocketFactory(
         /* [out] */ ISSLSocketFactory** factory);
 
-    /**
-     * Returns the name of the cipher suite negotiated during the SSL handshake.
-     *
-     * @return the name of the cipher suite negotiated during the SSL handshake.
-     * @throws IllegalStateException
-     *             if no connection has been established yet.
-     */
-    virtual CARAPI GetCipherSuite(
-        /* [out] */ String* suite) = 0;
-
-    /**
-     * Returns the list of local certificates used during the handshake. These
-     * certificates were sent to the peer.
-     *
-     * @return Returns the list of certificates used during the handshake with
-     *         the local identity certificate followed by CAs, or {@code null}
-     *         if no certificates were used during the handshake.
-     * @throws IllegalStateException
-     *             if no connection has been established yet.
-     */
-    virtual CARAPI GetLocalCertificates(
-        /* [out, callee] */ ArrayOf<ICertificate*>* certificates) = 0;
-
-    /**
-     * Return the list of certificates identifying the peer during the
-     * handshake.
-     *
-     * @return the list of certificates identifying the peer with the peer's
-     *         identity certificate followed by CAs.
-     * @throws SSLPeerUnverifiedException
-     *             if the identity of the peer has not been verified..
-     * @throws IllegalStateException
-     *             if no connection has been established yet.
-     */
-    virtual CARAPI GetServerCertificates(
-       /* [out, callee] */ ArrayOf<ICertificate*>* certificates) = 0;
-
     CARAPI constructor(
         /* [in] */ IURL* url);
 

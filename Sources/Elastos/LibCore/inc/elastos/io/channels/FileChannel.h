@@ -92,6 +92,8 @@ public:
 
     using IFileChannel::Force;
 
+    using Object::Lock;
+
     /**
      * Obtains an exclusive lock on this file.
      * <p>
@@ -117,7 +119,6 @@ public:
     using IFileChannel::Lock;
     using IFileChannel::Map;
     using IFileChannel::Position;
-    using IFileChannel::Read;
 
     /**
      * Reads bytes from this file channel and stores them in the specified array

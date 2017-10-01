@@ -104,7 +104,7 @@ module
          * @throws SignatureException
          *             if errors occur on signatures.
          */
-        VerifyEx(
+        Verify(
             [in] IPublicKey* key,
             [in] String sigProvider);
 

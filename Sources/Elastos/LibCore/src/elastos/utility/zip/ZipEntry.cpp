@@ -133,7 +133,7 @@ ECode ZipEntry::constructor(
     Int32 sig;
     it->ReadInt32(&sig);
     if (sig != IZipConstants::CENSIG) {
-        ALOGE("ZipException: ZipEntry::constructor Central Directory Entry not found., sig:%d,CENSIG:%d", sig, IZipConstants::CENSIG);
+        ALOGE("ZipException: ZipEntry::constructor Central Directory Entry not found., sig:%d,CENSIG:%lld", sig, IZipConstants::CENSIG);
         return E_ZIP_EXCEPTION;
 //         throw new ZipException("Central Directory Entry not found");
     }

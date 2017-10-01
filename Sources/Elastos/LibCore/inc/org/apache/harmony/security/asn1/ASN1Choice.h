@@ -42,6 +42,8 @@ public:
         /* [in] */ Int32 identifier,
         /* [out] */ Boolean* checkTag);
 
+    using ASN1Type::Decode;
+
     virtual CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);

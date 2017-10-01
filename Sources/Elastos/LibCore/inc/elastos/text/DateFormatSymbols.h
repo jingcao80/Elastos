@@ -101,7 +101,7 @@ public:
 
 //    @Override
     CARAPI GetHashCode(
-        /* [out] */ Int32 hash);
+        /* [out] */ Int32* hash);
 
     CARAPI SetAmPmStrings(
         /* [in] */ ArrayOf<String> * data);

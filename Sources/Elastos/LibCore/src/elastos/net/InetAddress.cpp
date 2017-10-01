@@ -696,7 +696,7 @@ Boolean InetAddress::IsIPv4MappedAddress(
             return FALSE;
         }
     }
-    if((*ipAddress)[10] != -1 || (*ipAddress)[11] != -1) {
+    if((*ipAddress)[10] != 0xff || (*ipAddress)[11] != 0xff) {
         return FALSE;
     }
     return TRUE;

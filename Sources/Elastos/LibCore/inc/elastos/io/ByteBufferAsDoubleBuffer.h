@@ -92,6 +92,8 @@ public:
     CARAPI GetOrder(
         /* [out] */ ByteOrder* byteOrder);
 
+    using DoubleBuffer::Put;
+
     CARAPI Put(
         /* [in] */ Double c);
 

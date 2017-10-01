@@ -140,7 +140,7 @@ private:
      *
      * @throws InvalidAlgorithmParameterException if trustAnchors set is empty.
      */
-    CheckTrustAnchors(
+    CARAPI CheckTrustAnchors(
         /* [in] */ ISet *trustAnchors);
 
 private:

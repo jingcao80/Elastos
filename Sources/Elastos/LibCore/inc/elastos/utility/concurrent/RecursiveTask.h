@@ -30,16 +30,13 @@ class RecursiveTask
 public:
     CAR_INTERFACE_DECL()
 
-    virtual CARAPI Compute(
-        /* [out] */ IInterface** outface) = 0;
-
-    virtual CARAPI GetRawResult(
+    CARAPI GetRawResult(
         /* [out] */ IInterface** outface);
 
-    virtual CARAPI SetRawResult(
+    CARAPI SetRawResult(
         /* [in] */ IInterface* value);
 
-    virtual CARAPI Exec(
+    CARAPI Exec(
         /* [out] */ Boolean* res);
 
 public:

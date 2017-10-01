@@ -160,6 +160,8 @@ public:
     CARAPI IsPersistent(
         /* [out] */ Boolean* isPersistent);
 
+    using Object::GetDomain;
+
     /**
      * Returns domain attribute of the cookie.
      *

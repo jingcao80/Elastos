@@ -51,6 +51,8 @@ private:
             /* [in] */ IPlainSocketImpl* socketImpl,
             /* [in] */ SocketChannelImpl* channel);
 
+        using Socket::GetChannel;
+
         CARAPI_(AutoPtr<SocketChannel>) GetChannel();
 
         CARAPI Connect(

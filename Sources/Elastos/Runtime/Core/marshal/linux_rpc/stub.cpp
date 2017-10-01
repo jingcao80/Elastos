@@ -320,7 +320,7 @@ ECode CObjectStub::Invoke(
 {
     MarshalHeader *inHeader = NULL, *outHeader = NULL;
     UInt32 *args, uMethodAddr, uMethodIndex;
-    ECode ec, orgec = NOERROR;
+    ECode ec = NOERROR, orgec = NOERROR;
     CInterfaceStub* curInterface;
     const CIMethodInfo* methodInfo;
     CRemoteParcel* parcel = NULL;

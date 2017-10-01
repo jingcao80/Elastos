@@ -37,6 +37,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    using ASN1Type::Decode;
+
     CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);

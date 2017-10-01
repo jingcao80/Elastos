@@ -118,8 +118,6 @@ public:
         /* [in] */ IInterface* start,
         /* [in] */ IInterface* end) = 0;
 
-    virtual CARAPI_(AutoPtr<IEnumSet>) Clone();
-
     virtual CARAPI_(Boolean) IsValidType(
         /* [in] */ const InterfaceID& cls);
 

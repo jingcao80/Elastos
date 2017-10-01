@@ -205,7 +205,7 @@ private:
      * Elimination array; null until enabled (within slotExchange).
      * Element accesses use emulation of volatile gets and CAS.
      */
-    volatile AutoPtr<ArrayOf<Node*> > mArena;
+    /* volatile */ AutoPtr<ArrayOf<Node*> > mArena;
 
     // // Unsafe mechanics
     // private static final sun.misc.Unsafe U;

@@ -30,8 +30,6 @@ namespace Elastos {
 namespace Security {
 namespace Cert {
 
-extern "C" const InterfaceID EIID_CertPath;
-
 class CertPath
     : public Object
     , public ICertPath

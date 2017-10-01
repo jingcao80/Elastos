@@ -65,6 +65,8 @@ public:
     CARAPI CloneImpl(
         /* [in] */ INumberFormat* format);
 
+    using FormatBase::Format;
+
     CARAPI Format(
         /* [in] */ Double value,
         /* [out] */ String* result);

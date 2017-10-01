@@ -583,6 +583,8 @@ public:
             /* [in] */ ArrayOf<IInterface*>* inArray,
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
+        using Object::ToString;
+
         /**
          * Returns a string representation of this collection.
          * The string representation consists of the string representations
@@ -762,8 +764,12 @@ public:
         CARAPI Remove(
             /* [in] */ IInterface* object);
 
+        using CollectionView::RemoveAll;
+
         CARAPI RemoveAll(
             /* [in] */ ICollection* collection);
+
+        using CollectionView::RetainAll;
 
         CARAPI RetainAll(
             /* [in] */ ICollection* collection);
@@ -1179,6 +1185,8 @@ public:
      */
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
+
+    using AbstractMap::ToString;
 
     /**
      * Returns a string representation of this map.  The string

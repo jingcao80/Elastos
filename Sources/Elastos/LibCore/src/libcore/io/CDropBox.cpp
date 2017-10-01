@@ -36,7 +36,7 @@ ECode CDropBox::DefaultReporter::AddData(
     CBase64::AcquireSingleton((IBase64**)&base64);
     String enStr;
     base64->Encode(data, &enStr);
-    ALOGD(tag + ":" + enStr);
+    ALOGD("%s:%s", tag.string(), enStr.string());
     return NOERROR;
 }
 
@@ -44,7 +44,7 @@ ECode CDropBox::DefaultReporter::AddText(
     /* [in] */ const String& tag,
     /* [in] */ const String& data)
 {
-    ALOGD(tag + ":" + data);
+    ALOGD("%s:%s", tag.string(), data.string());
     return NOERROR;
 }
 

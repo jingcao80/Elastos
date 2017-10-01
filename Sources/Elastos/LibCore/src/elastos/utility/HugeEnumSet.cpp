@@ -348,7 +348,7 @@ ECode HugeEnumSet::RemoveAll(
 {
     Boolean empty;
     if (collection->IsEmpty(&empty), empty) {
-        modified = FALSE;
+        *modified = FALSE;
         return NOERROR;
     }
 

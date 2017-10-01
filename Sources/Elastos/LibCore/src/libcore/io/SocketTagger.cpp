@@ -28,7 +28,7 @@ namespace IO {
 extern const _ELASTOS ClassID ECLSID_SocketTagger = {
     { 0x1d7f90b3, 0xc0ca, 0x45d9, { 0xaf, 0x25, 0x63, 0xfa, 0xc0, 0x17, 0x1a, 0xa5}},
     (char *)c_pElastos_CoreLibraryUunm,
-    0x2d2b67d7 };
+    0xf7796c27 };
 
 Object SocketTagger::sLock;
 

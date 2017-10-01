@@ -43,6 +43,11 @@ BasicPoolEntryRef::BasicPoolEntryRef(
     mRoute = entry->GetPlannedRoute();
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 PInterface BasicPoolEntryRef::Probe(
     /* [in] */ REIID riid)
 {
@@ -53,6 +58,10 @@ PInterface BasicPoolEntryRef::Probe(
         return Object::Probe(riid);
     }
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 AutoPtr<IHttpRoute> BasicPoolEntryRef::GetRoute()
 {

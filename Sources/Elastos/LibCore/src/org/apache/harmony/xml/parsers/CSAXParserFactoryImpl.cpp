@@ -139,7 +139,7 @@ ECode CSAXParserFactoryImpl::GetFeature(
     /* [out] */ Boolean * pFeature)
 {
     VALIDATE_NOT_NULL(pFeature);
-    pFeature = FALSE;
+    *pFeature = FALSE;
 
     if (name.IsNull()) {
         //throw new NullPointerException("name == null");

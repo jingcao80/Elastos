@@ -16,7 +16,7 @@ $;;=========================================================================
 $
 $INPUT module
 
-EXTERN_C ELAPI _Impl_CheckClsId(
+ELAPI _Impl_CheckClsId(
     PInterface pServerObj,
     const _ELASTOS ClassID* pClassid,
     PInterface *ppServerObj);

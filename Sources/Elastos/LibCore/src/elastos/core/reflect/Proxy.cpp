@@ -446,9 +446,8 @@ ECode CInterfaceProxy::ProxyEntry(
     /* [in] */ UInt32* args)
 {
     CInterfaceProxy* thisPtr;
-    UInt32 methodIndex, inSize, outSize;
-    Int32 size = 0;
-    ECode ec, orgec;
+    UInt32 methodIndex;
+    ECode ec;
 #ifndef _mips
     UInt32 argNum __attribute__((__unused__));
 #endif
@@ -491,14 +490,6 @@ ECode CInterfaceProxy::ProxyEntry(
     //  4. Call Thread::ReallocBuffer in SysReply if necessary to pass back the
     //      marshaled-out data with error info
     //
-
-#if defined(_DEBUG)
-    // _DumpObjectProxy(thisPtr->mOwner);
-    // ALOGD(" >>> tid:%d, Current Interface:", gettid());
-    // _DumpInterfaceProxy(thisPtr);
-    // ALOGD(" >>> Method index:%d, argNum:%d\n", methodIndex, argNum);
-    // ALOGD(" >>> Buffer size: inSize(%d), outSize(%d)\n", inSize, outSize);
-#endif
 
     AutoPtr<IMethodInfo> methodInfo;
     thisPtr->mInfo2->GetMethodInfo(methodIndex, (IMethodInfo**)&methodInfo);

@@ -41,7 +41,7 @@ ECode X509CRLEntry::Equals(
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
-    if (reinterpret_cast<X509CRLEntry*>(IX509CRLEntry::Probe(other)) == this) {
+    if ((X509CRLEntry*)IX509CRLEntry::Probe(other) == this) {
         *isEqual = TRUE;
         return NOERROR;
     }
@@ -49,7 +49,7 @@ ECode X509CRLEntry::Equals(
         *isEqual = FALSE;
         return NOERROR;
     }
-    AutoPtr<X509CRLEntry> obj = reinterpret_cast<X509CRLEntry*>(IX509CRLEntry::Probe(other));
+    AutoPtr<X509CRLEntry> obj = (X509CRLEntry*)IX509CRLEntry::Probe(other);
     AutoPtr<ArrayOf<Byte> > encode, oEncode;
     ECode ec = GetEncoded((ArrayOf<Byte>**)&encode);
     FAIL_GOTO(ec, FAIL_PROCESS)

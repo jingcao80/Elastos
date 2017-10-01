@@ -146,6 +146,11 @@ struct DefaultConstructibleConcept
     }
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-field"
+#endif
+
 template <typename T>
 struct AssignableConcept
 {
@@ -160,6 +165,10 @@ struct AssignableConcept
 
     T mA;
 };
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 template <typename T>
 struct CopyConstructibleConcept
@@ -181,6 +190,11 @@ struct CopyConstructibleConcept
     T mB;
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-field"
+#endif
+
 // The SGI STL version of Assignable requires copy constructor and operator=
 template <typename T>
 struct SGIAssignableConcept
@@ -200,6 +214,10 @@ struct SGIAssignableConcept
 
     T mA;
 };
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 template <typename From, typename To>
 struct ConvertibleConcept

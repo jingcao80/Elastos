@@ -46,7 +46,7 @@ IoUtils::FileReader::FileReader()
 {
 }
 
-IoUtils::FileReader::Init(
+ECode IoUtils::FileReader::Init(
     /* [in] */ const String& absolutePath)
 {
     // We use IoBridge.open because callers might differentiate

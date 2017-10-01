@@ -636,9 +636,9 @@ ECode Database::LastError(
 }
 
 ECode Database::SetLastError(
-    /* [in] */ Int32 mError_code)
+    /* [in] */ Int32 error_code)
 {
-    mError_code = mError_code;
+    mError_code = error_code;
     return NOERROR;
 }
 

@@ -91,6 +91,8 @@ public:
     CARAPI GetOrder(
         /* [out] */ ByteOrder* byteOrder);
 
+    using FloatBuffer::Put;
+
     CARAPI Put(
         /* [in] */ Float c);
 

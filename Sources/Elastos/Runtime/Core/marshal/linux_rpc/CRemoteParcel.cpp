@@ -300,7 +300,7 @@ ECode CRemoteParcel::WriteFloat(
 ECode CRemoteParcel::WriteDouble(
     /* [in] */ Double value)
 {
-    return WriteDouble(value);
+    return WriteAligned(value);
 }
 
 ECode CRemoteParcel::WriteString(

@@ -661,7 +661,7 @@ CSubject::SecureSet::SecureSet(
     {
         VerifyElement(o);
         Boolean is_contains;
-        if (trust || mElements->Contains(o, &is_contains), is_contains) {
+        if (trust || (mElements->Contains(o, &is_contains), is_contains)) {
             mElements->Add(o);
         }
         it->GetNext((IInterface**)&o);

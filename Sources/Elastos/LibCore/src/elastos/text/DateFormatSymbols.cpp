@@ -447,6 +447,47 @@ AutoPtr<ArrayOf<IArrayOf*> > DateFormatSymbols::Clone2dStringArray(
     return result;
 }
 
+ECode DateFormatSymbols::GetHashCode(
+    /* [out] */ Int32* hash)
+{
+    VALIDATE_NOT_NULL(hash)
+
+    AutoPtr< ArrayOf<IArrayOf*> > zoneStrings = InternalZoneStrings();
+    Int32 hashCode;
+    hashCode = mLocalPatternChars.GetHashCode();
+    for (Int32 i = 0; i < mAmpms->GetLength(); i++) {
+        hashCode += (*mAmpms)[i].GetHashCode();
+    }
+    for (Int32 i = 0; i < mEras->GetLength(); i++) {
+        hashCode += (*mEras)[i].GetHashCode();
+    }
+    for (Int32 i = 0; i < mMonths->GetLength(); i++) {
+        hashCode += (*mMonths)[i].GetHashCode();
+    }
+    for (Int32 i = 0; i < mShortMonths->GetLength(); i++) {
+        hashCode += (*mShortMonths)[i].GetHashCode();
+    }
+    for (Int32 i = 0; i < mShortWeekdays->GetLength(); i++) {
+        hashCode += (*mShortWeekdays)[i].GetHashCode();
+    }
+    for (Int32 i = 0; i < mWeekdays->GetLength(); i++) {
+        hashCode += (*mWeekdays)[i].GetHashCode();
+    }
+    for (Int32 i = 0; i < zoneStrings->GetLength(); i++) {
+        AutoPtr<IArrayOf> element = (*zoneStrings)[i];
+        Int32 N;
+        element->GetLength(&N);
+        for (Int32 j = 0; j < N; j++) {
+            AutoPtr<IInterface> obj;
+            element->Get(j, (IInterface**)&obj);
+            IObject::Probe(obj)->GetHashCode(hash);
+            hashCode += *hash;
+        }
+    }
+    *hash = hashCode;
+    return NOERROR;
+}
+
 ECode DateFormatSymbols::SetAmPmStrings(
     /* [in] */ ArrayOf<String> * data)
 {

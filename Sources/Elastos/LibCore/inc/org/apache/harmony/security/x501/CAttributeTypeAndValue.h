@@ -75,6 +75,8 @@ private:
             /* [in] */ Int32 tag,
             /* [out] */ Boolean* result);
 
+        using ASN1Type::Decode;
+
         CARAPI Decode(
             /* [in] */ IBerInputStream* in,
             /* [out] */ IInterface** result) /*throws IOException*/;

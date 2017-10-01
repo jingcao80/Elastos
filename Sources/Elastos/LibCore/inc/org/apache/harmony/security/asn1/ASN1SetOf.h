@@ -32,6 +32,8 @@ class ASN1SetOf
 public:
     CAR_INTERFACE_DECL()
 
+    using ASN1ValueCollection::Decode;
+
     virtual CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** ret);

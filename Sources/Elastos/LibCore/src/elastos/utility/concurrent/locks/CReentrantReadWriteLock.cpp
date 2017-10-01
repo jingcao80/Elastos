@@ -255,7 +255,7 @@ const Int32 CReentrantReadWriteLock::Sync::SHARED_UNIT    = (1 << SHARED_SHIFT);
 const Int32 CReentrantReadWriteLock::Sync::MAX_COUNT      = (1 << SHARED_SHIFT) - 1;
 const Int32 CReentrantReadWriteLock::Sync::EXCLUSIVE_MASK = (1 << SHARED_SHIFT) - 1;
 
-static const Int64 sSerialVersionUID = 6317671515068378041L;
+const Int64 CReentrantReadWriteLock::Sync::sSerialVersionUID = 6317671515068378041LL;
 
 Int32 CReentrantReadWriteLock::Sync::SharedCount(
     /* [in] */ Int32 c)

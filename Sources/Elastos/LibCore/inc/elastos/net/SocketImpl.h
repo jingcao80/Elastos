@@ -42,7 +42,7 @@ public:
     virtual CARAPI GetFD(
         /* [out] */ IFileDescriptor** fileDescriptor);
 
-    virtual ToString(
+    virtual CARAPI ToString(
         /* [out] */ String* str);
 
     virtual CARAPI Accept(

@@ -359,6 +359,8 @@ private:
     CARAPI_(Int32) Mod7(
         /* [in] */ Int64 num1);
 
+    using Calendar::GetFirstDayOfWeek;
+
     CARAPI_(Int32) GetFirstDayOfWeek();
 
     CARAPI_(Boolean) IsLeapYear(

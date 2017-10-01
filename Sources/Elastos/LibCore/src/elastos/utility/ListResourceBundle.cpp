@@ -172,12 +172,12 @@ ECode ListResourceBundle::HandleGetObject(
     return NOERROR;
 }
 
-AutoPtr<ISet> ListResourceBundle::HandleKeySet()
+ECode ListResourceBundle::HandleKeySet(
+    /* [out] */ ISet** outset)
 {
+    VALIDATE_NOT_NULL(outset)
     InitializeTable();
-    AutoPtr<ISet> set;
-    (IMap::Probe(mTable))->GetKeySet((ISet**)&set);
-    return set;
+    return (IMap::Probe(mTable))->GetKeySet(outset);
 }
 
 ECode ListResourceBundle::InitializeTable()

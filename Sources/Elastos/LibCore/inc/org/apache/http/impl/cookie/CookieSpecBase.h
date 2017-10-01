@@ -56,6 +56,8 @@ protected:
     static CARAPI_(String) GetDefaultDomain(
         /* [in] */ ICookieOrigin* origin);
 
+    using AbstractCookieSpec::Parse;
+
     CARAPI Parse(
         /* [in] */ ArrayOf<IHeaderElement*>* elems,
         /* [in] */ ICookieOrigin* origin,

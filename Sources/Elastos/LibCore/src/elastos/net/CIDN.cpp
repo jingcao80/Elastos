@@ -95,6 +95,11 @@ static Boolean IsLabelSeparator(const UChar ch)
     }
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 ECode CIDN::NativeConvert(
     /* [in] */ const String& s,
     /* [in] */ Int32 flags,
@@ -134,6 +139,10 @@ ECode CIDN::NativeConvert(
     *result = String(*outarr);
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 } // namespace Net
 } // namespace Elastos

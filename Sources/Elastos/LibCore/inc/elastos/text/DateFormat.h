@@ -113,6 +113,8 @@ public:
         /* [in] */ IInterface* object,
         /* [out] */ Boolean * result);
 
+    using FormatBase::Format;
+
     //@Override
     CARAPI Format(
         /* [in] */ IInterface* object,

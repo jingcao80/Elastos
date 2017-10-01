@@ -108,6 +108,8 @@ public:
         /* [in] */ IInterface* object,
         /* [out] */ IAttributedCharacterIterator** characterIterator);
 
+    using FormatBase::Format;
+
     CARAPI Format(
         /* [in] */ ArrayOf< IInterface* >* objects,
         /* [in] */ IStringBuffer * buffer,

@@ -467,8 +467,7 @@ Boolean CHttpCookie::IsValidName(
             nameChar = (*charArray)[i];
             // name must be ASCII characters and cannot contain ';', ',' and
             // whitespace
-            if (nameChar < 0
-                || nameChar >= 127
+            if (nameChar >= 127
                 || nameChar == ';'
                 || nameChar == ','
                 || (Character::IsWhitespace(nameChar) && nameChar != ' ')) {
@@ -720,7 +719,7 @@ void CHttpCookie::AppendAttribute(
     /* [in] */ const String& name,
     /* [in] */ const String& value)
 {
-    if (!value.IsNull() && (&builder != NULL)) {
+    if (!value.IsNull()) {
         builder += ";$";
         builder += name;
         builder += "=\"";

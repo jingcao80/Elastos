@@ -35,7 +35,7 @@ class FileHandler
 public:
     CAR_INTERFACE_DECL()
 
-    constructor();
+    CARAPI constructor();
 
     CARAPI OpenConnection(
         /* [in] */ IURL* u,

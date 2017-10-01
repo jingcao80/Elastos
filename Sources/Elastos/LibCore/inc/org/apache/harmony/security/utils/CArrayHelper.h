@@ -45,6 +45,8 @@ public:
         /* [in] */ ArrayOf<Byte> * pData,
         /* [out] */ String * pStr);
 
+    using Singleton::ToString;
+
     CARAPI ToString(
         /* [in] */ ArrayOf<Byte> * pArray,
         /* [in] */ const String& prefix,

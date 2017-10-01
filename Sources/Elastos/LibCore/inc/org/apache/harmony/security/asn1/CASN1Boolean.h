@@ -42,6 +42,8 @@ public:
     static CARAPI GetInstance(
         /* [out] */ IASN1Type** instance);
 
+    using ASN1Primitive::Decode;
+
     CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);

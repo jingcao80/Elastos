@@ -110,7 +110,7 @@ ECode HttpsURLConnection::GetPeerPrincipal(
     VALIDATE_NOT_NULL(principal)
 
     AutoPtr<ArrayOf<AutoPtr<ICertificate> > > certs;
-    FAIL_RETURN(GetServerCertificates((ArrayOf<ICertificate*>*)certs.Get()))
+    FAIL_RETURN(GetServerCertificates((ArrayOf<ICertificate*>**)&certs))
     if (certs == NULL || certs->GetLength() == 0 || (((*certs)[0]->Probe(EIID_IX509Certificate) == NULL))) {
         //throw new SSLPeerUnverifiedException("No server's end-entity certificate");
         return E_SSL_PEER_UNVERIFIED_EXCEPTION;
@@ -129,7 +129,7 @@ ECode HttpsURLConnection::GetLocalPrincipal(
     VALIDATE_NOT_NULL(principal)
 
     AutoPtr<ArrayOf<AutoPtr<ICertificate> > > certs;
-    FAIL_RETURN(GetLocalCertificates((ArrayOf<ICertificate*>*)certs.Get()))
+    FAIL_RETURN(GetLocalCertificates((ArrayOf<ICertificate*>**)&certs))
     if (certs == NULL || certs->GetLength() == 0 || (((*certs)[0]->Probe(EIID_IX509Certificate) == NULL))) {
         *principal = NULL;
         return NOERROR;

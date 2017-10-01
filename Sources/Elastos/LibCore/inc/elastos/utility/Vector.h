@@ -14,8 +14,8 @@
 // limitations under the License.
 //=========================================================================
 
-#ifndef __ELASTOS_UTILITY_UTILITYVECTOR_H__
-#define __ELASTOS_UTILITY_Vector_H__
+#ifndef __ELASTOS_UTILITY_VECTOR_H__
+#define __ELASTOS_UTILITY_VECTOR_H__
 
 #include "AbstractList.h"
 
@@ -315,4 +315,4 @@ private:
 } // namespace Utility
 } // namespace Elastos
 
-#endif // __ELASTOS_UTILITY_Vector_H__
+#endif // __ELASTOS_UTILITY_VECTOR_H__

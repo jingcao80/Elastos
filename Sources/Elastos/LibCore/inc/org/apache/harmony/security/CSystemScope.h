@@ -52,6 +52,8 @@ public:
     CARAPI Certificates(
         /* [out, callee] */ ArrayOf<ICertificate*>** ppCerts);
 
+    using Object::ToString;
+
     CARAPI ToString(
         /* [in] */ Boolean detailed,
         /* [out] */ String* pStr);

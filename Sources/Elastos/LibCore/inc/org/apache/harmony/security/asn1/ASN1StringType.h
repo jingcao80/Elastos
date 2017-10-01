@@ -54,6 +54,8 @@ public:
         /* [in] */ Int32 identifier,
         /* [ou] */ Boolean* result);
 
+    using ASN1Type::Decode;
+
     CARAPI Decode(
         /* [in] */ IBerInputStream* bis,
         /* [out] */ IInterface** object);

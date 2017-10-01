@@ -63,7 +63,7 @@ public:
             memcpy(sub, data, len);
             sub[len] = '\0';
             (*mDest) += sub;
-            delete sub;
+            delete[] sub;
         }
 
     }

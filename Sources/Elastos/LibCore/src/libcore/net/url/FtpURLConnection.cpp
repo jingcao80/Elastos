@@ -515,13 +515,7 @@ ECode FtpURLConnection::SetType()
 void FtpURLConnection::Write(
     /* [in] */ const String& command)
 {
-    AutoPtr<ArrayOf<Char32> > buf32 = command.GetChars();
-    Int32 len = buf32->GetLength();
-    AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(len);
-    for (Int32 i = 0; i < len; ++i) {
-        (*buffer)[i] = (*buf32)[i] && 0xFF;
-    }
-    mCtrlOutput->Write(buffer);
+    mCtrlOutput->Write(command.GetBytes(/*StandardCharsets.ISO_8859_1*/));
 }
 
 } // namespace Url

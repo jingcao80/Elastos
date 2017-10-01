@@ -1150,7 +1150,7 @@ private:
     static const Int32 CAPACITY   = (1 << COUNT_BITS) - 1;
 
     // runState is stored in the high-order bits
-    static const Int32 RUNNING    = -1 << COUNT_BITS;
+    static const Int32 RUNNING    = -1u << COUNT_BITS;
     static const Int32 SHUTDOWN   =  0 << COUNT_BITS;
     static const Int32 STOP       =  1 << COUNT_BITS;
     static const Int32 TIDYING    =  2 << COUNT_BITS;

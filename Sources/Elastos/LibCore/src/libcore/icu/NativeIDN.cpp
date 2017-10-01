@@ -76,6 +76,11 @@ static bool isLabelSeparator(const UChar ch) {
     }
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 ECode NativeIDN::ConvertImpl(
     /* [in] */ const String& s,
     /* [in] */ Int32 flags,
@@ -115,6 +120,10 @@ ECode NativeIDN::ConvertImpl(
     *result = s;
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 } // namespace ICU
 } // namespace Libcore

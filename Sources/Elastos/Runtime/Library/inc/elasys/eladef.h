@@ -131,7 +131,7 @@ EXTERN_C pthread_key_t *getTlSystemSlotBase();
 #endif // ELA_DBGOUT
 
 #if defined(_DEBUG) || defined(_ELASTOS_DEBUG)
-#define ELA_ASSERT_WITH_BLOCK(cond) for ( ; !(cond) ; assert(cond) )
+#define ELA_ASSERT_WITH_BLOCK(cond) for (; !(cond); assert(cond))
 #else
 #define ELA_ASSERT_WITH_BLOCK(cond) if (0)
 #endif // ELA_ASSERT_WITH_BLOCK

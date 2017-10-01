@@ -79,6 +79,8 @@ public:
         /* [in] */ IURL* url,
         /* [out] */ String* s);
 
+    using Object::Equals;
+
     CARAPI Equals(
         /* [in] */ IURL* url1,
         /* [in] */ IURL* url2,
@@ -90,6 +92,8 @@ public:
     CARAPI GetHostAddress(
         /* [in] */ IURL* url,
         /* [out] */ IInetAddress** hostAddress);
+
+    using Object::GetHashCode;
 
     CARAPI GetHashCode(
         /* [in] */ IURL* url,

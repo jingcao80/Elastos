@@ -61,6 +61,11 @@ ECode ThreadSafeClientConnManager::MyClientConnectionRequest::AbortRequest()
     return mRequest->AbortRequest();
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 ECode ThreadSafeClientConnManager::MyClientConnectionRequest::GetConnection(
     /* [in] */ Int64 timeout,
     /* [in] */ ITimeUnit* tunit,
@@ -104,6 +109,10 @@ ECode ThreadSafeClientConnManager::MyClientConnectionRequest::GetConnection(
     REFCOUNT_ADD(*connection)
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 
 //==============================================================================
@@ -169,6 +178,11 @@ ECode ThreadSafeClientConnManager::RequestConnection(
     REFCOUNT_ADD(*request)
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
 
 ECode ThreadSafeClientConnManager::ReleaseConnection(
     /* [in] */ IManagedClientConnection* conn,
@@ -242,6 +256,10 @@ ECode ThreadSafeClientConnManager::ReleaseConnection(
 
     return NOERROR;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 ECode ThreadSafeClientConnManager::Shutdown()
 {

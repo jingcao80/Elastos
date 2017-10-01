@@ -100,7 +100,7 @@ DateFormat::Field::Field()
     : mCalendarField(-1)
 { }
 
-DateFormat::Field::constructor(
+ECode DateFormat::Field::constructor(
     /* [in] */ const String& fieldName,
     /* [in] */ Int32 calendarField)
 {

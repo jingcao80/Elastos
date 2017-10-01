@@ -28,8 +28,6 @@ class ${name} :
     public I${ClassNameOfClassObj(name)}ClassObject
 {
 public:
-    ${name}(): m_cRef(0) {}
-
     CARAPI_(PInterface) Probe(
         /* [in] */ _ELASTOS REIID riid);
 
@@ -80,8 +78,6 @@ $END DO ;; all methods
 $IF type is "generic"
 $NewHeaderOfGenericClassObjects(class)
 $END IF
-private:
-    Int32 m_cRef;
 };
 
 ${ClassNamespaceEnd(class)}

@@ -39,7 +39,7 @@ public:
      *
      * @return the default ssl socket factory instance.
      */
-    GetDefault(
+    ECode GetDefault(
         /* [out] */ ISocketFactory** factory);
 };
 

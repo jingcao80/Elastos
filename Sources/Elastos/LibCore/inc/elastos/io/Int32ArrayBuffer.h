@@ -87,6 +87,8 @@ public:
     CARAPI ProtectedHasArray(
         /* [out] */ Boolean* hasArray);
 
+    using Int32Buffer::Put;
+
     CARAPI Put(
         /* [in] */ Int32 d);
 

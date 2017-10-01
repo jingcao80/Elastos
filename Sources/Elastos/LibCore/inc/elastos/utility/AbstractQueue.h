@@ -78,6 +78,8 @@ public:
         /* [in] */ IInterface* obj,
         /* [out] */ Boolean* result);
 
+    using AbstractCollection::Remove;
+
     /**
      * Retrieves and removes the head of this queue.  This method differs
      * from {@link #poll poll} only in that it throws an exception if this

@@ -56,7 +56,7 @@ ECode CAttributeTypeAndValue::ASN1TypeCls::constructor(
     return ASN1Type::constructor(tag);
 }
 
-CAttributeTypeAndValue::ASN1TypeCls::CheckTag(
+ECode CAttributeTypeAndValue::ASN1TypeCls::CheckTag(
     /* [in] */ Int32 tag,
     /* [out] */ Boolean* result)
 {

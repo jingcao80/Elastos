@@ -71,6 +71,11 @@ Int32 RouteSpecificPool::GetEntryCount()
     return mNumEntries;
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 AutoPtr<BasicPoolEntry> RouteSpecificPool::AllocEntry(
     /* [in] */ IObject* state)
 {
@@ -110,6 +115,10 @@ AutoPtr<BasicPoolEntry> RouteSpecificPool::AllocEntry(
     }
     return NULL;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 ECode RouteSpecificPool::FreeEntry(
     /* [in] */ BasicPoolEntry* entry)

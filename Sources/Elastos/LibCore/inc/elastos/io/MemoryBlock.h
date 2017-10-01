@@ -181,6 +181,8 @@ public:
 
     CARAPI_(Int64) ToInt64();
 
+    using Object::ToString;
+
     CARAPI_(String) ToString();
 
     CARAPI_(Int64) GetSize();
@@ -196,6 +198,7 @@ public:
     {
         return reinterpret_cast<Byte *>(mAddress);
     }
+
 protected:
     MemoryBlock(
         /* [in] */ Int64 address,

@@ -24,6 +24,7 @@ using Elastos::Core::Object;
 using Elastos::IO::IInputStream;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IList;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Security {
@@ -151,7 +152,7 @@ public:
      *             if the provider does not implement this method.
      */
     virtual CARAPI EngineGenerateCertPath(
-        /* [in] */ IList** certificates,
+        /* [in] */ IList* certificates,
         /* [out] */ ICertPath** certPath);
 
     /**
@@ -162,7 +163,7 @@ public:
      *         Strings).
      */
      virtual CARAPI EngineGetCertPathEncodings(
-        /* [out] */ ICertPath** IIterator);
+        /* [out] */ IIterator** it);
 };
 
 } // end Cert

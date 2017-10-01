@@ -74,6 +74,8 @@ public:
      */
     static CARAPI_(AutoPtr<IdentityScope>) GetSystemScope();
 
+    using IIdentityScope::GetIdentity;
+
     /**
      * Returns the {@code Identity} with the name of the specified principal or
      * {@code null} if no {@code Identity} with the name of the specified
@@ -88,10 +90,6 @@ public:
     CARAPI GetIdentity(
         /* [in] */ IPrincipal* principal,
         /* [out] */ IIdentity** result);
-
-    virtual CARAPI GetIdentity(
-        /* [in] */ String name,
-        /* [out] */ IIdentity** identity) = 0;
 
     /**
      * Returns a string containing a concise, human-readable description of this

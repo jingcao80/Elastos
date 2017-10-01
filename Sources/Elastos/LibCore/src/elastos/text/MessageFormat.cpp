@@ -188,7 +188,7 @@ ECode MessageFormat::Equals(
     /* [out] */ Boolean * result)
 {
     VALIDATE_NOT_NULL(result)
-    result = FALSE;
+    *result = FALSE;
 
     IMessageFormat* mfobj = IMessageFormat::Probe(object);
     if (mfobj == NULL) {

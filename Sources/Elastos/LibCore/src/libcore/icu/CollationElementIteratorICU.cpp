@@ -24,7 +24,7 @@ namespace ICU {
 extern "C" const _ELASTOS ClassID ECLSID_CollationElementIteratorICU = {
     { 0x015e3ac6, 0x25b8, 0x4982, { 0xa2, 0xb9, 0x24, 0x2f, 0x8f, 0xf1, 0x15, 0xde } },
     (char *)c_pElastos_CoreLibraryUunm,
-    0xf6f1637e };
+    0xf7796c27 };
 
 const Int32 CollationElementIteratorICU::PRIMARY_ORDER_MASK_ = 0xffff0000;
 const Int32 CollationElementIteratorICU::SECONDARY_ORDER_MASK_ = 0x0000ff00;

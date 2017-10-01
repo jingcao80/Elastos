@@ -38,6 +38,8 @@ CarClass(CAllowAllHostnameVerifier)
 public:
     CAR_OBJECT_DECL()
 
+    using AbstractVerifier::Verify;
+
     CARAPI Verify(
         /* [in] */ const String& host,
         /* [in] */ ArrayOf<String>* cns,

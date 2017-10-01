@@ -275,7 +275,8 @@ AutoPtr<BigInt> CBigInteger::GetBigInt()
         return mBigInt;
     }
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mNativeIsValid) {
             return mBigInt;
         }
@@ -287,7 +288,6 @@ AutoPtr<BigInt> CBigInteger::GetBigInt()
         SetBigInt(bigInt);
         return bigInt;
     }
-    return NOERROR;
 }
 
 void CBigInteger::SetJavaRepresentation(

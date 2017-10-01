@@ -59,6 +59,8 @@ public:
     virtual CARAPI GetSupportedCipherSuites(
         /* [out, callee] */ ArrayOf<String>** suites) = 0;
 
+    using SocketFactory::CreateSocket;
+
     /**
      * Creates an {@code SSLSocket} over the specified socket that is connected
      * to the specified host at the specified port.

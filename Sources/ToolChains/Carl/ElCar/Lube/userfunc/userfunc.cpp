@@ -2670,8 +2670,8 @@ void OutputInterface(InterfaceDirEntry* pItfDir, CLSModule* pModule)
         fprintf(pFile, "\n");
         fprintf(pFile, "#include <%s.h>\n", pModule->mName);
         fprintf(pFile, "\n");
-        fprintf(pFile, "EXTERN_C ELAPI _Impl_AcquireCallbackHandler(PInterface pServerObj, _ELASTOS REIID iid, PInterface *ppHandler);\n");
-        fprintf(pFile, "EXTERN_C ELAPI _Impl_CheckClsId(PInterface pServerObj, const _ELASTOS ClassID* pClassid, PInterface *ppServerObj);\n");
+        fprintf(pFile, "ELAPI _Impl_AcquireCallbackHandler(PInterface pServerObj, _ELASTOS REIID iid, PInterface *ppHandler);\n");
+        fprintf(pFile, "ELAPI _Impl_CheckClsId(PInterface pServerObj, const _ELASTOS ClassID* pClassid, PInterface *ppServerObj);\n");
         fprintf(pFile, "\n");
     }
     else {
@@ -2909,7 +2909,7 @@ void OutputClass(ClassDirEntry* pClsDir, CLSModule* pModule)
         fprintf(pFile, "#ifndef __%s__", buffer);
         fprintf(pFile, "\n");
         fprintf(pFile, "#include <%s.h>\n", pModule->mName);
-        fprintf(pFile, "EXTERN_C ELAPI _Impl_CheckClsId(PInterface pServerObj, const _ELASTOS ClassID* pClassid, PInterface *ppServerObj);\n");
+        fprintf(pFile, "ELAPI _Impl_CheckClsId(PInterface pServerObj, const _ELASTOS ClassID* pClassid, PInterface *ppServerObj);\n");
         fprintf(pFile, "\n");
     }
     else {

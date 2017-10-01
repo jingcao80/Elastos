@@ -47,10 +47,14 @@ public:
     CARAPI SetSeed(
         /* [in] */ Int64 seed);
 
+    using Random::NextInt32;
+
     CARAPI NextInt32(
         /* [in] */ Int32 least,
         /* [in] */ Int32 bound,
         /* [out] */ Int32* value);
+
+    using Random::NextInt64;
 
     CARAPI NextInt64(
         /* [in] */ Int64 n,
@@ -60,6 +64,8 @@ public:
         /* [in] */ Int64 least,
         /* [in] */ Int64 bound,
         /* [out] */ Int64* value);
+
+    using Random::NextDouble;
 
     CARAPI NextDouble(
         /* [in] */ Double n,

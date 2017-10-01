@@ -37,6 +37,11 @@ BasicPooledConnAdapter::BasicPooledConnAdapter(
     MarkReusable();
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+#endif
+
 PInterface BasicPooledConnAdapter::Probe(
     /* [in] */ REIID riid)
 {
@@ -47,6 +52,10 @@ PInterface BasicPooledConnAdapter::Probe(
         return AbstractPooledConnAdapter::Probe(riid);
     }
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 AutoPtr<IClientConnectionManager> BasicPooledConnAdapter::GetManager()
 {

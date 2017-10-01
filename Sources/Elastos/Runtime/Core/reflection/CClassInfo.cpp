@@ -35,6 +35,7 @@ CClassInfo::CClassInfo(
     mCBMethodCount = 0;
     mCBIFCount = 0;
     mIFCount = 0;
+    mCtorCount = 0;
 
     mBase = mClsModule->mBase;
     mDesc = adjustClassDescAddr(mBase, mClassDirEntry->mDesc);
@@ -777,7 +778,7 @@ ECode CClassInfo::HasInterfaceInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    for (Int32 i = 0; i < mIFCount; i++) {
+    for (UInt32 i = 0; i < mIFCount; i++) {
         AutoPtr<IInterfaceInfo> obj;
         mInterfaceList->AcquireObjByIndex(i, (IInterface**)&obj);
         IInterfaceInfo* itfInfo = IInterfaceInfo::Probe(obj);

@@ -113,6 +113,8 @@ public:
     CARAPI SetNamespaceAware(
         /* [in] */ Boolean value);
 
+    using DocumentBuilder::Parse;
+
 private:
     /**
      * Implements the whole parsing of the XML document. The XML pull parser is

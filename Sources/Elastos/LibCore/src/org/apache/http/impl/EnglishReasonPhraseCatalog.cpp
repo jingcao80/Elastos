@@ -128,7 +128,7 @@ AutoPtr< ArrayOf<IArrayOf*> > EnglishReasonPhraseCatalog::InitReasonPhrases()
     SetReason(IHttpStatus::SC_INSUFFICIENT_STORAGE, String("Insufficient Storage"));
     SetReason(IHttpStatus::SC_FAILED_DEPENDENCY, String("Failed Dependency"));
 
-    return NOERROR;
+    return phrases;
 }
 
 ECode EnglishReasonPhraseCatalog::GetReason(

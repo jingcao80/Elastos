@@ -34,7 +34,7 @@ ECode CDatabaseX::Exec(
     /* [in] */ ICallback * cb)
 {
     ECode ec = NOERROR;
-    ec = Exec(sql, cb);
+    ec = Database::Exec(sql, cb);
     mLock.Lock();
     mLock.NotifyAll();
     mLock.Unlock();
@@ -47,7 +47,7 @@ ECode CDatabaseX::Exec(
     /* [in] */ ArrayOf<String> * args)
 {
     ECode ec = NOERROR;
-    ec = Exec(sql, cb, args);
+    ec = Database::Exec(sql, cb, args);
     mLock.Lock();
     mLock.NotifyAll();
     mLock.Unlock();
@@ -60,7 +60,7 @@ ECode CDatabaseX::GetTable(
     /* [out] */ ITableResult ** tbl)
 {
     ECode ec = NOERROR;
-    ec = GetTable(sql, args, tbl);
+    ec = Database::GetTable(sql, args, tbl);
     mLock.Lock();
     mLock.NotifyAll();
     mLock.Unlock();
@@ -73,7 +73,7 @@ ECode CDatabaseX::GetTable(
     /* [in] */ ITableResult * tbl)
 {
     ECode ec = NOERROR;
-    ec = GetTable(sql, args, tbl);
+    ec = Database::GetTable(sql, args, tbl);
     mLock.Lock();
     mLock.NotifyAll();
     mLock.Unlock();

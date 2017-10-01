@@ -62,11 +62,14 @@ namespace Concurrent {
 //====================================================================
 CAR_INTERFACE_IMPL(CForkJoinPool::DefaultForkJoinWorkerThreadFactory, Object, IForkJoinPoolForkJoinWorkerThreadFactory)
 
-AutoPtr<IForkJoinWorkerThread> CForkJoinPool::DefaultForkJoinWorkerThreadFactory::NewThread(
-    /* [in] */ IForkJoinPool* pool)
+ECode CForkJoinPool::DefaultForkJoinWorkerThreadFactory::NewThread(
+    /* [in] */ IForkJoinPool* pool,
+    /* [out] */ IForkJoinWorkerThread** thread)
 {
     AutoPtr<IForkJoinWorkerThread> p = new ForkJoinWorkerThread(pool);
-   return p;
+    *thread = p;
+    REFCOUNT_ADD(*thread);
+    return NOERROR;
 }
 
 //====================================================================

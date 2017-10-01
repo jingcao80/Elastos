@@ -50,8 +50,9 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        CARAPI_(AutoPtr<IForkJoinWorkerThread>) NewThread(
-            /* [in] */ IForkJoinPool* pool);
+        CARAPI NewThread(
+            /* [in] */ IForkJoinPool* pool,
+            /* [out] */ IForkJoinWorkerThread** thread);
     };
 
     /**
@@ -916,7 +917,7 @@ private:
      * any security checks or parameter validation.  Invoked directly by
      * makeCommonPool.
      */
-    ForkJoinPool(
+    CARAPI_(void) ForkJoinPool(
         /* [in] */ Int32 parallelism,
         /* [in] */ IForkJoinPoolForkJoinWorkerThreadFactory* factory,
         /* [in] */ IThreadUncaughtExceptionHandler* handler,

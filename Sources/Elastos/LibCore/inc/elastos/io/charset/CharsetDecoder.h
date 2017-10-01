@@ -52,7 +52,7 @@ public:
      *             if <code>averageCharsPerByte</code> or
      *             <code>maxCharsPerByte</code> is negative.
      */
-    constructor(
+    CARAPI constructor(
         /* [in] */ ICharset* charset,
         /* [in] */ Float averageCharsPerByte,
         /* [in] */ Float maxCharsPerByte);
