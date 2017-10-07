@@ -35,7 +35,7 @@ SOURCES += CCallbackContext.cpp
 SOURCES += CCallbackParcel.cpp
 
 ifeq "$(XDK_TARGET_CPU)" "arm"
-ifneq "$(XDK_COMPILER)" "gnu"
+ifeq "$(XDK_COMPILER)" "msvc"
 SOURCES += invokeCallback_ievc.asm
 else
 SOURCES += invokeCallback_gnuc.S

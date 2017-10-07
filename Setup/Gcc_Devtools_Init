@@ -1,3 +1,0 @@
-source ~/.bashrc
-
-source ~/ElastosRDK4_2_2/Setup/SetEnv.sh gcc_devtools

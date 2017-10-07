@@ -1,6 +1,6 @@
 ##########################################################################
 #
-# File:    $XDK/DevKit/misc/makerules_gnu.mk
+# File:    $XDK_ROOT/Build/Makefiles/makerules.mk
 # Purpose: Building rules for GCC compiler
 #
 
@@ -112,8 +112,6 @@ endif
 		$(CC) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
 	fi
 	$(CC) $(C_DEFINES) -c -fno-builtin -o $*.def __$*_exp.c
-#	$(CC) $(C_DEFINES) -fPIC -c -fno-builtin -o __$*_dllmain.o __$*_dllmain.c
-#	$(CC) $(C_DEFINES) -fPIC -c -fno-builtin -o $*.def __$*_exp.c
 	touch $*.exp
 endif
 	touch $(TARGET_NAME).lib
@@ -251,10 +249,10 @@ ifeq "$(DEBUG_INFO)" "1"
 	$(LD) $(ECX_CRT_BEGIN) $(ECX_FLAGS) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map \
 		$(SEARCH_LIB) -o $(TARGET_DBG_INFO_PATH)/$(TARGET_NAME) \
 		$(PASS2LD)--start-group $(OBJECTS) $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) $(RESSECTION) $(PASS2LD)--end-group $(ECX_CRT_END)
+endif
 
-endif
-endif
-endif
+endif # ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+endif # ifneq "$(USE_STDLIB)" ""
 # endif (ELF PE)
 	touch $@
 
@@ -291,10 +289,10 @@ ifeq "$(DEBUG_INFO)" "1"
 	$(LD) $(EXE_CRT_BEGIN) $(EXE_FLAGS) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map \
 		$(SEARCH_LIB) -o $(TARGET_DBG_INFO_PATH)/$(TARGET_NAME) \
 		$(PASS2LD)--start-group $(OBJECTS) $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) $(RESSECTION) $(PASS2LD)--end-group $(EXE_CRT_END)
+endif
 
-endif
-endif
-endif
+endif # ifeq "$(XDK_TARGET_PLATFORM)" "win32"
+endif # ifneq "$(USE_STDLIB)" ""
 # endif (ELF PE)
 	touch $@
 
@@ -317,7 +315,7 @@ $(TARGET_NAME).eco: $(RESOURCES_OBJECTS) $(OBJECTS) $(filter-out -l%,$(LIBRARIES
 # else PE(for win32 .zener. linux)
 ifneq "$(filter %.car,$(SOURCES))" ""
 ifneq "$(TARGET_NAME).car" "$(filter %.car,$(SOURCES))"
-	$(error The target Eco's Name must be the same as Car Filename)
+	$(error The target Eco\'s Name must be the same as Car Filename)
 endif
 endif
 
@@ -351,7 +349,7 @@ else
 	$(LD) $(DLL_FLAGS) $(DLLTOOL_FLAGS) $(DLL_CRT_BEGIN) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map $(SEARCH_LIB) -o  $(XDK_TARGETS)/$@ \
 		$(PASS2LD)--strip-all $(PASS2LD)--start-group $(OBJECTS:exp=def) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
 		$(RESSECTION) $(DLL_ENTRY_OBJECT_FILE) $(PASS2LD)--end-group $(DLL_CRT_END)
-endif
+endif # "$(DEBUG_INFO)" "1"
 
 ifneq "$(APPPACK)" ""
 	if [ ! -d  $(XDK_TARGETS)/$(TARGET_NAME) ]; then $(MKDIR) $(XDK_TARGETS)/$(TARGET_NAME); fi
@@ -397,7 +395,7 @@ endif
 	java -jar $(XDK_SIGNAPK_JAR) $(XDK_PRIVATE_CERTIFICATE) $(XDK_PRIVATE_PRIVATE_KEY) $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk.unsigned $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk.signed
 	mv $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk.signed $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk
 	rm -rf $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk.unsigned
-endif
+endif # ifneq "$(LIBRESOURCES)" ""
 
 	if [ -f $(XDK_USER_LIB)/$(TARGET_NAME).lib ]; then  \
 	    touch $(XDK_USER_LIB)/$(TARGET_NAME).lib; \
@@ -409,7 +407,7 @@ $(TARGET_NAME).node: $(RESOURCES_OBJECTS) $(OBJECTS) $(filter-out -l%,$(LIBRARIE
 # else PE(for win32 .zener. linux)
 ifneq "$(filter %.car,$(SOURCES))" ""
 ifneq "$(TARGET_NAME).car" "$(filter %.car,$(SOURCES))"
-	$(error The target Eco's Name must be the same as Car Filename)
+	$(error The target Eco\'s Name must be the same as Car Filename)
 endif
 endif
 
@@ -443,7 +441,7 @@ else
 	$(LD) $(DLL_FLAGS) $(DLLTOOL_FLAGS) $(DLL_CRT_BEGIN) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map $(SEARCH_LIB) -o  $(XDK_TARGETS)/$@ \
 		$(PASS2LD)--strip-all $(PASS2LD)--start-group $(OBJECTS:exp=def) $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
 		$(DLL_ENTRY_OBJECT_FILE) $(PASS2LD)--end-group $(DLL_CRT_END)
-endif
+endif # ifeq "$(DEBUG_INFO)" "1"
 
 $(TARGET_NAME).lib: $(OBJECTS) $(ELASTOS_LIBS) $(LIBRARIES) $(MAKEDIR)/sources
 	@echo Packing $@ ...

@@ -1,0 +1,3 @@
+source ~/.bashrc
+
+source ELASTOS_ROOT_PATH/Setup/SetEnv.sh elastos_linux_x86

@@ -1,0 +1,3 @@
+source ~/.bashrc
+
+source /home/jingcao/Workspace2/Elastos5_on_A8/Setup/SetEnv.sh elastos_android_arm

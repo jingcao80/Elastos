@@ -1,0 +1,14 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=Elastos for Android(ARM)
+Comment=Elastos Development Environment
+TryExec=gnome-terminal
+Exec=gnome-terminal -e 'bash --init-file ELASTOS_ROOT_PATH/Setup/elastos_android_arm_init'
+Icon=ELASTOS_ROOT_PATH/Setup/Shortcuts/elastos_android_arm.ico
+#Icon=utilities-terminal
+Type=Application
+Categories=TerminalEmulator
+StartupNotify=true
+#OnlyShowIn=GNOME;
+X-Ubuntu-Gettext-Domain=gnome-terminal

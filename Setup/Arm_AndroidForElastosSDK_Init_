@@ -1,3 +1,0 @@
-source ~/.bashrc
-
-source ~/ElastosSDK/Setup/SetEnv.sh sdk arm_android

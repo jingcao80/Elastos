@@ -425,7 +425,7 @@ build() {
         return
     fi
 
-    local mirror_path="$XDK_USER_OBJ/$XDK_BUILD_KIND/mirror/"
+    local mirror_path="$XDK_USER_OBJ/mirror/"
     mirror_path+="${src_path#$sources_path/}"
     [[ -d "$mirror_path" ]] || mkdir -p "$mirror_path"
     cd "$mirror_path"
@@ -557,8 +557,8 @@ para_emake_init() {
 
     setup_path="$XDK_ROOT/Setup"
     if [[ -n $opt_export ]]; then
-        if [[ ! -f "$setup_path/Config/arm_android.sh" ]]; then
-            echo Unsupported Platform: arm_android
+        if [[ ! -f "$setup_path/Config/elastos_android_arm.sh" ]]; then
+            echo Unsupported Platform: elastos_android_arm
             exit 1
         fi
     else
@@ -568,12 +568,12 @@ para_emake_init() {
         fi
     fi
 
-    targets_path="$XDK_ROOT/Targets"
+    targets_path="$XDK_ROOT/Out"
 
     pushd "$setup_path" >/dev/null
     set -o allexport
     if [[ -n "$opt_export" ]]; then
-        source $XDK_ROOT/Setup/SetEnv.sh arm_android
+        source $XDK_ROOT/Setup/SetEnv.sh elastos_android_arm
     else
         source $XDK_ROOT/Setup/SetEnv.sh $target_desc
     fi

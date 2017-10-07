@@ -78,40 +78,34 @@ change_version ()
 
 reset_env ()
 {
-   export PATH=$XDK_GENERAL_PATH
+    export PATH=$XDK_GENERAL_PATH
 
-   unset DEBUG_INFO
-   if [ ! "$XDK_VERSION" == "rls" ]; then
-       export DEBUG_INFO=1
-   fi
+    unset DEBUG_INFO
+    if [ ! "$XDK_VERSION" == "rls" ]; then
+        export DEBUG_INFO=1
+    fi
 
-   # Set target object environment variables
-   if [ -z "$XDK_TARGET_PRODUCT" ]; then
-       export XDK_BUILD_KIND=$XDK_TARGET_CPU.$XDK_COMPILER.$XDK_TARGET_PLATFORM.$XDK_VERSION
-   else
-       export XDK_BUILD_KIND=$XDK_TARGET_CPU.$XDK_COMPILER.$XDK_TARGET_PLATFORM.$XDK_TARGET_PRODUCT.$XDK_VERSION
-   fi
-   export XDK_USER_OBJ=$XDK_TARGETS_PATH/obj/$XDK_BUILD_ENV
-   export XDK_USER_INC=$XDK_USER_OBJ/$XDK_BUILD_KIND/inc
-   export XDK_USER_LIB=$XDK_USER_OBJ/$XDK_BUILD_KIND/lib
-   export XDK_TARGETS=$XDK_TARGETS_PATH/$XDK_BUILD_ENV/$XDK_BUILD_KIND/bin
-   export TARGET_PACK_PATH=$XDK_TARGETS/package
+    # Set target object environment variables
+    if [ -z "$XDK_TARGET_PRODUCT" ]; then
+        export XDK_BUILD_KIND=$XDK_TARGET_CPU.$XDK_COMPILER.$XDK_TARGET_PLATFORM.$XDK_VERSION
+    else
+        export XDK_BUILD_KIND=$XDK_TARGET_CPU.$XDK_COMPILER.$XDK_TARGET_PLATFORM.$XDK_TARGET_PRODUCT.$XDK_VERSION
+    fi
+    export XDK_USER_OBJ=$XDK_TARGETS_PATH/$XDK_BUILD_ENV/$XDK_BUILD_KIND/obj
+    export XDK_USER_INC=$XDK_USER_OBJ/inc
+    export XDK_USER_LIB=$XDK_USER_OBJ/lib
+    export XDK_TARGETS=$XDK_TARGETS_PATH/$XDK_BUILD_ENV/$XDK_BUILD_KIND/bin
+    export TARGET_PACK_PATH=$XDK_TARGETS/packages
 
-   export PATH=$PATH:$XDK_TARGETS:
+    export PATH=$PATH:$XDK_TARGETS:
 
-#   if [ -d $XDK_DEFAULT_PATH ]; then
-#      cd $XDK_DEFAULT_PATH
-#   else
-#      cd /d $XDK_SOURCE_PATH
-#      export XDK_DEFAULT_PATH=$XDK_SOURCE_PATH
-#   fi
-   #set title
-   if [ -z "$XDK_TARGET_PRODUCT" ]; then
-       local TITLE=$XDK_TARGET_PLATFORM-$XDK_TARGET_CPU.$XDK_COMPILER-$XDK_VERSION
-   else
-       local TITLE=$XDK_TARGET_PLATFORM-$XDK_TARGET_CPU.$XDK_COMPILER-$XDK_TARGET_PRODUCT-$XDK_VERSION
-   fi
-   export PS1="\[\e]0;$TITLE \w\a\]${debian_chroot:+($debian_chroot)}\w\$"
+    #set title
+    if [ -z "$XDK_TARGET_PRODUCT" ]; then
+        local TITLE=$XDK_TARGET_PLATFORM-$XDK_TARGET_CPU.$XDK_COMPILER-$XDK_VERSION
+    else
+        local TITLE=$XDK_TARGET_PLATFORM-$XDK_TARGET_CPU.$XDK_COMPILER-$XDK_TARGET_PRODUCT-$XDK_VERSION
+    fi
+    export PS1="\[\e]0;$TITLE \w\a\]${debian_chroot:+($debian_chroot)}\w\$"
 }
 
 makedir ()
@@ -331,7 +325,7 @@ function eldrop ()
             while read -u3 TARGET TARGET_TYPE;
             do
                 if [ "`expr index "$TARGET" ";"`" == "0" ]; then
-                    if [ "$XDK_BUILD_ENV" == "rdk" ]; then
+                    if [ "$XDK_BUILD_ENV" == "target" ]; then
                         if [ "$TARGET_TYPE" == "dir" ]; then
                             elcopy $XDK_TARGETS/$TARGET $TARGET
                         else
@@ -374,12 +368,10 @@ function pd ()
             echo "usage: pd DIR     (same as PUSHD DIR)"
             echo "       pd         (same as POPD)"
             echo "       pd m       (PUSHD to mirror directory)"
-#            echo "       pd p       (PUSHD to android package directory or msvc win32 app directory)"
             echo "       pd @       (PUSHD to target directory)"
             echo "       pd inc     (PUSHD to compiled INC directory)"
             echo "       pd lib     (PUSHD to compiled LIB directory)"
             echo "       pd p       (PUSHD to compiled EPK directory)"
-#            echo "       pd cls     (PUSHD to compiled CLS directory)"
         ;;
         "")
             popd
@@ -398,24 +390,6 @@ function pd ()
             local XDK_EMAKE_DIR=${PWD/$XDK_SOURCE_PATH/}
             pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/mirror$XDK_EMAKE_DIR 1>/dev/null
         ;;
-#        "p")
-#            PROJECT_DIR=$PWD
-#            temp_dir=`dirname $PROJECT_DIR`
-#            XDK_EMAKE_DIR=${PROJECT_DIR/$temp_dir/}
-#            if [ "$XDK_TARGET_PLATFORM" = "win32" ]; then
-#                if [ -d $XDK_TARGETS$XDK_EMAKE_DIR ]; then
-#                    pushd $XDK_TARGETS$XDK_EMAKE_DIR
-#                else
-#                    pushd $XDK_TARGETS
-#                fi
-#            elif [ "$XDK_TARGET_PLATFORM" = "openkode" ]; then
-#                if [ -d $XDK_USER_OBJ/$XDK_BUILD_KIND/package$XDK_EMAKE_DIR ]; then
-#                    pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/package$XDK_EMAKE_DIR
-#                else
-#                    pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/package
-#                fi
-#            fi
-#        ;;
         *)
             pushd $1 1>/dev/null
         ;;
@@ -428,11 +402,9 @@ function chv ()
         "-h")
             echo "Version:"
             echo "  dbg   "
-#            echo "  opt   "
-#            echo "  pre   "
             echo "  rls   "
         ;;
-        "dbg" | "opt" | "pre" | "rls")
+        "dbg" | "rls")
             change_version $1
         ;;
         *)
@@ -490,7 +462,6 @@ emu_arm_android_linux ()
                 local QEMU_FLAG="-avd $QEMU_NAME"
                 local QEMU_FLAG="$QEMU_FLAG -memory 1024"
                 local QEMU_FLAG="$QEMU_FLAG -show-kernel"
-#                local QEMU_FLAG="$QEMU_FLAG -scale 0.8"
                 local QEMU_FLAG="$QEMU_FLAG -skin 1200x720 "
                 local QEMU_FLAG="$QEMU_FLAG -dynamic-skin"
                 if [ "$TEST_FLAG" == "" ]; then
@@ -573,22 +544,14 @@ function emake ()
                 export XDK_MAKE='make'
             fi
 
-            export XDK_MAKEFILE=$XDK_BUILD_PATH/Makefiles/makefile_$XDK_BUILD_ENV.mk
+            export XDK_MAKEFILE=$XDK_BUILD_PATH/Makefiles/main.mk
 
             export LD_LIBRARY_PATH=$XDK_BUILD_PATH/Tools
 
             if [ ! "${1%.car}" == "$1" ]; then
                 carc -i -c ${1%.car}.cls $1
                 if [ "$?" == "0" ]; then
-                    if [ "$XDK_PACKAGE" == "sdk" ]; then
-                       if [ -z "$INTERNAL_SDK" ]; then
-                         lube -C ${1%.car}.cls -s -T foreground
-                       else
-                         lube -C ${1%.car}.cls -T foreground
-                       fi
-                    else
-                        lube -C ${1%.car}.cls -T foreground
-                    fi
+                    lube -C ${1%.car}.cls -T foreground
                 fi
                 if [ -f ${1%.car}.cls ]; then
                     rm -f ${1%.car}.cls

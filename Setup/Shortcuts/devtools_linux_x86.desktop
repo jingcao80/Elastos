@@ -1,0 +1,14 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=Elastos Devtools for Linux(x86)
+Comment=Elastos Devtools Development Environment
+TryExec=gnome-terminal
+Exec=gnome-terminal -e 'bash --init-file ELASTOS_ROOT_PATH/Setup/devtools_linux_x86_init'
+Icon=ELASTOS_ROOT_PATH/Setup/Shortcuts/devtools_linux_x86.ico
+#Icon=utilities-terminal
+Type=Application
+Categories=TerminalEmulator
+StartupNotify=true
+#OnlyShowIn=GNOME;
+X-Ubuntu-Gettext-Domain=gnome-terminal

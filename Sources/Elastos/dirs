@@ -16,7 +16,8 @@
 
 DIRS = Runtime
 DIRS += LibCore
+DIRS += External/conscrypt
 DIRS += Frameworks/Droid
 DIRS += Packages
-DIRS += External
+DIRS += External/alljoyn
 #DIRS += Samples

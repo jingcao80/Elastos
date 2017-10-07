@@ -28,7 +28,7 @@ INCLUDES = $(MAKEDIR)/../inc;
 INCLUDES += $(INCLUDESTEMP);
 
 ifeq "$(XDK_TARGET_CPU)" "arm"
-ifneq "$(XDK_COMPILER)" "gnu"
+ifeq "$(XDK_COMPILER)" "msvc"
 SOURCES = invoke_ievc.asm
 else
 SOURCES = invoke_gnuc.S

@@ -17,7 +17,7 @@
 #include "CCallbackContext.h"
 #include "CCallbackParcel.h"
 #include <pthread.h>
-#if !defined(_android) && !defined(_linux)
+#if !defined(_linux)
 #include <e_time.h>
 #endif
 #include <errno.h>

@@ -1,7 +1,7 @@
 
 ##########################################################################
 #
-# File:     $XDK/DevKit/misc/makefile.rdk
+# File:     $XDK_ROOT/Build/Makefiles/main.mk
 # Purpose:  Generic makefile (GNU version) for most Elastos projects
 # Usage:    emake [ all | clean | clobber ]
 #
@@ -25,7 +25,7 @@
 #                  environment, ignoring errors
 #
 # Useful variables to set:
-#   XDK_SOURCE_PATH  -- Elastos project root, set by $/DevKit/misc/setenv.bat
+#   XDK_SOURCE_PATH  -- Elastos project root, set by $XDK_ROOT/Setup/SetEnv.sh
 #   XDK_USER_OBJ     -- Tree for generated files
 #   EXTERN_SDK       -- Hosting OS SDK, e.g., inc, lib, bin, etc.
 #   EXTERN_BIN       -- Hosting OS tools, eg, VS60 compliler, linker etc.
@@ -44,7 +44,7 @@ MAKE_TARGETS= all clean
 # Build environment (where to find: src, inc, lib, tools, etc.)
 #
 ifndef XDK_ROOT
-$(error !!You must set XDK_ROOT environment variable first (see setenv.bat)!!)
+$(error !!You must set XDK_ROOT environment variable first (see SetEnv.sh)!!)
 endif
 
 ifndef XDK_MAKEFILE_PATH
@@ -67,26 +67,16 @@ endif
 #EXTERN_LIB=
 #endif
 
-ifneq "$(XDK_TARGET_PRODUCT)" "devtools"
+ifeq "$(XDK_TARGET_PRODUCT)" "elastos"
 ifeq "$(XDK_TARGET_PLATFORM)" "linux"
-      PREBUILD_LIB = /usr/lib32
+  PREBUILD_LIB = /usr/lib32
 endif
-ifndef CERTIFICATE_PATH
 ifeq "$(XDK_TARGET_PLATFORM)" "android"
-      XDK_CERTIFICATE_PATH = $(XDK_BUILD_PATH)/Prebuilt/JavaFramework/security
-      XDK_SIGNAPK_JAR = $(XDK_BUILD_PATH)/Prebuilt/JavaFramework/signapk.jar
-endif
-endif
-ifndef PREBUILD_PATH
-ifeq "$(XDK_TARGET_PLATFORM)" "android"
-      PREBUILD_PATH = $(XDK_BUILD_PATH)/Prebuilt/Linux
-endif
-ifndef PREBUILD_INC
-      PREBUILD_INC = $(PREBUILD_PATH)/usr/include
-endif
-ifndef PREBUILD_LIB
-      PREBUILD_LIB = $(PREBUILD_PATH)/usr/lib
-endif
+  PREBUILD_PATH = $(XDK_BUILD_PATH)/Prebuilt/Linux
+  PREBUILD_INC = $(PREBUILD_PATH)/usr/include
+  PREBUILD_LIB = $(PREBUILD_PATH)/usr/lib
+  XDK_CERTIFICATE_PATH = $(XDK_TOOLS)/security
+  XDK_SIGNAPK_JAR = $(XDK_TOOLS)/signapk.jar
 endif
 endif
 
@@ -94,8 +84,8 @@ endif
 #
 # turn on verbose mode if "emake -v" was specified (which sets BUILD_VERBOSE=1)
 #
-ifeq "$(BUILD_VERBOSE)" ""			# verbose is on
-  ifeq "$(XDK_COMPILER)" "gnu"
+ifeq "$(BUILD_VERBOSE)" ""			# verbose is off
+  ifeq "$(XDK_COMPILER)" "gcc"
     C_FLAGS:= -s $(C_FLAGS)			# add --slient flags to gcc
   endif
   MAKE_FLAGS:= -s $(MAKE_FLAGS)		# add --slient flags to make
@@ -111,11 +101,11 @@ MAKE_FLAGS:= -f$(XDK_MAKEFILE) --no-print-directory -r -R $(MAKE_FLAGS)
 # set XDK_TARGET_CPU, XDK_TARGET_BOARD before including DIRS, SOURCES
 #
 ifeq "$(XDK_TARGET_CPU)" ""
-$(error !!You must set XDK_TARGET_CPU  first (see setenv.bat)!!)
+$(error !!You must set XDK_TARGET_CPU  first (see SetEnv.sh)!!)
 endif
 
 ifeq "$(XDK_TARGET_PLATFORM)" ""
-$(error !!You must set XDK_TARGET_PLATFORM  first (see setenv.bat)!!)
+$(error !!You must set XDK_TARGET_PLATFORM  first (see SetEnv.sh)!!)
 endif
 
 ##########################################################################
@@ -123,7 +113,7 @@ endif
 # Set TARGET paths
 #
 ifndef TARGET_PATH
-TARGET_PATH= $(XDK_USER_OBJ)/$(XDK_BUILD_KIND)
+TARGET_PATH= $(XDK_USER_OBJ)
 endif
 
 ifeq "$(DEBUG_INFO)" "1"
@@ -143,25 +133,11 @@ endif
 
 MAKEDIR= $(XDK_SOURCE_PATH)$(XDK_EMAKE_DIR)
 
-# SDK PATH
-ifeq "$(XDK_BUILD_ENV)" "rdk"
 TARGET_XSL_C_PATH= $(XDK_SOURCE_PATH)/Documents/References/Chinese/xsl/xsl_c
 TARGET_XSL_E_PATH= $(XDK_SOURCE_PATH)/Documents/References/English/xsl/xsl_e
-endif
 
 # SYSTEM INCLUDE PATH
-ifeq "$(XDK_TARGET_PRODUCT)" "devtools"
-INCLUDES = .; $(XDK_USER_INC); \
-          $(MAKEDIR);
-endif
-ifeq "$(XDK_TARGET_PLATFORM)" "linux"
-INCLUDES = .; $(XDK_USER_INC); $(XDK_INC_PATH); \
-          $(MAKEDIR);
-endif
-ifeq "$(XDK_TARGET_PLATFORM)" "android"
-INCLUDES = .; $(PREBUILD_INC); $(XDK_USER_INC); $(XDK_INC_PATH); \
-          $(MAKEDIR);
-endif
+INCLUDES = .; $(XDK_USER_INC); $(PREBUILD_INC); $(MAKEDIR);
 SYSTEM_INCLUDES := $(INCLUDES)
 
 #$(warning makefile_rdk)
@@ -169,7 +145,7 @@ SYSTEM_INCLUDES := $(INCLUDES)
 #$(warning INCLUDES=$(INCLUDES))
 
 # default C_FLAGS
-ifeq "$(XDK_COMPILER)" "gnu"
+ifeq "$(XDK_TARGET_PRODUCT)" "elastos"
 C_FLAGS += -fno-exceptions
 endif
 
@@ -225,8 +201,7 @@ ifneq "$(TARGET_NAME)" ""
   endif
 endif
 
--include $(XDK_MAKEFILE_PATH)/makedefs_internal.mk
-include $(XDK_MAKEFILE_PATH)/makedefs_$(XDK_COMPILER)_$(XDK_BUILD_ENV).mk
+include $(XDK_MAKEFILE_PATH)/makedefs.mk
 
 #
 # Make being invoked twice in the current directory and then walk down
@@ -266,11 +241,7 @@ clobber:
 
 else # ifndef MAKECMD
 
-ifeq "$(XDK_COMPILER)" "gnu"
-  include $(XDK_MAKEFILE_PATH)/makerules_gnu_$(XDK_BUILD_ENV).mk
-else
-  include $(XDK_MAKEFILE_PATH)/makerules_win_$(XDK_BUILD_ENV).mk
-endif
+include $(XDK_MAKEFILE_PATH)/makerules.mk
 
 ##########################################################################
 
@@ -307,17 +278,9 @@ endif
 #
 # Custom defined makefile rules, targets and macros
 #
-ifeq "$(XDK_COMPILER)" "gnu"
 -include $(MAKEDIR)/makefile.inc
 ifeq "$(NODEPEND)" ""
 -include $(TARGET_OBJ_PATH)/depend.mk
-endif
-endif
-ifeq "$(XDK_COMPILER)" "msvc"
--include $(MAKEDIR)/makefile.inc
-ifeq "$(NODEPEND)" ""
--include $(TARGET_OBJ_PATH)/depend.mk
-endif
 endif
 endif # MAKECMD
 
