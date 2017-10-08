@@ -54,10 +54,10 @@ OBJ_SUFFIX = .o
 # Select C/C++ compiler and assembler
 #
 
-CC = $(CROSS_COMPILE)gcc
-CXX = $(CROSS_COMPILE)g++
-ASM = $(CROSS_COMPILE)gcc
-AR = $(CROSS_COMPILE)ar
+CC = gcc
+CXX = g++
+ASM = gcc
+AR = ar
 
 DLLTOOL = dlltool
 
@@ -105,9 +105,9 @@ endif
 #
 # Linker and its flags
 #
-LD = $(CROSS_COMPILE)gcc
-STRIP = $(CROSS_COMPILE)strip
-OBJCOPY = $(CROSS_COMPILE)objcopy
+LD = gcc
+STRIP = strip
+OBJCOPY = objcopy
 PASS2LD = -Wl,
 
 ifeq "$(ECX_ENTRY)" ""
