@@ -36,6 +36,8 @@ public:
     CAR_OBJECT_DECL()
 
 private:
+    using Provider::Put;
+
     CARAPI Put(
         /* [in] */ const char* key,
         /* [in] */ const char* value);

@@ -38,7 +38,7 @@ public:
 
     ~OpenSSLBIOSink();
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IByteArrayOutputStream* buffer);
 
     CARAPI Available(

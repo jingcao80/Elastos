@@ -46,6 +46,13 @@ namespace Conscrypt {
 //=========================================
 CAR_INTERFACE_IMPL(OpenSSLKey, Object, IOpenSSLKey)
 
+OpenSSLKey::~OpenSSLKey()
+{
+    if (mCtx != 0) {
+        NativeCrypto::EVP_PKEY_free(mCtx);
+    }
+}
+
 ECode OpenSSLKey::constructor(
     /* [in] */ Int64 ctx)
 {
@@ -351,15 +358,6 @@ ECode OpenSSLKey::GetSecretKey(
             return E_NO_SUCH_ALGORITHM_EXCEPTION;
         }
     }
-    return NOERROR;
-}
-
-ECode OpenSSLKey::Finalize()
-{
-    if (mCtx != 0) {
-        NativeCrypto::EVP_PKEY_free(mCtx);
-    }
-    Finalize();
     return NOERROR;
 }
 

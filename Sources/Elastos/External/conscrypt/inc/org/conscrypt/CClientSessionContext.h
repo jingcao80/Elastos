@@ -76,6 +76,8 @@ public:
     CARAPI SetPersistentCache(
         /* [in] */  ISSLClientSessionCache* persistentCache);
 
+    using AbstractSessionContext::GetSession;
+
     /**
      * Finds a cached session for the given host name and port.
      *

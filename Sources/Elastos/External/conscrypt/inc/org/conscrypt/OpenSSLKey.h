@@ -34,6 +34,8 @@ class OpenSSLKey
     , public IOpenSSLKey
 {
 public:
+    virtual ~OpenSSLKey();
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor(
@@ -84,8 +86,6 @@ public:
     CARAPI GetSecretKey(
         /* [in] */ const String& algorithm,
         /* [out] */ ISecretKey** result);
-
-    CARAPI Finalize();
 
     CARAPI Equals(
         /* [in] */ IInterface* o,

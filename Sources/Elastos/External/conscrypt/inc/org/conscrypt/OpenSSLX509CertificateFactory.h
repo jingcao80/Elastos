@@ -166,7 +166,7 @@ public:
 
     CARAPI EngineGenerateCertPath(
         /* [in] */ IInputStream* inStream,
-        /* [in] */ String encoding,
+        /* [in] */ const String& encoding,
         /* [out] */ ICertPath** result);
 
     CARAPI EngineGenerateCertPath(

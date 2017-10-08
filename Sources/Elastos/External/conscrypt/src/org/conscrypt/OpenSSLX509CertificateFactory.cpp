@@ -471,7 +471,7 @@ ECode OpenSSLX509CertificateFactory::EngineGenerateCertPath(
 
 ECode OpenSSLX509CertificateFactory::EngineGenerateCertPath(
     /* [in] */ IInputStream* inStream,
-    /* [in] */ String encoding,
+    /* [in] */ const String& encoding,
     /* [out] */ ICertPath** result)
 {
     VALIDATE_NOT_NULL(result)

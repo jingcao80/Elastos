@@ -94,7 +94,7 @@ public:
      * @param maximumSize of cache
      * @param timeout for cache entries
      */
-    virtual CARAPI constructor(
+    CARAPI constructor(
         /* [in] */ Int32 maximumSize,
         /* [in] */ Int32 timeout);
 
