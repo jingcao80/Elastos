@@ -205,7 +205,7 @@ ECode Part::Length(
 
     // LOG->Trace(String("enter length()"));
     FAIL_RETURN(LengthOfData(length));
-    if (length < 0) {
+    if (*length < 0) {
         *length = -1;
         return NOERROR;
     }

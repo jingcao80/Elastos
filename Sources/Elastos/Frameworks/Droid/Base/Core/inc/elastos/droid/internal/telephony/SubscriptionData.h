@@ -34,7 +34,7 @@ class SubscriptionData
 public:
     CAR_INTERFACE_DECL()
 
-    constructor(
+    ECode constructor(
         /* [in] */ Int32 numSub);
 
     CARAPI IsSame(

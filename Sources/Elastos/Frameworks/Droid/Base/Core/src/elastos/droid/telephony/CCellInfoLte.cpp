@@ -165,7 +165,7 @@ ECode CCellInfoLte::ReadFromParcel(
 ECode CCellInfoLte::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    CellInfo::WriteToParcel(dest, TYPE_LTE);
+    CellInfo::WriteToParcel(dest);
     dest->WriteInterfacePtr(mCellIdentityLte);
     dest->WriteInterfacePtr(mCellSignalStrengthLte);
     return NOERROR;

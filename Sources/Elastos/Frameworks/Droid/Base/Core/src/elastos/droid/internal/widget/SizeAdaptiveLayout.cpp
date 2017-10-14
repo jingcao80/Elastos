@@ -555,13 +555,13 @@ ECode SizeAdaptiveLayout::GenerateLayoutParams(
     return NOERROR;
 }
 
-AutoPtr<IViewGroupLayoutParams> SizeAdaptiveLayout::GenerateDefaultLayoutParams()
+ECode SizeAdaptiveLayout::GenerateDefaultLayoutParams(
+    /* [out] */ IViewGroupLayoutParams** params)
 {
+    VALIDATE_NOT_NULL(params);
     if (DEBUG) Slogger::D(TAG, "generate default layout from NULL");
 
-    AutoPtr<IViewGroupLayoutParams> lp;
-    CSizeAdaptiveLayoutLayoutParams::New((IViewGroupLayoutParams**)&lp);
-    return lp;
+    return CSizeAdaptiveLayoutLayoutParams::New(params);
 }
 
 Boolean SizeAdaptiveLayout::CheckLayoutParams(

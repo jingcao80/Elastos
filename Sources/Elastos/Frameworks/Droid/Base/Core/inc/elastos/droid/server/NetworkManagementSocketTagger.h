@@ -106,9 +106,13 @@ public:
     static CARAPI SetThreadSocketStatsUid(
         /* [in] */ Int32 uid);
 
+    using SocketTagger::Tag;
+
     // @Override
     CARAPI Tag(
         /* [in] */ IFileDescriptor* fd);
+
+    using SocketTagger::Untag;
 
     // @Override
     CARAPI Untag(

@@ -80,6 +80,8 @@ public:
         CARAPI Clone(
             /* [out] */ IInterface** result);
 
+        using MediaMetadataEditor::PutString;
+
         /**
          * Adds textual information to be displayed.
          * Note that none of the information added after {@link #apply()} has been called,
@@ -106,6 +108,8 @@ public:
             /* [in] */ const String& value,
             /* [out] */ IRemoteControlClientMetadataEditor** result);
 
+        using MediaMetadataEditor::PutInt64;
+
         /**
          * Adds numerical information to be displayed.
          * Note that none of the information added after {@link #apply()} has been called,
@@ -126,6 +130,8 @@ public:
             /* [in] */ Int64 value,
             /* [out] */ IRemoteControlClientMetadataEditor** result);
 
+        using MediaMetadataEditor::PutBitmap;
+
         /**
          * Sets the album / artwork picture to be displayed on the remote control.
          * @param key the identifier of the bitmap to set. The only valid value is
@@ -140,6 +146,8 @@ public:
             /* [in] */ Int32 key,
             /* [in] */ IBitmap* bitmap,
             /* [out] */ IRemoteControlClientMetadataEditor** result);
+
+        using MediaMetadataEditor::PutObject;
 
         /*synchronized*/ CARAPI PutObject(
             /* [in] */ Int32 key,

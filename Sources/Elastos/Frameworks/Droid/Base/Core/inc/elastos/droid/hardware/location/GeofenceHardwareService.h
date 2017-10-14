@@ -130,6 +130,8 @@ public:
     CARAPI OnDestroy();
 
 private:
+    using Service::CheckPermission;
+
     CARAPI CheckPermission(
         /* [in] */ Int32 pid,
         /* [in] */ Int32 uid,

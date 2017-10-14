@@ -145,7 +145,7 @@ ECode Subscription::IsSame(
 //                    + ":" + appType
 //                    + ":" + iccId);
 //        }
-        if ((m3gppIndex == m3gppIndex)
+        if ((m3gppIndex == m3gppIndexGet)
                 && (m3gpp2Index == m3gpp2IndexGet)
                 && ((TextUtils::IsEmpty(mAppId) && TextUtils::IsEmpty(appId))
                         || TextUtils::Equals(mAppId, appId))

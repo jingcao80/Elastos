@@ -460,7 +460,7 @@ AutoPtr<IIHdmiMhlVendorCommandListener> HdmiTvClient::GetListenerWrapper(
     /* [in] */ IHdmiTvClientHdmiMhlVendorCommandListener* listener)
 {
     AutoPtr<IIHdmiMhlVendorCommandListener> tmp = new MyListener3(listener);
-    return NOERROR;
+    return tmp;
 }
 
 ECode HdmiTvClient::SendMhlVendorCommand(

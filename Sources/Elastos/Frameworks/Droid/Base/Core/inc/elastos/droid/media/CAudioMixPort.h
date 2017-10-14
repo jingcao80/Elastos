@@ -53,6 +53,8 @@ public:
         /* [in] */ ArrayOf<Int32>* formats,
         /* [in] */ ArrayOf<IAudioGain*>* gains);
 
+    using AudioPort::BuildConfig;
+
     /**
      * Build a specific configuration of this audio mix port for use by methods
      * like AudioManager.connectAudioPatch().

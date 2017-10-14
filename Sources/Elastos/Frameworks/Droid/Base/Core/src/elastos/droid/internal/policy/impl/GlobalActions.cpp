@@ -1086,7 +1086,7 @@ GlobalActions::AirplaneModeObserver::AirplaneModeObserver(
 {
 }
 
-GlobalActions::AirplaneModeObserver::constructor(
+ECode GlobalActions::AirplaneModeObserver::constructor(
     /* [in] */ IHandler* handler)
 {
     return ContentObserver::constructor(handler);
@@ -1493,7 +1493,7 @@ ECode GlobalActions::UserSinglePressAction::OnPress()
     Boolean value = FALSE;
     ECode ec = ActivityManagerNative::GetDefault()->SwitchUser(mUserId, &value);
     if (FAILED(ec)) {
-        Logger::E(TAG, "Couldn't switch user %d" + mUserId);
+        Logger::E(TAG, "Couldn't switch user %d", mUserId);
     }
     return NOERROR;
 }

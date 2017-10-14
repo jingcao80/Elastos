@@ -69,7 +69,7 @@ public:
         // @Override
         CARAPI Equals(
             /* [in] */ IInterface* o,
-            /* [out] */ Int32* result);
+            /* [out] */ Boolean* result);
 
         CARAPI GetImeName(
             /* [out] */ ICharSequence** imeName);

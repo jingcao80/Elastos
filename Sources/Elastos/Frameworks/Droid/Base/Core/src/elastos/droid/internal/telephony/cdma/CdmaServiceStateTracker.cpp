@@ -1557,7 +1557,7 @@ ECode CdmaServiceStateTracker::PollStateDone()
     IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
     mCi->GetRadioState(&state);
     if (hasChanged) {
-        Boolean b;
+        Boolean b = FALSE;
 // TODO: NeedICommandsInterfaceRadioState::IsOn
         // state->IsOn(&b);
         if (b && (!mIsSubscriptionFromRuim)) {
@@ -2059,7 +2059,6 @@ void CdmaServiceStateTracker::QueueNextSignalStrengthPoll()
     AutoPtr<IMessage> msg;
 
     ObtainMessage((IMessage**)&msg);
-    Int32 what;
     msg->SetWhat(EVENT_POLL_SIGNAL_STRENGTH);
 
     // TODO Don't poll signal strength if screen is off

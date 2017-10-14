@@ -418,13 +418,13 @@ ECode ActionMenuItemView::OnPopulateAccessibilityEvent(
     return NOERROR;
 }
 
-ECode ActionMenuItemView::DispatchHoverEvent(
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
+Boolean ActionMenuItemView::DispatchHoverEvent(
+    /* [in] */ IMotionEvent* event)
 {
-    VALIDATE_NOT_NULL(result)
     // Don't allow children to hover; we want this to be treated as a single component.
-    return OnHoverEvent(event, result);
+    Boolean result;
+    OnHoverEvent(event, &result);
+    return result;
 }
 
 ECode ActionMenuItemView::ShowsIcon(

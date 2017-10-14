@@ -44,6 +44,8 @@ public:
     CARAPI constructor(
         /* [in] */ ArrayOf<Byte>* table);
 
+    using IccServiceTable::IsAvailable;
+
     virtual CARAPI IsAvailable(
         /* [in] */ UsimService service,
         /* [out] */ Boolean* result);

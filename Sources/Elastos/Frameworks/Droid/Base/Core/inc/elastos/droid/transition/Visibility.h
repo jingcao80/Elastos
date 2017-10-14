@@ -209,6 +209,8 @@ public:
         /* [out] */ IAnimator** result);
 
 private:
+    using Transition::CaptureValues;
+
     CARAPI_(void) CaptureValues(
         /* [in] */ ITransitionValues* transitionValues,
         /* [in] */ Int32 forcedVisibility);

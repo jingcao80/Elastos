@@ -169,7 +169,7 @@ ECode BluetoothManager::OpenGattServer(
     /* [out] */ IBluetoothGattServer** result)
 {
     VALIDATE_NOT_NULL(result);
-    return (OpenGattServer (context, callback, IBluetoothDevice::TRANSPORT_AUTO));
+    return OpenGattServer(context, callback, IBluetoothDevice::TRANSPORT_AUTO, result);
 }
 
 ECode BluetoothManager::OpenGattServer(

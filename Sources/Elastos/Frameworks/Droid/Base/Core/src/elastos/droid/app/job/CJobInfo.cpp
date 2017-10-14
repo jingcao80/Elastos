@@ -316,9 +316,9 @@ ECode JobInfoBuilder::SetExtras(
 }
 
 ECode JobInfoBuilder::SetRequiredNetworkType(
-    /* [in] */ Int32 mNetworkType)
+    /* [in] */ Int32 networkType)
 {
-    mNetworkType = mNetworkType;
+    mNetworkType = networkType;
     return NOERROR;
 }
 
@@ -337,44 +337,44 @@ ECode JobInfoBuilder::SetRequiresDeviceIdle(
 }
 
 ECode JobInfoBuilder::SetPeriodic(
-    /* [in] */ Int64 mIntervalMillis)
+    /* [in] */ Int64 intervalMillis)
 {
     mIsPeriodic = TRUE;
-    mIntervalMillis = mIntervalMillis;
+    mIntervalMillis = intervalMillis;
     mHasEarlyConstraint = mHasLateConstraint = TRUE;
     return NOERROR;
 }
 
 ECode JobInfoBuilder::SetMinimumLatency(
-    /* [in] */ Int64 mMinLatencyMillis)
+    /* [in] */ Int64 minLatencyMillis)
 {
-    mMinLatencyMillis = mMinLatencyMillis;
+    mMinLatencyMillis = minLatencyMillis;
     mHasEarlyConstraint = TRUE;
     return NOERROR;
 }
 
 ECode JobInfoBuilder::SetOverrideDeadline(
-    /* [in] */ Int64 mMaxExecutionDelayMillis)
+    /* [in] */ Int64 maxExecutionDelayMillis)
 {
-    mMaxExecutionDelayMillis = mMaxExecutionDelayMillis;
+    mMaxExecutionDelayMillis = maxExecutionDelayMillis;
     mHasLateConstraint = TRUE;
     return NOERROR;
 }
 
 ECode JobInfoBuilder::SetBackoffCriteria(
-    /* [in] */ Int64 mInitialBackoffMillis,
-    /* [in] */ Int32 mBackoffPolicy)
+    /* [in] */ Int64 initialBackoffMillis,
+    /* [in] */ Int32 backoffPolicy)
 {
     mBackoffPolicySet = TRUE;
-    mInitialBackoffMillis = mInitialBackoffMillis;
-    mBackoffPolicy = mBackoffPolicy;
+    mInitialBackoffMillis = initialBackoffMillis;
+    mBackoffPolicy = backoffPolicy;
     return NOERROR;
 }
 
 ECode JobInfoBuilder::SetPersisted(
-    /* [in] */ Boolean mIsPersisted)
+    /* [in] */ Boolean isPersisted)
 {
-    mIsPersisted = mIsPersisted;
+    mIsPersisted = isPersisted;
     return NOERROR;
 }
 

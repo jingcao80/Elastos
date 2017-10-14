@@ -40,9 +40,14 @@ ECode GestureLibrary::IsReadOnly(
     return NOERROR;
 }
 
-AutoPtr<Learner> GestureLibrary::GetLearner()
+ECode GestureLibrary::GetLearner(
+    /* [out] */ ILearner** learner)
 {
-    return ((CGestureStore*)mStore.Get())->GetLearner();
+    VALIDATE_NOT_NULL(learner);
+    AutoPtr<Learner> ln = ((CGestureStore*)mStore.Get())->GetLearner();
+    *learner = ln;
+    REFCOUNT_ADD(*learner);
+    return NOERROR;
 }
 
 ECode GestureLibrary::SetOrientationStyle(

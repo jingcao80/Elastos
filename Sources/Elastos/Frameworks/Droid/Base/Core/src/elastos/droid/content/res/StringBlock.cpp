@@ -574,7 +574,6 @@ AutoPtr<ICharacterStyle> StringBlock::GetColor(
     AutoPtr<ICharacterStyle> style;
     if (foreground) {
         CForegroundColorSpan::New(c, (ICharacterStyle**)&style);
-        return NOERROR;
     }
     else {
         CBackgroundColorSpan::New(c, (ICharacterStyle**)&style);

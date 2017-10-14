@@ -37,7 +37,7 @@ HandlerDispatcher::MyRunnable::MyRunnable(
 
 ECode HandlerDispatcher::MyRunnable::Run()
 {
-    ECode ec = mDispatchTarget->Dispatch(mMethod, mArgs);
+    mDispatchTarget->Dispatch(mMethod, mArgs);
     mDispatchTarget = NULL;
     return NOERROR;
 }

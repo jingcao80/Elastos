@@ -50,6 +50,8 @@ public:
         /* [in] */ Int32 end,
         /* [out] */ ICharSequence** cs);
 
+    using Singleton::Equals;
+
     CARAPI Equals(
         /* [in] */ ICharSequence* a,
         /* [in] */ ICharSequence* b,

@@ -2476,7 +2476,7 @@ AutoPtr<IDrawable> CResources::GetCachedDrawableLocked(
     if (entry != NULL) {
         AutoPtr<IDrawable> dr;
         entry->NewDrawable(this, (IDrawable**)&dr);
-        return NOERROR;
+        return dr;
     }
     return NULL;
 }

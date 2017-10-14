@@ -107,20 +107,20 @@ class AbstractThreadedSyncAdapter
 
         CAR_INTERFACE_DECL()
 
-        StartSync(
+        CARAPI StartSync(
             /* [in] */ IISyncContext* syncContext,
             /* [in] */ const String& authority,
             /* [in] */ IAccount* account,
             /* [in] */ IBundle* extras);
 
-        CancelSync(
+        CARAPI CancelSync(
             /* [in] */ IISyncContext* syncContext);
 
-        Initialize(
+        CARAPI Initialize(
             /* [in] */ IAccount* account,
             /* [in] */ const String& authority);
 
-        ToString(
+        CARAPI ToString(
             /* [out] */ String* str);
 
     private:

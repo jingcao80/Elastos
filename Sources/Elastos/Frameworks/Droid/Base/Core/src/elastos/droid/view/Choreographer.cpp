@@ -200,15 +200,6 @@ ECode Choreographer::FrameDisplayEventReceiver::OnVsync(
     return NOERROR;
 }
 
-ECode Choreographer::FrameDisplayEventReceiver::OnHotplug(
-    /* [in] */ Int64 timestampNanos,
-    /* [in] */ Int64 builtInDisplayId,
-    /* [in] */ Boolean connected)
-{
-    return NOERROR;
-}
-
-
 ECode Choreographer::FrameDisplayEventReceiver::Run()
 {
     mHavePendingVsync = FALSE;

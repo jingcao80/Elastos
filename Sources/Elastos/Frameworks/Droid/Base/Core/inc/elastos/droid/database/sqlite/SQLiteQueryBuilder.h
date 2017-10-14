@@ -48,9 +48,9 @@ public:
 
     SQLiteQueryBuilder();
 
-    constructor();
-
     virtual ~SQLiteQueryBuilder();
+
+    CARAPI constructor();
 
     /**
      * Mark the query as DISTINCT.

@@ -323,7 +323,8 @@ ECode MenuItemImpl::GetShortcut(
     /* [out] */ Char32* c)
 {
     VALIDATE_NOT_NULL(c);
-    Boolean isQwertyMode = mMenu->IsQwertyMode();
+    Boolean isQwertyMode;
+    mMenu->IsQwertyMode(&isQwertyMode);
     *c = isQwertyMode ? mShortcutAlphabeticChar : mShortcutNumericChar;
 
     return NOERROR;

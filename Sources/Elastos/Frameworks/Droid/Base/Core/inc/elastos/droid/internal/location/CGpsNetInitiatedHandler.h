@@ -59,7 +59,7 @@ public:
 
         CAR_INTERFACE_DECL()
 
-        constructor();
+        CARAPI constructor();
 
         CARAPI GetNotificationId(
             /* [out] */ Int32* notifacationId);

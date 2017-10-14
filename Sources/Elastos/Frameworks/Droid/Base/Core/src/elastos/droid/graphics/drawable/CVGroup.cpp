@@ -26,9 +26,7 @@ CAR_OBJECT_IMPL(CVGroup)
 ECode CVGroup::GetRotation(
     /* [out] */ Float* rotation)
 {
-    VALIDATE_NOT_NULL(rotation);
-    *rotation = VectorDrawable::VGroup::GetRotation();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetRotation(rotation);
 }
 
 //ECode CVGroup::SetRotation(
@@ -41,9 +39,7 @@ ECode CVGroup::GetRotation(
 ECode CVGroup::GetPivotX(
     /* [out] */ Float* pivotx)
 {
-    VALIDATE_NOT_NULL(pivotx);
-    *pivotx = VectorDrawable::VGroup::GetPivotX();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetPivotX(pivotx);
 }
 
 //ECode CVGroup::SetPivotX(
@@ -56,9 +52,7 @@ ECode CVGroup::GetPivotX(
 ECode CVGroup::GetPivotY(
     /* [out] */ Float* pivoty)
 {
-    VALIDATE_NOT_NULL(pivoty);
-    *pivoty = VectorDrawable::VGroup::GetPivotY();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetPivotY(pivoty);
 }
 
 //ECode CVGroup::SetPivotY(
@@ -71,9 +65,7 @@ ECode CVGroup::GetPivotY(
 ECode CVGroup::GetScaleX(
     /* [out] */ Float* scalex)
 {
-    VALIDATE_NOT_NULL(scalex);
-    *scalex = VectorDrawable::VGroup::GetScaleX();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetScaleX(scalex);
 }
 
 //ECode CVGroup::SetScaleX(
@@ -86,9 +78,7 @@ ECode CVGroup::GetScaleX(
 ECode CVGroup::GetScaleY(
     /* [out] */ Float* scaley)
 {
-    VALIDATE_NOT_NULL(scaley);
-    *scaley = VectorDrawable::VGroup::GetScaleY();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetScaleY(scaley);
 }
 
 //ECode CVGroup::SetScaleY(
@@ -101,9 +91,7 @@ ECode CVGroup::GetScaleY(
 ECode CVGroup::GetTranslateX(
     /* [out] */ Float* translatex)
 {
-    VALIDATE_NOT_NULL(translatex);
-    *translatex = VectorDrawable::VGroup::GetTranslateX();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetTranslateX(translatex);
 }
 
 //ECode CVGroup::SetTranslateX(
@@ -116,9 +104,7 @@ ECode CVGroup::GetTranslateX(
 ECode CVGroup::GetTranslateY(
     /* [out] */ Float* translatey)
 {
-    VALIDATE_NOT_NULL(translatey);
-    *translatey = VectorDrawable::VGroup::GetTranslateY();
-    return NOERROR;
+    return VectorDrawable::VGroup::GetTranslateY(translatey);
 }
 
 //ECode CVGroup::SetTranslateY(

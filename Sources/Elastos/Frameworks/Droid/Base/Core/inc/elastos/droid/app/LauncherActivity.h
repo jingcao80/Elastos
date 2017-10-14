@@ -298,7 +298,7 @@ protected:
         /* [in] */ IListView* l,
         /* [in] */ IView* v,
         /* [in] */ Int32 position,
-        /* [in] */ long id);
+        /* [in] */ Int64 id);
 
     /**
      * Return the actual Intent for a specific position in our
@@ -338,7 +338,8 @@ protected:
     /**
      * Perform the query to determine which results to show and return a list of them.
      */
-    AutoPtr<IList> MakeListItems();
+    CARAPI MakeListItems(
+        /* [out] */ IList** items);
 
     /**
      * Whether or not to show icons in the list

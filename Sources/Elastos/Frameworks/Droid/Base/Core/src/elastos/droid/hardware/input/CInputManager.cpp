@@ -232,7 +232,7 @@ ECode CInputManager::GetInputDeviceByDescriptor(
             AutoPtr<IInputDevice> inputDevice = iter->mSecond;
             if (inputDevice == NULL) {
                 Int32 id = iter->mFirst;
-                if (FAILED(mIm->GetInputDevice(id, (IInputDevice**)&inputDevice))); {
+                if (FAILED(mIm->GetInputDevice(id, (IInputDevice**)&inputDevice))) {
                     return E_REMOTE_EXCEPTION;
                 }
 
@@ -685,7 +685,7 @@ void CInputManager::OnInputDevicesChanged(
             }
             else {
                 if (DEBUG) {
-                    Logger::D(TAG, "Device added: %d" + deviceId);
+                    Logger::D(TAG, "Device added: %d", deviceId);
                 }
                 (*mInputDevices)[deviceId] = NULL;
                 SendMessageToInputDeviceListenersLocked(MSG_DEVICE_ADDED, deviceId);

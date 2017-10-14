@@ -162,7 +162,7 @@ Boolean CPeriodicSync::SyncExtrasEquals(
     Int32 size1, size2;
     b1->GetSize(&size1);
     b2->GetSize(&size2);
-    if (size2 != size2) {
+    if (size1 != size2) {
         return FALSE;
     }
 

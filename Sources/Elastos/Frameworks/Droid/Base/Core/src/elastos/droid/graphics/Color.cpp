@@ -70,7 +70,7 @@ AutoPtr<HashMap<String, Int32> > Color::sColorNameMap = InitColorNameMap();
 Int32 Color::Alpha(
     /* [in] */ Int32 color)
 {
-    return (unsigned Int32)color >> 24;
+    return (UInt32)color >> 24;
 }
 
 Int32 Color::Red(

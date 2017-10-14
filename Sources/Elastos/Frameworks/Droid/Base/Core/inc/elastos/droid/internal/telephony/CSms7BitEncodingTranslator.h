@@ -60,7 +60,7 @@ public:
 
 
 protected:
-    Sms7BitEncodingTranslator();
+    CARAPI Sms7BitEncodingTranslator();
 
 private:
     /**

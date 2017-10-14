@@ -84,12 +84,15 @@ AutoPtr<IPduCache> PduCache::GetInstance()
 }
 
 // synchronized
-Boolean PduCache::Put(
-    /* [in] */ IUri* uri,
-    /* [in] */ IPduCacheEntry* entry)
+ECode PduCache::Put(
+    /* [in] */ IInterface* uri,
+    /* [in] */ IInterface* entry,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     Int32 msgBoxId = 0;
-    entry->GetMessageBox(&msgBoxId);
+    IPduCacheEntry::Probe(entry)->GetMessageBox(&msgBoxId);
     AutoPtr<IInterface> p;
     mMessageBoxes->Get(CoreUtils::Convert(msgBoxId), (IInterface**)&p);
     AutoPtr<IHashSet> msgBox = IHashSet::Probe(p);
@@ -99,7 +102,7 @@ Boolean PduCache::Put(
     }
 
     Int64 threadId = 0;
-    entry->GetThreadId(&threadId);
+    IPduCacheEntry::Probe(entry)->GetThreadId(&threadId);
     AutoPtr<IInterface> pT;
     mThreads->Get(CoreUtils::Convert(threadId), (IInterface**)&pT);
     AutoPtr<IHashSet> thread = IHashSet::Probe(pT);
@@ -108,15 +111,14 @@ Boolean PduCache::Put(
         mThreads->Put(CoreUtils::Convert(threadId), thread);
     }
 
-    AutoPtr<IUri> finalKey = NormalizeKey(uri);
-    Boolean result = FALSE;
-    AbstractCache::Put(finalKey, entry, &result);
-    if (result) {
+    AutoPtr<IUri> finalKey = NormalizeKey(IUri::Probe(uri));
+    AbstractCache::Put(finalKey, entry, result);
+    if (*result) {
         msgBox->Add(finalKey);
         thread->Add(finalKey);
     }
-    SetUpdating(uri, FALSE);
-    return result;
+    SetUpdating(IUri::Probe(uri), FALSE);
+    return NOERROR;
 }
 
 // synchronized
@@ -144,36 +146,44 @@ ECode PduCache::IsUpdating(
 }
 
 // synchronized
-AutoPtr<IPduCacheEntry> PduCache::Purge(
-    /* [in] */ IUri* uri)
+ECode PduCache::Purge(
+    /* [in] */ IInterface* uri,
+    /* [out] */ IInterface** result)
 {
     Int32 match = 0;
-    URI_MATCHER->Match(uri, &match);
+    URI_MATCHER->Match(IUri::Probe(uri), &match);
     switch (match) {
         case MMS_ALL_ID: {
-            return PurgeSingleEntry(uri);
+            AutoPtr<IPduCacheEntry> entry = PurgeSingleEntry(IUri::Probe(uri));
+            *result = entry;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
         case MMS_INBOX_ID:
         case MMS_SENT_ID:
         case MMS_DRAFTS_ID:
         case MMS_OUTBOX_ID: {
             String msgId;
-            uri->GetLastPathSegment(&msgId);
+            IUri::Probe(uri)->GetLastPathSegment(&msgId);
             AutoPtr<IUriHelper> uhlp;
             CUriHelper::AcquireSingleton((IUriHelper**)&uhlp);
             AutoPtr<ITelephonyMms> tmms;
             CTelephonyMms::AcquireSingleton((ITelephonyMms**)&tmms);
             AutoPtr<IUri> content_uri;
             tmms->GetCONTENT_URI((IUri**)&content_uri);
-            AutoPtr<IUri> uri;
-            uhlp->WithAppendedPath(content_uri, msgId, (IUri**)&uri);
-            return PurgeSingleEntry(uri);
+            AutoPtr<IUri> newUri;
+            uhlp->WithAppendedPath(content_uri, msgId, (IUri**)&newUri);
+            AutoPtr<IPduCacheEntry> entry = PurgeSingleEntry(newUri);
+            *result = entry;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
         // Implicit batch of purge, return NULL.
         case MMS_ALL:
         case MMS_CONVERSATION:
             PurgeAll();
-            return NULL;
+            *result = NULL;
+            return NOERROR;
         case MMS_INBOX:
         case MMS_SENT:
         case MMS_DRAFTS:
@@ -181,18 +191,21 @@ AutoPtr<IPduCacheEntry> PduCache::Purge(
             AutoPtr<IInterface> p;
             MATCH_TO_MSGBOX_ID_MAP->Get(CoreUtils::Convert(match), (IInterface**)&p);
             PurgeByMessageBox(IInteger32::Probe(p));
-            return NULL;
+            *result = NULL;
+            return NOERROR;
         }
         case MMS_CONVERSATION_ID: {
             AutoPtr<IContentUris> cu;
             CContentUris::AcquireSingleton((IContentUris**)&cu);
             Int64 id = 0;
-            cu->ParseId(uri, &id);
+            cu->ParseId(IUri::Probe(uri), &id);
             PurgeByThreadId(id);
-            return NULL;
+            *result = NULL;
+            return NOERROR;
         }
         default:
-            return NULL;
+            *result = NULL;
+            return NOERROR;
     }
 }
 

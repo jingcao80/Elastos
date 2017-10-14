@@ -163,8 +163,8 @@ ECode SmsStorageMonitor::HandleMessage(
            AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
            if (ar->mException != NULL) {
                mReportMemoryStatusPending = TRUE;
-               Logger::V(TAG, "Memory status report to modem pending : mStorageAvailable = %d"
-                       + mStorageAvailable);
+               Logger::V(TAG, "Memory status report to modem pending : mStorageAvailable = %d",
+                         mStorageAvailable);
            }
            else {
                mReportMemoryStatusPending = FALSE;
@@ -174,8 +174,8 @@ ECode SmsStorageMonitor::HandleMessage(
 
        case EVENT_RADIO_ON: {
            if (mReportMemoryStatusPending) {
-               Logger::V(TAG, "Sending pending memory status report : mStorageAvailable = %d"
-                       + mStorageAvailable);
+               Logger::V(TAG, "Sending pending memory status report : mStorageAvailable = %d",
+                         mStorageAvailable);
                AutoPtr<IMessage> msg;
                ObtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE, (IMessage**)&msg);
                mCi->ReportSmsMemoryStatus(mStorageAvailable, msg);

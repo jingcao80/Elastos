@@ -108,7 +108,8 @@ public:
     /**
      * {@inheritDoc}
      */
-    CARAPI_(Boolean) IsOpaque();
+    CARAPI IsOpaque(
+        /* [out] */ Boolean* opaque);
 
     /**
      * Indicates whether the content of this TextureView is opaque. The

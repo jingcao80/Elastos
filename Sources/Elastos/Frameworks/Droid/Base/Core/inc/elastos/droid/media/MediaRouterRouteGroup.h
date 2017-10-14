@@ -40,6 +40,8 @@ public:
     CARAPI constructor(
         /* [in] */ IMediaRouterRouteCategory* category);
 
+    using MediaRouterRouteInfo::GetName;
+
     CARAPI GetName(
         /* [in] */ IResources* res,
         /* [out] */ ICharSequence** result);

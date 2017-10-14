@@ -38,7 +38,7 @@ Policy::Policy()
 {
 }
 
-Policy::constructor()
+ECode Policy::constructor()
 {
     return NOERROR;
 }

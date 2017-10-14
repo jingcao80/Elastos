@@ -291,7 +291,7 @@ ECode RequestHolder::FailRequest()
 {
     Int32 id;
     GetRequestId(&id);
-    Logger::W(TAG, "Capture failed for request: %d" + id);
+    Logger::W(TAG, "Capture failed for request: %d", id);
     mFailed = TRUE;
     return NOERROR;
 }

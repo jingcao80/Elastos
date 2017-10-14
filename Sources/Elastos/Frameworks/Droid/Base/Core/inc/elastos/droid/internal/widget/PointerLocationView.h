@@ -123,6 +123,8 @@ private:
             /* [in] */ Float value,
             /* [in] */ Int32 precision);
 
+        using Object::ToString;
+
         CARAPI_(String) ToString();
 
     private:

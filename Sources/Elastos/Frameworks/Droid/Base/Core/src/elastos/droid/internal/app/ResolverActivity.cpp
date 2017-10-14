@@ -735,7 +735,7 @@ ResolverActivity::ViewHolder::ViewHolder(
 CAR_INTERFACE_IMPL_2(ResolverActivity::ItemLongClickListener, Object,
     IAdapterViewOnItemLongClickListener, IAdapterViewOnItemClickListener)
 
-ResolverActivity::ItemLongClickListener::OnItemLongClick(
+ECode ResolverActivity::ItemLongClickListener::OnItemLongClick(
     /* [in] */ IAdapterView* parent,
     /* [in] */ IView* view,
     /* [in] */ Int32 position,
@@ -757,7 +757,7 @@ ResolverActivity::ItemLongClickListener::OnItemLongClick(
     return NOERROR;
 }
 
-ResolverActivity::ItemLongClickListener::OnItemClick(
+ECode ResolverActivity::ItemLongClickListener::OnItemClick(
     /* [in] */ IAdapterView* parent,
     /* [in] */ IView* view,
     /* [in] */ Int32 position,

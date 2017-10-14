@@ -51,7 +51,7 @@ ECode LegacyExceptionUtils::ThrowOnError(
 
     if (errorFlag < 0) {
         //throw new UnsupportedOperationException("Unknown error " + errorFlag);
-        Logger::E(TAG, "Unknown error %d" + errorFlag);
+        Logger::E(TAG, "Unknown error %d", errorFlag);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     *result = errorFlag;

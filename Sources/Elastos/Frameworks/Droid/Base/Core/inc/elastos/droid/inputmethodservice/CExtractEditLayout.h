@@ -199,9 +199,10 @@ public:
     CARAPI FinishActionMode();
 
     //@Override
-    CARAPI_(AutoPtr<IActionMode>) StartActionModeForChild(
+    CARAPI StartActionModeForChild(
         /* [in] */ IView* sourceView,
-        /* [in] */ IActionModeCallback* cb);
+        /* [in] */ IActionModeCallback* cb,
+        /* [out] */ IActionMode** mode);
 
     //@Override
     CARAPI OnFinishInflate();

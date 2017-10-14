@@ -257,7 +257,8 @@ ECode CAudioAttributes::UsageToString(
             *result = "USAGE_GAME";
             return NOERROR;
         default:
-            *result = "unknown usage " + usage;
+            *result = "unknown usage ";
+            result->AppendFormat("%d", usage);
             return NOERROR;
     }
 }

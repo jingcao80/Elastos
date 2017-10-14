@@ -1712,7 +1712,7 @@ ECode WindowDecorActionBar::CollapseActionView(
 {
     VALIDATE_NOT_NULL(result)
     Boolean res;
-    if (mDecorToolbar != NULL && mDecorToolbar->HasExpandedActionView(&res), res) {
+    if (mDecorToolbar != NULL && (mDecorToolbar->HasExpandedActionView(&res), res)) {
         mDecorToolbar->CollapseActionView();
         *result = TRUE;
         return NOERROR;

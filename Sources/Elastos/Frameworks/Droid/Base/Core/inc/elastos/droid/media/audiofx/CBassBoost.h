@@ -138,6 +138,8 @@ public:
     CARAPI GetRoundedStrength(
         /* [out] */ Int16* strength);
 
+    using AudioEffect::SetParameterListener;
+
     /**
      * Registers an OnParameterChangeListener interface.
      * @param listener OnParameterChangeListener interface registered

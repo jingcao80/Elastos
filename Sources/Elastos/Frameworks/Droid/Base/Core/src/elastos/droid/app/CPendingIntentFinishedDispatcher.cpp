@@ -30,7 +30,7 @@ CPendingIntentFinishedDispatcher::MyRunnable::MyRunnable(
     : mHost(host)
 {}
 
-CPendingIntentFinishedDispatcher::MyRunnable::Run()
+ECode CPendingIntentFinishedDispatcher::MyRunnable::Run()
 {
     ECode ec = mHost->Run();
     mHost = NULL;       // release ref-count

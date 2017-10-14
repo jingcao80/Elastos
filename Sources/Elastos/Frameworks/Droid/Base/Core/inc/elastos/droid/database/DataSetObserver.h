@@ -36,7 +36,7 @@ class ECO_PUBLIC DataSetObserver
 public:
     CAR_INTERFACE_DECL()
 
-    virtual CARAPI constructor();
+    CARAPI constructor();
 
     /**
      * This method is called when the entire data set has changed,

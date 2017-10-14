@@ -1073,7 +1073,7 @@ AutoPtr<ICharSequence> CNotificationBuilder::ProcessLegacyText(
     if (IsLegacy()) {
         AutoPtr<ICharSequence> seq;
         mColorUtil->InvertCharSequenceColors(charSequence, (ICharSequence**)&seq);
-        return NOERROR;
+        return seq;
     }
 
     return charSequence;

@@ -184,9 +184,12 @@ void TextureView::Init()
     mUpdateListener = new OnFrameAvailableListener(this);
 }
 
-Boolean TextureView::IsOpaque()
+ECode TextureView::IsOpaque(
+    /* [out] */ Boolean* opaque)
 {
-    return mOpaque;
+    VALIDATE_NOT_NULL(opaque);
+    *opaque = mOpaque;
+    return NOERROR;
 }
 
 ECode TextureView::SetOpaque(

@@ -88,8 +88,8 @@ private:
             /* [out] */ Boolean* result);
 
     protected:
-        CARAPI Set(
-            /* [in] */ IBundle* bundle);
+        CARAPI_(void) Set(
+            /* [in] */ IInterface* bundle);
 
         CARAPI_(void) Done();
 
@@ -503,6 +503,8 @@ private:
             /* [in] */ CAccountManager* host);
 
         CARAPI DoWork();
+
+        using AmsTask::Run;
 
         CARAPI Run(
             /* [in] */ IAccountManagerFuture* future);

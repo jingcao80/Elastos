@@ -783,7 +783,7 @@ AutoPtr<IContext> CallManager::GetContext()
     AutoPtr<IPhone> defaultPhone;
     GetDefaultPhone((IPhone**)&defaultPhone);
     if (defaultPhone == NULL) {
-        return NOERROR;
+        return NULL;
     }
 
     AutoPtr<IContext> ctx;

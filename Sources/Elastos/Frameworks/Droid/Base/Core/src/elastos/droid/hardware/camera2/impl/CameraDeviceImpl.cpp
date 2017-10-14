@@ -299,7 +299,6 @@ CAR_INTERFACE_IMPL(CameraDeviceImpl::FrameNumberTracker, Object,
 
 CameraDeviceImpl::FrameNumberTracker::FrameNumberTracker()
     : mCompletedFrameNumber(-1)
-    , _mHost(NULL)
     , mHost(NULL)
 {
 }
@@ -307,8 +306,7 @@ CameraDeviceImpl::FrameNumberTracker::FrameNumberTracker()
 ECode CameraDeviceImpl::FrameNumberTracker::constructor(
     /* [in] */ ICameraDeviceImpl* host)
 {
-    _mHost = host;
-    mHost = (CameraDeviceImpl*)_mHost;
+    mHost = (CameraDeviceImpl*)host;
     return CTreeSet::New((ITreeSet**)&mFutureErrorSet);
 }
 
@@ -418,16 +416,14 @@ CAR_INTERFACE_IMPL_3(CameraDeviceImpl::CameraDeviceCallbacks, Object,
         ICameraDeviceImplCameraDeviceCallbacks, IICameraDeviceCallbacks, IBinder)
 
 CameraDeviceImpl::CameraDeviceCallbacks::CameraDeviceCallbacks()
-    : _mHost(NULL)
-    , mHost(NULL)
+    : mHost(NULL)
 {
 }
 
-CameraDeviceImpl::CameraDeviceCallbacks::constructor(
+ECode CameraDeviceImpl::CameraDeviceCallbacks::constructor(
     /* [in] */ ICameraDeviceImpl* host)
 {
-    _mHost = host;
-    mHost = (CameraDeviceImpl*)_mHost;
+    mHost = (CameraDeviceImpl*)host;
     return NOERROR;
 }
 
@@ -1794,7 +1790,7 @@ ECode CameraDeviceImpl::SubmitCaptureRequest(
         if (DEBUG) {
             Int64 number;
             lastFrameNumberRef->GetNumber(&number);
-            Logger::V(TAG, "last frame number %d" + number);
+            Logger::V(TAG, "last frame number %d", number);
         }
         if (ec == (ECode)E_CAMERA_RUNTIME_EXCEPTION) {
             //throw e.asChecked();

@@ -1310,9 +1310,10 @@ ECode CMediaRouter::RemoveUserRoute(
 ECode CMediaRouter::ClearUserRoutes()
 {
     AutoPtr<IMediaRouterRouteInfo> info;
-    for (Int32 i = 0; i < (((Static*)(sStatic.Get()))->mRoutes).GetSize(); i++) {
-        info = NULL;
-        info = ((Static*)(sStatic.Get()))->mRoutes[i];
+    Static* staticObj = (Static*)sStatic.Get();
+
+    for (Int32 i = 0; i < staticObj->mRoutes.GetSize(); i++) {
+        info = staticObj->mRoutes[i];
         // TODO Right now, RouteGroups only ever contain user routes.
         // The code below will need to change if this assumption does.
         if ((IMediaRouterUserRouteInfo::Probe(info) != NULL) || (IMediaRouterRouteGroup::Probe(info) != NULL)) {
@@ -1629,34 +1630,33 @@ ECode CMediaRouter::AddRouteStatic(
 ECode CMediaRouter::RemoveRouteStatic(
     /* [in] */ IMediaRouterRouteInfo* info)
 {
-    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it_ = Find(
-        ((Static*)(sStatic.Get()))->mRoutes.Begin(), ((Static*)(sStatic.Get()))->mRoutes.End(), AutoPtr<IMediaRouterRouteInfo>(info));
-    ((Static*)(sStatic.Get()))->mRoutes.Erase(it_);//
+    Static* staticObj = (Static*)sStatic.Get();
+    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it = Find(
+        staticObj->mRoutes.Begin(), staticObj->mRoutes.End(), AutoPtr<IMediaRouterRouteInfo>(info));
+    staticObj->mRoutes.Erase(it);//
 
     AutoPtr<IMediaRouterRouteCategory> removingCat;
     info->GetCategory((IMediaRouterRouteCategory**)&removingCat);
     Boolean found = FALSE;
-    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it = ((Static*)(sStatic.Get()))->mRoutes.Begin();
-    AutoPtr<IMediaRouterRouteCategory> cat;
-    for (; it != (((Static*)(sStatic.Get()))->mRoutes).End(); ++it) {
-       cat = NULL;
-       (*it)->GetCategory((IMediaRouterRouteCategory**)&cat);
-       if (removingCat == cat) {
-           found = TRUE;
-           break;
-       }
+    for (it = staticObj->mRoutes.Begin(); it != staticObj->mRoutes.End(); ++it) {
+        AutoPtr<IMediaRouterRouteCategory> cat;
+        (*it)->GetCategory((IMediaRouterRouteCategory**)&cat);
+        if (removingCat == cat) {
+            found = TRUE;
+            break;
+        }
     }//
 
     Boolean isSelected = FALSE;
     info->IsSelected(&isSelected);
     if (isSelected) {
-       // Removing the currently selected route? Select the default before we remove it.
-       SelectDefaultRouteStatic();
+        // Removing the currently selected route? Select the default before we remove it.
+        SelectDefaultRouteStatic();
     }
     if (!found) {
-       List< AutoPtr<IMediaRouterRouteCategory> >::Iterator it =
-       Find((((Static*)(sStatic.Get()))->mCategories).Begin(), (((Static*)(sStatic.Get()))->mCategories).End(), removingCat);
-       ((Static*)(sStatic.Get()))->mCategories.Erase(it);
+        List< AutoPtr<IMediaRouterRouteCategory> >::Iterator it =
+                Find(staticObj->mCategories.Begin(), staticObj->mCategories.End(), removingCat);
+        staticObj->mCategories.Erase(it);
     }
 
     DispatchRouteRemoved(info);
@@ -1807,7 +1807,7 @@ ECode CMediaRouter::DispatchRouteRemoved(
     return NOERROR;
 }
 
-CMediaRouter::DispatchRouteGrouped(
+ECode CMediaRouter::DispatchRouteGrouped(
     /* [in] */ IMediaRouterRouteInfo* info,
     /* [in] */ IMediaRouterRouteGroup* group,
     /* [in] */ Int32 index)
@@ -2151,11 +2151,12 @@ AutoPtr<IWifiDisplay> CMediaRouter::FindWifiDisplay(
 AutoPtr<IMediaRouterRouteInfo> CMediaRouter::FindWifiDisplayRoute(
     /* [in] */ IWifiDisplay* d)
 {
-    Int32 count = ((Static*)(sStatic.Get()))->mRoutes.GetSize();
+    Static* staticObj = (Static*)sStatic.Get();
+    Int32 count = staticObj->mRoutes.GetSize();
     String tempText1, tempText2;//
 
-    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it = ((Static*)(sStatic.Get()))->mRoutes.Begin();
-    for (; it != ((Static*)(sStatic.Get()))->mRoutes.End(); ++it) {
+    List< AutoPtr<IMediaRouterRouteInfo> >::Iterator it = staticObj->mRoutes.Begin();
+    for (; it != staticObj->mRoutes.End(); ++it) {
        AutoPtr<IMediaRouterRouteInfo> info = *it;
        d->GetDeviceAddress(&tempText1);
        info->GetDeviceAddress(&tempText2);

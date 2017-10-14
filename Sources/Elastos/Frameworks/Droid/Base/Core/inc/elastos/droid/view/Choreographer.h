@@ -120,10 +120,6 @@ private:
 
         CARAPI Run();
 
-        CARAPI OnHotplug(
-            /* [in] */ Int64 timestampNanos,
-            /* [in] */ Int64 builtInDisplayId,
-            /* [in] */ Boolean connected);
     private:
         Boolean mHavePendingVsync;
         Int64 mTimestampNanos;

@@ -424,8 +424,8 @@ ECode CMediaRecorder::SetLocation(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    SetParameter(String("param-geotag-latitude=" + latitudex10000));
-    SetParameter(String("param-geotag-longitude=" + longitudex10000));
+    SetParameter(String::Format("param-geotag-latitude=%d", latitudex10000));
+    SetParameter(String::Format("param-geotag-longitude=%d", longitudex10000));
     return NOERROR;
 }
 

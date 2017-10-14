@@ -191,7 +191,7 @@ public:
         /* [in] */ ArrayOf<Int32>* consumed);
 
     CARAPI OnNestedPreFling(
-        /* [in] */ View target,
+        /* [in] */ IView* target,
         /* [in] */ Float velocityX,
         /* [in] */ Float velocityY,
         /* [out] */ Boolean* result);
@@ -223,15 +223,13 @@ protected:
         /* [in] */ Int32 r,
         /* [in] */ Int32 b);
 
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** result);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     CARAPI GenerateDefaultLayoutParams(
         /* [out] */ IViewGroupLayoutParams** result);
 
-    CARAPI OnSaveInstanceState(
-        /* [out] */ IParcelable** result);
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);

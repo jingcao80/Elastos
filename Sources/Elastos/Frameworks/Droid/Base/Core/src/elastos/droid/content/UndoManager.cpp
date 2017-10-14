@@ -699,7 +699,7 @@ ECode UndoManager::GetLastOperation(
 }
 
 ECode UndoManager::GetLastOperation(
-    /* [in] */ ClassID clazz,
+    /* [in] */ const ClassID& clazz,
     /* [in] */ IUndoOwner* owner,
     /* [in] */ Int32 mergeMode,
     /* [out] */ IInterface** res)

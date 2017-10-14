@@ -126,7 +126,7 @@ public:
 };
 
 template<typename T>
-HashCodeHelpers::GetHashCode(
+ECode HashCodeHelpers::GetHashCode(
     /* [in] */ ArrayOf<T*>* array,
     /* [out] */ Int32* value)
 {

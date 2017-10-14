@@ -2744,6 +2744,8 @@ public:
 
     CARAPI_(void) PrepareForDumpLocked();
 
+    using BatteryStats::DumpLocked;
+
     CARAPI_(void) DumpLocked(
         /* [in] */ IContext* context,
         /* [in] */ IPrintWriter* pw,

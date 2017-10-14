@@ -44,9 +44,10 @@ public:
 
     // @Override
     // synchronized
-    CARAPI_(Boolean) Put(
-        /* [in] */ IUri* uri,
-        /* [in] */ IPduCacheEntry* entry);
+    CARAPI Put(
+        /* [in] */ IInterface* uri,
+        /* [in] */ IInterface* entry,
+        /* [out] */ Boolean* result);
 
     // synchronized
     virtual CARAPI SetUpdating(
@@ -60,8 +61,9 @@ public:
 
     // @Override
     // synchronized
-    CARAPI_(AutoPtr<IPduCacheEntry>) Purge(
-        /* [in] */ IUri* uri);
+    CARAPI Purge(
+        /* [in] */ IInterface* uri,
+        /* [out] */ IInterface** result);
 
     // @Override
     // synchronized

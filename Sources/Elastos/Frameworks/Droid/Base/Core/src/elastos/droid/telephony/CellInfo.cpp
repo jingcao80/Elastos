@@ -185,10 +185,8 @@ ECode CellInfo::ReadFromParcel(
 }
 
 ECode CellInfo::WriteToParcel(
-    /* [in] */ IParcel* dest,
-    /* [in] */ Int32 type)
+    /* [in] */ IParcel* dest)
 {
-    dest->WriteInt32(type);
     dest->WriteBoolean(mRegistered);
     dest->WriteInt32(mTimeStampType);
     dest->WriteInt64(mTimeStamp);

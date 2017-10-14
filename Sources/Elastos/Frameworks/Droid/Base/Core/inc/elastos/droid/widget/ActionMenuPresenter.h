@@ -86,11 +86,9 @@ private:
         CARAPI GetPopup(
             /* [out] */ IListPopupWindow** window);
 
-        CARAPI OnForwardingStarted(
-            /* [out] */ Boolean* result);
+        CARAPI_(Boolean) OnForwardingStarted();
 
-        CARAPI OnForwardingStopped(
-            /* [out] */ Boolean* result);
+        CARAPI_(Boolean) OnForwardingStopped();
 
     private:
         ActionMenuPresenter* mHostEx;

@@ -83,7 +83,7 @@ private:
             /* [in] */ IVirtualDisplayCallback* callback);
 
         //@Override
-        HandleMessage(
+        CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
     public:
@@ -107,13 +107,13 @@ private:
             /* [in] */ IHandler* handler);
 
         //@Override // Binder call
-        OnPaused();
+        CARAPI OnPaused();
 
         //@Override // Binder call
-        OnResumed();
+        CARAPI OnResumed();
 
         //@Override // Binder call
-        OnStopped();
+        CARAPI OnStopped();
 
     private:
         AutoPtr<VirtualDisplayCallbackDelegate> mDelegate;

@@ -218,6 +218,8 @@ public:
     virtual CARAPI NotifyForVideoCapabilityChanged(
         /* [in] */ Boolean isVideoCapable);
 
+    using ImsPhoneBase::Dial;
+
     // @Override
     CARAPI Dial(
         /* [in] */ const String& dialString,
@@ -447,6 +449,8 @@ public:
         /* [out] */ Boolean* result);
 
 protected:
+    using ImsPhoneBase::DialInternal;
+
     virtual CARAPI DialInternal(
         /* [in] */ const String& dialString,
         /* [in] */ Int32 videoState,

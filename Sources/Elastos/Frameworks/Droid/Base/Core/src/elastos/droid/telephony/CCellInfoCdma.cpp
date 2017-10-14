@@ -165,7 +165,7 @@ ECode CCellInfoCdma::ReadFromParcel(
 ECode CCellInfoCdma::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    CellInfo::WriteToParcel(dest, TYPE_CDMA);
+    CellInfo::WriteToParcel(dest);
     dest->WriteInterfacePtr(mCellIdentityCdma);
     dest->WriteInterfacePtr(mCellSignalStrengthCdma);
     return NOERROR;

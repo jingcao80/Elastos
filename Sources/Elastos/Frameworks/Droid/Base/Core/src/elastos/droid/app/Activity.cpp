@@ -2190,8 +2190,9 @@ void Activity::OnPrepareDialog(
     /* [in] */ Int32 id,
     /* [in] */ IDialog* dialog)
 {
-    if (dialog);
+    if (dialog) {
         dialog->SetOwnerActivity(this);
+    }
 }
 
 void Activity::OnPrepareDialog(

@@ -56,7 +56,7 @@ public:
 
         /** Release the lock with {@link CloseableLock#releaseLock}. */
         //@Override
-        Close();
+        CARAPI Close();
 
     private:
         ScopedLock() {}

@@ -662,7 +662,10 @@ ECode CRingtoneManager::SetActualRingtoneUriBySubId(
 
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
-    String ringtoneUriStr = ringtoneUri != NULL ? (IObject::Probe(ringtoneUri)->ToString(&ringtoneUriStr), ringtoneUriStr) : String("");
+    String ringtoneUriStr("");
+    if (ringtoneUri != NULL) {
+        IObject::Probe(ringtoneUri)->ToString(&ringtoneUriStr);
+    }
     Boolean resTmp = FALSE;
     Settings::System::PutString(contentResolver, setting, ringtoneUriStr, &resTmp);
     return NOERROR;

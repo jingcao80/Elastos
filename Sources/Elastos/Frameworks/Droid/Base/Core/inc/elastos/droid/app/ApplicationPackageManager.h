@@ -91,6 +91,8 @@ public:
             /* [in] */ IResolveInfo* rInfo,
             /* [in] */ Int32 iconId);
 
+        using Object::Equals;
+
         CARAPI_(Boolean) Equals(
             /* [in] */ ResourceName* o);
 

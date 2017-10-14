@@ -865,7 +865,7 @@ Boolean CommandParamsFactory::ProcessPlayTone(
 {
     CatLog::D(IHandler::Probe(this), String("process PlayTone"));
 
-    Tone tone;
+    Tone tone = Tone_NONE;
     AutoPtr<ITextMessage> _textMsg;
     CTextMessage::New((ITextMessage**)&_textMsg);
     AutoPtr<IDuration> duration;

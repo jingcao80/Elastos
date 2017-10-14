@@ -259,49 +259,56 @@ public:
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetRotation();
+        CARAPI GetRotation(
+            /* [out] */ Float* rotation);
 
         // @SuppressWarnings("unused")
         CARAPI SetRotation(
             /* [in] */ Float rotation);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetPivotX();
+        CARAPI GetPivotX(
+            /* [out] */ Float* pivotX);
 
         // @SuppressWarnings("unused")
         CARAPI SetPivotX(
             /* [in] */ Float pivotX);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetPivotY();
+        CARAPI GetPivotY(
+            /* [out] */ Float* pivotY);
 
         // @SuppressWarnings("unused")
         CARAPI SetPivotY(
             /* [in] */ Float pivotY);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetScaleX();
+        CARAPI GetScaleX(
+            /* [out] */ Float* scaleX);
 
         // @SuppressWarnings("unused")
         CARAPI SetScaleX(
             /* [in] */ Float scaleX);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetScaleY();
+        CARAPI GetScaleY(
+            /* [out] */ Float* scaleY);
 
         // @SuppressWarnings("unused")
         CARAPI SetScaleY(
             /* [in] */ Float scaleY);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetTranslateX();
+        CARAPI GetTranslateX(
+            /* [out] */ Float* translateX);
 
         // @SuppressWarnings("unused")
         CARAPI SetTranslateX(
             /* [in] */ Float translateX);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetTranslateY();
+        CARAPI GetTranslateY(
+            /* [out] */ Float* translateY);
 
         // @SuppressWarnings("unused")
         CARAPI SetTranslateY(
@@ -442,56 +449,64 @@ public:
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
         // @SuppressWarnings("unused")
-        CARAPI_(Int32) GetStrokeColor();
+        CARAPI GetStrokeColor(
+            /* [out] */ Int32* strokeColor);
 
         // @SuppressWarnings("unused")
         CARAPI SetStrokeColor(
             /* [in] */ Int32 strokeColor);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetStrokeWidth();
+        CARAPI GetStrokeWidth(
+            /* [out] */ Float* strokeWidth);
 
         // @SuppressWarnings("unused")
         CARAPI SetStrokeWidth(
             /* [in] */ Float strokeWidth);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetStrokeAlpha();
+        CARAPI GetStrokeAlpha(
+            /* [out] */ Float* strokeAlpha);
 
         // @SuppressWarnings("unused")
         CARAPI SetStrokeAlpha(
             /* [in] */ Float strokeAlpha);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Int32) GetFillColor();
+        CARAPI GetFillColor(
+            /* [out] */ Int32* fillColor);
 
         // @SuppressWarnings("unused")
         CARAPI SetFillColor(
             /* [in] */ Int32 fillColor);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetFillAlpha();
+        CARAPI GetFillAlpha(
+            /* [out] */ Float* fillAlpha);
 
         // @SuppressWarnings("unused")
         CARAPI SetFillAlpha(
             /* [in] */ Float fillAlpha);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetTrimPathStart();
+        CARAPI GetTrimPathStart(
+            /* [out] */ Float* trimPathStart);
 
         // @SuppressWarnings("unused")
         CARAPI SetTrimPathStart(
             /* [in] */ Float trimPathStart);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetTrimPathEnd();
+        CARAPI GetTrimPathEnd(
+            /* [out] */ Float* trimPathEnd);
 
         // @SuppressWarnings("unused")
         CARAPI SetTrimPathEnd(
             /* [in] */ Float trimPathEnd);
 
         // @SuppressWarnings("unused")
-        CARAPI_(Float) GetTrimPathOffset();
+        CARAPI GetTrimPathOffset(
+            /* [out] */ Float* trimPathOffset);
 
         // @SuppressWarnings("unused")
         CARAPI SetTrimPathOffset(

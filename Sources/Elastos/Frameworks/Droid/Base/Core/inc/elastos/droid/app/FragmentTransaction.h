@@ -268,7 +268,7 @@ public:
      *
      * @return True if {@link #addToBackStack(String)} is permitted on this transaction.
      */
-    virtual IsAddToBackStackAllowed(
+    virtual CARAPI IsAddToBackStackAllowed(
         /* [out] */ Boolean* bval) = 0;
 
     /**

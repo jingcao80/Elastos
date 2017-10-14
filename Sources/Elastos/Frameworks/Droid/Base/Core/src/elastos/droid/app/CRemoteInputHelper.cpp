@@ -42,7 +42,7 @@ ECode CRemoteInputHelper::AddResultsToIntent(
     /* [in] */ IIntent* intent,
     /* [in] */ IBundle* results)
 {
-    return AddResultsToIntent(remoteInputs, intent, results);
+    return CRemoteInput::AddResultsToIntent(remoteInputs, intent, results);
 }
 
 } // namespace App

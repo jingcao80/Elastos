@@ -1000,8 +1000,9 @@ protected:
 
     CARAPI OnRadioAvailable();
 
-    CARAPI_(ICommandsInterfaceRadioState) GetRadioStateFromInt(
-        /* [in] */ Int32 stateInt);
+    CARAPI GetRadioStateFromInt(
+        /* [in] */ Int32 stateInt,
+        /* [out] */ ICommandsInterfaceRadioState* state);
 
     CARAPI_(void) SwitchToRadioState(
         /* [in] */ ICommandsInterfaceRadioState newState);

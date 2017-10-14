@@ -4201,7 +4201,7 @@ public:
         /* [in] */ IDrawable* who);
 
     virtual CARAPI OnResolveDrawables(
-        /* [in] */ Int64 layoutDirection);
+        /* [in] */ Int32 layoutDirection);
 
     virtual CARAPI RefreshDrawableState();
 

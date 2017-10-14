@@ -283,6 +283,8 @@ public:
         /* [in] */ Boolean restart,
         /* [out] */ Boolean* result);
 
+    using StateListDrawable::AddState;
+
     /**
      * Add a new drawable to the set of keyframes.
      *

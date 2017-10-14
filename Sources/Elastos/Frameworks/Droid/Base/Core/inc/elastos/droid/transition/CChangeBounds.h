@@ -221,6 +221,8 @@ public:
         /* [in] */ IChangeBounds* obj);
 
 private:
+    using Transition::CaptureValues;
+
     CARAPI_(void) CaptureValues(
         /* [in] */ ITransitionValues* values);
 

@@ -181,7 +181,7 @@ ECode InputMethodSubtypeSwitchingController::ImeSubtypeListItem::ToString(
 
 ECode InputMethodSubtypeSwitchingController::ImeSubtypeListItem::Equals(
     /* [in] */ IInterface* o,
-    /* [out] */ Int32* result)
+    /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
     if (TO_IINTERFACE(o) == TO_IINTERFACE(this)) {

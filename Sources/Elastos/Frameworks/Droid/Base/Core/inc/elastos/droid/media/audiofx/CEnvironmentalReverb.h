@@ -332,6 +332,8 @@ public:
     CARAPI GetDensity(
         /* [out] */ Int16* density);
 
+    using AudioEffect::SetParameterListener;
+
     /**
      * Registers an OnParameterChangeListener interface.
      * @param listener OnParameterChangeListener interface registered

@@ -303,6 +303,8 @@ public:
 
     CARAPI StopDtmf();
 
+    using PhoneBase::SendBurstDtmf;
+
     CARAPI SendBurstDtmf(
         /* [in] */ const String& dtmfString);
 
@@ -602,10 +604,11 @@ public:
 protected:
     CARAPI_(void) SetProperties();
 
-    CARAPI_(AutoPtr<IConnection>) DialInternal(
+    CARAPI DialInternal(
         /* [in] */ const String& dialString,
         /* [in] */ IUUSInfo* uusInfo,
-        /* [in] */ Int32 videoState);
+        /* [in] */ Int32 videoState,
+        /* [out] */ IConnection** connection);
 
     CARAPI_(Boolean) IsCfEnable(
         /* [in] */ Int32 action);

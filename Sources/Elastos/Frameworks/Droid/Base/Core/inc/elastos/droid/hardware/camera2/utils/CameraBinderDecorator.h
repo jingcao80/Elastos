@@ -43,25 +43,25 @@ private:
         CAR_INTERFACE_DECL()
 
         //@Override
-        OnBeforeInvocation(
+        CARAPI OnBeforeInvocation(
             /* [in] */ IMethodInfo* m,
             /* [in] */ ArrayOf<IInterface*>* args);
 
         //@Override
-        OnAfterInvocation(
+        CARAPI OnAfterInvocation(
             /* [in] */ IMethodInfo* m,
             /* [in] */ ArrayOf<IInterface*>* args,
             /* [in] */ IInterface* result);
 
         //@Override
-        OnCatchException(
+        CARAPI OnCatchException(
             /* [in] */ IMethodInfo* m,
             /* [in] */ ArrayOf<IInterface*>* args,
             /* [in] */ ECode t,
             /* [out] */ Boolean* result);
 
         //@Override
-        OnFinally(
+        CARAPI OnFinally(
             /* [in] */ IMethodInfo* m,
             /* [in] */ ArrayOf<IInterface*>* args);
     };

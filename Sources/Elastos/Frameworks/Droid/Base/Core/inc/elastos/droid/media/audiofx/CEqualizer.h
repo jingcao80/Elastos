@@ -154,117 +154,118 @@ public:
         /* [in] */ Int16 band,
         /* [out] */ Int16* bandLevel);
 
-        /**
-         * Gets the center frequency of the given band.
-         * @param band frequency band whose center frequency is requested. The numbering of the bands
-         * starts from 0 and ends at (number of bands - 1).
-         * @return the center frequency in milliHertz
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets the center frequency of the given band.
+     * @param band frequency band whose center frequency is requested. The numbering of the bands
+     * starts from 0 and ends at (number of bands - 1).
+     * @return the center frequency in milliHertz
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetCenterFreq(
         /* [in] */ Int16 band,
         /* [out] */ Int32* centerFreq);
 
-        /**
-         * Gets the frequency range of the given frequency band.
-         * @param band frequency band whose frequency range is requested. The numbering of the bands
-         * starts from 0 and ends at (number of bands - 1).
-         * @return the frequency range in millHertz in an array of integers. The first element is the
-         * lower limit of the range, the second element the upper limit.
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets the frequency range of the given frequency band.
+     * @param band frequency band whose frequency range is requested. The numbering of the bands
+     * starts from 0 and ends at (number of bands - 1).
+     * @return the frequency range in millHertz in an array of integers. The first element is the
+     * lower limit of the range, the second element the upper limit.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetBandFreqRange(
         /* [in] */ Int16 band,
         /* [out, callee] */ ArrayOf<Int32>** bandFreqRange);
 
-
-        /**
-         * Gets the band that has the most effect on the given frequency.
-         * @param frequency frequency in milliHertz which is to be equalized via the returned band.
-         * @return the frequency band that has most effect on the given frequency.
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets the band that has the most effect on the given frequency.
+     * @param frequency frequency in milliHertz which is to be equalized via the returned band.
+     * @return the frequency band that has most effect on the given frequency.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetBand(
         /* [in] */ Int32 frequency,
         /* [out] */ Int16* band);
 
-        /**
-         * Gets current preset.
-         * @return the preset that is set at the moment.
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets current preset.
+     * @return the preset that is set at the moment.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetCurrentPreset(
         /* [out] */ Int16* preset);
 
-        /**
-         * Sets the equalizer according to the given preset.
-         * @param preset new preset that will be taken into use. The valid range is [0,
-         * number of presets-1].
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         * @see #getNumberOfPresets()
-         */
+    /**
+     * Sets the equalizer according to the given preset.
+     * @param preset new preset that will be taken into use. The valid range is [0,
+     * number of presets-1].
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     * @see #getNumberOfPresets()
+     */
     CARAPI UsePreset(
         /* [in] */ Int16 preset);
 
-        /**
-         * Gets the total number of presets the equalizer supports. The presets will have indices
-         * [0, number of presets-1].
-         * @return the number of presets the equalizer supports.
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets the total number of presets the equalizer supports. The presets will have indices
+     * [0, number of presets-1].
+     * @return the number of presets the equalizer supports.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetNumberOfPresets(
         /* [out] */ Int16* numPresets);
 
-        /**
-         * Gets the preset name based on the index.
-         * @param preset index of the preset. The valid range is [0, number of presets-1].
-         * @return a string containing the name of the given preset.
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets the preset name based on the index.
+     * @param preset index of the preset. The valid range is [0, number of presets-1].
+     * @return a string containing the name of the given preset.
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetPresetName(
         /* [in] */ Int16 preset,
         /* [out] */ String* presetName);
 
-        /**
-         * Registers an OnParameterChangeListener interface.
-         * @param listener OnParameterChangeListener interface registered
-         */
+    using AudioEffect::SetParameterListener;
+
+    /**
+     * Registers an OnParameterChangeListener interface.
+     * @param listener OnParameterChangeListener interface registered
+     */
     CARAPI SetParameterListener(
         /* [in] */ IEqualizerOnParameterChangeListener* listener);
 
-        /**
-         * Gets the equalizer properties. This method is useful when a snapshot of current
-         * equalizer settings must be saved by the application.
-         * @return an Equalizer.Settings object containing all current parameters values
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Gets the equalizer properties. This method is useful when a snapshot of current
+     * equalizer settings must be saved by the application.
+     * @return an Equalizer.Settings object containing all current parameters values
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI GetProperties(
         /* [out] */ IEqualizerSettings** properties);
 
-        /**
-         * Sets the equalizer properties. This method is useful when equalizer settings have to
-         * be applied from a previous backup.
-         * @param settings an Equalizer.Settings object containing the properties to apply
-         * @throws IllegalStateException
-         * @throws IllegalArgumentException
-         * @throws UnsupportedOperationException
-         */
+    /**
+     * Sets the equalizer properties. This method is useful when equalizer settings have to
+     * be applied from a previous backup.
+     * @param settings an Equalizer.Settings object containing the properties to apply
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws UnsupportedOperationException
+     */
     CARAPI SetProperties(
         /* [in] */ IEqualizerSettings* settings);
 

@@ -426,7 +426,7 @@ ECode PhoneBase::constructor(
 
     SystemProperties::GetInt32(
             ITelephonyProperties::PROPERTY_CALL_RING_DELAY, 3000, &mCallRingDelay);
-    Logger::D(TAG, "mCallRingDelay=" + mCallRingDelay);
+    Logger::D(TAG, "mCallRingDelay=%d", mCallRingDelay);
 
     Int32 iv = 0;
     GetPhoneType(&iv);

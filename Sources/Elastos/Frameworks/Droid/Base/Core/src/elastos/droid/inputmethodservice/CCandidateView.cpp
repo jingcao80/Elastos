@@ -43,12 +43,14 @@ CCandidateView::SelfSimpleOnGestureListener::SelfSimpleOnGestureListener(
 CCandidateView::SelfSimpleOnGestureListener::~SelfSimpleOnGestureListener()
 {}
 
-Boolean CCandidateView::SelfSimpleOnGestureListener::OnScroll(
+ECode CCandidateView::SelfSimpleOnGestureListener::OnScroll(
     /* [in] */ IMotionEvent* e1,
     /* [in] */ IMotionEvent* e2,
     /* [in] */ Float distanceX,
-    /* [in] */ Float distanceY)
+    /* [in] */ Float distanceY,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     assert(mHost != NULL);
     mHost->mScrolled = TRUE;
     Int32 sx = 0;
@@ -66,7 +68,8 @@ Boolean CCandidateView::SelfSimpleOnGestureListener::OnScroll(
     mHost->GetScrollY(&value);
     mHost->ScrollTo(sx, value);
     mHost->Invalidate();
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 CAR_OBJECT_IMPL(CCandidateView);
@@ -136,12 +139,9 @@ ECode CCandidateView::SetService(
     return NOERROR;
 }
 
-ECode CCandidateView::ComputeHorizontalScrollRange(
-    /* [out] */ Int32* range)
+Int32 CCandidateView::ComputeHorizontalScrollRange()
 {
-    assert(range != NULL);
-    *range = mTotalWidth;
-    return NOERROR;
+    return mTotalWidth;
 }
 
 ECode CCandidateView::OnMeasure(

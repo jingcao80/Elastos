@@ -1031,7 +1031,7 @@ HardwareCamera::Parameters::Parameters(
     mOuter = camera;
 }
 
-HardwareCamera::Parameters::CopyFrom(
+ECode HardwareCamera::Parameters::CopyFrom(
     /* [in] */ IParameters* other)
 {
     if (other == NULL) {
@@ -1048,7 +1048,7 @@ AutoPtr<IHardwareCamera> HardwareCamera::Parameters::GetOuter()
     return mOuter;
 }
 
-HardwareCamera::Parameters::Same(
+ECode HardwareCamera::Parameters::Same(
     /* [in] */ IParameters* other,
     /* [out] */ Boolean* result)
 {

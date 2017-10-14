@@ -134,7 +134,7 @@ ECode AudioPortEventHandler::EventHandler::HandleMessage(
         }
     }
     Boolean b;
-    if (listeners == NULL || listeners->IsEmpty(&b), b) {
+    if (listeners == NULL || (listeners->IsEmpty(&b), b)) {
         return NOERROR;
     }
     // reset audio port cache if the event corresponds to a change coming

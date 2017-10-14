@@ -1160,7 +1160,7 @@ ECode SIMRecords::HandleMessage(
             CSimTlv::New(data, 0, data->GetLength(), (ISimTlv**)&tlv);
 
             Boolean bValid = FALSE, nextObj = FALSE;
-            for ( ; (tlv->IsValidObject(&bValid), bValid); (tlv->NextObject(&nextObj), nextObj)) {
+            for ( ; (tlv->IsValidObject(&bValid), bValid); tlv->NextObject(&nextObj)) {
                 Int32 tag = 0;
                 tlv->GetTag(&tag);
                 if (tag == TAG_FULL_NETWORK_NAME) {
@@ -2430,7 +2430,7 @@ void SIMRecords::ParseEfSpdi(
     AutoPtr<ArrayOf<Byte> > plmnEntries;
 
     Boolean bValid = FALSE, bNext = FALSE;
-    for ( ; (tlv->IsValidObject(&bValid), bValid); (tlv->NextObject(&bNext), bNext)) {
+    for ( ; (tlv->IsValidObject(&bValid), bValid); tlv->NextObject(&bNext)) {
         // Skip SPDI tag, if existant
         Int32 tag = 0;
         tlv->GetTag(&tag);

@@ -67,7 +67,7 @@ ECode CAudioPolicyConfig::ToString(
     String textDump("android.media.audiopolicy.AudioPolicyConfig:\n");
     Int32 size;
     mMixes->GetSize(&size);
-    textDump += size + " AudioMix:\n";
+    textDump.AppendFormat("%d AudioMix:\n", size);
     // for(AudioMix mix : mMixes) {
     //     // write mix route flags
     //     textDump += "* route flags=0x" + Integer.toHexString(mix.getRouteFlags()) + "\n";

@@ -143,6 +143,8 @@ protected:
     CARAPI_(AutoPtr<IUiccCardApplication>) GetUiccCardApplication();
 
 private:
+    using SMSDispatcher::HandleStatusReport;
+
     /**
      * Called when a status report is received.  This should correspond to
      * a previously successful SEND.

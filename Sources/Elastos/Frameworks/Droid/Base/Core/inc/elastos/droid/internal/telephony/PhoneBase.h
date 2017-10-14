@@ -1181,11 +1181,6 @@ public:
     virtual CARAPI AddParticipant(
         /* [in] */ const String& dialString) /*throws CallStateException*/;
 
-    virtual CARAPI Dial(
-        /* [in] */ const String& dialString,
-        /* [in] */ Int32 videoState,
-        /* [out] */ IConnection** result) = 0;
-
 protected:
     // Set the Card into the Phone Book.
     virtual CARAPI_(void) SetCardInPhoneBook();

@@ -47,7 +47,7 @@ ECode CAccountManagerAmsResponse::OnResult(
         return mHost->DoWork();
     }
     else {
-        return mHost->Set(bundle);
+        mHost->Set(bundle);
     }
     return NOERROR;
 }

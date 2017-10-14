@@ -452,7 +452,7 @@ ECode CdmaCallTracker::CanDial(
     ICallState backgroundCallState;
     ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
 
-    Boolean b1, b2, b3;
+    Boolean b1 = FALSE, b2 = FALSE, b3 = FALSE;
 // TODO: Need ICallState::IsAlive
     // foregroundCallState->IsAlive(&b1);
     // backgroundCallState->IsAlive(&b2);

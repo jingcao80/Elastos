@@ -57,9 +57,10 @@ private:
          * @param start true if focus starts to move, false if focus stops to move
          * @param camera the Camera service object
          */
-        OnAutoFocusMoving(
+        CARAPI OnAutoFocusMoving(
             /* [in] */ Boolean start,
             /* [in] */ IHardwareCamera* camera);
+
     private:
         LegacyFocusStateMapper* mHost;
         Int32 mCurrentAfRun;
@@ -95,6 +96,7 @@ private:
         CARAPI OnAutoFocus(
             /* [in] */ Boolean success,
             /* [in] */ IHardwareCamera* camera);
+
     private:
         LegacyFocusStateMapper* mHost;
         Int32 mCurrentAfRun;

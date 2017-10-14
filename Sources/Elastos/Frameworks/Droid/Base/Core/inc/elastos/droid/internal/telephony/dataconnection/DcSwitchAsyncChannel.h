@@ -55,6 +55,8 @@ public:
         /* [in] */ IMessage* response,
         /* [out] */ Int32* result);
 
+    using AsyncChannel::ConnectSync;
+
     CARAPI ConnectSync(
         /* [in] */ const String& type,
         /* [out] */ Int32* result);

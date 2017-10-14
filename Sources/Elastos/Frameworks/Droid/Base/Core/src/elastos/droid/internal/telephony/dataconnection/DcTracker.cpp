@@ -614,7 +614,7 @@ DcTracker::OnDemandDdsLockNotifier::OnDemandDdsLockNotifier(
     : mHost(host)
 {}
 
-DcTracker::OnDemandDdsLockNotifier::NotifyOnDemandDdsLockGranted(
+ECode DcTracker::OnDemandDdsLockNotifier::NotifyOnDemandDdsLockGranted(
     /* [in] */ INetworkRequest* n)
 {
     mHost->Log("Got the tempDds lock for the request = %s", TO_CSTR(n));

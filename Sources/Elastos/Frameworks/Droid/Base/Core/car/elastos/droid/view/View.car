@@ -6175,7 +6175,7 @@ module
              * @hide
              */
             OnResolveDrawables(
-                [in] Int64 layoutDirection);
+                [in] Int32 layoutDirection);
 
             /**
              * This function is called whenever the view hotspot changes and needs to

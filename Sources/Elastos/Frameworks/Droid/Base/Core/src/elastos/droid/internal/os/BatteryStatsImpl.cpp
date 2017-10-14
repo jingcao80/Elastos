@@ -8392,6 +8392,7 @@ void BatteryStatsImpl::SetOnBatteryLocked(
                 && (mHistoryBuffer->GetDataSize(&eleSize), eleSize >= MAX_HISTORY_BUFFER)))) {
             Int32 low;
             GetLowDischargeAmountSinceCharge(&low);
+            GetHighDischargeAmountSinceCharge(&high);
             Slogger::I(TAG, "Resetting battery stats: level=%d status=%d dischargeLevel=%d lowAmount=%d highAmount=%d",
                 level, oldStatus, mDischargeCurrentLevel, low, high);
             // Before we write, collect a snapshot of the final aggregated

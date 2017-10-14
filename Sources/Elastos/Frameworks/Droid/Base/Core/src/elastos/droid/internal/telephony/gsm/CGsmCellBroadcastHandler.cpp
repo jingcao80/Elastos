@@ -144,9 +144,11 @@ void CGsmCellBroadcastHandler::OnQuitting()
     CellBroadcastHandler::OnQuitting();     // release wakelock
 }
 
-Boolean CGsmCellBroadcastHandler::HandleSmsMessage(
-    /* [in] */ IMessage* message)
+ECode CGsmCellBroadcastHandler::HandleSmsMessage(
+    /* [in] */ IMessage* message,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IInterface> obj;
     message->GetObj((IInterface**)&obj);
     // if (obj instanceof AsyncResult) {
@@ -154,13 +156,12 @@ Boolean CGsmCellBroadcastHandler::HandleSmsMessage(
         AutoPtr<ISmsCbMessage> cbMessage = HandleGsmBroadcastSms((AsyncResult*)IAsyncResult::Probe(obj));
         if (cbMessage != NULL) {
             HandleBroadcastSms(cbMessage);
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
     }
 
-    Boolean b;
-    CellBroadcastHandler::HandleSmsMessage(message, &b);
-    return b;
+    return CellBroadcastHandler::HandleSmsMessage(message, result);
 }
 
 AutoPtr<ISmsCbMessage> CGsmCellBroadcastHandler::HandleGsmBroadcastSms(

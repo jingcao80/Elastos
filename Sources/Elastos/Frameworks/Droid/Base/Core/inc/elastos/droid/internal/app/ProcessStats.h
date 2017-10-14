@@ -428,6 +428,8 @@ public:
             /* [in] */ Int32 memFactor,
             /* [in] */ Int64 now);
 
+        using DurationsTable::GetDuration;
+
         CARAPI_(Int64) GetDuration(
             /* [in] */ Int32 opType,
             /* [in] */ Int32 curState,

@@ -259,8 +259,7 @@ ECode DataConnection::DcDefaultState::ProcessMessage(
     if (VDBG) {
         Int32 size;
         mHost->mApnContexts->GetSize(&size);
-        String s;
-        mHost->GetWhatToString(msgWhat, &s);
+        String s = mHost->GetWhatToString(msgWhat);
         mHost->Log("DcDefault msg= %s RefCount=%d", s.string(), size);
     }
     if (msgWhat == IAsyncChannel::CMD_CHANNEL_FULL_CONNECTION) {
@@ -413,8 +412,7 @@ ECode DataConnection::DcDefaultState::ProcessMessage(
     }
     else {
         if (DBG) {
-            String s;
-            mHost->GetWhatToString(msgWhat, &s);
+            String s = mHost->GetWhatToString(msgWhat);
             mHost->Log("DcDefaultState: shouldn't happen but ignore msg.what=", s.string());
         }
     }
@@ -546,8 +544,7 @@ ECode DataConnection::DcInactiveState::ProcessMessage(
         retVal = HANDLED;
     } else {
         if (VDBG) {
-            String whatToString;
-            mHost->GetWhatToString(msgWhat, &whatToString);
+            String whatToString = mHost->GetWhatToString(msgWhat);
             mHost->Log("DcInactiveState nothandled msg.what=%s", whatToString.string());
         }
         retVal = NOT_HANDLED;
@@ -752,8 +749,7 @@ ECode DataConnection::DcRetryingState::ProcessMessage(
         }
         else {
             if (VDBG) {
-                String whatToString;
-                mHost->GetWhatToString(msgWhat, &whatToString);
+                String whatToString = mHost->GetWhatToString(msgWhat);
                 mHost->Log("DcRetryingState nothandled msg.what=%s", whatToString.string());
             }
             retVal = NOT_HANDLED;
@@ -960,8 +956,7 @@ ECode DataConnection::DcActivatingState::ProcessMessage(
         if (VDBG) {
             Int32 size;
             mHost->mApnContexts->GetSize(&size);
-            String whatToString;
-            mHost->GetWhatToString(msgWhat, &whatToString);
+            String whatToString = mHost->GetWhatToString(msgWhat);
             mHost->Log("DcActivatingState not handled msg.what=%s RefCount=%d", whatToString.string(), size);
         }
         retVal = NOT_HANDLED;
@@ -1150,8 +1145,7 @@ ECode DataConnection::DcActiveState::ProcessMessage(
     }
     else {
         if (VDBG) {
-            String whatToString;
-            mHost->GetWhatToString(msgWhat, &whatToString);
+            String whatToString = mHost->GetWhatToString(msgWhat);
             mHost->Log("DcActiveState not handled msg.what=%s", whatToString.string());
         }
         retVal = NOT_HANDLED;
@@ -1212,8 +1206,7 @@ ECode DataConnection::DcDisconnectingState::ProcessMessage(
     }
     else {
         if (VDBG) {
-            String whatToString;
-            mHost->GetWhatToString(msgWhat, &whatToString);
+            String whatToString = mHost->GetWhatToString(msgWhat);
             mHost->Log("DcDisconnectingState not handled msg.what=%s", whatToString.string());
         }
         retVal = NOT_HANDLED;
@@ -1270,8 +1263,7 @@ ECode DataConnection::DcDisconnectionErrorCreatingConnection::ProcessMessage(
     }
     else {
         if (VDBG) {
-            String whatToString;
-            mHost->GetWhatToString(msgWhat, &whatToString);
+            String whatToString = mHost->GetWhatToString(msgWhat);
             mHost->Log("DcDisconnectionErrorCreatingConnection not handled msg.what=%s", whatToString.string());
         }
         retVal = NOT_HANDLED;
@@ -2463,11 +2455,12 @@ ECode DataConnection::TearDownNow()
     return NOERROR;
 }
 
-ECode DataConnection::GetWhatToString(
-    /* [in] */ Int32 what,
-    /* [out] */ String* result)
+String DataConnection::GetWhatToString(
+    /* [in] */ Int32 what)
 {
-    return CmdToString(what, result);
+    String cmdStr;
+    CmdToString(what, &cmdStr);
+    return cmdStr;
 }
 
 ECode DataConnection::MsgToString(

@@ -85,7 +85,7 @@ AutoPtr<ILayoutInflaterFilter> AppWidgetHostView::sInflaterFilter = new AppWidge
 
 CAR_INTERFACE_IMPL(AppWidgetHostView::MyLayoutInflaterFilter, Object, ILayoutInflaterFilter);
 
-AppWidgetHostView::MyLayoutInflaterFilter::OnLoadClass(
+ECode AppWidgetHostView::MyLayoutInflaterFilter::OnLoadClass(
     /* [in] */ IClassInfo* clazz,
     /* [out] */ Boolean* allowed)
 {
@@ -103,7 +103,7 @@ AppWidgetHostView::MyLayoutInflaterFilter::OnLoadClass(
 
 CAR_INTERFACE_IMPL(AppWidgetHostView::ParcelableSparseArray, SparseArray, IParcelable);
 
-AppWidgetHostView::ParcelableSparseArray::WriteToParcel(
+ECode AppWidgetHostView::ParcelableSparseArray::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest);
@@ -122,7 +122,7 @@ AppWidgetHostView::ParcelableSparseArray::WriteToParcel(
     return NOERROR;
 }
 
-AppWidgetHostView::ParcelableSparseArray::ReadFromParcel(
+ECode AppWidgetHostView::ParcelableSparseArray::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     VALIDATE_NOT_NULL(source);

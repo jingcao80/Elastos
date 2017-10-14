@@ -50,7 +50,8 @@ public:
         /* [out] */ Boolean *isReadOnly);
 
     /** @hide */
-    CARAPI_(AutoPtr<Learner>) GetLearner();
+    CARAPI GetLearner(
+        /* [out] */ ILearner** learner);
 
     CARAPI SetOrientationStyle(
         /* [in] */ Int32 style);

@@ -1241,11 +1241,11 @@ ECode PduPersister::Persist(
     values->Put(ITelephonyMmsPart::MSG_ID, msgId);
     AutoPtr<IUriHelper> urihlp;
     CUriHelper::AcquireSingleton((IUriHelper**)&urihlp);
-    AutoPtr<IUri> uri;
-    urihlp->Parse(String("content://mms/") + StringUtils::ToString(dummyId) + String("/part"), (IUri**)&uri);
+    AutoPtr<IUri> newUri;
+    urihlp->Parse(String("content://mms/") + StringUtils::ToString(dummyId) + String("/part"), (IUri**)&newUri);
     Int32 UpdateResult = 0;
     sw->Update(mContext, mContentResolver,
-                        uri,
+                        newUri,
                         values, String(NULL), NULL, &UpdateResult);
     // We should return the longest URI of the persisted PDU, for
     // example, if input URI is "content://mms/inbox" and the _ID of
@@ -2038,15 +2038,15 @@ void PduPersister::UpdatePart(
     AutoPtr<ArrayOf<Byte> > fileName;
     part->GetFilename((ArrayOf<Byte>**)&fileName);
     if (fileName != NULL) {
-        String fileName(fileName);
-        values->Put(ITelephonyMmsPart::FILENAME, fileName);
+        String fileNameStr(*fileName);
+        values->Put(ITelephonyMmsPart::FILENAME, fileNameStr);
     }
 
     AutoPtr<ArrayOf<Byte> > name;
     part->GetName((ArrayOf<Byte>**)&name);
     if (name != NULL) {
-        String name(name);
-        values->Put(ITelephonyMmsPart::NAME, name);
+        String nameStr(*name);
+        values->Put(ITelephonyMmsPart::NAME, nameStr);
     }
 
     String value;

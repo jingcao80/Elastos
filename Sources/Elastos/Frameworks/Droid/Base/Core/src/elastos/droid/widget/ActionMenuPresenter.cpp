@@ -79,28 +79,25 @@ ECode ActionMenuPresenter::MyForwardingListener::GetPopup(
     return mHostEx->mOverflowPopup->GetPopup(window);
 }
 
-ECode ActionMenuPresenter::MyForwardingListener::OnForwardingStarted(
-    /* [out] */ Boolean* result)
+Boolean ActionMenuPresenter::MyForwardingListener::OnForwardingStarted()
 {
-    mHostEx->ShowOverflowMenu(result);
-    *result = TRUE;
-    return NOERROR;
+    Boolean result;
+    mHostEx->ShowOverflowMenu(&result);
+    return TRUE;
 }
 
-ECode ActionMenuPresenter::MyForwardingListener::OnForwardingStopped(
-    /* [out] */ Boolean* result)
+Boolean ActionMenuPresenter::MyForwardingListener::OnForwardingStopped()
 {
     // Displaying the popup occurs asynchronously, so wait for
     // the runnable to finish before deciding whether to stop
     // forwarding.
     if (mHostEx->mPostedOpenRunnable != NULL) {
-        *result = FALSE;
-        return NOERROR;
+        return FALSE;
     }
 
-    mHostEx->HideOverflowMenu(result);
-    *result = TRUE;
-    return NOERROR;
+    Boolean result;
+    mHostEx->HideOverflowMenu(&result);
+    return TRUE;
 }
 
 CAR_INTERFACE_IMPL(ActionMenuPresenter::OverflowMenuButton, ImageButton, IActionMenuChildView)

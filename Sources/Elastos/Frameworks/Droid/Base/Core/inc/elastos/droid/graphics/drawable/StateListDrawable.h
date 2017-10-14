@@ -165,8 +165,13 @@ public:
     CARAPI SetLayoutDirection(
         /* [in] */ Int32 layoutDirection);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+
     CARAPI_(void) SetConstantState(
         /* [in] */ StateListState* state);
+
+#pragma clang diagnostic pop
 
 protected:
     //@Override

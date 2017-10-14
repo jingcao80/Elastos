@@ -2312,7 +2312,7 @@ ECode DcTrackerBase::SendCleanUpConnection(
     /* [in] */ Boolean tearDown,
     /* [in] */ IApnContext* apnContext)
 {
-    if (DBG) Log("sendCleanUpConnection: tearDown=%d", tearDown + " apnContext=%s", TO_CSTR(apnContext));
+    if (DBG) Log("sendCleanUpConnection: tearDown=%d apnContext=%s", tearDown, TO_CSTR(apnContext));
     AutoPtr<IMessage> msg;
     ObtainMessage(IDctConstants::EVENT_CLEAN_UP_CONNECTION, (IMessage**)&msg);
     msg->SetArg1(tearDown ? 1 : 0);

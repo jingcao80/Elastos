@@ -56,6 +56,8 @@ public:
     CARAPI constructor(
         /* [in] */ IAudioDevicePortConfig* config);
 
+    using AudioPortConfig::Port;
+
     /**
      * Returns the audio device port this AudioDevicePortConfig is issued from.
      */

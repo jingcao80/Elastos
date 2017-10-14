@@ -869,10 +869,7 @@ ECode CGSMPhone::Dial(
     }
 
     if (LOCAL_DEBUG) Logger::D(TAG, "Trying (non-IMS) CS call");
-    AutoPtr<IConnection> c = DialInternal(dialString, NULL, IVideoProfileVideoState::AUDIO_ONLY);
-    *result = c;
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return DialInternal(dialString, NULL, IVideoProfileVideoState::AUDIO_ONLY, result);
 }
 
 ECode CGSMPhone::AddParticipant(
@@ -880,8 +877,8 @@ ECode CGSMPhone::AddParticipant(
 {
     AutoPtr<IImsPhone> imsPhone = mImsPhone;
 
-    Boolean b1, b2;
-    Boolean imsUseEnabled;
+    Boolean b1 = FALSE, b2 = FALSE;
+    Boolean imsUseEnabled = FALSE;
 // TODO: Need CImsManager
     // imsUseEnabled =
     //         (CImsManager->IsEnhanced4gLteModeSettingEnabledByPlatform(mContext, &b1), b1) &&
@@ -2185,11 +2182,13 @@ void CGSMPhone::SetProperties()
             id, str);
 }
 
-AutoPtr<IConnection> CGSMPhone::DialInternal(
+ECode CGSMPhone::DialInternal(
     /* [in] */ const String& dialString,
     /* [in] */ IUUSInfo* uusInfo,
-    /* [in] */ Int32 videoState)
+    /* [in] */ Int32 videoState,
+    /* [out] */ IConnection** connection)
 {
+    VALIDATE_NOT_NULL(connection);
     // Need to make sure dialString gets parsed properly
     String newDialString;
     PhoneNumberUtils::StripSeparators(dialString, &newDialString);
@@ -2197,7 +2196,8 @@ AutoPtr<IConnection> CGSMPhone::DialInternal(
     // handle in-call MMI first if applicable
     Boolean b;
     if (HandleInCallMmiCommands(newDialString, &b), b) {
-        return NULL;
+        *connection = NULL;
+        return NOERROR;
     }
 
     // Only look at the Network portion for mmi
@@ -2211,17 +2211,14 @@ AutoPtr<IConnection> CGSMPhone::DialInternal(
     // if (LOCAL_DEBUG) Logger::D(TAG,
     //                        "dialing w/ mmi '" + mmi + "'...");
 
-    AutoPtr<IConnection> conn;
     if (mmi == NULL) {
-        ((CGsmCallTracker*)mCT.Get())->Dial(newDialString, uusInfo, (IConnection**)&conn);
-        return conn;
+        return ((CGsmCallTracker*)mCT.Get())->Dial(newDialString, uusInfo, connection);
     }
     else if (((CGsmMmiCode*)mmi.Get())->IsTemporaryModeCLIR(&b), b) {
         Int32 mode;
         ((CGsmMmiCode*)mmi.Get())->GetCLIRMode(&mode);
-        ((CGsmCallTracker*)mCT.Get())->Dial(((CGsmMmiCode*)mmi.Get())->mDialingNumber,
-                mode, uusInfo, (IConnection**)&conn);
-        return conn;
+        return ((CGsmCallTracker*)mCT.Get())->Dial(((CGsmMmiCode*)mmi.Get())->mDialingNumber,
+                mode, uusInfo, connection);
     }
     else {
         mPendingMMIs->Add(mmi);
@@ -2230,7 +2227,8 @@ AutoPtr<IConnection> CGSMPhone::DialInternal(
         ((CGsmMmiCode*)mmi.Get())->ProcessCode();
 
         // FIXME should this return NULL or something else?
-        return NULL;
+        *connection = NULL;
+        return NOERROR;
     }
 }
 

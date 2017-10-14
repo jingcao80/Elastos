@@ -46,9 +46,7 @@ ECode SubMenuBuilder::SetQwertyMode(
 ECode SubMenuBuilder::IsQwertyMode(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = mParentMenu->IsQwertyMode();
-    return NOERROR;
+    return mParentMenu->IsQwertyMode(result);
 }
 
 ECode SubMenuBuilder::SetShortcutsVisible(

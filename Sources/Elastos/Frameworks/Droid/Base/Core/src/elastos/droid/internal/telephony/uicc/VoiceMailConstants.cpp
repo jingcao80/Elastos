@@ -77,8 +77,9 @@ ECode VoiceMailConstants::GetCarrierName(
     AutoPtr<IArrayOf> arrayOf = IArrayOf::Probe(p);
     AutoPtr<IInterface> obj;
     arrayOf->Get(NAME, (IInterface**)&obj);
-    if (obj != NULL);
+    if (obj != NULL) {
         ICharSequence::Probe(obj)->ToString(result);
+    }
     //*result = (*data)[NAME];
     return NOERROR;
 }
@@ -93,8 +94,9 @@ ECode VoiceMailConstants::GetVoiceMailNumber(
     AutoPtr<IArrayOf> arrayOf = IArrayOf::Probe(p);
     AutoPtr<IInterface> obj;
     arrayOf->Get(NUMBER, (IInterface**)&obj);
-    if (obj != NULL);
+    if (obj != NULL) {
         ICharSequence::Probe(obj)->ToString(result);
+    }
     return NOERROR;
 }
 
@@ -108,8 +110,9 @@ ECode VoiceMailConstants::GetVoiceMailTag(
     AutoPtr<IArrayOf> arrayOf = IArrayOf::Probe(p);
     AutoPtr<IInterface> obj;
     arrayOf->Get(TAG, (IInterface**)&obj);
-    if (obj != NULL);
+    if (obj != NULL) {
         ICharSequence::Probe(obj)->ToString(result);
+    }
     return NOERROR;
 }
 

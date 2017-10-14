@@ -1863,7 +1863,7 @@ void ImsPhoneMmiCode::OnSuppSvcQueryComplete(
             ssInfo = (CImsSsInfo*)IImsSsInfo::Probe(p);
 
             if (ssInfo != NULL) {
-                Logger::D(LOGTAG, "ImsSsInfo mStatus = " + ssInfo->mStatus);
+                Logger::D(LOGTAG, "ImsSsInfo mStatus = %d", ssInfo->mStatus);
                 if (ssInfo->mStatus == IImsSsInfo::DISABLED) {
                     cs = NULL;
                     sb.Append((mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs), cs));

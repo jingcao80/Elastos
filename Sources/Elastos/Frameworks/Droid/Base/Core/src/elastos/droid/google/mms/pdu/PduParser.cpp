@@ -1128,7 +1128,7 @@ AutoPtr<IEncodedStringValue> PduParser::ParseEncodedStringValue(
     if (first == 0) {
         AutoPtr<IEncodedStringValue> p;
         CEncodedStringValue::New(String(""), (IEncodedStringValue**)&p);
-        return NOERROR;
+        return p;
     }
 
     IInputStream::Probe(pduDataStream)->Reset();
@@ -1436,8 +1436,8 @@ void PduParser::ParseContentTypeParams(
      * if that is possible.
      * Untyped-value = Integer-value | Text-value
      */
-    assert(NULL != pduDataStream);
-    assert(length > 0);
+    assert(pduDataStream != NULL);
+    assert(length != NULL);
 
     Int32 startPos = 0;
     IInputStream::Probe(pduDataStream)->Available(&startPos);

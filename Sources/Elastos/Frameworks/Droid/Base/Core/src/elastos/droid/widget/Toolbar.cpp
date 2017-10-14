@@ -1212,8 +1212,7 @@ void Toolbar::OnSetLayoutParams(
      * be reflected in the final results.
      */
     if (!CheckLayoutParams(layoutParams)) {
-        AutoPtr<IViewGroupLayoutParams> lp;
-        GenerateLayoutParams(layoutParams, (IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> lp = GenerateLayoutParams(layoutParams);
         child->SetLayoutParams(lp);
     }
 }
@@ -1228,11 +1227,12 @@ ECode Toolbar::GenerateLayoutParams(
     return CToolbarLayoutParams::New(ctx, attrs, layoutParams);
 }
 
-ECode Toolbar::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** layoutParams)
+AutoPtr<IViewGroupLayoutParams> Toolbar::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    return CToolbarLayoutParams::New(p, layoutParams);
+    AutoPtr<IViewGroupLayoutParams> params;
+    CToolbarLayoutParams::New(p, (IViewGroupLayoutParams**)&params);
+    return params;
 }
 
 ECode Toolbar::GetWrapper(
@@ -1925,7 +1925,7 @@ ECode Toolbar::AddSystemView(
         GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
     }
     else if (!CheckLayoutParams(vlp)) {
-        GenerateLayoutParams(vlp, (IViewGroupLayoutParams**)&lp);
+        lp = GenerateLayoutParams(vlp);
     }
     else {
         lp = vlp;

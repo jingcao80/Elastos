@@ -1180,19 +1180,19 @@ void GpsMeasurement::Initialize()
 }
 
 void GpsMeasurement::SetFlag(
-    /* [in] */ Int16 flag)
+    /* [in] */ Int32 flag)
 {
     mFlags |= flag;
 }
 
 void GpsMeasurement::ResetFlag(
-    /* [in] */ Int16 flag)
+    /* [in] */ Int32 flag)
 {
     mFlags &= ~flag;
 }
 
 Boolean GpsMeasurement::IsFlagSet(
-    /* [in] */ Int16 flag)
+    /* [in] */ Int32 flag)
 {
     return (mFlags & flag) == flag;
 }

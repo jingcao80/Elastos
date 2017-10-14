@@ -739,7 +739,7 @@ Boolean CDMASmsMessage::ProcessCdmaCTWdpHeader(
     }
 
     AutoPtr<CDMASmsMessage> sm = (CDMASmsMessage*)sms;
-    AutoPtr<BearerData> bd = (BearerData*)bd.Get();
+    AutoPtr<BearerData> bd = (BearerData*)sm->mBearerData.Get();
     inStream->Read(4, &bd->messageType);
     Int32 val;
     msgID = (inStream->Read(8, &val), val) << 8;

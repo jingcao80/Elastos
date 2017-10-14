@@ -292,7 +292,6 @@ public:
         AutoPtr<ITreeSet> mFutureErrorSet;
         /** Map frame numbers to list of partial results */
         HashMap<Int64, AutoPtr<IList> > mPartialResults;
-        ICameraDeviceImpl* _mHost;
         CameraDeviceImpl* mHost;
     };
 
@@ -346,7 +345,6 @@ public:
             /* [in] */ ICaptureResultExtras* resultExtras);
 
     private:
-        ICameraDeviceImpl* _mHost;
         CameraDeviceImpl* mHost;
     };
 

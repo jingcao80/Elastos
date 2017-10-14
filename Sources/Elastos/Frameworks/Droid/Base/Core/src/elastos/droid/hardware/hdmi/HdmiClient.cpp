@@ -33,7 +33,7 @@ HdmiClient::MyListener::MyListener(
 {
 }
 
-HdmiClient::MyListener::OnReceived(
+ECode HdmiClient::MyListener::OnReceived(
     /* [in] */ Int32 srcAddress,
     /* [in] */ ArrayOf<Byte>* params,
     /* [in] */ Boolean hasVendorId)

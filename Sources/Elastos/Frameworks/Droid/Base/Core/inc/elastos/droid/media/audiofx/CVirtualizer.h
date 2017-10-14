@@ -235,6 +235,8 @@ public:
     CARAPI GetVirtualizationMode(
         /* [out] */ Int32 * result);
 
+    using AudioEffect::SetParameterListener;
+
     /**
      * Registers an OnParameterChangeListener interface.
      * @param listener OnParameterChangeListener interface registered

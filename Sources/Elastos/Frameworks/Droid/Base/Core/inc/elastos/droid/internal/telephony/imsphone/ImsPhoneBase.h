@@ -55,7 +55,6 @@ class ImsPhoneBase
     : public PhoneBase
 {
 public:
-
     ImsPhoneBase();
 
     CARAPI constructor(
@@ -63,14 +62,14 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IPhoneNotifier* notifier);
 
+    using PhoneBase::Dial;
+
     // @Override
     CARAPI Dial(
         /* [in] */ const String& dialString,
         /* [in] */ IUUSInfo* uusInfo,
         /* [in] */ Int32 videoState,
         /* [out] */ IConnection** result);
-
-    using PhoneBase::Dial;
 
     // @Override
     CARAPI MigrateFrom(

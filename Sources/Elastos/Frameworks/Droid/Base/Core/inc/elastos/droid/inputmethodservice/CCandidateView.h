@@ -51,11 +51,13 @@ protected:
 
         ~SelfSimpleOnGestureListener();
 
-        Boolean OnScroll(
+        CARAPI OnScroll(
             /* [in] */ IMotionEvent* e1,
             /* [in] */ IMotionEvent* e2,
             /* [in] */ Float distanceX,
-            /* [in] */ Float distanceY);
+            /* [in] */ Float distanceY,
+            /* [out] */ Boolean* res);
+
     private:
         CCandidateView* mHost;
     };
@@ -77,8 +79,7 @@ public:
     CARAPI SetService(
         /* [in] */ ISoftKeyboard* listener);
 
-    CARAPI ComputeHorizontalScrollRange(
-        /* [out] */ Int32* range);
+    CARAPI_(Int32) ComputeHorizontalScrollRange();
 
     CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,

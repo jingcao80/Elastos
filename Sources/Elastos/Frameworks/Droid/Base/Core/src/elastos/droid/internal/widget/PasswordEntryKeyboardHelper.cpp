@@ -288,7 +288,7 @@ void PasswordEntryKeyboardHelper::SendKeyEventsToTarget(
     /* [in] */ Int32 character)
 {
     AutoPtr<IViewRootImpl> viewRootImpl;
-    reinterpret_cast<Elastos::Droid::View::View*>(mTargetView.Get())->GetViewRootImpl((IViewRootImpl**)&viewRootImpl);
+    ((Elastos::Droid::View::View*)mTargetView.Get())->GetViewRootImpl((IViewRootImpl**)&viewRootImpl);
     AutoPtr<ArrayOf<IKeyEvent*> > events;
     AutoPtr<IKeyCharacterMap> kcm;
     CKeyCharacterMap::Load(IKeyCharacterMap::VIRTUAL_KEYBOARD, (IKeyCharacterMap**)&kcm);
@@ -314,7 +314,7 @@ ECode PasswordEntryKeyboardHelper::SendDownUpKeyEvents(
 {
     Int64 eventTime = SystemClock::GetUptimeMillis();
     AutoPtr<IViewRootImpl> viewRootImpl;
-    reinterpret_cast<Elastos::Droid::View::View*>(mTargetView.Get())->GetViewRootImpl((IViewRootImpl**)&viewRootImpl);
+    ((Elastos::Droid::View::View*)mTargetView.Get())->GetViewRootImpl((IViewRootImpl**)&viewRootImpl);
     AutoPtr<IKeyEvent> keyEvent;
     CKeyEvent::New(eventTime, eventTime, IKeyEvent::ACTION_DOWN, keyEventCode, 0, 0,
                         IKeyCharacterMap::VIRTUAL_KEYBOARD, 0,

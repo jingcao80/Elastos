@@ -118,19 +118,16 @@ ECode CAccountManager::AmsTask::Start(
     return NOERROR;
 }
 
-ECode CAccountManager::AmsTask::Set(
-    /* [in] */ IBundle* bundle)
+void CAccountManager::AmsTask::Set(
+    /* [in] */ IInterface* bundle)
 {
     //TODO: somehow a null is being set as the result of the Future. Log this
     // case to help debug where this is occurring. When this bug is fixed this
     // condition statement should be removed.
     if (bundle == NULL) {
         Slogger::E(TAG, "the bundle must not be null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    //super.set(bundle);
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    FutureTask::Set(bundle);
 }
 
 ECode CAccountManager::AmsTask::InternalGetResult(
@@ -560,13 +557,8 @@ ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::Run(
         return mHost->GetAuthToken(account, mAuthTokenType, NULL /* options */, mActivity,
                 mMyCallback, mHandler, (IAccountManagerFuture**)&f);
     }
-    ECode ec = Set(result);
-    if (ec == (ECode)E_OPERATION_CANCELED_EXCEPTION) {
-        Boolean result;
-        Cancel(TRUE /* mayInterruptIfRUnning */, &result);
-    }
-
-    return ec;
+    Set(result);
+    return NOERROR;
     // } catch (OperationCanceledException e) {
     //     cancel(true /* mayInterruptIfRUnning */);
     // } catch (IOException e) {

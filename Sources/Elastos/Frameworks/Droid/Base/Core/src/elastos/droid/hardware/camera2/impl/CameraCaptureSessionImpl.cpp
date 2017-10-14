@@ -359,7 +359,7 @@ CameraCaptureSessionImpl::MyCaptureCallback::MyCaptureCallback(
 {
 }
 
-CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceCompleted(
+ECode CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceCompleted(
     /* [in] */ ICameraDevice* camera,
     /* [in] */ Int32 sequenceId,
     /* [in] */ Int64 frameNumber)
@@ -367,7 +367,7 @@ CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceCompleted(
     return mHost->FinishPendingSequence(sequenceId);
 }
 
-CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceAborted(
+ECode CameraCaptureSessionImpl::MyCaptureCallback::OnCaptureSequenceAborted(
     /* [in] */ ICameraDevice* camera,
     /* [in] */ Int32 sequenceId)
 {

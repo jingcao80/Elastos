@@ -94,7 +94,7 @@ ECode ImsPhoneCallTracker::InnerBroadcastReceiver::OnReceive(
 
         // try {
         // Network initiated USSD will be treated by mImsUssdListener
-        Boolean isUssd;
+        Boolean isUssd = FALSE;
 // TODO: Need IImsManager
         // intent->GetBooleanExtra(IImsManager::EXTRA_USSD, FALSE, &isUssd);
         if (isUssd) {
@@ -402,7 +402,7 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallHoldReceived(
     AutoPtr<IImsPhoneConnection> conn = mOwner->FindConnection(imsCall);
     ICallState state;
     if (conn != NULL && (IConnection::Probe(conn)->GetState(&state), state) == ICallState_ACTIVE) {
-        Boolean b;
+        Boolean b = FALSE;
 // TODO: Need IImsCall
         // ImsPhoneCall->IsLocalTone(imsCall, &b);
         if (!mOwner->mOnHoldToneStarted && b) {
@@ -1127,7 +1127,7 @@ ECode ImsPhoneCallTracker::CanDial(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    Boolean ret;
+    Boolean ret = FALSE;
     Int32 serviceState;
     AutoPtr<IServiceState> ss;
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&ss);

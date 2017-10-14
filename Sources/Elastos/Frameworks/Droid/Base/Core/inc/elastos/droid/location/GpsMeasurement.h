@@ -751,13 +751,13 @@ private:
     CARAPI_(void) Initialize();
 
     CARAPI_(void) SetFlag(
-        /* [in] */ Int16 flag);
+        /* [in] */ Int32 flag);
 
     CARAPI_(void) ResetFlag(
-        /* [in] */ Int16 flag);
+        /* [in] */ Int32 flag);
 
     CARAPI_(Boolean) IsFlagSet(
-        /* [in] */ Int16 flag);
+        /* [in] */ Int32 flag);
 
 private:
     const static String TAG;

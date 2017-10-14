@@ -55,7 +55,7 @@ private:
 
         CAR_INTERFACE_DECL()
 
-        DispatchRemoteVolumeUpdate(
+        CARAPI DispatchRemoteVolumeUpdate(
             /* [in] */ Int32 direction,
             /* [in] */ Int32 value);
 

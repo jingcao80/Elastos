@@ -607,7 +607,8 @@ public:
     /**
      * @return whether the menu shortcuts are in qwerty mode or not
      */
-    virtual CARAPI_(Boolean) IsQwertyMode();
+    virtual CARAPI IsQwertyMode(
+        /* [out] */ Boolean* qwertyMode);
 
     virtual CARAPI_(AutoPtr<IResources>) GetResources();
 

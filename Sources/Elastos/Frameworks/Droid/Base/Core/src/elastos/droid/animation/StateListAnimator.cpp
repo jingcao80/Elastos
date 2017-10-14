@@ -49,7 +49,7 @@ StateListAnimator::AnimatorListener::AnimatorListener(
     : mHost(host)
 {}
 
-StateListAnimator::AnimatorListener::OnAnimationEnd(
+ECode StateListAnimator::AnimatorListener::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     animation->SetTarget(NULL);

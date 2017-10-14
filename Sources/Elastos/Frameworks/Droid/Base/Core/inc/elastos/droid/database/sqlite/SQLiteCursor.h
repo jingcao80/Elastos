@@ -127,6 +127,8 @@ public:
         /* [in] */ ArrayOf<String>* selectionArgs);
 
 private:
+    using AbstractWindowedCursor::FillWindow;
+
     CARAPI_(void) FillWindow(
         /* [in] */ Int32 requiredPos);
 

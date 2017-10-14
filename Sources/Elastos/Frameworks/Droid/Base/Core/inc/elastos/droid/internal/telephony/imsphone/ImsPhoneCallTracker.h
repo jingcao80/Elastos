@@ -392,6 +392,8 @@ public:
     virtual CARAPI GetUtInterface(
         /* [out] */ /*TODO IImsUtInterface*/IInterface** result);
 
+    using CallTracker::NotifySrvccState;
+
     /* package */
     virtual CARAPI NotifySrvccState(
         /* [in] */ ICallSrvccState state);

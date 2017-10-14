@@ -231,7 +231,8 @@ module
          * @return {@code true} if the surface was set, {@code false} otherwise.
          */
         OnSetSurface(
-            [in] ISurface * surface);
+            [in] ISurface* surface,
+            [out] Boolean* result);
 
         /**
          * Called after any structural changes (format or size) have been made to the

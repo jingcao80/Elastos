@@ -97,9 +97,9 @@ ECode CloseableLock::Close()
     }
     else {
         pthread_once(&sKeyOnce, MakeKey);
-        Int32* lockCount = (Int32*)pthread_getspecific(sTlsKey);
+        Int32 lockCount = (Int32)pthread_getspecific(sTlsKey);
 
-        if (*lockCount != 1) {
+        if (lockCount != 1) {
             // Future: may want to add a #releaseAndClose to allow this.
             // throw new IllegalStateException(
             //         "Cannot close while one or more acquired locks are being held by this " +
@@ -152,8 +152,7 @@ ECode CloseableLock::AcquireLock(
     }
 
     pthread_once(&sKeyOnce, MakeKey);
-    Int32* lockCount1 = (Int32*)pthread_getspecific(sTlsKey);
-    ownedLocks = *lockCount1;
+    ownedLocks = (Int32)pthread_getspecific(sTlsKey);
 
     // This thread is already holding an exclusive lock
     if (mExclusive && ownedLocks > 0) {
@@ -182,9 +181,8 @@ ECode CloseableLock::AcquireLock(
     mSharedLocks++;
 
     pthread_once(&sKeyOnce, MakeKey);
-    Int32* lockCount2 = (Int32*)pthread_getspecific(sTlsKey);
-    ownedLocks = *lockCount2 + 1;
-    ASSERT_TRUE(pthread_setspecific(sTlsKey, &ownedLocks) == 0)
+    ownedLocks = (Int32)pthread_getspecific(sTlsKey) + 1;
+    ASSERT_TRUE(pthread_setspecific(sTlsKey, (void*)ownedLocks) == 0)
 
     //} finally {
     ILock::Probe(mLock)->UnLock();
@@ -222,8 +220,7 @@ ECode CloseableLock::AcquireExclusiveLock(
     }
 
     pthread_once(&sKeyOnce, MakeKey);
-    Int32* lockCount1 = (Int32*)pthread_getspecific(sTlsKey);
-    ownedLocks = *lockCount1;
+    ownedLocks = (Int32)pthread_getspecific(sTlsKey);
     // This thread is already holding a shared lock
     if (!mExclusive && ownedLocks > 0) {
         // throw new IllegalStateException(
@@ -256,9 +253,8 @@ ECode CloseableLock::AcquireExclusiveLock(
     mExclusive = TRUE;
 
     pthread_once(&sKeyOnce, MakeKey);
-    Int32* lockCount2 = (Int32*)pthread_getspecific(sTlsKey);
-    ownedLocks = *lockCount2 + 1;
-    ASSERT_TRUE(pthread_setspecific(sTlsKey, &ownedLocks) == 0)
+    ownedLocks = (Int32)pthread_getspecific(sTlsKey) + 1;
+    ASSERT_TRUE(pthread_setspecific(sTlsKey, (void*)ownedLocks) == 0)
     //} finally {
     ILock::Probe(mLock)->UnLock();
     //}
@@ -276,7 +272,7 @@ ECode CloseableLock::AcquireExclusiveLock(
 ECode CloseableLock::ReleaseLock()
 {
     pthread_once(&sKeyOnce, MakeKey);
-    Int32* lockCount1 = (Int32*)pthread_getspecific(sTlsKey);
+    Int32 lockCount1 = (Int32)pthread_getspecific(sTlsKey);
 
     if (lockCount1 <= 0) {
         // throw new IllegalStateException(
@@ -311,9 +307,8 @@ ECode CloseableLock::ReleaseLock()
     }
 
     pthread_once(&sKeyOnce, MakeKey);
-    Int32* lockCount2 = (Int32*)pthread_getspecific(sTlsKey);
-    ownedLocks = *lockCount2 - 1;
-    ASSERT_TRUE(pthread_setspecific(sTlsKey, &ownedLocks) == 0)
+    ownedLocks = (Int32)pthread_getspecific(sTlsKey) - 1;
+    ASSERT_TRUE(pthread_setspecific(sTlsKey, (void*)ownedLocks) == 0)
 
 
     if (ownedLocks == 0 && mExclusive) {

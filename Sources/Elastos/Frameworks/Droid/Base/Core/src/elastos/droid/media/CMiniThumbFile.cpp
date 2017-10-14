@@ -306,7 +306,7 @@ String CMiniThumbFile::RandomAccessFilePath(
     file->ToString(&tempText);
     String directoryName = tempText + "/DCIM/.thumbnails";
 
-    Int32 tempValue;
+    Int32 tempValue = 0;
     IObject* obj = IObject::Probe(mUri.Get());
     if (obj != NULL) {
         obj->GetHashCode(&tempValue);

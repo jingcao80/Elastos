@@ -101,6 +101,8 @@ public:
             /* [in] */ Int64 lastModified,
             /* [in] */ Int32 format);
 
+        using Object::ToString;
+
         CARAPI_(String) ToString();
 
     public:

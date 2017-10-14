@@ -59,7 +59,7 @@ CContentProviderTransport::CContentProviderTransport()
 {
 }
 
-CContentProviderTransport::ToString(
+ECode CContentProviderTransport::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)

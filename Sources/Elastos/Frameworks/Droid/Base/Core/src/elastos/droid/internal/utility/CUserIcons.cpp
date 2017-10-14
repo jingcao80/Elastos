@@ -30,7 +30,7 @@ ECode CUserIcons::ConvertToBitmap(
     /* [in] */ IDrawable* icon,
     /* [out] */ IBitmap** bitmap)
 {
-    return ConvertToBitmap(icon, bitmap);
+    return UserIcons::ConvertToBitmap(icon, bitmap);
 }
 
 ECode CUserIcons::GetDefaultUserIcon(

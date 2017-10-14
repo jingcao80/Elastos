@@ -169,12 +169,12 @@ CLauncherApps::MyOnAppsChangedListener::MyOnAppsChangedListener()
 {
 }
 
-CLauncherApps::MyOnAppsChangedListener::constructor()
+ECode CLauncherApps::MyOnAppsChangedListener::constructor()
 {
     return NOERROR;
 }
 
-CLauncherApps::MyOnAppsChangedListener::constructor(
+ECode CLauncherApps::MyOnAppsChangedListener::constructor(
     /* [in] */ IWeakReference* weakHost)
 {
     mWeakHost = weakHost;

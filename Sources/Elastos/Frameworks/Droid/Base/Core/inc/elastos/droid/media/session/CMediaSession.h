@@ -99,6 +99,8 @@ private:
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
+        using Handler::Post;
+
         CARAPI Post(
             /* [in] */ Int32 what,
             /* [in] */ IInterface * obj,

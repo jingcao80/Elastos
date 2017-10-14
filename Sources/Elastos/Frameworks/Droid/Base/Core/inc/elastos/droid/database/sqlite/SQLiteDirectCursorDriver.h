@@ -60,6 +60,8 @@ public:
     CARAPI CursorRequeried(
         /* [in] */ ICursor* cursor);
 
+    using Object::ToString;
+
     CARAPI_(String) ToString();
 
 private:

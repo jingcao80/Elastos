@@ -4040,8 +4040,10 @@ Boolean ViewGroup::IsLayoutModeOptical()
     return mLayoutMode == LAYOUT_MODE_OPTICAL_BOUNDS;
 }
 
-AutoPtr<IInsets> ViewGroup::ComputeOpticalInsets()
+ECode ViewGroup::ComputeOpticalInsets(
+    /* [out] */ IInsets** res)
 {
+    VALIDATE_NOT_NULL(res)
     if (IsLayoutModeOptical()) {
         Int32 left = 0, top = 0, right = 0, bottom = 0;
         for (Int32 i = 0; i < mChildrenCount; i++) {
@@ -4059,9 +4061,15 @@ AutoPtr<IInsets> ViewGroup::ComputeOpticalInsets()
                 bottom = Elastos::Core::Math::Max(bottom, temp->mBottom);
             }
         }
-        return Insets::Of(left, top, right, bottom);
-    } else {
-        return Insets::NONE;
+        AutoPtr<IInsets> insets = Insets::Of(left, top, right, bottom);
+        *res = insets;
+        REFCOUNT_ADD(*res);
+        return NOERROR;
+    }
+    else {
+        *res = Insets::NONE;
+        REFCOUNT_ADD(*res);
+        return NOERROR;
     }
 }
 

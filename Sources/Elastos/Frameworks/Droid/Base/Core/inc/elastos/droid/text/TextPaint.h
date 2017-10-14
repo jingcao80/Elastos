@@ -100,6 +100,8 @@ public:
     CARAPI GetUnderlineThickness(
         /* [out] */ Float* underlineThickness);
 
+    using Paint::Set;
+
     /**
      * Copy the fields from tp into this TextPaint, including the
      * fields inherited from Paint.

@@ -416,6 +416,8 @@ public:
         /* [in] */ IResolveInfo* ri);
 
 protected:
+    using Activity::OnCreate;
+
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
 

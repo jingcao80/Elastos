@@ -77,10 +77,10 @@ public:
      *         <code>fraction</code> parameter.
      */
     // @Override
-    virtual CARAPI Evaluate(
+    CARAPI Evaluate(
         /* [in] */ Float fraction,
-        /* [in] */ IPointF* startValue,
-        /* [in] */ IPointF* endValue,
+        /* [in] */ IInterface* startValue,
+        /* [in] */ IInterface* endValue,
         /* [out] */ IInterface** pf);
 
 private:

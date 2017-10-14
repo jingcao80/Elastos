@@ -363,8 +363,8 @@ ECode BarController::UpdateVisibilityLw(
         return NOERROR;
     }
     Boolean isTransientShowing, isTransientShowRequested;
-    if (IsTransientShowing(&isTransientShowing), isTransientShowing ||
-            IsTransientShowRequested(&isTransientShowRequested), isTransientShowRequested) { // transient bar requested
+    if ((IsTransientShowing(&isTransientShowing), isTransientShowing) ||
+            (IsTransientShowRequested(&isTransientShowRequested), isTransientShowRequested)) { // transient bar requested
         if (transientAllowed) {
             vis |= mTransientFlag;
             if ((oldVis & mTransientFlag) == 0) {

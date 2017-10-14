@@ -323,7 +323,7 @@ HdmiRecordSources::ExternalPlugData::ExternalPlugData(
         EXTRA_DATA_SIZE);
 }
 
-HdmiRecordSources::ExternalPlugData::ExtraParamToByteArray(
+ECode HdmiRecordSources::ExternalPlugData::ExtraParamToByteArray(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 index,
     /* [out] */ Int32* array)
@@ -372,8 +372,8 @@ const Int32 HdmiRecordSources::RECORD_SOURCE_TYPE_EXTERNAL_PLUG;
 const Int32 HdmiRecordSources::RECORD_SOURCE_TYPE_EXTERNAL_PHYSICAL_ADDRESS;
 
 /** Channel number formats. */
-static const Int32 CHANNEL_NUMBER_FORMAT_1_PART = 0x01;
-static const Int32 CHANNEL_NUMBER_FORMAT_2_PART = 0x02;
+const Int32 HdmiRecordSources::CHANNEL_NUMBER_FORMAT_1_PART = 0x01;
+const Int32 HdmiRecordSources::CHANNEL_NUMBER_FORMAT_2_PART = 0x02;
 
 CAR_INTERFACE_IMPL(HdmiRecordSources, Object, IHdmiRecordSources)
 
@@ -558,22 +558,18 @@ ECode HdmiRecordSources::OfAnalogue(
 
     if (broadcastType < ANALOGUE_BROADCAST_TYPE_CABLE
             || broadcastType > ANALOGUE_BROADCAST_TYPE_TERRESTRIAL) {
-        Logger::W(TAG, "Invalid Broadcast type:%d", broadcastType);
         //throw new IllegalArgumentException("Invalid Broadcast type:" + broadcastType);
-        Logger::E(TAG, "Invalid Broadcast type:%d",broadcastType);
+        Logger::E(TAG, "Invalid Broadcast type:%d", broadcastType);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (frequency < 0 || frequency > 0xFFFF) {
-        Logger::W(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d", frequency);
         // throw new IllegalArgumentException(
         //         "Invalid frequency value[0x0000-0xFFFF]:" + frequency);
-        Logger::E(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d" + frequency);
+        Logger::E(TAG, "Invalid frequency value[0x0000-0xFFFF]:%d", frequency);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (broadcastSystem < BROADCAST_SYSTEM_PAL_BG
             || broadcastSystem > BROADCAST_SYSTEM_PAL_OTHER_SYSTEM) {
-
-        Logger::W(TAG, "Invalid Broadcast system:%d", broadcastSystem);
         // throw new IllegalArgumentException(
         //         "Invalid Broadcast system:" + broadcastSystem);
         Logger::E(TAG, "Invalid Broadcast system:%d", broadcastSystem);
@@ -595,9 +591,8 @@ ECode HdmiRecordSources::OfExternalPlug(
     *data = NULL;
 
     if (plugNumber < 1 || plugNumber > 255) {
-        Logger::W(TAG, "Invalid plug number[1-255] %d", plugNumber);
         //throw new IllegalArgumentException("Invalid plug number[1-255]" + plugNumber);
-        Logger::E(TAG, "Invalid plug number[1-255] %d" + plugNumber);
+        Logger::E(TAG, "Invalid plug number[1-255] %d", plugNumber);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -615,9 +610,8 @@ ECode HdmiRecordSources::OfExternalPhysicalAddress(
     *address = NULL;
 
     if ((physicalAddress & ~0xFFFF) != 0) {
-        Logger::W(TAG, "Invalid physical address: %d" + physicalAddress);
         //throw new IllegalArgumentException("Invalid physical address:" + physicalAddress);
-        Logger::E(TAG, "Invalid physical address: %d" + physicalAddress);
+        Logger::E(TAG, "Invalid physical address: %d", physicalAddress);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

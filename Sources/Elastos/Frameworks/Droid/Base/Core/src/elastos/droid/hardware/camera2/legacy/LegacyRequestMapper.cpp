@@ -199,7 +199,7 @@ ECode LegacyRequestMapper::ConvertRequestMetadata(
             // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
             if (maxNumFocusAreas > 0) {
                 ICameraArea* ca;
-                Int32 size = 0, i = 0;
+                Int32 size = 0;
                 focusAreaList->GetSize(&size);
                 AutoPtr< ArrayOf<ICameraArea*> > array = ArrayOf<ICameraArea*>::Alloc(size);
                 for (Int32 i = 0; i < size; ++i) {
@@ -694,7 +694,7 @@ Boolean LegacyRequestMapper::CheckForCompleteGpsData(
 Int32 LegacyRequestMapper::FilterSupportedCaptureIntent(
     /* [in] */ Int32 captureIntent)
 {
-    Int32 res;
+    Int32 res = captureIntent;
     switch (captureIntent) {
         case ICameraMetadata::CONTROL_CAPTURE_INTENT_CUSTOM:
         case ICameraMetadata::CONTROL_CAPTURE_INTENT_PREVIEW:

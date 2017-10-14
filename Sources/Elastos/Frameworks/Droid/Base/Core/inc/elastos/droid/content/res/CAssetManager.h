@@ -677,7 +677,7 @@ public:
     /**
      * {@hide}
      */
-    GetAssignedPackageIdentifiers(
+    CARAPI GetAssignedPackageIdentifiers(
         /* [out] */ ISparseArray** array);
 
     CARAPI GetNativeAssetManager(
@@ -759,6 +759,8 @@ public:
     CARAPI GetBasePackageId(
         /* [in] */ Int32 index,
         /* [out] */ Int32* pkgId);
+
+    using Object::GetHashCode;
 
     CARAPI_(Int32) GetHashCode();
 

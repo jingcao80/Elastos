@@ -41,7 +41,7 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        constructor();
+        CARAPI constructor();
 
         CARAPI Cancel();
 

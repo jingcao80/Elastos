@@ -52,6 +52,8 @@ public:
         /* [in] */ Int32 format,
         /* [in] */ IAudioGainConfig* gain);
 
+    using AudioPortConfig::Port;
+
     /**
      * Returns the audio mix port this AudioMixPortConfig is issued from.
      */

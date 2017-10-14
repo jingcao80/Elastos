@@ -131,7 +131,7 @@ Boolean Base64::IsBase64(
     if (octect == PAD) {
         return TRUE;
     }
-    else if ((*mBase64Alphabet)[octect] == -1) {
+    else if ((*mBase64Alphabet)[octect] == 0xff) {
         return FALSE;
     }
     else {

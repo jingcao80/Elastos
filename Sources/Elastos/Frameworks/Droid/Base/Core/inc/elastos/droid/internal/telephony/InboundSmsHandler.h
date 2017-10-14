@@ -447,8 +447,6 @@ protected:
         /* [in] */ const String& s,
         /* [in] */ IThrowable* e);
 
-    virtual CARAPI_(String) GetName();
-
 private:
     CARAPI_(Int32) CheckIfBlacklisted(
         /* [in] */ ISmsMessageBase* sms);

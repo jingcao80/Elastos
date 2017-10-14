@@ -6289,7 +6289,7 @@ Int32 CAudioService::CheckForRingerModeChange(
                 "but no vibrator is present");
             break;
         }
-        if ((direction == IAudioManager::ADJUST_LOWER)) {
+        if (direction == IAudioManager::ADJUST_LOWER) {
             if (VOLUME_SETS_RINGER_MODE_SILENT
                     && mPrevVolDirection != IAudioManager::ADJUST_LOWER) {
                 ringerMode = IAudioManager::RINGER_MODE_SILENT;
@@ -6470,8 +6470,8 @@ Int32 CAudioService::GetActiveStreamType(
             break;
         }
     }
-    if (DEBUG_VOL) Logger::V(TAG, "getActiveStreamType: Returning suggested type "
-            + suggestedStreamType);
+    if (DEBUG_VOL) Logger::V(TAG, "getActiveStreamType: Returning suggested type %d",
+            suggestedStreamType);
     return suggestedStreamType;
 }
 

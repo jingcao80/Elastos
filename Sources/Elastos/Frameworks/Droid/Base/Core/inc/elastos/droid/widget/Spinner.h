@@ -292,6 +292,8 @@ private:
         CARAPI SetPromptText(
             /* [in] */ ICharSequence* hintText);
 
+        using ListPopupWindow::Show;
+
         CARAPI Show(
             /* [in] */ Int32 textDirection,
             /* [in] */ Int32 textAlignment);
@@ -342,8 +344,7 @@ private:
             /* [out] */ IListPopupWindow** window);
 
         // @Override
-        CARAPI OnForwardingStarted(
-            /* [out] */ Boolean* result);
+        CARAPI_(Boolean) OnForwardingStarted();
 
     private:
         DropdownPopup* mData;

@@ -954,7 +954,7 @@ ECode Fragment::SetIndex(
     return NOERROR;
 }
 
-Fragment::IsInBackStack(
+ECode Fragment::IsInBackStack(
     /* [out] */ Boolean* inbs)
 {
     VALIDATE_NOT_NULL(inbs);
@@ -2022,7 +2022,7 @@ ECode Fragment::Dump(
     return NOERROR;
 }
 
-Fragment::FindFragmentByWho(
+ECode Fragment::FindFragmentByWho(
     /* [in] */ const String& who,
     /* [out] */ IFragment** f)
 {

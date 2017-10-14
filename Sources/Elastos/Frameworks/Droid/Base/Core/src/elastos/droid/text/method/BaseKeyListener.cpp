@@ -265,6 +265,14 @@ ECode BaseKeyListener::OnKeyOther(
     return NOERROR;
 }
 
+ECode BaseKeyListener::ClearMetaKeyState(
+    /* [in] */ IView* view,
+    /* [in] */ IEditable* content,
+    /* [in] */ Int32 states)
+{
+    return MetaKeyKeyListener::ClearMetaKeyState(view, content, states);
+}
+
 } // namespace Method
 } // namespace Text
 } // namepsace Droid

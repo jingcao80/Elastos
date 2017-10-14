@@ -85,6 +85,8 @@ private:
         CARAPI HasVibrator(
             /* [out] */ Boolean* res);
 
+        using Vibrator::Vibrate;
+
         CARAPI Vibrate(
             /* [in] */ Int32 uid,
             /* [in] */ const String& opPkg,
@@ -125,7 +127,7 @@ public:
 
     ~CInputManager();
 
-    constructor();
+    CARAPI constructor();
 
     /**
      * Gets information about the input device with the specified id.

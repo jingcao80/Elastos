@@ -486,14 +486,6 @@ ECode TextKeyListener::GetPrefs(
     return NOERROR;
 }
 
-ECode TextKeyListener::ClearMetaKeyState(
-    /* [in] */ IView* view,
-    /* [in] */ IEditable* content,
-    /* [in] */ Int32 states)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
 } // namespace Method
 } // namespace Text
 } // namepsace Droid

@@ -271,13 +271,12 @@ ECode ActionBarView::HomeView::OnPopulateAccessibilityEvent(
     return NOERROR;
 }
 
-ECode ActionBarView::HomeView::DispatchHoverEvent(
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
+Boolean ActionBarView::HomeView::DispatchHoverEvent(
+    /* [in] */ IMotionEvent* event)
 {
-    VALIDATE_NOT_NULL(result)
-    OnHoverEvent(event, result);
-    return NOERROR;
+    Boolean result;
+    OnHoverEvent(event, &result);
+    return result;
 }
 
 ECode ActionBarView::HomeView::GetStartOffset(
@@ -1526,23 +1525,20 @@ ECode ActionBarView::GenerateLayoutParams(
     return CActionBarLayoutParams::New(context, attrs, result);
 }
 
-ECode ActionBarView::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* lp,
-    /* [out] */ IViewGroupLayoutParams** result)
+AutoPtr<IViewGroupLayoutParams> ActionBarView::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* lp)
 {
-    VALIDATE_NOT_NULL(result)
+    AutoPtr<IViewGroupLayoutParams> result;
     if (lp == NULL) {
-        return GenerateDefaultLayoutParams(result);
+        GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&result);
+        return result;
     }
-    *result = lp;
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    result = lp;
+    return result;
 }
 
-ECode ActionBarView::OnSaveInstanceState(
-    /* [out] */ IParcelable** result)
+AutoPtr<IParcelable> ActionBarView::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(result)
     AutoPtr<IParcelable> superState = AbsActionBarView::OnSaveInstanceState();
     AutoPtr<IActionBarViewSavedState> state;
     CActionBarViewSavedState::New(superState, (IActionBarViewSavedState**)&state);
@@ -1553,9 +1549,8 @@ ECode ActionBarView::OnSaveInstanceState(
         ss->mExpandedMenuItemId = itemId;
     }
     IsOverflowMenuShowing(&ss->mIsOverflowOpen);
-    *result = IParcelable::Probe(state);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    AutoPtr<IParcelable> result = IParcelable::Probe(state);
+    return result;
 }
 
 ECode ActionBarView::OnRestoreInstanceState(
@@ -1891,8 +1886,7 @@ ECode ActionBarView::OnMeasure(
     if (customView) {
         AutoPtr<IViewGroupLayoutParams> cv;
         customView->GetLayoutParams((IViewGroupLayoutParams**)&cv);
-        AutoPtr<IViewGroupLayoutParams> lp;
-        GenerateLayoutParams(cv, (IViewGroupLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> lp = GenerateLayoutParams(cv);
         AutoPtr<IActionBarLayoutParams> ablp;
         if (IActionBarLayoutParams::Probe(lp)) {
             ablp = IActionBarLayoutParams::Probe(lp);

@@ -893,14 +893,13 @@ ECode CdmaLteServiceStateTracker::OnSignalStrengthResult(
     return NOERROR;
 }
 
-ECode CdmaLteServiceStateTracker::GetUiccCardApplication(
-    /* [out] */ IUiccCardApplication** result)
+AutoPtr<IUiccCardApplication> CdmaLteServiceStateTracker::GetUiccCardApplication()
 {
-    VALIDATE_NOT_NULL(result);
     Int32 id;
     ((CDMALTEPhone*)mPhone.Get())->GetPhoneId(&id);
-    mUiccController->GetUiccCardApplication(id, IUiccController::APP_FAM_3GPP2, result);
-    return NOERROR;
+    AutoPtr<IUiccCardApplication> app;
+    mUiccController->GetUiccCardApplication(id, IUiccController::APP_FAM_3GPP2, (IUiccCardApplication**)&app);
+    return app;
 }
 
 void CdmaLteServiceStateTracker::UpdateCdmaSubscription()

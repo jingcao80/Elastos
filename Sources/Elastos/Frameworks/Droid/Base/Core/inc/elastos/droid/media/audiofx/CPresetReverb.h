@@ -141,6 +141,8 @@ public:
     CARAPI GetPreset(
         /* [out] */ Int16* preset);
 
+    using AudioEffect::SetParameterListener;
+
     /**
      * Registers an OnParameterChangeListener interface.
      * @param listener OnParameterChangeListener interface registered

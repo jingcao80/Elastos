@@ -141,9 +141,8 @@ public:
             /* [in] */ IAccessibilityEvent* event);
 
         // @Override
-        CARAPI DispatchHoverEvent(
-            /* [in] */ IMotionEvent* event,
-            /* [out] */ Boolean* result);
+        CARAPI_(Boolean) DispatchHoverEvent(
+            /* [in] */ IMotionEvent* event);
 
         virtual CARAPI GetStartOffset(
             /* [out] */ Int32* result);
@@ -454,13 +453,11 @@ public:
         /* [out] */ IViewGroupLayoutParams** result);
 
     // @Override
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* lp,
-        /* [out] */ IViewGroupLayoutParams** result);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* lp);
 
     // @Override
-    CARAPI OnSaveInstanceState(
-        /* [out] */ IParcelable** result);
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     // @Override
     CARAPI OnRestoreInstanceState(

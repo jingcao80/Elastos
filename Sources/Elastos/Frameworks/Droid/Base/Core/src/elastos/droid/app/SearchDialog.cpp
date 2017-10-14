@@ -213,7 +213,7 @@ SearchDialog::MyViewOnClickListener::MyViewOnClickListener(
     : mHost(host)
 {}
 
-SearchDialog::MyViewOnClickListener::OnClick(
+ECode SearchDialog::MyViewOnClickListener::OnClick(
     /* [in] */ IView*view)
 {
     mHost->Dismiss();

@@ -837,7 +837,7 @@ ECode ResolverDrawerLayout::OnNestedPreScroll(
 }
 
 ECode ResolverDrawerLayout::OnNestedPreFling(
-    /* [in] */ View target,
+    /* [in] */ IView* target,
     /* [in] */ Float velocityX,
     /* [in] */ Float velocityY,
     /* [out] */ Boolean* result)
@@ -1016,11 +1016,12 @@ ECode ResolverDrawerLayout::GenerateLayoutParams(
     return CResolverDrawerLayoutParams::New(cxt, attrs, result);
 }
 
-ECode ResolverDrawerLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** result)
+AutoPtr<IViewGroupLayoutParams> ResolverDrawerLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    return CResolverDrawerLayoutParams::New(p, result);
+    AutoPtr<IViewGroupLayoutParams> result;
+    CResolverDrawerLayoutParams::New(p, (IViewGroupLayoutParams**)&result);
+    return result;
 }
 
 ECode ResolverDrawerLayout::GenerateDefaultLayoutParams(
@@ -1030,17 +1031,14 @@ ECode ResolverDrawerLayout::GenerateDefaultLayoutParams(
         IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, result);
 }
 
-ECode ResolverDrawerLayout::OnSaveInstanceState(
-    /* [out] */ IParcelable** result)
+AutoPtr<IParcelable> ResolverDrawerLayout::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(result)
     AutoPtr<IParcelable> p = View::OnSaveInstanceState();
     AutoPtr<IViewBaseSavedState> ss;
     CResolverDrawerLayoutSavedState::New(p, (IViewBaseSavedState**)&ss);
     ((ResolverDrawerLayoutSavedState*)ss.Get())->mOpen = mCollapsibleHeight > 0 && mCollapseOffset == 0;
-    *result = IParcelable::Probe(ss);
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    AutoPtr<IParcelable> result = IParcelable::Probe(ss);
+    return result;
 }
 
 ECode ResolverDrawerLayout::OnRestoreInstanceState(

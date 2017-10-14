@@ -249,9 +249,12 @@ ECode StandaloneActionMode::OnMenuModeChange(
     return IAbsActionBarView::Probe(mContextView)->ShowOverflowMenu(&isShow);
 }
 
-Boolean StandaloneActionMode::IsUiFocusable()
+ECode StandaloneActionMode::IsUiFocusable(
+    /* [out] */ Boolean* uiFocusable)
 {
-    return mFocusable;
+    VALIDATE_NOT_NULL(uiFocusable);
+    *uiFocusable = mFocusable;
+    return NOERROR;
 }
 
 } // namespace View

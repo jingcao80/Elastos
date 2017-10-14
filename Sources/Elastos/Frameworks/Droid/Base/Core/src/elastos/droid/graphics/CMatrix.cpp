@@ -311,7 +311,7 @@ ECode CMatrix::IdentityMatrix::SetRectToRect(
 }
 
 ECode CMatrix::IdentityMatrix::SetPolyToPoly(
-    /* [in] */ const ArrayOf<Float>& src,
+    /* [in] */ ArrayOf<Float>* src,
     /* [in] */ Int32 srcIndex,
     /* [out] */ ArrayOf<Float>* dst,
     /* [in] */ Int32 dstIndex,
@@ -324,7 +324,7 @@ ECode CMatrix::IdentityMatrix::SetPolyToPoly(
 }
 
 ECode CMatrix::IdentityMatrix::SetValues(
-    /* [in] */ const ArrayOf<Float>& values)
+    /* [in] */ ArrayOf<Float>* values)
 {
     return Oops();
 }

@@ -185,7 +185,7 @@ HdmiTimerRecordSources::ExternalSourceDecorator::ExternalSourceDecorator(
     HdmiRecordSources::RecordSource::constructor(_recordSource->mSourceType, size + 1);
 }
 
-HdmiTimerRecordSources::ExternalSourceDecorator::ExtraParamToByteArray(
+ECode HdmiTimerRecordSources::ExternalSourceDecorator::ExtraParamToByteArray(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 index,
     /* [out] */ Int32* array)

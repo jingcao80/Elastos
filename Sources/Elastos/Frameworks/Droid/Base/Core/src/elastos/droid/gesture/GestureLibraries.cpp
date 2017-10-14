@@ -228,12 +228,7 @@ ECode GestureLibraries::FileGestureLibrary::GetGestures(
 CARAPI GestureLibraries::FileGestureLibrary::GetLearner(
     /* [out] */ ILearner** learner)
 {
-    AutoPtr<ILearner> lnr;
-
-    lnr = GestureLibrary::GetLearner();
-    *learner = lnr;
-    REFCOUNT_ADD(*learner)
-    return  NOERROR;
+    return GestureLibrary::GetLearner(learner);
 }
 
 GestureLibraries::ResourceGestureLibrary::ResourceGestureLibrary(
@@ -361,12 +356,7 @@ ECode GestureLibraries::ResourceGestureLibrary::GetGestures(
 CARAPI GestureLibraries::ResourceGestureLibrary::GetLearner(
     /* [out] */ ILearner** learner)
 {
-    AutoPtr<ILearner> lnr;
-
-    lnr = GestureLibrary::GetLearner();
-    *learner = lnr;
-    REFCOUNT_ADD(*learner)
-    return  NOERROR;
+    return GestureLibrary::GetLearner(learner);
 }
 
 } // namespace Gesture

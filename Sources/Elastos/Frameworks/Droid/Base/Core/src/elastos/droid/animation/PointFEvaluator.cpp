@@ -36,18 +36,18 @@ PointFEvaluator::PointFEvaluator(
 
 ECode PointFEvaluator::Evaluate(
     /* [in] */ Float fraction,
-    /* [in] */ IPointF* startValue,
-    /* [in] */ IPointF* endValue,
+    /* [in] */ IInterface* startValue,
+    /* [in] */ IInterface* endValue,
     /* [out] */ IInterface** pf)
 {
     VALIDATE_NOT_NULL(pf);
     Float v1 = 0.f, v2 = 0.f;
-    startValue->GetX(&v1);
-    endValue->GetX(&v2);
+    IPointF::Probe(startValue)->GetX(&v1);
+    IPointF::Probe(endValue)->GetX(&v2);
     Float x = v1 + (fraction * (v2 - v1));
 
-    startValue->GetY(&v1);
-    endValue->GetY(&v2);
+    IPointF::Probe(startValue)->GetY(&v1);
+    IPointF::Probe(endValue)->GetY(&v2);
     Float y = v1 + (fraction * (v2 - v1));
 
     if (mPoint != NULL) {

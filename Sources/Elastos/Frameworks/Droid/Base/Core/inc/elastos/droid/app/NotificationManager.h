@@ -54,6 +54,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
 
+    using Object::Notify;
+
     /**
      * Post a notification to be shown in the status bar. If a notification with
      * the same id has already been posted by your application and has not yet been canceled, it

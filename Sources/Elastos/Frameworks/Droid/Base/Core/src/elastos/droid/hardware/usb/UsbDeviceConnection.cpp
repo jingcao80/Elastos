@@ -256,10 +256,10 @@ Boolean UsbDeviceConnection::NativeOpen(
     struct usb_device* device = usb_device_new(deviceNameStr, fd);
 
     if (device) {
-        this->mNativeContext = (Int64) device ;
+        mNativeContext = (Int64)device;
     } else {
         //ALOGE("usb_device_open failed for %s", deviceNameStr);
-        Logger::D(UsbDeviceConnection::TAG, "usb_device_open failed for " + *deviceNameStr);
+        Logger::D(UsbDeviceConnection::TAG, "usb_device_open failed for %s", deviceNameStr);
         close(fd);
     }
 
@@ -404,7 +404,7 @@ Int32 UsbDeviceConnection::NativeControlRequest(
     }
 
     Byte* bufferBytes = NULL;
-    if (&buffer && buffer.GetPayload() != NULL) {\
+    if (buffer.GetPayload() != NULL) {
         bufferBytes = buffer.GetPayload();
     }
 
@@ -427,7 +427,7 @@ Int32 UsbDeviceConnection::NativeBulkRequest(
     }
 
     Byte* bufferBytes = NULL;
-    if (&buffer && buffer.GetPayload() != NULL) {
+    if (buffer.GetPayload() != NULL) {
         bufferBytes = buffer.GetPayload();
     }
 
@@ -468,7 +468,7 @@ String UsbDeviceConnection::NativeGetSerial()
         return String("");
     }
 
-    String result = String(serial);
+    String result(serial);
     free(serial);
     return result;
 }

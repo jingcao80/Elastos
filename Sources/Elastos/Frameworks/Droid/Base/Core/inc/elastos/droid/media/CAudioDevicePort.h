@@ -79,6 +79,8 @@ public:
     CARAPI Address(
         /* [out] */ String* result);
 
+    using AudioPort::BuildConfig;
+
     /**
      * Build a specific configuration of this audio device port for use by methods
      * like AudioManager.connectAudioPatch().

@@ -217,6 +217,8 @@ public:
         /* [in] */ ITransitionValues* endValues,
         /* [out] */ IAnimator** result);
 
+    using Transition::CaptureValues;
+
     CARAPI_(void) CaptureValues(
         /* [in] */ ITransitionValues* transitionValues);
 

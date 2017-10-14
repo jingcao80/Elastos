@@ -166,6 +166,8 @@ public:
         /* [in] */ Int32 position,
         /* [in] */ Boolean animate);
 
+    using AdapterView::Layout;
+
     virtual CARAPI_(void) Layout(
         /* [in] */ Int32 delta,
         /* [in] */ Boolean animate) = 0;

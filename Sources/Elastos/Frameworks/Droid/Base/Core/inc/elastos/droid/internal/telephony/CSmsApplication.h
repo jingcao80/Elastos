@@ -58,7 +58,7 @@ public:
          * Returns TRUE if this SmsApplicationData is Complete (all intents handled).
          * @return
          */
-        IsComplete(
+        CARAPI IsComplete(
             /* [out] */ Boolean* result);
 
     public:
@@ -125,7 +125,9 @@ private:
             /* [in] */ const String& packageName);
 
     private:
-        void OnPackageChanged(
+        using PackageMonitor::OnPackageChanged;
+
+        CARAPI_(void) OnPackageChanged(
             /* [in] */ const String& packageName);
 
     private:

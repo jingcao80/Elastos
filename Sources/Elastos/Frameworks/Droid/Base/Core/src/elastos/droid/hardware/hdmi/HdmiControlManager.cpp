@@ -33,7 +33,7 @@ HdmiControlManager::MyListener::MyListener(
 {
 }
 
-HdmiControlManager::MyListener::OnReceived(
+ECode HdmiControlManager::MyListener::OnReceived(
     /* [in] */ IHdmiHotplugEvent* event)
 {
     return mListener->OnReceived(event);

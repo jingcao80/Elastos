@@ -667,7 +667,7 @@ public:
 
             SavedState();
 
-            constructor();
+            CARAPI constructor();
 
             CARAPI ReadFromParcel(
                 /* [in] */ IParcel* in);

@@ -141,8 +141,7 @@ protected:
         /* [out] */ Boolean* resutl);
 
     // @Override
-    CARAPI GetUiccCardApplication(
-        /* [out] */ IUiccCardApplication** result);
+    CARAPI_(AutoPtr<IUiccCardApplication>) GetUiccCardApplication();
 
     virtual CARAPI_(void) UpdateCdmaSubscription();
 

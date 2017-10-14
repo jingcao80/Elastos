@@ -148,7 +148,7 @@ ECode LocationManager::ListenerTransport::OnProviderEnabled(
     return NOERROR;
 }
 
-LocationManager::ListenerTransport::OnProviderDisabled(
+ECode LocationManager::ListenerTransport::OnProviderDisabled(
     /* [in] */ const String& provider)
 {
     AutoPtr<IMessage> msg = CMessage::Obtain();

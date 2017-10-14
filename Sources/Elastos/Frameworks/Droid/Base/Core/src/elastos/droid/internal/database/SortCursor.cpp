@@ -31,7 +31,7 @@ SortCursor::MyDataSetObserver::MyDataSetObserver(
 {
 }
 
-SortCursor::MyDataSetObserver::OnChanged()
+ECode SortCursor::MyDataSetObserver::OnChanged()
 {
     // Reset our position so the optimizations in move-related code
     // don't screw us over
@@ -39,7 +39,7 @@ SortCursor::MyDataSetObserver::OnChanged()
     return NOERROR;
 }
 
-SortCursor::MyDataSetObserver::OnInvalidated()
+ECode SortCursor::MyDataSetObserver::OnInvalidated()
 {
     mOwner->mPos = -1;
     return NOERROR;

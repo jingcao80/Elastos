@@ -183,7 +183,7 @@ private:
             /* [out] */ Boolean* result);
 
         CARAPI SetPolyToPoly(
-            /* [in] */ const ArrayOf<Float>& src,
+            /* [in] */ ArrayOf<Float>* src,
             /* [in] */ Int32 srcIndex,
             /* [out] */ ArrayOf<Float>* dst,
             /* [in] */ Int32 dstIndex,
@@ -191,7 +191,7 @@ private:
             /* [out] */ Boolean* result);
 
         CARAPI SetValues(
-            /* [in] */ const ArrayOf<Float>& values);
+            /* [in] */ ArrayOf<Float>* values);
     };
 
 public:

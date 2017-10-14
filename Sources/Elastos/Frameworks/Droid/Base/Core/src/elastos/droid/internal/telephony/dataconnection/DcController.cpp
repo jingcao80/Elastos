@@ -574,19 +574,15 @@ ECode DcController::Loge(
     return Logger::E(name, msgBuf);
 }
 
-ECode DcController::GetWhatToString(
-    /* [in] */ Int32 what,
-    /* [out] */ String* result)
+String DcController::GetWhatToString(
+    /* [in] */ Int32 what)
 {
-    VALIDATE_NOT_NULL(result)
-
     String info(NULL);
     DataConnection::CmdToString(what, &info);
-    if (info == NULL) {
+    if (info.IsNull()) {
         DcAsyncChannel::CmdToString(what, &info);
     }
-    *result = info;
-    return NOERROR;
+    return info;
 }
 
 ECode DcController::ToString(

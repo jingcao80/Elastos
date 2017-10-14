@@ -50,6 +50,8 @@ public:
     CARAPI HasVibrator(
         /* [out] */ Boolean* result);
 
+    using Vibrator::Vibrate;
+
     //@Override
     CARAPI Vibrate(
         /* [in] */ Int32 uid,

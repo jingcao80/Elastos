@@ -34,6 +34,7 @@ module {
      */
     enum Tone {
         // Standard supervisory tones
+        Tone_NONE = 0x00,
 
         /**
          * Dial tone.

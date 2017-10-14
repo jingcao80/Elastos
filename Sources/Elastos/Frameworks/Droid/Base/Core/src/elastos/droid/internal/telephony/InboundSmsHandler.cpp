@@ -1455,7 +1455,9 @@ void InboundSmsHandler::StoreVoiceMailCount()
 void InboundSmsHandler::Log(
     /* [in] */ const String& s)
 {
-    Logger::D(GetName(), s);
+    String name;
+    GetName(&name);
+    Logger::D(name, s);
 }
 
 /**
@@ -1466,7 +1468,9 @@ void InboundSmsHandler::Log(
 void InboundSmsHandler::Loge(
     /* [in] */ const String& s)
 {
-    Logger::E(GetName(), s);
+    String name;
+    GetName(&name);
+    Logger::E(name, s);
 }
 
 /**
@@ -1479,15 +1483,11 @@ void InboundSmsHandler::Loge(
     /* [in] */ const String& s,
     /* [in] */ IThrowable* e)
 {
-    Logger::E(GetName(), "%s %s", s.string(), TO_CSTR(e));
+    String name;
+    GetName(&name);
+    Logger::E(name, "%s %s", s.string(), TO_CSTR(e));
 }
 
-String InboundSmsHandler::GetName()
-{
-    String result;
-    StateMachine::GetName(&result);
-    return result;
-}
 /**
  * Store a received SMS into Telephony provider
  *

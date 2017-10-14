@@ -462,7 +462,7 @@ ECode CDMAPhone::Dial(
 
     AutoPtr<IImsPhone> imsPhone = mImsPhone;
 
-    Boolean imsUseEnabled;
+    Boolean imsUseEnabled = FALSE;
 // TODO: Need ImsManager
     // imsUseEnabled =
     //         ImsManager.isEnhanced4gLteModeSettingEnabledByPlatform(mContext) &&
@@ -498,10 +498,7 @@ ECode CDMAPhone::Dial(
     }
 
     if (DBG) Logger::D(LOGTAG, "Trying (non-IMS) CS call");
-    AutoPtr<IConnection> con = DialInternal(dialString, NULL, videoState);
-    *result = con;
-    REFCOUNT_ADD(*result)
-    return NOERROR;
+    return DialInternal(dialString, NULL, videoState, result);
 }
 
 ECode CDMAPhone::Dial(
@@ -810,8 +807,9 @@ ECode CDMAPhone::GetCellLocation(
     GetContext((IContext**)&ctx);
     AutoPtr<IContentResolver> cr;
     ctx->GetContentResolver((IContentResolver**)&cr);
-    Int32 mode = Settings::Secure::GetInt32(cr,
-            ISettingsSecure::LOCATION_MODE, ISettingsSecure::LOCATION_MODE_OFF);
+    Int32 mode;
+    Settings::Secure::GetInt32(cr,
+            ISettingsSecure::LOCATION_MODE, ISettingsSecure::LOCATION_MODE_OFF, &mode);
     if (mode == ISettingsSecure::LOCATION_MODE_OFF) {
         // clear lat/long values for location privacy
         AutoPtr<ICdmaCellLocation> privateLoc;
@@ -2056,17 +2054,17 @@ void CDMAPhone::Init(
     UpdateCurrentCarrierInProvider(operatorNumeric, &b);
 }
 
-AutoPtr<IConnection> CDMAPhone::DialInternal(
+ECode CDMAPhone::DialInternal(
     /* [in] */ const String& dialString,
     /* [in] */ IUUSInfo* uusInfo,
-    /* [in] */ Int32 videoState)
+    /* [in] */ Int32 videoState,
+    /* [out] */ IConnection** connection)
 {
+    VALIDATE_NOT_NULL(connection);
     // Need to make sure dialString gets parsed properly
     String newDialString;
     PhoneNumberUtils::StripSeparators(dialString, &newDialString);
-    AutoPtr<IConnection> conn;
-    ((CdmaCallTracker*)mCT.Get())->Dial(newDialString, (IConnection**)&conn);
-    return conn;
+    return ((CdmaCallTracker*)mCT.Get())->Dial(newDialString, connection);
 }
 
 AutoPtr<IUiccCardApplication> CDMAPhone::GetUiccCardApplication()

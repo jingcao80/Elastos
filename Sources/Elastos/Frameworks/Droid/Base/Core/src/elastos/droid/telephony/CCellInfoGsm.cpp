@@ -165,7 +165,7 @@ ECode CCellInfoGsm::ReadFromParcel(
 ECode CCellInfoGsm::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    CellInfo::WriteToParcel(dest, TYPE_GSM);
+    CellInfo::WriteToParcel(dest);
     dest->WriteInterfacePtr(mCellIdentityGsm);
     dest->WriteInterfacePtr(mCellSignalStrengthGsm);
     return NOERROR;

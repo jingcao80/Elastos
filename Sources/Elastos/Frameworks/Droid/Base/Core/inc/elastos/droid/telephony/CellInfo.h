@@ -71,8 +71,7 @@ public:
         /* [in] */ IParcel* source);
 
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* dest,
-        /* [in] */ Int32 type);
+        /* [in] */ IParcel* dest);
 
 protected:
     CellInfo();

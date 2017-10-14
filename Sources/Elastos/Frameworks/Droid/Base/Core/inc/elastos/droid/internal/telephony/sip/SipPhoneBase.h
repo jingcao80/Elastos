@@ -85,6 +85,8 @@ public:
         /* [in] */ Int32 videoState,
         /* [out] */ IConnection** result);
 
+    using PhoneBase::MigrateFrom;
+
     virtual CARAPI MigrateFrom(
         /* [in] */ ISipPhoneBase* from);
 

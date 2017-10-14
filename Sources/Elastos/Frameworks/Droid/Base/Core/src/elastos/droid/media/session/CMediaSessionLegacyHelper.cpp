@@ -140,7 +140,7 @@ void CMediaSessionLegacyHelper::MediaButtonListener::SendKeyEvent(
     }
 }
 
-CMediaSessionLegacyHelper::SessionHolder::SessionCallback::OnMediaButtonEvent(
+ECode CMediaSessionLegacyHelper::SessionHolder::SessionCallback::OnMediaButtonEvent(
     /* [in] */ IIntent * mediaButtonIntent,
     /* [out] */ Boolean * result)
 {

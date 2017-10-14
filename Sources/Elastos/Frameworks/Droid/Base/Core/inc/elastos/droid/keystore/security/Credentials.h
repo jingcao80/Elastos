@@ -45,20 +45,20 @@ public:
      * Convert objects to a PEM format which is used for
      * CA_CERTIFICATE and USER_CERTIFICATE entries.
      */
-   static CARAPI ConvertToPem(
+    static CARAPI ConvertToPem(
        /* [in] */ ArrayOf<ICertificate*>* objects,
        /* [out] */ ArrayOf<Byte>** result);
 
-   /**
+    /**
      * Convert objects from PEM format, which is used for
      * CA_CERTIFICATE and USER_CERTIFICATE entries.
      */
-   static CARAPI ConvertFromPem(
+    static CARAPI ConvertFromPem(
        /* [in] */ ArrayOf<Byte>* bytes,
        /* [out] */ IList** result); // List<X509Certificate>
 
 
-   static CARAPI GetInstance(
+    static CARAPI GetInstance(
        /* [out] */ ICredentials** instance);
 
     /**
@@ -66,7 +66,7 @@ public:
      * particular {@code alias}. All three can exist for any given alias.
      * Returns {@code true} if there was at least one of those types.
      */
-   static CARAPI DeleteCertificateTypesForAlias(
+    static CARAPI DeleteCertificateTypesForAlias(
        /* [in] */ IKeyStore* keystore,
        /* [in] */ const String& alias,
        /* [out] */ Boolean* result);
@@ -76,22 +76,24 @@ public:
      * particular {@code alias}. All three can exist for any given alias.
      * Returns {@code true} if there was at least one of those types.
      */
-   static CARAPI DeleteAllTypesForAlias(
+    static CARAPI DeleteAllTypesForAlias(
        /* [in] */ IKeyStore* keystore,
        /* [in] */ const String& alias,
        /* [out] */ Boolean* ret);
 
-   CARAPI Unlock(
+    using Object::Unlock;
+
+    CARAPI Unlock(
         /* [in] */ IContext* context);
 
-   CARAPI Install(
+    CARAPI Install(
         /* [in] */ IContext* context);
 
-   CARAPI Install(
+    CARAPI Install(
         /* [in] */ IContext* context,
         /* [in] */ IKeyPair* pair);
 
-   CARAPI Install(
+    CARAPI Install(
         /* [in] */ IContext* context,
         /* [in] */ const String& type,
         /* [in] */ ArrayOf<Byte>* value);
@@ -99,7 +101,6 @@ public:
 private:
     static const String LOGTAG;// = "Credentials";
     static AutoPtr<ICredentials> singleton;
-
 };
 
 }// namespace Elastos

@@ -134,6 +134,8 @@ public:
     CARAPI GetTargetGain(
         /* [out] */ Float * result);
 
+    using AudioEffect::SetParameterListener;
+
     /**
      * @hide
      * Registers an OnParameterChangeListener interface.

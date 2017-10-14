@@ -707,9 +707,12 @@ void VectorDrawable::VGroup::UpdateLocalMatrix()
     mLocalMatrix->PostTranslate(mTranslateX + mPivotX, mTranslateY + mPivotY, &res);
 }
 
-Float VectorDrawable::VGroup::GetRotation()
+ECode VectorDrawable::VGroup::GetRotation(
+    /* [out] */ Float* rotation)
 {
-    return mRotate;
+    VALIDATE_NOT_NULL(rotation);
+    *rotation = mRotate;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetRotation(
@@ -722,9 +725,12 @@ ECode VectorDrawable::VGroup::SetRotation(
     return NOERROR;
 }
 
-Float VectorDrawable::VGroup::GetPivotX()
+ECode VectorDrawable::VGroup::GetPivotX(
+    /* [out] */ Float* pivotX)
 {
-    return mPivotX;
+    VALIDATE_NOT_NULL(pivotX);
+    *pivotX = mPivotX;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetPivotX(
@@ -737,9 +743,12 @@ ECode VectorDrawable::VGroup::SetPivotX(
     return NOERROR;
 }
 
-Float VectorDrawable::VGroup::GetPivotY()
+ECode VectorDrawable::VGroup::GetPivotY(
+    /* [out] */ Float* pivotY)
 {
-    return mPivotY;
+    VALIDATE_NOT_NULL(pivotY);
+    *pivotY = mPivotY;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetPivotY(
@@ -752,9 +761,12 @@ ECode VectorDrawable::VGroup::SetPivotY(
     return NOERROR;
 }
 
-Float VectorDrawable::VGroup::GetScaleX()
+ECode VectorDrawable::VGroup::GetScaleX(
+    /* [out] */ Float* scaleX)
 {
-    return mScaleX;
+    VALIDATE_NOT_NULL(scaleX);
+    *scaleX = mScaleX;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetScaleX(
@@ -767,9 +779,12 @@ ECode VectorDrawable::VGroup::SetScaleX(
     return NOERROR;
 }
 
-Float VectorDrawable::VGroup::GetScaleY()
+ECode VectorDrawable::VGroup::GetScaleY(
+    /* [out] */ Float* scaleY)
 {
-    return mScaleY;
+    VALIDATE_NOT_NULL(scaleY);
+    *scaleY = mScaleY;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetScaleY(
@@ -782,9 +797,12 @@ ECode VectorDrawable::VGroup::SetScaleY(
     return NOERROR;
 }
 
-Float VectorDrawable::VGroup::GetTranslateX()
+ECode VectorDrawable::VGroup::GetTranslateX(
+    /* [out] */ Float* translateX)
 {
-    return mTranslateX;
+    VALIDATE_NOT_NULL(translateX);
+    *translateX = mTranslateX;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetTranslateX(
@@ -797,9 +815,12 @@ ECode VectorDrawable::VGroup::SetTranslateX(
     return NOERROR;
 }
 
-Float VectorDrawable::VGroup::GetTranslateY()
+ECode VectorDrawable::VGroup::GetTranslateY(
+    /* [out] */ Float* translateY)
 {
-    return mTranslateY;
+    VALIDATE_NOT_NULL(translateY);
+    *translateY = mTranslateY;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VGroup::SetTranslateY(
@@ -1088,9 +1109,12 @@ void VectorDrawable::VFullPath::ApplyTheme(
     a->Recycle();
 }
 
-Int32 VectorDrawable::VFullPath::GetStrokeColor()
+ECode VectorDrawable::VFullPath::GetStrokeColor(
+    /* [out] */ Int32* strokeColor)
 {
-    return mStrokeColor;
+    VALIDATE_NOT_NULL(strokeColor);
+    *strokeColor = mStrokeColor;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetStrokeColor(
@@ -1100,9 +1124,12 @@ ECode VectorDrawable::VFullPath::SetStrokeColor(
     return NOERROR;
 }
 
-Float VectorDrawable::VFullPath::GetStrokeWidth()
+ECode VectorDrawable::VFullPath::GetStrokeWidth(
+    /* [out] */ Float* strokeWidth)
 {
-    return mStrokeWidth;
+    VALIDATE_NOT_NULL(strokeWidth);
+    *strokeWidth = mStrokeWidth;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetStrokeWidth(
@@ -1112,9 +1139,12 @@ ECode VectorDrawable::VFullPath::SetStrokeWidth(
     return NOERROR;
 }
 
-Float VectorDrawable::VFullPath::GetStrokeAlpha()
+ECode VectorDrawable::VFullPath::GetStrokeAlpha(
+    /* [out] */ Float* strokeAlpha)
 {
-    return mStrokeAlpha;
+    VALIDATE_NOT_NULL(strokeAlpha);
+    *strokeAlpha = mStrokeAlpha;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetStrokeAlpha(
@@ -1124,9 +1154,12 @@ ECode VectorDrawable::VFullPath::SetStrokeAlpha(
     return NOERROR;
 }
 
-Int32 VectorDrawable::VFullPath::GetFillColor()
+ECode VectorDrawable::VFullPath::GetFillColor(
+    /* [out] */ Int32* fillColor)
 {
-    return mFillColor;
+    VALIDATE_NOT_NULL(fillColor);
+    *fillColor = mFillColor;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetFillColor(
@@ -1136,9 +1169,12 @@ ECode VectorDrawable::VFullPath::SetFillColor(
     return NOERROR;
 }
 
-Float VectorDrawable::VFullPath::GetFillAlpha()
+ECode VectorDrawable::VFullPath::GetFillAlpha(
+    /* [out] */ Float* fillAlpha)
 {
-    return mFillAlpha;
+    VALIDATE_NOT_NULL(fillAlpha);
+    *fillAlpha = mFillAlpha;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetFillAlpha(
@@ -1148,9 +1184,12 @@ ECode VectorDrawable::VFullPath::SetFillAlpha(
     return NOERROR;
 }
 
-Float VectorDrawable::VFullPath::GetTrimPathStart()
+ECode VectorDrawable::VFullPath::GetTrimPathStart(
+    /* [out] */ Float* trimPathStart)
 {
-    return mTrimPathStart;
+    VALIDATE_NOT_NULL(trimPathStart);
+    *trimPathStart = mTrimPathStart;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetTrimPathStart(
@@ -1160,9 +1199,12 @@ ECode VectorDrawable::VFullPath::SetTrimPathStart(
     return NOERROR;
 }
 
-Float VectorDrawable::VFullPath::GetTrimPathEnd()
+ECode VectorDrawable::VFullPath::GetTrimPathEnd(
+    /* [out] */ Float* trimPathEnd)
 {
-    return mTrimPathEnd;
+    VALIDATE_NOT_NULL(trimPathEnd);
+    *trimPathEnd = mTrimPathEnd;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetTrimPathEnd(
@@ -1172,9 +1214,12 @@ ECode VectorDrawable::VFullPath::SetTrimPathEnd(
     return NOERROR;
 }
 
-Float VectorDrawable::VFullPath::GetTrimPathOffset()
+ECode VectorDrawable::VFullPath::GetTrimPathOffset(
+    /* [out] */ Float* trimPathOffset)
 {
-    return mTrimPathOffset;
+    VALIDATE_NOT_NULL(trimPathOffset);
+    *trimPathOffset = mTrimPathOffset;
+    return NOERROR;
 }
 
 ECode VectorDrawable::VFullPath::SetTrimPathOffset(

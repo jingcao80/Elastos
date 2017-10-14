@@ -219,7 +219,8 @@ protected:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    virtual CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateDefaultLayoutParams();
+    virtual CARAPI GenerateDefaultLayoutParams(
+        /* [out] */ IViewGroupLayoutParams** params);
 
     virtual CARAPI_(Boolean) CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p);

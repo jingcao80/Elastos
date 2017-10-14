@@ -149,7 +149,6 @@ public:
      * Like {@link #vibrate(long, AudioAttributes)}, but allowing the caller to specify that
      * the vibration is owned by someone else.
      */
-    using IVibrator::Vibrate;
 
     /**
      * @hide

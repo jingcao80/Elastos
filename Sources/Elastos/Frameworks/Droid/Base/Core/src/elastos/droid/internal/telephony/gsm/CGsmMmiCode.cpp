@@ -260,7 +260,7 @@ ECode CGsmMmiCode::ParseSsData(
     mAction = GetActionStringFromReqType(ssData->mRequestType);
     // Logger::D("CGsmMmiCode", "parseSsData msc = " + mSc + ", action = " + mAction + ", ex = " + ex);
 
-    Boolean b1, b2, b3;
+    Boolean b1 = FALSE, b2 = FALSE, b3 = FALSE;
 // TODO: Need ServiceType::isTypeUnConditional
     // ssData->mServiceType->IsTypeUnConditional(&b1);
     // ssData->mServiceType->IsTypeClir(&b2);
@@ -327,7 +327,7 @@ ECode CGsmMmiCode::ParseSsData(
             break;
         }
         default:
-            Logger::E("CGsmMmiCode", "Invaid requestType in SSData : " + ssData->mRequestType);
+            Logger::E("CGsmMmiCode", "Invaid requestType in SSData : %d", ssData->mRequestType);
             break;
     }
     return NOERROR;
@@ -1694,7 +1694,7 @@ AutoPtr<ICharSequence> CGsmMmiCode::MakeCFQueryResultMessage(
     /* [in] */ ICallForwardInfo* _info,
     /* [in] */ Int32 serviceClassMask)
 {
-    AutoPtr<CallForwardInfo> info = (CallForwardInfo*)info;
+    AutoPtr<CallForwardInfo> info = (CallForwardInfo*)_info;
     AutoPtr<ICharSequence> cs;
     AutoPtr<ArrayOf<String> > sources = ArrayOf<String>::Alloc(3); //{"{0}", "{1}", "{2}"};
     (*sources)[0] = String("0");

@@ -377,7 +377,7 @@ LauncherActivity::ActivityAdapter::ActivityAdapter(
     mHost->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
     mInflater = ILayoutInflater::Probe(obj);
     mShowIcons = mHost->OnEvaluateShowIcons();
-    mActivitiesList = mHost->MakeListItems();
+    mHost->MakeListItems((IList**)&mActivitiesList);
 }
 
 ECode LauncherActivity::ActivityAdapter::IntentForPosition(
@@ -728,7 +728,7 @@ ECode LauncherActivity::OnListItemClick(
     /* [in] */ IListView* l,
     /* [in] */ IView* v,
     /* [in] */ Int32 position,
-    /* [in] */ long id)
+    /* [in] */ Int64 id)
 {
     AutoPtr<IIntent> intent = IntentForPosition(position);
     StartActivity(intent);
@@ -757,7 +757,7 @@ AutoPtr<IIntent> LauncherActivity::GetTargetIntent()
 {
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    return NOERROR;
+    return intent;
 }
 
 AutoPtr<IList> LauncherActivity::OnQueryPackageManager(
@@ -779,7 +779,8 @@ ECode LauncherActivity::OnSortResultList(
     return NOERROR;
 }
 
-AutoPtr<IList> LauncherActivity::MakeListItems()
+ECode LauncherActivity::MakeListItems(
+    /* [out] */ IList** items)
 {
     // Load all matching activities and sort correctly
     AutoPtr<IList> list = OnQueryPackageManager(mIntent);
@@ -800,7 +801,9 @@ AutoPtr<IList> LauncherActivity::MakeListItems()
         result->Add(listItem.Get());
     }
 
-    return IList::Probe(result);
+    *items = IList::Probe(result);
+    REFCOUNT_ADD(*items);
+    return NOERROR;
 }
 
 Boolean LauncherActivity::OnEvaluateShowIcons()

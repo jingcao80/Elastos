@@ -712,7 +712,7 @@ ECode DctController::EnableApnType(
         if (mCurrentDataPhone == PHONE_NONE) {
             mCurrentDataPhone = phoneId;
             mRequestedDataPhone = PHONE_NONE;
-            Logd("enableApnType(): current PHONE is NONE or IDLE, mCurrentDataPhone=" +
+            Logd("enableApnType(): current PHONE is NONE or IDLE, mCurrentDataPhone=%d",
                     mCurrentDataPhone);
             return (*mDcSwitchAsyncChannel)[phoneId]->ConnectSync(type, result);
         } else {
@@ -1203,7 +1203,9 @@ ECode DctController::HandleMessage(
                 if (isRetryPossible) {
                     AutoPtr<SomeArgs> args = SomeArgs::Obtain();
                     args->mArg1 = TO_IINTERFACE(s);
-                    args->mArg2 = FALSE;
+                    AutoPtr<IBoolean> ib;
+                    CBoolean::New(FALSE, (IBoolean**)&ib);
+                    args->mArg2 = ib;
                     AutoPtr<IMessage> msg;
                     ObtainMessage(EVENT_DELAYED_RETRY, TO_IINTERFACE(args), (IMessage**)&msg);
                     Boolean b;

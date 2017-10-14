@@ -408,13 +408,14 @@ public:
         /* [in] */ IView* child,
         /* [in] */ IViewGroupLayoutParams* layoutParams);
 
+    // @Override
     CARAPI GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IViewGroupLayoutParams** layoutParams);
 
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** layoutParams);
+    // @Override
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     CARAPI GetWrapper(
         /* [out] */ IDecorToolbar** bar);

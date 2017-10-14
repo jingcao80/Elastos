@@ -165,12 +165,14 @@ ECode Location::Convert(
     CDecimalFormat::New(String("###.#####"), (IDecimalFormat**)&df);
     if (outputType == ILocation::FORMAT_MINUTES || outputType == ILocation::FORMAT_SECONDS) {
         Int32 degrees = (Int32) Elastos::Core::Math::Floor(coordinate);
-        sb += degrees + ":";
+        sb += degrees;
+        sb += ":";
         coordinate -= degrees;
         coordinate *= 60.0;
         if (outputType == ILocation::FORMAT_SECONDS) {
             Int32 minutes = (Int32) Elastos::Core::Math::Floor(coordinate);
-            sb += minutes + ":";
+            sb += minutes;
+            sb += ":";
             coordinate -= minutes;
             coordinate *= 60.0;
         }

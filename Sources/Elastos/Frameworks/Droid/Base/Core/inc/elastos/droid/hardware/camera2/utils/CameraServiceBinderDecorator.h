@@ -41,7 +41,7 @@ private:
         CAR_INTERFACE_DECL()
 
         //@Override
-        OnCatchException(
+        CARAPI OnCatchException(
             /* [in] */ IMethodInfo* m,
             /* [in] */ ArrayOf<IInterface*>* args,
             /* [in] */ ECode t,

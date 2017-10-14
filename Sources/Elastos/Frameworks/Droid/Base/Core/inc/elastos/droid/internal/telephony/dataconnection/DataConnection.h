@@ -430,9 +430,8 @@ public:
      * @return the string for msg.what as our info.
      */
     // @Override
-    CARAPI GetWhatToString(
-        /* [in] */ Int32 what,
-        /* [out] */ String* result);
+    CARAPI_(String) GetWhatToString(
+        /* [in] */ Int32 what);
 
     static CARAPI Slog(
         /* [in] */ const char *fmt, ...);

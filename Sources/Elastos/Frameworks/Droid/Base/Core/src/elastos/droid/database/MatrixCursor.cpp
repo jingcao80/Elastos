@@ -370,7 +370,7 @@ ECode MatrixCursor::GetDouble(
     AutoPtr<IInterface> _value;
     Get(column, (IInterface**)&_value);
     if (_value == NULL) {
-        *value = 0.0d;
+        *value = 0.0l;
         return NOERROR;
     }
     if (INumber::Probe(_value) != NULL) {

@@ -679,10 +679,8 @@ ECode Spinner::SpinnerForwardingListener::GetPopup(
     return NOERROR;
 }
 
-ECode Spinner::SpinnerForwardingListener::OnForwardingStarted(
-    /* [out] */ Boolean* result)
+Boolean Spinner::SpinnerForwardingListener::OnForwardingStarted()
 {
-    VALIDATE_NOT_NULL(result);
     Boolean showing = FALSE;
     if (mHost->mPopup->IsShowing(&showing), !showing) {
         Int32 dir = 0, align = 0;
@@ -690,8 +688,7 @@ ECode Spinner::SpinnerForwardingListener::OnForwardingStarted(
         mHost->GetTextAlignment(&align);
         mHost->mPopup->Show(dir, align);
     }
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 //==========================================================================

@@ -13944,7 +13944,7 @@ void View::ResolveDrawables()
 }
 
 ECode View::OnResolveDrawables(
-    /* [in] */ Int64 layoutDirection)
+    /* [in] */ Int32 layoutDirection)
 {
     return NOERROR;
 }

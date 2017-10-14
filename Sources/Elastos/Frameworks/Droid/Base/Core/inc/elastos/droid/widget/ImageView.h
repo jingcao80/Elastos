@@ -208,6 +208,8 @@ public:
     virtual CARAPI SetImageAlpha(
         /* [in] */ Int32 alpha);
 
+    using View::SetAlpha;
+
     virtual CARAPI SetAlpha(
         /* [in] */ Int32 alpha);
 

@@ -130,7 +130,8 @@ public:
     CARAPI OnMenuModeChange(
         /* [in] */ IMenuBuilder* menu);
 
-    CARAPI_(Boolean) IsUiFocusable();
+    CARAPI IsUiFocusable(
+        /* [out] */ Boolean* uiFocusable);
 
 private:
     IContext* mContext;

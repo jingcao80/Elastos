@@ -120,8 +120,9 @@ protected:
      * @param message the message to process
      * @return true if an ordered broadcast was sent; false on failure
      */
-    CARAPI_(Boolean) HandleSmsMessage(
-        /* [in] */ IMessage* message);
+    CARAPI HandleSmsMessage(
+        /* [in] */ IMessage* message,
+        /* [out] */ Boolean* result);
 
 private:
     /**

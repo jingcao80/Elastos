@@ -53,7 +53,7 @@ public:
 
     ~StreamConfigurationMap();
 
-    constructor();
+    CARAPI constructor();
 
     /**
      * Create a new {@link StreamConfigurationMap}.

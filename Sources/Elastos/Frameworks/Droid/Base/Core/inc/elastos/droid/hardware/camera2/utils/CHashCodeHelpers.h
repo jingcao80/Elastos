@@ -38,6 +38,8 @@ public:
 
     CAR_SINGLETON_DECL()
 
+    using Singleton::GetHashCode;
+
     /**
      * Hash every element uniformly using the Modified Bernstein hash.
      *

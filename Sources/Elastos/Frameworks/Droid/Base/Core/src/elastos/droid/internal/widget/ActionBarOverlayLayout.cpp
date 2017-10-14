@@ -864,12 +864,12 @@ ECode ActionBarOverlayLayout::GenerateDefaultLayoutParams(
     return CActionBarOverlayLayoutLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT, result);
 }
 
-ECode ActionBarOverlayLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** result)
+AutoPtr<IViewGroupLayoutParams> ActionBarOverlayLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result);
-    return CActionBarOverlayLayoutLayoutParams::New(p, result);
+    AutoPtr<IViewGroupLayoutParams> result;
+    CActionBarOverlayLayoutLayoutParams::New(p, (IViewGroupLayoutParams**)&result);
+    return result;
 }
 
 Boolean ActionBarOverlayLayout::CheckLayoutParams(

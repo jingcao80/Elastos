@@ -99,7 +99,7 @@ MediaRouteActionProvider::~MediaRouteActionProvider()
 ECode MediaRouteActionProvider::constructor(
     /* [in] */ IContext* context)
 {
-    MediaRouteActionProvider::constructor(context);
+    ActionProvider::constructor(context);
 
     mContext = context;
     AutoPtr<IInterface> obj;

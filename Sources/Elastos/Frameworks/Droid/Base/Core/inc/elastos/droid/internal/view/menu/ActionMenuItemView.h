@@ -177,9 +177,8 @@ public:
         /* [in] */ IAccessibilityEvent* event);
 
     //@Override
-    CARAPI DispatchHoverEvent(
-        /* [in] */ IMotionEvent* event,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) DispatchHoverEvent(
+        /* [in] */ IMotionEvent* event);
 
     CARAPI ShowsIcon(
         /* [out] */ Boolean* shows);

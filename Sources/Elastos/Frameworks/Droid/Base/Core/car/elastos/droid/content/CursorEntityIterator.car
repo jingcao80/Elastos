@@ -65,7 +65,7 @@ module
          * @see #hasNext
          */
         GetNext(
-            [out] IInterface** object);
+            [out] IEntity** object);
 
         /**
          * Removes the last object returned by {@code next} from the collection.

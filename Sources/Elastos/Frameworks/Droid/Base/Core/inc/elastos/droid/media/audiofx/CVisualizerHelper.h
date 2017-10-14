@@ -40,7 +40,7 @@ public:
      * @return the mininum capture size is returned in first array element and the maximum in second
      * array element.
      */
-    GetCaptureSizeRange(
+    CARAPI GetCaptureSizeRange(
         /* [out, callee] */ ArrayOf<Int32>** captureSizeRange);
 
     /**
@@ -49,7 +49,7 @@ public:
      * {@link #setDataCaptureListener(OnDataCaptureListener, int, boolean, boolean)} method.
      * @return the maximum capture rate expressed in milliHertz
      */
-    GetMaxCaptureRate(
+    CARAPI GetMaxCaptureRate(
         /* [out] */ Int32* captureRate);
 };
 

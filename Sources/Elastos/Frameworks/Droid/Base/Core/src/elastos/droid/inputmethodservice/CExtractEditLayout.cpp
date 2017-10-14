@@ -233,10 +233,12 @@ ECode CExtractEditLayout::_OnClickListener::OnClick(
     return NOERROR;
 }
 
-AutoPtr<IActionMode> CExtractEditLayout::StartActionModeForChild(
+ECode CExtractEditLayout::StartActionModeForChild(
     /* [in] */ IView* sourceView,
-    /* [in] */ IActionModeCallback* cb)
+    /* [in] */ IActionModeCallback* cb,
+    /* [out] */ IActionMode** am)
 {
+    VALIDATE_NOT_NULL(am);
     AutoPtr<ExtractActionMode> mode = new ExtractActionMode(cb, this);
     if (mode->DispatchOnCreate()) {
         mode->Invalidate();
@@ -244,10 +246,13 @@ AutoPtr<IActionMode> CExtractEditLayout::StartActionModeForChild(
         IView::Probe(mEditButton)->SetVisibility(IView::VISIBLE);
         mActionMode = mode;
         SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
-        return mode;
+        *am = mode;
+        REFCOUNT_ADD(*am);
+        return NOERROR;
     }
 
-    return NULL;
+    *am = NULL;
+    return NOERROR;
 }
 
 ECode CExtractEditLayout::OnFinishInflate()

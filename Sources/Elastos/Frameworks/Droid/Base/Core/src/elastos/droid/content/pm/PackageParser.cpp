@@ -3726,7 +3726,7 @@ ECode PackageParser::ParseKeySets(
     AutoPtr<ISet> definedks;
     definedKeySetsMap->GetKeySet((ISet**)&definedks);
     Boolean bval;
-    publicKeyNames->RemoveAll(ICollection::Probe(definedks));
+    publicKeyNames->RemoveAll(ICollection::Probe(definedks), &bval);
     if (bval) {
         Slogger::W(TAG, "Package %s AndroidManifext.xml "
             "'key-set' and 'public-key' names must be distinct.", owner->mPackageName.string());

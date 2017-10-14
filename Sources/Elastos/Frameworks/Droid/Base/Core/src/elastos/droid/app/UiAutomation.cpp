@@ -385,16 +385,17 @@ ECode UiAutomation::InjectInputEvent(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    result = FALSE;
+    *result = FALSE;
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         FAIL_RETURN(ThrowIfNotConnectedLocked())
     }
     // try {
-        if (DEBUG) {
-            Logger::I(TAG, "Injecting: %s sync: %d", TO_CSTR(event), sync);
-        }
-        // Calling out without a lock held.
+    if (DEBUG) {
+        Logger::I(TAG, "Injecting: %s sync: %d", TO_CSTR(event), sync);
+    }
+    // Calling out without a lock held.
     ECode ec = mUiAutomationConnection->InjectInputEvent(event, sync, result);
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "Error while injecting input event!");

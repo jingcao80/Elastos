@@ -278,6 +278,8 @@ public:
         virtual CARAPI ResolveLayoutDirection(
             /* [in] */ Int32 layoutDirection);
 
+        using LayoutParams::OnDebugDraw;
+
         virtual CARAPI OnDebugDraw(
             /* [in] */ IView* view,
             /* [in] */ ICanvas* canvas);
@@ -2134,16 +2136,17 @@ private:
     static CARAPI_(AutoPtr<IPaint>) GetDebugPaint();
 
     static CARAPI_(AutoPtr<ArrayOf<Float> >) GetDebugLines(
-            /* [in] */ Int32 x1,
-            /* [in] */ Int32 y1,
-            /* [in] */ Int32 x2,
-            /* [in] */ Int32 y2);
+        /* [in] */ Int32 x1,
+        /* [in] */ Int32 y1,
+        /* [in] */ Int32 x2,
+        /* [in] */ Int32 y2);
 
     CARAPI_(AutoPtr<IPointF>) GetLocalPoint();
 
     CARAPI_(Boolean) IsLayoutModeOptical();
 
-    CARAPI_(AutoPtr<IInsets>) ComputeOpticalInsets();
+    CARAPI ComputeOpticalInsets(
+        /* [out] */ IInsets** insets);
 
     static CARAPI_(void) FillRect(
         /* [in] */ ICanvas* canvas,

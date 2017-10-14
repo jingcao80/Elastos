@@ -349,6 +349,8 @@ public:
     // @Override
     CARAPI RejectCall();
 
+    using SipPhoneBase::Dial;
+
     // @Override
     CARAPI Dial(
         /* [in] */ const String& dialString,
@@ -388,6 +390,8 @@ public:
 
     // @Override
     CARAPI StopDtmf();
+
+    using SipPhoneBase::SendBurstDtmf;
 
     virtual CARAPI SendBurstDtmf(
         /* [in] */ const String& dtmfString);
@@ -445,6 +449,8 @@ public:
         /* [out] */ IConnection** result);
 
 private:
+    using SipPhoneBase::DialInternal;
+
     CARAPI DialInternal(
         /* [in] */ const String& dialString,
         /* [in] */ Int32 videoState,

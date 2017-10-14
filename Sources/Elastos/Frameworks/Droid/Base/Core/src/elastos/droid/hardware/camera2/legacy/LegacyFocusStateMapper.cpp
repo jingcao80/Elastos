@@ -57,7 +57,7 @@ LegacyFocusStateMapper::MyMoveCallback::MyMoveCallback(
 {
 }
 
-LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
+ECode LegacyFocusStateMapper::MyMoveCallback::OnAutoFocusMoving(
     /* [in] */ Boolean start,
     /* [in] */ IHardwareCamera* camera)
 {

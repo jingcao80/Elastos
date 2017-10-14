@@ -564,6 +564,8 @@ public:
      */
     CARAPI_(void) Clear();
 
+    using Object::ToString;
+
     CARAPI_(String) ToString();
 
 private:

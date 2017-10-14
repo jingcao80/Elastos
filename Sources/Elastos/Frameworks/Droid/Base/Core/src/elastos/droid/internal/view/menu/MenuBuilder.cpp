@@ -973,9 +973,12 @@ Int32 MenuBuilder::GetOrdering(
     return (sCategoryToOrder[index] << IMenu::CATEGORY_SHIFT) | (categoryOrder & IMenu::USER_MASK);
 }
 
-Boolean MenuBuilder::IsQwertyMode()
+ECode MenuBuilder::IsQwertyMode(
+    /* [out] */ Boolean* qwertyMode)
 {
-    return mQwertyMode;
+    VALIDATE_NOT_NULL(qwertyMode);
+    *qwertyMode = mQwertyMode;
+    return NOERROR;
 }
 
 ECode MenuBuilder::SetShortcutsVisible(
@@ -1084,7 +1087,8 @@ void MenuBuilder::FindItemsWithShortcutForKey(
     /* [in] */ Int32 keyCode,
     /* [in] */ IKeyEvent* event)
 {
-    const Boolean qwerty = IsQwertyMode();
+    Boolean qwerty;
+    IsQwertyMode(&qwerty);
     Int32 metaState = 0;
     event->GetMetaState(&metaState);
     AutoPtr<CKeyCharacterMap::KeyData> possibleChars = new CKeyCharacterMap::KeyData();
@@ -1153,7 +1157,8 @@ AutoPtr<IMenuItemImpl> MenuBuilder::FindItemWithShortcutForKey(
         return item;
     }
 
-    const Boolean qwerty = IsQwertyMode();
+    Boolean qwerty;
+    IsQwertyMode(&qwerty);
     // If we found more than one item associated with the key,
     // we have to return the exact match
     MenuItemImplList::Iterator iter;

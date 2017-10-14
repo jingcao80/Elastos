@@ -887,7 +887,7 @@ ECode SipPhone::SipAudioCallAdapter::OnCallEnded(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* call)
 {
     // if (SACA_DBG) Log("onCallEnded: call=" + call);
-    Boolean b;
+    Boolean b = FALSE;
 // TODO: Need ISipAudioCall
     // call->IsInCall(&b);
     OnCallEnded(b
@@ -1120,7 +1120,7 @@ ECode SipPhone::RejectCall()
     AutoLock lock(this);    // synchronized (SipPhone.class)
     ICallState state;
     mRingingCall->GetState(&state);
-    Boolean b;
+    Boolean b = FALSE;
 // TODO: Need ICallState::IsRinging
     // state->IsRinging(&b);
     if (b) {
@@ -1476,7 +1476,7 @@ ICallState SipPhone::GetCallStateFrom(
 {
 // TODO: Need ISipAudioCall
     // if (sipAudioCall->IsOnHold()) return ICallState_HOLDING;
-    Int32 sessionState;
+    Int32 sessionState = 0;
     // sipAudioCall->GetState(&sessionState);
     switch (sessionState) {
 // TODO: Need SipSession

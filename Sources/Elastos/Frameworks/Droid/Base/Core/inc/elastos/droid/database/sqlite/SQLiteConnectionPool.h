@@ -224,6 +224,8 @@ public:
         /* [in] */ IPrinter* printer,
         /* [in] */ Boolean verbose);
 
+    using Object::ToString;
+
     //@Override
     CARAPI_(String) ToString();
 

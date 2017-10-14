@@ -916,7 +916,7 @@ public:
         /* [in] */ IInputStream* in,
         /* [out] */ Int64* result);
 
-    static CloseQuietly(
+    static CARAPI CloseQuietly(
         /* [in] */ IStrictJarFile* jarFile);
 
     /**

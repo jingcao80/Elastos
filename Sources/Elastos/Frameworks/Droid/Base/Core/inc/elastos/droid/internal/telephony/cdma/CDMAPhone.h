@@ -811,10 +811,11 @@ protected:
     CARAPI_(void) Finalize();
 
     // @Override
-    CARAPI_(AutoPtr<IConnection>) DialInternal(
+    CARAPI DialInternal(
         /* [in] */ const String& dialString,
         /* [in] */ IUUSInfo* uusInfo,
-        /* [in] */ Int32 videoState);
+        /* [in] */ Int32 videoState,
+        /* [out] */ IConnection** connection);
 
     virtual CARAPI_(AutoPtr<IUiccCardApplication>) GetUiccCardApplication();
 

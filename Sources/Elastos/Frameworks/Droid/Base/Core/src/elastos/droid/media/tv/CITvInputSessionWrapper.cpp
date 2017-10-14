@@ -226,7 +226,7 @@ ECode CITvInputSessionWrapper::ExecuteMessage(
             break;
         }
         default: {
-            Logger::W(TAG, "Unhandled message code: " + what);
+            Logger::W(TAG, "Unhandled message code: %d", what);
             break;
         }
     }

@@ -1272,7 +1272,7 @@ ECode CImageReader::AcquireNextSurfaceImage(
         case ACQUIRE_MAX_IMAGES:
             break;
         default:
-            Logger::E(TAG, "Unknown nativeImageSetup return code " + status);
+            Logger::E(TAG, "Unknown nativeImageSetup return code %d", status);
             return E_ASSERTION_ERROR;
     }
     *result = status;

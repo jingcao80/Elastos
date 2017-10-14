@@ -1795,27 +1795,19 @@ ECode ApplicationPackageManager::GetText(
     return NOERROR;
 
 ERROR:
-    switch(ec) {
-        case E_NAME_NOT_FOUND_EXCEPTION:
-        {
-            String pkgName;
-            IPackageItemInfo::Probe(appInfo)->GetPackageName(&pkgName);
-            Slogger::W("PackageManager", "Failure retrieving resources for %s",
-                pkgName.string());
-            ec = NOERROR;
-            break;
-        }
-        case E_RUNTIME_EXCEPTION:
-        {
-           // If an exception was thrown, fall through to return
-           // default icon.
-            Slogger::W("PackageManager", "Failure retrieving text 0x%08x  in package %s",
-                resid, packageName.string());
-            ec = NOERROR;
-            break;
-        }
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+        String pkgName;
+        IPackageItemInfo::Probe(appInfo)->GetPackageName(&pkgName);
+        Slogger::W("PackageManager", "Failure retrieving resources for %s",
+            pkgName.string());
     }
-    return ec;
+    if (ec == (ECode)E_RUNTIME_EXCEPTION) {
+        // If an exception was thrown, fall through to return
+       // default icon.
+        Slogger::W("PackageManager", "Failure retrieving text 0x%08x  in package %s",
+            resid, packageName.string());
+    }
+    return NOERROR;
 }
 
 ECode ApplicationPackageManager::GetXml(

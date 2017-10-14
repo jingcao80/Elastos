@@ -90,7 +90,6 @@ module
          * This configuration is very flexible and offers the best
          * quality. It should be used whenever possible.
          */
-
         BitmapConfig_ARGB_8888   = 5
     }
 

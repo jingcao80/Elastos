@@ -180,12 +180,6 @@ public:
         /* [in] */ IContext* context,
         /* [out] */ Int32* ret);
 
-    //override
-    CARAPI ClearMetaKeyState(
-            /* [in] */ IView* view,
-            /* [in] */ IEditable* content,
-            /* [in] */ Int32 states);
-
 private:
     CARAPI_(AutoPtr<IKeyListener>) GetKeyListener(
         /* [in] */ IKeyEvent* event);

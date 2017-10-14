@@ -3605,15 +3605,16 @@ ECode RIL::OnRadioAvailable()
     return NOERROR;
 }
 
-ICommandsInterfaceRadioState RIL::GetRadioStateFromInt(
-    /* [in] */ Int32 stateInt)
+ECode RIL::GetRadioStateFromInt(
+    /* [in] */ Int32 stateInt,
+    /* [out] */ ICommandsInterfaceRadioState* state)
 {
-    ICommandsInterfaceRadioState state;
+    VALIDATE_NOT_NULL(state);
 
     /* RIL_RadioState ril.h */
     switch(stateInt) {
-        case 0: state = RADIO_OFF; break;
-        case 1: state = RADIO_UNAVAILABLE; break;
+        case 0: *state = RADIO_OFF; break;
+        case 1: *state = RADIO_UNAVAILABLE; break;
         case 2:
         case 3:
         case 4:
@@ -3622,14 +3623,14 @@ ICommandsInterfaceRadioState RIL::GetRadioStateFromInt(
         case 7:
         case 8:
         case 9:
-        case 10: state = RADIO_ON; break;
+        case 10: *state = RADIO_ON; break;
 
         default:
             // throw new RuntimeException(
             //             "Unrecognized RIL_RadioState: " + stateInt);
-        break;
+            return E_RUNTIME_EXCEPTION;
     }
-    return state;
+    return NOERROR;
 }
 
 void RIL::SwitchToRadioState(
@@ -4193,7 +4194,8 @@ void RIL::ProcessUnsolicited(
             /* has bonus radio state Int32 */
             Int32 st = 0;
             p->ReadInt32(&st);
-            ICommandsInterfaceRadioState newState = GetRadioStateFromInt(st);
+            ICommandsInterfaceRadioState newState;
+            GetRadioStateFromInt(st, &newState);
             if (RILJ_LOGD) UnsljLogMore(response, StringUtils::ToString(newState));
 
             SwitchToRadioState(newState);

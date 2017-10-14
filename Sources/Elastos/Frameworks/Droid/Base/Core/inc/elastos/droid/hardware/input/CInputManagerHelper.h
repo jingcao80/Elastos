@@ -40,7 +40,7 @@ public:
      *
      * @hide
      */
-    GetInstance(
+    CARAPI GetInstance(
         /* [out] */ IInputManager** manager);
 };
 
