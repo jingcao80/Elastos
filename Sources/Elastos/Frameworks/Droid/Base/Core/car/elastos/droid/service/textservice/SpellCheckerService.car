@@ -83,7 +83,7 @@ module
          * {@link SpellCheckerService.Session#onGetSuggestions(TextInfo, int)}
          */
         OnGetSuggestionsMultiple(
-            [in] ArrayOf<ITextInfo>* textInfos,
+            [in] ArrayOf<ITextInfo*>* textInfos,
             [in] Int32 suggestionsLimit,
             [in] Boolean sequentialWords,
             [out, callee] ArrayOf<ISuggestionsInfo*>* result);
@@ -103,7 +103,7 @@ module
          * {@link SpellCheckerService.Session#onGetSuggestions(TextInfo, int)}
          */
         OnGetSentenceSuggestionsMultiple(
-            [in] ArrayOf<ITextInfo>* textInfos,
+            [in] ArrayOf<ITextInfo*>* textInfos,
             [in] Int32 suggestionsLimit,
             [out, callee] ArrayOf<ISentenceSuggestionsInfo*>* result);
 

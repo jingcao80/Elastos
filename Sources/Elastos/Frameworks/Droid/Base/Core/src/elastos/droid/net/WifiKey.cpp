@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include "elastos/droid/net/WifiKey.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
@@ -58,13 +57,14 @@ ECode WifiKey::constructor(
 {
     AutoPtr<IMatcher> matcher;
     SSID_PATTERN->Matcher(ssid, (IMatcher**)&matcher);
-    if (!Ptr(matcher)->Func(matcher->Matches)) {
+    Boolean match;
+    if (matcher->Matches(&match), !match) {
         Logger::E("WifiKey", "Invalid ssid: %s", mSsid.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     matcher = NULL;
     BSSID_PATTERN->Matcher(bssid, (IMatcher**)&matcher);
-    if (!Ptr(matcher)->Func(matcher->Matches)) {
+    if (matcher->Matches(&match), !match) {
         Logger::E("WifiKey", "Invalid bssid: %s", mBssid.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -79,12 +79,21 @@ ECode WifiKey::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
-    if (o == NULL) FUNC_RETURN(FALSE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (o == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     ClassID this_cid, o_cid;
-    IObject::Probe(TO_IINTERFACE(this))->GetClassID(&this_cid);
+    GetClassID(&this_cid);
     IObject::Probe(o)->GetClassID(&o_cid);
-    if (this_cid != o_cid) FUNC_RETURN(FALSE)
+    if (this_cid != o_cid) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<WifiKey> wifiKey = (WifiKey*) IWifiKey::Probe(o);
     *result = mSsid.Equals(wifiKey->mSsid) && mBssid.Equals(wifiKey->mBssid);
     return NOERROR;

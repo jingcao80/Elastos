@@ -26,7 +26,7 @@ CAR_INTERFACE_IMPL(CSamplingDataTrackerHelper, Singleton, ISamplingDataTrackerHe
 
 CAR_SINGLETON_IMPL(CSamplingDataTrackerHelper)
 
-CSamplingDataTrackerHelper::GetSamplingSnapshots(
+ECode CSamplingDataTrackerHelper::GetSamplingSnapshots(
     /* [in] */ IMap* mapIfaceToSample)
 {
     return CSamplingDataTracker::GetSamplingSnapshots(mapIfaceToSample);

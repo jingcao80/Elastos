@@ -806,10 +806,7 @@ MtpResponseCode MyMtpDatabase::getObjectFilePath(
         return result;
     }
 
-    String str = String(*mStringBuffer.Get());
-    AutoPtr<ArrayOf<Char16> > array16s = str.GetChar16s();
-    Char16* str16s = array16s.Get()->GetPayload();
-    outFilePath.setTo(str16s, strlen16(str16s));
+    outFilePath.setTo((const char32_t*)mStringBuffer->GetPayload(), mStringBuffer->GetLength());
 
     outFileLength = (*mLongBuffer)[0];
     outFormat = (*mLongBuffer)[1];

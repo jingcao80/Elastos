@@ -108,7 +108,8 @@ FastScroller::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
     : mHost(host)
 {}
 
-ECode FastScroller::MyAnimatorListenerAdapter::OnAnimationEnd()
+ECode FastScroller::MyAnimatorListenerAdapter::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
 {
     mHost->mShowingPrimary = !mHost->mShowingPrimary;
     return NOERROR;

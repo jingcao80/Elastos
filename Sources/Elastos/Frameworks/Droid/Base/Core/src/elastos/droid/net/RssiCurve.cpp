@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include "elastos/droid/net/RssiCurve.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
@@ -67,10 +66,12 @@ ECode RssiCurve::LookupScore(
     // Snap the index to the closest bucket if it falls outside the curve.
     if (index < 0) {
         index = 0;
-    } else if (index > mRssiBuckets->GetLength() - 1) {
+    }
+    else if (index > mRssiBuckets->GetLength() - 1) {
         index = mRssiBuckets->GetLength() - 1;
     }
-    FUNC_RETURN((*mRssiBuckets)[index])
+    *result = (*mRssiBuckets)[index];
+    return NOERROR;
 }
 
 ECode RssiCurve::Equals(
@@ -79,11 +80,16 @@ ECode RssiCurve::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     ClassID this_cid, o_cid;
-    IObject::Probe(TO_IINTERFACE(this))->GetClassID(&this_cid);
-    IObject::Probe(obj)->GetClassID(&o_cid);
-    if (obj == NULL || this_cid != o_cid) FUNC_RETURN(FALSE)
+    GetClassID(&this_cid);
+    if (obj == NULL || (IObject::Probe(obj)->GetClassID(&o_cid), this_cid != o_cid)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<RssiCurve> rssiCurve = (RssiCurve*) IRssiCurve::Probe(obj);
     *result = mStart == rssiCurve->mStart &&
             mBucketWidth == rssiCurve->mBucketWidth &&

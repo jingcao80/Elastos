@@ -16,7 +16,6 @@
 
 #include <Elastos.CoreLibrary.Apache.h>
 #include "elastos/droid/net/http/CharArrayBuffers.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 
 using Org::Apache::Http::Protocol::IHTTP;
 
@@ -61,7 +60,8 @@ ECode CharArrayBuffers::ContainsIgnoreCaseTrimmed(
             ok = a == b;
         }
     }
-    FUNC_RETURN(ok)
+    *result = ok;
+    return NOERROR;
 }
 
 ECode CharArrayBuffers::SetLowercaseIndexOf(
@@ -79,14 +79,17 @@ ECode CharArrayBuffers::SetLowercaseIndexOf(
     for (Int32 i = beginIndex; i < endIndex; i++) {
         Char32 current = (*chars)[i];
         if (current == ch) {
-            FUNC_RETURN(i);
-        } else if (current >= 'A' && current <= 'Z'){
+            *result = i;
+            return NOERROR;
+        }
+        else if (current >= 'A' && current <= 'Z'){
             // make lower case
             current += uppercaseAddon;
             (*chars)[i] = current;
         }
     }
-    FUNC_RETURN(-1);
+    *result = -1;
+    return NOERROR;
 }
 
 Char32 CharArrayBuffers::ToLower(

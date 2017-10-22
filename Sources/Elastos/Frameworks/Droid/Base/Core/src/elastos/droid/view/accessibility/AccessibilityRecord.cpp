@@ -42,10 +42,6 @@ namespace Droid {
 namespace View {
 namespace Accessibility {
 
-// {657EA1A2-91E4-4414-9514-CE42594D9BC5}
-extern const InterfaceID EIID_AccessibilityRecord =
-        { 0x657ea1a2, 0x91e4, 0x4414, { 0x95, 0x14, 0xce, 0x42, 0x59, 0x4d, 0x9b, 0xc5 } };
-
 const String AccessibilityRecord::TAG("AccessibilityRecord");
 const Int32 AccessibilityRecord::UNDEFINED = -1;
 const Int32 AccessibilityRecord::PROPERTY_CHECKED = 0x00000001;

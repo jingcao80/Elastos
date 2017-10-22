@@ -471,7 +471,8 @@ protected:
         /* [out] */ IViewGroupLayoutParams** params);
 
     //@Override
-    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateDefaultLayoutParams();
+    CARAPI GenerateDefaultLayoutParams(
+        /* [out] */ IViewGroupLayoutParams** params);
 
     //@Override
     CARAPI OnLayout(

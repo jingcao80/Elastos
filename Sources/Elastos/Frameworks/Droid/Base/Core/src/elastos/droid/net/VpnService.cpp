@@ -21,7 +21,6 @@
 #include "elastos/droid/net/CRouteInfo.h"
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkUtils.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/UserHandle.h"
@@ -193,7 +192,9 @@ ECode VpnService::AddAddress(
 
     Check(address, prefixLength);
         // try {
-    ECode ec = GetService()->AddVpnAddress(Ptr(address)->Func(address->GetHostAddress), prefixLength, result);
+    String host;
+    address->GetHostAddress(&host);
+    ECode ec = GetService()->AddVpnAddress(host, prefixLength, result);
     if (!FAILED(ec)) return NOERROR;
         // } catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -213,7 +214,9 @@ ECode VpnService::RemoveAddress(
 
     Check(address, prefixLength);
         // try {
-    ECode ec = GetService()->RemoveVpnAddress(Ptr(address)->Func(address->GetHostAddress), prefixLength, result);
+    String host;
+    address->GetHostAddress(&host);
+    ECode ec = GetService()->RemoveVpnAddress(host, prefixLength, result);
     if (!FAILED(ec)) return NOERROR;
         // } catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -252,7 +255,8 @@ ECode VpnService::Check(
     /* [in] */ IInetAddress* address,
     /* [in] */ Int32 prefixLength)
 {
-    if (Ptr(address)->Func(address->IsLoopbackAddress)) {
+    Boolean loopbackAddr;
+    if (address->IsLoopbackAddress(&loopbackAddr), loopbackAddr) {
         Logger::E("VpnService", "Bad address");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -504,34 +508,44 @@ ECode VpnServiceBuilder::VerifyApp(
 ECode VpnServiceBuilder::AddAllowedApplication(
     /* [in] */ const String& packageName)
 {
-    if (Ptr(mConfig)->Func(mConfig->GetDisallowedApplications) != NULL) {
+    AutoPtr<IList> list;
+    mConfig->GetDisallowedApplications((IList**)&list);
+    if (list != NULL) {
         Logger::E("VpnService", "addDisallowedApplication already called");
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     VerifyApp(packageName);
-    if (Ptr(mConfig)->Func(mConfig->GetAllowedApplications) == NULL) {
+    list = NULL;
+    mConfig->GetAllowedApplications((IList**)&list);
+    if (list == NULL) {
         AutoPtr<IList> newArrayList;
         CArrayList::New((IList**)&newArrayList);
         mConfig->SetAllowedApplications(newArrayList);
+        list = newArrayList;
     }
-    Ptr(mConfig)->Func(mConfig->GetAllowedApplications)->Add(StringUtils::ParseCharSequence(packageName));
+    list->Add(StringUtils::ParseCharSequence(packageName));
     return NOERROR;
 }
 
 ECode VpnServiceBuilder::AddDisallowedApplication(
     /* [in] */ const String& packageName)
 {
-    if (Ptr(mConfig)->Func(mConfig->GetAllowedApplications) != NULL) {
+    AutoPtr<IList> list;
+    mConfig->GetAllowedApplications((IList**)&list);
+    if (list != NULL) {
         Logger::E("VpnService", "addAllowedApplication already called");
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     VerifyApp(packageName);
-    if (Ptr(mConfig)->Func(mConfig->GetDisallowedApplications) == NULL) {
+    list = NULL;
+    mConfig->GetDisallowedApplications((IList**)&list);
+    if (list == NULL) {
         AutoPtr<IList> newArrayList;
         CArrayList::New((IList**)&newArrayList);
         mConfig->SetDisallowedApplications(newArrayList);
+        list = newArrayList;
     }
-    Ptr(mConfig)->Func(mConfig->GetDisallowedApplications)->Add(StringUtils::ParseCharSequence(packageName));
+    list->Add(StringUtils::ParseCharSequence(packageName));
     return NOERROR;
 }
 

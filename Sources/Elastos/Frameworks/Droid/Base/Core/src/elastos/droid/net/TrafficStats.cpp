@@ -23,7 +23,6 @@
 #include "elastos/droid/net/CNetworkStats.h"
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkStats.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/server/CNetworkManagementSocketTaggerHelper.h"
@@ -253,17 +252,17 @@ ECode TrafficStats::ClearThreadStatsUid()
 ECode TrafficStats::TagSocket(
     /* [in] */ ISocket* socket)
 {
-    AutoPtr<ISocketTaggerHelper> helper;
-    CSocketTaggerHelper::AcquireSingleton((ISocketTaggerHelper**)&helper);
-    return Ptr(helper)->Func(helper->Get)->Tag(socket);
+    AutoPtr<ISocketTagger> tagger;
+    SocketTagger::Get((ISocketTagger**)&tagger);
+    return tagger->Tag(socket);
 }
 
 ECode TrafficStats::UntagSocket(
     /* [in] */ ISocket* socket)
 {
-    AutoPtr<ISocketTaggerHelper> helper;
-    CSocketTaggerHelper::AcquireSingleton((ISocketTaggerHelper**)&helper);
-    return Ptr(helper)->Func(helper->Get)->Untag(socket);
+    AutoPtr<ISocketTagger> tagger;
+    SocketTagger::Get((ISocketTagger**)&tagger);
+    return tagger->Untag(socket);
 }
 
 ECode TrafficStats::StartDataProfiling(
@@ -425,7 +424,8 @@ ECode TrafficStats::GetMobileTcpRxPackets(
             total += stat;
         }
     }
-    FUNC_RETURN(total)
+    *result = total;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetMobileTcpTxPackets(
@@ -443,7 +443,8 @@ ECode TrafficStats::GetMobileTcpTxPackets(
             total += stat;
         }
     }
-    FUNC_RETURN(total)
+    *result = total;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetTxPackets(
@@ -528,7 +529,8 @@ ECode TrafficStats::GetUidTxBytes(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(NativeGetUidStat(uid, TYPE_TX_BYTES))
+    *result = NativeGetUidStat(uid, TYPE_TX_BYTES);
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidRxBytes(
@@ -537,7 +539,8 @@ ECode TrafficStats::GetUidRxBytes(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(NativeGetUidStat(uid, TYPE_RX_BYTES))
+    *result = NativeGetUidStat(uid, TYPE_RX_BYTES);
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidTxPackets(
@@ -546,7 +549,8 @@ ECode TrafficStats::GetUidTxPackets(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(NativeGetUidStat(uid, TYPE_TX_PACKETS))
+    *result = NativeGetUidStat(uid, TYPE_TX_PACKETS);
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidRxPackets(
@@ -555,7 +559,8 @@ ECode TrafficStats::GetUidRxPackets(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(NativeGetUidStat(uid, TYPE_RX_PACKETS))
+    *result = NativeGetUidStat(uid, TYPE_RX_PACKETS);
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidTcpTxBytes(
@@ -564,7 +569,8 @@ ECode TrafficStats::GetUidTcpTxBytes(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidTcpRxBytes(
@@ -573,7 +579,8 @@ ECode TrafficStats::GetUidTcpRxBytes(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidUdpTxBytes(
@@ -582,7 +589,8 @@ ECode TrafficStats::GetUidUdpTxBytes(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidUdpRxBytes(
@@ -591,7 +599,8 @@ ECode TrafficStats::GetUidUdpRxBytes(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidTcpTxSegments(
@@ -600,7 +609,8 @@ ECode TrafficStats::GetUidTcpTxSegments(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidTcpRxSegments(
@@ -609,7 +619,8 @@ ECode TrafficStats::GetUidTcpRxSegments(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidUdpTxPackets(
@@ -618,7 +629,8 @@ ECode TrafficStats::GetUidUdpTxPackets(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetUidUdpRxPackets(
@@ -627,7 +639,8 @@ ECode TrafficStats::GetUidUdpRxPackets(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(ITrafficStats::UNSUPPORTED)
+    *result = ITrafficStats::UNSUPPORTED;
+    return NOERROR;
 }
 
 ECode TrafficStats::GetDataLayerSnapshotForUid(

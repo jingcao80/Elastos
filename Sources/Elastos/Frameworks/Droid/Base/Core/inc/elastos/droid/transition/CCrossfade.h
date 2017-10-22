@@ -125,6 +125,8 @@ public:
         /* [in] */ ICrossfade* obj);
 
 private:
+    using Transition::CaptureValues;
+
     CARAPI CaptureValues(
         /* [in] */ ITransitionValues* transitionValues);
 

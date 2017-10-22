@@ -1933,7 +1933,7 @@ Boolean Settings::Secure::SetLocationModeForUser(
                 network = TRUE;
                 break;
             default:
-                Slogger::E("Settings::Secure", "Invalid location mode: %d" + mode);
+                Slogger::E("Settings::Secure", "Invalid location mode: %d", mode);
                 // return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 return FALSE;
         }

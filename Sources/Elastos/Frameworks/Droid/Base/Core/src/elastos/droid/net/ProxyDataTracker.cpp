@@ -29,7 +29,6 @@
 #include "elastos/droid/net/NetworkInfo.h"
 #include "elastos/droid/net/NetworkState.h"
 #include "elastos/droid/net/Proxy.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/CMessenger.h"
 #include "elastos/droid/os/Handler.h"
@@ -156,7 +155,8 @@ ECode ProxyDataTracker::Teardown(
     SetTeardownRequested(TRUE);
     mReconnectRequested->Set(FALSE);
     // try {
-    if (Ptr(mIsProxyAvailable)->Func(mIsProxyAvailable->Get) && mProxyStatusService != NULL) {
+    Boolean available;
+    if ((mIsProxyAvailable->Get(&available), available) && mProxyStatusService != NULL) {
         AutoPtr<IMessage> msg = CMessage::Obtain(NULL, MSG_TEAR_DOWN_REQUEST);
         ECode ec = mProxyStatusService->Send(msg);
         if (FAILED(ec)) {
@@ -182,7 +182,8 @@ ECode ProxyDataTracker::Reconnect(
 
     mReconnectRequested->Set(TRUE);
     SetTeardownRequested(FALSE);
-    if (!Ptr(mIsProxyAvailable)->Func(mIsProxyAvailable->Get)) {
+    Boolean available;
+    if (mIsProxyAvailable->Get(&available), !available) {
         Logger::W(TAG, "Reconnect requested even though proxy service is not up. Bailing.");
         *result = FALSE;
         return NOERROR;
@@ -248,11 +249,12 @@ ECode ProxyDataTracker::InnerSub_BroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    if (Ptr(intent)->Func(intent->GetAction).Equals(ACTION_PROXY_STATUS_CHANGE)) {
+    String action;
+    if (intent->GetAction(&action), action.Equals(ACTION_PROXY_STATUS_CHANGE)) {
         Boolean b;
         intent->GetBooleanExtra(KEY_IS_PROXY_AVAILABLE, FALSE, &b);
         mHost->mIsProxyAvailable->Set(b);
-        if (Ptr(mHost->mIsProxyAvailable)->Func(mHost->mIsProxyAvailable->Get)) {
+        if (mHost->mIsProxyAvailable->Get(&b), b) {
             AutoPtr<IBundle> bundle;
             intent->GetBundleExtra(KEY_REPLY_TO_MESSENGER_BINDER_BUNDLE, (IBundle**)&bundle);
             b = bundle == NULL;
@@ -268,7 +270,7 @@ ECode ProxyDataTracker::InnerSub_BroadcastReceiver::OnReceive(
             }
             CMessenger::New(IIMessenger::Probe(binder), (IMessenger**)&(mHost->mProxyStatusService));
             // If there is a pending reconnect request, do it now.
-            if (Ptr(mHost->mReconnectRequested)->Func(mHost->mReconnectRequested->Get)) {
+            if (mHost->mReconnectRequested->Get(&b), b) {
                 Boolean tmp;
                 mHost->Reconnect(&tmp);
             }

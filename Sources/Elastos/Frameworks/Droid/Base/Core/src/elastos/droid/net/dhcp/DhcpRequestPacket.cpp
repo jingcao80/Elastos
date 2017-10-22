@@ -19,7 +19,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/net/dhcp/DhcpRequestPacket.h"
 #include "elastos/droid/net/dhcp/DhcpPacket.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -80,10 +79,12 @@ ECode DhcpRequestPacket::BuildPacket(
     byteBufferHelper->Allocate(MAX_LENGTH, result);
     AutoPtr<IInet4AddressHelper> inet4AddressHelper;
     CInet4AddressHelper::AcquireSingleton((IInet4AddressHelper**)&inet4AddressHelper);
+    AutoPtr<IInetAddress> all;
+    inet4AddressHelper->GetALL((IInetAddress**)&all);
+    AutoPtr<IInetAddress> any;
+    inet4AddressHelper->GetANY((IInetAddress**)&any);
     FillInPacket(encap,
-        Ptr(inet4AddressHelper)->Func(inet4AddressHelper->GetALL),
-        Ptr(inet4AddressHelper)->Func(inet4AddressHelper->GetANY),
-        destUdp, srcUdp, *result, DHCP_BOOTREQUEST, mBroadcast);
+        all, any, destUdp, srcUdp, *result, DHCP_BOOTREQUEST, mBroadcast);
     IBuffer::Probe(*result)->Flip();
     return NOERROR;
 }

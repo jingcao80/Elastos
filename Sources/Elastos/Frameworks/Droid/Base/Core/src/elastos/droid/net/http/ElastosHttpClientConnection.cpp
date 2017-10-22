@@ -19,7 +19,6 @@
 #include "elastos/droid/net/http/CElastosHttpClient.h"
 #include "elastos/droid/net/http/ElastosHttpClient.h"
 #include "elastos/droid/net/http/HttpLog.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -387,8 +386,10 @@ ECode ElastosHttpClientConnection::ParseResponseHeader(
     // TODO: Waiting for IBasicLineParser
     assert(0);
     // helper->GetDEFAULT((IBasicLineParser**)&defaultBasicLineParser);
+    Int32 curLength;
+    current->GetLength(&curLength);
     AutoPtr<IParserCursor> newParserCursor;
-    CParserCursor::New(0, Ptr(current)->Func(current->GetLength), (IParserCursor**)&newParserCursor);
+    CParserCursor::New(0, curLength, (IParserCursor**)&newParserCursor);
     ILineParser::Probe(defaultBasicLineParser)->ParseStatusLine(current, newParserCursor, (IStatusLine**)&statusline);
 
     if (HttpLog::LOGV) HttpLog::V("read: %s", TO_CSTR(statusline));
@@ -406,7 +407,7 @@ ECode ElastosHttpClientConnection::ParseResponseHeader(
         }
         Int32 l;
         mInbuffer->ReadLine(current, &l);
-        if (l == -1 || Ptr(current)->Func(current->GetLength) < 1) {
+        if (l == -1 || (current->GetLength(&curLength), curLength < 1)) {
             break;
         }
         // Parse the header name and value
@@ -419,9 +420,8 @@ ECode ElastosHttpClientConnection::ParseResponseHeader(
             // we have continuation folded header
             // so append value
             Int32 start = 0;
-            Int32 length;
-            current->GetLength(&length);
-            while (start < length) {
+            current->GetLength(&curLength);
+            while (start < curLength) {
                 Char32 ch;
                 current->CharAt(start, &ch);
                 if (ch != ' ' && ch != '\t') {
@@ -429,15 +429,17 @@ ECode ElastosHttpClientConnection::ParseResponseHeader(
                 }
                 start++;
             }
+            Int32 prevLength;
+            previous->GetLength(&prevLength);
             if (mMaxLineLength > 0 &&
-                    Ptr(previous)->Func(previous->GetLength) + 1 + Ptr(current)->Func(current->GetLength) - start >
-                        mMaxLineLength) {
+                    prevLength + 1 + curLength - start > mMaxLineLength) {
                 Logger::E("ElastosHttpClientConnection", "Maximum line length limit exceeded");
                 return E_IO_EXCEPTION;
             }
             previous->Append(' ');
-            previous->Append(current, start, Ptr(current)->Func(current->GetLength) - start);
-        } else {
+            previous->Append(current, start, curLength - start);
+        }
+        else {
             if (previous != NULL) {
                 headers->ParseHeader(previous);
             }
@@ -458,7 +460,9 @@ ECode ElastosHttpClientConnection::ParseResponseHeader(
         assert(0);
         // mMetrics->IncrementResponseCount();
     }
-    FUNC_RETURN(statusline);
+    *result = statusline;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode ElastosHttpClientConnection::ReceiveResponseEntity(
@@ -507,7 +511,9 @@ ECode ElastosHttpClientConnection::ReceiveResponseEntity(
     if (contentEncodingHeader != NULL) {
         IAbstractHttpEntity::Probe(entity)->SetContentEncoding(contentEncodingHeader);
     }
-    FUNC_RETURN(IHttpEntity::Probe(entity));
+    *result = IHttpEntity::Probe(entity);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 Int64 ElastosHttpClientConnection::DetermineLength(
@@ -557,7 +563,9 @@ ECode ElastosHttpClientConnection::GetMetrics(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(IHttpConnectionMetrics::Probe(mMetrics))
+    *result = IHttpConnectionMetrics::Probe(mMetrics);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 } // namespace Http

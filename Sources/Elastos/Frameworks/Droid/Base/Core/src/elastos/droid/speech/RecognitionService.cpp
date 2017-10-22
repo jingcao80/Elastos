@@ -345,8 +345,9 @@ Boolean RecognitionService::CheckPermissions(
     return FALSE;
 }
 
-AutoPtr</*IIBinder*/IBinder> RecognitionService::OnBind(
-    /* [in] */ IIntent* intent)
+ECode RecognitionService::OnBind(
+    /* [in] */ IIntent* intent,
+    /* [out] */ IBinder** service)
 {
     if (DBG) {
         //Java:    Log.d(TAG, "onBind, intent=" + intent);
@@ -354,7 +355,8 @@ AutoPtr</*IIBinder*/IBinder> RecognitionService::OnBind(
         intent->ToString(&strIntent);
         Logger::D(TAG, "onBind, intent=%s\n", strIntent.string());
     }
-    return /*mBinder*/NULL;
+    *service = NULL;
+    return NOERROR;
 }
 
 ECode RecognitionService::OnDestroy()

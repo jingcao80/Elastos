@@ -51,9 +51,9 @@ private:
 
         virtual ~UtteranceProgressListenerStand();
 
-        constructor();
+        CARAPI constructor();
 
-        constructor(
+        CARAPI constructor(
             /* [in] */ ITextToSpeechOnUtteranceCompletedListener* listener);
     public:
         //@Override
@@ -106,7 +106,8 @@ public:
 
     ~UtteranceProgressListener();
 
-    constructor();
+    CARAPI constructor();
+
     /**
      * Called when an utterance "starts" as perceived by the caller. This will
      * be soon before audio is played back in the case of a {@link TextToSpeech#speak}

@@ -325,7 +325,7 @@ void CAccessibilityEvent::ReadAccessibilityRecordFromParcel(
     /* [in] */ IAccessibilityRecord* record,
     /* [in] */ IParcel* parcel)
 {
-    AccessibilityRecord* cls = reinterpret_cast<AccessibilityRecord*>(record->Probe(EIID_AccessibilityRecord));
+    AccessibilityRecord* cls = (AccessibilityRecord*)(record);
     parcel->ReadInt32(&cls->mBooleanProperties);
     parcel->ReadInt32(&cls->mCurrentItemIndex);
     parcel->ReadInt32(&cls->mItemCount);
@@ -386,7 +386,7 @@ void CAccessibilityEvent::WriteAccessibilityRecordToParcel(
     /* [in] */ IAccessibilityRecord* record,
     /* [in] */ IParcel* parcel)
 {
-    AccessibilityRecord* cls = reinterpret_cast<AccessibilityRecord*>(record->Probe(EIID_AccessibilityRecord));
+    AccessibilityRecord* cls = (AccessibilityRecord*)(record);
     parcel->WriteInt32(cls->mBooleanProperties);
     parcel->WriteInt32(cls->mCurrentItemIndex);
     parcel->WriteInt32(cls->mItemCount);

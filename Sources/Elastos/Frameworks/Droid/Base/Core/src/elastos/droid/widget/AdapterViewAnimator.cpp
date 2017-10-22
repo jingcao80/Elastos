@@ -405,10 +405,8 @@ ECode AdapterViewAnimator::OnTouchEvent(
     return NOERROR;
 }
 
-ECode AdapterViewAnimator::OnSaveInstanceState(
-    /* [out] */ IParcelable** result)
+AutoPtr<IParcelable> AdapterViewAnimator::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<IParcelable> superState = AdapterView::OnSaveInstanceState();
     if (mRemoteViewsAdapter) {
         mRemoteViewsAdapter->SaveRemoteViewsCache();
@@ -417,9 +415,7 @@ ECode AdapterViewAnimator::OnSaveInstanceState(
     AutoPtr<IAdapterViewAnimatorSavedState> state;
     CAdapterViewAnimatorSavedState::New(superState, mWhichChild,
             (IAdapterViewAnimatorSavedState**)&state);
-    *result = IParcelable::Probe(state);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return IParcelable::Probe(state);
 }
 
 ECode AdapterViewAnimator::OnRestoreInstanceState(

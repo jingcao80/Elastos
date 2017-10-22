@@ -49,7 +49,7 @@ ScaleGestureDetector::SimpleOnScaleGestureListener::SimpleOnScaleGestureListener
 ScaleGestureDetector::SimpleOnScaleGestureListener::~SimpleOnScaleGestureListener()
 {}
 
-ScaleGestureDetector::SimpleOnScaleGestureListener::constructor()
+ECode ScaleGestureDetector::SimpleOnScaleGestureListener::constructor()
 {
     return NOERROR;
 }
@@ -89,12 +89,12 @@ ScaleGestureDetector::MySimpleOnGestureListener::MySimpleOnGestureListener(
 ScaleGestureDetector::MySimpleOnGestureListener::~MySimpleOnGestureListener()
 {}
 
-ScaleGestureDetector::MySimpleOnGestureListener::constructor()
+ECode ScaleGestureDetector::MySimpleOnGestureListener::constructor()
 {
     return NOERROR;
 }
 
-ScaleGestureDetector::MySimpleOnGestureListener::OnDoubleTap(
+ECode ScaleGestureDetector::MySimpleOnGestureListener::OnDoubleTap(
     /* [in] */ IMotionEvent* e,
     /* [out] */ Boolean* res)
 {

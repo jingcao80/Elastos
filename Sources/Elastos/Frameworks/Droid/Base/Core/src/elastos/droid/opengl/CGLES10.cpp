@@ -242,7 +242,7 @@ getarray
     const char * _exceptionMessage;
     Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
-    Int32 _remaining;
+    Int32 _remaining = 0;
     Handle64 data;
     CTYPE *params = (CTYPE *) 0;
     Int32 _needed = 0;
@@ -2886,7 +2886,7 @@ ECode CGLES10::GlColorPointerBounds(
     /* [in] */ Elastos::IO::IBuffer* pointer,
     /* [in] */ Int32 remaining)
 {
-    Handle64 address;
+    Handle64 address = 0;
     if (pointer) {
         ASSERT_SUCCEEDED(GetDirectBufferPointer(pointer, &address));
         if (address == 0) {

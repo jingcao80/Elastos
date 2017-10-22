@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include "elastos/droid/net/MobileLinkQualityInfo.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 
 namespace Elastos {
 namespace Droid {
@@ -45,7 +44,9 @@ ECode MobileLinkQualityInfo::CreateFromParcelBody(
 {
     AutoPtr<MobileLinkQualityInfo> li = new MobileLinkQualityInfo();
     li->ReadFromParcel(in);
-    FUNC_RETURN(li)
+    *result = li;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode MobileLinkQualityInfo::GetMobileNetworkType(

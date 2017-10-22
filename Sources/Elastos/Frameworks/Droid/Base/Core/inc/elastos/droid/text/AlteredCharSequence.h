@@ -58,7 +58,7 @@ public:
 
     virtual ~AlteredCharSequence();
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ ICharSequence* source,
         /* [in] */ ArrayOf<Char32>* sub,
         /* [in] */ Int32 substart,

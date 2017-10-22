@@ -20,7 +20,6 @@
 #include "elastos/droid/net/CProxyInfo.h"
 #include "elastos/droid/net/CRouteInfo.h"
 #include "elastos/droid/net/LinkProperties.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/Singleton.h>
 #include <elastos/utility/Objects.h>
@@ -84,50 +83,52 @@ ECode LinkProperties::constructor(
         source->GetInterfaceName(&mIfaceName);
         AutoPtr<IList> linkAddresses;
         source->GetLinkAddresses((IList**)&linkAddresses);
-        AutoPtr<IIterator> iter;
-        linkAddresses->GetIterator((IIterator**)&iter);
-        AutoPtr<IInterface> l;
-        while (RETN_OUT_VAL(iter, HasNext)) {
-            iter->GetNext((IInterface**)&l);
-            mLinkAddresses->Add(l);
-            l = NULL;
+        AutoPtr<IIterator> it;
+        linkAddresses->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> address;
+            it->GetNext((IInterface**)&address);
+            mLinkAddresses->Add(address);
         }
-        AutoPtr<IList> dnses = RETN_OUT_VAL(source, GetDnsServers);
-        iter = NULL;
-        dnses->GetIterator((IIterator**)&iter);
-        AutoPtr<IInterface> i;
-        while (RETN_OUT_VAL(iter, HasNext)) {
-            iter->GetNext((IInterface**)&i);
-            mDnses->Add(i);
-            i = NULL;
+        AutoPtr<IList> dnses;
+        source->GetDnsServers((IList**)&dnses);
+        it = NULL;
+        dnses->GetIterator((IIterator**)&it);
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> dns;
+            it->GetNext((IInterface**)&dns);
+            mDnses->Add(dns);
         }
         source->GetDomains(&mDomains);
-        AutoPtr<IList> routes = (RETN_OUT_VAL(source, GetRoutes));
-        iter = NULL;
-        routes->GetIterator((IIterator**)&iter);
-        AutoPtr<IInterface> r;
-        while (RETN_OUT_VAL(iter, HasNext)) {
-            iter->GetNext((IInterface**)&r);
-            mRoutes->Add(r);
-            r = NULL;
+        AutoPtr<IList> routes;
+        source->GetRoutes((IList**)&routes);
+        it = NULL;
+        routes->GetIterator((IIterator**)&it);
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> route;
+            it->GetNext((IInterface**)&route);
+            mRoutes->Add(route);
         }
 
-        if (RETN_OUT_VAL(source, GetHttpProxy) == NULL) {
-            mHttpProxy =  NULL;
-        }
-        else {
-            CProxyInfo::New(RETN_OUT_VAL(source, GetHttpProxy), (IProxyInfo**)&mHttpProxy);
+        AutoPtr<IProxyInfo> proxy;
+        source->GetHttpProxy((IProxyInfo**)&proxy);
+        if (proxy != NULL) {
+            CProxyInfo::New(proxy, (IProxyInfo**)&mHttpProxy);
         }
         AutoPtr<ICollection> values;
         ((LinkProperties*)source)->mStackedLinks->GetValues((ICollection**)&values);
-        iter = NULL;
-        values->GetIterator((IIterator**)&iter);
-        AutoPtr<IInterface> lp;
-        while (RETN_OUT_VAL(iter, HasNext)) {
-            iter->GetNext((IInterface**)&lp);
-            RETN_OUT_VAL(this, AddStackedLink, ILinkProperties::Probe(lp));
+        it = NULL;
+        values->GetIterator((IIterator**)&it);
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> lp;
+            it->GetNext((IInterface**)&lp);
+            Boolean result;
+            AddStackedLink(ILinkProperties::Probe(lp), &result);
         }
-        SetMtu(RETN_OUT_VAL(source, GetMtu));
+        Int32 mtu;
+        source->GetMtu(&mtu);
+        SetMtu(mtu);
         mTcpBufferSizes = ((LinkProperties*)source)->mTcpBufferSizes;
     }
     return NOERROR;
@@ -137,12 +138,17 @@ ECode LinkProperties::SetInterfaceName(
     /* [in] */ const String& iface)
 {
     mIfaceName = iface;
+    Int32 size;
+    mRoutes->GetSize(&size);
     AutoPtr<IArrayList> newRoutes;
-    CArrayList::New(RETN_OUT_VAL(mRoutes, GetSize), (IArrayList**)&newRoutes);
-    AutoPtr<IIterator> iter;
-    mRoutes->GetIterator((IIterator**)&iter);
-    while (RETN_OUT_VAL(iter, HasNext)) {
-        newRoutes->Add(RouteWithInterface(IRouteInfo::Probe(RETN_OUT_VAL(iter, GetNext))));
+    CArrayList::New(size, (IArrayList**)&newRoutes);
+    AutoPtr<IIterator> it;
+    mRoutes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        newRoutes->Add(RouteWithInterface(IRouteInfo::Probe(obj)));
     }
     mRoutes = newRoutes;
     return NOERROR;
@@ -162,18 +168,25 @@ ECode LinkProperties::GetAllInterfaceNames(
 {
     VALIDATE_NOT_NULL(result)
 
+    Int32 size;
+    mStackedLinks->GetSize(&size);
     AutoPtr<IList> interfaceNames;
-    CArrayList::New(RETN_OUT_VAL(mStackedLinks, GetSize) + 1, (IList**)&interfaceNames);
-    if (mIfaceName != String(NULL)) {
+    CArrayList::New(size + 1, (IList**)&interfaceNames);
+    if (!mIfaceName.IsNull()) {
         AutoPtr<ICharSequence> csq;
         CString::New(mIfaceName, (ICharSequence**)&csq);
         interfaceNames->Add(csq);
     }
-    AutoPtr<IIterator> iter;
-    RETN_OUT_VAL(mStackedLinks, GetValues)->GetIterator((IIterator**)&iter);
-    while (RETN_OUT_VAL(iter, HasNext)) {
+    AutoPtr<ICollection> values;
+    mStackedLinks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
         AutoPtr<IList> l;
-        ILinkProperties::Probe(RETN_OUT_VAL(iter, GetNext))->GetAllInterfaceNames((IList**)&l);
+        ILinkProperties::Probe(obj)->GetAllInterfaceNames((IList**)&l);
         interfaceNames->AddAll(ICollection::Probe(l));
     }
     *result = interfaceNames;
@@ -188,9 +201,15 @@ ECode LinkProperties::GetAddresses(
 
     AutoPtr<IList> addresses;
     CArrayList::New((IList**)&addresses);
-    FOR_EACH(iter, mLinkAddresses) {
-        AutoPtr<ILinkAddress> linkAddress = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        addresses->Add(RETN_OUT_VAL(linkAddress, GetAddress));
+    AutoPtr<IIterator> it;
+    mLinkAddresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IInetAddress> address;
+        ILinkAddress::Probe(obj)->GetAddress((IInetAddress**)&address);
+        addresses->Add(address);
     }
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
@@ -204,13 +223,26 @@ ECode LinkProperties::GetAllAddresses(
 
     AutoPtr<IList> addresses;
     CArrayList::New((IList**)&addresses);
-    FOR_EACH(iter, mLinkAddresses) {
-        AutoPtr<ILinkAddress> linkAddress = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        addresses->Add(RETN_OUT_VAL(linkAddress, GetAddress));
+    AutoPtr<IIterator> it;
+    mLinkAddresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IInetAddress> address;
+        ILinkAddress::Probe(obj)->GetAddress((IInetAddress**)&address);
+        addresses->Add(address);
     }
-    FOR_EACH(iter_stacked, RETN_OUT_VAL(mStackedLinks, GetValues)) {
-        AutoPtr<ILinkProperties> stacked = ILinkProperties::Probe(ReturnOutValue(iter_stacked, iter_stacked->GetNext));
-        addresses->AddAll(ICollection::Probe(RETN_OUT_VAL(stacked, GetAllAddresses)));
+    AutoPtr<ICollection> links;
+    mStackedLinks->GetValues((ICollection**)&links);
+    it = NULL;
+    links->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IList> allAddresses;
+        ILinkProperties::Probe(obj)->GetAllAddresses((IList**)&allAddresses);
+        addresses->AddAll(ICollection::Probe(allAddresses));
     }
     *result = addresses;
     REFCOUNT_ADD(*result)
@@ -220,9 +252,13 @@ ECode LinkProperties::GetAllAddresses(
 Int32 LinkProperties::FindLinkAddressIndex(
     /* [in] */ ILinkAddress* address)
 {
-    for (Int32 i = 0; i < RETN_OUT_VAL(mLinkAddresses, GetSize); i++) {
-        AutoPtr<ILinkAddress> linkAddress = ILinkAddress::Probe(RETN_OUT_VAL(mLinkAddresses, Get, i));
-        if (RETN_OUT_VAL(linkAddress, IsSameAddressAs, address)) {
+    Int32 size;
+    mLinkAddresses->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mLinkAddresses->Get(i, ((IInterface**)&obj));
+        Boolean same;
+        if (ILinkAddress::Probe(obj)->IsSameAddressAs(address, &same), same) {
             return i;
         }
     }
@@ -247,10 +283,9 @@ ECode LinkProperties::AddLinkAddress(
         return NOERROR;
     }
     else {
-        AutoPtr<ILinkAddress> linkAddress = ILinkAddress::Probe(RETN_OUT_VAL(mLinkAddresses, Get, i));
-        Boolean isEquals;
-        IObject::Probe(linkAddress)->Equals(address, &isEquals);
-        if (isEquals) {
+        AutoPtr<IInterface> linkAddress;
+        mLinkAddresses->Get(i, (IInterface**)&linkAddress);
+        if (Object::Equals(linkAddress, address)) {
             // Address was present and has same properties. Do nothing.
             *result = FALSE;
             return NOERROR;
@@ -299,9 +334,17 @@ ECode LinkProperties::GetAllLinkAddresses(
     AutoPtr<IList> addresses;
     CArrayList::New((IList**)&addresses);
     addresses->AddAll(ICollection::Probe(mLinkAddresses));
-    FOR_EACH(iter, RETN_OUT_VAL(mStackedLinks, GetValues)) {
-        AutoPtr<ILinkProperties> stacked = ILinkProperties::Probe(RETN_OUT_VAL(iter, GetNext));
-        addresses->AddAll(ICollection::Probe(RETN_OUT_VAL(stacked, GetAllLinkAddresses)));
+    AutoPtr<ICollection> links;
+    mStackedLinks->GetValues((ICollection**)&links);
+    AutoPtr<IIterator> it;
+    links->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
+        AutoPtr<IList> linkAddresses;
+        ILinkProperties::Probe(link)->GetAllLinkAddresses((IList**)&linkAddresses);
+        addresses->AddAll(ICollection::Probe(linkAddresses));
     }
     *result = addresses;
     REFCOUNT_ADD(*result)
@@ -312,9 +355,14 @@ ECode LinkProperties::SetLinkAddresses(
     /* [in] */ ICollection* addresses)
 {
     mLinkAddresses->Clear();
-    FOR_EACH(iter, addresses) {
-        AutoPtr<ILinkAddress> address = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        RETN_OUT_VAL(this, AddLinkAddress, address);
+    AutoPtr<IIterator> it;
+    addresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
+        Boolean result;
+        AddLinkAddress(ILinkAddress::Probe(link), &result);
     }
     return NOERROR;
 }
@@ -325,7 +373,8 @@ ECode LinkProperties::AddDnsServer(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (dnsServer != NULL && !RETN_OUT_VAL(mDnses, Contains, IInterface::Probe(dnsServer))) {
+    Boolean contains;
+    if (dnsServer != NULL && (mDnses->Contains(dnsServer, &contains), !contains)) {
         mDnses->Add(dnsServer);
         *result = TRUE;
         return NOERROR;
@@ -338,9 +387,14 @@ ECode LinkProperties::SetDnsServers(
     /* [in] */ ICollection* dnsServers)
 {
     mDnses->Clear();
-    FOR_EACH(iter, dnsServers) {
-        AutoPtr<IInetAddress> dnsServer = IInetAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        RETN_OUT_VAL(this, AddDnsServer, dnsServer);
+    AutoPtr<IIterator> it;
+    dnsServers->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> dnsServer;
+        it->GetNext((IInterface**)&dnsServer);
+        Boolean result;
+        AddDnsServer(IInetAddress::Probe(dnsServer), &result);
     }
     return NOERROR;
 }
@@ -406,13 +460,14 @@ ECode LinkProperties::GetTcpBufferSizes(
 AutoPtr<IRouteInfo> LinkProperties::RouteWithInterface(
     /* [in] */ IRouteInfo* route)
 {
+    AutoPtr<IIpPrefix> dest;
+    route->GetDestination((IIpPrefix**)&dest);
+    AutoPtr<IInetAddress> gateway;
+    route->GetGateway((IInetAddress**)&gateway);
+    Int32 type;
+    route->GetType(&type);
     AutoPtr<IRouteInfo> rev;
-    CRouteInfo::New(
-        RETN_OUT_VAL(route, GetDestination),
-        RETN_OUT_VAL(route, GetGateway),
-        mIfaceName,
-        RETN_OUT_VAL(route, GetType),
-        (IRouteInfo**)&rev);
+    CRouteInfo::New(dest, gateway, mIfaceName, type, (IRouteInfo**)&rev);
     return rev;
 }
 
@@ -431,7 +486,8 @@ ECode LinkProperties::AddRoute(
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         AutoPtr<IRouteInfo> route2 = RouteWithInterface(route);
-        if (!RETN_OUT_VAL(mRoutes, Contains, IInterface::Probe(route2))) {
+        Boolean contains;
+        if (mRoutes->Contains(route2, &contains), !contains) {
             mRoutes->Add(route2);
             *result = TRUE;
             return NOERROR;
@@ -447,9 +503,10 @@ ECode LinkProperties::RemoveRoute(
 {
     VALIDATE_NOT_NULL(result)
 
+    String itf;
     *result = route != NULL &&
-            mIfaceName.Equals(RETN_OUT_VAL(route, GetInterface)) &&
-            RETN_OUT_VAL(mRoutes, Remove, IInterface::Probe(route));
+            (route->GetInterface(&itf), mIfaceName.Equals(itf)) &&
+            (mRoutes->Remove(route, result), *result);
     return NOERROR;
 }
 
@@ -471,9 +528,17 @@ ECode LinkProperties::GetAllRoutes(
     AutoPtr<IList> routes;
     CArrayList::New((IList**)&routes);
     routes->AddAll(ICollection::Probe(mRoutes));
-    FOR_EACH(iter, RETN_OUT_VAL(mStackedLinks, GetValues)) {
-        AutoPtr<ILinkProperties> stacked = ILinkProperties::Probe(RETN_OUT_VAL(iter, GetNext));
-        routes->AddAll(ICollection::Probe(RETN_OUT_VAL(stacked, GetAllRoutes)));
+    AutoPtr<ICollection> links;
+    mStackedLinks->GetValues((ICollection**)&links);
+    AutoPtr<IIterator> it;
+    links->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext) ,hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
+        AutoPtr<IList> allRoutes;
+        ILinkProperties::Probe(link)->GetAllRoutes((IList**)&allRoutes);
+        routes->AddAll(ICollection::Probe(allRoutes));
     }
     *result = routes;
     REFCOUNT_ADD(*result)
@@ -503,9 +568,10 @@ ECode LinkProperties::AddStackedLink(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (link != NULL && RETN_OUT_VAL(link, GetInterfaceName) != NULL) {
+    String itfName;
+    if (link != NULL && (link->GetInterfaceName(&itfName), !itfName.IsNull())) {
         AutoPtr<ICharSequence> csq;
-        CString::New(RETN_OUT_VAL(link, GetInterfaceName), (ICharSequence**)&csq);
+        CString::New(itfName, (ICharSequence**)&csq);
         mStackedLinks->Put(csq, link);
         *result = TRUE;
         return NOERROR;
@@ -520,9 +586,10 @@ ECode LinkProperties::RemoveStackedLink(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (link != NULL && RETN_OUT_VAL(link, GetInterfaceName) != NULL) {
+    String itfName;
+    if (link != NULL && (link->GetInterfaceName(&itfName), !itfName.IsNull())) {
         AutoPtr<ICharSequence> csq;
-        CString::New(RETN_OUT_VAL(link, GetInterfaceName), (ICharSequence**)&csq);
+        CString::New(itfName, (ICharSequence**)&csq);
         AutoPtr<IInterface> removed;
         mStackedLinks->Remove(csq, (IInterface**)&removed);
         *result = removed != NULL;
@@ -539,18 +606,25 @@ ECode LinkProperties::GetStackedLinks(
 
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
-    if (RETN_OUT_VAL(mStackedLinks, IsEmpty)) {
+    Boolean empty;
+    if (mStackedLinks->IsEmpty(&empty), empty) {
         helper->GetEmptyList(result);
     }
     AutoPtr<IList> stacked;
     CArrayList::New((IList**)&stacked);
-    FOR_EACH(iter, RETN_OUT_VAL(mStackedLinks, GetValues)) {
-        AutoPtr<ILinkProperties> link = ILinkProperties::Probe(RETN_OUT_VAL(iter, GetNext));
-        AutoPtr<ILinkProperties> new_link;
-        CLinkProperties::New(link, (ILinkProperties**)&new_link);
-        stacked->Add(ReturnOutValue<ILinkProperties, ILinkProperties>(CLinkProperties::New, link));
+    AutoPtr<ICollection> links;
+    mStackedLinks->GetValues((ICollection**)&links);
+    AutoPtr<IIterator> it;
+    links->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext) ,hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
+        AutoPtr<ILinkProperties> newLink;
+        CLinkProperties::New(ILinkProperties::Probe(link), (ILinkProperties**)&newLink);
+        stacked->Add(newLink);
     }
-    return helper->UnmodifiableList(IList::Probe(stacked), result);
+    return helper->UnmodifiableList(stacked, result);
 }
 
 ECode LinkProperties::Clear()
@@ -573,47 +647,66 @@ ECode LinkProperties::ToString(
     VALIDATE_NOT_NULL(result)
 
     String ifaceName = (mIfaceName == NULL ? String("") : String("InterfaceName: ") + mIfaceName + " ");
+
     String linkAddresses("LinkAddresses: [");
-    FOR_EACH(iter, mLinkAddresses) {
-        AutoPtr<ILinkAddress> addr = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
+    AutoPtr<IIterator> it;
+    mLinkAddresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
         String s;
-        IObject::Probe(addr)->ToString(&s);
+        IObject::Probe(link)->ToString(&s);
         linkAddresses += s + ",";
     }
     linkAddresses += "] ";
+
     String dns("DnsAddresses: [");
-    FOR_EACH(iter_dns, mDnses) {
-        AutoPtr<IInetAddress> addr = IInetAddress::Probe(ReturnOutValue(iter_dns, iter_dns->GetNext));
-        dns += RETN_OUT_VAL(addr, GetHostAddress) + ",";
+    it = NULL;
+    mDnses->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        String hostAddr;
+        IInetAddress::Probe(obj)->GetHostAddress(&hostAddr);
+        dns += hostAddr + ",";
     }
     dns += "] ";
+
     String domainName = String("Domains: ") + mDomains;
-    String mtu;
-    mtu.AppendFormat(" MTU: %d", mMtu);
+
+    String mtu = String::Format(" MTU: %d", mMtu);
+
     String tcpBuffSizes("");
     if (mTcpBufferSizes != NULL) {
         tcpBuffSizes = " TcpBufferSizes: ";
         tcpBuffSizes += mTcpBufferSizes;
     }
+
     String routes(" Routes: [");
-    FOR_EACH(iter_route, mRoutes) {
-        AutoPtr<IRouteInfo> route = IRouteInfo::Probe(ReturnOutValue(iter_route, iter_route->GetNext));
+    it = NULL;
+    mRoutes->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> route;
+        it->GetNext((IInterface**)&route);
         String s;
         IObject::Probe(route)->ToString(&s);
         routes += s + ",";
     }
     routes += "] ";
-    String s;
-    if (mHttpProxy != NULL)
-        IObject::Probe(mHttpProxy)->ToString(&s);
-    String proxy = (mHttpProxy == NULL ? String("") : String(" HttpProxy: ") + s + " ");
+    String proxy = (mHttpProxy == NULL ? String("") : String(" HttpProxy: ") + TO_STR(mHttpProxy) + " ");
+
     String stacked("");
     AutoPtr<ICollection> values;
     mStackedLinks->GetValues((ICollection**)&values);
-    if (RETN_OUT_VAL(values, GetSize) > 0) {
+    Int32 size;
+    if (values->GetSize(&size), size > 0) {
         stacked += " Stacked: [";
-        FOR_EACH(iter, values) {
-            AutoPtr<ILinkProperties> link = ILinkProperties::Probe(RETN_OUT_VAL(iter, GetNext));
+        it = NULL;
+        values->GetIterator((IIterator**)&it);
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> link;
+            it->GetNext((IInterface**)&link);
             String s;
             IObject::Probe(link)->ToString(&s);
             stacked += String(" [") + s + " ],";
@@ -630,9 +723,15 @@ ECode LinkProperties::HasIPv4Address(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mLinkAddresses) {
-        AutoPtr<ILinkAddress> address = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        if (IInet4Address::Probe(RETN_OUT_VAL(address, GetAddress)) != NULL) {
+    AutoPtr<IIterator> it;
+    mLinkAddresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
+        AutoPtr<IInetAddress> address;
+        ILinkAddress::Probe(link)->GetAddress((IInetAddress**)&address);
+        if (IInet4Address::Probe(address) != NULL) {
             *result = TRUE;
             return NOERROR;
         }
@@ -646,9 +745,17 @@ ECode LinkProperties::HasGlobalIPv6Address(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mLinkAddresses) {
-        AutoPtr<ILinkAddress> address = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        if (IInet6Address::Probe(RETN_OUT_VAL(address, GetAddress)) != NULL  && RETN_OUT_VAL(address, IsGlobalPreferred)) {
+    AutoPtr<IIterator> it;
+    mLinkAddresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
+        AutoPtr<IInetAddress> address;
+        ILinkAddress::Probe(link)->GetAddress((IInetAddress**)&address);
+        Boolean globalPreferred;
+        if (IInet6Address::Probe(address) != NULL &&
+            (ILinkAddress::Probe(link)->IsGlobalPreferred(&globalPreferred), globalPreferred)) {
             *result = TRUE;
             return NOERROR;
         }
@@ -662,9 +769,14 @@ ECode LinkProperties::HasIPv4DefaultRoute(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mRoutes) {
-        AutoPtr<IRouteInfo> r = IRouteInfo::Probe(RETN_OUT_VAL(iter, GetNext));
-        if (RETN_OUT_VAL(r, IsIPv4Default)) {
+    AutoPtr<IIterator> it;
+    mRoutes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> route;
+        it->GetNext((IInterface**)&route);
+        Boolean ipv4Default;
+        if (IRouteInfo::Probe(route)->IsIPv4Default(&ipv4Default), ipv4Default) {
             *result = TRUE;
             return NOERROR;
         }
@@ -678,9 +790,14 @@ ECode LinkProperties::HasIPv6DefaultRoute(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mRoutes) {
-        AutoPtr<IRouteInfo> r = IRouteInfo::Probe(RETN_OUT_VAL(iter, GetNext));
-        if (RETN_OUT_VAL(r, IsIPv6Default)) {
+    AutoPtr<IIterator> it;
+    mRoutes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> route;
+        it->GetNext((IInterface**)&route);
+        Boolean ipv6Default;
+        if (IRouteInfo::Probe(route)->IsIPv6Default(&ipv6Default), ipv6Default) {
             *result = TRUE;
             return NOERROR;
         }
@@ -694,9 +811,13 @@ ECode LinkProperties::HasIPv4DnsServer(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mDnses) {
-        AutoPtr<IInetAddress> ia = IInetAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        if (IInet4Address::Probe(ia) != NULL) {
+    AutoPtr<IIterator> it;
+    mDnses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> dns;
+        it->GetNext((IInterface**)&dns);
+        if (IInet4Address::Probe(dns) != NULL) {
             *result = TRUE;
             return NOERROR;
         }
@@ -710,9 +831,13 @@ ECode LinkProperties::HasIPv6DnsServer(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mDnses) {
-        AutoPtr<IInetAddress> ia = IInetAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-        if (IInet6Address::Probe(ia) != NULL) {
+    AutoPtr<IIterator> it;
+    mDnses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> dns;
+        it->GetNext((IInterface**)&dns);
+        if (IInet6Address::Probe(dns) != NULL) {
             *result = TRUE;
             return NOERROR;
         }
@@ -726,8 +851,11 @@ ECode LinkProperties::IsProvisioned(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = (RETN_OUT_VAL(this, HasIPv4Address) ||
-            (RETN_OUT_VAL(this, HasGlobalIPv6Address) && RETN_OUT_VAL(this, HasIPv6DefaultRoute) && RETN_OUT_VAL(this, HasIPv6DnsServer)));
+    Boolean ipv4Address, ipv6Address, ipv6DefaultRoute, ipv6DnsServer;
+    *result = (HasIPv4Address(&ipv4Address), ipv4Address) ||
+            ((HasGlobalIPv6Address(&ipv6Address), ipv6Address) &&
+             (HasIPv6DefaultRoute(&ipv6DefaultRoute), ipv6DefaultRoute) &&
+             (HasIPv6DnsServer(&ipv6DnsServer), ipv6DnsServer));
     return NOERROR;
 }
 
@@ -737,7 +865,10 @@ ECode LinkProperties::IsIdenticalInterfaceName(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = TextUtils::Equals(RETN_OUT_VAL(this, GetInterfaceName), RETN_OUT_VAL(target, GetInterfaceName));
+    String itfName1, itfName2;
+    GetInterfaceName(&itfName1);
+    target->GetInterfaceName(&itfName2);
+    *result = TextUtils::Equals(itfName1, itfName2);
     return NOERROR;
 }
 
@@ -746,13 +877,18 @@ ECode LinkProperties::IsIdenticalAddresses(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     AutoPtr<IList> targetAddresses;
     target->GetAddresses((IList**)&targetAddresses);
     AutoPtr<IList> sourceAddresses;
     GetAddresses((IList**)&sourceAddresses);
-    *result = (RETN_OUT_VAL(sourceAddresses, GetSize) == RETN_OUT_VAL(targetAddresses, GetSize)) ?
-                RETN_OUT_VAL(sourceAddresses, ContainsAll, ICollection::Probe(targetAddresses)) : FALSE;
+    Int32 srcSize, tarSize;
+    sourceAddresses->GetSize(&srcSize);
+    targetAddresses->GetSize(&tarSize);
+    if (srcSize == tarSize) {
+        return sourceAddresses->ContainsAll(ICollection::Probe(targetAddresses), result);
+    }
     return NOERROR;
 }
 
@@ -761,25 +897,30 @@ ECode LinkProperties::IsIdenticalDnses(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     AutoPtr<IList> targetDnses;
     target->GetDnsServers((IList**)&targetDnses);
     String targetDomains;
     target->GetDomains(&targetDomains);
-    if (mDomains == NULL) {
-        if (targetDomains != NULL) {
+    if (mDomains.IsNull()) {
+        if (!targetDomains.IsNull()) {
             *result = FALSE;
             return NOERROR;
         }
     }
     else {
-        if (mDomains.Equals(targetDomains) == FALSE) {
+        if (!mDomains.Equals(targetDomains)) {
             *result = FALSE;
             return NOERROR;
         }
     }
-    *result = (RETN_OUT_VAL(mDnses, GetSize) == RETN_OUT_VAL(targetDnses, GetSize)) ?
-                RETN_OUT_VAL(mDnses, ContainsAll, ICollection::Probe(targetDnses)) : FALSE;
+    Int32 srcSize, tarSize;
+    mDnses->GetSize(&srcSize);
+    targetDnses->GetSize(&tarSize);
+    if (srcSize == tarSize) {
+        return mDnses->ContainsAll(ICollection::Probe(targetDnses), result);
+    }
     return NOERROR;
 }
 
@@ -788,11 +929,16 @@ ECode LinkProperties::IsIdenticalRoutes(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     AutoPtr<IList> targetRoutes;
     target->GetRoutes((IList**)&targetRoutes);
-    *result = (RETN_OUT_VAL(mRoutes, GetSize) == RETN_OUT_VAL(targetRoutes, GetSize)) ?
-                RETN_OUT_VAL(mRoutes, ContainsAll, ICollection::Probe(targetRoutes)) : FALSE;
+    Int32 srcSize, tarSize;
+    mRoutes->GetSize(&srcSize);
+    targetRoutes->GetSize(&tarSize);
+    if (srcSize == tarSize) {
+        return mRoutes->ContainsAll(ICollection::Probe(targetRoutes), result);
+    }
     return NOERROR;
 }
 
@@ -802,9 +948,10 @@ ECode LinkProperties::IsIdenticalHttpProxy(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IInterface> obj = IInterface::Probe(RETN_OUT_VAL(target, GetHttpProxy));
-    *result = RETN_OUT_VAL(this, GetHttpProxy) == NULL ? RETN_OUT_VAL(target, GetHttpProxy) == NULL :
-            RETN_OUT_VAL(IObject::Probe(RETN_OUT_VAL(this, GetHttpProxy)), Equals, obj);
+    AutoPtr<IProxyInfo> srcProxy, tarProxy;
+    GetHttpProxy((IProxyInfo**)&srcProxy);
+    target->GetHttpProxy((IProxyInfo**)&tarProxy);
+    *result = srcProxy == NULL ? tarProxy == NULL : Object::Equals(srcProxy, tarProxy);
     return NOERROR;
 }
 
@@ -814,22 +961,31 @@ ECode LinkProperties::IsIdenticalStackedLinks(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<ISet> keySet;
-    ((LinkProperties*)target)->mStackedLinks->GetKeySet((ISet**)&keySet);
-    if (!RETN_OUT_VAL(IObject::Probe(RETN_OUT_VAL(mStackedLinks, GetKeySet)), Equals, IInterface::Probe(keySet))) {
+    AutoPtr<ISet> srcKeySet, tarKeySet;
+    mStackedLinks->GetKeySet((ISet**)&srcKeySet);
+    ((LinkProperties*)target)->mStackedLinks->GetKeySet((ISet**)&tarKeySet);
+    Boolean equal;
+    if (srcKeySet->Equals(tarKeySet, &equal), !equal) {
         *result = FALSE;
         return NOERROR;
     }
-    FOR_EACH(iter, RETN_OUT_VAL(mStackedLinks, GetValues)) {
-        AutoPtr<ILinkProperties> stacked = ILinkProperties::Probe(RETN_OUT_VAL(iter, GetNext));
+
+    AutoPtr<ICollection> values;
+    mStackedLinks->GetValues((ICollection**)&values);
+    AutoPtr<IIterator> it;
+    values->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> link;
+        it->GetNext((IInterface**)&link);
         // Hashtable values can never be null.
         String iface;
-        stacked->GetInterfaceName(&iface);
+        ILinkProperties::Probe(link)->GetInterfaceName(&iface);
         AutoPtr<ICharSequence> csq;
         CString::New(iface, (ICharSequence**)&csq);
         AutoPtr<IInterface> value;
         ((LinkProperties*)target)->mStackedLinks->Get(csq, (IInterface**)&value);
-        if (!RETN_OUT_VAL(IObject::Probe(stacked), Equals, value)) {
+        if (!Object::Equals(link, value)) {
             *result = FALSE;
             return NOERROR;
         }
@@ -844,7 +1000,10 @@ ECode LinkProperties::IsIdenticalMtu(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = RETN_OUT_VAL(this, GetMtu) == RETN_OUT_VAL(target, GetMtu);
+    Int32 srcMtu, tarMtu;
+    GetMtu(&srcMtu);
+    target->GetMtu(&tarMtu);
+    *result = srcMtu == tarMtu;
     return NOERROR;
 }
 
@@ -869,7 +1028,7 @@ ECode LinkProperties::Equals(
         return NOERROR;
     }
 
-    if (ILinkProperties::Probe(obj) == NULL) {
+    if (!ILinkProperties::Probe(obj)) {
         *result = FALSE;
         return NOERROR;
     }
@@ -880,14 +1039,15 @@ ECode LinkProperties::Equals(
      * stacked interfaces are not so much a property of the link as a
      * description of connections between links.
      */
-    *result = RETN_OUT_VAL(this, IsIdenticalInterfaceName, target) &&
-            RETN_OUT_VAL(this, IsIdenticalAddresses, target) &&
-            RETN_OUT_VAL(this, IsIdenticalDnses, target) &&
-            RETN_OUT_VAL(this, IsIdenticalRoutes, target) &&
-            RETN_OUT_VAL(this, IsIdenticalHttpProxy, target) &&
-            RETN_OUT_VAL(this, IsIdenticalStackedLinks, target) &&
-            RETN_OUT_VAL(this, IsIdenticalMtu, target) &&
-            RETN_OUT_VAL(this, IsIdenticalTcpBufferSizes, target);
+    Boolean identical;
+    *result = (IsIdenticalInterfaceName(target, &identical), identical) &&
+              (IsIdenticalAddresses(target, &identical), identical) &&
+              (IsIdenticalDnses(target, &identical), identical) &&
+              (IsIdenticalRoutes(target, &identical), identical) &&
+              (IsIdenticalHttpProxy(target, &identical), identical) &&
+              (IsIdenticalStackedLinks(target, &identical), identical) &&
+              (IsIdenticalMtu(target, &identical), identical) &&
+              (IsIdenticalTcpBufferSizes(target, &identical), identical);
     return NOERROR;
 }
 
@@ -904,17 +1064,32 @@ ECode LinkProperties::CompareAddresses(
      * are in target but not in mLinkAddresses are placed in the
      * addedAddresses.
      */
-    CLinkPropertiesCompareResult::New(result);
-    (*result)->SetRemoved(IList::Probe(ReturnOutValue<IArrayList, ICollection>(CArrayList::New, ICollection::Probe(mLinkAddresses))));
-    RETN_OUT_VAL((*result), GetAdded)->Clear();
+    AutoPtr<ILinkPropertiesCompareResult> compareResult;
+    CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&compareResult);
+    AutoPtr<IList> links;
+    CArrayList::New(ICollection::Probe(mLinkAddresses), (IList**)&links);
+    compareResult->SetRemoved(links);
+    AutoPtr<IList> added, removed;
+    compareResult->GetRemoved((IList**)&removed);
+    compareResult->GetAdded((IList**)&added);
+    added->Clear();
     if (target != NULL) {
-        FOR_EACH(iter, RETN_OUT_VAL(target, GetLinkAddresses)) {
-            AutoPtr<ILinkAddress> newAddress = ILinkAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-            if (!RETN_OUT_VAL(RETN_OUT_VAL((*result), GetRemoved), Remove, IInterface::Probe(newAddress))) {
-                RETN_OUT_VAL((*result), GetAdded)->Add(newAddress);
+        AutoPtr<IList> tarLinks;
+        target->GetLinkAddresses((IList**)&tarLinks);
+        AutoPtr<IIterator> it;
+        tarLinks->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> newAddress;
+            it->GetNext((IInterface**)&newAddress);
+            Boolean succeeded;
+            if (removed->Remove(newAddress, &succeeded), !succeeded) {
+                added->Add(newAddress);
             }
         }
     }
+    *result = compareResult;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -931,17 +1106,32 @@ ECode LinkProperties::CompareDnses(
      * are in target but not in mDnses are placed in the
      * addedAddresses.
      */
-    CLinkPropertiesCompareResult::New(result);
-    (*result)->SetRemoved(ReturnOutValue<IList, ICollection>(CArrayList::New, ICollection::Probe(mDnses)));
-    RETN_OUT_VAL((*result), GetAdded)->Clear();
+    AutoPtr<ILinkPropertiesCompareResult> compareResult;
+    CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&compareResult);
+    AutoPtr<IList> dnses;
+    CArrayList::New(ICollection::Probe(mDnses), (IList**)&dnses);
+    compareResult->SetRemoved(dnses);
+    AutoPtr<IList> added, removed;
+    compareResult->GetRemoved((IList**)&removed);
+    compareResult->GetAdded((IList**)&added);
+    added->Clear();
     if (target != NULL) {
-        FOR_EACH(iter, RETN_OUT_VAL(target, GetDnsServers)) {
-            AutoPtr<IInetAddress> newAddress = IInetAddress::Probe(RETN_OUT_VAL(iter, GetNext));
-            if (!RETN_OUT_VAL(RETN_OUT_VAL((*result), GetRemoved), Remove, IInterface::Probe(newAddress))) {
-                RETN_OUT_VAL((*result), GetAdded)->Add(newAddress);
+        AutoPtr<IList> tarDnses;
+        target->GetDnsServers((IList**)&tarDnses);
+        AutoPtr<IIterator> it;
+        tarDnses->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> newAddress;
+            it->GetNext((IInterface**)&newAddress);
+            Boolean succeeded;
+            if (removed->Remove(newAddress, &succeeded), !succeeded) {
+                added->Add(newAddress);
             }
         }
     }
+    *result = compareResult;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -957,17 +1147,32 @@ ECode LinkProperties::CompareAllRoutes(
      * leaving the routes that are different. And route address which
      * are in target but not in mRoutes are placed in added.
      */
-    CLinkPropertiesCompareResult::New(result);
-    (*result)->SetRemoved(RETN_OUT_VAL(this, GetAllRoutes));
-    RETN_OUT_VAL((*result), GetAdded)->Clear();
+    AutoPtr<ILinkPropertiesCompareResult> compareResult;
+    CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&compareResult);
+    AutoPtr<IList> routes;
+    GetAllRoutes((IList**)&routes);
+    compareResult->SetRemoved(routes);
+    AutoPtr<IList> added, removed;
+    compareResult->GetRemoved((IList**)&removed);
+    compareResult->GetAdded((IList**)&added);
+    added->Clear();
     if (target != NULL) {
-        FOR_EACH(iter, RETN_OUT_VAL(target, GetAllRoutes)) {
-            AutoPtr<IRouteInfo> r = IRouteInfo::Probe(RETN_OUT_VAL(iter, GetNext));
-            if (!RETN_OUT_VAL(RETN_OUT_VAL((*result), GetRemoved), Remove, IInterface::Probe(r))) {
-                RETN_OUT_VAL((*result), GetAdded)->Add(r);
+        AutoPtr<IList> tarRoutes;
+        target->GetAllRoutes((IList**)&tarRoutes);
+        AutoPtr<IIterator> it;
+        tarRoutes->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> r;
+            it->GetNext((IInterface**)&r);
+            Boolean succeeded;
+            if (removed->Remove(r, &succeeded), !succeeded) {
+                added->Add(r);
             }
         }
     }
+    *result = compareResult;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -983,19 +1188,32 @@ ECode LinkProperties::CompareAllInterfaceNames(
      * leaving the interface names that are different. And interface names which
      * are in target but not in this are placed in added.
      */
-    CLinkPropertiesCompareResult::New(result);
-    (*result)->SetRemoved(RETN_OUT_VAL(this, GetAllInterfaceNames));
-    AutoPtr<IList> list;
-    (*result)->GetAdded((IList**)&list);
-    list->Clear();
+    AutoPtr<ILinkPropertiesCompareResult> compareResult;
+    CLinkPropertiesCompareResult::New((ILinkPropertiesCompareResult**)&compareResult);
+    AutoPtr<IList> interfaceNames;
+    GetAllInterfaceNames((IList**)&interfaceNames);
+    compareResult->SetRemoved(interfaceNames);
+    AutoPtr<IList> added, removed;
+    compareResult->GetRemoved((IList**)&removed);
+    compareResult->GetAdded((IList**)&added);
+    added->Clear();
     if (target != NULL) {
-        FOR_EACH(iter, RETN_OUT_VAL(target, GetAllInterfaceNames)) {
-            AutoPtr<ICharSequence> r = ICharSequence::Probe(RETN_OUT_VAL(iter, GetNext));
-            if (!RETN_OUT_VAL(RETN_OUT_VAL((*result), GetRemoved), Remove, IInterface::Probe(r))) {
-                RETN_OUT_VAL((*result), GetAdded)->Add(r);
+        AutoPtr<IList> tarInterfaceNames;
+        target->GetAllInterfaceNames((IList**)&tarInterfaceNames);
+        AutoPtr<IIterator> it;
+        tarInterfaceNames->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> r;
+            it->GetNext((IInterface**)&r);
+            Boolean succeeded;
+            if (removed->Remove(r, &succeeded), !succeeded) {
+                added->Add(r);
             }
         }
     }
+    *result = compareResult;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -1004,15 +1222,28 @@ ECode LinkProperties::GetHashCode(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = ((String(NULL) == mIfaceName) ? 0 : mIfaceName.GetHashCode())
-            + RETN_OUT_VAL(mLinkAddresses, GetSize) * 31
-            + RETN_OUT_VAL(mDnses, GetSize) * 37
-            + (((String(NULL) == mDomains) ? 0 : mDomains.GetHashCode()))
-            + RETN_OUT_VAL(mRoutes, GetSize) * 41
-            + ((NULL == mHttpProxy) ? 0 : RETN_OUT_VAL(IObject::Probe(mHttpProxy), GetHashCode))
-            + RETN_OUT_VAL(mStackedLinks, GetHashCode) * 47
-            + mMtu * 51
-            + ((String(NULL) == mTcpBufferSizes) ? 0 : mTcpBufferSizes.GetHashCode());
+    *result = 0;
+    if (!mIfaceName.IsNull()) {
+        *result += mIfaceName.GetHashCode();
+    }
+    Int32 size;
+    mLinkAddresses->GetSize(&size);
+    *result += size * 31;
+    mDnses->GetSize(&size);
+    *result += size * 37;
+    if (!mDomains.IsNull()) {
+        *result += mDomains.GetHashCode();
+    }
+    mRoutes->GetSize(&size);
+    *result += size * 41;
+    if (mHttpProxy != NULL) {
+        *result += Object::GetHashCode(mHttpProxy);
+    }
+    *result += Object::GetHashCode(mStackedLinks) * 47;
+    *result += mMtu * 51;
+    if (!mTcpBufferSizes.IsNull()) {
+        *result += mTcpBufferSizes.GetHashCode();
+    }
     return NOERROR;
 }
 
@@ -1162,14 +1393,21 @@ ECode LinkPropertiesCompareResult::ToString(
     VALIDATE_NOT_NULL(result)
 
     String retVal("removed=[");
-    FOR_EACH(iter, mRemoved) {
-        AutoPtr<IObject> addr = IObject::Probe(RETN_OUT_VAL(iter, GetNext));
-        retVal += RETN_OUT_VAL(addr, ToString) + ",";
+    AutoPtr<IIterator> it;
+    mRemoved->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        retVal += Object::ToString(obj) + ",";
     }
     retVal += "] added=[";
-    FOR_EACH (iter_added, mAdded) {
-        AutoPtr<IObject> addr = IObject::Probe(RETN_OUT_VAL(iter_added, GetNext));
-        retVal += RETN_OUT_VAL(addr, ToString) + ",";
+    it = NULL;
+    mAdded->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        retVal += Object::ToString(obj) + ",";
     }
     retVal += "]";
     *result = retVal;

@@ -345,25 +345,25 @@ ECode CaptioningManager::CaptionStyle::GetCustomStyle(
 /* CaptioningManager::CaptioningChangeListener */
 CAR_INTERFACE_IMPL(CaptioningManager::CaptioningChangeListener, Object, ICaptioningManagerCaptioningChangeListener)
 
-CaptioningManager::CaptioningChangeListener::OnEnabledChanged(
+ECode CaptioningManager::CaptioningChangeListener::OnEnabledChanged(
     /* [in] */ Boolean enabled)
 {
     return NOERROR;
 }
 
-CaptioningManager::CaptioningChangeListener::OnUserStyleChanged(
+ECode CaptioningManager::CaptioningChangeListener::OnUserStyleChanged(
     /* [in] */ ICaptioningManagerCaptionStyle* userStyle)
 {
     return NOERROR;
 }
 
-CaptioningManager::CaptioningChangeListener::OnLocaleChanged(
+ECode CaptioningManager::CaptioningChangeListener::OnLocaleChanged(
     /* [in] */ ILocale* locale)
 {
     return NOERROR;
 }
 
-CaptioningManager::CaptioningChangeListener::OnFontScaleChanged(
+ECode CaptioningManager::CaptioningChangeListener::OnFontScaleChanged(
     /* [in] */ Float fontScale)
 {
     return NOERROR;
@@ -378,7 +378,7 @@ CaptioningManager::MyContentObserver::MyContentObserver(
 CaptioningManager::MyContentObserver::~MyContentObserver()
 {}
 
-CaptioningManager::MyContentObserver::OnChange(
+ECode CaptioningManager::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange,
     /* [in] */ IUri* uri)
 {

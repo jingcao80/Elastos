@@ -18,7 +18,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/net/SamplingDataTracker.h"
 #include "elastos/droid/net/LinkQualityInfo.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
@@ -42,6 +41,7 @@ using Elastos::IO::IReader;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IMap;
 using Elastos::Utility::IMapEntry;
+using Elastos::Utility::ISet;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -56,7 +56,6 @@ const String SamplingDataTracker::TAG("SamplingDataTracker");
 SamplingDataTracker::SamplingDataTracker()
     : MINIMUM_SAMPLING_INTERVAL(15 * 1000)
     , MINIMUM_SAMPLED_PACKETS(30)
-    , SAMPLING_DATA_LOCK(CreateSAMPLING_DATA_LOCK())
 {}
 
 ECode SamplingDataTracker::constructor()
@@ -110,14 +109,22 @@ ECode SamplingDataTracker::GetSamplingSnapshots(
             ss->SetRxPacketErrorCount(StringUtils::ParseInt64((*tokens)[11]));
             ss->SetTimestamp(SystemClock::GetElapsedRealtime());
             if (DBG) {
+                Int64 count;
                 Slogger::D(TAG, "Interface = %s", currentIface.string());
-                Slogger::D(TAG, "ByteCount = %d", Ptr(ss)->Func(ss->GetTxByteCount));
-                Slogger::D(TAG, "TxPacketCount = %s", Ptr(ss)->Func(ss->GetTxPacketCount));
-                Slogger::D(TAG, "TxPacketErrorCount = %s", Ptr(ss)->Func(ss->GetTxPacketErrorCount));
-                Slogger::D(TAG, "RxByteCount = %s", Ptr(ss)->Func(ss->GetRxByteCount));
-                Slogger::D(TAG, "RxPacketCount = %s", Ptr(ss)->Func(ss->GetRxPacketCount));
-                Slogger::D(TAG, "RxPacketErrorCount = %s", Ptr(ss)->Func(ss->GetRxPacketErrorCount));
-                Slogger::D(TAG, "Timestamp = %s", Ptr(ss)->Func(ss->GetTimestamp));
+                ss->GetTxByteCount(&count);
+                Slogger::D(TAG, "ByteCount = %lld", count);
+                ss->GetTxPacketCount(&count);
+                Slogger::D(TAG, "TxPacketCount = %lld", count);
+                ss->GetTxPacketErrorCount(&count);
+                Slogger::D(TAG, "TxPacketErrorCount = %lld", count);
+                ss->GetRxByteCount(&count);
+                Slogger::D(TAG, "RxByteCount = %lld", count);
+                ss->GetRxPacketCount(&count);
+                Slogger::D(TAG, "RxPacketCount = %lld", count);
+                ss->GetRxPacketErrorCount(&count);
+                Slogger::D(TAG, "RxPacketErrorCount = %lld", count);
+                ss->GetTimestamp(&count);
+                Slogger::D(TAG, "Timestamp = %lld", count);
                 Slogger::D(TAG, "---------------------------");
             }
             AutoPtr<ICharSequence> csq;
@@ -129,18 +136,24 @@ ECode SamplingDataTracker::GetSamplingSnapshots(
         }
     }
     if (DBG) {
+        AutoPtr<ISet> entries;
+        mapIfaceToSample->GetEntrySet((ISet**)&entries);
         AutoPtr<IIterator> it;
-        Ptr(mapIfaceToSample)->Func(mapIfaceToSample->GetEntrySet)->GetIterator((IIterator**)&it);
-        while (Ptr(it)->Func(it->HasNext)) {
-            AutoPtr<IMapEntry> kvpair = IMapEntry::Probe(Ptr(it)->Func(it->GetNext));
-            if (Ptr(kvpair)->Func(kvpair->GetValue) == NULL) {
-                String s;
-                IObject::Probe(Ptr(kvpair)->Func(kvpair->GetKey))->ToString(&s);
-                Slogger::D(TAG, "could not find snapshot for interface %s", s.string());
+        entries->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            IMapEntry* kvpair = IMapEntry::Probe(obj);
+            AutoPtr<IInterface> key, value;
+            if (kvpair->GetValue((IInterface**)&value), value == NULL) {
+                kvpair->GetKey((IInterface**)&key);
+                Slogger::D(TAG, "could not find snapshot for interface %s", TO_CSTR(key));
             }
         }
     }
     return NOERROR;
+
 _ERR_EXIT_:
         // } catch(FileNotFoundException e) {
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
@@ -167,7 +180,8 @@ _ERR_EXIT_:
 ECode SamplingDataTracker::StartSampling(
     /* [in] */ ISamplingDataTrackerSamplingSnapshot* s)
 {
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         mLastSample = s;
     }
     return NOERROR;
@@ -176,16 +190,21 @@ ECode SamplingDataTracker::StartSampling(
 ECode SamplingDataTracker::StopSampling(
     /* [in] */ ISamplingDataTrackerSamplingSnapshot* s)
 {
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         if (mLastSample != NULL) {
             Int64 sampledPacketCount;
             GetSampledPacketCount(mLastSample, s, &sampledPacketCount);
-            if (Ptr(s)->Func(s->GetTimestamp) - Ptr(mLastSample)->Func(mLastSample->GetTimestamp) > MINIMUM_SAMPLING_INTERVAL
+            Int64 begin, end;
+            s->GetTimestamp(&end);
+            mLastSample->GetTimestamp(&begin);
+            if (end - begin > MINIMUM_SAMPLING_INTERVAL
                     && sampledPacketCount > MINIMUM_SAMPLED_PACKETS) {
                 mBeginningSample = mLastSample;
                 mEndingSample = s;
                 mLastSample = NULL;
-            } else {
+            }
+            else {
                 if (DBG) Slogger::D(TAG, "Throwing current sample away because it is too small");
             }
         }
@@ -196,7 +215,8 @@ ECode SamplingDataTracker::StopSampling(
 ECode SamplingDataTracker::ResetSamplingData()
 {
     if (DBG) Slogger::D(TAG, "Resetting sampled network data");
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         // We could just take another sample here and treat it as an
         // 'ending sample' effectively shortening sampling interval, but that
         // requires extra work (specifically, reading the sample needs to be
@@ -211,11 +231,16 @@ ECode SamplingDataTracker::GetSampledTxByteCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetTxByteCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTxByteCount);
+            Int64 begin, end;
+            mEndingSample->GetTxByteCount(&end);
+            mBeginningSample->GetTxByteCount(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -228,11 +253,16 @@ ECode SamplingDataTracker::GetSampledTxPacketCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetTxPacketCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTxPacketCount);
+            Int64 begin, end;
+            mEndingSample->GetTxPacketCount(&end);
+            mBeginningSample->GetTxPacketCount(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -245,11 +275,16 @@ ECode SamplingDataTracker::GetSampledTxPacketErrorCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetTxPacketErrorCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTxPacketErrorCount);
+            Int64 begin, end;
+            mEndingSample->GetTxPacketErrorCount(&end);
+            mBeginningSample->GetTxPacketErrorCount(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -262,11 +297,16 @@ ECode SamplingDataTracker::GetSampledRxByteCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetRxByteCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetRxByteCount);
+            Int64 begin, end;
+            mEndingSample->GetRxByteCount(&end);
+            mBeginningSample->GetRxByteCount(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -279,11 +319,16 @@ ECode SamplingDataTracker::GetSampledRxPacketCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {
+        AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetRxPacketCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetRxPacketCount);
+            Int64 begin, end;
+            mEndingSample->GetRxPacketCount(&end);
+            mBeginningSample->GetRxPacketCount(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -307,11 +352,17 @@ ECode SamplingDataTracker::GetSampledPacketCount(
     VALIDATE_NOT_NULL(result)
 
     if (begin != NULL && end != NULL) {
-        long rxPacketCount = Ptr(end)->Func(end->GetRxPacketCount) - Ptr(begin)->Func(begin->GetRxPacketCount);
-        long txPacketCount = Ptr(end)->Func(end->GetTxPacketCount) - Ptr(begin)->Func(begin->GetTxPacketCount);
+        Int64 beginCount, endCount;
+        end->GetRxPacketCount(&endCount);
+        begin->GetRxPacketCount(&beginCount);
+        Int64 rxPacketCount = endCount - beginCount;
+        end->GetTxPacketCount(&endCount);
+        begin->GetTxPacketCount(&beginCount);
+        Int64 txPacketCount = endCount - beginCount;
         *result = rxPacketCount + txPacketCount;
         return NOERROR;
-    } else {
+    }
+    else {
         *result = ILinkQualityInfo::UNKNOWN_LONG;
         return NOERROR;
     }
@@ -330,7 +381,8 @@ ECode SamplingDataTracker::GetSampledPacketErrorCount(
         GetSampledTxPacketErrorCount(&txPacketErrorCount);
         *result = rxPacketErrorCount + txPacketErrorCount;
         return NOERROR;
-    } else {
+    }
+    else {
         *result = ILinkQualityInfo::UNKNOWN_LONG;
         return NOERROR;
     }
@@ -342,11 +394,15 @@ ECode SamplingDataTracker::GetSampledRxPacketErrorCount(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {    AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetRxPacketErrorCount) - Ptr(mBeginningSample)->Func(mBeginningSample->GetRxPacketErrorCount);
+            Int64 begin, end;
+            mEndingSample->GetRxPacketErrorCount(&end);
+            mBeginningSample->GetRxPacketErrorCount(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -359,11 +415,11 @@ ECode SamplingDataTracker::GetSampleTimestamp(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {    AutoLock syncLock(mSamplingDataLock);
         if (mEndingSample != NULL) {
-            *result = Ptr(mEndingSample)->Func(mEndingSample->GetTimestamp);
-            return NOERROR;
-        } else {
+            return mEndingSample->GetTimestamp(result);
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_LONG;
             return NOERROR;
         }
@@ -376,11 +432,15 @@ ECode SamplingDataTracker::GetSampleDuration(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
+    {    AutoLock syncLock(mSamplingDataLock);
         if (mBeginningSample != NULL && mEndingSample != NULL) {
-            *result = (int) (Ptr(mEndingSample)->Func(mEndingSample->GetTimestamp) - Ptr(mBeginningSample)->Func(mBeginningSample->GetTimestamp));
+            Int64 begin, end;
+            mEndingSample->GetTimestamp(&end);
+            mBeginningSample->GetTimestamp(&begin);
+            *result = end - begin;
             return NOERROR;
-        } else {
+        }
+        else {
             *result = ILinkQualityInfo::UNKNOWN_INT;
             return NOERROR;
         }
@@ -391,30 +451,21 @@ ECode SamplingDataTracker::GetSampleDuration(
 ECode SamplingDataTracker::SetCommonLinkQualityInfoFields(
     /* [in] */ ILinkQualityInfo* li)
 {
-    {    AutoLock syncLock(SAMPLING_DATA_LOCK);
-        li->SetLastDataSampleTime(Ptr(this)->Func(this->GetSampleTimestamp));
-        li->SetDataSampleDuration(Ptr(this)->Func(this->GetSampleDuration));
-        li->SetPacketCount(Ptr(this)->Func(this->GetSampledPacketCount));
-        li->SetPacketErrorCount(Ptr(this)->Func(this->GetSampledPacketErrorCount));
+    {
+        AutoLock syncLock(mSamplingDataLock);
+        Int64 timestamp;
+        GetSampleTimestamp(&timestamp);
+        li->SetLastDataSampleTime(timestamp);
+        Int32 duration;
+        GetSampleDuration(&duration);
+        li->SetDataSampleDuration(duration);
+        Int64 count;
+        GetSampledPacketCount(&count);
+        li->SetPacketCount(count);
+        GetSampledPacketErrorCount(&count);
+        li->SetPacketErrorCount(count);
     }
     return NOERROR;
-}
-
-ECode SamplingDataTracker::GetSAMPLING_DATA_LOCK(
-    /* [out] */ IInterface** result)
-{
-    VALIDATE_NOT_NULL(result)
-
-    *result = SAMPLING_DATA_LOCK;
-    REFCOUNT_ADD(*result)
-    return NOERROR;
-}
-
-AutoPtr<IInterface> SamplingDataTracker::CreateSAMPLING_DATA_LOCK()
-{
-    AutoPtr<IInterface> rev;
-    rev = (new Object)->Probe(EIID_IInterface);
-    return rev;
 }
 
 //===================================================
@@ -447,9 +498,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetTxByteCount(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetTxByteCount(
-    /* [in] */ Int64 mTxByteCount)
+    /* [in] */ Int64 txByteCount)
 {
-    this->mTxByteCount = mTxByteCount;
+    mTxByteCount = txByteCount;
     return NOERROR;
 }
 
@@ -463,9 +514,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetRxByteCount(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetRxByteCount(
-    /* [in] */ Int64 mRxByteCount)
+    /* [in] */ Int64 rxByteCount)
 {
-    this->mRxByteCount = mRxByteCount;
+    mRxByteCount = rxByteCount;
     return NOERROR;
 }
 
@@ -479,9 +530,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetTxPacketCount(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetTxPacketCount(
-    /* [in] */ Int64 mTxPacketCount)
+    /* [in] */ Int64 txPacketCount)
 {
-    this->mTxPacketCount = mTxPacketCount;
+    mTxPacketCount = txPacketCount;
     return NOERROR;
 }
 
@@ -495,9 +546,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetRxPacketCount(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetRxPacketCount(
-    /* [in] */ Int64 mRxPacketCount)
+    /* [in] */ Int64 rxPacketCount)
 {
-    this->mRxPacketCount = mRxPacketCount;
+    mRxPacketCount = rxPacketCount;
     return NOERROR;
 }
 
@@ -511,9 +562,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetTxPacketErrorCount(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetTxPacketErrorCount(
-    /* [in] */ Int64 mTxPacketErrorCount)
+    /* [in] */ Int64 txPacketErrorCount)
 {
-    this->mTxPacketErrorCount = mTxPacketErrorCount;
+    mTxPacketErrorCount = txPacketErrorCount;
     return NOERROR;
 }
 
@@ -527,9 +578,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetRxPacketErrorCount(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetRxPacketErrorCount(
-    /* [in] */ Int64 mRxPacketErrorCount)
+    /* [in] */ Int64 rxPacketErrorCount)
 {
-    this->mRxPacketErrorCount = mRxPacketErrorCount;
+    mRxPacketErrorCount = rxPacketErrorCount;
     return NOERROR;
 }
 
@@ -543,9 +594,9 @@ ECode SamplingDataTrackerSamplingSnapshot::GetTimestamp(
 }
 
 ECode SamplingDataTrackerSamplingSnapshot::SetTimestamp(
-    /* [in] */ Int64 mTimestamp)
+    /* [in] */ Int64 timestamp)
 {
-    this->mTimestamp = mTimestamp;
+    mTimestamp = timestamp;
     return NOERROR;
 }
 

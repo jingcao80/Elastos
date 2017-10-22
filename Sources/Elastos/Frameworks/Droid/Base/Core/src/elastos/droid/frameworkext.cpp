@@ -36,7 +36,7 @@ namespace Utility {
 // {C6F9F8F0-9887-492B-87DA-4A8D61762F91}
 extern "C" const ClassID ECLSID_CDummyObject =
     {{0x00000000,0x0000,0x0000,{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}},
-    (char *)"elastos.dll"};
+    (char *)"elastos.dll", 0x1c692272};
 
 
 } // namespace Utility

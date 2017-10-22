@@ -20,7 +20,6 @@
 #include "elastos/droid/net/http/CharArrayBuffers.h"
 #include "elastos/droid/net/http/Connection.h"
 #include "elastos/droid/net/http/HttpLog.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/List.h>
 
@@ -158,11 +157,12 @@ ECode Headers::ParseHeader(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     pos++;
-
+    Int32 bufLength;
+    buffer->GetLength(&bufLength);
     String val;
-    buffer->SubstringTrimmed(pos, Ptr(buffer)->Func(buffer->GetLength), &val);
+    buffer->SubstringTrimmed(pos, bufLength, &val);
     if (HttpLog::LOGV) {
-        HttpLog::V("hdr %d %s", Ptr(buffer)->Func(buffer->GetLength), TO_CSTR(buffer));
+        HttpLog::V("hdr %d %s", bufLength, TO_CSTR(buffer));
     }
 
     switch (name.GetHashCode()) {
@@ -176,17 +176,20 @@ ECode Headers::ParseHeader(
                 AutoPtr<IBasicHeaderValueParser> bhpDefault;
                 // bhpHelper->GetDEFAULT((IBasicHeaderValueParser**)&bhpDefault);
                 AutoPtr<IParserCursor> cursor;
-                CParserCursor::New(pos, Ptr(buffer)->Func(buffer->GetLength), (IParserCursor**)&cursor);
+                CParserCursor::New(pos, bufLength, (IParserCursor**)&cursor);
                 IHeaderValueParser::Probe(bhpDefault)->ParseElements(buffer, cursor, (ArrayOf<IHeaderElement*>**)&encodings);
                 // The chunked encoding must be the last one applied RFC2616,
                 // 14.41
-                Int32 len = encodings->GetLength();
+                String name;
                 if (IHTTP::IDENTITY_CODING.EqualsIgnoreCase(val)) {
                     mTransferEncoding = IContentLengthStrategy::IDENTITY;
-                } else if ((len > 0)
-                        && (IHTTP::CHUNK_CODING.EqualsIgnoreCase(Ptr((*encodings)[len - 1])->Func((*encodings)[len - 1]->GetName)))) {
+                }
+                else if ((encodings->GetLength() > 0)
+                        && ((*encodings)[encodings->GetLength() - 1]->GetName(&name),
+                            IHTTP::CHUNK_CODING.EqualsIgnoreCase(name))) {
                     mTransferEncoding = IContentLengthStrategy::CHUNKED;
-                } else {
+                }
+                else {
                     mTransferEncoding = IContentLengthStrategy::IDENTITY;
                 }
             }
@@ -458,7 +461,9 @@ ECode Headers::GetSetCookie(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(mCookies)
+    *result = mCookies;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Headers::GetPragma(

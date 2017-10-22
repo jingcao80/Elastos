@@ -234,7 +234,7 @@ Int32 TextToSpeechService::SynthHandler::EnqueueSpeechItem(
     AutoPtr<IRunnable> runnable = new RunnableSynthHandlerEnqueueSpeechItem(this, speechItem);
     //Boolean result;
     // TODO
-    ECode ec;   // = this->Post(runnable, &result);
+    ECode ec = E_FAIL;   // = this->Post(runnable, &result);
 
     if (!FAILED(ec)) {
         return ITextToSpeech::TTS_SUCCESS;
@@ -888,17 +888,16 @@ ECode TextToSpeechService::TextToSpeechServiceStub::constructor(
 }
 
 ECode TextToSpeechService::TextToSpeechServiceStub::Speak(
-    /* [in] */ /*IIBinder*/IBinder* caller,
-    /* [in] */ const String & text,
+    /* [in] */ IBinder* caller,
+    /* [in] */ ICharSequence* text,
     /* [in] */ Int32 queueMode,
     /* [in] */ IBundle* params,
+    /* [in] */ const String& utteranceld,
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(3);
     aryInterface->Set(0, caller);
-    AutoPtr<ICharSequence> cs;
-    CString::New(text, (ICharSequence**)&cs);
-    aryInterface->Set(1, cs);
+    aryInterface->Set(1, text);
     aryInterface->Set(2, params);
 
     if (!CheckNonNull( aryInterface.Get() )) {
@@ -906,45 +905,42 @@ ECode TextToSpeechService::TextToSpeechServiceStub::Speak(
         return NOERROR;
     }
 
-    AutoPtr<SpeechItem> item = new SynthesisSpeechItemV1(caller,
-                    CBinder::GetCallingUid(), CBinder::GetCallingPid(), params, text, mTtss.Get());
-    *result = (mTtss->mSynthHandler)->EnqueueSpeechItem(queueMode, item.Get());
+    // AutoPtr<SpeechItem> item = new SynthesisSpeechItemV1(caller,
+    //                 CBinder::GetCallingUid(), CBinder::GetCallingPid(), params, text, mTtss.Get());
+    // *result = (mTtss->mSynthHandler)->EnqueueSpeechItem(queueMode, item.Get());
     return NOERROR;
 }
 
-ECode TextToSpeechService::TextToSpeechServiceStub::SynthesizeToFile(
-    /* [in] */ /*IIBinder*/IBinder* caller,
-    /* [in] */ const String & text,
-    /* [in] */ const String & filename,
+ECode TextToSpeechService::TextToSpeechServiceStub::SynthesizeToFileDescriptor(
+    /* [in] */ IBinder* caller,
+    /* [in] */ ICharSequence* text,
+    /* [in] */ IParcelFileDescriptor* fd,
     /* [in] */ IBundle* params,
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(4);
     aryInterface->Set(0, caller);
-    AutoPtr<ICharSequence> cs;
-    CString::New(text, (ICharSequence**)&cs);
-    aryInterface->Set(1, cs);
-    AutoPtr<ICharSequence> cs2;
-    CString::New(filename, (ICharSequence**)&cs2);
-    aryInterface->Set(2, cs2);
+    aryInterface->Set(1, text);
+    aryInterface->Set(2, fd);
     aryInterface->Set(3, params);
     if (!CheckNonNull( aryInterface.Get() )) {
         *result = ITextToSpeech::TTS_ERROR;
         return NOERROR;
     }
 
-    AutoPtr<IFile> file;
-    CFile::New(filename, (IFile**)&file);
+    // AutoPtr<IFile> file;
+    // CFile::New(filename, (IFile**)&file);
 //    AutoPtr<SpeechItem> item = new SynthesisToFileSpeechItem(caller, CBinder::GetCallingUid(), CBinder::GetCallingPid(), params, text, file.Get(), mTtss.Get());
 //    *result = (mTtss->mSynthHandler)->EnqueueSpeechItem(ITextToSpeech::QUEUE_ADD, item.Get());
     return NOERROR;
 }
 
 ECode TextToSpeechService::TextToSpeechServiceStub::PlayAudio(
-    /* [in] */ /*IIBinder*/IBinder* caller,
+    /* [in] */ IBinder* caller,
     /* [in] */ IUri* audioUri,
     /* [in] */ Int32 queueMode,
     /* [in] */ IBundle* params,
+    /* [in] */ const String& utteranceId,
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(3);
@@ -965,10 +961,11 @@ ECode TextToSpeechService::TextToSpeechServiceStub::PlayAudio(
 }
 
 ECode TextToSpeechService::TextToSpeechServiceStub::PlaySilence(
-    /* [in] */ /*IIBinder*/IBinder* caller,
+    /* [in] */ IBinder* caller,
     /* [in] */ Int64 duration,
     /* [in] */ Int32 queueMode,
     /* [in] */ IBundle* params,
+    /* [in] */ const String& utteranceId,
     /* [out] */ Int32* result)
 {
     AutoPtr<ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(2);
@@ -994,7 +991,7 @@ ECode TextToSpeechService::TextToSpeechServiceStub::IsSpeaking(
 }
 
 ECode TextToSpeechService::TextToSpeechServiceStub::Stop(
-    /* [in] */ /*IIBinder*/IBinder* caller,
+    /* [in] */ IBinder* caller,
     /* [out] */ Int32* result)
 {
     AutoPtr< ArrayOf<IInterface*> > aryInterface = ArrayOf<IInterface*>::Alloc(1);
@@ -1060,6 +1057,7 @@ ECode TextToSpeechService::TextToSpeechServiceStub::GetFeaturesForLanguage(
 }
 
 ECode TextToSpeechService::TextToSpeechServiceStub::LoadLanguage(
+    /* [in] */ IBinder* caller,
     /* [in] */ const String & lang,
     /* [in] */ const String & country,
     /* [in] */ const String & variant,
@@ -1311,22 +1309,27 @@ Int32 TextToSpeechService::GetSecureSettingInt(
 {
     AutoPtr<IContentResolver> cr;
     GetContentResolver((IContentResolver**)&cr);
-    Int32 secureSettingInt;
+    Int32 secureSettingInt = 0;
     // TODO
 //    Settings::Secure::GetInt32(cr.Get(), name, defaultValue, &secureSettingInt);
     return secureSettingInt;
 }
 
 
-AutoPtr</*IIBinder*/IBinder> TextToSpeechService::OnBind(
-    /* [in] */ IIntent* intent)
+ECode TextToSpeechService::OnBind(
+    /* [in] */ IIntent* intent,
+    /* [out] */ IBinder** service)
 {
+    VALIDATE_NOT_NULL(service);
     String strAction;
     intent->GetAction(&strAction);
     if (ITextToSpeechEngine::INTENT_ACTION_TTS_SERVICE.Equals(strAction)) {
-        return (IBinder*)(mBinder->Probe(EIID_IBinder));
+        *service = IBinder::Probe(mBinder);
+        REFCOUNT_ADD(*service);
+        return NOERROR;
     }
-    return NULL;
+    *service = NULL;
+    return NOERROR;
 }
 
 Int32 GetExpectedLanguageAvailableStatus(

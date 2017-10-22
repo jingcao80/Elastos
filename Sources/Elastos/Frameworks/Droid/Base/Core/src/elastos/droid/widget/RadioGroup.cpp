@@ -208,7 +208,7 @@ ECode RadioGroup::constructor(
     return NOERROR;
 }
 
-RadioGroup::constructor(
+ECode RadioGroup::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -370,18 +370,13 @@ Boolean RadioGroup::CheckLayoutParams(
 }
 
 ECode RadioGroup::GenerateDefaultLayoutParams(
-    /* [out] */ ILinearLayoutLayoutParams** params)
+    /* [out] */ IViewGroupLayoutParams** params)
 {
-    VALIDATE_NOT_NULL(*params)
+    VALIDATE_NOT_NULL(params)
 
-    AutoPtr<IRadioGroupLayoutParams> p;
-    CRadioGroupLayoutParams::New(
+    return CRadioGroupLayoutParams::New(
             IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT,
-            (IRadioGroupLayoutParams**)&p);
-
-    *params = ILinearLayoutLayoutParams::Probe(p);
-    REFCOUNT_ADD(*params);
-    return NOERROR;
+            params);
 }
 
 ECode RadioGroup::OnInitializeAccessibilityEvent(

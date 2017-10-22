@@ -481,7 +481,7 @@ public:
     AutoPtr<ISmsMessageBase> mWrappedSmsMessage;
 
 private:
-    constructor(
+    CARAPI constructor(
         /* [in] */ ISmsMessageBase* smb);
 
     /** This method returns the reference to a specific

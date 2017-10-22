@@ -106,7 +106,7 @@ public:
     virtual CARAPI GetChild(
         /* [in] */ Int32 groupPosition,
         /* [in] */ Int32 childPosition,
-        /* [out] */ ICursor** cursor);
+        /* [out] */ IInterface** cursor);
 
     virtual CARAPI GetChildId(
         /* [in] */ Int32 groupPosition,
@@ -119,7 +119,7 @@ public:
 
     virtual CARAPI GetGroup(
         /* [in] */ Int32 groupPosition,
-        /* [out] */ ICursor** cursor);
+        /* [out] */ IInterface** cursor);
 
     virtual CARAPI GetGroupCount(
         /* [out] */ Int32* count);

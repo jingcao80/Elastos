@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/nsd/NsdManager.h"
 #include "elastos/droid/net/nsd/CNsdServiceInfo.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/internal/utility/CAsyncChannel.h"
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/os/Handler.h"
@@ -386,8 +385,14 @@ ECode NsdManager::GetMessenger(
 
     // try {
     AutoPtr<IMessenger> messenger;
-    mService->GetMessenger((IMessenger**)&messenger);
-    FUNC_RETURN(messenger);
+    ECode ec = mService->GetMessenger((IMessenger**)&messenger);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        *result = NULL;
+        return NOERROR;
+    }
+    *result = messenger;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
     // } catch (RemoteException e) {
     //     return NULL;
     // }

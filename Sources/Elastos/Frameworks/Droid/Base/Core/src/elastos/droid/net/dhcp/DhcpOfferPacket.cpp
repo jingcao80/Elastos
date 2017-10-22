@@ -19,12 +19,13 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/net/dhcp/DhcpOfferPacket.h"
 #include "elastos/droid/net/dhcp/DhcpPacket.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
-#include <elastos/core/StringUtils.h>
+#include "elastos/core/StringBuilder.h"
+#include "elastos/core/StringUtils.h"
 
 using Elastos::Droid::Os::Build;
 
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::CByteBufferHelper;
 using Elastos::IO::IBuffer;
@@ -33,6 +34,7 @@ using Elastos::Net::CInet4AddressHelper;
 using Elastos::Net::IInet4Address;
 using Elastos::Net::IInet4AddressHelper;
 using Elastos::Net::IInetAddress;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -63,21 +65,36 @@ ECode DhcpOfferPacket::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
+    StringBuilder sb;
+
     String s;
     DhcpPacket::ToString(&s);
-    String dnsServers(", DNS servers: ");
+    sb += s;
+    sb += " OFFER, ip ";
+    sb += Object::ToString(mYourIp);
+    sb += ", mask ";
+    sb += Object::ToString(mSubnetMask);
+    sb += ", DNS servers: ";
     if (mDnsServers != NULL) {
-        FOR_EACH(iter, mDnsServers) {
-            AutoPtr<IInetAddress> dnsServer = IInetAddress::Probe(Ptr(iter)->Func(iter->GetNext));
+        AutoPtr<IIterator> it;
+        mDnsServers->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
             String sDnsServer;
-            IObject::Probe(dnsServer)->ToString(&sDnsServer);
-            dnsServers += sDnsServer + " ";
+            IObject::Probe(obj)->ToString(&sDnsServer);
+            sb += sDnsServer;
+            sb += " ";
         }
     }
-    *result = s + " OFFER, ip " + Object::ToString(mYourIp) + ", mask " + Object::ToString(mSubnetMask) +
-            dnsServers + ", gateway " + Object::ToString(mGateway) +
-            " lease time " + Object::ToString(mLeaseTime) + ", domain " + mDomainName;
-    return NOERROR;
+    sb += ", gateway ";
+    sb += Object::ToString(mGateway);
+    sb += " lease time ";
+    sb += Object::ToString(mLeaseTime);
+    sb += ", domain ";
+    sb += mDomainName;
+    return sb.ToString(result);
 }
 
 ECode DhcpOfferPacket::BuildPacket(
@@ -92,14 +109,24 @@ ECode DhcpOfferPacket::BuildPacket(
     AutoPtr<IByteBufferHelper> byteBufferHelper;
     CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&byteBufferHelper);
     byteBufferHelper->Allocate(MAX_LENGTH, (IByteBuffer**)&rev);
-    AutoPtr<IInet4AddressHelper> inet4AddressHelper;
-    CInet4AddressHelper::AcquireSingleton((IInet4AddressHelper**)&inet4AddressHelper);
-    AutoPtr<IInetAddress> destIp = mBroadcast ? Ptr(inet4AddressHelper)->Func(inet4AddressHelper->GetALL) : mYourIp;
-    AutoPtr<IInetAddress> srcIp = mBroadcast ? Ptr(inet4AddressHelper)->Func(inet4AddressHelper->GetANY) : mSrcIp;
+    AutoPtr<IInetAddress> destIp;
+    AutoPtr<IInetAddress> srcIp;
+    if (mBroadcast) {
+        AutoPtr<IInet4AddressHelper> helper;
+        CInet4AddressHelper::AcquireSingleton((IInet4AddressHelper**)&helper);
+        helper->GetALL((IInetAddress**)&destIp);
+        helper->GetANY((IInetAddress**)&srcIp);
+    }
+    else {
+        destIp = mYourIp;
+        srcIp = mSrcIp;
+    }
     FillInPacket(encap, destIp, srcIp, destUdp, srcUdp, rev,
         DHCP_BOOTREPLY, mBroadcast);
     IBuffer::Probe(rev)->Flip();
-    FUNC_RETURN(rev)
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode DhcpOfferPacket::FinishPacket(
@@ -110,8 +137,9 @@ ECode DhcpOfferPacket::FinishPacket(
     AddTlv(buffer, DHCP_LEASE_TIME, mLeaseTime);
     // the client should renew at 1/2 the lease-expiry interval
     if (mLeaseTime != NULL) {
-        AddTlv(buffer, DHCP_RENEWAL_TIME,
-            StringUtils::ToString(Ptr(mLeaseTime)->Func(mLeaseTime->GetValue) / 2));
+        Int32 time;
+        mLeaseTime->GetValue(&time);
+        AddTlv(buffer, DHCP_RENEWAL_TIME, StringUtils::ToString(time / 2));
     }
     AddTlv(buffer, DHCP_SUBNET_MASK, mSubnetMask);
     AddTlv(buffer, DHCP_ROUTER, mGateway);

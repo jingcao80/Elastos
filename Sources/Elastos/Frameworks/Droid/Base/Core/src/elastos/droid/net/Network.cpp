@@ -17,7 +17,6 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include "elastos/droid/net/Network.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/NetworkUtils.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/AutoLock.h>
@@ -106,13 +105,16 @@ ECode Network::GetSocketFactory(
     VALIDATE_NOT_NULL(result)
 
     if (mNetworkBoundSocketFactory == NULL) {
-        {    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mLock);
             if (mNetworkBoundSocketFactory == NULL) {
                 mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(mNetId, this);
             }
         }
     }
-    FUNC_RETURN(ISocketFactory::Probe(mNetworkBoundSocketFactory))
+    *result = ISocketFactory::Probe(mNetworkBoundSocketFactory);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Network::MaybeInitHttpClient()
@@ -207,10 +209,17 @@ ECode Network::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
-    if (INetwork::Probe(obj) == NULL) FUNC_RETURN(FALSE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (INetwork::Probe(obj) == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<Network> other = (Network*)INetwork::Probe(obj);
-    FUNC_RETURN(mNetId == other->mNetId)
+    *result = mNetId == other->mNetId;
+    return NOERROR;
 }
 
 ECode Network::GetHashCode(
@@ -218,7 +227,8 @@ ECode Network::GetHashCode(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mNetId * 11)
+    *result = mNetId * 11;
+    return NOERROR;
 }
 
 ECode Network::ToString(
@@ -226,7 +236,8 @@ ECode Network::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(StringUtils::ToString(mNetId))
+    *result = StringUtils::ToString(mNetId);
+    return NOERROR;
 }
 
 ECode Network::ReadFromParcel(
@@ -302,7 +313,11 @@ ECode Network::NetworkBoundSocketFactory::ConnectToHost(
                 ec = CInetSocketAddress::New((*hostAddresses)[i], port, (IInetSocketAddress**)&inetSocketAddress);
                 if (!FAILED(ec)) {
                     ec = socket->Connect(ISocketAddress::Probe(inetSocketAddress));
-                    if (!FAILED(ec)) FUNC_RETURN(socket)
+                    if (!FAILED(ec)) {
+                        *result = socket;
+                        REFCOUNT_ADD(*result);
+                        return NOERROR;
+                    }
                 }
             }
         }
@@ -349,7 +364,9 @@ ECode Network::NetworkBoundSocketFactory::CreateSocket(
     AutoPtr<IInetSocketAddress> inetSocketAddress;
     CInetSocketAddress::New(address, port, (IInetSocketAddress**)&inetSocketAddress);
     socket->Connect(ISocketAddress::Probe(inetSocketAddress));
-    FUNC_RETURN(socket)
+    *result = socket;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Network::NetworkBoundSocketFactory::CreateSocket(
@@ -364,7 +381,9 @@ ECode Network::NetworkBoundSocketFactory::CreateSocket(
     AutoPtr<IInetSocketAddress> inetSocketAddress;
     CInetSocketAddress::New(host, port, (IInetSocketAddress**)&inetSocketAddress);
     socket->Connect(ISocketAddress::Probe(inetSocketAddress));
-    FUNC_RETURN(socket)
+    *result = socket;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Network::NetworkBoundSocketFactory::CreateSocket(
@@ -385,7 +404,9 @@ ECode Network::NetworkBoundSocketFactory::CreateSocket(
     AutoPtr<ISocket> socket;
     CSocket::New((ISocket**)&socket);
     mHost->BindSocket(socket);
-    FUNC_RETURN(socket)
+    *result = socket;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 Boolean Network::GetHTTP_KEEP_ALIVE()

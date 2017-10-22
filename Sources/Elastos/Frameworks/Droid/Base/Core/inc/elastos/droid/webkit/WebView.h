@@ -1658,35 +1658,43 @@ public:
 
     CARAPI ComputeScroll();
 
-    CARAPI_(Boolean) OnHoverEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI OnHoverEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnTouchEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnGenericMotionEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI OnGenericMotionEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnTrackballEvent(
-        /* [in] */ IMotionEvent* event);
+    CARAPI OnTrackballEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnKeyDown(
+    CARAPI OnKeyDown(
         /* [in] */ Int32 keyCode,
-        /* [in] */ IKeyEvent* event);
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnKeyUp(
+    CARAPI OnKeyUp(
         /* [in] */ Int32 keyCode,
-        /* [in] */ IKeyEvent* event);
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) OnKeyMultiple(
+    CARAPI OnKeyMultiple(
         /* [in] */ Int32 keyCode,
         /* [in] */ Int32 repeatCount,
-        /* [in] */ IKeyEvent* event);
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* result);
 
     CARAPI GetAccessibilityNodeProvider(
         /* [out] */ IAccessibilityNodeProvider** provider);
 
-    CARAPI_(Boolean) ShouldDelayChildPressedState();
+    CARAPI ShouldDelayChildPressedState(
+        /* [out] */ Boolean* result);
 
     CARAPI OnInitializeAccessibilityNodeInfo(
         /* [in] */ IAccessibilityNodeInfo* info);
@@ -1694,29 +1702,35 @@ public:
     CARAPI OnInitializeAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
 
-    CARAPI_(Boolean) PerformAccessibilityAction(
+    CARAPI PerformAccessibilityAction(
         /* [in] */ Int32 action,
-        /* [in] */ IBundle* arguments);
+        /* [in] */ IBundle* arguments,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) PerformLongClick();
+    CARAPI PerformLongClick(
+        /* [out] */ Boolean* result);
 
-    CARAPI_(AutoPtr<IInputConnection>) OnCreateInputConnection(
-        /* [in] */ IEditorInfo* outAttrs);
+    CARAPI OnCreateInputConnection(
+        /* [in] */ IEditorInfo* outAttrs,
+        /* [out] */ IInputConnection** connection);
 
     CARAPI OnWindowFocusChanged(
         /* [in] */ Boolean hasWindowFocus);
 
-    CARAPI_(Boolean) DispatchKeyEvent(
-        /* [in] */ IKeyEvent* event);
+    CARAPI DispatchKeyEvent(
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) RequestFocus(
+    CARAPI RequestFocus(
         /* [in] */ Int32 direction,
-        /* [in] */ IRect* previouslyFocusedRect);
+        /* [in] */ IRect* previouslyFocusedRect,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) RequestChildRectangleOnScreen(
+    CARAPI RequestChildRectangleOnScreen(
         /* [in] */ IView* child,
         /* [in] */ IRect* rect,
-        /* [in] */ Boolean immediate);
+        /* [in] */ Boolean immediate,
+        /* [out] */ Boolean* result);
 
     CARAPI SetBackgroundColor(
         /* [in] */ Int32 color);

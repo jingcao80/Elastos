@@ -24,7 +24,6 @@
 #include "elastos/droid/net/CNetwork.h"
 #include "elastos/droid/net/CNetworkIdentity.h"
 #include "elastos/droid/net/Network.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
@@ -85,7 +84,10 @@ ECode NetworkIdentity::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     if (INetworkIdentity::Probe(obj) != NULL) {
         AutoPtr<NetworkIdentity> ident = (NetworkIdentity*) INetworkIdentity::Probe(obj);
         *result = mType == ident->mType && mSubType == ident->mSubType && mRoaming == ident->mRoaming

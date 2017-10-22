@@ -15,12 +15,10 @@
 //=========================================================================
 
 #include "elastos/droid/net/http/HttpResponseCache.h"
-#include "elastos/droid/net/http/CHttpResponseCache.h"
 #include "elastos/droid/net/http/Connection.h"
 #include "elastos/droid/net/http/Headers.h"
 #include "elastos/droid/net/http/Request.h"
 #include "elastos/droid/net/Network.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 
 using Elastos::Droid::Content::IContext;
 
@@ -61,9 +59,10 @@ ECode HttpResponseCache::GetInstalled(
     AutoPtr<IResponseCache> installed;
     ResponseCache::GetDefault((IResponseCache**)&installed);
     if (Com::Squareup::Okhttp::IHttpResponseCache::Probe(installed) != NULL) {
-        AutoPtr<IHttpResponseCache> rev = new CHttpResponseCache();
-        ((HttpResponseCache*)rev.Get())->constructor(Com::Squareup::Okhttp::IHttpResponseCache::Probe(installed));
-        FUNC_RETURN(rev)
+        AutoPtr<HttpResponseCache> cache = new HttpResponseCache();
+        cache->constructor(Com::Squareup::Okhttp::IHttpResponseCache::Probe(installed));
+        *result = cache;
+        REFCOUNT_ADD(*result);
     }
     return NOERROR;
 }
@@ -101,9 +100,11 @@ ECode HttpResponseCache::Install(
     assert(0);
     // Com::Squareup::Okhttp::CHttpResponseCache::New(directory, maxSize, (Com::Squareup::Okhttp::IHttpResponseCache**)&responseCache);
     helper->SetDefault(IResponseCache::Probe(responseCache));
-    AutoPtr<IHttpResponseCache> rev = new CHttpResponseCache();
-    ((HttpResponseCache*)rev.Get())->constructor(responseCache);
-    FUNC_RETURN(rev)
+    AutoPtr<HttpResponseCache> rev = new HttpResponseCache();
+    rev->constructor(responseCache);
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode HttpResponseCache::Get(
@@ -192,9 +193,9 @@ ECode HttpResponseCache::Close()
 {
     AutoPtr<IResponseCacheHelper> helper;
     CResponseCacheHelper::AcquireSingleton((IResponseCacheHelper**)&helper);
-    Boolean isEquals;
-    IObject::Probe(mDelegate)->Equals(Ptr(helper)->Func(helper->GetDefault), &isEquals);
-    if (isEquals) {
+    AutoPtr<IResponseCache> defaultCache;
+    helper->GetDefault((IResponseCache**)&defaultCache);
+    if (Object::Equals(mDelegate, defaultCache)) {
         helper->SetDefault(NULL);
     }
     // TODO: Waiting for Com::Squareup::Okhttp::IHttpResponseCache
@@ -207,9 +208,9 @@ ECode HttpResponseCache::Delete()
 {
     AutoPtr<IResponseCacheHelper> helper;
     CResponseCacheHelper::AcquireSingleton((IResponseCacheHelper**)&helper);
-    Boolean isEquals;
-    IObject::Probe(mDelegate)->Equals(Ptr(helper)->Func(helper->GetDefault), &isEquals);
-    if (isEquals) {
+    AutoPtr<IResponseCache> defaultCache;
+    helper->GetDefault((IResponseCache**)&defaultCache);
+    if (Object::Equals(mDelegate, defaultCache)) {
         helper->SetDefault(NULL);
     }
     // TODO: Waiting for Com::Squareup::Okhttp::IHttpResponseCache

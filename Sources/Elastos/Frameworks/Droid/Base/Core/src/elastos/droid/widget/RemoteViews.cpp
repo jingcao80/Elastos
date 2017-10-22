@@ -2401,7 +2401,7 @@ ECode RemoteViews::MyContextWrapper::GetResources(
     return mContextForResources->GetResources(res);
 }
 
-RemoteViews::MyContextWrapper::GetTheme(
+ECode RemoteViews::MyContextWrapper::GetTheme(
     /* [out] */ IResourcesTheme** theme)
 {
     VALIDATE_NOT_NULL(theme)
@@ -3075,7 +3075,7 @@ AutoPtr<IArgumentList> RemoteViews::WrapArg(
     if (argument != NULL) {
         argument->Release();
     }
-    argument == NULL;
+    argument = NULL;
     method->CreateArgumentList((IArgumentList**)&argument);
     pthread_setspecific(sInvokeArgsTls, argument.Get());
     argument->AddRef();

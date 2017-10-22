@@ -24,7 +24,6 @@
 #include "elastos/droid/net/http/ErrorStrings.h"
 #include "elastos/droid/net/http/HttpLog.h"
 #include "elastos/droid/net/http/CHttpsConnection.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -115,7 +114,9 @@ ECode Connection::GetHost(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mHost)
+    *result = mHost;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Connection::GetConnection(
@@ -127,7 +128,9 @@ ECode Connection::GetConnection(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (Ptr(host)->Func(host->GetSchemeName).Equals("http")) {
+    String scheme;
+    host->GetSchemeName(&scheme);
+    if (scheme.Equals("http")) {
         // TODO: Waiting for CHttpConnection
         assert(0);
         // return CHttpConnection::New(context, host, requestFeeder, result);
@@ -142,15 +145,18 @@ ECode Connection::GetCertificate(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mCertificate);
+    *result = mCertificate;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Connection::Cancel()
 {
     mActive = sSTATE_CANCEL_REQUESTED;
     CloseConnection();
-    if (HttpLog::LOGV)
+    if (HttpLog::LOGV) {
         HttpLog::V("Connection.cancel(): connection closed %s", TO_CSTR(mHost));
+    }
     return NOERROR;
 }
 
@@ -208,9 +214,9 @@ ECode Connection::ProcessRequests(
                     break;
                 }
 
-                Boolean lamp = FALSE;
+                Boolean open, lamp = FALSE;
                 if (mHttpClientConnection == NULL) lamp = TRUE;
-                else if (!Ptr(mHttpClientConnection)->Func(mHttpClientConnection->IsOpen)){
+                else if (mHttpClientConnection->IsOpen(&open), !open) {
                     lamp = TRUE;
                 }
                 if (lamp) {
@@ -436,13 +442,18 @@ Boolean Connection::HttpFailure(
     /* [in] */ Int32 errorId,
     /* [in] */ ECode e)
 {
+    Request* reqObj = (Request*)req;
+
     Boolean ret = TRUE;
 
-    if (HttpLog::LOGV)
-        HttpLog::V("httpFailure() ******* %d count %d %s %s", e, ((Request*)req)->mFailCount,
-            TO_CSTR(mHost), Ptr(((Request*)req))->Func(((Request*)req)->GetUri).string());
+    if (HttpLog::LOGV) {
+        String uri;
+        reqObj->GetUri(&uri);
+        HttpLog::V("httpFailure() ******* %d count %d %s %s", e, reqObj->mFailCount,
+                TO_CSTR(mHost), uri.string());
+    }
 
-    if (++((Request*)req)->mFailCount >= RETRY_REQUEST_LIMIT) {
+    if (++reqObj->mFailCount >= RETRY_REQUEST_LIMIT) {
         ret = FALSE;
         String error;
         if (errorId < 0) {
@@ -450,8 +461,8 @@ Boolean Connection::HttpFailure(
         } else {
             error.AppendFormat("%d", e);
         }
-        ((Request*)req)->mEventHandler->Error(errorId, error);
-        ((Request*)req)->Complete();
+        reqObj->mEventHandler->Error(errorId, error);
+        reqObj->Complete();
     }
 
     CloseConnection();
@@ -481,16 +492,28 @@ Boolean Connection::KeepAlive(
     context->GetAttribute(IExecutionContext::HTTP_CONNECTION, (IInterface**)&obj);
     AutoPtr<IHttpConnection> conn = IHttpConnection::Probe(obj);
 
-    if (conn != NULL && !Ptr(conn)->Func(conn->IsOpen)) return FALSE;
+    Boolean open;
+    if (conn != NULL && (conn->IsOpen(&open), !open)) return FALSE;
     // do NOT check for stale connection, that is an expensive operation
 
     AutoPtr<IHttpVersionHelper> helper;
     CHttpVersionHelper::AcquireSingleton((IHttpVersionHelper**)&helper);
     Boolean isLessEquals;
     if (entity != NULL) {
-        if (Ptr(entity)->Func(entity->GetContentLength) < 0) {
-            ver->LessEquals(IProtocolVersion::Probe(Ptr(helper)->Func(helper->GerHttpVersion10)), &isLessEquals);
-            if (!Ptr(entity)->Func(entity->IsChunked) || isLessEquals) {
+        Int64 contentLength;
+        entity->GetContentLength(&contentLength);
+        if (contentLength < 0) {
+            Boolean chunked;
+            entity->IsChunked(&chunked);
+            if (!chunked) {
+                // if the content length is not known and is not chunk
+                // encoded, the connection cannot be reused
+                return FALSE;
+            }
+            AutoPtr<IHttpVersion> hVersion;
+            helper->GerHttpVersion10((IHttpVersion**)&hVersion);
+            ver->LessEquals(IProtocolVersion::Probe(hVersion), &isLessEquals);
+            if (isLessEquals) {
                 // if the content length is not known and is not chunk
                 // encoded, the connection cannot be reused
                 return FALSE;
@@ -504,7 +527,9 @@ Boolean Connection::KeepAlive(
         return TRUE;
     }
     // Resorting to protocol version default close connection policy
-    ver->LessEquals(IProtocolVersion::Probe(Ptr(helper)->Func(helper->GerHttpVersion10)), &isLessEquals);
+    AutoPtr<IHttpVersion> hVersion;
+    helper->GerHttpVersion10((IHttpVersion**)&hVersion);
+    ver->LessEquals(IProtocolVersion::Probe(hVersion), &isLessEquals);
     return !isLessEquals;
 }
 

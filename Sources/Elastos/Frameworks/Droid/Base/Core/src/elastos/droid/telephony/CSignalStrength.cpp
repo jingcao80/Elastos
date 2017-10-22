@@ -796,7 +796,7 @@ ECode CSignalStrength::Equals(
             && mLteRsrq == lteRsrq
             && mLteRssnr == lteRssnr
             && mLteCqi == lteCqi
-            && isGsm == isGsm);
+            && mIsGsm == isGsm);
 
     return NOERROR;
 }

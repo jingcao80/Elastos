@@ -1110,12 +1110,6 @@ module
         interface IHttpAuthHeader;
     }
 
-    class CHttpResponseCache {
-        interface IResponseCache;
-        interface ICloseable;
-        interface IHttpResponseCache;
-    }
-
     singleton class CHttpResponseCacheHelper {
         interface IHttpResponseCacheHelper;
     }

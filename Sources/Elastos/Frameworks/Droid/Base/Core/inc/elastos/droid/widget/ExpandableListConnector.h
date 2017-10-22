@@ -213,11 +213,13 @@ public:
         /* [out] */ IPositionMetadata** result);
 
     // @Override
-    CARAPI_(Boolean) AreAllItemsEnabled();
+    CARAPI AreAllItemsEnabled(
+        /* [out] */ Boolean* enabled);
 
     // @Override
-    CARAPI_(Boolean) IsEnabled(
-        /* [in] */ Int32 flatListPos);
+    CARAPI IsEnabled(
+        /* [in] */ Int32 flatListPos,
+        /* [out] */ Boolean* enabled);
 
     virtual CARAPI GetCount(
         /* [out] */ Int32* result);
@@ -237,14 +239,17 @@ public:
         /* [out] */ IView** result);
 
     // @Override
-    CARAPI_(Int32) GetItemViewType(
-        /* [in] */ Int32 flatListPos);
+    CARAPI GetItemViewType(
+        /* [in] */ Int32 flatListPos,
+        /* [out] */ Int32* type);
 
     // @Override
-    CARAPI_(Int32) GetViewTypeCount();
+    CARAPI GetViewTypeCount(
+        /* [out] */ Int32* count);
 
     // @Override
-    CARAPI_(Boolean) HasStableIds();
+    CARAPI HasStableIds(
+        /* [out] */ Boolean* has);
 
     /**
       * Collapse a group in the grouped list view
@@ -299,7 +304,8 @@ public:
         /* [in] */ IList* expandedGroupMetadataList);
 
     // @Override
-    CARAPI_(Boolean) IsEmpty();
+    CARAPI IsEmpty(
+        /* [out] */ Boolean* empty);
 
     /**
       * Searches the expandable list adapter for a group position matching the

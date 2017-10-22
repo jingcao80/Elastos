@@ -1870,7 +1870,7 @@ void ViewRootImpl::EnableHardwareAcceleration(
     }
 }
 
-ViewRootImpl::GetView(
+ECode ViewRootImpl::GetView(
     /* [out] */ IView** res)
 {
     VALIDATE_NOT_NULL(res)
@@ -6305,7 +6305,7 @@ ECode ViewRootImpl::OnStartNestedScroll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    result = FALSE;
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -7743,8 +7743,10 @@ ECode ViewRootImpl::SyntheticTouchNavigationHandler::Process(
     Int64 time = 0;
     ie->GetEventTime(&time);
     Int32 deviceId, source;
-    if (mCurrentDeviceId != (ie->GetDeviceId(&deviceId), deviceId)
-        || mCurrentSource != (ie->GetSource(&source), source)) {
+    ie->GetDeviceId(&deviceId);
+    ie->GetSource(&source);
+    if (mCurrentDeviceId != deviceId
+        || mCurrentSource != source) {
         FinishKeys(time);
         FinishTracking(time);
         mCurrentDeviceId = deviceId;

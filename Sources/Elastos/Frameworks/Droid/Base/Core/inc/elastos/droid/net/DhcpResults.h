@@ -97,12 +97,16 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* in);
 
+    using StaticIpConfiguration::SetIpAddress;
+
     // Utils for jni population - false on success
     // Not part of the superclass because they're only used by the JNI iterface to the DHCP daemon.
     CARAPI SetIpAddress(
         /* [in] */ const String& addrString,
         /* [in] */ Int32 prefixLength,
         /* [out] */ Boolean* result);
+
+    using StaticIpConfiguration::SetGateway;
 
     CARAPI SetGateway(
         /* [in] */ const String& addrString,

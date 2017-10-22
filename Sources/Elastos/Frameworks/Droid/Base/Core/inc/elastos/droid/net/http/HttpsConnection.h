@@ -59,7 +59,7 @@ private:
             /* [in] */ const String& authType);
 
         CARAPI CheckServerTrusted(
-            /* [in] */ ArrayOf<ICertificate*>* chain,
+            /* [in] */ ArrayOf<IX509Certificate*>* chain,
             /* [in] */ const String& authType);
     };
 

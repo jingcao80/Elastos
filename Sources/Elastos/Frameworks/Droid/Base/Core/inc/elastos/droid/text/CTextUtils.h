@@ -149,6 +149,8 @@ public:
         /* [in] */ ICharSequence* s,
         /* [out] */ Int32* result);
 
+    using Object::Equals;
+
     CARAPI Equals(
         /* [in] */ ICharSequence* a,
         /* [in] */ ICharSequence* b,

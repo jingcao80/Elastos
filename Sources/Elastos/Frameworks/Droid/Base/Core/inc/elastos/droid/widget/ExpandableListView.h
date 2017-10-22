@@ -534,7 +534,7 @@ public:
      * @param end The end position (relative to the end bounds of this
      *            View) to end the drawing of the indicator.
      */
-    SetIndicatorBoundsRelative(
+    CARAPI SetIndicatorBoundsRelative(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 

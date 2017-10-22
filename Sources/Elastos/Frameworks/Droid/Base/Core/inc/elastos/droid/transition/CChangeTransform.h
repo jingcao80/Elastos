@@ -48,6 +48,8 @@ private:
         CARAPI_(void) Restore(
             /* [in] */ IView* view);
 
+        using Object::Equals;
+
         CARAPI_(Boolean) Equals(
             /* [in] */ IInterface* that);
 
@@ -209,6 +211,8 @@ public:
         /* [in] */ IChangeTransform* obj);
 
 private:
+    using Transition::CaptureValues;
+
     CARAPI_(void) CaptureValues(
         /* [in] */ ITransitionValues* transitionValues);
 

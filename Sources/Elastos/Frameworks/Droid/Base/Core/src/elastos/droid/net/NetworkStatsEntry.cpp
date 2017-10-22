@@ -19,7 +19,6 @@
 #include "elastos/droid/net/CNetworkStats.h"
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkStats.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
@@ -147,7 +146,10 @@ ECode NetworkStatsEntry::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     if (INetworkStatsEntry::Probe(o) != NULL) {
         AutoPtr<NetworkStatsEntry> e = (NetworkStatsEntry*) INetworkStatsEntry::Probe(o);
         *result = mUid == e->mUid && mSet == e->mSet && mTag == e->mTag && mRxBytes == e->mRxBytes

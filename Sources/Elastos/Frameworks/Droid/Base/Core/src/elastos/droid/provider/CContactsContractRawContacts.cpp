@@ -242,34 +242,6 @@ ECode CContactsContractRawContacts::EntityIteratorImpl::GetEntityAndIncrementCur
     return NOERROR;
 }
 
-//override
-ECode CContactsContractRawContacts::EntityIteratorImpl::HasNext(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode CContactsContractRawContacts::EntityIteratorImpl::GetNext(
-    /* [out] */ IInterface** object)
-{
-    return NOERROR;
-}
-
-ECode CContactsContractRawContacts::EntityIteratorImpl::Remove()
-{
-    return NOERROR;
-}
-
-ECode CContactsContractRawContacts::EntityIteratorImpl::Reset()
-{
-    return NOERROR;
-}
-
-ECode CContactsContractRawContacts::EntityIteratorImpl::Close()
-{
-    return NOERROR;
-}
-
 } //Provider
 } //Droid
 } //Elastos

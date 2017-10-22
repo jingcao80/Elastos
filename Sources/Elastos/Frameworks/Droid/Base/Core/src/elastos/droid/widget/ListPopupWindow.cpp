@@ -966,7 +966,7 @@ ECode ListPopupWindow::constructor(
 ECode ListPopupWindow::SetAdapter(
     /* [in] */ IListAdapter* adapter)
 {
-    if (mObserver = NULL) {
+    if (mObserver == NULL) {
         mObserver = new PopupDataSetObserver(this);
     }
     else if (mAdapter != NULL) {

@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/nsd/DnsSdTxtRecord.h"
 #include "elastos/droid/net/nsd/CDnsSdTxtRecord.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
@@ -354,7 +353,10 @@ ECode DnsSdTxtRecord::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
 
     if (IDnsSdTxtRecord::Probe(o)) {
         *result = TRUE;

@@ -9785,7 +9785,7 @@ Boolean TextView::TextCanBeSelected()
     // If you change this condition, make sure prepareCursorController is called anywhere
     // the value of this condition might be changed.
     Boolean result;
-    if (mMovement == NULL || mMovement->CanSelectArbitrarily(&result), !result) {
+    if (mMovement == NULL || (mMovement->CanSelectArbitrarily(&result), !result)) {
         return FALSE;
     }
     Boolean isTextSelectable, isEnabled;

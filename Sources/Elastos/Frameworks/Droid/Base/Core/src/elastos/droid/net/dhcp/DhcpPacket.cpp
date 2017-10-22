@@ -25,7 +25,6 @@
 #include "elastos/droid/net/dhcp/DhcpAckPacket.h"
 #include "elastos/droid/net/dhcp/DhcpNakPacket.h"
 #include "elastos/droid/net/dhcp/DhcpInformPacket.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringUtils.h>
 
@@ -49,6 +48,7 @@ using Elastos::Net::IInet4AddressHelper;
 using Elastos::Net::IInetAddress;
 using Elastos::Net::IInetAddressHelper;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -121,7 +121,8 @@ ECode DhcpPacket::constructor(
 ECode DhcpPacket::GetTransactionId(
     /* [out] */ Int32* result)
 {
-    FUNC_RETURN(mTransId)
+    *result = mTransId;
+    return NOERROR;
 }
 
 ECode DhcpPacket::FillInPacket(
@@ -185,10 +186,18 @@ ECode DhcpPacket::FillInPacket(
     } else {
         buf->PutInt16((Int16) 0x0000); // Flags
     }
-    buf->Put(Ptr(mClientIp)->Func(mClientIp->GetAddress));
-    buf->Put(Ptr(mYourIp)->Func(mYourIp->GetAddress));
-    buf->Put(Ptr(mNextIp)->Func(mNextIp->GetAddress));
-    buf->Put(Ptr(mRelayIp)->Func(mRelayIp->GetAddress));
+    AutoPtr< ArrayOf<Byte> > address;
+    mClientIp->GetAddress((ArrayOf<Byte>**)&address);
+    buf->Put(address);
+    address = NULL;
+    mYourIp->GetAddress((ArrayOf<Byte>**)&address);
+    buf->Put(address);
+    address = NULL;
+    mNextIp->GetAddress((ArrayOf<Byte>**)&address);
+    buf->Put(address);
+    address = NULL;
+    mRelayIp->GetAddress((ArrayOf<Byte>**)&address);
+    buf->Put(address);
     buf->Put(mClientMac);
     Int32 position;
     IBuffer::Probe(buf)->GetPosition(&position);
@@ -317,7 +326,9 @@ ECode DhcpPacket::AddTlv(
     /* [in] */ IInetAddress* addr)
 {
     if (addr != NULL) {
-        AddTlv(buf, type, Ptr(addr)->Func(addr->GetAddress));
+        AutoPtr< ArrayOf<Byte> > address;
+        addr->GetAddress((ArrayOf<Byte>**)&address);
+        AddTlv(buf, type, address);
     }
     return NOERROR;
 }
@@ -327,12 +338,19 @@ ECode DhcpPacket::AddTlv(
     /* [in] */ Byte type,
     /* [in] */ IList* addrs)
 {
-    if (addrs != NULL && Ptr(addrs)->Func(addrs->GetSize) > 0) {
+    Int32 size;
+    if (addrs != NULL && (addrs->GetSize(&size), size > 0)) {
         buf->Put(type);
-        buf->Put((Byte)(4 * Ptr(addrs)->Func(addrs->GetSize)));
-        FOR_EACH(iter, addrs) {
-            AutoPtr<IInetAddress> addr = IInetAddress::Probe(Ptr(iter)->Func(iter->GetNext));
-            buf->Put(Ptr(addr)->Func(addr->GetAddress));
+        buf->Put((Byte)(4 * size));
+        AutoPtr<IIterator> it;
+        addrs->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr< ArrayOf<Byte> > address;
+            IInetAddress::Probe(obj)->GetAddress((ArrayOf<Byte>**)&address);
+            buf->Put(address);
         }
     }
     return NOERROR;
@@ -346,7 +364,9 @@ ECode DhcpPacket::AddTlv(
     if (value != NULL) {
         buf->Put(type);
         buf->Put((Byte) 4);
-        buf->PutInt32(Ptr(value)->Func(value->GetValue));
+        Int32 i32v;
+        value->GetValue(&i32v);
+        buf->PutInt32(i32v);
     }
     return NOERROR;
 }
@@ -501,8 +521,10 @@ ECode DhcpPacket::DecodeFullPacket(
         packet->GetInt16(&ipChksm);
         ReadIpAddress(packet, (IInetAddress**)&ipSrc);
         ReadIpAddress(packet, (IInetAddress**)&ipDst);
-        if (ipProto != IP_TYPE_UDP) // UDP
-            FUNC_RETURN(NULL)
+        if (ipProto != IP_TYPE_UDP) { // UDP
+            *result = NULL;
+            return NOERROR;
+        }
         // assume UDP
         Int16 udpSrcPort;
         packet->GetInt16(&udpSrcPort);
@@ -512,8 +534,10 @@ ECode DhcpPacket::DecodeFullPacket(
         packet->GetInt16(&udpLen);
         Int16 udpChkSum;
         packet->GetInt16(&udpChkSum);
-        if ((udpSrcPort != DHCP_SERVER) && (udpSrcPort != DHCP_CLIENT))
-            FUNC_RETURN(NULL)
+        if ((udpSrcPort != DHCP_SERVER) && (udpSrcPort != DHCP_CLIENT)) {
+            *result = NULL;
+            return NOERROR;
+        }
     }
     // assume bootp
     Byte type;
@@ -537,52 +561,48 @@ ECode DhcpPacket::DecodeFullPacket(
         packet->Get(ipv4addr);
         ECode ec = inetAddressHelper->GetByAddress(ipv4addr, (IInetAddress**)&clientIp);
         if (FAILED(ec)) {
-            if (ec == (ECode)E_UNKNOWN_HOST_EXCEPTION) {
-                FUNC_RETURN(NULL)
-            }
-            return ec;
+            *result = NULL;
+            return ec == (ECode)E_UNKNOWN_HOST_EXCEPTION ? NOERROR : ec;
         }
         packet->Get(ipv4addr);
         ec = inetAddressHelper->GetByAddress(ipv4addr, (IInetAddress**)&yourIp);
         if (FAILED(ec)) {
-            if (ec == (ECode)E_UNKNOWN_HOST_EXCEPTION) {
-                FUNC_RETURN(NULL)
-            }
-            return ec;
+            *result = NULL;
+            return ec == (ECode)E_UNKNOWN_HOST_EXCEPTION ? NOERROR : ec;
         }
         packet->Get(ipv4addr);
         ec = inetAddressHelper->GetByAddress(ipv4addr, (IInetAddress**)&nextIp);
         if (FAILED(ec)) {
-            if (ec == (ECode)E_UNKNOWN_HOST_EXCEPTION) {
-                FUNC_RETURN(NULL)
-            }
-            return ec;
+            *result = NULL;
+            return ec == (ECode)E_UNKNOWN_HOST_EXCEPTION ? NOERROR : ec;
         }
         packet->Get(ipv4addr);
         ec = inetAddressHelper->GetByAddress(ipv4addr, (IInetAddress**)&relayIp);
         if (FAILED(ec)) {
-            if (ec == (ECode)E_UNKNOWN_HOST_EXCEPTION) {
-                FUNC_RETURN(NULL)
-            }
-            return ec;
+            *result = NULL;
+            return ec == (ECode)E_UNKNOWN_HOST_EXCEPTION ? NOERROR : ec;
         }
     // } catch (UnknownHostException ex) {
     // }
     clientMac = ArrayOf<Byte>::Alloc(addrLen);
     packet->Get(clientMac);
     // skip over address padding (16 octets allocated)
-    IBuffer::Probe(packet)->SetPosition(Ptr(IBuffer::Probe(packet))->Func(IBuffer::Probe(packet)->GetPosition) + (16 - addrLen)
+    Int32 pos;
+    IBuffer::Probe(packet)->GetPosition(&pos);
+    IBuffer::Probe(packet)->SetPosition(pos + (16 - addrLen)
                     + 64    // skip server host name (64 chars)
                     + 128); // skip boot file name (128 chars)
     Int32 dhcpMagicCookie;
     packet->GetInt32(&dhcpMagicCookie);
-    if (dhcpMagicCookie !=  0x63825363)
-        FUNC_RETURN(NULL)
+    if (dhcpMagicCookie !=  0x63825363) {
+        *result = NULL;
+        return NOERROR;
+    }
     // parse options
     Boolean notFinishedOptions = TRUE;
     Int32 limit;
     IBuffer::Probe(packet)->GetLimit(&limit);
-    while ((Ptr(IBuffer::Probe(packet))->Func(IBuffer::Probe(packet)->GetPosition) < limit) && notFinishedOptions) {
+    while ((IBuffer::Probe(packet)->GetPosition(&pos), pos < limit) && notFinishedOptions) {
         Byte optionType;
         packet->Get(&optionType);
         if (optionType == (Byte) 0xFF) {
@@ -625,10 +645,13 @@ ECode DhcpPacket::DecodeFullPacket(
                     ReadIpAddress(packet, (IInetAddress**)&requestedIp);
                     expectedLen = 4;
                     break;
-                case DHCP_LEASE_TIME:
-                    CInteger32::New(Ptr(packet)->Func(packet->GetInt16), (IInteger32**)&leaseTime);
+                case DHCP_LEASE_TIME: {
+                    Int16 i16v;
+                    packet->GetInt16(&i16v);
+                    CInteger32::New(i16v, (IInteger32**)&leaseTime);
                     expectedLen = 4;
                     break;
+                }
                 case DHCP_MESSAGE_TYPE:
                     packet->Get(&dhcpType);
                     expectedLen = 1;
@@ -664,14 +687,17 @@ ECode DhcpPacket::DecodeFullPacket(
                     }
             }
             if (expectedLen != optionLen) {
-                FUNC_RETURN(NULL)
+                *result = NULL;
+                return NOERROR;
             }
         }
     }
     AutoPtr<DhcpPacket> newPacket;
     switch(dhcpType) {
-        case (Byte)-1:
-            FUNC_RETURN(NULL)
+        case (Byte)-1: {
+            *result = NULL;
+            return NOERROR;
+        }
         case DHCP_MESSAGE_TYPE_DISCOVER:
             newPacket = new DhcpDiscoverPacket();
             ((DhcpDiscoverPacket*)newPacket.Get())->constructor(transactionId, clientMac, broadcast);
@@ -708,7 +734,8 @@ ECode DhcpPacket::DecodeFullPacket(
             String s("Unimplemented type: ");
             s.AppendFormat("%d", dhcpType);
             printStream->Println(s);
-            FUNC_RETURN(NULL)
+            *result = NULL;
+            return NOERROR;
     }
     newPacket->mBroadcastAddress = bcAddr;
     newPacket->mDnsServers = dnsServers;
@@ -721,7 +748,9 @@ ECode DhcpPacket::DecodeFullPacket(
     newPacket->mRequestedParams = expectedParams;
     newPacket->mServerIdentifier = serverIdentifier;
     newPacket->mSubnetMask = netMask;
-    FUNC_RETURN(newPacket)
+    *result = newPacket;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode DhcpPacket::DecodeFullPacket(

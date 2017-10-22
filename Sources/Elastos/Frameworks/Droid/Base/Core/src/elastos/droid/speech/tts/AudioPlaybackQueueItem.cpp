@@ -97,12 +97,12 @@ AudioPlaybackQueueItem::MediaPlayerOnCompletionListener::MediaPlayerOnCompletion
 AudioPlaybackQueueItem::MediaPlayerOnCompletionListener::~MediaPlayerOnCompletionListener()
 {}
 
-AudioPlaybackQueueItem::MediaPlayerOnCompletionListener::constructor()
+ECode AudioPlaybackQueueItem::MediaPlayerOnCompletionListener::constructor()
 {
     return NOERROR;
 }
 
-AudioPlaybackQueueItem::MediaPlayerOnCompletionListener::constructor(
+ECode AudioPlaybackQueueItem::MediaPlayerOnCompletionListener::constructor(
     /* [in] */ AudioPlaybackQueueItem* apqi)
 {
     mApqi = apqi;

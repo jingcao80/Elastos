@@ -23,7 +23,6 @@
 #include <Elastos.CoreLibrary.Utility.Zip.h>
 #include "elastos/droid/net/http/Request.h"
 #include "elastos/droid/net/Proxy.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/net/http/CHeaders.h"
 #include "elastos/droid/net/http/CHttpsConnection.h"
@@ -135,7 +134,9 @@ ECode Request::constructor(
             SetBodyProvider(bodyProvider, bodyLength);
         }
     }
-    AddHeader(HOST_HEADER, Ptr(this)->Func(GetHostPort));
+    String port;
+    GetHostPort(&port);
+    AddHeader(HOST_HEADER, port);
 
     /* FIXME: if webcore will make the root document a
        high-priority request, we can ask for gzip encoding only on
@@ -172,7 +173,9 @@ ECode Request::GetEventHandler(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mEventHandler)
+    *result = mEventHandler;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode Request::AddHeader(
@@ -180,8 +183,7 @@ ECode Request::AddHeader(
     /* [in] */ const String& value)
 {
     if (name.IsNullOrEmpty()) {
-        String damage("Null http header name");
-        HttpLog::E(damage);
+        HttpLog::E(String("Null http header name"));
         return E_NULL_POINTER_EXCEPTION;
     }
     if (value.IsNullOrEmpty() || value.GetLength() == 0) {
@@ -203,19 +205,24 @@ ECode Request::AddHeaders(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<ICollection> collection;
-    FOR_EACH(it, collection) {
-        AutoPtr<IInterface> pair;
-        it->GetNext((IInterface**)&pair);
-        AutoPtr<IInterface> first;
-        IPair::Probe(pair)->GetFirst((IInterface**)&first);
-        AutoPtr<IInterface> second;
-        IPair::Probe(pair)->GetSecond((IInterface**)&second);
-        String name;
-        ICharSequence::Probe(first)->ToString(&name);
-        String value;
-        ICharSequence::Probe(second)->ToString(&value);
-        AddHeader(name, value);
+    AutoPtr<ISet> entries;
+    headers->GetEntrySet((ISet**)&entries);
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IMapEntry* entry = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> key;
+        entry->GetKey((IInterface**)&key);
+        AutoPtr<IInterface> value;
+        entry->GetValue((IInterface**)&value);
+        String keyStr;
+        ICharSequence::Probe(key)->ToString(&keyStr);
+        String valueStr;
+        ICharSequence::Probe(value)->ToString(&valueStr);
+        AddHeader(keyStr, valueStr);
     }
 
     return NOERROR;
@@ -422,8 +429,10 @@ ECode Request::ReadResponse(
     if (HttpLog::LOGV) {
         String name;
         mHost->GetSchemeName(&name);
+        String port;
+        GetHostPort(&port);
         HttpLog::V("Request.readResponse(): done %s://%s%s",
-            name.string(), Ptr(this)->Func(GetHostPort).string(), mPath.string());
+                name.string(), port.string(), mPath.string());
     }
 
     return NOERROR;
@@ -431,9 +440,12 @@ ECode Request::ReadResponse(
 
 ECode Request::Cancel()
 {
-    {    AutoLock syncLock(mClientResource);
+    {
+        AutoLock syncLock(mClientResource);
         if (HttpLog::LOGV) {
-            HttpLog::V("Request.cancel(): %s", Ptr(this)->Func(GetUri).string());
+            String uri;
+            GetUri(&uri);
+            HttpLog::V("Request.cancel(): %s", uri.string());
         }
 
         // Ensure that the network thread is not blocked by a hanging request from WebCore to
@@ -469,7 +481,8 @@ ECode Request::GetHostPort(
         mHost->GetHostName(&port);
     }
 
-    FUNC_RETURN(port)
+    *result = port;
+    return NOERROR;
 }
 
 ECode Request::GetUri(
@@ -480,10 +493,14 @@ ECode Request::GetUri(
     String name;
     if (mProxyHost == NULL ||
             (mHost->GetSchemeName(&name), name).Equals("https")) {
-        FUNC_RETURN(mPath)
+        *result = mPath;
+        return NOERROR;
     }
     mHost->GetSchemeName(&name);
-    FUNC_RETURN(name + String("://") + Ptr(this)->Func(GetHostPort) + mPath)
+    String port;
+    GetHostPort(&port);
+    *result = name + String("://") + port + mPath;
+    return NOERROR;
 }
 
 ECode Request::ToString(
@@ -505,7 +522,9 @@ ECode Request::Reset()
     if (mBodyProvider != NULL) {
         if(FAILED(mBodyProvider->Reset())) {
             if (HttpLog::LOGV) {
-                HttpLog::V("failed to reset body provider %s", Ptr(this)->Func(GetUri).string());
+                String uri;
+                GetUri(&uri);
+                HttpLog::V("failed to reset body provider %s", uri.string());
             }
         }
 
@@ -564,7 +583,8 @@ ECode Request::SetBodyProvider(
     /* [in] */ IInputStream* bodyProvider,
     /* [in] */ Int32 bodyLength)
 {
-    if (!Ptr(bodyProvider)->Func(IInputStream::IsMarkSupported)) {
+    Boolean markSupported;
+    if (bodyProvider->IsMarkSupported(&markSupported), !markSupported) {
         Logger::E("Request", "bodyProvider must support mark()");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

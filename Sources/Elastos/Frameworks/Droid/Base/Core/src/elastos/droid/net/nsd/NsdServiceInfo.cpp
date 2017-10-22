@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/nsd/NsdServiceInfo.h"
 #include "elastos/droid/net/nsd/DnsSdTxtRecord.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include <Elastos.CoreLibrary.IO.h>
@@ -279,7 +278,11 @@ ECode NsdServiceInfo::GetTxtRecord(
         entry->GetValue((IInterface**)&iValue);
         AutoPtr<IArrayOf> value = IArrayOf::Probe(iValue);
         // One byte to record the length of this key/value pair.
-        (*txtRecord)[ptr++] = (Byte) (key.GetLength() + (value == NULL ? 0 : Ptr(value)->Func(value->GetLength)) + 1);
+        Int32 length = 0;
+        if (value != NULL) {
+            value->GetLength(&length);
+        }
+        (*txtRecord)[ptr++] = (Byte) (key.GetLength() + length + 1);
         // The key, in US-ASCII.
         // Note: use the StandardCharsets const here because it doesn't raise exceptions and we
         // already know the key is ASCII at this point.
@@ -297,8 +300,9 @@ ECode NsdServiceInfo::GetTxtRecord(
             for (Int32 i = 0; i < length; ++i) {
                 AutoPtr<IInterface> obj;
                 value->Get(i, (IInterface**)&obj);
-                AutoPtr<IByte> b = IByte::Probe(obj);
-                (*aValue)[i] = Ptr(b)->Func(b->GetValue);
+                Byte bv;
+                IByte::Probe(obj)->GetValue(&bv);
+                (*aValue)[i] = bv;
             }
             txtRecord->Copy(ptr, aValue, 0, length);
             ptr += length;

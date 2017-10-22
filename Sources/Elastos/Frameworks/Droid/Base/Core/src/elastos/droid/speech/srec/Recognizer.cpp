@@ -51,7 +51,7 @@ ECode Recognizer::RecognizerGrammar::constructor()
     return NOERROR;
 }
 
-Recognizer::RecognizerGrammar::constructor(
+ECode Recognizer::RecognizerGrammar::constructor(
     /* [in] */ const String& g2gFileName,
     /* [in] */ IRecognizer* r)
 {

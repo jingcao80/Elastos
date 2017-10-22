@@ -79,7 +79,8 @@ private:
         MyAnimatorListenerAdapter(
             /* [in] */ FastScroller* host);
 
-        CARAPI OnAnimationEnd();
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
 
     private:
         FastScroller* mHost;

@@ -25,12 +25,10 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/app/AppGlobals.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Environment.h>
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::Content::CComponentName;
@@ -51,7 +49,9 @@ using Elastos::IO::IFile;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::IFileOutputStream;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::ICollection;
 using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Slogger;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlSerializer;

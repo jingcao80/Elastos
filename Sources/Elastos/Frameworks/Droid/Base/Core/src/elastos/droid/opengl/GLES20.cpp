@@ -268,7 +268,7 @@ getarray
     const char * _exceptionMessage;
     Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
-    Int32 _remaining;
+    Int32 _remaining = 0;
     Handle64 data;
     CTYPE *params = (CTYPE *) 0;
     Int32 _needed = 0;

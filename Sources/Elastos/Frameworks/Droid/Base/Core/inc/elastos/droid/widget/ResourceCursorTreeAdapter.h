@@ -98,19 +98,17 @@ public:
         /* [in] */ Int32 groupLayout,
         /* [in] */ Int32 childLayout);
 
-    virtual CARAPI NewChildView(
+    CARAPI_(AutoPtr<IView>) NewChildView(
         /* [in] */ IContext* context,
         /* [in] */ ICursor* cursor,
         /* [in] */ Boolean isLastChild,
-        /* [in] */ IViewGroup* parent,
-        /* [out] */ IView** view);
+        /* [in] */ IViewGroup* parent);
 
-    virtual CARAPI NewGroupView(
+    CARAPI_(AutoPtr<IView>) NewGroupView(
         /* [in] */ IContext* context,
         /* [in] */ ICursor* cursor,
         /* [in] */ Boolean isExpanded,
-        /* [in] */ IViewGroup* parent,
-        /* [out] */ IView** view);
+        /* [in] */ IViewGroup* parent);
 
 private:
      Int32 mCollapsedGroupLayout;

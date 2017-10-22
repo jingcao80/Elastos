@@ -20,7 +20,6 @@
 #include "elastos/droid/net/http/RequestHandle.h"
 #include "elastos/droid/net/CWebAddress.h"
 #include "elastos/droid/net/Proxy.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/net/WebAddress.h"
 #include "elastos/droid/net/http/CRequestHandle.h"
@@ -418,7 +417,8 @@ ECode RequestHandle::ComputeDigestAuthResponse(
         response += String(", qop=") + QOP + String(", nc=") + nc + String(", cnonce=") + DoubleQuote(cnonce);
     }
 
-    FUNC_RETURN(response)
+    *result = response;
+    return NOERROR;
 }
 
 ECode RequestHandle::AuthorizationHeader(
@@ -463,7 +463,8 @@ ECode RequestHandle::ComputeDigest(
         }
     }
 
-    FUNC_RETURN(String(NULL))
+    *result = NULL;
+    return NOERROR;
 }
 
 ECode RequestHandle::KD(

@@ -489,12 +489,11 @@ ECode Gallery::GenerateLayoutParams(
     return NOERROR;
 }
 
-AutoPtr<IViewGroupLayoutParams> Gallery::GenerateDefaultLayoutParams()
+ECode Gallery::GenerateDefaultLayoutParams(
+    /* [out] */ IViewGroupLayoutParams** params)
 {
-    AutoPtr<IGalleryLayoutParams> lp;
-    CGalleryLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
-            IViewGroupLayoutParams::WRAP_CONTENT, (IGalleryLayoutParams**)&lp);
-    return IViewGroupLayoutParams::Probe(lp);
+    return CGalleryLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
+            IViewGroupLayoutParams::WRAP_CONTENT, params);
 }
 
 ECode Gallery::OnLayout(
@@ -1030,7 +1029,7 @@ void Gallery::SetUpChild(
     AutoPtr<IViewGroupLayoutParams> lp;
     child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
     if (lp == NULL) {
-        lp = GenerateDefaultLayoutParams();
+        GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
     }
 
     AddViewInLayout(child, fromLeft != mIsRtl ? -1 : 0, lp);
@@ -1414,7 +1413,7 @@ ECode Gallery::OnKeyUp(
         case IKeyEvent::KEYCODE_ENTER: {
             if (mReceivedInvokeKeyDown) {
                 if (mItemCount > 0) {
-                    if (mKeyUpRunnable = NULL) {
+                    if (mKeyUpRunnable == NULL) {
                         mKeyUpRunnable = new KeyUpRunnable(this);
                     }
                     DispatchPress(mSelectedChild);

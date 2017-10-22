@@ -58,8 +58,7 @@ module
             [out] Int32* value);
 
         SetSelectedDayOfMonth(
-            [in] Int32 dayOfMonth,
-            [out] Int32* value);
+            [in] Int32 dayOfMonth);
 
         IsSelected(
             [in] Int32 row,

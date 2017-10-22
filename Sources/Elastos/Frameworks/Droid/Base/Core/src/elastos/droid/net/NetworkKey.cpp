@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/NetworkKey.h"
 #include "elastos/droid/net/Network.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/logging/Logger.h>
@@ -54,13 +53,19 @@ ECode NetworkKey::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     ClassID this_cid, o_cid;
-    IObject::Probe(TO_IINTERFACE(this))->GetClassID(&this_cid);
-    IObject::Probe(o)->GetClassID(&o_cid);
-    if (o == NULL || this_cid != o_cid) FUNC_RETURN(FALSE)
-    AutoPtr<NetworkKey> that = (NetworkKey*) INetworkKey::Probe(o);
-    FUNC_RETURN(mType == that->mType && Objects::Equals(mWifiKey, that->mWifiKey))
+    GetClassID(&this_cid);
+    if (o == NULL || (IObject::Probe(o)->GetClassID(&o_cid), this_cid != o_cid)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    NetworkKey* that = (NetworkKey*)INetworkKey::Probe(o);
+    *result = mType == that->mType && Objects::Equals(mWifiKey, that->mWifiKey);
+    return NOERROR;
 }
 
 ECode NetworkKey::GetHashCode(

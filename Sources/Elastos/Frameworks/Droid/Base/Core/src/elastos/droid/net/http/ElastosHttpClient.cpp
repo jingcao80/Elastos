@@ -24,7 +24,6 @@
 #include "elastos/droid/net/CSSLSessionCache.h"
 #include "elastos/droid/net/SSLCertificateSocketFactory.h"
 #include "elastos/droid/net/http/CElastosHttpClient.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Build.h"
@@ -299,9 +298,11 @@ ECode ElastosHttpClient::NewInstance(
     CSchemeRegistry::New((ISchemeRegistry**)&schemeRegistry);
     AutoPtr<IPlainSocketFactoryHelper> plainSocketFactoryHelper;
     CPlainSocketFactoryHelper::AcquireSingleton((IPlainSocketFactoryHelper**)&plainSocketFactoryHelper);
+    AutoPtr<IPlainSocketFactory> psFactory;
+    plainSocketFactoryHelper->GetSocketFactory((IPlainSocketFactory**)&psFactory);
     AutoPtr<IScheme> scheme;
     CScheme::New(String("http"),
-            Org::Apache::Http::Conn::Scheme::ISocketFactory::Probe(Ptr(plainSocketFactoryHelper)->Func(plainSocketFactoryHelper->GetSocketFactory)),
+            Org::Apache::Http::Conn::Scheme::ISocketFactory::Probe(psFactory),
             80, (IScheme**)&scheme);
     AutoPtr<IScheme> oldScheme;
     schemeRegistry->Register(scheme, (IScheme**)&oldScheme);
@@ -360,22 +361,38 @@ ECode ElastosHttpClient::GetUngzippedContent(
 
     AutoPtr<IInputStream> responseStream;
     entity->GetContent((IInputStream**)&responseStream);
-    if (responseStream == NULL) FUNC_RETURN(responseStream);
+    if (responseStream == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
     AutoPtr<IHeader> header;
     entity->GetContentEncoding((IHeader**)&header);
-    if (header == NULL) FUNC_RETURN(responseStream);
+    if (header == NULL) {
+        *result = responseStream;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
     String contentEncoding;
     header->GetValue(&contentEncoding);
-    if (contentEncoding == NULL) FUNC_RETURN(responseStream);
-    if (contentEncoding.Contains("gzip"))
-        CGZIPInputStream::New(responseStream, (IInputStream**)&responseStream);
-    FUNC_RETURN(responseStream);
+    if (contentEncoding == NULL) {
+        *result = responseStream;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    if (contentEncoding.Contains("gzip")) {
+        return CGZIPInputStream::New(responseStream, result);
+    }
+    *result = responseStream;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode ElastosHttpClient::Close()
 {
     if (mLeakedException) {
-        Ptr(this)->Func(this->GetConnectionManager)->Shutdown();
+        AutoPtr<IClientConnectionManager> connManager;
+        GetConnectionManager((IClientConnectionManager**)&connManager);
+        connManager->Shutdown();
         mLeakedException = FALSE;
     }
     return NOERROR;
@@ -514,7 +531,9 @@ ECode ElastosHttpClient::GetCompressedEntity(
         // CByteArrayEntity::New()(Ptr(arr)->Func(arr->ToByteArray), (IByteArrayEntity**)&entity);
         // entity->SetContentEncoding(String("gzip"));
     }
-    FUNC_RETURN(entity);
+    *result = entity;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode ElastosHttpClient::GetMinGzipSize(
@@ -523,7 +542,8 @@ ECode ElastosHttpClient::GetMinGzipSize(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(DEFAULT_SYNC_MIN_GZIP_BYTES);  // For now, this is just a constant.
+    *result = DEFAULT_SYNC_MIN_GZIP_BYTES;  // For now, this is just a constant.
+    return NOERROR;
 }
 
 ECode ElastosHttpClient::EnableCurlLogging(
@@ -634,7 +654,9 @@ String ElastosHttpClient::ToCurl(
 
     // add in the method
     builder->Append("-X ");
-    builder->Append(Ptr(request)->Func(request->GetMethod));
+    String method;
+    request->GetMethod(&method);
+    builder->Append(method);
     builder->Append(" ");
 
     AutoPtr<ArrayOf<IHeader*> > headers;
@@ -681,8 +703,11 @@ String ElastosHttpClient::ToCurl(
     if (entityRequest != NULL) {
         AutoPtr<IHttpEntity> entity;
         entityRequest->GetEntity((IHttpEntity**)&entity);
-        if (entity != NULL && Ptr(entity)->Func(entity->IsRepeatable)) {
-            if (Ptr(entity)->Func(entity->GetContentLength) < 1024) {
+        Boolean repeatable;
+        if (entity != NULL && (entity->IsRepeatable(&repeatable), repeatable)) {
+            Int64 contentLength;
+            entity->GetContentLength(&contentLength);
+            if (contentLength < 1024) {
                 AutoPtr<IByteArrayOutputStream> stream;
                 CByteArrayOutputStream::New((IByteArrayOutputStream**)&stream);
                 entity->WriteTo(IOutputStream::Probe(stream));
@@ -690,8 +715,10 @@ String ElastosHttpClient::ToCurl(
                 if (IsBinaryContent(request)) {
                     AutoPtr<IBase64> helper;
                     CBase64::AcquireSingleton((IBase64**)&helper);
+                    AutoPtr< ArrayOf<Byte> > streamArray;
+                    stream->ToByteArray((ArrayOf<Byte>**)&streamArray);
                     String base64;
-                    helper->EncodeToString(Ptr(stream)->Func(stream->ToByteArray), IBase64::NO_WRAP, &base64);
+                    helper->EncodeToString(streamArray, IBase64::NO_WRAP, &base64);
                     builder->Insert(0, String("echo '") + base64 + "' | base64 -d > /tmp/$$.bin; ");
                     builder->Append(" --data-binary @/tmp/$$.bin");
                 } else {

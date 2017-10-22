@@ -22,7 +22,6 @@
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.Text.h>
 #include "elastos/droid/R.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/http/SslCertificate.h"
 #include "elastos/droid/net/http/CSslCertificate.h"
 #include "elastos/droid/net/http/CSslCertificateDName.h"
@@ -97,7 +96,9 @@ ECode SslCertificateDName::constructor(
         AutoPtr<IVector> oid;
         // x509Name->GetOIDs(&oid);
 
-        for (Int32 i = 0; i < Ptr(oid)->Func(IVector::GetSize); i++) {
+        Int32 size;
+        oid->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
         //     if (oid->At(i)->Equals(IX509Name::CN)) {
         //         if (mCName.IsNull()) {
         //             mCName = (String) val->At(i);

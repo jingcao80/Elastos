@@ -31,7 +31,7 @@ WifiLinkQualityInfo::WifiLinkQualityInfo()
     , mTxBad(UNKNOWN_LONG)
 {}
 
-WifiLinkQualityInfo::constructor()
+ECode WifiLinkQualityInfo::constructor()
 {
     return NOERROR;
 }

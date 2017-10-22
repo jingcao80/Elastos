@@ -30,7 +30,7 @@ namespace View {
 
 CAR_SINGLETON_IMPL(CWindowManagerLayoutParamsHelper);
 CAR_INTERFACE_IMPL(CWindowManagerLayoutParamsHelper, Singleton, IWindowManagerLayoutParamsHelper);
-CWindowManagerLayoutParamsHelper::MayUseInputMethod(
+ECode CWindowManagerLayoutParamsHelper::MayUseInputMethod(
     /* [in] */ Int32 flags,
     /* [out] */ Boolean* mayUse)
 {

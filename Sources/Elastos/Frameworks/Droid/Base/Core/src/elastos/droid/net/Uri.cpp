@@ -23,7 +23,6 @@
 #include "elastos/droid/net/COpaqueUri.h"
 #include "elastos/droid/net/CHierarchicalUri.h"
 #include "elastos/droid/net/CUriBuilder.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/CStrictMode.h"
@@ -322,7 +321,9 @@ ECode StringUri::GetPathSegments(
     AutoPtr<PathPart> part = GetPathPart();
     AutoPtr<PathSegments> segments = part->GetPathSegments();
 
-    FUNC_RETURN(IList::Probe(segments))
+    *result = IList::Probe(segments);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 String StringUri::ParsePath()
@@ -991,12 +992,11 @@ ECode AbstractHierarchicalUri::GetLastPathSegment(
     if (segments == NULL) {
         return NOERROR;
     }
-    else if (Ptr(segments)->Func(segments->GetSize) == 0) {
-        return NOERROR;
-    }
-
     Int32 size;
     segments->GetSize(&size);
+    if (size == 0) {
+        return NOERROR;
+    }
     AutoPtr<IInterface> obj;
     segments->Get(size - 1, (IInterface**)&obj);
     ICharSequence::Probe(obj)->ToString(pathSegment);
@@ -1591,7 +1591,7 @@ ECode UriBuilder::AppendQueryParameter(
 
 ECode UriBuilder::ClearQuery()
 {
-    return Query((Handle32)NULL);
+    return Query(NULL);
 }
 
 ECode UriBuilder::Build(
@@ -2198,7 +2198,9 @@ ECode Uri::FromFile(
         Logger::E("Uri", "file");
         return E_NULL_POINTER_EXCEPTION;
     }
-    AutoPtr<PathPart> path = PathPart::FromDecoded(Ptr(file)->Func(file->GetAbsolutePath));
+    String pathStr;
+    file->GetAbsolutePath(&pathStr);
+    AutoPtr<PathPart> path = PathPart::FromDecoded(pathStr);
     return CHierarchicalUri::New(String("file"), (Handle32)Part::sEMPTY.Get(), (Handle32)path.Get(),
         (Handle32)Part::sNULL.Get(), (Handle32)Part::sNULL.Get(), result);
 }
@@ -2230,13 +2232,14 @@ ECode Uri::GetQueryParameterNames(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    if (Ptr(this)->Func(this->IsOpaque)) {
+    Boolean opaque;
+    if (IsOpaque(&opaque), opaque) {
         Logger::E("Uri", NOT_HIERARCHICAL);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     String query;
     GetEncodedQuery(&query);
-    if (query == NULL) {
+    if (query.IsNull()) {
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         return helper->GetEmptySet(result);
@@ -2274,17 +2277,18 @@ ECode Uri::GetQueryParameters(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    if (Ptr(this)->Func(this->IsOpaque)) {
+    Boolean opaque;
+    if (IsOpaque(&opaque), opaque) {
         Logger::E("Uri", NOT_HIERARCHICAL);
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    if (key == NULL) {
+    if (key.IsNull()) {
       Logger::E("Uri", "key");
       return E_NULL_POINTER_EXCEPTION;
     }
     String query;
     GetEncodedQuery(&query);
-    if (query == NULL) {
+    if (query.IsNull()) {
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         return helper->GetEmptyList(result);
@@ -2721,15 +2725,31 @@ ECode Uri::IsPathPrefixMatch(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (!Ptr(IUri::Probe(this))->Func(IUri::GetScheme).Equals(Ptr(prefix)->Func(IUri::GetScheme))) FUNC_RETURN(FALSE)
-    if (!Ptr(IUri::Probe(this))->Func(IUri::GetAuthority).Equals(Ptr(prefix)->Func(IUri::GetAuthority))) FUNC_RETURN(FALSE)
+    String scheme, preScheme;
+    GetScheme(&scheme);
+    prefix->GetScheme(&preScheme);
+    if (!scheme.Equals(preScheme)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    String auth, preAuth;
+    GetAuthority(&auth);
+    prefix->GetAuthority(&preAuth);
+    if (!auth.Equals(preAuth)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<IList> seg;
     GetPathSegments((IList**)&seg);
     AutoPtr<IList> prefixSeg;
     prefix->GetPathSegments((IList**)&prefixSeg);
-    Int32 prefixSize;
+    Int32 segSize, prefixSize;
+    seg->GetSize(&segSize);
     prefixSeg->GetSize(&prefixSize);
-    if (Ptr(seg)->Func(seg->GetSize) < prefixSize) FUNC_RETURN(FALSE)
+    if (segSize < prefixSize) {
+        *result = FALSE;
+        return NOERROR;
+    }
     for (Int32 i = 0; i < prefixSize; i++) {
         AutoPtr<IInterface> iSeg;
         seg->Get(i, (IInterface**)&iSeg);

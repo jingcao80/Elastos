@@ -17,7 +17,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/net/NetworkUtils.h"
 #include "elastos/droid/net/CRouteInfo.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/utility/CPair.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuffer.h>
@@ -40,6 +39,7 @@ using Elastos::Net::CInetAddressHelper;
 using Elastos::Net::IInet6Address;
 using Elastos::Net::IInetAddress;
 using Elastos::Net::IInetAddressHelper;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 extern "C" {
@@ -287,7 +287,10 @@ ECode NetworkUtils::ParcelInetAddress(
     /* [in] */ IInetAddress* address,
     /* [in] */ Int32 flags)
 {
-    AutoPtr<ArrayOf<Byte> > addressArray = (address != NULL) ? Ptr(address)->Func(address->GetAddress) : NULL;
+    AutoPtr<ArrayOf<Byte> > addressArray;
+    if (address != NULL) {
+        address->GetAddress((ArrayOf<Byte>**)&addressArray);
+    }
     parcel->WriteArrayOf((Handle32)addressArray.Get());
     return NOERROR;
 }
@@ -301,7 +304,8 @@ ECode NetworkUtils::UnparcelInetAddress(
     AutoPtr<ArrayOf<Byte> > addressArray;
     in->ReadArrayOf((Handle32*)&addressArray);
     if (addressArray == NULL) {
-        FUNC_RETURN(NULL)
+        *result = NULL;
+        return NOERROR;
     }
         // try {
     AutoPtr<IInetAddressHelper> inetaddresshelper;
@@ -309,8 +313,8 @@ ECode NetworkUtils::UnparcelInetAddress(
     ECode ec = inetaddresshelper->GetByAddress(addressArray, result);
         // } catch (UnknownHostException e) {
     if (FAILED(ec)) {
-        if (ec == (ECode)E_UNKNOWN_HOST_EXCEPTION) FUNC_RETURN(NULL)
-        return ec;
+        *result = NULL;
+        return ec == (ECode)E_UNKNOWN_HOST_EXCEPTION ? NOERROR : ec;
     }
         // }
     return NOERROR;
@@ -374,15 +378,16 @@ ECode NetworkUtils::ParseIpAndMask(
     StringUtils::Split(ipAndMaskString, "/", 2, (ArrayOf<String>**)&pieces);
     AutoPtr<IInetAddressHelper> inetaddresshelper;
     CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&inetaddresshelper);
-    ECode ec;
     if (pieces->GetLength() > 1) {
         prefixLength = StringUtils::ParseInt32((*pieces)[1]);
-        ec = inetaddresshelper->ParseNumericAddress((*pieces)[0], (IInetAddress**)&address);
+        ECode ec = inetaddresshelper->ParseNumericAddress((*pieces)[0], (IInetAddress**)&address);
+        if (FAILED(ec)) {
+            if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION && ec != (ECode)E_NUMBER_FORMAT_EXCEPTION) {
+                return ec;
+            }
+        }
     }
-    if (FAILED(ec)) {
-        if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION && ec != (ECode)E_NUMBER_FORMAT_EXCEPTION)
-            return ec;
-    }
+
     // } catch (NullPointerException e) {            // Null string.
     // } catch (ArrayIndexOutOfBoundsException e) {  // No prefix length.
     // } catch (NumberFormatException e) {           // Non-numeric prefix.
@@ -458,14 +463,20 @@ ECode NetworkUtils::MakeStrings(
     addrs->GetSize(&n);
     AutoPtr<ArrayOf<String> > strs = ArrayOf<String>::Alloc(n);
 
+    AutoPtr<IIterator> it;
+    addrs->GetIterator((IIterator**)&it);
     Int32 i = 0;
-    FOR_EACH(iter, addrs) {
-        AutoPtr<IInetAddress> addr = IInetAddress::Probe(Ptr(iter)->Func(iter->GetNext));
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> addr;
+        it->GetNext((IInterface**)&addr);
         String s;
-        addr->GetHostAddress(&s);
+        IInetAddress::Probe(addr)->GetHostAddress(&s);
         (*strs)[i++] = s;
     }
-    FUNC_RETURN(strs);
+    *result = strs;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode NetworkUtils::TrimV4AddrZeros(
@@ -475,19 +486,22 @@ ECode NetworkUtils::TrimV4AddrZeros(
     VALIDATE_NOT_NULL(result);
 
     if (addr.IsNull()) {
-        FUNC_RETURN(String(NULL))
+        *result = NULL;
+        return NOERROR;
     }
 
     AutoPtr<ArrayOf<String> > octets;
     StringUtils::Split(addr, String("\\."), (ArrayOf<String>**)&octets);
     if (octets->GetLength() != 4) {
-        FUNC_RETURN(addr)
+        *result = addr;
+        return NOERROR;
     }
     StringBuffer buff;
     for (Int32 i = 0; i < 4; i++) {
 //        try {
             if ((*octets)[i].GetLength() > 3) {
-                FUNC_RETURN(addr)
+                *result = addr;
+        return NOERROR;
             }
             buff += (*octets)[i];
 //        } catch (NumberFormatException e) {
@@ -496,7 +510,8 @@ ECode NetworkUtils::TrimV4AddrZeros(
         if (i < 3)
             buff += String(".");
     }
-    FUNC_RETURN(buff.ToString())
+    *result = buff.ToString();
+    return NOERROR;
 }
 
 Boolean NetworkUtils::NativeRunDhcpCommon(

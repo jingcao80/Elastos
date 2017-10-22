@@ -110,11 +110,15 @@ private:
             /* [in] */ const String& password,
             /* [out] */ Int32* ret);
 
+        using Object::Lock;
+
         /**
          * throws RemoteException
          */
         CARAPI Lock(
             /* [out] */ Int32* ret);
+
+        using Object::Unlock;
 
         /**
          * throws RemoteException
@@ -331,8 +335,12 @@ public:
         /* [in] */ const String& password,
         /* [out] */ Boolean* result);
 
+    using Object::Lock;
+
     CARAPI Lock(
         /* [out] */ Boolean* result);
+
+    using Object::Unlock;
 
     CARAPI Unlock(
         /* [in] */ const String& password,

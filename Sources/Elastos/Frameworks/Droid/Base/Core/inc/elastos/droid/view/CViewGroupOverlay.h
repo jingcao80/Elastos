@@ -49,6 +49,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IView* hostView);
 
+    using ViewOverlay::Add;
+
     /**
      * Adds a View to the overlay. The bounds of the added view should be
      * relative to the host view. Any view added to the overlay should be
@@ -74,6 +76,8 @@ public:
      */
     CARAPI Add(
         /* [in] */ IView* view);
+
+    using ViewOverlay::Remove;
 
     /**
      * Removes the specified View from the overlay.

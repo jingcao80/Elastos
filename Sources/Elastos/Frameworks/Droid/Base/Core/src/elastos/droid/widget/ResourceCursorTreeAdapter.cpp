@@ -71,26 +71,26 @@ ECode ResourceCursorTreeAdapter::constructor(
     return constructor(context, cursor, groupLayout, groupLayout, childLayout, childLayout);
 }
 
-ECode ResourceCursorTreeAdapter::NewChildView(
+AutoPtr<IView> ResourceCursorTreeAdapter::NewChildView(
     /* [in] */ IContext* context,
     /* [in] */ ICursor* cursor,
     /* [in] */ Boolean isLastChild,
-    /* [in] */ IViewGroup* parent,
-    /* [out] */ IView** view)
+    /* [in] */ IViewGroup* parent)
 {
-    VALIDATE_NOT_NULL(view);
-    return mInflater->Inflate((isLastChild) ? mLastChildLayout : mChildLayout, parent, FALSE, view);
+    AutoPtr<IView> view;
+    mInflater->Inflate((isLastChild) ? mLastChildLayout : mChildLayout, parent, FALSE, (IView**)&view);
+    return view;
 }
 
-ECode ResourceCursorTreeAdapter::NewGroupView(
+AutoPtr<IView> ResourceCursorTreeAdapter::NewGroupView(
     /* [in] */ IContext* context,
     /* [in] */ ICursor* cursor,
     /* [in] */ Boolean isExpanded,
-    /* [in] */ IViewGroup* parent,
-    /* [out] */ IView** view)
+    /* [in] */ IViewGroup* parent)
 {
-    VALIDATE_NOT_NULL(view);
-    return mInflater->Inflate((isExpanded) ? mExpandedGroupLayout : mCollapsedGroupLayout, parent, FALSE, view);
+    AutoPtr<IView> view;
+    mInflater->Inflate((isExpanded) ? mExpandedGroupLayout : mCollapsedGroupLayout, parent, FALSE, (IView**)&view);
+    return view;
 }
 
 } // namespace Widget

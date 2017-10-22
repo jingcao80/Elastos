@@ -262,7 +262,7 @@ ECode TableRow::constructor(
  * @param context the application environment
  * @param attrs a collection of attributes
  */
-TableRow::constructor(
+ECode TableRow::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {

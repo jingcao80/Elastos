@@ -19,7 +19,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/net/dhcp/DhcpNakPacket.h"
 #include "elastos/droid/net/dhcp/DhcpPacket.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 
 using Elastos::Droid::Os::Build;
@@ -82,7 +81,9 @@ ECode DhcpNakPacket::BuildPacket(
     FillInPacket(encap, destIp, srcIp, destUdp, srcUdp, rev,
         DHCP_BOOTREPLY, mBroadcast);
     IBuffer::Probe(rev)->Flip();
-    FUNC_RETURN(rev)
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode DhcpNakPacket::FinishPacket(

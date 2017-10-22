@@ -47,7 +47,7 @@ public:
 
     virtual ~CTimeFormatter();
 
-    constructor();
+    CARAPI constructor();
 
     CARAPI Format(
         /* [in] */ const String& pattern,

@@ -42,6 +42,8 @@ public:
     CARAPI CaptureEndValues(
         /* [in] */ ITransitionValues* transitionValues);
 
+    using Transition::CaptureValues;
+
     CARAPI CaptureValues(
         /* [in] */ ITransitionValues* transitionValues);
 

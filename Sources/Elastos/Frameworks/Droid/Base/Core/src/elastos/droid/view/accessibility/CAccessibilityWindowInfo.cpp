@@ -525,12 +525,12 @@ ECode CAccessibilityWindowInfo::Changed(
 
     AutoPtr<CAccessibilityWindowInfo> info = (CAccessibilityWindowInfo*)other;
     if (info->mId != mId) {
-        Slogger::E(DEBUG, "Not same window.");
+        Slogger::E("CAccessibilityWindowInfo", "Not same window.");
         // throw new IllegalArgumentException("Not same window.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (info->mType != mType) {
-        Slogger::E(DEBUG, "Not same type.");
+        Slogger::E("CAccessibilityWindowInfo", "Not same type.");
         // throw new IllegalArgumentException("Not same type.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

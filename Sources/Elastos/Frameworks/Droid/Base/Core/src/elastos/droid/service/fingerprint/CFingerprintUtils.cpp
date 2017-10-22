@@ -48,7 +48,7 @@ ECode CFingerprintUtils::RemoveFingerprintIdForUser(
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* ret)
 {
-    return CFingerprintUtils::RemoveFingerprintIdForUser(fingerId, res, userId, ret);
+    return FingerprintUtils::RemoveFingerprintIdForUser(fingerId, res, userId, ret);
 }
 
 } // namespace Fingerprint

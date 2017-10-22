@@ -21,7 +21,6 @@
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkUtils.h"
 #include "elastos/droid/net/PacProxySelector.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/net/ProxySelector.h>
@@ -106,10 +105,14 @@ ECode Proxy::GetProxy(
         ProxySelector::GetDefault((IProxySelector**)&proxySelector);
         AutoPtr<IList> proxyList;
         proxySelector->Select(uri, (IList**)&proxyList);
-        if (Ptr(proxyList)->Func(proxyList->GetSize) > 0) {
+        Int32 size;
+        proxyList->GetSize(&size);
+        if (size > 0) {
             AutoPtr<IInterface> obj;
             proxyList->Get(0, (IInterface**)&obj);
-            FUNC_RETURN(Elastos::Net::IProxy::Probe(obj))
+            *result = Elastos::Net::IProxy::Probe(obj);
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
     AutoPtr<Elastos::Net::IProxyHelper> helper;
@@ -261,11 +264,24 @@ ECode Proxy::Validate(
     HOSTNAME_PATTERN->Matcher(hostname, (IMatcher**)&match);
     AutoPtr<IMatcher> listMatch;
     EXCLLIST_PATTERN->Matcher(exclList, (IMatcher**)&listMatch);
-    if (!Ptr(match)->Func(match->Matches)) FUNC_RETURN(IProxy::PROXY_HOSTNAME_INVALID)
-    if (!Ptr(listMatch)->Func(listMatch->Matches)) FUNC_RETURN(IProxy::PROXY_EXCLLIST_INVALID)
-    if (hostname.GetLength() > 0 && port.GetLength() == 0) FUNC_RETURN(IProxy::PROXY_PORT_EMPTY)
+    Boolean isMatch;
+    if (match->Matches(&isMatch), !isMatch) {
+        *result = IProxy::PROXY_HOSTNAME_INVALID;
+        return NOERROR;
+    }
+    if (listMatch->Matches(&isMatch), !isMatch) {
+        *result = IProxy::PROXY_EXCLLIST_INVALID;
+        return NOERROR;
+    }
+    if (hostname.GetLength() > 0 && port.GetLength() == 0) {
+        *result = IProxy::PROXY_PORT_EMPTY;
+        return NOERROR;
+    }
     if (port.GetLength() > 0) {
-        if (hostname.GetLength() == 0) FUNC_RETURN(IProxy::PROXY_HOSTNAME_EMPTY)
+        if (hostname.GetLength() == 0) {
+            *result = IProxy::PROXY_HOSTNAME_EMPTY;
+            return NOERROR;
+        }
         Int32 portVal = -1;
         // try {
         ECode ec = StringUtils::Parse(port, &portVal);
@@ -278,7 +294,10 @@ ECode Proxy::Validate(
             else return ec;
         }
         // }
-        if (portVal <= 0 || portVal > 0xFFFF) FUNC_RETURN(IProxy::PROXY_PORT_INVALID)
+        if (portVal <= 0 || portVal > 0xFFFF) {
+            *result = IProxy::PROXY_PORT_INVALID;
+            return NOERROR;
+        }
     }
     *result = IProxy::PROXY_VALID;
     return NOERROR;

@@ -585,7 +585,7 @@ String FileUtils::BuildValidExtFilename(
 Boolean FileUtils::IsValidFatFilenameChar(
     /* [in] */ Char32 c)
 {
-    if ((0x00 <= c && c <= 0x1f)) {
+    if (0x00 <= c && c <= 0x1f) {
         return FALSE;
     }
     switch (c) {

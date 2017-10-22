@@ -36,6 +36,8 @@ public:
     CARAPI GetStrings(
         /* [out, callee] */ ArrayOf<String>** strings);
 
+    using Singleton::ToString;
+
     CARAPI ToString(
         /* [in] */ Int32 index,
         /* [out] */ String* strValue);

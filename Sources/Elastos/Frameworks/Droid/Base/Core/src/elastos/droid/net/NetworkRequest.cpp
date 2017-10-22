@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/CNetworkCapabilities.h"
 #include "elastos/droid/net/NetworkRequest.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/CNetworkCapabilities.h"
 #include "elastos/droid/net/CNetworkRequest.h"
 
@@ -93,23 +92,35 @@ ECode NetworkRequest::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean* result)
 {
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
-    if (INetworkRequest::Probe(obj) == NULL) FUNC_RETURN(FALSE)
+    VALIDATE_NOT_NULL(result);
+
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (INetworkRequest::Probe(obj) == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     NetworkRequest* that = (NetworkRequest*)(INetworkRequest::Probe(obj));
     Boolean bEquals;
     IObject::Probe(that->mNetworkCapabilities)->Equals(mNetworkCapabilities, &bEquals);
-    FUNC_RETURN(that->mLegacyType == mLegacyType &&
+    *result = that->mLegacyType == mLegacyType &&
             that->mRequestId == mRequestId &&
             ((that->mNetworkCapabilities == NULL && mNetworkCapabilities == NULL) ||
-            (that->mNetworkCapabilities != NULL && bEquals)));
+            (that->mNetworkCapabilities != NULL && bEquals));
+    return NOERROR;
 }
 
 ECode NetworkRequest::GetHashCode(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result);
+
     Int32 hashCode;
     IObject::Probe(mNetworkCapabilities)->GetHashCode(&hashCode);
-    FUNC_RETURN(mRequestId + (mLegacyType * 1013) + hashCode * 1051)
+    *result = mRequestId + (mLegacyType * 1013) + hashCode * 1051;
+    return NOERROR;
 }
 
 ECode NetworkRequest::GetNetworkCapabilities(
@@ -163,7 +174,9 @@ ECode NetworkRequestBuilder::Build(
     AutoPtr<INetworkRequest> rev;
     CNetworkRequest::New(mNetworkCapabilities, IConnectivityManager::TYPE_NONE,
             IConnectivityManager::REQUEST_ID_UNSET, (INetworkRequest**)&rev);
-    FUNC_RETURN(rev)
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode NetworkRequestBuilder::AddCapability(

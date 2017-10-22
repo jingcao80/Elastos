@@ -44,7 +44,7 @@ public:
         /* [out] */ Int64* res);
 
     CARAPI IsRecordingFor(
-        /* [in] */ IObject* o,
+        /* [in] */ IInterface* o,
         /* [out] */ Boolean* res);
 
     AutoPtr<IRenderNode> mNode;

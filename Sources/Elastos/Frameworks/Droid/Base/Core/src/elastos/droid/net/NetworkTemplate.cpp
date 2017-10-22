@@ -23,7 +23,6 @@
 #include "elastos/droid/net/CNetworkTemplate.h"
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkIdentity.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include <elastos/core/StringBuilder.h>
@@ -235,7 +234,10 @@ ECode NetworkTemplate::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     if (INetworkTemplate::Probe(obj) != NULL) {
         AutoPtr<INetworkTemplate> other = INetworkTemplate::Probe(obj);
         Int32 matchrule;

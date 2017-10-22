@@ -382,7 +382,7 @@ ECode SurfaceView::constructor(
     return NOERROR;
 }
 
-SurfaceView::constructor(
+ECode SurfaceView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr,
@@ -541,19 +541,20 @@ Boolean SurfaceView::SetFrame(
     return result;
 }
 
-Boolean SurfaceView::GatherTransparentRegion(
-    /* [in] */ IRegion* region)
+ECode SurfaceView::GatherTransparentRegion(
+    /* [in] */ IRegion* region,
+    /* [out] */ Boolean* isOpaque)
 {
-    Boolean opaque = TRUE;
+    VALIDATE_NOT_NULL(isOpaque);
     if (mWindowType == IWindowManagerLayoutParams::TYPE_APPLICATION_PANEL) {
-        View::GatherTransparentRegion(region, &opaque);
-        return opaque;
+        return View::GatherTransparentRegion(region, isOpaque);
     }
 
     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == 0) {
         // this view draws, remove it from the transparent region
-        opaque = View::GatherTransparentRegion(region, &opaque);
-    } else if (region != NULL) {
+        View::GatherTransparentRegion(region, isOpaque);
+    }
+    else if (region != NULL) {
         Int32 w, h;
         GetWidth(&w);
         GetHeight(&h);
@@ -568,9 +569,9 @@ Boolean SurfaceView::GatherTransparentRegion(
         }
     }
     if (PixelFormat::FormatHasAlpha(mRequestedFormat)) {
-        opaque = FALSE;
+        *isOpaque = FALSE;
     }
-    return opaque;
+    return NOERROR;
 }
 
 ECode SurfaceView::Draw(

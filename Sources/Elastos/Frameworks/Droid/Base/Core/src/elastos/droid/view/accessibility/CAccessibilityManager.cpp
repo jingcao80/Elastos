@@ -156,12 +156,12 @@ ECode CAccessibilityManager::GetInstance(
             Int32 userId;
             Int32 result1, result2;
             if (Binder::GetCallingUid() == IProcess::SYSTEM_UID
-                    || context->CheckCallingOrSelfPermission(
+                    || (context->CheckCallingOrSelfPermission(
                             Elastos::Droid::Manifest::permission::INTERACT_ACROSS_USERS, &result1), result1
-                                    == IPackageManager::PERMISSION_GRANTED
-                    || context->CheckCallingOrSelfPermission(
+                                    == IPackageManager::PERMISSION_GRANTED)
+                    || (context->CheckCallingOrSelfPermission(
                             Elastos::Droid::Manifest::permission::INTERACT_ACROSS_USERS_FULL, &result2), result2
-                                    == IPackageManager::PERMISSION_GRANTED) {
+                                    == IPackageManager::PERMISSION_GRANTED)) {
                 userId = IUserHandle::USER_CURRENT;
             }
             else {

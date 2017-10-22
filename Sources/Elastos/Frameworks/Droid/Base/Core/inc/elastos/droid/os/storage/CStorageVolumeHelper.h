@@ -42,7 +42,7 @@ public:
 
     CAR_SINGLETON_DECL()
 
-    FromTemplate(
+    ECode FromTemplate(
         /* [in] */ IStorageVolume* temp,
         /* [in] */ IFile* path,
         /* [in] */ IUserHandle* owner,

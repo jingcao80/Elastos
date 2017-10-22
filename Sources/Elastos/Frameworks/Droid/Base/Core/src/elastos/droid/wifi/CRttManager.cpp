@@ -107,7 +107,7 @@ ECode CRttManager::ServiceHandler::HandleMessage(
             RemoveListener(arg2);
             break;
         default:
-            if (DBG) Logger::D(TAG, "Ignoring message %d" + what);
+            if (DBG) Logger::D(TAG, "Ignoring message %d", what);
             return NOERROR;
     }
 

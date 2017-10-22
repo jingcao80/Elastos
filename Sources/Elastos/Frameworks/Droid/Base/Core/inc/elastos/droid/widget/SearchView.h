@@ -257,7 +257,7 @@ private:
 
         CAR_INTERFACE_DECL()
 
-        OnLayoutChange(
+        CARAPI OnLayoutChange(
             /* [in] */ IView* v,
             /* [in] */ Int32 left,
             /* [in] */ Int32 top,

@@ -35,7 +35,9 @@ public:
 
     CAR_OBJECT_DECL()
 
-    constructor();
+    CARAPI constructor();
+
+    using Object::ToString;
 
     CARAPI ToString(
         /* [in] */ Int32 status,

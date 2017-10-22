@@ -59,7 +59,7 @@ ECode GLES20RecordingCanvas::FinishRecording(
 }
 
 ECode GLES20RecordingCanvas::IsRecordingFor(
-    /* [in] */ IObject* o,
+    /* [in] */ IInterface* o,
     /* [out] */ Boolean* res)
 {
     AutoPtr<IRenderNode> n = IRenderNode::Probe(o);

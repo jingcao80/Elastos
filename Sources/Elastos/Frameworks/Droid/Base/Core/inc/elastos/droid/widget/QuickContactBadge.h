@@ -72,19 +72,19 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyleAttr);
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyleAttr,

@@ -21,7 +21,6 @@
 #include "elastos/droid/net/http/ElastosHttpClientConnection.h"
 #include "elastos/droid/net/http/HttpLog.h"
 #include "elastos/droid/net/http/Request.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Handler.h"
 
 using Elastos::Droid::Content::IContext;
@@ -86,15 +85,13 @@ ECode HttpConnection::OpenConnection(
 
 ECode HttpConnection::CloseConnection()
 {
-    ECode ec = NOERROR;
     if (mHttpClientConnection != NULL) {
-        if (Ptr(mHttpClientConnection)->Func(mHttpClientConnection->IsOpen)) {
-            ec = mHttpClientConnection->Close();
+        Boolean open;
+        if (mHttpClientConnection->IsOpen(&open), open) {
+            ECode ec = mHttpClientConnection->Close();
             if (FAILED(ec)) {
                 if (HttpLog::LOGV) {
-                    String shost;
-                    IObject::Probe(mHost)->ToString(&shost);
-                    HttpLog::V("closeConnection(): failed closing connection %s", shost.string());
+                    HttpLog::V("closeConnection(): failed closing connection %s", TO_CSTR(mHost));
                 }
             }
         }

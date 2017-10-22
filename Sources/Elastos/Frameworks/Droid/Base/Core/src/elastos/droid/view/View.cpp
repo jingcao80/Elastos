@@ -708,7 +708,8 @@ ECode View::MeasureSpec::GetDescription(
         sb += "AT_MOST ";
     }
     else {
-        sb += mode + " ";
+        sb += mode;
+        sb += " ";
     }
 
     sb += size;
@@ -2185,8 +2186,7 @@ ECode View::RequestRectangleOnScreen(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
-    *res = RequestRectangleOnScreen(rectangle, FALSE);
-    return NOERROR;
+    return RequestRectangleOnScreen(rectangle, FALSE, res);
 }
 
 /**

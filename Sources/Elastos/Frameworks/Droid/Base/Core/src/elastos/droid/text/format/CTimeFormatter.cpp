@@ -566,6 +566,7 @@ ECode CTimeFormatter::ModifyAndAppend(
         break;
     case '^':
         for (Int32 i = 0; i < length; i++) {
+            str->GetCharAt(i,&c);
             mOutputBuilder.AppendChar(BrokenToUpper(c));
         }
         break;

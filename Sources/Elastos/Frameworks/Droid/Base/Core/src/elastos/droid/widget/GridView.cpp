@@ -1317,7 +1317,7 @@ ECode GridView::LayoutChildren()
             AutoPtr<IView> focusChild = GetAccessibilityFocusedChild(focusHost);
             if (focusChild != NULL) {
                 Boolean hasTransientState;
-                if (!dataChanged || (focusChild->HasTransientState(&hasTransientState)), hasTransientState
+                if (!dataChanged || (focusChild->HasTransientState(&hasTransientState), hasTransientState)
                         || mAdapterHasStableIds) {
                     // The views won't be changing, so try to maintain
                     // focus on the current host and virtual view.

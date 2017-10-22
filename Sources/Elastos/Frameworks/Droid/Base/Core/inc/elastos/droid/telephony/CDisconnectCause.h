@@ -33,6 +33,8 @@ public:
 
     CAR_SINGLETON_DECL()
 
+    using Singleton::ToString;
+
     /** Returns descriptive string for the specified disconnect cause. */
     CARAPI ToString(
         /* [in] */ Int32 cause,

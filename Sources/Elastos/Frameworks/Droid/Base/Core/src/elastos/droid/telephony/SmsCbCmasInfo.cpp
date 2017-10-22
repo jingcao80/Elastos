@@ -15,8 +15,10 @@
 //=========================================================================
 
 #include "elastos/droid/telephony/SmsCbCmasInfo.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 
 namespace Elastos {
@@ -137,14 +139,21 @@ ECode SmsCbCmasInfo::GetCertainty(
 ECode SmsCbCmasInfo::ToString(
     /* [out] */ String* result)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = String("SmsCbCmasInfo{messageClass=") + StringUtils::ToString(mMessageClass)
-            + ", category=" + StringUtils::ToString(mCategory)
-            + ", responseType=" + StringUtils::ToString(mResponseType)
-            + ", severity=" + StringUtils::ToString(mSeverity)
-            + ", urgency=" + StringUtils::ToString(mUrgency)
-            + ", certainty=" + StringUtils::ToString(mCertainty) + '}';
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    StringBuilder sb("SmsCbCmasInfo{messageClass=");
+    sb += mMessageClass;
+    sb += ", category=";
+    sb += mCategory;
+    sb += ", responseType=";
+    sb += mResponseType;
+    sb += ", severity=";
+    sb += mSeverity;
+    sb += ", urgency=";
+    sb += mUrgency;
+    sb += ", certainty=";
+    sb += mCertainty;
+    sb += "}";
+    return sb.ToString(result);
 }
 
 } // namespace Telephony

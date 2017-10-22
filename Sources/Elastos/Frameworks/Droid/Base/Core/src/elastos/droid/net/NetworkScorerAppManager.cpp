@@ -25,7 +25,6 @@
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkScoreManager.h"
 #include "elastos/droid/net/NetworkScorerAppManager.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -46,6 +45,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 
@@ -80,8 +80,13 @@ ECode NetworkScorerAppManager::GetAllValidScorers(
     // Only apps installed under the primary user of the device can be scorers.
     AutoPtr<IList> receivers;
     pm->QueryBroadcastReceivers(SCORE_INTENT, 0 /* flags */, UserHandle::USER_OWNER, (IList**)&receivers);
-    FOR_EACH(iter, receivers) {
-        AutoPtr<IResolveInfo> receiver = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    receivers->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IResolveInfo* receiver = IResolveInfo::Probe(obj);
         // This field is a misnomer, see android.content.pm.ResolveInfo#activityInfo
         /* final */ AutoPtr<IActivityInfo> receiverInfo;
         receiver->GetActivityInfo((IActivityInfo**)&receiverInfo);
@@ -89,7 +94,9 @@ ECode NetworkScorerAppManager::GetAllValidScorers(
             // Should never happen with queryBroadcastReceivers, but invalid nonetheless.
             continue;
         }
-        if (!Manifest::permission::BROADCAST_SCORE_NETWORKS.Equals(Ptr(receiverInfo)->Func(receiverInfo->GetPermission))) {
+        String permission;
+        receiverInfo->GetPermission(&permission);
+        if (!Manifest::permission::BROADCAST_SCORE_NETWORKS.Equals(permission)) {
             // Receiver doesn't require the BROADCAST_SCORE_NETWORKS permission, which means
             // anyone could trigger network scoring and flood the framework with score requests.
             continue;
@@ -110,7 +117,8 @@ ECode NetworkScorerAppManager::GetAllValidScorers(
         intent->SetPackage(packageName);
         AutoPtr<IList> configActivities;
         pm->QueryIntentActivities(intent, 0 /* flags */, (IList**)&configActivities);
-        if (!Ptr(configActivities)->Func(configActivities->IsEmpty)) {
+        Boolean empty;
+        if (configActivities->IsEmpty(&empty), !empty) {
             AutoPtr<IInterface> obj;
             configActivities->Get(0, (IInterface**)&obj);
             AutoPtr<IActivityInfo> activityInfo;
@@ -128,7 +136,9 @@ ECode NetworkScorerAppManager::GetAllValidScorers(
                 configurationActivityClassName, (INetworkScorerAppData**)&newNetworkScorerAppData);
         scorers->Add(newNetworkScorerAppData);
     }
-    FUNC_RETURN(ICollection::Probe(scorers))
+    *result = ICollection::Probe(scorers);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode NetworkScorerAppManager::GetActiveScorer(
@@ -137,8 +147,10 @@ ECode NetworkScorerAppManager::GetActiveScorer(
 {
     VALIDATE_NOT_NULL(result)
 
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
     String scorerPackage;
-    Settings::Global::GetString(Ptr(context)->Func(context->GetContentResolver),
+    Settings::Global::GetString(cr,
             ISettingsGlobal::NETWORK_SCORER_APP, &scorerPackage);
     return GetScorer(context, scorerPackage, result);
 }
@@ -150,10 +162,11 @@ ECode NetworkScorerAppManager::SetActiveScorer(
 {
     VALIDATE_NOT_NULL(result)
 
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
     String oldPackageName;
-    Boolean bTemp;
-    Settings::Global::GetString(Ptr(context)->Func(context->GetContentResolver),
-             ISettingsGlobal::NETWORK_SCORER_APP, &oldPackageName);
+    Settings::Global::GetString(cr,
+            ISettingsGlobal::NETWORK_SCORER_APP, &oldPackageName);
     if (TextUtils::Equals(oldPackageName, packageName)) {
         // No change.
         *result = TRUE;
@@ -161,20 +174,24 @@ ECode NetworkScorerAppManager::SetActiveScorer(
     }
     Logger::I(TAG, "Changing network scorer from %s to %s", oldPackageName.string(), packageName.string());
     if (packageName.IsNull()) {
-        Settings::Global::PutString(Ptr(context)->Func(context->GetContentResolver),
+        Boolean bTemp;
+        Settings::Global::PutString(cr,
                  ISettingsGlobal::NETWORK_SCORER_APP, String(NULL), &bTemp);
         *result = TRUE;
         return NOERROR;
-    } else {
+    }
+    else {
         // We only make the change if the new package is valid.
         AutoPtr<INetworkScorerAppData> networkScorerAppData;
         GetScorer(context, packageName, (INetworkScorerAppData**)&networkScorerAppData);
         if (networkScorerAppData != NULL) {
-            Settings::Global::PutString(Ptr(context)->Func(context->GetContentResolver),
+            Boolean bTemp;
+            Settings::Global::PutString(cr,
                      ISettingsGlobal::NETWORK_SCORER_APP, packageName, &bTemp);
             *result = TRUE;
             return NOERROR;
-        } else {
+        }
+        else {
             Logger::W(TAG, "Requested network scorer is not valid: %s", packageName.string());
             *result = FALSE;
             return NOERROR;
@@ -200,13 +217,15 @@ ECode NetworkScorerAppManager::IsCallerActiveScorer(
     context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
     AutoPtr<IAppOpsManager> appOpsMgr = IAppOpsManager::Probe(obj);
     // try {
-        ECode ec = appOpsMgr->CheckPackage(callingUid, Ptr(defaultApp)->Func(defaultApp->GetPackageName));
+    String package;
+    defaultApp->GetPackageName(&package);
+    ECode ec = appOpsMgr->CheckPackage(callingUid, package);
     // } catch (SecurityException e) {
-        if (ec == (ECode)E_SECURITY_EXCEPTION) {
-            *result = FALSE;
-            return NOERROR;
-        }
-        if (FAILED(ec)) return ec;
+    if (ec == (ECode)E_SECURITY_EXCEPTION) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    if (FAILED(ec)) return ec;
     // }
     // To be extra safe, ensure the caller holds the SCORE_NETWORKS permission. It always
     // should, since it couldn't become the active scorer otherwise, but this can't hurt.
@@ -224,17 +243,27 @@ ECode NetworkScorerAppManager::GetScorer(
     VALIDATE_NOT_NULL(result)
 
     if (TextUtils::IsEmpty(packageName)) {
-        FUNC_RETURN(NULL)
+        *result = NULL;
+        return NOERROR;
     }
     AutoPtr<ICollection> applications;
     GetAllValidScorers(context, (ICollection**)&applications);
-    FOR_EACH(iter, applications) {
-        AutoPtr<INetworkScorerAppData> app = INetworkScorerAppData::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (packageName.Equals(Ptr(app)->Func(app->GetPackageName))) {
-            FUNC_RETURN(app)
+    AutoPtr<IIterator> it;
+    applications->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> app;
+        it->GetNext((IInterface**)&app);
+        String appPackage;
+        INetworkScorerAppData::Probe(app)->GetPackageName(&appPackage);
+        if (packageName.Equals(appPackage)) {
+            *result = INetworkScorerAppData::Probe(app);
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
-    FUNC_RETURN(NULL)
+    *result = NULL;
+    return NOERROR;
 }
 
 //=====================================================================

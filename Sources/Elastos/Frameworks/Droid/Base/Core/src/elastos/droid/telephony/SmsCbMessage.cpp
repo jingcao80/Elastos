@@ -15,8 +15,10 @@
 //=========================================================================
 
 #include "elastos/droid/telephony/SmsCbMessage.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 
 namespace Elastos {
@@ -222,19 +224,30 @@ ECode SmsCbMessage::IsCmasMessage(
 ECode SmsCbMessage::ToString(
     /* [out] */ String* result)
 {
-    *result = String("SmsCbMessage{geographicalScope=")
-            + StringUtils::ToString(mGeographicalScope)
-            + ", serialNumber=" + StringUtils::ToString(mSerialNumber)
-            + ", location=" + TO_CSTR(mLocation)
-            + ", serviceCategory=" + StringUtils::ToString(mServiceCategory)
-            + ", language=" + mLanguage + ", body=" + mBody
-            + ", priority=" + StringUtils::ToString(mPriority)
-            + (mEtwsWarningInfo != NULL ?
-            (String(", ") + Object::ToString(mEtwsWarningInfo)) : "")
-            + (mCmasWarningInfo != NULL ?
-            (String(", ") + Object::ToString(mCmasWarningInfo)) : "")
-            + '}';
-    return NOERROR;
+    StringBuilder sb("SmsCbMessage{geographicalScope=");
+    sb += mGeographicalScope;
+    sb += ", serialNumber=";
+    sb += mSerialNumber;
+    sb += ", location=";
+    sb += mLocation;
+    sb += ", serviceCategory=";
+    sb += mServiceCategory;
+    sb += ", language=";
+    sb += mLanguage;
+    sb += ", body=";
+    sb += mBody;
+    sb += ", priority=";
+    sb += mPriority;
+    if (mEtwsWarningInfo != NULL) {
+        sb += ", ";
+        sb += Object::ToString(mEtwsWarningInfo);
+    }
+    if (mCmasWarningInfo != NULL) {
+        sb += ", ";
+        sb += Object::ToString(mCmasWarningInfo);
+    }
+    sb += "}";
+    return sb.ToString(result);
 }
 
 } // namespace Telephony

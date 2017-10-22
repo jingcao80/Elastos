@@ -19,7 +19,6 @@
 #include "elastos/droid/net/CUrlQuerySanitizerIllegalCharacterValueSanitizer.h"
 #include "elastos/droid/net/CUrlQuerySanitizerParameterValuePair.h"
 #include "elastos/droid/net/http/Headers.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -287,7 +286,9 @@ ECode UrlQuerySanitizer::GetParameterList(
 {
     VALIDATE_NOT_NULL(result);
 
-    FUNC_RETURN(IList::Probe(mEntriesList))
+    *result = IList::Probe(mEntriesList);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode UrlQuerySanitizer::HasParameter(
@@ -418,7 +419,9 @@ ECode UrlQuerySanitizer::GetValueSanitizer(
 
     AutoPtr<IInterface> obj;
     mSanitizers->Get(StringUtils::ParseCharSequence(parameter), (IInterface**)&obj);
-    FUNC_RETURN(IUrlQuerySanitizerValueSanitizer::Probe(obj))
+    *result = IUrlQuerySanitizerValueSanitizer::Probe(obj);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode UrlQuerySanitizer::GetEffectiveValueSanitizer(

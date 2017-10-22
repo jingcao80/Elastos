@@ -19,7 +19,6 @@
 #include "elastos/droid/net/CProxy.h"
 #include "elastos/droid/net/CProxyInfo.h"
 #include "elastos/droid/net/Proxy.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -196,7 +195,9 @@ ECode ProxyInfo::GetPacFileUrl(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mPacFileUrl)
+    *result = mPacFileUrl;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode ProxyInfo::SetPacFileUrl(
@@ -211,7 +212,8 @@ ECode ProxyInfo::GetHost(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mHost)
+    *result = mHost;
+    return NOERROR;
 }
 
 ECode ProxyInfo::GetPort(
@@ -219,13 +221,18 @@ ECode ProxyInfo::GetPort(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mPort)
+    *result = mPort;
+    return NOERROR;
 }
 
 ECode ProxyInfo::GetExclusionList(
     /* [out, callee] */ ArrayOf<String>** result)
 {
-    FUNC_RETURN(mParsedExclusionList)
+    VALIDATE_NOT_NULL(result);
+
+    *result = mParsedExclusionList;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode ProxyInfo::SetExclusionList(
@@ -240,7 +247,8 @@ ECode ProxyInfo::GetExclusionListAsString(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mExclusionList)
+    *result = mExclusionList;
+    return NOERROR;
 }
 
 ECode ProxyInfo::SetExclusionList(
@@ -249,7 +257,8 @@ ECode ProxyInfo::SetExclusionList(
     mExclusionList = exclusionList;
     if (mExclusionList == NULL) {
         mParsedExclusionList = ArrayOf<String>::Alloc(0);
-    } else {
+    }
+    else {
         StringUtils::Split(exclusionList.ToLowerCase(), String(","), (ArrayOf<String>**)&mParsedExclusionList);
     }
     return NOERROR;
@@ -264,7 +273,10 @@ ECode ProxyInfo::IsValid(
     Uri::GetEMPTY((IUri**)&empty);
     Boolean isEqual;
     IObject::Probe(empty)->Equals(mPacFileUrl, &isEqual);
-    if (!isEqual) FUNC_RETURN(TRUE)
+    if (!isEqual) {
+        *result = TRUE;
+        return NOERROR;
+    }
     Int32 validCode;
     Proxy::Validate(mHost == NULL ? String("") : mHost,
             mPort == 0 ? String("") : StringUtils::ToString(mPort),
@@ -298,7 +310,9 @@ ECode ProxyInfo::MakeProxy(
         // } catch (IllegalArgumentException e) {
         // }
     }
-    FUNC_RETURN(proxy)
+    *result = proxy;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode ProxyInfo::ToString(
@@ -316,7 +330,8 @@ ECode ProxyInfo::ToString(
         String s;
         IObject::Probe(mPacFileUrl)->ToString(&s);
         sb.Append(s);
-    } else if (mHost != NULL) {
+    }
+    else if (mHost != NULL) {
         sb.Append("[");
         sb.Append(mHost);
         sb.Append("] ");
@@ -325,7 +340,8 @@ ECode ProxyInfo::ToString(
                 sb.Append(" xl=");
                 sb.Append(mExclusionList);
         }
-    } else {
+    }
+    else {
         sb.Append("[ProxyProperties.mHost == NULL]");
     }
     sb.ToString(result);
@@ -338,36 +354,52 @@ ECode ProxyInfo::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
-    if (!(IProxyInfo::Probe(o) != NULL)) FUNC_RETURN(FALSE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (IProxyInfo::Probe(o) == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     ProxyInfo* p = (ProxyInfo*)(IProxyInfo::Probe(o));
     // If PAC URL is present in either then they must be equal.
     // Other parameters will only be for fall back.
     AutoPtr<IUri> empty;
     Uri::GetEMPTY((IUri**)&empty);
-    Boolean isEqual;
-    IObject::Probe(empty)->Equals(mPacFileUrl, &isEqual);
-    if (!isEqual) {
-        IObject::Probe(mPacFileUrl)->Equals(Ptr(p)->Func(p->GetPacFileUrl), &isEqual);
-        *result = isEqual && mPort == p->mPort;
+    if (!Object::Equals(empty, mPacFileUrl)) {
+        AutoPtr<IUri> othUri;
+        p->GetPacFileUrl((IUri**)&othUri);
+        *result = Object::Equals(mPacFileUrl, othUri) && mPort == p->mPort;
         return NOERROR;
     }
-    IObject::Probe(empty)->Equals(p->mPacFileUrl, &isEqual);
-    if (!isEqual) {
+    if (!Object::Equals(empty, p->mPacFileUrl)) {
         *result = FALSE;
         return NOERROR;
     }
-    if (mExclusionList != String(NULL) && !mExclusionList.Equals(Ptr(p)->Func(p->GetExclusionListAsString))) {
+    String othExclusionList;
+    if (!mExclusionList.IsNull() &&
+            (p->GetExclusionListAsString(&othExclusionList), !mExclusionList.Equals(othExclusionList))) {
         *result = FALSE;
         return NOERROR;
     }
-    if (mHost != String(NULL) && Ptr(p)->Func(p->GetHost) != String(NULL) && mHost.Equals(Ptr(p)->Func(p->GetHost)) == FALSE) {
+    String othHost;
+    if (!mHost.IsNull() && (p->GetHost(&othHost), !othHost.IsNull()) && !mHost.Equals(othHost)) {
         *result = FALSE;
         return NOERROR;
     }
-    if (mHost != String(NULL) && p->mHost == String(NULL)) return FALSE;
-    if (mHost == String(NULL) && p->mHost != String(NULL)) return FALSE;
-    if (mPort != p->mPort) return FALSE;
+    if (!mHost.IsNull() && p->mHost.IsNull()) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    if (mHost.IsNull() && !p->mHost.IsNull()) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    if (mPort != p->mPort) {
+        *result = FALSE;
+        return NOERROR;
+    }
     *result = TRUE;
     return NOERROR;
 }
@@ -377,8 +409,8 @@ ECode ProxyInfo::GetHashCode(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = ((String(NULL) == mHost) ? 0 : mHost.GetHashCode())
-            + ((String(NULL) == mExclusionList) ? 0 : mExclusionList.GetHashCode())
+    *result = (mHost.IsNull() ? 0 : mHost.GetHashCode())
+            + (mExclusionList.IsNull() ? 0 : mExclusionList.GetHashCode())
             + mPort;
     return NOERROR;
 }

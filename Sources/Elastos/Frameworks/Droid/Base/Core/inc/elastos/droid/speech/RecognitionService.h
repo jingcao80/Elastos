@@ -237,9 +237,9 @@ public:
 
 public:
     //@Override
-    //public final
-    CARAPI_(AutoPtr<IBinder>) OnBind(
-        /* [in]  */ IIntent* intent);
+    CARAPI OnBind(
+        /* [in]  */ IIntent* intent,
+        /* [out] */ IBinder** service);
 
     //@Override
     //public void

@@ -30,8 +30,6 @@ namespace Droid {
 namespace View {
 namespace Accessibility {
 
-extern const InterfaceID EIID_AccessibilityRecord;
-
 class CAccessibilityRecord;
 
 class AccessibilityRecord

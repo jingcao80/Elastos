@@ -257,7 +257,7 @@ protected:
 
     //@Override
     CARAPI GenerateDefaultLayoutParams(
-        /* [out] */ ILinearLayoutLayoutParams** params);
+        /* [out] */ IViewGroupLayoutParams** params);
 
 private:
     ECO_LOCAL CARAPI_(void) Init();

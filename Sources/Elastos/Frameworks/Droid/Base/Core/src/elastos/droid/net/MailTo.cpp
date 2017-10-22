@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/MailTo.h"
 #include "elastos/droid/net/CMailTo.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/Uri.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -199,8 +198,10 @@ ECode MailTo::ToString(
     //for (Map.Entry<String,String> header : mHeaders.entrySet()) {
     AutoPtr<ISet> entrySet;
     mHeaders->GetEntrySet((ISet**)&entrySet);
-    FOR_EACH(it, entrySet)
-    {
+    AutoPtr<IIterator> it;
+    entrySet->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> header;
         it->GetNext((IInterface**)&header);
         AutoPtr<IInterface> key, value;

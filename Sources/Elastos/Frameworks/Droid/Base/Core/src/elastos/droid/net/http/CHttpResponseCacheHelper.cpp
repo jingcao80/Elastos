@@ -15,8 +15,8 @@
 //=========================================================================
 
 #include "elastos/droid/ext/frameworkdef.h"
-#include "elastos/droid/net/http/CHttpResponseCache.h"
 #include "elastos/droid/net/http/CHttpResponseCacheHelper.h"
+#include "elastos/droid/net/http/HttpResponseCache.h"
 
 namespace Elastos {
 namespace Droid {

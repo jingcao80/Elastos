@@ -1329,7 +1329,7 @@ ECode CConnectivityManager::IsTetheringSupported(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    result = FALSE;
+    *result = FALSE;
 
     ECode ec = mService->IsTetheringSupported(result);
     if ((ECode)E_REMOTE_EXCEPTION == ec) {

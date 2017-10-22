@@ -88,7 +88,7 @@ ECode CEGL14::EglGetDisplay(
     VALIDATE_NOT_NULL(display)
     *display = NULL;
 
-    if ((EGLNativeDisplayType)display_id != IEGL14::_EGL_DEFAULT_DISPLAY) {
+    if ((EGLNativeDisplayType)display_id != (EGLNativeDisplayType)IEGL14::_EGL_DEFAULT_DISPLAY) {
         // jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglGetDisplay");
         SLOGGERD("CEGL14", "eglGetDisplay E_UNSUPPORTED_OPERATION_EXCEPTION")
         return E_UNSUPPORTED_OPERATION_EXCEPTION;

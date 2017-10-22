@@ -445,9 +445,8 @@ ECode TextToSpeech::TextToSpeechConnection::constructor(
 }
 
 ECode TextToSpeech::TextToSpeechConnection::OnServiceConnected(
-    /* [in] */ IComponentName* name//,
-//    /* [in] */ IIBinder* service
-    )
+    /* [in] */ IComponentName* name,
+    /* [in] */ IBinder* service)
 {
     //Java:    Log.i(TAG, "Connected to " + name);
     String shortStringComponentName;

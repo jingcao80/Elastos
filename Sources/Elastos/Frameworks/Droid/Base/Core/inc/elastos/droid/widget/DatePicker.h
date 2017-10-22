@@ -372,7 +372,7 @@ private:
         DatePickerOnDateChangeListener(
             /* [in] */ DatePickerSpinnerDelegate* host);
 
-        OnSelectedDayChange(
+        CARAPI OnSelectedDayChange(
             /* [in] */ ICalendarView* view,
             /* [in] */ Int32 year,
             /* [in] */ Int32 month,

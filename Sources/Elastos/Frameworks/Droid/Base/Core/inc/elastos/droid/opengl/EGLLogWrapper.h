@@ -244,6 +244,8 @@ private:
     CARAPI Returns(
         /* [in] */ IInterface* result);
 
+    using Object::ToString;
+
     CARAPI_(String) ToString(
         /* [in] */ IInterface* obj);
 

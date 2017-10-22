@@ -149,7 +149,7 @@ ECode NetworkPolicy::GetHashCode(
     Int32 hashCode;
     hashCode = 1;
     Int32 tempHashCode;
-    if (mTemplate = NULL) tempHashCode = 0;
+    if (mTemplate == NULL) tempHashCode = 0;
     else IObject::Probe(mTemplate)->GetHashCode(&tempHashCode);
 
     hashCode = 31 * hashCode + tempHashCode;

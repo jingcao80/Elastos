@@ -19,7 +19,6 @@
 #include "elastos/droid/net/CRouteInfo.h"
 #include "elastos/droid/net/IpConfiguration.h"
 #include "elastos/droid/net/LinkProperties.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/NetworkUtils.h"
 #include <elastos/core/StringBuffer.h>
 #include <elastos/utility/Objects.h>
@@ -34,6 +33,7 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Objects;
 
 namespace Elastos {
@@ -105,15 +105,22 @@ ECode StaticIpConfiguration::ToLinkProperties(
     }
     AutoPtr<IList> routes;
     GetRoutes(iface, (IList**)&routes);
-    FOR_EACH(iter, routes) {
-        AutoPtr<IRouteInfo> route = IRouteInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    routes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> route;
+        it->GetNext((IInterface**)&route);
         Boolean b;
-        (*result)->AddRoute(route, &b);
+        (*result)->AddRoute(IRouteInfo::Probe(route), &b);
     }
-    FOR_EACH(iter_dns, mDnsServers) {
-        AutoPtr<IInetAddress> dns = IInetAddress::Probe(Ptr(iter_dns)->Func(iter_dns->GetNext));
+    it = NULL;
+    mDnsServers->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> dns;
+        it->GetNext((IInterface**)&dns);
         Boolean b;
-        (*result)->AddDnsServer(dns, &b);
+        (*result)->AddDnsServer(IInetAddress::Probe(dns), &b);
     }
     return NOERROR;
 }
@@ -138,14 +145,18 @@ ECode StaticIpConfiguration::ToString(
         str.Append(" ");
     }
     str.Append(" DNS servers: [");
-    FOR_EACH(iter_dns, mDnsServers) {
-        AutoPtr<IInetAddress> dns = IInetAddress::Probe(Ptr(iter_dns)->Func(iter_dns->GetNext));
+    AutoPtr<IIterator> it;
+    mDnsServers->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> dns;
+        it->GetNext((IInterface**)&dns);
         str.Append(" ");
-        dns->GetHostAddress(&s);
+        IInetAddress::Probe(dns)->GetHostAddress(&s);
         str.Append(s);
     }
     str.Append(" ] Domains");
-    if (mDomains != NULL) {
+    if (!mDomains.IsNull()) {
         str.Append(mDomains);
     }
     *result = str.ToString();
@@ -158,10 +169,10 @@ ECode StaticIpConfiguration::GetHashCode(
     VALIDATE_NOT_NULL(result)
 
     Int32 rev = 13;
-    rev = 47 * rev + (mIpAddress == NULL ? 0 : Ptr(IObject::Probe(mIpAddress))->Func(IObject::Probe(mIpAddress)->GetHashCode));
-    rev = 47 * rev + (mGateway == NULL ? 0 : Ptr(IObject::Probe(mGateway))->Func(IObject::Probe(mGateway)->GetHashCode));
-    rev = 47 * rev + (mDomains == NULL ? 0 : mDomains.GetHashCode());
-    rev = 47 * rev + Ptr(IObject::Probe(mDnsServers))->Func(IObject::Probe(mDnsServers)->GetHashCode);
+    rev = 47 * rev + (mIpAddress == NULL ? 0 : Object::GetHashCode(mIpAddress));
+    rev = 47 * rev + (mGateway == NULL ? 0 : Object::GetHashCode(mGateway));
+    rev = 47 * rev + (mDomains.IsNull() ? 0 : mDomains.GetHashCode());
+    rev = 47 * rev + Object::GetHashCode(mDnsServers);
     *result = rev;
     return NOERROR;
 }
@@ -172,8 +183,14 @@ ECode StaticIpConfiguration::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
-    if (!(IStaticIpConfiguration::Probe(obj) != NULL)) FUNC_RETURN(FALSE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (!(IStaticIpConfiguration::Probe(obj) != NULL)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<StaticIpConfiguration> other = (StaticIpConfiguration*) IStaticIpConfiguration::Probe(obj);
     *result = other != NULL &&
             Objects::Equals(mIpAddress, other->mIpAddress) &&

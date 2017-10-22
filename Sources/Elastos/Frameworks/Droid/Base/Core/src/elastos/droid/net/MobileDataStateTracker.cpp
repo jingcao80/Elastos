@@ -27,7 +27,6 @@
 #include "elastos/droid/net/CNetworkCapabilities.h"
 #include "elastos/droid/net/CNetworkInfo.h"
 #include "elastos/droid/net/LinkProperties.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/Handler.h"
@@ -925,28 +924,38 @@ ECode MobileDataStateTracker::NetworkTypeToApnType(
 
     switch(netType) {
         case IConnectivityManager::TYPE_MOBILE:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_DEFAULT)  // TODO - use just one of these
+            *result = IPhoneConstants::APN_TYPE_DEFAULT;  // TODO - use just one of these
+            break;
         case IConnectivityManager::TYPE_MOBILE_MMS:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_MMS)
+            *result = IPhoneConstants::APN_TYPE_MMS;
+            break;
         case IConnectivityManager::TYPE_MOBILE_SUPL:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_SUPL)
+            *result = IPhoneConstants::APN_TYPE_SUPL;
+            break;
         case IConnectivityManager::TYPE_MOBILE_DUN:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_DUN)
+            *result = IPhoneConstants::APN_TYPE_DUN;
+            break;
         case IConnectivityManager::TYPE_MOBILE_HIPRI:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_HIPRI)
+            *result = IPhoneConstants::APN_TYPE_HIPRI;
+            break;
         case IConnectivityManager::TYPE_MOBILE_FOTA:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_FOTA)
+            *result = IPhoneConstants::APN_TYPE_FOTA;
+            break;
         case IConnectivityManager::TYPE_MOBILE_IMS:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_IMS)
+            *result = IPhoneConstants::APN_TYPE_IMS;
+            break;
         case IConnectivityManager::TYPE_MOBILE_CBS:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_CBS)
+            *result = IPhoneConstants::APN_TYPE_CBS;
+            break;
         case IConnectivityManager::TYPE_MOBILE_IA:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_IA)
+            *result = IPhoneConstants::APN_TYPE_IA;
+            break;
         case IConnectivityManager::TYPE_MOBILE_EMERGENCY:
-            FUNC_RETURN(IPhoneConstants::APN_TYPE_EMERGENCY)
+            *result = IPhoneConstants::APN_TYPE_EMERGENCY;
+            break;
         default:
             Sloge("Error mapping networkType %d to apnType.", netType);
-            FUNC_RETURN(String(NULL))
+            *result = NULL;
     }
     return NOERROR;
 }

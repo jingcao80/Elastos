@@ -129,7 +129,7 @@ private:
      * @return An SSL error object if there is an error and null otherwise
      */
     static CARAPI VerifyServerDomainAndCertificates(
-        /* [in] */ ArrayOf<ICertificate*>* chain,
+        /* [in] */ ArrayOf<IX509Certificate*>* chain,
         /* [in] */ const String& domain,
         /* [in] */ const String& authType,
         /* [out] */ ISslError** result);

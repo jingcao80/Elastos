@@ -114,9 +114,9 @@ private:
      * only from the synthesis thread. All three variables are read from the
      * audio playback thread.
      */
-    volatile Boolean mStopped;
-    volatile Boolean mDone;
-    volatile Boolean mStatusCode;
+    /* volatile */ Boolean mStopped;
+    /* volatile */ Boolean mDone;
+    /* volatile */ Int32 mStatusCode;
 
     AutoPtr<BlockingAudioTrack> mAudioTrack;
     AutoPtr<AbstractEventLogger> mLogger;

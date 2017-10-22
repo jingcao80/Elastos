@@ -36,6 +36,7 @@ using Elastos::Utility::Etl::Map;
 using Elastos::Utility::Etl::Set;
 using Elastos::Utility::Etl::List;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IContext;
@@ -344,6 +345,7 @@ private:
             TextToSpeech* mTts;
 
         };
+
     public:
         CAR_INTERFACE_DECL()
 
@@ -355,12 +357,12 @@ private:
 
         CARAPI constructor(
             /* [in] */ TextToSpeech* tts);
+
     public:
         //@Override
         CARAPI OnServiceConnected(
-            /* [in] */ IComponentName* name//,
-//            /* [in] */ IIBinder* service
-            );
+            /* [in] */ IComponentName* name,
+            /* [in] */ IBinder* service);
 
         //public
         CARAPI_(AutoPtr</*IIBinder*/IInterface>) GetCallerIdentity();
@@ -662,7 +664,7 @@ public:
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the speak operation.
      */
-    Speak(
+    CARAPI Speak(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 queueMode,
         /* [in] */ IBundle* params,
@@ -717,13 +719,12 @@ public:
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
      */
-    PlayEarcon(
+    CARAPI PlayEarcon(
         /* [in] */ const String& earcon,
         /* [in] */ Int32 queueMode,
         /* [in] */ IBundle* params,
         /* [in] */ const String& utteranceld,
         /* [out] */ Int32* ret);
-
 
     /**
      * Plays the earcon using the specified queueing mode and parameters.

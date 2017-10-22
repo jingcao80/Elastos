@@ -43,6 +43,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    using Singleton::ToString;
+
     CARAPI ToString(
         /* [in] */ Int32 callState,
         /* [out] */ String* result);

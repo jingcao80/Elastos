@@ -41,10 +41,6 @@ public:
 
     CARAPI constructor();
 
-    // Protects sampling data from concurrent access
-    CARAPI GetSAMPLING_DATA_LOCK(
-        /* [out] */ IInterface** o);
-
     static CARAPI GetSamplingSnapshots(
         /* [in] */ IMap* mapIfaceToSample);
 
@@ -94,9 +90,11 @@ public:
     CARAPI SetCommonLinkQualityInfoFields(
         /* [in] */ ILinkQualityInfo* li);
 
-private:
-    CARAPI_(AutoPtr<IInterface>) CreateSAMPLING_DATA_LOCK();
+public:
+    // Protects sampling data from concurrent access
+    Object mSamplingDataLock;
 
+private:
     static const Boolean DBG;
 
     static const String TAG;
@@ -114,9 +112,6 @@ private:
 
     // statistics is useless unless we have enough data
     const Int32 MINIMUM_SAMPLED_PACKETS;
-
-    // Protects sampling data from concurrent access
-    /* const */ AutoPtr<IInterface> SAMPLING_DATA_LOCK;
 };
 
 //===================================================

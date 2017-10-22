@@ -60,19 +60,6 @@ private:
         CARAPI GetEntityAndIncrementCursor(
             /* [in] */ ICursor* cursor,
             /* [out] */ IEntity** entity);
-
-        //override
-        CARAPI HasNext(
-            /* [out] */ Boolean* result);
-
-        CARAPI GetNext(
-            /* [out] */ IInterface** object);
-
-        CARAPI Remove();
-
-        CARAPI Reset();
-
-        CARAPI Close();
     };
 
 public:

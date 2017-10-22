@@ -249,7 +249,7 @@ ECode CAccessibilityInteractionConnection::ComputeClickPointInScreen(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-        return callback->SetComputeClickPointInScreenActionResult(FALSE, interactionId);
+        return callback->SetComputeClickPointInScreenActionResult(NULL, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }

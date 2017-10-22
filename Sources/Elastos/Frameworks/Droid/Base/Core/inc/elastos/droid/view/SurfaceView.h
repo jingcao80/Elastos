@@ -174,8 +174,9 @@ public:
     virtual CARAPI SetVisibility(
         /* [in] */ Int32 visibility);
 
-    virtual CARAPI_(Boolean) GatherTransparentRegion(
-        /* [in] */ IRegion* region);
+    virtual CARAPI GatherTransparentRegion(
+        /* [in] */ IRegion* region,
+        /* [out] */ Boolean* isOpaque);
 
     virtual CARAPI Draw(
         /* [in] */ ICanvas* canvas);

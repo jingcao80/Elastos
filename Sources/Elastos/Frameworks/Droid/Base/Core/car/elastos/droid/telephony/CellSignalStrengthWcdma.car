@@ -27,13 +27,9 @@ module
      * interface IParcelable
      */
     interface ICellSignalStrengthWcdma {
-
         Initialize(
             [in] Int32 ss,
             [in] Int32 ber);
-
-        Copy(
-            [out] ICellSignalStrengthWcdma** res);
     }
 
     } // namespace Telephony

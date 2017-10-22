@@ -393,6 +393,8 @@ public:
         /* [in] */ ICanvasProperty* radius,
         /* [in] */ ICanvasProperty* paint);
 
+    using Canvas::DrawRoundRect;
+
     CARAPI DrawRoundRect(
         /* [in] */ ICanvasProperty* left,
         /* [in] */ ICanvasProperty* top,

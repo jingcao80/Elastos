@@ -196,7 +196,8 @@ module
          * Hook in which to create the session's UI.
          * @SystemApi
          */
-        OnCreateContentView();
+        OnCreateContentView(
+            [out] IView** view);
 
         SetContentView(
             [in] IView* view);

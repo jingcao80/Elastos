@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include "elastos/droid/net/PacProxySelector.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -29,6 +28,7 @@ using Elastos::Net::CInetSocketAddress;
 using Elastos::Net::CInetSocketAddressHelper;
 using Elastos::Net::IInetSocketAddress;
 using Elastos::Net::IInetSocketAddressHelper;
+using Elastos::Net::IURL;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
@@ -82,31 +82,35 @@ ECode PacProxySelector::Select(
         return NOERROR;
     }
     String response(NULL);
-    String urlString;
     // try {
-        ECode ec = Ptr(uri)->Func(uri->ToURL)->ToString(&urlString);
+    AutoPtr<IURL> url;
+    uri->ToURL((IURL**)&url);
+    String urlString;
+    ECode ec = url->ToString(&urlString);
     // } catch (MalformedURLException e) {
-        if (ec == (ECode)E_MALFORMED_URL_EXCEPTION) {
-            uri->GetHost(&urlString);
-        }
-        else if (FAILED(ec)) return ec;
+    if (ec == (ECode)E_MALFORMED_URL_EXCEPTION) {
+        uri->GetHost(&urlString);
+    }
+    else if (FAILED(ec)) return ec;
     // }
     // try {
         // TODO: Waiting for IIProxyService
-        assert(0);
+    assert(0);
         // mProxyService->ResolvePacFile(Ptr(uri)->Func(uri->GetHost), urlString, &response);
     // } catch (RemoteException e) {
-        if (FAILED(ec)) {
-            if (ec == (ECode)E_REMOTE_EXCEPTION) {
-                // e.printStackTrace();
-            }
-            else {
-                return ec;
-            }
+    if (FAILED(ec)) {
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            // e.printStackTrace();
         }
+        else {
+            return ec;
+        }
+    }
     // }
     if (response == NULL) {
-        FUNC_RETURN(mDefaultList)
+        *result = mDefaultList;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
 
     AutoPtr<IList> list = ParseResponse(response);
@@ -145,7 +149,9 @@ AutoPtr<IList> PacProxySelector::ParseResponse(
             }
         }
     }
-    if (Ptr(ret)->Func(ret->GetSize) == 0) {
+    Int32 size;
+    ret->GetSize(&size);
+    if (size == 0) {
         AutoPtr<Elastos::Net::IProxyHelper> helper;
         Elastos::Net::CProxyHelper::AcquireSingleton((Elastos::Net::IProxyHelper**)&helper);
         AutoPtr<Elastos::Net::IProxy> noProxy;
@@ -190,7 +196,9 @@ ECode PacProxySelector::ProxyFromHostPort(
         }
         return ec;
     }
-    FUNC_RETURN(rev)
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
         // } catch (NumberFormatException|ArrayIndexOutOfBoundsException e) {
         // }
 }

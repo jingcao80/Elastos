@@ -18,7 +18,6 @@
 #include "elastos/droid/net/http/IdleCache.h"
 #include "elastos/droid/net/http/Connection.h"
 #include "elastos/droid/net/http/HttpLog.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/core/AutoLock.h>
@@ -122,8 +121,8 @@ ECode IdleCache::CacheConnection(
     VALIDATE_NOT_NULL(result)
 
     Boolean ret = FALSE;
-    {    AutoLock syncLock(this);
-
+    {
+        AutoLock syncLock(this);
 
         if (HttpLog::LOGV) {
             HttpLog::V(String("IdleCache size ") + StringUtils::ToString(mCount) + String(" host ")/* + host*/);
@@ -149,7 +148,8 @@ ECode IdleCache::CacheConnection(
             }
         }
     }
-    FUNC_RETURN(ret);
+    *result = ret;
+    return NOERROR;
 }
 
 ECode IdleCache::GetConnection(
@@ -158,9 +158,10 @@ ECode IdleCache::GetConnection(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
 
-        Connection* ret = NULL;
+        AutoPtr<IConnection> ret;
 
         if (mCount > 0) {
             for (Int32 i = 0; i < IDLE_CACHE_MAX; i++) {
@@ -178,14 +179,16 @@ ECode IdleCache::GetConnection(
             }
         }
 
-        FUNC_RETURN(ret)
+        *result = ret;
+        REFCOUNT_ADD(*result);
     }
     return NOERROR;
 }
 
 ECode IdleCache::Clear()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
 
         for (Int32 i = 0; mCount > 0 && i < IDLE_CACHE_MAX; i++) {
             Entry* entry = (*mEntries)[i];
@@ -202,7 +205,8 @@ ECode IdleCache::Clear()
 
 ECode IdleCache::ClearIdle()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
 
         if (mCount > 0) {
             Int64 time = SystemClock::GetUptimeMillis();

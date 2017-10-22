@@ -117,9 +117,11 @@ ECode SynthesisPlaybackQueueItem::Run()
 
     if (mStatusCode == ITextToSpeech::TTS_SUCCESS) {
         dispatcher->DispatchOnSuccess();
-    } else if(mStatusCode == ITextToSpeech::STOPPED) {
+    }
+    else if(mStatusCode == ITextToSpeech::STOPPED) {
         dispatcher->DispatchOnStop();
-    } else {
+    }
+    else {
         dispatcher->DispatchOnError(mStatusCode);
     }
 

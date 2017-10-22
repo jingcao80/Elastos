@@ -16,7 +16,6 @@
 
 #include "elastos/droid/net/NetworkCapabilities.h"
 #include "elastos/droid/net/Network.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
@@ -224,7 +223,8 @@ ECode NetworkCapabilities::GetLinkUpstreamBandwidthKbps(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mLinkUpBandwidthKbps)
+    *result = mLinkUpBandwidthKbps;
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::SetLinkDownstreamBandwidthKbps(
@@ -239,7 +239,8 @@ ECode NetworkCapabilities::GetLinkDownstreamBandwidthKbps(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mLinkDownBandwidthKbps)
+    *result = mLinkDownBandwidthKbps;
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::CombineLinkBandwidths(
@@ -282,7 +283,8 @@ ECode NetworkCapabilities::GetNetworkSpecifier(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mNetworkSpecifier)
+    *result = mNetworkSpecifier;
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::CombineSpecifiers(
@@ -331,11 +333,12 @@ ECode NetworkCapabilities::SatisfiedByNetworkCapabilities(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(nc != NULL &&
+    *result = nc != NULL &&
             SatisfiedByNetCapabilities(nc) &&
             SatisfiedByTransportTypes(nc) &&
             SatisfiedByLinkBandwidths(nc) &&
-            SatisfiedBySpecifier(nc));
+            SatisfiedBySpecifier(nc);
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::Equals(
@@ -344,13 +347,20 @@ ECode NetworkCapabilities::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if(TO_IINTERFACE(this) != IInterface::Probe(obj)) FUNC_RETURN(FALSE)
-    if (obj == NULL || (INetworkCapabilities::Probe(obj) == NULL)) FUNC_RETURN(FALSE)
+    if (TO_IINTERFACE(this) != IInterface::Probe(obj)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    if (obj == NULL || (INetworkCapabilities::Probe(obj) == NULL)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<NetworkCapabilities> that = (NetworkCapabilities*)INetworkCapabilities::Probe(obj);
-    FUNC_RETURN(EqualsNetCapabilities(that) &&
+    *result = EqualsNetCapabilities(that) &&
             EqualsTransportTypes(that) &&
             EqualsLinkBandwidths(that) &&
-            EqualsSpecifier(that));
+            EqualsSpecifier(that);
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::GetHashCode(
@@ -358,13 +368,14 @@ ECode NetworkCapabilities::GetHashCode(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN((Int32)(mNetworkCapabilities & 0xFFFFFFFF) +
+    *result = (Int32)(mNetworkCapabilities & 0xFFFFFFFF) +
             ((Int32)(mNetworkCapabilities >> 32) * 3) +
             ((Int32)(mTransportTypes & 0xFFFFFFFF) * 5) +
             ((Int32)(mTransportTypes >> 32) * 7) +
             (mLinkUpBandwidthKbps * 11) +
             (mLinkDownBandwidthKbps * 13) +
-            (TextUtils::IsEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.GetHashCode() * 17));
+            (TextUtils::IsEmpty(mNetworkSpecifier) ? 0 : mNetworkSpecifier.GetHashCode() * 17);
+    return NOERROR;
 }
 
 ECode NetworkCapabilities::ReadFromParcel(
@@ -479,7 +490,8 @@ ECode NetworkCapabilities::ToString(
             StringUtils::ToString(mLinkDownBandwidthKbps) + "Kbps" : String(""));
     String specifier = (mNetworkSpecifier == NULL ?
             String("") : String(" Specifier: <") + mNetworkSpecifier + ">");
-    FUNC_RETURN(String("[") + transports + capabilities + upBand + dnBand + specifier + "]")
+    *result = String("[") + transports + capabilities + upBand + dnBand + specifier + "]";
+    return NOERROR;
 }
 
 } // namespace Net

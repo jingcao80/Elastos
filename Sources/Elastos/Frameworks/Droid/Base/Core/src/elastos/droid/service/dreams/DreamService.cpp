@@ -716,7 +716,7 @@ ECode DreamService::OnDestroy()
     // Just in case destroy came in before detach, let's take care of that now
     Detach();
 
-    OnDestroy();
+    Service::OnDestroy();
     return NOERROR;
 }
 

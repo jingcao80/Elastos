@@ -7833,7 +7833,7 @@ Boolean AbsListView::SendToTextFilter(
     return handled;
 }
 
-AbsListView::OnCreateInputConnection(
+ECode AbsListView::OnCreateInputConnection(
     /* [in] */ IEditorInfo* outAttrs,
     /* [out] */ IInputConnection** connection)
 {

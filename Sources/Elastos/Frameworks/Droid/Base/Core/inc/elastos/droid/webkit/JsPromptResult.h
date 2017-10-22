@@ -48,6 +48,8 @@ public:
     CARAPI constructor(
         /* [in] */ IJsResultReceiver* receiver);
 
+    using JsResult::Confirm;
+
     /**
      * Handle a confirmation response from the user.
      */

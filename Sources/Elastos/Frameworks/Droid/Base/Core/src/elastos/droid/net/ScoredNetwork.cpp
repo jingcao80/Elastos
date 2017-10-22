@@ -17,7 +17,6 @@
 #include "elastos/droid/net/ScoredNetwork.h"
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkKey.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
 
@@ -53,11 +52,16 @@ ECode ScoredNetwork::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     ClassID this_cid, o_cid;
-    IObject::Probe(TO_IINTERFACE(this))->GetClassID(&this_cid);
-    IObject::Probe(o)->GetClassID(&o_cid);
-    if (o == NULL || this_cid != o_cid) FUNC_RETURN(FALSE)
+    GetClassID(&this_cid);
+    if (o == NULL || (IObject::Probe(o)->GetClassID(&o_cid), this_cid != o_cid)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<ScoredNetwork> that = (ScoredNetwork*) IScoredNetwork::Probe(o);
     *result = Objects::Equals(mNetworkKey, that->mNetworkKey) &&
             Objects::Equals(mRssiCurve, that->mRssiCurve);

@@ -142,11 +142,7 @@ ECode Platform::CheckServerTrusted(
         tm.checkServerTrusted(chain, authType, host);
     } else {
     */
-    AutoPtr<ArrayOf<ICertificate*> > array = ArrayOf<ICertificate*>::Alloc(chain->GetLength());
-    for (Int32 i = 0; i < chain->GetLength(); i++) {
-        array->Set(i, ICertificate::Probe((*chain)[i]));
-    }
-    return x509tm->CheckServerTrusted(array, authType);
+    return x509tm->CheckServerTrusted(chain, authType);
     /*
     }
     */

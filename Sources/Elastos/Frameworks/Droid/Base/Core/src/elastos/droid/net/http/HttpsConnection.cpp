@@ -20,7 +20,6 @@
 #include "_Org.Conscrypt.h"
 #include "elastos/droid/net/http/HttpsConnection.h"
 #include "elastos/droid/net/Proxy.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/http/CCertificateChainValidator.h"
 #include "elastos/droid/net/http/CCertificateChainValidatorHelper.h"
 #include "elastos/droid/net/http/CElastosHttpClient.h"
@@ -109,7 +108,7 @@ ECode HttpsConnection::InnerSub_X509TrustManager::CheckClientTrusted(
 }
 
 ECode HttpsConnection::InnerSub_X509TrustManager::CheckServerTrusted(
-    /* [in] */ ArrayOf<ICertificate*>* chain,
+    /* [in] */ ArrayOf<IX509Certificate*>* chain,
     /* [in] */ const String& authType)
 {
     return NOERROR;

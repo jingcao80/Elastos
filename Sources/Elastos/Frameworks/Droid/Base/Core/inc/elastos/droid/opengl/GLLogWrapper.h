@@ -1376,6 +1376,8 @@ private:
         /* [in] */ Int32 value,
         /* [in] */ Int32 format);
 
+    using Object::ToString;
+
     CARAPI_(String) ToString(
         /* [in] */ Int32 n,
         /* [in] */ Int32 format,

@@ -25,7 +25,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/Object.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/utility/logging/Slogger.h>
 
 // using Elastos::Droid::Hardware::Hdmi::CHdmiDeviceInfo;
@@ -141,7 +140,10 @@ ECode DeviceDiscoveryAction::Start(
 ECode DeviceDiscoveryAction::AllocateDevices(
     /* [in] */ IList* addresses)
 {
-    FOR_EACH(it, addresses) {
+    AutoPtr<IIterator> it;
+    addresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IInteger32> i32 = IInteger32::Probe(obj);
@@ -446,7 +448,10 @@ ECode DeviceDiscoveryAction::WrapUpAndFinish()
     Slogger::V(TAG, "---------Wrap up Device Discovery:[%d]---------", size);
     AutoPtr<IArrayList> result;
     CArrayList::New((IArrayList**)&result);
-    FOR_EACH(it, mDevices) {
+    AutoPtr<IIterator> it;
+    mDevices->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<DeviceInfo> info = (DeviceInfo*) IObject::Probe(obj);

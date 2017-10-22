@@ -377,6 +377,8 @@ private:
         /* [in] */ IView* child,
         /* [in] */ RelativeLayoutLayoutParams* params);
 
+    using ViewGroup::MeasureChild;
+
     /**
      * Measure a child. The child should have left, top, right and bottom information
      * stored in its RelativeLayoutLayoutParams. If any of these values is -1 it means that the view

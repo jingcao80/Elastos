@@ -332,7 +332,7 @@ ECode CEGLImpl::EglCreateWindowSurface(
         sur = ISurface::Probe(native_window);
     }
 
-    Int64 eglSurfaceId;
+    Int64 eglSurfaceId = 0;
     if (sur != NULL) {
         FAIL_RETURN(_eglCreateWindowSurface(display, config, sur, attrib_list, &eglSurfaceId));
     } else if (ISurfaceTexture::Probe(native_window) != NULL) {

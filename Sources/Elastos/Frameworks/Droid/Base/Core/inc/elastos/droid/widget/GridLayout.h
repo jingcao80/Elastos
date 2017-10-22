@@ -1396,6 +1396,8 @@ public:
         /* [in] */ Boolean horizontal,
         /* [in] */ Boolean leading);
 
+    using ViewGroup::GetLayoutParams;
+
     CARAPI_(AutoPtr<IGridLayoutLayoutParams>) GetLayoutParams(
         /* [in] */ IView* c);
 

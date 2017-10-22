@@ -252,7 +252,7 @@ AutoPtr<KeyCharacterMap::FallbackAction> KeyCharacterMap::FallbackAction::Obtain
     return target;
 }
 
-KeyCharacterMap::FallbackAction::Recycle()
+ECode KeyCharacterMap::FallbackAction::Recycle()
 {
     {    AutoLock syncLock(sRecycleLock);
         if (sRecycledCount < MAX_RECYCLED) {

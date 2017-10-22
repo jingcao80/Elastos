@@ -42,7 +42,7 @@ class BaseNetworkStateTracker
 public:
     CAR_INTERFACE_DECL()
 
-    virtual CARAPI constructor(
+    CARAPI constructor(
         /* [in] */ Int32 networkType);
 
     // @Override
@@ -135,7 +135,7 @@ public:
 protected:
     BaseNetworkStateTracker();
 
-    virtual CARAPI constructor();
+    CARAPI constructor();
 
     virtual CARAPI GetTargetHandler(
         /* [out] */ IHandler** handler);

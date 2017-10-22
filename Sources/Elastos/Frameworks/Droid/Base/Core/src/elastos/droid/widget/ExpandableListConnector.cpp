@@ -430,31 +430,31 @@ ECode ExpandableListConnector::GetFlattenedPos(
     return NOERROR;
 }
 
-Boolean ExpandableListConnector::AreAllItemsEnabled()
+ECode ExpandableListConnector::AreAllItemsEnabled(
+    /* [out] */ Boolean* enabled)
 {
-    Boolean enabled;
-    mExpandableListAdapter->AreAllItemsEnabled(&enabled);
-    return enabled;
+    return mExpandableListAdapter->AreAllItemsEnabled(enabled);
 }
 
-Boolean ExpandableListConnector::IsEnabled(
-    /* [in] */ Int32 flatListPos)
+ECode ExpandableListConnector::IsEnabled(
+    /* [in] */ Int32 flatListPos,
+    /* [out] */ Boolean* enabled)
 {
+    VALIDATE_NOT_NULL(enabled);
     AutoPtr<IPositionMetadata> posMetadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&posMetadata);
     PositionMetadata* metadata = (PositionMetadata*)posMetadata.Get();
     AutoPtr<IExpandableListPosition> pos = metadata->mPosition;
-    Boolean retValue = FALSE;
     if (((ExpandableListPosition*)pos.Get())->mType == IExpandableListPosition::CHILD) {
         mExpandableListAdapter->IsChildSelectable(((ExpandableListPosition*)pos.Get())->mGroupPos,
-            ((ExpandableListPosition*)pos.Get())->mChildPos, &retValue);
+            ((ExpandableListPosition*)pos.Get())->mChildPos, enabled);
     }
     else {
-        retValue = TRUE;
+        *enabled = TRUE;
     }
 
     metadata->Recycle();
-    return retValue;
+    return NOERROR;
 }
 
 ECode ExpandableListConnector::GetCount(
@@ -562,64 +562,68 @@ ECode ExpandableListConnector::GetView(
     return NOERROR;
 }
 
-Int32 ExpandableListConnector::GetItemViewType(
-    /* [in] */ Int32 flatListPos)
+ECode ExpandableListConnector::GetItemViewType(
+    /* [in] */ Int32 flatListPos,
+    /* [out] */ Int32* type)
 {
+    VALIDATE_NOT_NULL(type);
     AutoPtr<IPositionMetadata> metadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&metadata);
     PositionMetadata* posMetadata = (PositionMetadata*)metadata.Get();
     AutoPtr<IExpandableListPosition> pos = posMetadata->mPosition;
 
-    Int32 result = 0;
     IHeterogeneousExpandableList* adapter = IHeterogeneousExpandableList::Probe(mExpandableListAdapter);
     if (adapter != NULL) {
         if (((ExpandableListPosition*)pos.Get())->mType == IExpandableListPosition::GROUP) {
-            adapter->GetGroupType(((ExpandableListPosition*)pos.Get())->mGroupPos, &result);
+            adapter->GetGroupType(((ExpandableListPosition*)pos.Get())->mGroupPos, type);
         }
         else {
             Int32 childType;
             adapter->GetChildType(((ExpandableListPosition*)pos.Get())->mGroupPos,
                 ((ExpandableListPosition*)pos.Get())->mChildPos, &childType);
-            adapter->GetGroupTypeCount(&result);
-            result += childType;
+            adapter->GetGroupTypeCount(type);
+            *type += childType;
         }
     }
     else {
         if (((ExpandableListPosition*)pos.Get())->mType == IExpandableListPosition::GROUP) {
-            result = 0;
+            *type = 0;
         }
         else {
-            result = 1;
+            *type = 1;
         }
     }
 
     metadata->Recycle();
-    return result;
+    return NOERROR;
 }
 
-Int32 ExpandableListConnector::GetViewTypeCount()
+ECode ExpandableListConnector::GetViewTypeCount(
+    /* [out] */ Int32* count)
 {
+    VALIDATE_NOT_NULL(count);
     IHeterogeneousExpandableList* adapter = IHeterogeneousExpandableList::Probe(mExpandableListAdapter);
     if (adapter != NULL) {
         Int32 groupCount = 0;
         Int32 childCount = 0;
         adapter->GetGroupTypeCount(&groupCount);
         adapter->GetChildTypeCount(&childCount);
-        return groupCount + childCount;
+        *count = groupCount + childCount;
+        return NOERROR;
     }
     else {
-        return 2;
+        *count = 2;
+        return NOERROR;
     }
 }
 
-Boolean ExpandableListConnector::HasStableIds()
+ECode ExpandableListConnector::HasStableIds(
+    /* [out] */ Boolean* has)
 {
     // ==================before translated======================
     // return mExpandableListAdapter.hasStableIds();
 
-    Boolean ret = FALSE;
-    mExpandableListAdapter->HasStableIds(&ret);
-    return ret;
+    return mExpandableListAdapter->HasStableIds(has);
 }
 
 ECode ExpandableListConnector::CollapseGroup(
@@ -842,15 +846,17 @@ ECode ExpandableListConnector::SetExpandedGroupMetadataList(
     return NOERROR;
 }
 
-Boolean ExpandableListConnector::IsEmpty()
+ECode ExpandableListConnector::IsEmpty(
+    /* [out] */ Boolean* empty)
 {
-    Boolean empty = FALSE;
+    VALIDATE_NOT_NULL(empty);
+    *empty = FALSE;
     AutoPtr<IExpandableListAdapter> adapter;
     GetAdapter((IExpandableListAdapter**)&adapter);
     if (adapter) {
-        adapter->IsEmpty(&empty);
+        adapter->IsEmpty(empty);
     }
-    return empty;
+    return NOERROR;
 }
 
 ECode ExpandableListConnector::FindGroupPosition(

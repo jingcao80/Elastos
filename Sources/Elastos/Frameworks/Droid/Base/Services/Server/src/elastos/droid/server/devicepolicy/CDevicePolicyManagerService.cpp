@@ -33,7 +33,6 @@
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/UserHandle.h"
@@ -199,6 +198,7 @@ using Elastos::Utility::ICollections;
 using Elastos::Utility::IDate;
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
@@ -2741,9 +2741,12 @@ AutoPtr<CDevicePolicyManagerService::ActiveAdmin> CDevicePolicyManagerService::G
         Int32 identifier;
         userHandle->GetIdentifier(&identifier);
         AutoPtr<DevicePolicyData> policy = GetUserData(identifier);
-        FOR_EACH(it, policy->mAdminList) {
+        AutoPtr<IIterator> it2;
+        policy->mAdminList->GetIterator((IIterator**)&it2);
+        Boolean hasNext2;
+        while (it2->HasNext(&hasNext2), hasNext2) {
             AutoPtr<IInterface> obj;
-            it->GetNext((IInterface**)&obj);
+            it2->GetNext((IInterface**)&obj);
             AutoPtr<ActiveAdmin> admin = (ActiveAdmin*) IObject::Probe(obj);
             if (admin->mMaximumFailedPasswordsForWipe ==
                     ActiveAdmin::DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
@@ -4741,8 +4744,12 @@ ECode CDevicePolicyManagerService::GetActiveAdminForCallerLocked(
             return E_SECURITY_EXCEPTION;
         }
         candidates->Add(TO_IINTERFACE(admin));
-    } else {
-        FOR_EACH(it, policy->mAdminList) {
+    }
+    else {
+        AutoPtr<IIterator> it;
+        policy->mAdminList->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), &hasNext) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
             AutoPtr<ActiveAdmin> admin = (ActiveAdmin*) IObject::Probe(obj);
@@ -8330,7 +8337,10 @@ ECode CDevicePolicyManagerService::NotifyLockTaskModeChanged(
         AutoPtr<IBundle> adminExtras;
         CBundle::New((IBundle**)&adminExtras);
         adminExtras->PutString(IDeviceAdminReceiver::EXTRA_LOCK_TASK_PACKAGE, pkg);
-        FOR_EACH(it, policy->mAdminList) {
+        AutoPtr<IIterator> it;
+        policy->mAdminList->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
             AutoPtr<ActiveAdmin> admin = (ActiveAdmin*) IObject::Probe(obj);

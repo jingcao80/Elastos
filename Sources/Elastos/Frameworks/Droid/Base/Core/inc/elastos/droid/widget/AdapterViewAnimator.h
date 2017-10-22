@@ -206,8 +206,7 @@ public:
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI OnSaveInstanceState(
-        /* [out] */ IParcelable** result);
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     // @Override
     CARAPI OnRestoreInstanceState(
@@ -360,6 +359,8 @@ private:
 
     CARAPI_(void) AddChild(
         /* [in] */ IView* child);
+
+    using AdapterView::MeasureChildren;
 
     CARAPI_(void) MeasureChildren();
 

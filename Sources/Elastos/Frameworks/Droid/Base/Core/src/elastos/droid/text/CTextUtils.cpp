@@ -335,7 +335,7 @@ ECode CTextUtils::CopySpansFrom(
     /* [in] */ ISpannable* dest,
     /* [in] */ Int32 destoff)
 {
-    return CopySpansFrom(source, start, end, kind, dest, destoff);
+    return TextUtils::CopySpansFrom(source, start, end, kind, dest, destoff);
 }
 
 ECode CTextUtils::Ellipsize(

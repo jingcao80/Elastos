@@ -40,6 +40,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Core::Runnable;
 using Elastos::Droid::Speech::Tts::IITextToSpeechService;
 using Elastos::Droid::App::Service;
@@ -585,75 +586,69 @@ private:
 
     public:
         //@Override
-        //public int
         CARAPI Speak(
-            /* [in] */ /*IIBinder*/IBinder* caller,
-            /* [in] */ const String & text,
+            /* [in] */ IBinder* callingInstance,
+            /* [in] */ ICharSequence* text,
             /* [in] */ Int32 queueMode,
             /* [in] */ IBundle* params,
-            /* [out] */ Int32* result);
+            /* [in] */ const String& utteranceld,
+            /* [out] */ Int32* ret);
 
         //@Override
-        //public int
-        CARAPI SynthesizeToFile(
-            /* [in] */ /*IIBinder*/IBinder* caller,
-            /* [in] */ const String & text,
-            /* [in] */ const String & filename,
+        CARAPI SynthesizeToFileDescriptor(
+            /* [in] */ IBinder* callingInstance,
+            /* [in] */ ICharSequence* text,
+            /* [in] */ IParcelFileDescriptor* fd,
             /* [in] */ IBundle* params,
-            /* [out] */ Int32* result);
+            /* [out] */ Int32* ret);
 
         //@Override
-        //public int
         CARAPI PlayAudio(
-            /* [in] */ /*IIBinder*/IBinder* caller,
+            /* [in] */ IBinder* callingInstance,
             /* [in] */ IUri* audioUri,
             /* [in] */ Int32 queueMode,
             /* [in] */ IBundle* params,
-            /* [out] */ Int32* result);
+            /* [in] */ const String& utteranceId,
+            /* [out] */ Int32* ret);
 
         //@Override
-        //public int
         CARAPI PlaySilence(
-            /* [in] */ /*IIBinder*/IBinder* caller,
+            /* [in] */ IBinder* callingInstance,
             /* [in] */ Int64 duration,
             /* [in] */ Int32 queueMode,
             /* [in] */ IBundle* params,
-            /* [out] */ Int32* result);
+            /* [in] */ const String& utteranceId,
+            /* [out] */ Int32* ret);
 
         //@Override
-        //public boolean
         CARAPI IsSpeaking(
             /* [out] */ Boolean* result);
 
         //@Override
-        //public int
         CARAPI Stop(
-            /* [in] */ /*IIBinder*/IBinder* caller,
+            /* [in] */ IBinder* caller,
             /* [out] */ Int32* result);
 
         //@Override
-        //public String []
         CARAPI GetLanguage(
-            /* [out] */ ArrayOf<String>** result);
+            /* [out, callee] */ ArrayOf<String>** result);
 
         /*
          * If defaults are enforced, then no language is "available" except
          * perhaps the default language selected by the user.
          */
         //@Override
-        //public int
         CARAPI IsLanguageAvailable(
-            /* [in] */ const String & lang,
-            /* [in] */ const String & country,
-            /* [in] */ const String & variant,
+            /* [in] */ const String& lang,
+            /* [in] */ const String& country,
+            /* [in] */ const String& variant,
             /* [out] */ Int32* result);
 
         //@Override
-        //public String[]
         CARAPI GetFeaturesForLanguage(
-            /* [in] */ const String & lang,
-            /* [in] */ const String & country,
-            /* [in] */ const String & variant,
+            /* [in] */ const String& lang,
+            /* [in] */ const String& country,
+            /* [in] */ const String& variant,
             /* [out] */ ArrayOf<String>** result);
 
         /*
@@ -661,17 +656,16 @@ private:
          * are enforced.
          */
         //@Override
-        //public int
         CARAPI LoadLanguage(
-            /* [in] */ const String & lang,
-            /* [in] */ const String & country,
-            /* [in] */ const String & variant,
+            /* [in] */ IBinder* caller,
+            /* [in] */ const String& lang,
+            /* [in] */ const String& country,
+            /* [in] */ const String& variant,
             /* [out] */ Int32* result);
 
         //@Override
-        //public void
         CARAPI SetCallback(
-            /* [in] */ /*IIBinder*/IBinder* caller,
+            /* [in] */ IBinder* caller,
             /* [in] */ IITextToSpeechCallback* cb);
 
     public:
@@ -698,39 +692,34 @@ private:
 //        , public RemoteCallbackList
     {
     public:
-        //public void
-        void SetCallback(
+        CARAPI_(void) SetCallback(
             /* [in] */ /*IIBinder*/IBinder* caller,
             /* [in] */ IITextToSpeechCallback* cb);
 
-        //public void
-        void DispatchOnDone(
+        CARAPI_(void) DispatchOnDone(
             /* [in] */ IInterface* callerIdentity,
             /* [in] */ const String& utteranceId);
 
-        //public void
-        void DispatchOnStart(
+        CARAPI_(void) DispatchOnStart(
             /* [in] */ IInterface* callerIdentity,
             /* [in] */ const String& utteranceId);
 
-        //public void
-        void DispatchOnError(
+        CARAPI_(void) DispatchOnError(
             /* [in] */ IInterface* callerIdentity,
             /* [in] */ const String& utteranceId,
             /* [in] */ Int32 errorCode);
 
-        //@Override
-        //public void
-        void OnCallbackDied(
+        CARAPI_(void) OnCallbackDied(
             /* [in] */ IITextToSpeechCallback* callback,
             /* [in] */ IInterface* cookie);
 
         //@Override
-        //public
-        void Kill();
+        CARAPI_(void) Kill();
+
     public:
         CallbackMap(
             /* [in] */ TextToSpeechService* ttss);
+
     private:
         //private
         AutoPtr<IITextToSpeechCallback> GetCallbackFor(
@@ -763,9 +752,9 @@ public:
 
 public:
     //@Override
-    //public
-    AutoPtr</*IIBinder*/IBinder> OnBind(
-        /* [in] */ IIntent* intent);
+    CARAPI OnBind(
+        /* [in] */ IIntent* intent,
+        /* [out] */ IBinder** service);
 
 protected:
     /**
@@ -802,9 +791,9 @@ protected:
      * @return A name of the default voice for a given locale.
      */
     CARAPI OnGetDefaultVoiceNameFor(
-        /* [in]  */ String lang,
-        /* [in]  */ String country,
-        /* [in]  */ String variant,
+        /* [in]  */ const String& lang,
+        /* [in]  */ const String& country,
+        /* [in]  */ const String& variant,
         /* [out] */ String* name);
 
     /**
@@ -823,7 +812,7 @@ protected:
      * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
      */
     CARAPI OnLoadVoice(
-        /* [in]  */ String voiceName,
+        /* [in]  */ const String& voiceName,
         /* [out] */ Int32* voice);
 
     /**
@@ -838,7 +827,7 @@ protected:
      * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
      */
     CARAPI OnIsValidVoiceName(
-        /* [in]  */ String voiceName,
+        /* [in]  */ const String& voiceName,
         /* [out] */ Int32* ret);
 
     /**

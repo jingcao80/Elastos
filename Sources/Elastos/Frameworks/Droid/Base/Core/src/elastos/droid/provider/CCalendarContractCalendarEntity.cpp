@@ -153,34 +153,6 @@ ECode CCalendarContractCalendarEntity::NewEntityIterator(
     return NOERROR;
 }
 
-//override
-ECode CCalendarContractCalendarEntity::EntityIteratorImpl::HasNext(
-    /* [out] */ Boolean* result)
-{
-    return NOERROR;
-}
-
-ECode CCalendarContractCalendarEntity::EntityIteratorImpl::GetNext(
-    /* [out] */ IInterface** object)
-{
-    return NOERROR;
-}
-
-ECode CCalendarContractCalendarEntity::EntityIteratorImpl::Remove()
-{
-    return NOERROR;
-}
-
-ECode CCalendarContractCalendarEntity::EntityIteratorImpl::Reset()
-{
-    return NOERROR;
-}
-
-ECode CCalendarContractCalendarEntity::EntityIteratorImpl::Close()
-{
-    return NOERROR;
-}
-
 } //Provider
 } //Droid
 } //Elastos

@@ -64,19 +64,6 @@ private:
             /* [in] */ ICursor* cursor,
             /* [out] */ IEntity** entity);
 
-        //override
-        CARAPI HasNext(
-            /* [out] */ Boolean* result);
-
-        CARAPI GetNext(
-            /* [out] */ IInterface** object);
-
-        CARAPI Remove();
-
-        CARAPI Reset();
-
-        CARAPI Close();
-
     private:
         AutoPtr<IContentResolver> mResolver;
         AutoPtr<IContentProviderClient> mProvider;

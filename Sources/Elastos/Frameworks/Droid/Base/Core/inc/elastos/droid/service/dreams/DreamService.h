@@ -814,6 +814,8 @@ private:
      */
     CARAPI Detach();
 
+    using Service::Attach;
+
     /**
      * Called when the Dream is ready to be shown.
      *

@@ -21,7 +21,6 @@
 #include "elastos/droid/net/http/Connection.h"
 #include "elastos/droid/net/http/HttpLog.h"
 #include "elastos/droid/net/http/Request.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/core/AutoLock.h>
@@ -122,7 +121,9 @@ ECode ConnectionThread::Run()
 
             mConnectionManager->GetConnection(mContext, ((Request*)request.Get())->mHost, (IConnection**)&mConnection);
             ((Connection*)mConnection.Get())->ProcessRequests(request);
-            if (Ptr((Connection*)mConnection.Get())->Func(((Connection*)mConnection.Get())->GetCanPersist)) {
+            Boolean canPersist;
+            ((Connection*)mConnection.Get())->GetCanPersist(&canPersist);
+            if (canPersist) {
                 Boolean isRecycleConnectionOk;
                 mConnectionManager->RecycleConnection(mConnection, &isRecycleConnectionOk);
                 if (!isRecycleConnectionOk) {

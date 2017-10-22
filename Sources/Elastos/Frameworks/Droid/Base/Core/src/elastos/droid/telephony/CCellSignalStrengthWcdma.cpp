@@ -96,7 +96,7 @@ ECode CCellSignalStrengthWcdma::Initialize(
 }
 
 ECode CCellSignalStrengthWcdma::Copy(
-    /* [out] */ ICellSignalStrengthWcdma** css)
+    /* [out] */ ICellSignalStrength** css)
 {
     VALIDATE_NOT_NULL(css);
     CCellSignalStrengthWcdma::New(this, css);

@@ -22,7 +22,6 @@
 #include "elastos/droid/net/LinkProperties.h"
 #include "elastos/droid/net/Network.h"
 #include "elastos/droid/net/NetworkUtils.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/logging/Logger.h>
@@ -38,6 +37,7 @@ using Elastos::Net::IInet6Address;
 using Elastos::Net::IInet6AddressHelper;
 using Elastos::Net::IInetAddress;
 using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Objects;
 
@@ -120,11 +120,13 @@ ECode RouteInfo::constructor(
             gateway = net6any;
         }
     }
-    mHasGateway = (!Ptr(gateway)->Func(gateway->IsAnyLocalAddress));
+    Boolean anyLocalAddress;
+    gateway->IsAnyLocalAddress(&anyLocalAddress);
+    mHasGateway = !anyLocalAddress;
     if ((IInet4Address::Probe(destAddress) != NULL &&
-            ((IInet4Address::Probe(gateway) != NULL) == FALSE)) ||
+            IInet4Address::Probe(gateway) == NULL) ||
             (IInet6Address::Probe(destAddress) != NULL &&
-            ((IInet6Address::Probe(gateway) != NULL) == FALSE))) {
+            IInet6Address::Probe(gateway) == NULL)) {
         Logger::E("RouteInfo", "address family mismatch in RouteInfo constructor");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -153,7 +155,9 @@ ECode RouteInfo::constructor(
     if (destination != NULL) {
         AutoPtr<IInetAddress> destAddress;
         destination->GetAddress((IInetAddress**)&destAddress);
-        CIpPrefix::New(destAddress, Ptr(destination)->Func(destination->GetPrefixLength), (IIpPrefix**)&ipPrefix);
+        Int32 prefixLength;
+        destination->GetPrefixLength(&prefixLength);
+        CIpPrefix::New(destAddress, prefixLength, (IIpPrefix**)&ipPrefix);
     }
     return constructor(ipPrefix, gateway, iface);
 }
@@ -213,12 +217,16 @@ ECode RouteInfo::MakeHostRoute(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (host == NULL) FUNC_RETURN(NULL)
+    if (host == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
     if (IInet4Address::Probe(host) != NULL) {
         AutoPtr<IIpPrefix> newIpPrefix;
         CIpPrefix::New(host, 32, (IIpPrefix**)&newIpPrefix);
         return CRouteInfo::New(newIpPrefix, gateway, iface, result);
-    } else {
+    }
+    else {
         AutoPtr<IIpPrefix> newIpPrefix;
         CIpPrefix::New(host, 128, (IIpPrefix**)&newIpPrefix);
         return CRouteInfo::New(newIpPrefix, gateway, iface, result);
@@ -230,10 +238,10 @@ Boolean RouteInfo::IsHost()
 {
     AutoPtr<IInetAddress> destAddress;
     mDestination->GetAddress((IInetAddress**)&destAddress);
-    return ((IInet4Address::Probe(destAddress) != NULL) &&
-            Ptr(mDestination)->Func(mDestination->GetPrefixLength) == 32) ||
-           ((IInet6Address::Probe(destAddress) != NULL) &&
-            Ptr(mDestination)->Func(mDestination->GetPrefixLength) == 128);
+    Int32 prefixLength;
+    mDestination->GetPrefixLength(&prefixLength);
+    return (IInet4Address::Probe(destAddress) != NULL && prefixLength == 32) ||
+           (IInet6Address::Probe(destAddress) != NULL && prefixLength == 128);
 }
 
 ECode RouteInfo::GetDestination(
@@ -241,14 +249,19 @@ ECode RouteInfo::GetDestination(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mDestination)
+    *result = mDestination;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode RouteInfo::GetDestinationLinkAddress(
     /* [out] */ ILinkAddress** result)
 {
-    return CLinkAddress::New(Ptr(mDestination)->Func(mDestination->GetAddress),
-            Ptr(mDestination)->Func(mDestination->GetPrefixLength), result);
+    AutoPtr<IInetAddress> address;
+    mDestination->GetAddress((IInetAddress**)&address);
+    Int32 prefixLength;
+    mDestination->GetPrefixLength(&prefixLength);
+    return CLinkAddress::New(address, prefixLength, result);
 }
 
 ECode RouteInfo::GetGateway(
@@ -256,7 +269,9 @@ ECode RouteInfo::GetGateway(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mGateway)
+    *result = mGateway;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode RouteInfo::GetInterface(
@@ -264,7 +279,8 @@ ECode RouteInfo::GetInterface(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mInterface)
+    *result = mInterface;
+    return NOERROR;
 }
 
 ECode RouteInfo::GetType(
@@ -272,7 +288,8 @@ ECode RouteInfo::GetType(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mType)
+    *result = mType;
+    return NOERROR;
 }
 
 ECode RouteInfo::IsDefaultRoute(
@@ -280,7 +297,9 @@ ECode RouteInfo::IsDefaultRoute(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = mType == IRouteInfo::RTN_UNICAST && Ptr(mDestination)->Func(mDestination->GetPrefixLength) == 0;
+    Int32 prefixLength;
+    *result = mType == IRouteInfo::RTN_UNICAST &&
+            (mDestination->GetPrefixLength(&prefixLength), prefixLength == 0);
     return NOERROR;
 }
 
@@ -289,7 +308,11 @@ ECode RouteInfo::IsIPv4Default(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = Ptr(this)->Func(this->IsDefaultRoute) && IInet4Address::Probe(Ptr(mDestination)->Func(mDestination->GetAddress)) != NULL;
+    Boolean defaultRoute;
+    IsDefaultRoute(&defaultRoute);
+    AutoPtr<IInetAddress> address;
+    mDestination->GetAddress((IInetAddress**)&address);
+    *result = defaultRoute && IInet4Address::Probe(address) != NULL;
     return NOERROR;
 }
 
@@ -298,7 +321,11 @@ ECode RouteInfo::IsIPv6Default(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = Ptr(this)->Func(this->IsDefaultRoute) && IInet6Address::Probe(Ptr(mDestination)->Func(mDestination->GetAddress)) != NULL;
+    Boolean defaultRoute;
+    IsDefaultRoute(&defaultRoute);
+    AutoPtr<IInetAddress> address;
+    mDestination->GetAddress((IInetAddress**)&address);
+    *result = defaultRoute && IInet6Address::Probe(address) != NULL;
     return NOERROR;
 }
 
@@ -326,13 +353,18 @@ ECode RouteInfo::Matches(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (destination == NULL) FUNC_RETURN(FALSE)
+    if (destination == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     // match the route destination and destination with prefix length
+    Int32 prefixLength;
+    mDestination->GetPrefixLength(&prefixLength);
     AutoPtr<IInetAddress> dstNet;
-    NetworkUtils::GetNetworkPart(destination,
-            Ptr(mDestination)->Func(mDestination->GetPrefixLength),
-            (IInetAddress**)&dstNet);
-    return IObject::Probe(Ptr(mDestination)->Func(mDestination->GetAddress))->Equals(dstNet, result);
+    NetworkUtils::GetNetworkPart(destination, prefixLength, (IInetAddress**)&dstNet);
+    AutoPtr<IInetAddress> srcNet;
+    mDestination->GetAddress((IInetAddress**)&srcNet);
+    return IObject::Probe(srcNet)->Equals(dstNet, result);
 }
 
 ECode RouteInfo::SelectBestRoute(
@@ -342,30 +374,36 @@ ECode RouteInfo::SelectBestRoute(
 {
     VALIDATE_NOT_NULL(result)
 
-    if ((routes == NULL) || (dest == NULL)) FUNC_RETURN(NULL)
-    AutoPtr<IRouteInfo> bestRoute;
+    if (routes == NULL || dest == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<RouteInfo> bestRoute;
     // pick a longest prefix match under same address type
-    FOR_EACH(iter, routes) {
-        AutoPtr<IRouteInfo> route = IRouteInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    routes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        RouteInfo* route = (RouteInfo*)IRouteInfo::Probe(obj);
         AutoPtr<IInetAddress> destAddress;
-        ((RouteInfo*)route.Get())->mDestination->GetAddress((IInetAddress**)&destAddress);
+        route->mDestination->GetAddress((IInetAddress**)&destAddress);
         Boolean isMatch;
-        NetworkUtils::AddressTypeMatches(destAddress, dest, &isMatch);
-        if (isMatch) {
-            Int32 bestPrefixLength;
-            ((RouteInfo*)bestRoute.Get())->mDestination->GetPrefixLength(&bestPrefixLength);
-            Int32 thisPrefixLength;
-            ((RouteInfo*)route.Get())->mDestination->GetPrefixLength(&thisPrefixLength);
+        if (NetworkUtils::AddressTypeMatches(destAddress, dest, &isMatch), isMatch) {
+            Int32 bestPrefixLength, thisPrefixLength;
             if ((bestRoute != NULL) &&
-                    (bestPrefixLength >= thisPrefixLength)) {
+                    (bestRoute->mDestination->GetPrefixLength(&bestPrefixLength),
+                     route->mDestination->GetPrefixLength(&thisPrefixLength),
+                     bestPrefixLength >= thisPrefixLength)) {
                 continue;
             }
-            Boolean isMatch;
-            route->Matches(dest, &isMatch);
-            if (isMatch) bestRoute = route;
+            if (route->Matches(dest, &isMatch), isMatch) bestRoute = route;
         }
     }
-    FUNC_RETURN(bestRoute)
+    *result = bestRoute;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode RouteInfo::ToString(
@@ -377,17 +415,24 @@ ECode RouteInfo::ToString(
     if (mDestination != NULL) IObject::Probe(mDestination)->ToString(&val);
     if (mType == IRouteInfo::RTN_UNREACHABLE) {
         val += " unreachable";
-    } else if (mType == IRouteInfo::RTN_THROW) {
+    }
+    else if (mType == IRouteInfo::RTN_THROW) {
         val += " throw";
-    } else {
+    }
+    else {
         val += " ->";
-        if (mGateway != NULL) val += String(" ") + Ptr(mGateway)->Func(mGateway->GetHostAddress);
+        if (mGateway != NULL) {
+            String host;
+            mGateway->GetHostAddress(&host);
+            val += String(" ") + host;
+        }
         if (mInterface != NULL) val += String(" ") + mInterface;
         if (mType != IRouteInfo::RTN_UNICAST) {
             val += String(" unknown type ") + StringUtils::ToString(mType);
         }
     }
-    FUNC_RETURN(val)
+    *result = val;
+    return NOERROR;
 }
 
 ECode RouteInfo::Equals(
@@ -396,14 +441,26 @@ ECode RouteInfo::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) FUNC_RETURN(TRUE)
-    if (!(IRouteInfo::Probe(obj) != NULL)) FUNC_RETURN(FALSE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(obj)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (IRouteInfo::Probe(obj) == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     AutoPtr<IRouteInfo> target = IRouteInfo::Probe(obj);
-    Boolean b1 = Objects::Equals(mDestination, Ptr(target)->Func(target->GetDestination));
-    Boolean b2 = Objects::Equals(mGateway, Ptr(target)->Func(target->GetGateway));
-    Boolean b3 = mInterface.Equals(Ptr(target)->Func(target->GetInterface));
-    Boolean b4 = mType == Ptr(target)->Func(target->GetType);
-    *result = b1 && b2 && b3 && b4;
+    AutoPtr<IIpPrefix> destination;
+    target->GetDestination((IIpPrefix**)&destination);
+    AutoPtr<IInetAddress> gateway;
+    target->GetGateway((IInetAddress**)&gateway);
+    String itf;
+    target->GetInterface(&itf);
+    Int32 type;
+    target->GetType(&type);
+    *result = Objects::Equals(mDestination, destination) &&
+            Objects::Equals(mGateway, gateway) &&
+            mInterface.Equals(itf) && mType == type;
     return NOERROR;
 }
 

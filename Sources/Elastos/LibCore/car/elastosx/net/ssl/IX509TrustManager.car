@@ -17,7 +17,6 @@
 module
 {
     interface Elastos.Security.Cert.IX509Certificate;
-    interface Elastos.Security.Cert.ICertificate;
 
     namespace Elastosx {
     namespace Net {
@@ -69,7 +68,7 @@ module
          *             empty string.
          */
         CheckServerTrusted(
-            [in] ArrayOf<ICertificate*>* chain,
+            [in] ArrayOf<IX509Certificate*>* chain,
             [in] String authType);
 
         /**

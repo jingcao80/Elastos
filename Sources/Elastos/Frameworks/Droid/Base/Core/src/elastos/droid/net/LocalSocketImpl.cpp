@@ -17,7 +17,6 @@
 #include <Elastos.CoreLibrary.Net.h>
 #include "elastos/droid/net/LocalSocketImpl.h"
 #include "elastos/droid/net/CCredentials.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/system/Os.h"
 #include "elastos/droid/system/OsConstants.h"

@@ -31,10 +31,6 @@ module
      * no super interface
      */
     interface ISamplingDataTracker {
-        // Protects sampling data from concurrent access
-        GetSAMPLING_DATA_LOCK(
-            [out] IInterface** o);
-
         StartSampling(
             [in] ISamplingDataTrackerSamplingSnapshot* s);
 

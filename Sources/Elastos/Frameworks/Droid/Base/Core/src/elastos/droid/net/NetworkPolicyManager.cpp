@@ -20,7 +20,6 @@
 #include "_Elastos.Droid.Core.h"
 #include "elastos/droid/net/NetworkPolicyManager.h"
 #include "elastos/droid/net/Network.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/text/format/CTime.h"
 #include <elastos/utility/logging/Logger.h>

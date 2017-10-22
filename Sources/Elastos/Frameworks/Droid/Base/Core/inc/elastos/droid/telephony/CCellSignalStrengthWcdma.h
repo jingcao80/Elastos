@@ -60,7 +60,7 @@ public:
         /* [in] */ Int32 ber);
 
     CARAPI Copy(
-        /* [out] */ ICellSignalStrengthWcdma** css);
+        /* [out] */ ICellSignalStrength** css);
 
     CARAPI SetDefaultValues();
 

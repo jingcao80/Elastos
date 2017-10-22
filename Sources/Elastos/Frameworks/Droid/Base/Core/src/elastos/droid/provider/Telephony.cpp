@@ -659,7 +659,7 @@ ECode Telephony::Mms::IsEmailAddress(
     /* [out] */ Boolean* isEmailAddress)
 {
     VALIDATE_NOT_NULL(isEmailAddress);
-    isEmailAddress = FALSE;
+    *isEmailAddress = FALSE;
     if (TextUtils::IsEmpty(address)) {
         return NOERROR;
     }
@@ -676,7 +676,7 @@ ECode Telephony::Mms::IsPhoneNumber(
     /* [out] */ Boolean* isPhoneNumber)
 {
     VALIDATE_NOT_NULL(isPhoneNumber);
-    isPhoneNumber = FALSE;
+    *isPhoneNumber = FALSE;
     if (TextUtils::IsEmpty(number)) {
         return NOERROR;
     }

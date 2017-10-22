@@ -323,38 +323,6 @@ ECode CCalendarContractEventsEntity::EntityIteratorImpl::GetEntityAndIncrementCu
     return NOERROR;
 }
 
-ECode CCalendarContractEventsEntity::EntityIteratorImpl::HasNext(
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    return CursorEntityIterator::HasNext(result);
-}
-
-ECode CCalendarContractEventsEntity::EntityIteratorImpl::GetNext(
-    /* [out] */ IInterface** object)
-{
-    VALIDATE_NOT_NULL(object);
-    AutoPtr<IEntity> entity;
-    CursorEntityIterator::GetNext((IEntity**)&entity);
-    *object = entity.Get();
-    REFCOUNT_ADD(*object);
-    return NOERROR;
-}
-
-ECode CCalendarContractEventsEntity::EntityIteratorImpl::Remove()
-{
-    return CursorEntityIterator::Remove();
-}
-
-ECode CCalendarContractEventsEntity::EntityIteratorImpl::Reset()
-{
-    return CursorEntityIterator::Reset();
-}
-
-ECode CCalendarContractEventsEntity::EntityIteratorImpl::Close()
-{
-    return CursorEntityIterator::Close();
-}
 
 CAR_SINGLETON_IMPL(CCalendarContractEventsEntity)
 

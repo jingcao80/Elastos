@@ -16,7 +16,6 @@
 
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/net/LinkAddress.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/NetworkUtils.h"
 #include "elastos/droid/system/OsConstants.h"
 #include <elastos/utility/logging/Logger.h>
@@ -40,19 +39,24 @@ ECode LinkAddress::ScopeForUnicastAddress(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (RETN_OUT_VAL(addr, IsAnyLocalAddress)) {
+    Boolean anyLocalAddr;
+    if (addr->IsAnyLocalAddress(&anyLocalAddr), anyLocalAddr) {
         *result = OsConstants::_RT_SCOPE_HOST;
         return NOERROR;
     }
 
-    if (RETN_OUT_VAL(addr, IsLoopbackAddress) || RETN_OUT_VAL(addr, IsLinkLocalAddress)) {
+    Boolean loopbackAddr, linkLocalAddr;
+    if ((addr->IsLoopbackAddress(&loopbackAddr), loopbackAddr) ||
+        (addr->IsLinkLocalAddress(&linkLocalAddr), linkLocalAddr)) {
         *result = OsConstants::_RT_SCOPE_LINK;
         return NOERROR;
     }
 
     // isSiteLocalAddress() returns true for private IPv4 addresses, but RFC 6724 section 3.2
     // says that they are assigned global scope.
-    if ((IInet4Address::Probe(addr) == NULL) && RETN_OUT_VAL(addr, IsSiteLocalAddress)) {
+    Boolean siteLocalAddr;
+    if ((IInet4Address::Probe(addr) == NULL) &&
+        (addr->IsSiteLocalAddress(&siteLocalAddr), siteLocalAddr)) {
         *result = OsConstants::_RT_SCOPE_SITE;
         return NOERROR;
     }
@@ -66,14 +70,13 @@ ECode LinkAddress::Init(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 scope)
 {
+    Boolean multicastAddr;
     if (address == NULL ||
-            RETN_OUT_VAL(address, IsMulticastAddress) ||
+            (address->IsMulticastAddress(&multicastAddr), multicastAddr) ||
             prefixLength < 0 ||
             ((IInet4Address::Probe(address) != NULL ) && prefixLength > 32) ||
             (prefixLength > 128)) {
-        String s;
-        IObject::Probe(address)->ToString(&s);
-        Logger::E("LinkAddress", "Bad LinkAddress params %s/%d", s.string(), prefixLength);
+        Logger::E("LinkAddress", "Bad LinkAddress params %s/%d", TO_CSTR(address), prefixLength);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mAddress = address;
@@ -108,8 +111,11 @@ ECode LinkAddress::constructor(
 ECode LinkAddress::constructor(
     /* [in] */ IInterfaceAddress* interfaceAddress)
 {
-    return constructor(RETN_OUT_VAL(interfaceAddress, GetAddress),
-            RETN_OUT_VAL(interfaceAddress, GetNetworkPrefixLength));
+    AutoPtr<IInetAddress> address;
+    interfaceAddress->GetAddress((IInetAddress**)&address);
+    Int16 prefixLength;
+    interfaceAddress->GetNetworkPrefixLength(&prefixLength);
+    return constructor(address, prefixLength);
 }
 
 ECode LinkAddress::constructor(
@@ -127,10 +133,12 @@ ECode LinkAddress::constructor(
     // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
     AutoPtr<IPair> ipAndMask;
     NetworkUtils::ParseIpAndMask(address, (IPair**)&ipAndMask);
-    Int32 second;
-    IInteger32::Probe(RETN_OUT_VAL(ipAndMask, GetSecond))->GetValue(&second);
-    return Init(IInetAddress::Probe(RETN_OUT_VAL(ipAndMask, GetFirst)),
-            second, flags, scope);
+    AutoPtr<IInterface> first, second;
+    ipAndMask->GetFirst((IInterface**)&first);
+    ipAndMask->GetSecond((IInterface**)&second);
+    Int32 prefixLength;
+    IInteger32::Probe(second)->GetValue(&prefixLength);
+    return Init(IInetAddress::Probe(first), prefixLength, flags, scope);
 }
 
 ECode LinkAddress::ToString(
@@ -138,7 +146,11 @@ ECode LinkAddress::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
-    result->AppendFormat("%s/%d", mAddress != NULL ? RETN_OUT_VAL(mAddress, GetHostAddress).string() : "", mPrefixLength);
+    String address("");
+    if (mAddress != NULL) {
+        mAddress->GetHostAddress(&address);
+    }
+    result->AppendFormat("%s/%d", address.string(), mPrefixLength);
     return NOERROR;
 }
 

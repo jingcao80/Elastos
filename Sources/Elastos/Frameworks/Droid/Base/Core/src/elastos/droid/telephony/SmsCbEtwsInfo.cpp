@@ -17,12 +17,14 @@
 #include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/telephony/SmsCbEtwsInfo.h"
 #include "elastos/droid/text/format/CTime.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 
 using Elastos::Droid::Internal::Telephony::IccUtils;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Text::Format::ITime;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 
@@ -169,9 +171,13 @@ ECode SmsCbEtwsInfo::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = String("SmsCbEtwsInfo{warningType=") + StringUtils::ToString(mWarningType)
-            + ", emergencyUserAlert=" + StringUtils::BooleanToString(mEmergencyUserAlert)
-            + ", activatePopup=" + StringUtils::BooleanToString(mActivatePopup) + '}';
+    StringBuilder sb("SmsCbEtwsInfo{warningType=");
+    sb += mWarningType;
+    sb += ", emergencyUserAlert=";
+    sb += mEmergencyUserAlert;
+    sb += ", activatePopup=";
+    sb += mActivatePopup;
+    sb += "}";
     return NOERROR;
 }
 

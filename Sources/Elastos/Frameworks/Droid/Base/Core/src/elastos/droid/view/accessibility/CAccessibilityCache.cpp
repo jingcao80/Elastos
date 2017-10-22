@@ -437,7 +437,7 @@ ECode CAccessibilityCache::CheckIntegrity()
         Int32 size1, size2;
         Boolean res;
         AutoPtr<IInterface> obj;
-        if (mWindowCache->GetSize(&size1), size1 <= 0 && mNodeCache->GetSize(&size2), size2 == 0) {
+        if ((mWindowCache->GetSize(&size1), size1 <= 0) && (mNodeCache->GetSize(&size2), size2 == 0)) {
             return NOERROR;
         }
 

@@ -227,6 +227,8 @@ private:
         public:
             StateInfo();
 
+            using Object::ToString;
+
             /**
              * Convert StateInfo to string
              */

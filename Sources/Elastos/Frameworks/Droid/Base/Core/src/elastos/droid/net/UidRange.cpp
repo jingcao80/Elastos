@@ -17,7 +17,6 @@
 #include "_Elastos.Droid.Os.h"
 #include "elastos/droid/net/UidRange.h"
 #include "elastos/droid/net/CUidRange.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IUserHandle;
@@ -90,13 +89,17 @@ ECode UidRange::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
+    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+        *result = TRUE;
+        return NOERROR;
+    }
     if (IUidRange::Probe(o) != NULL) {
         AutoPtr<UidRange> other = (UidRange*) IUidRange::Probe(o);
         *result = mStart == other->mStart && mStop == other->mStop;
         return NOERROR;
     }
-    FUNC_RETURN(FALSE)
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode UidRange::ToString(

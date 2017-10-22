@@ -75,7 +75,7 @@ ECode CContactsContractGroups::NewEntityIterator(
     return NOERROR;
 }
 
-CContactsContractGroups::EntityIteratorImpl::constructor(
+ECode CContactsContractGroups::EntityIteratorImpl::constructor(
     /* [in] */ ICursor* cursor)
 {
     return CursorEntityIterator::constructor(cursor);
@@ -125,40 +125,6 @@ ECode CContactsContractGroups::EntityIteratorImpl::GetEntityAndIncrementCursor(
     Boolean result;
     FAIL_RETURN(cursor->MoveToNext(&result))
     return CEntity::New(values, entity);
-}
-
-//override
-ECode CContactsContractGroups::EntityIteratorImpl::HasNext(
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    return CursorEntityIterator::HasNext(result);
-}
-
-ECode CContactsContractGroups::EntityIteratorImpl::GetNext(
-    /* [out] */ IInterface** object)
-{
-    VALIDATE_NOT_NULL(object);
-    AutoPtr<IEntity> entity;
-    CursorEntityIterator::GetNext((IEntity**)&entity);
-    *object = entity.Get();
-    REFCOUNT_ADD(*object);
-    return NOERROR;
-}
-
-ECode CContactsContractGroups::EntityIteratorImpl::Remove()
-{
-    return CursorEntityIterator::Remove();
-}
-
-ECode CContactsContractGroups::EntityIteratorImpl::Reset()
-{
-    return CursorEntityIterator::Reset();
-}
-
-ECode CContactsContractGroups::EntityIteratorImpl::Close()
-{
-    return CursorEntityIterator::Close();
 }
 
 } //Provider

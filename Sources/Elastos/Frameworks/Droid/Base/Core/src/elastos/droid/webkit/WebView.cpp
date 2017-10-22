@@ -439,7 +439,7 @@ ECode WebView::SetHorizontalScrollbarOverlay(
 {
     FAIL_RETURN(CheckThread());
     if (DebugFlags::TRACE_API) {
-        Logger::D(LOGTAG, "setHorizontalScrollbarOverlay=" + overlay);
+        Logger::D(LOGTAG, "setHorizontalScrollbarOverlay=%d", overlay);
     }
 
     return mProvider->SetHorizontalScrollbarOverlay(overlay);
@@ -455,7 +455,7 @@ ECode WebView::SetVerticalScrollbarOverlay(
 {
     FAIL_RETURN(CheckThread());
     if (DebugFlags::TRACE_API) {
-        Logger::D(LOGTAG, "setVerticalScrollbarOverlay=" + overlay);
+        Logger::D(LOGTAG, "setVerticalScrollbarOverlay=%d", overlay);
     }
     return mProvider->SetVerticalScrollbarOverlay(overlay);
 }
@@ -2394,78 +2394,78 @@ ECode WebView::ComputeScroll()
     return NOERROR;
 }
 
-Boolean WebView::OnHoverEvent(
-    /* [in] */ IMotionEvent* event)
+ECode WebView::OnHoverEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnHoverEvent(event, &result);
-    return result;
+    return viewDelegate->OnHoverEvent(event, result);
 }
 
-Boolean WebView::OnTouchEvent(
-    /* [in] */ IMotionEvent* event)
+ECode WebView::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnTouchEvent(event, &result);
-    return result;
+    return viewDelegate->OnTouchEvent(event, result);
 }
 
-Boolean WebView::OnGenericMotionEvent(
-    /* [in] */ IMotionEvent* event)
+ECode WebView::OnGenericMotionEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnGenericMotionEvent(event, &result);
-    return result;
+    return viewDelegate->OnGenericMotionEvent(event, result);
 }
 
-Boolean WebView::OnTrackballEvent(
-    /* [in] */ IMotionEvent* event)
+ECode WebView::OnTrackballEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnTrackballEvent(event, &result);
-    return result;
+    return viewDelegate->OnTrackballEvent(event, result);
 }
 
-Boolean WebView::OnKeyDown(
+ECode WebView::OnKeyDown(
     /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event)
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnKeyDown(keyCode, event, &result);
-    return result;
+    return viewDelegate->OnKeyDown(keyCode, event, result);
 }
 
-Boolean WebView::OnKeyUp(
+ECode WebView::OnKeyUp(
     /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event)
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnKeyUp(keyCode, event, &result);
-    return result;
+    return viewDelegate->OnKeyUp(keyCode, event, result);
 }
 
-Boolean WebView::OnKeyMultiple(
+ECode WebView::OnKeyMultiple(
     /* [in] */ Int32 keyCode,
     /* [in] */ Int32 repeatCount,
-    /* [in] */ IKeyEvent* event)
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->OnKeyMultiple(keyCode, repeatCount, event, &result);
-    return result;
+    return viewDelegate->OnKeyMultiple(keyCode, repeatCount, event, result);
 }
 
 ECode WebView::GetAccessibilityNodeProvider(
@@ -2482,13 +2482,13 @@ ECode WebView::GetAccessibilityNodeProvider(
     return NOERROR;
 }
 
-Boolean WebView::ShouldDelayChildPressedState()
+ECode WebView::ShouldDelayChildPressedState(
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->ShouldDelayChildPressedState(&result);
-    return result;
+    return viewDelegate->ShouldDelayChildPressedState(result);
 }
 
 ECode WebView::OnInitializeAccessibilityNodeInfo(
@@ -2517,15 +2517,15 @@ ECode WebView::OnInitializeAccessibilityEvent(
     return NOERROR;
 }
 
-Boolean WebView::PerformAccessibilityAction(
+ECode WebView::PerformAccessibilityAction(
     /* [in] */ Int32 action,
-    /* [in] */ IBundle* arguments)
+    /* [in] */ IBundle* arguments,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->PerformAccessibilityAction(action, arguments, &result);
-    return result;
+    return viewDelegate->PerformAccessibilityAction(action, arguments, result);
 }
 
 /** @hide */
@@ -2572,13 +2572,13 @@ void WebView::OnDraw(
     viewDelegate->OnDraw(canvas);
 }
 
-Boolean WebView::PerformLongClick()
+ECode WebView::PerformLongClick(
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result = FALSE;
-    viewDelegate->PerformLongClick(&result);
-    return result;
+    return viewDelegate->PerformLongClick(result);
 }
 
 ECode WebView::OnConfigurationChanged(
@@ -2590,14 +2590,14 @@ ECode WebView::OnConfigurationChanged(
     return NOERROR;
 }
 
-AutoPtr<IInputConnection> WebView::OnCreateInputConnection(
-    /* [in] */ IEditorInfo* outAttrs)
+ECode WebView::OnCreateInputConnection(
+    /* [in] */ IEditorInfo* outAttrs,
+    /* [out] */ IInputConnection** connection)
 {
+    VALIDATE_NOT_NULL(connection);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    AutoPtr<IInputConnection> conn;
-    viewDelegate->OnCreateInputConnection(outAttrs, (IInputConnection**)&conn);
-    return conn;
+    return viewDelegate->OnCreateInputConnection(outAttrs, connection);
 }
 
 ECode WebView::OnVisibilityChanged(
@@ -2674,25 +2674,25 @@ ECode WebView::OnScrollChanged(
     return NOERROR;
 }
 
-Boolean WebView::DispatchKeyEvent(
-    /* [in] */ IKeyEvent* event)
+ECode WebView::DispatchKeyEvent(
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->DispatchKeyEvent(event, &result);
-    return result;
+    return viewDelegate->DispatchKeyEvent(event, result);
 }
 
-Boolean WebView::RequestFocus(
+ECode WebView::RequestFocus(
     /* [in] */ Int32 direction,
-    /* [in] */ IRect* previouslyFocusedRect)
+    /* [in] */ IRect* previouslyFocusedRect,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->RequestFocus(direction, previouslyFocusedRect, &result);
-    return result;
+    return viewDelegate->RequestFocus(direction, previouslyFocusedRect, result);
 }
 
 ECode WebView::OnMeasure(
@@ -2716,16 +2716,16 @@ ECode WebView::DispatchDraw(
     return NOERROR;
 }
 
-Boolean WebView::RequestChildRectangleOnScreen(
+ECode WebView::RequestChildRectangleOnScreen(
     /* [in] */ IView* child,
     /* [in] */ IRect* rect,
-    /* [in] */ Boolean immediate)
+    /* [in] */ Boolean immediate,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
-    Boolean result;
-    viewDelegate->RequestChildRectangleOnScreen(child, rect, immediate, &result);
-    return result;
+    return viewDelegate->RequestChildRectangleOnScreen(child, rect, immediate, result);
 }
 
 ECode WebView::SetBackgroundColor(

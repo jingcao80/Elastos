@@ -105,6 +105,8 @@ public:
         /* [in] */ IKeyEvent* event,
         /* [out] */ Boolean* ret);
 
+    using MetaKeyKeyListener::ClearMetaKeyState;
+
     CARAPI ClearMetaKeyState(
         /* [in] */ IView* view,
         /* [in] */ IEditable* content,

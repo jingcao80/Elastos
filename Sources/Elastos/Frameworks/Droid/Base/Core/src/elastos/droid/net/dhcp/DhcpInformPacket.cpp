@@ -18,7 +18,6 @@
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/net/dhcp/DhcpInformPacket.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include "elastos/droid/net/dhcp/DhcpInformPacket.h"
 #include "elastos/droid/net/dhcp/DhcpPacket.h"
 #include "elastos/droid/os/Build.h"
@@ -75,7 +74,9 @@ ECode DhcpInformPacket::BuildPacket(
     FillInPacket(encap, mClientIp, mYourIp, destUdp, srcUdp, rev,
         DHCP_BOOTREQUEST, FALSE);
     IBuffer::Probe(rev)->Flip();
-    FUNC_RETURN(rev)
+    *result = rev;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode DhcpInformPacket::FinishPacket(

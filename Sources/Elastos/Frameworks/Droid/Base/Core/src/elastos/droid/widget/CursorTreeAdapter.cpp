@@ -114,7 +114,7 @@ ECode CursorTreeAdapter::SetChildrenCursor(
 ECode CursorTreeAdapter::GetChild(
     /* [in] */ Int32 groupPosition,
     /* [in] */ Int32 childPosition,
-    /* [out] */ ICursor** cursor)
+    /* [out] */ IInterface** cursor)
 {
     VALIDATE_NOT_NULL(cursor);
     // Return this group's children Cursor pointing to the particular child
@@ -146,7 +146,7 @@ ECode CursorTreeAdapter::GetChildrenCount(
 
 ECode CursorTreeAdapter::GetGroup(
     /* [in] */ Int32 groupPosition,
-    /* [out] */ ICursor** cursor)
+    /* [out] */ IInterface** cursor)
 {
     VALIDATE_NOT_NULL(cursor);
     // Return the group Cursor pointing to the given group

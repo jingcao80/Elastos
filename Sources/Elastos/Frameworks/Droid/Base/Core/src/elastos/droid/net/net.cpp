@@ -86,7 +86,6 @@
 #include "elastos/droid/net/http/CDelegatingSSLSessionCertificateWrap.h"
 #include "elastos/droid/net/http/CHeaders.h"
 #include "elastos/droid/net/http/CHttpAuthHeader.h"
-#include "elastos/droid/net/http/CHttpResponseCache.h"
 #include "elastos/droid/net/http/CHttpsConnection.h"
 #include "elastos/droid/net/http/CLoggingEventHandler.h"
 #include "elastos/droid/net/http/CRequestHandle.h"
@@ -248,8 +247,6 @@ CAR_OBJECT_IMPL(CDelegatingSSLSessionCertificateWrap)
 CAR_OBJECT_IMPL(CHeaders)
 
 CAR_OBJECT_IMPL(CHttpAuthHeader)
-
-CAR_OBJECT_IMPL(CHttpResponseCache)
 
 CAR_OBJECT_IMPL(CHttpsConnection)
 

@@ -64,6 +64,8 @@ public:
         /* [in] */ ITransition* obj);
 
 private:
+    using Transition::CaptureValues;
+
     CARAPI_(void) CaptureValues(
         /* [in] */ ITransitionValues* values);
 

@@ -32,13 +32,13 @@ CAR_INTERFACE_IMPL(CAnimationUtils, Singleton, IAnimationUtils)
 
 CAR_SINGLETON_IMPL(CAnimationUtils)
 
-CAnimationUtils::CurrentAnimationTimeMillis(
+ECode CAnimationUtils::CurrentAnimationTimeMillis(
     /* [out] */ Int64* time)
 {
     return AnimationUtils::CurrentAnimationTimeMillis(time);
 }
 
-CAnimationUtils::LoadAnimation(
+ECode CAnimationUtils::LoadAnimation(
     /* [in] */ IContext* context,
     /* [in] */ Int32 id,
     /* [out] */ IAnimation** animation)
@@ -46,7 +46,7 @@ CAnimationUtils::LoadAnimation(
     return AnimationUtils::LoadAnimation(context, id, animation);
 }
 
-CAnimationUtils::LoadLayoutAnimation(
+ECode CAnimationUtils::LoadLayoutAnimation(
     /* [in] */ IContext* context,
     /* [in] */ Int32 id,
     /* [out] */ ILayoutAnimationController** controller)
@@ -54,7 +54,7 @@ CAnimationUtils::LoadLayoutAnimation(
     return AnimationUtils::LoadLayoutAnimation(context, id, controller);
 }
 
-CAnimationUtils::MakeInAnimation(
+ECode CAnimationUtils::MakeInAnimation(
     /* [in] */ IContext* context,
     /* [in] */ Boolean fromLeft,
     /* [out] */ IAnimation** animation)
@@ -62,7 +62,7 @@ CAnimationUtils::MakeInAnimation(
     return AnimationUtils::MakeInAnimation(context, fromLeft, animation);
 }
 
-CAnimationUtils::MakeOutAnimation(
+ECode CAnimationUtils::MakeOutAnimation(
     /* [in] */ IContext* context,
     /* [in] */ Boolean toRight,
     /* [out] */ IAnimation** animation)
@@ -70,14 +70,14 @@ CAnimationUtils::MakeOutAnimation(
     return AnimationUtils::MakeOutAnimation(context, toRight, animation);
 }
 
-CAnimationUtils::MakeInChildBottomAnimation(
+ECode CAnimationUtils::MakeInChildBottomAnimation(
     /* [in] */ IContext* context,
     /* [out] */ IAnimation** animation)
 {
     return AnimationUtils::MakeInChildBottomAnimation(context, animation);
 }
 
-CAnimationUtils::LoadInterpolator(
+ECode CAnimationUtils::LoadInterpolator(
     /* [in] */ IContext* context,
     /* [in] */ Int32 id,
     /* [out] */ IInterpolator** interpolator)
@@ -85,7 +85,7 @@ CAnimationUtils::LoadInterpolator(
     return AnimationUtils::LoadInterpolator(context, id, interpolator);
 }
 
-CAnimationUtils::LoadInterpolator(
+ECode CAnimationUtils::LoadInterpolator(
     /* [in] */ IResources* res,
     /* [in] */ IResourcesTheme* theme,
     /* [in] */ Int32 id,

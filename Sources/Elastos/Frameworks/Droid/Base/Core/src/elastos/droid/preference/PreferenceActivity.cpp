@@ -179,7 +179,7 @@ PreferenceActivity::HeaderAdapter::HeaderAdapter(
     mInflater = ILayoutInflater::Probe(object);
 }
 
-PreferenceActivity::HeaderAdapter::GetView(
+ECode PreferenceActivity::HeaderAdapter::GetView(
     /* [in] */ Int32 position,
     /* [in] */ IView* convertView,
     /* [in] */ IViewGroup* parent,
@@ -190,7 +190,7 @@ PreferenceActivity::HeaderAdapter::GetView(
     AutoPtr<IView> v;
 
     if (convertView == NULL) {
-        mInflater->Inflate(mLayoutResId, FALSE, (IView**)&v);
+        mInflater->Inflate(mLayoutResId, parent, FALSE, (IView**)&v);
         holder = new HeaderViewHolder();
         AutoPtr<IView> tempView;
         v->FindViewById(R::id::icon, (IView**)&tempView);

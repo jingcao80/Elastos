@@ -25,7 +25,6 @@
 #include "elastos/droid/net/http/CSslError.h"
 #include "elastos/droid/net/http/HttpLog.h"
 #include "elastos/droid/net/http/HttpsConnection.h"
-#include "elastos/droid/net/ReturnOutValue.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -109,7 +108,9 @@ ECode CertificateChainValidator::GetInstance(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(NoPreloadHolder::sInstance);
+    *result = NoPreloadHolder::sInstance;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CertificateChainValidator::constructor()
@@ -171,15 +172,17 @@ ECode CertificateChainValidator::DoHandshakeAndValidateServerCertificates(
     // get a valid SSLSession, close the socket if we fail
     AutoPtr<ISSLSession> sslSession;
     sslSocket->GetSession((ISSLSession**)&sslSession);
-    if (!Ptr(sslSession)->Func(sslSession->IsValid)) {
-        CloseSocketThrowException(sslSocket, String("failed to perform SSL handshake"));
+    Boolean valid;
+    if (sslSession->IsValid(&valid), !valid) {
+        return CloseSocketThrowException(sslSocket, String("failed to perform SSL handshake"));
     }
     // retrieve the chain of the server peer certificates
     AutoPtr<ArrayOf<ICertificate*> > peerCertificates;
-    Ptr(sslSocket)->Func(sslSocket->GetSession)->GetPeerCertificates((ArrayOf<ICertificate*>**)&peerCertificates);
+    sslSession->GetPeerCertificates((ArrayOf<ICertificate*>**)&peerCertificates);
     if (peerCertificates == NULL || peerCertificates->GetLength() == 0) {
-        CloseSocketThrowException(sslSocket, String("failed to retrieve peer certificates"));
-    } else {
+        return CloseSocketThrowException(sslSocket, String("failed to retrieve peer certificates"));
+    }
+    else {
         // update the SSL certificate associated with the connection
         if (connection != NULL) {
             if ((*peerCertificates)[0] != NULL) {
@@ -189,7 +192,12 @@ ECode CertificateChainValidator::DoHandshakeAndValidateServerCertificates(
             }
         }
     }
-    return VerifyServerDomainAndCertificates(peerCertificates, domain, String("RSA"), result);
+
+    AutoPtr<ArrayOf<IX509Certificate*> > x509Certificates = ArrayOf<IX509Certificate*>::Alloc(peerCertificates->GetLength());
+    for (Int32 i = 0; i < peerCertificates->GetLength(); i++) {
+        x509Certificates->Set(i, IX509Certificate::Probe((*peerCertificates)[i]));
+    }
+    return VerifyServerDomainAndCertificates(x509Certificates, domain, String("RSA"), result);
 }
 
 ECode CertificateChainValidator::VerifyServerCertificates(
@@ -205,23 +213,18 @@ ECode CertificateChainValidator::VerifyServerCertificates(
         Logger::E(TAG, "bad certificate chain");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    AutoPtr<ArrayOf<ICertificate*> > serverCertificates = ArrayOf<ICertificate*>::Alloc(certChain->GetLength());
+    AutoPtr<ArrayOf<IX509Certificate*> > serverCertificates = ArrayOf<IX509Certificate*>::Alloc(certChain->GetLength());
     // try {
     AutoPtr<ICertificateFactoryHelper> helper;
     CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&helper);
     AutoPtr<ICertificateFactory> cf;
-    ECode ec = helper->GetInstance(String("X.509"), (ICertificateFactory**)&cf);
-    if (FAILED(ec)) {
-        if (ec == (ECode)E_CERTIFICATE_EXCEPTION) {
-            Logger::E(TAG, "can't read certificate %d", ec);
-            return E_IO_EXCEPTION;
-        }
-        return ec;
-    }
+    helper->GetInstance(String("X.509"), (ICertificateFactory**)&cf);
     for (Int32 i = 0; i < certChain->GetLength(); ++i) {
         AutoPtr<IByteArrayInputStream> newByteArrayInputStream;
         AutoPtr<IArrayOf> oldArray = (*certChain)[i];
-        AutoPtr<ArrayOf<Byte> > newArray = ArrayOf<Byte>::Alloc(Ptr(oldArray)->Func(oldArray->GetLength));
+        Int32 length;
+        oldArray->GetLength(&length);
+        AutoPtr<ArrayOf<Byte> > newArray = ArrayOf<Byte>::Alloc(length);
         for (Int32 j = 0; j < newArray->GetLength(); ++j) {
             AutoPtr<IInterface> obj;
             oldArray->Get(j, (IInterface**)&obj);
@@ -231,7 +234,7 @@ ECode CertificateChainValidator::VerifyServerCertificates(
         }
         CByteArrayInputStream::New(newArray, (IByteArrayInputStream**)&newByteArrayInputStream);
         AutoPtr<ICertificate> certificate;
-        ec = cf->GenerateCertificate(IInputStream::Probe(newByteArrayInputStream), (ICertificate**)&certificate);
+        ECode ec = cf->GenerateCertificate(IInputStream::Probe(newByteArrayInputStream), (ICertificate**)&certificate);
         if (FAILED(ec)) {
             if (ec == (ECode)E_CERTIFICATE_EXCEPTION) {
                 Logger::E(TAG, "can't read certificate %d", ec);
@@ -239,7 +242,7 @@ ECode CertificateChainValidator::VerifyServerCertificates(
             }
             return ec;
         }
-        serverCertificates->Set(i, certificate);
+        serverCertificates->Set(i, IX509Certificate::Probe(certificate));
     }
     // } catch (CertificateException e) {
     // }
@@ -301,7 +304,7 @@ ECode CertificateChainValidator::HandleTrustStorageUpdate()
 }
 
 ECode CertificateChainValidator::VerifyServerDomainAndCertificates(
-    /* [in] */ ArrayOf<ICertificate*>* chain, /* change original type, ArrayOf<IX509Certificate*>, to fill force cast from Certificate[] to X509Certificate[] in java */
+    /* [in] */ ArrayOf<IX509Certificate*>* chain,
     /* [in] */ const String& domain,
     /* [in] */ const String& authType,
     /* [out] */ ISslError** result)
@@ -309,7 +312,7 @@ ECode CertificateChainValidator::VerifyServerDomainAndCertificates(
     VALIDATE_NOT_NULL(result);
 
     // check if the first certificate in the chain is for this site
-    AutoPtr<IX509Certificate> currCertificate = IX509Certificate::Probe((*chain)[0]);
+    AutoPtr<IX509Certificate> currCertificate = (*chain)[0];
     if (currCertificate == NULL) {
         Logger::E(TAG, "certificate for this site is null");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -370,7 +373,9 @@ ECode CertificateChainValidator::GetTrustManager(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mTrustManager);
+    *result = mTrustManager;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CertificateChainValidator::CloseSocketThrowException(
