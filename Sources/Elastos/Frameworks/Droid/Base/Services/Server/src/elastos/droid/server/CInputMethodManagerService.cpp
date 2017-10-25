@@ -274,7 +274,7 @@ CInputMethodManagerService::ClientState::ClientState(
             mUid, mPid, (IInputBinding**)&mBinding));
 }
 
-CInputMethodManagerService::ClientState::ToString(
+ECode CInputMethodManagerService::ClientState::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)

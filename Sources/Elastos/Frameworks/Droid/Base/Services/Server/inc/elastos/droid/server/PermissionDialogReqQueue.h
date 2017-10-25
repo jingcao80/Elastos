@@ -58,6 +58,8 @@ public:
 
     CARAPI_(AutoPtr<IPermissionDialog>) GetDialog();
 
+    using Object::NotifyAll;
+
     CARAPI_(void) NotifyAll(
         /* [in] */ Int32 mode);
 

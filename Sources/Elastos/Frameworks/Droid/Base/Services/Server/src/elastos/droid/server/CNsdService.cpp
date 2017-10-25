@@ -25,7 +25,6 @@
 #include <elastos/core/Thread.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/internal/utility/State.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/net/Uri.h>
 #include <elastos/droid/os/Build.h>
 #include <elastos/core/Runnable.h>
@@ -357,7 +356,9 @@ ECode CNsdService::NsdStateMachine::EnabledState::Exit()
 Boolean CNsdService::NsdStateMachine::EnabledState::RequestLimitReached(
     /* [in] */ ClientInfo* clientInfo)
 {
-    if (Ptr(clientInfo->mClientIds)->Func(ISparseArray::GetSize) >= ClientInfo::MAX_LIMIT) {
+    Int32 size;
+    clientInfo->mClientIds->GetSize(&size);
+    if (size >= ClientInfo::MAX_LIMIT) {
         if (DBG) {
             Slogger::E("NsdStateMachine::EnabledState",
                 "Exceeded max outstanding requests %p", clientInfo);
@@ -626,7 +627,7 @@ ECode CNsdService::NsdStateMachine::EnabledState::ProcessMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<NativeEvent> event = reinterpret_cast<NativeEvent*>(obj->Probe(EIID_NativeEvent));
+            AutoPtr<NativeEvent> event = (NativeEvent*)IObject::Probe(obj);
             if (HandleNativeEvent(event->mCode, event->mRaw, event->mCooked)) {
                 result = StateMachine::NOT_HANDLED;
             }
@@ -915,7 +916,9 @@ ECode CNsdService::ClientInfo::ToString(
     sb.Append("mResolvedService ");
     sb.Append(mResolvedService);
     sb.Append("\n");
-    for(Int32 i = 0; i< Ptr(mClientIds)->Func(ISparseArray::GetSize); i++) {
+    Int32 size;
+    mClientIds->GetSize(&size);
+    for(Int32 i = 0; i < size; i++) {
         Int32 clientID;
         mClientIds->KeyAt(i, &clientID);
         sb.Append("clientId ");
@@ -936,8 +939,9 @@ ECode CNsdService::ClientInfo::ToString(
 
 ECode CNsdService::ClientInfo::ExpungeAllRequests()
 {
-    Int32 globalId, clientId, i;
-    for (i = 0; i < Ptr(mClientIds)->Func(mClientIds->GetSize); i++) {
+    Int32 globalId, clientId, size;
+    mClientIds->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         mClientIds->KeyAt(i, &clientId);
         AutoPtr<IInterface> value;
         mClientIds->ValueAt(i, (IInterface**)&value);
@@ -991,10 +995,6 @@ Int32 CNsdService::ClientInfo::GetClientId(
 //====================================================================
 // CNsdService
 //====================================================================
-
-// 2d5d16db-461c-4eec-82ed-9358f877c13f
-extern "C" const InterfaceID EIID_NativeEvent =
-    { 0x2d5d16db, 0x461c, 0x4eec, { 0x82, 0xed, 0x93, 0x58, 0xf8, 0x77, 0xc1, 0x3f } };
 
 const String CNsdService::TAG("NsdService");
 const String CNsdService::MDNS_TAG("mDnsConnector");
@@ -1226,12 +1226,18 @@ Boolean CNsdService::RegisterService(
     // Add TXT records as additional arguments.
     AutoPtr<IMap> txtRecords;
     service->GetAttributes((IMap**)&txtRecords);
-    FOR_EACH(iter, Ptr(txtRecords)->Func(txtRecords->GetKeySet)) {
+    AutoPtr<ISet> keys;
+    txtRecords->GetKeySet((ISet**)&keys);
+    AutoPtr<IIterator> it;
+    keys->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
         String key;
-        ICharSequence::Probe(Ptr(iter)->Func(iter->GetNext))->ToString(&key);
+        ICharSequence::Probe(obj)->ToString(&key);
         // try {
         // TODO: Send encoded TXT record as bytes once NDC/netd supports binary data.
-        AutoPtr<IInterface> obj;
         txtRecords->Get(StringUtils::ParseCharSequence(key), (IInterface**)&obj);
         AutoPtr<IArrayOf> recordValue = IArrayOf::Probe(obj);
         String arg;
@@ -1247,8 +1253,9 @@ Boolean CNsdService::RegisterService(
             if ((ECode)E_UNSUPPORTED_ENCODING_EXCEPTION == ec) {
                 Slogger::E(TAG, "Failed to encode txtRecord %d", ec);
             }
-            else
+            else {
                 return ec;
+            }
         }
         // }
     }

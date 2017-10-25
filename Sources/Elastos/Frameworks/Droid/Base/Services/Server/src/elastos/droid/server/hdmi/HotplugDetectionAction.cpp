@@ -26,7 +26,6 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 
 using Elastos::Core::IInteger32;
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
@@ -34,6 +33,7 @@ using Elastos::Droid::Server::Hdmi::IHdmiControlServiceDevicePollingCallback;
 using Elastos::Droid::Utility::ISlog;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::CBitSet;
+using Elastos::Utility::IIterator;
 using Elastos::Core::ICloneable;
 
 namespace Elastos {
@@ -222,7 +222,10 @@ AutoPtr<IBitSet> HotplugDetectionAction::InfoListToBitSet(
 {
     AutoPtr<IBitSet> set;
     CBitSet::New(NUM_OF_ADDRESS, (IBitSet**)&set);
-    FOR_EACH(it, infoList) {
+    AutoPtr<IIterator> it;
+    infoList->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
@@ -248,7 +251,10 @@ AutoPtr<IBitSet> HotplugDetectionAction::AddressListToBitSet(
 {
     AutoPtr<IBitSet> set;
     CBitSet::New(NUM_OF_ADDRESS, (IBitSet**)&set);
-    FOR_EACH(it, list) {
+    AutoPtr<IIterator> it;
+    list->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         Int32 value;
@@ -340,7 +346,10 @@ ECode HotplugDetectionAction::MayCancelOneTouchRecord(
 {
     AutoPtr<IList> actions;
     GetActions(ECLSID_COneTouchRecordAction, (IList**)&actions);
-    FOR_EACH(it, actions) {
+    AutoPtr<IIterator> it;
+    actions->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<OneTouchRecordAction> action = (OneTouchRecordAction*) IOneTouchRecordAction::Probe(obj);

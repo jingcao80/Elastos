@@ -1607,9 +1607,10 @@ AutoPtr<IMessage> WifiP2pServiceImpl::P2pStateMachine::ObtainMessage(
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> msg;
     helper->Obtain((IMessage**)&msg);
-    Int32 arg2;
-    if (srcMsg != NULL)
+    Int32 arg2 = 0;
+    if (srcMsg != NULL) {
         srcMsg->GetArg2(&arg2);
+    }
     msg->SetArg2(arg2);
     return msg;
 }

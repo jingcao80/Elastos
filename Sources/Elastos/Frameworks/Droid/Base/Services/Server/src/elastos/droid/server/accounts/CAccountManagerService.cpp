@@ -196,7 +196,7 @@ ECode CAccountManagerService::MessageHandler::HandleMessage(
 
     if (what == MESSAGE_TIMED_OUT) {
         Session* session =
-            reinterpret_cast<Session*>(obj.Get());
+                (Session*)IIAccountAuthenticatorResponse::Probe(obj);
         if (session) {
             session->OnTimedOut();
         }
@@ -1311,7 +1311,7 @@ ECode CAccountManagerService::Session::OnResult(
     }
     if (response != NULL) {
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             if (result == NULL) {
                 if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
@@ -2041,7 +2041,8 @@ AutoPtr<CAccountManagerService::UserAccounts> CAccountManagerService::GetUserAcc
 AutoPtr<CAccountManagerService::UserAccounts> CAccountManagerService::GetUserAccounts(
     /* [in] */ Int32 userId)
 {
-    {    AutoLock syncLock(mUsers);
+    {
+        AutoLock syncLock(mUsers);
         AutoPtr<IInterface> obj;
         mUsers->Get(userId, (IInterface**)&obj);
         AutoPtr<UserAccounts> accounts = (UserAccounts*)IObject::Probe(obj);
@@ -2051,7 +2052,6 @@ AutoPtr<CAccountManagerService::UserAccounts> CAccountManagerService::GetUserAcc
         }
         return accounts;
     }
-    return NOERROR;
 }
 
 void CAccountManagerService::OnUserRemoved(
@@ -2163,7 +2163,8 @@ ECode CAccountManagerService::ReadPasswordInternal(
         return NOERROR;
     }
 
-    {    AutoLock syncLock(accounts->mCacheLock);
+    {
+        AutoLock syncLock(accounts->mCacheLock);
         AutoPtr<ISQLiteDatabase> db;
         FAIL_RETURN(accounts->mOpenHelper->GetReadableDatabase((ISQLiteDatabase**)&db))
         AutoPtr<ICursor> cursor;
@@ -2177,7 +2178,7 @@ ECode CAccountManagerService::ReadPasswordInternal(
                 ACCOUNTS_NAME + String("=? AND ") + ACCOUNTS_TYPE+ String("=?"),
                 accounts2, nullStr, nullStr, nullStr, (ICursor**)&cursor))
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             Boolean isMoveToNextOk;
             if (cursor->MoveToNext(&isMoveToNextOk), isMoveToNextOk) {
@@ -3344,12 +3345,13 @@ ECode CAccountManagerService::SaveAuthTokenToDatabase(
     CUserHandle::New(accounts->mUserId, (IUserHandle**)&userH);
     CancelNotification(GetSigninRequiredNotificationId(accounts, account), userH);
 
-    {    AutoLock syncLock(accounts->mCacheLock);
+    {
+        AutoLock syncLock(accounts->mCacheLock);
         AutoPtr<ISQLiteDatabase> db;
         FAIL_RETURN(accounts->mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db))
         db->BeginTransaction();
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             Int64 accountId;
             GetAccountIdLocked(db, account, &accountId);
@@ -4773,7 +4775,7 @@ ECode CAccountManagerService::GetAccountIdLocked(
     FAIL_RETURN(db->Query(TABLE_ACCOUNTS, ss1, String("name=? AND type=?"),
             ss2, nullStr, nullStr, nullStr, (ICursor**)&cursor))
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         Boolean isMoveToNextOk;
         cursor->MoveToNext(&isMoveToNextOk);

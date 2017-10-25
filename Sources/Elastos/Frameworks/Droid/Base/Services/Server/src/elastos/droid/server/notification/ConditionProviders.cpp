@@ -600,7 +600,7 @@ ECode ConditionProviders::SubscribeLocked(
 {
     if (DEBUG) Slogger::D(TAG, "subscribeLocked %p", r);
     AutoPtr<IIConditionProvider> provider = Provider(r);
-    ECode ec;
+    ECode ec = NOERROR;
     if (provider != NULL) {
         // try {
         Slogger::D(TAG, "Subscribing to %p with %p", r->mId.Get(), provider.Get());
@@ -736,7 +736,7 @@ ECode ConditionProviders::UnsubscribeLocked(
 {
     if (DEBUG) Slogger::D(TAG, "unsubscribeLocked %p", r);
     AutoPtr<IIConditionProvider> provider = Provider(r);
-    ECode ec;
+    ECode ec = NOERROR;
     if (provider != NULL) {
         // try {
         ec = provider->OnUnsubscribe(r->mId);

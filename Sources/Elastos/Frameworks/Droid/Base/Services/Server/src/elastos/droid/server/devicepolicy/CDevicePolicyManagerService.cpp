@@ -3832,7 +3832,7 @@ ECode CDevicePolicyManagerService::ClearProfileOwner(
     // Check if this is the profile owner who is calling
     AutoPtr<ActiveAdmin> objNoUse;
     GetActiveAdminForCallerLocked(who, IDeviceAdminInfo::USES_POLICY_PROFILE_OWNER, (ActiveAdmin**)&objNoUse);
-    ECode ec;
+    ECode ec = NOERROR;
     {
         AutoLock syncLock(this);
         Int64 ident = Binder::ClearCallingIdentity();
@@ -3934,7 +3934,11 @@ ECode CDevicePolicyManagerService::SetProfileEnabled(
                     IIntent::FLAG_RECEIVER_FOREGROUND);
             if (FAILED(ec)) break;
             // TODO This should send to parent of profile (which is always owner at the moment).
-            ec = mContext->SendBroadcastAsUser(intent, IUserHandle::USER_OWNER);
+            AutoPtr<IUserHandleHelper> helper;
+            CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+            AutoPtr<IUserHandle> owner;
+            helper->GetOWNER((IUserHandle**)&owner);
+            ec = mContext->SendBroadcastAsUser(intent, owner);
         } while(FALSE);
         // } finally {
         Binder::RestoreCallingIdentity(id);
@@ -4340,7 +4344,7 @@ ECode CDevicePolicyManagerService::SetActivePasswordState(
     AutoPtr<DevicePolicyData> p = GetUserData(userHandle);
     ValidateQualityConstant(quality);
 
-    ECode ec;
+    ECode ec = NOERROR;
     {
         AutoLock syncLock(this);
         if (p->mActivePasswordQuality != quality || p->mActivePasswordLength != length
@@ -4605,7 +4609,7 @@ ECode CDevicePolicyManagerService::EnforceCrossUserPermission(
     /* [in] */ Int32 userHandle)
 {
     if (userHandle < 0) {
-        Logger::E(TAG, "Invalid userId " + userHandle);
+        Logger::E(TAG, "Invalid userId %d", userHandle);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     const Int32 callingUid = Binder::GetCallingUid();
@@ -7343,7 +7347,7 @@ ECode CDevicePolicyManagerService::GetPermittedInputMethodsForCurrentUser(
             inputMethodManager->GetInputMethodList((IList**)&imes);
             Int64 id = Binder::ClearCallingIdentity();
             // try {
-            ECode ec;
+            ECode ec = NOERROR;
             do {
                 AutoPtr<IIPackageManager> pm = AppGlobals::GetPackageManager();
                 if (imes != NULL) {
@@ -7628,7 +7632,7 @@ ECode CDevicePolicyManagerService::SetUserRestriction(
         }
         if (enabled && !alreadyRestricted) {
             // try {
-            ECode ec;
+            ECode ec = NOERROR;
             do {
                 if (IUserManager::DISALLOW_UNMUTE_MICROPHONE.Equals(key)) {
                     String packageName;
@@ -7652,7 +7656,7 @@ ECode CDevicePolicyManagerService::SetUserRestriction(
         }
         Int64 id = Binder::ClearCallingIdentity();
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             if (enabled && !alreadyRestricted) {
                 if (IUserManager::DISALLOW_CONFIG_WIFI.Equals(key)) {

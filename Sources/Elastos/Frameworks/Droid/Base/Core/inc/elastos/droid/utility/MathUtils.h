@@ -50,6 +50,10 @@ public:
         return amount < low ? low : (amount > high ? high : amount);
     }
 
+    static Double Constrain(Double amount, Double low, Double high) {
+        return amount < low ? low : (amount > high ? high : amount);
+    }
+
     static Float Log(Float a) {
         return (Float) Elastos::Core::Math::Log(a);
     }

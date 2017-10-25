@@ -43,8 +43,6 @@ namespace Droid {
 namespace Server {
 namespace Net {
 
-extern "C" const InterfaceID EIID_NetworkStatsCollection;
-
 class NetworkStatsCollection
     : public Object
     , public IFileRotatorReader
@@ -59,6 +57,8 @@ public:
             /* [in] */ Int32 uid,
             /* [in] */ Int32 set,
             /* [in] */ Int32 tag);
+
+        using Object::Equals;
 
         CARAPI_(Boolean) Equals(
             /* [in] */ const Key* o) const;

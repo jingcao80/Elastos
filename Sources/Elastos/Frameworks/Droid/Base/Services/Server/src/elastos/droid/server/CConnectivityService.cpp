@@ -1275,7 +1275,7 @@ ECode CConnectivityService::constructor(
         mNetworksDefined++;
     }
 
-    if (VDBG) Slogger::D(TAG, "mNetworksDefined=" + mNetworksDefined);
+    if (VDBG) Slogger::D(TAG, "mNetworksDefined=%d", mNetworksDefined);
 
     AutoPtr< ArrayOf<Int32> > protectedNetworks;
     resources->GetInt32Array(R::array::config_protectedNetworks, (ArrayOf<Int32>**)&protectedNetworks);

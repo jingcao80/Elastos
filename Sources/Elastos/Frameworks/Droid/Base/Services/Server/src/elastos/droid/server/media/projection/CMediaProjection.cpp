@@ -43,7 +43,7 @@ namespace Projection {
 
 CAR_INTERFACE_IMPL(CMediaProjection::DeathEater, Object, IProxyDeathRecipient)
 
-CMediaProjection::DeathEater::ProxyDied()
+ECode CMediaProjection::DeathEater::ProxyDied()
 {
     mHost->mHost->mCallbackDelegate->Remove(mCallback);
     return mHost->Stop();

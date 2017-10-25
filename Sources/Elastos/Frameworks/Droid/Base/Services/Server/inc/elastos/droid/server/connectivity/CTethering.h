@@ -398,6 +398,8 @@ public:
                     /* [in] */IMessage* m,
                     /* [out]*/Boolean* result);
 
+            using State::Notify;
+
             CARAPI_(void) Notify(
                     /* [in] */Int32 msgType);
 

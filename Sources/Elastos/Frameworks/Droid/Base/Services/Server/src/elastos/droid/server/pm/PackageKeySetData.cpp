@@ -79,7 +79,7 @@ void PackageKeySetData::AddUpgradeKeySet(
     /* [in] */ const String& alias)
 {
     /* must have previously been defined */
-    Int64 ks;
+    Int64 ks = 0;
     HashMap<String, Int64>::Iterator it = mKeySetAliases.Find(alias);
     if (it != mKeySetAliases.End()) {
         ks = it->mSecond;

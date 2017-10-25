@@ -1444,7 +1444,7 @@ AutoPtr< ArrayOf<IUidRange*> > Vpn::UidRangesForUser(
         range->GetStart(&ls);
         range->GetStop(&le);
 
-        if (ls >= ls && le <= re) {
+        if (ls >= rs && le <= re) {
             ranges->Add(range);
         }
     }

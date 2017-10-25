@@ -27,7 +27,6 @@
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/app/ActivityManagerNative.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/os/SystemClock.h>
@@ -71,6 +70,7 @@ using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::SystemClock;
@@ -89,8 +89,10 @@ using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::ICollection;
 using Elastos::Utility::IList;
 using Elastos::Utility::ISet;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastosx::Net::Ssl::ITrustManager;
@@ -216,9 +218,17 @@ TrustManagerService::InnerSub_ITrustManager::InnerSub_Runnable::InnerSub_Runnabl
 ECode TrustManagerService::InnerSub_ITrustManager::InnerSub_Runnable::Run()
 {
     mFout->Println(String("Trust manager state:"));
-    FOR_EACH(iter, mUserInfos) {
-        AutoPtr<IUserInfo> user = IUserInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        mHost->DumpUser(mFout, user, Ptr(user)->Func(user->GetId) == Ptr(mCurrentUser)->Func(mCurrentUser->GetId));
+    AutoPtr<IIterator> it;
+    mUserInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IUserInfo* user = IUserInfo::Probe(obj);
+        Int32 userId, currId;
+        user->GetId(&userId);
+        mCurrentUser->GetId(&currId);
+        mHost->DumpUser(mFout, user, userId == currId);
     }
     return NOERROR;
 }
@@ -333,31 +343,44 @@ ECode TrustManagerService::InnerSub_ITrustManager::DumpUser(
     /* [in] */ Boolean isCurrent)
 {
     AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, StringUtils::ParseCharSequence(Ptr(user)->Func(user->GetName)));
+    String name;
+    user->GetName(&name);
+    args->Set(0, StringUtils::ParseCharSequence(name));
+    Int32 userId;
+    user->GetId(&userId);
     AutoPtr<IInteger32> i32;
-    CInteger32::New(Ptr(user)->Func(user->GetId), (IInteger32**)&i32);
+    CInteger32::New(userId, (IInteger32**)&i32);
     args->Set(1, i32);
+    Int32 flags;
+    user->GetFlags(&flags);
     i32 = NULL;
-    CInteger32::New(Ptr(user)->Func(user->GetFlags), (IInteger32**)&i32);
+    CInteger32::New(flags, (IInteger32**)&i32);
     args->Set(2, i32);
     fout->Printf(String(" User \"%s\" (id=%d, flags=%#x)"), args);
     if (isCurrent) {
         fout->Print(String(" (current)"));
     }
-    fout->Print(String(": trusted=") + DumpBool(mHost->AggregateIsTrusted(Ptr(user)->Func(user->GetId))));
-    fout->Print(String(", trustManaged=") + DumpBool(mHost->AggregateIsTrustManaged(Ptr(user)->Func(user->GetId))));
+    fout->Print(String(": trusted=") + DumpBool(mHost->AggregateIsTrusted(userId)));
+    fout->Print(String(", trustManaged=") + DumpBool(mHost->AggregateIsTrustManaged(userId)));
     fout->Println();
     fout->Println(String("   Enabled agents:"));
     Boolean duplicateSimpleNames = FALSE;
     AutoPtr<IArraySet> simpleNames;
     CArraySet::New((IArraySet**)&simpleNames);
-    FOR_EACH(iter, mHost->mActiveAgents) {
-        AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (info->mUserId != Ptr(user)->Func(user->GetId)) { continue; }
+    AutoPtr<IIterator> it;
+    mHost->mActiveAgents->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
+        if (info->mUserId != userId) { continue; }
         Boolean trusted;
         info->mAgent->IsTrusted(&trusted);
         fout->Print(String("    "));
-        fout->Println(Ptr(info->mComponent)->Func(IComponentName::FlattenToShortString));
+        String component;
+        info->mComponent->FlattenToShortString(&component);
+        fout->Println(component);
         Boolean b;
         info->mAgent->IsBound(&b);
         fout->Print(String("     bound=") + DumpBool(b));
@@ -389,7 +412,7 @@ ECode TrustManagerService::InnerSub_ITrustManager::DumpUser(
         }
     }
     fout->Println(String("   Events:"));
-    mHost->mArchive->Dump(fout, 50, Ptr(user)->Func(user->GetId), String("    ") /* linePrefix */, duplicateSimpleNames);
+    mHost->mArchive->Dump(fout, 50, userId, String("    ") /* linePrefix */, duplicateSimpleNames);
     fout->Println();
     return NOERROR;
 }
@@ -526,7 +549,9 @@ ECode TrustManagerService::OnBootPhase(
     Boolean isSafeMode;
     IsSafeMode(&isSafeMode);
     if (phase == ISystemService::PHASE_SYSTEM_SERVICES_READY && !isSafeMode) {
-        mPackageMonitor->Register(mContext, Ptr(mHandler)->Func(mHandler->GetLooper), UserHandle::ALL, TRUE);
+        AutoPtr<ILooper> looper;
+        mHandler->GetLooper((ILooper**)&looper);
+        mPackageMonitor->Register(mContext, looper, UserHandle::ALL, TRUE);
         mReceiver->Register(mContext);
         RefreshAgentList(IUserHandle::USER_ALL);
     }
@@ -540,9 +565,15 @@ ECode TrustManagerService::UpdateTrustAll()
 {
     AutoPtr<IList> userInfos;
     mUserManager->GetUsers(TRUE /* excludeDying */, (IList**)&userInfos);
-    FOR_EACH(iter, userInfos) {
-        AutoPtr<IUserInfo> userInfo = IUserInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        UpdateTrust(Ptr(userInfo)->Func(userInfo->GetId), FALSE);
+    AutoPtr<IIterator> it;
+    userInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> user;
+        it->GetNext((IInterface**)&user);
+        Int32 userId;
+        IUserInfo::Probe(user)->GetId(&userId);
+        UpdateTrust(userId, FALSE);
     }
     return NOERROR;
 }
@@ -581,29 +612,43 @@ ECode TrustManagerService::RefreshAgentList(
     AutoPtr<IArraySet> obsoleteAgents;
     CArraySet::New((IArraySet**)&obsoleteAgents);
     obsoleteAgents->AddAll(mActiveAgents);
-    FOR_EACH(iter, userInfos) {
-        AutoPtr<IUserInfo> userInfo = IUserInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (!Ptr(userInfo)->Func(userInfo->SupportsSwitchTo)) continue;
+    AutoPtr<IIterator> it;
+    userInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IUserInfo* userInfo = IUserInfo::Probe(obj);
+        Boolean switchTo;
+        userInfo->SupportsSwitchTo(&switchTo);
+        if (!switchTo) continue;
+        Int32 userId;
+        userInfo->GetId(&userId);
         Int32 quality;
-        lockPatternUtils->GetKeyguardStoredPasswordQuality(Ptr(userInfo)->Func(userInfo->GetId), &quality);
+        lockPatternUtils->GetKeyguardStoredPasswordQuality(userId, &quality);
         if (quality == IDevicePolicyManager::PASSWORD_QUALITY_UNSPECIFIED) continue;
         Boolean b;
-        mUserHasAuthenticatedSinceBoot->Get(Ptr(userInfo)->Func(userInfo->GetId), &b);
+        mUserHasAuthenticatedSinceBoot->Get(userId, &b);
         if (!b) continue;
         AutoPtr<IDevicePolicyManager> dpm;
         lockPatternUtils->GetDevicePolicyManager((IDevicePolicyManager**)&dpm);
         Int32 disabledFeatures;
-        dpm->GetKeyguardDisabledFeatures(NULL, Ptr(userInfo)->Func(userInfo->GetId), &disabledFeatures);
+        dpm->GetKeyguardDisabledFeatures(NULL, userId, &disabledFeatures);
         const Boolean disableTrustAgents =
                 (disabledFeatures & IDevicePolicyManager::KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
         AutoPtr<IList> enabledAgents;
-        lockPatternUtils->GetEnabledTrustAgents(Ptr(userInfo)->Func(userInfo->GetId), (IList**)&enabledAgents);
+        lockPatternUtils->GetEnabledTrustAgents(userId, (IList**)&enabledAgents);
         if (enabledAgents == NULL) {
             continue;
         }
-        AutoPtr<IList> resolveInfos = ResolveAllowedTrustAgents(pm, Ptr(userInfo)->Func(userInfo->GetId));
-        FOR_EACH(iter, resolveInfos) {
-            AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+        AutoPtr<IList> resolveInfos = ResolveAllowedTrustAgents(pm, userId);
+        AutoPtr<IIterator> it2;
+        resolveInfos->GetIterator((IIterator**)&it2);
+        Boolean hasNext2;
+        while (it2->HasNext(&hasNext2), hasNext2) {
+            AutoPtr<IInterface> obj;
+            it2->GetNext((IInterface**)&obj);
+            IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
             AutoPtr<IComponentName> name = GetComponentName(resolveInfo);
             Boolean b;
             enabledAgents->Contains(name, &b);
@@ -612,7 +657,7 @@ ECode TrustManagerService::RefreshAgentList(
                 AutoPtr<IList> features;
                 dpm->GetTrustAgentFeaturesEnabled(NULL /* admin */, name, (IList**)&features);
                 // Disable agent if no features are enabled.
-                if (features == NULL || Ptr(features)->Func(features->IsEmpty)) continue;
+                if (features == NULL || (features->IsEmpty(&b), b)) continue;
             }
             AutoPtr<AgentInfo> agentInfo = new AgentInfo();
             agentInfo->mComponent = name;
@@ -626,8 +671,9 @@ ECode TrustManagerService::RefreshAgentList(
                 AutoPtr<IIntent> intent;
                 CIntent::New((IIntent**)&intent);
                 intent->SetComponent(name);
-                agentInfo->mAgent->constructor(mContext, this,
-                        intent, Ptr(userInfo)->Func(userInfo->GetUserHandle));
+                AutoPtr<IUserHandle> userHandle;
+                userInfo->GetUserHandle((IUserHandle**)&userHandle);
+                agentInfo->mAgent->constructor(mContext, this, intent, userHandle);
                 ISet::Probe(mActiveAgents)->Add(TO_IINTERFACE(agentInfo));
             } else {
                 ISet::Probe(obsoleteAgents)->Remove(TO_IINTERFACE(agentInfo));
@@ -635,12 +681,16 @@ ECode TrustManagerService::RefreshAgentList(
         }
     }
     Boolean trustMayHaveChanged = FALSE;
-    for (Int32 i = 0; i < Ptr(ISet::Probe(obsoleteAgents))->Func(ISet::GetSize); i++) {
+    Int32 size;
+    obsoleteAgents->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         obsoleteAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
         if (userId == IUserHandle::USER_ALL || userId == info->mUserId) {
-            if (Ptr(info->mAgent)->Func(info->mAgent->IsManagingTrust)) {
+            Boolean trust;
+            info->mAgent->IsManagingTrust(&trust);
+            if (trust) {
                 trustMayHaveChanged = TRUE;
             }
             info->mAgent->Unbind();
@@ -655,7 +705,9 @@ ECode TrustManagerService::RefreshAgentList(
 
 ECode TrustManagerService::UpdateDevicePolicyFeatures()
 {
-    for (Int32 i = 0; i < Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize); i++) {
+    Int32 size;
+    mActiveAgents->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mActiveAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
@@ -672,13 +724,21 @@ ECode TrustManagerService::RemoveAgentsOfPackage(
     /* [in] */ const String& packageName)
 {
     Boolean trustMayHaveChanged = FALSE;
-    for (Int32 i = Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize) - 1; i >= 0; i--) {
+    Int32 size;
+    mActiveAgents->GetSize(&size);
+    for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mActiveAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
-        if (packageName.Equals(Ptr(info->mComponent)->Func(info->mComponent->GetPackageName))) {
-            Logger::I(TAG, "Resetting agent %s", Ptr(info->mComponent)->Func(info->mComponent->FlattenToShortString).string());
-            if (Ptr(info->mAgent)->Func(info->mAgent->IsManagingTrust)) {
+        String agentPackageName;
+        info->mComponent->GetPackageName(&agentPackageName);
+        if (packageName.Equals(agentPackageName)) {
+            String component;
+            info->mComponent->FlattenToShortString(&component);
+            Logger::I(TAG, "Resetting agent %s", component.string());
+            Boolean trust;
+            info->mAgent->IsManagingTrust(&trust);
+            if (trust) {
                 trustMayHaveChanged = TRUE;
             }
             info->mAgent->Unbind();
@@ -697,15 +757,21 @@ ECode TrustManagerService::ResetAgent(
     /* [in] */ Int32 userId)
 {
     Boolean trustMayHaveChanged = FALSE;
-    for (Int32 i = Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize) - 1; i >= 0; i--) {
+    Int32 size;
+    mActiveAgents->GetSize(&size);
+    for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mActiveAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
         Boolean bEquals;
         IObject::Probe(name)->Equals(info->mComponent, &bEquals);
         if (bEquals && userId == info->mUserId) {
-            Logger::I(TAG, "Resetting agent %s", Ptr(info->mComponent)->Func(info->mComponent->FlattenToShortString).string());
-            if (Ptr(info->mAgent)->Func(info->mAgent->IsManagingTrust)) {
+            String component;
+            info->mComponent->FlattenToShortString(&component);
+            Logger::I(TAG, "Resetting agent %s", component.string());
+            Boolean trust;
+            info->mAgent->IsManagingTrust(&trust);
+            if (trust) {
                 trustMayHaveChanged = TRUE;
             }
             info->mAgent->Unbind();
@@ -729,23 +795,29 @@ ECode TrustManagerService::GetSettingsComponentName(
 
     AutoPtr<IServiceInfo> serviceInfo;
     resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
+    AutoPtr<IBundle> metaData;
     if (resolveInfo == NULL || serviceInfo == NULL
-            || Ptr(IPackageItemInfo::Probe(serviceInfo))->Func(IPackageItemInfo::GetMetaData) == NULL) FUNC_RETURN(NULL);
+            || (IPackageItemInfo::Probe(serviceInfo)->GetMetaData((IBundle**)&metaData), metaData == NULL)) {
+        *result = NULL;
+        return NOERROR;
+    }
     String cn(NULL);
     AutoPtr<IXmlResourceParser> parser;
     ECode caughtException = NOERROR;
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
-        IPackageItemInfo::Probe(Ptr(resolveInfo)->Func(resolveInfo->GetServiceInfo))->LoadXmlMetaData(pm,
+        IPackageItemInfo::Probe(serviceInfo)->LoadXmlMetaData(pm,
                 ITrustAgentService::TRUST_AGENT_META_DATA, (IXmlResourceParser**)&parser);
         if (parser == NULL) {
             Slogger::W(TAG, "Can't find %s meta-data", ITrustAgentService::TRUST_AGENT_META_DATA.string());
             *result = NULL;
             return NOERROR;
         }
+        AutoPtr<IApplicationInfo> appInfo;
+        IComponentInfo::Probe(serviceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
         AutoPtr<IResources> res;
-        ec = pm->GetResourcesForApplication(Ptr(IComponentInfo::Probe(serviceInfo))->Func(IComponentInfo::GetApplicationInfo), (IResources**)&res);
+        ec = pm->GetResourcesForApplication(appInfo, (IResources**)&res);
         if (FAILED(ec)) break;
         AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(IXmlPullParser::Probe(parser));
         Int32 type;
@@ -799,9 +871,9 @@ ECode TrustManagerService::GetSettingsComponentName(
     // }
     if (FAILED(ec)) return ec;
     if (caughtException != NOERROR) {
-        AutoPtr<IServiceInfo> serviceInfo;
-        resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
-        Slogger::W(TAG, "Error parsing : %s %d", Ptr(IPackageItemInfo::Probe(serviceInfo))->Func(IPackageItemInfo::GetPackageName).string(), caughtException);
+        String packageName;
+        IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&packageName);
+        Slogger::W(TAG, "Error parsing : %s %d", packageName.string(), caughtException);
         *result = NULL;
         return NOERROR;
     }
@@ -810,11 +882,9 @@ ECode TrustManagerService::GetSettingsComponentName(
         return NOERROR;
     }
     if (cn.IndexOf('/') < 0) {
-        AutoPtr<IServiceInfo> serviceInfo;
-        resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
-        String s;
-        IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&s);
-        cn = s + "/" + cn;
+        String packageName;
+        IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&packageName);
+        cn = packageName + "/" + cn;
     }
     AutoPtr<IComponentNameHelper> helper;
     CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
@@ -828,10 +898,10 @@ AutoPtr<IComponentName> TrustManagerService::GetComponentName(
     AutoPtr<IServiceInfo> serviceInfo;
     resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
     if (resolveInfo == NULL || serviceInfo == NULL) return NULL;
-    String s;
-    IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&s);
-    CComponentName::New(Ptr(IPackageItemInfo::Probe(serviceInfo))->Func(IPackageItemInfo::GetPackageName),
-            Ptr(IPackageItemInfo::Probe(serviceInfo))->Func(IPackageItemInfo::GetName), (IComponentName**)&rev);
+    String packageName, name;
+    IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&packageName);
+    IPackageItemInfo::Probe(serviceInfo)->GetName(&name);
+    CComponentName::New(packageName, name, (IComponentName**)&rev);
     return rev;
 }
 
@@ -839,8 +909,10 @@ ECode TrustManagerService::MaybeEnableFactoryTrustAgents(
     /* [in] */ ILockPatternUtils* utils,
     /* [in] */ Int32 userId)
 {
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
     Int32 value;
-    Settings::Secure::GetInt32ForUser(Ptr(mContext)->Func(mContext->GetContentResolver),
+    Settings::Secure::GetInt32ForUser(resolver,
             ISettingsSecure::TRUST_AGENTS_INITIALIZED, 0, userId, &value);
     if (0 != value) {
         return NOERROR;
@@ -850,13 +922,20 @@ ECode TrustManagerService::MaybeEnableFactoryTrustAgents(
     AutoPtr<IList> resolveInfos = ResolveAllowedTrustAgents(pm, userId);
     AutoPtr<IArraySet> discoveredAgents;
     CArraySet::New((IArraySet**)&discoveredAgents);
-    FOR_EACH(iter, resolveInfos) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    resolveInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         AutoPtr<IComponentName> componentName = GetComponentName(resolveInfo);
-        Int32 applicationInfoFlags;
         AutoPtr<IServiceInfo> serviceInfo;
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
-        Ptr(IComponentInfo::Probe(serviceInfo))->Func(IComponentInfo::GetApplicationInfo)->GetFlags(&applicationInfoFlags);
+        AutoPtr<IApplicationInfo> appInfo;
+        IComponentInfo::Probe(serviceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        Int32 applicationInfoFlags;
+        appInfo->GetFlags(&applicationInfoFlags);
         if ((applicationInfoFlags & IApplicationInfo::FLAG_SYSTEM) == 0) {
             Logger::I(TAG, "Leaving agent %s disabled because package is not a system package.", TO_CSTR(componentName));
             continue;
@@ -870,7 +949,7 @@ ECode TrustManagerService::MaybeEnableFactoryTrustAgents(
     }
     utils->SetEnabledTrustAgents(ICollection::Probe(discoveredAgents), userId);
     Boolean bNoUse;
-    Settings::Secure::PutInt32ForUser(Ptr(mContext)->Func(mContext->GetContentResolver),
+    Settings::Secure::PutInt32ForUser(resolver,
             ISettingsSecure::TRUST_AGENTS_INITIALIZED, 1, userId, &bNoUse);
     return NOERROR;
 }
@@ -882,14 +961,23 @@ AutoPtr<IList> TrustManagerService::ResolveAllowedTrustAgents(
     AutoPtr<IList> resolveInfos;
     pm->QueryIntentServicesAsUser(TRUST_AGENT_INTENT,
             0 /* flags */, userId, (IList**)&resolveInfos);
+    Int32 size;
+    resolveInfos->GetSize(&size);
     AutoPtr<IArrayList> allowedAgents;
-    CArrayList::New(Ptr(resolveInfos)->Func(resolveInfos->GetSize), (IArrayList**)&allowedAgents);
-    FOR_EACH(iter, resolveInfos) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    CArrayList::New(size, (IArrayList**)&allowedAgents);
+    AutoPtr<IIterator> it;
+    resolveInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         AutoPtr<IServiceInfo> serviceInfo;
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
         if (serviceInfo == NULL) continue;
-        if (Ptr(IComponentInfo::Probe(serviceInfo))->Func(IComponentInfo::GetApplicationInfo) == NULL) continue;
+        AutoPtr<IApplicationInfo> appInfo;
+        IComponentInfo::Probe(serviceInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        if (appInfo == NULL) continue;
         String packageName;
         IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&packageName);
         Int32 permission;
@@ -912,12 +1000,16 @@ Boolean TrustManagerService::AggregateIsTrusted(
     if (!b) {
         return FALSE;
     }
-    for (Int32 i = 0; i < Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize); i++) {
+    Int32 size;
+    mActiveAgents->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mActiveAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
         if (info->mUserId == userId) {
-            if (Ptr(info->mAgent)->Func(info->mAgent->IsTrusted)) {
+            Boolean trusted;
+            info->mAgent->IsTrusted(&trusted);
+            if (trusted) {
                 return TRUE;
             }
         }
@@ -933,12 +1025,16 @@ Boolean TrustManagerService::AggregateIsTrustManaged(
     if (!b) {
             return FALSE;
     }
-    for (Int32 i = 0; i < Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize); i++) {
+    Int32 size;
+    mActiveAgents->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mActiveAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
         if (info->mUserId == userId) {
-            if (Ptr(info->mAgent)->Func(info->mAgent->IsManagingTrust)) {
+            Boolean trust;
+            info->mAgent->IsManagingTrust(&trust);
+            if (trust) {
                 return TRUE;
             }
         }
@@ -950,7 +1046,9 @@ ECode TrustManagerService::DispatchUnlockAttempt(
     /* [in] */ Boolean successful,
     /* [in] */ Int32 userId)
 {
-    for (Int32 i = 0; i < Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize); i++) {
+    Int32 size;
+    mActiveAgents->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mActiveAgents->GetValueAt(i, (IInterface**)&obj);
         AutoPtr<AgentInfo> info = (AgentInfo*)IAgentInfo::Probe(obj);
@@ -992,7 +1090,9 @@ ECode TrustManagerService::RequireCredentialEntry(
 ECode TrustManagerService::AddListener(
     /* [in] */ IITrustListener* listener)
 {
-    for (Int32 i = 0; i < Ptr(mTrustListeners)->Func(mTrustListeners->GetSize); i++) {
+    Int32 size;
+    mTrustListeners->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mTrustListeners->Get(i, (IInterface**)&obj);
         if (IBinder::Probe(obj) == IBinder::Probe(listener)) {
@@ -1007,7 +1107,9 @@ ECode TrustManagerService::AddListener(
 ECode TrustManagerService::RemoveListener(
     /* [in] */ IITrustListener* listener)
 {
-    for (Int32 i = 0; i < Ptr(mTrustListeners)->Func(IArrayList::GetSize); i++) {
+    Int32 size;
+    mTrustListeners->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mTrustListeners->Get(i, (IInterface**)&obj);
         if (IBinder::Probe(obj) == IBinder::Probe(listener)) {
@@ -1024,7 +1126,9 @@ ECode TrustManagerService::DispatchOnTrustChanged(
     /* [in] */ Boolean initiatedByUser)
 {
     if (!enabled) initiatedByUser = FALSE;
-    for (Int32 i = 0; i < Ptr(mTrustListeners)->Func(IArrayList::GetSize); i++) {
+    Int32 size;
+    mTrustListeners->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
         // try {
         ECode ec;
         do {
@@ -1057,8 +1161,10 @@ ECode TrustManagerService::DispatchOnTrustManagedChanged(
     /* [in] */ Boolean managed,
     /* [in] */ Int32 userId)
 {
-    for (Int32 i = 0; i < Ptr(mTrustListeners)->Func(IArrayList::GetSize); i++) {
-        ECode ec;
+    Int32 size;
+    mTrustListeners->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        ECode ec = NOERROR;
         // try {
         do {
             AutoPtr<IInterface> obj;

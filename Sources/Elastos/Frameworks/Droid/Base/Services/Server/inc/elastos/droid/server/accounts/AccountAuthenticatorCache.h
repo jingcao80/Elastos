@@ -83,6 +83,9 @@ public:
         /* [in] */ IAttributeSet* attrs,
         /* [out] */ IInterface** attributes);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+
     CARAPI GetServiceInfo(
         /* [in] */ IAuthenticatorDescription* type,
         /* [in] */ Int32 userId,
@@ -91,6 +94,8 @@ public:
     CARAPI GetAllServices(
         /* [in] */ Int32 userId,
         /* [out] */ ICollection** result);
+
+#pragma clang diagnostic pop
 
     CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,

@@ -569,8 +569,8 @@ void NotificationUsageStats::SQLiteLog::PrintPostFrequencies(
     AutoPtr<ICursor> cursor;
     db->RawQuery(q, NULL, (ICursor**)&cursor);
     // try {
-    Boolean res1, res2, res3;
-    for ((cursor->MoveToFirst(&res1), res1); (cursor->IsAfterLast(&res2), !res2); (cursor->MoveToNext(&res3), res3)) {
+    Boolean res;
+    for (cursor->MoveToFirst(&res); (cursor->IsAfterLast(&res), !res); cursor->MoveToNext(&res)) {
         Int32 userId;
         cursor->GetInt32(0, &userId);
         String pkg;

@@ -352,8 +352,8 @@ ECode CLockSettingsService::UserAddedBroadcastReceiver::OnReceive(
     intent->GetAction(&action);
     if (action.Equals(IIntent::ACTION_USER_ADDED)) {
         Int32 userHandle;
-        Int32 userSysUid = UserHandle::GetUid(userHandle, IProcess::SYSTEM_UID);
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &userHandle);
+        Int32 userSysUid = UserHandle::GetUid(userHandle, IProcess::SYSTEM_UID);
 
         AutoPtr<IKeyStoreHelper> helper;
         CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);

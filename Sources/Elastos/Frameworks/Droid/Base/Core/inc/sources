@@ -121,7 +121,6 @@ EXPORT_HEADERS += elastos/droid/media/session/MediaSessionCallback.h
 
 EXPORT_HEADERS += elastos/droid/net/Uri.h
 EXPORT_HEADERS += elastos/droid/net/ConnectivityManagerNetworkCallback.h
-EXPORT_HEADERS += elastos/droid/net/ReturnOutValue.h
 EXPORT_HEADERS += elastos/droid/net/NetworkUtils.h
 EXPORT_HEADERS += elastos/droid/net/NetworkAgent.h
 EXPORT_HEADERS += elastos/droid/net/NetworkFactory.h

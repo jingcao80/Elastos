@@ -22,15 +22,14 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Internal.h>
 #include <Elastos.Droid.Utility.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/core/Runnable.h>
 #include <elastos/droid/os/ServiceManager.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CObject;
@@ -66,6 +65,7 @@ using Elastos::Utility::CLinkedList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::ICollections;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
@@ -152,7 +152,9 @@ ECode TvInputHardwareManager::Connection::GetHardwareInfoLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mHardwareInfo)
+    *result = mHardwareInfo;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetInfoLocked(
@@ -160,7 +162,9 @@ ECode TvInputHardwareManager::Connection::GetInfoLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mInfo)
+    *result = mInfo;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetHardwareLocked(
@@ -168,7 +172,9 @@ ECode TvInputHardwareManager::Connection::GetHardwareLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mHardware)
+    *result = mHardware;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetHardwareImplLocked(
@@ -176,7 +182,9 @@ ECode TvInputHardwareManager::Connection::GetHardwareImplLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mHardware)
+    *result = mHardware;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetCallbackLocked(
@@ -184,7 +192,9 @@ ECode TvInputHardwareManager::Connection::GetCallbackLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mCallback)
+    *result = mCallback;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetConfigsLocked(
@@ -192,7 +202,9 @@ ECode TvInputHardwareManager::Connection::GetConfigsLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mConfigs)
+    *result = mConfigs;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetCallingUidLocked(
@@ -200,7 +212,8 @@ ECode TvInputHardwareManager::Connection::GetCallingUidLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mCallingUid)
+    *result = mCallingUid;
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::GetResolvedUserIdLocked(
@@ -208,7 +221,8 @@ ECode TvInputHardwareManager::Connection::GetResolvedUserIdLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mResolvedUserId)
+    *result = mResolvedUserId;
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::SetOnFirstFrameCapturedLocked(
@@ -223,12 +237,15 @@ ECode TvInputHardwareManager::Connection::GetOnFirstFrameCapturedLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mOnFirstFrameCaptured)
+    *result = mOnFirstFrameCaptured;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::Connection::ProxyDied()
 {
-    {    AutoLock syncLock(mHost->mLock);
+    {
+        AutoLock syncLock(mHost->mLock);
         return ResetLocked(NULL, NULL, NULL, NULL, NULL);
     }
     return NOERROR;
@@ -262,7 +279,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::InnerSub_AudioManagerOnAudioP
 
 ECode TvInputHardwareManager::TvInputHardwareImpl::InnerSub_AudioManagerOnAudioPortUpdateListener::OnServiceDied()
 {
-    {    AutoLock syncLock(mHost->mImplLock);
+    {
+        AutoLock syncLock(mHost->mImplLock);
         mHost->mAudioSource = NULL;
         mHost->mAudioSink = NULL;
         mHost->mAudioPatch = NULL;
@@ -296,8 +314,12 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::constructor(
 {
     mInfo = info;
     mHost->mAudioManager->RegisterAudioPortUpdateListener(mAudioListener);
-    if (Ptr(mInfo)->Func(mInfo->GetAudioType) != IAudioManager::DEVICE_NONE) {
-        FindAudioDevicePort(Ptr(mInfo)->Func(mInfo->GetAudioType), Ptr(mInfo)->Func(mInfo->GetAudioAddress), (IAudioDevicePort**)&mAudioSource);
+    Int32 type;
+    mInfo->GetAudioType(&type);
+    if (type != IAudioManager::DEVICE_NONE) {
+        String address;
+        mInfo->GetAudioAddress(&address);
+        FindAudioDevicePort(type, address, (IAudioDevicePort**)&mAudioSource);
         FindAudioSinkFromAudioPolicy((IAudioDevicePort**)&mAudioSink);
     }
     return NOERROR;
@@ -315,11 +337,19 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::FindAudioSinkFromAudioPolicy(
     if (status == IAudioManager::SUCCESS) {
         Int32 sinkDevice;
         mHost->mAudioManager->GetDevicesForStream(IAudioManager::STREAM_MUSIC, &sinkDevice);
-        FOR_EACH(iter, devicePorts) {
-            AutoPtr<IAudioPort> port = IAudioPort::Probe(Ptr(iter)->Func(iter->GetNext));
-            AutoPtr<IAudioDevicePort> devicePort = IAudioDevicePort::Probe(port);
-            if ((Ptr(devicePort)->Func(devicePort->Type) & sinkDevice) != 0) {
-                FUNC_RETURN(devicePort)
+        AutoPtr<IIterator> it;
+        devicePorts->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> port;
+            it->GetNext((IInterface**)&port);
+            IAudioDevicePort* devicePort = IAudioDevicePort::Probe(port);
+            Int32 type;
+            devicePort->Type(&type);
+            if ((type & sinkDevice) != 0) {
+                *result = devicePort;
+                REFCOUNT_ADD(*result);
+                return NOERROR;
             }
         }
     }
@@ -346,11 +376,21 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::FindAudioDevicePort(
         *result = NULL;
         return NOERROR;
     }
-    FOR_EACH(iter, devicePorts) {
-        AutoPtr<IAudioPort> port = IAudioPort::Probe(Ptr(iter)->Func(iter->GetNext));
-        AutoPtr<IAudioDevicePort> devicePort = IAudioDevicePort::Probe(port);
-        if (Ptr(devicePort)->Func(devicePort->Type) == type && Ptr(devicePort)->Func(devicePort->Address).Equals(address)) {
-            FUNC_RETURN(devicePort)
+    AutoPtr<IIterator> it;
+    devicePorts->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> port;
+        it->GetNext((IInterface**)&port);
+        IAudioDevicePort* devicePort = IAudioDevicePort::Probe(port);
+        Int32 deviceType;
+        devicePort->Type(&deviceType);
+        String deviceAddress;
+        devicePort->Address(&deviceAddress);
+        if (deviceType == type && deviceAddress.Equals(address)) {
+            *result = devicePort;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
     *result = NULL;
@@ -359,7 +399,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::FindAudioDevicePort(
 
 ECode TvInputHardwareManager::TvInputHardwareImpl::ReleaseResources()
 {
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         mHost->mAudioManager->UnregisterAudioPortUpdateListener(mAudioListener);
         if (mAudioPatch != NULL) {
             Int32 iNoUse;
@@ -379,7 +420,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::SetSurface(
     VALIDATE_NOT_NULL(rev)
     *rev = FALSE;
 
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         if (mReleased) {
             Logger::E(TAG, "Device already released.");
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -394,19 +436,23 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::SetSurface(
         }
         Int32 result = TvInputHal::ERROR_UNKNOWN;
         if (surface == NULL) {
-            mHost->mHal->RemoveStream(Ptr(mInfo)->Func(mInfo->GetDeviceId), mActiveConfig, &result);
+            Int32 deviceId;
+            mInfo->GetDeviceId(&deviceId);
+            mHost->mHal->RemoveStream(deviceId, mActiveConfig, &result);
             mActiveConfig = NULL;
         }
         else {
+            Int32 deviceId;
+            mInfo->GetDeviceId(&deviceId);
             if (config != mActiveConfig && mActiveConfig != NULL) {
-                mHost->mHal->RemoveStream(Ptr(mInfo)->Func(mInfo->GetDeviceId), mActiveConfig, &result);
+                mHost->mHal->RemoveStream(deviceId, mActiveConfig, &result);
                 if (result != TvInputHal::SUCCESS) {
                     mActiveConfig = NULL;
                     *rev = FALSE;
                     return NOERROR;
                 }
             }
-            mHost->mHal->AddStream(Ptr(mInfo)->Func(mInfo->GetDeviceId), surface, config, &result);
+            mHost->mHal->AddStream(deviceId, surface, config, &result);
             if (result == TvInputHal::SUCCESS) {
                 mActiveConfig = config;
             }
@@ -441,30 +487,35 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioConfigLocked()
         AutoPtr<IAudioGain> sourceGain;
         for (Int32 i = 0; i < gains->GetLength(); ++i) {
             AutoPtr<IAudioGain> gain = (*gains)[i];
-            if ((Ptr(gain)->Func(gain->Mode) & IAudioGain::MODE_JOINT) != 0) {
+            Int32 mode;
+            gain->Mode(&mode);
+            if ((mode & IAudioGain::MODE_JOINT) != 0) {
                 sourceGain = gain;
                 break;
             }
         }
         // NOTE: we only change the source gain in MODE_JOINT here.
         if (sourceGain != NULL) {
-            Int32 steps = (Ptr(sourceGain)->Func(sourceGain->MaxValue) - Ptr(sourceGain)->Func(sourceGain->MinValue))
-                    / Ptr(sourceGain)->Func(sourceGain->StepValue);
-            Int32 gainValue;
-            sourceGain->MinValue(&gainValue);
+            Int32 maxValue, minValue, stepValue;
+            sourceGain->MaxValue(&maxValue);
+            sourceGain->MinValue(&minValue);
+            sourceGain->StepValue(&stepValue);
+            Int32 steps = (maxValue - minValue) / stepValue;
+            Int32 gainValue = minValue;
             if (mVolume < 1.0f) {
-                gainValue += Ptr(sourceGain)->Func(sourceGain->StepValue) * (Int32) (mVolume * steps + 0.5);
+                gainValue += stepValue * (Int32) (mVolume * steps + 0.5);
             } else {
-                sourceGain->MaxValue(&gainValue);
+                gainValue = maxValue;
             }
-            Int32 numChannels = 0;
-            for (Int32 mask = Ptr(sourceGain)->Func(sourceGain->ChannelMask); mask > 0; mask >>= 1) {
+            Int32 numChannels = 0, mask;
+            for (sourceGain->ChannelMask(&mask); mask > 0; mask >>= 1) {
                 numChannels += (mask & 1);
             }
             AutoPtr<ArrayOf<Int32> > gainValues = ArrayOf<Int32>::Alloc(numChannels);
             Arrays::Fill(gainValues, gainValue);
+            sourceGain->ChannelMask(&mask);
             sourceGain->BuildConfig(IAudioGain::MODE_JOINT,
-                    Ptr(sourceGain)->Func(sourceGain->ChannelMask), gainValues, 0, (IAudioGainConfig**)&sourceGainConfig);
+                    mask, gainValues, 0, (IAudioGainConfig**)&sourceGainConfig);
         } else {
             Slogger::W(TAG, "No audio source gain with MODE_JOINT support exists.");
         }
@@ -476,13 +527,14 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioConfigLocked()
     AutoPtr<ArrayOf<IAudioPatch*> > audioPatchArray = ArrayOf<IAudioPatch*>::Alloc(1);
     audioPatchArray->Set(0, mAudioPatch);
     Boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated;
+    Int32 value;
     if (sinkConfig == NULL
             || (mDesiredSamplingRate != 0
-                    && Ptr(sinkConfig)->Func(sinkConfig->SamplingRate) != mDesiredSamplingRate)
+                    && (sinkConfig->SamplingRate(&value), value != mDesiredSamplingRate))
             || (mDesiredChannelMask != IAudioFormat::CHANNEL_OUT_DEFAULT
-                    && Ptr(sinkConfig)->Func(sinkConfig->ChannelMask) != mDesiredChannelMask)
+                    && (sinkConfig->ChannelMask(&value), value != mDesiredChannelMask))
             || (mDesiredFormat != IAudioFormat::ENCODING_DEFAULT
-                    && Ptr(sinkConfig)->Func(sinkConfig->Format) != mDesiredFormat)) {
+                    && (sinkConfig->Format(&value), value != mDesiredFormat))) {
         AutoPtr<IAudioDevicePortConfig> tmp;
         mAudioSource->BuildConfig(mDesiredSamplingRate, mDesiredChannelMask,
                 mDesiredFormat, NULL, (IAudioDevicePortConfig**)&tmp);
@@ -490,9 +542,12 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioConfigLocked()
         shouldRecreateAudioPatch = TRUE;
     }
     if (sourceConfig == NULL || sourceGainConfig != NULL) {
+        Int32 rate, mask, format;
+        sinkConfig->SamplingRate(&rate);
+        sinkConfig->ChannelMask(&mask);
+        sinkConfig->Format(&format);
         AutoPtr<IAudioDevicePortConfig> tmp;
-        mAudioSource->BuildConfig(Ptr(sinkConfig)->Func(sinkConfig->SamplingRate),
-                Ptr(sinkConfig)->Func(sinkConfig->ChannelMask), Ptr(sinkConfig)->Func(sinkConfig->Format), sourceGainConfig, (IAudioDevicePortConfig**)&tmp);
+        mAudioSource->BuildConfig(rate, mask, format, sourceGainConfig, (IAudioDevicePortConfig**)&tmp);
         sourceConfig = IAudioPortConfig::Probe(tmp);
         shouldRecreateAudioPatch = TRUE;
     }
@@ -530,13 +585,16 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::DispatchKeyEventToHdmi(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         if (mReleased) {
             Logger::E(TAG, "Device already released.");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
-    if (Ptr(mInfo)->Func(mInfo->GetType) != ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI) {
+    Int32 type;
+    mInfo->GetType(&type);
+    if (type != ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI) {
         *result = FALSE;
         return NOERROR;
     }
@@ -553,7 +611,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::StartCapture(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         if (mReleased) {
             *result = FALSE;
             return NOERROR;
@@ -562,12 +621,16 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::StartCapture(
             *result = FALSE;
             return NOERROR;
         }
-        if (Ptr(config)->Func(config->GetType) != ITvStreamConfig::STREAM_TYPE_BUFFER_PRODUCER) {
+        Int32 type;
+        config->GetType(&type);
+        if (type != ITvStreamConfig::STREAM_TYPE_BUFFER_PRODUCER) {
             *result = FALSE;
             return NOERROR;
         }
+        Int32 deviceId;
+        mInfo->GetDeviceId(&deviceId);
         Int32 status;
-        mHost->mHal->AddStream(Ptr(mInfo)->Func(mInfo->GetDeviceId), surface, config, &status);
+        mHost->mHal->AddStream(deviceId, surface, config, &status);
         *result = status == TvInputHal::SUCCESS;
         return NOERROR;
     }
@@ -581,7 +644,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::StopCapture(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         if (mReleased) {
             *result = FALSE;
             return NOERROR;
@@ -590,8 +654,10 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::StopCapture(
             *result = FALSE;
             return NOERROR;
         }
+        Int32 deviceId;
+        mInfo->GetDeviceId(&deviceId);
         Int32 status;
-        mHost->mHal->RemoveStream(Ptr(mInfo)->Func(mInfo->GetDeviceId), config, &status);
+        mHost->mHal->RemoveStream(deviceId, config, &status);
         return status == TvInputHal::SUCCESS;
     }
     return NOERROR;
@@ -603,14 +669,19 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioSourceLocked(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    if (Ptr(mInfo)->Func(mInfo->GetAudioType) == IAudioManager::DEVICE_NONE) {
+    Int32 type;
+    mInfo->GetAudioType(&type);
+    if (type == IAudioManager::DEVICE_NONE) {
         *result = FALSE;
         return NOERROR;
     }
     AutoPtr<IAudioDevicePort> previousSource = mAudioSource;
-    FindAudioDevicePort(Ptr(mInfo)->Func(mInfo->GetAudioType), Ptr(mInfo)->Func(mInfo->GetAudioAddress), (IAudioDevicePort**)&mAudioSource);
-    if (mAudioSource == NULL)
+    String address;
+    mInfo->GetAudioAddress(&address);
+    FindAudioDevicePort(type, address, (IAudioDevicePort**)&mAudioSource);
+    if (mAudioSource == NULL) {
         *result = previousSource != NULL;
+    }
     else {
         IObject::Probe(mAudioSource)->Equals(previousSource, result);
         *result = !(*result);
@@ -624,24 +695,27 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioSinkLocked(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    if (Ptr(mInfo)->Func(mInfo->GetAudioType) == IAudioManager::DEVICE_NONE) {
+    Int32 type;
+    mInfo->GetAudioType(&type);
+    if (type == IAudioManager::DEVICE_NONE) {
         *result = FALSE;
         return NOERROR;
     }
     AutoPtr<IAudioDevicePort> previousSink = mAudioSink;
     if (mOverrideAudioType == IAudioManager::DEVICE_NONE) {
         FindAudioSinkFromAudioPolicy((IAudioDevicePort**)&mAudioSink);
-    } else {
+    }
+    else {
         AutoPtr<IAudioDevicePort> audioSink;
         FindAudioDevicePort(mOverrideAudioType, mOverrideAudioAddress, (IAudioDevicePort**)&audioSink);
         if (audioSink != NULL) {
             mAudioSink = audioSink;
         }
     }
-    if (mAudioSink == NULL)
+    if (mAudioSink == NULL) {
         *result = previousSink != NULL;
-    else
-    {
+    }
+    else {
         IObject::Probe(mAudioSink)->Equals(previousSink, result);
         *result = !(*result);
     }
@@ -650,7 +724,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::UpdateAudioSinkLocked(
 
 ECode TvInputHardwareManager::TvInputHardwareImpl::HandleAudioSinkUpdated()
 {
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         UpdateAudioConfigLocked();
     }
     return NOERROR;
@@ -663,7 +738,8 @@ ECode TvInputHardwareManager::TvInputHardwareImpl::OverrideAudioSink(
     /* [in] */ Int32 channelMask,
     /* [in] */ Int32 format)
 {
-    {    AutoLock syncLock(mImplLock);
+    {
+        AutoLock syncLock(mImplLock);
         mOverrideAudioType = audioType;
         mOverrideAudioAddress = audioAddress;
         mDesiredSamplingRate = samplingRate;
@@ -702,7 +778,9 @@ ECode TvInputHardwareManager::ListenerHandler::HandleMessage(
     msg->GetArg1(&arg1);
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    switch (Ptr(msg)->Func(msg->GetWhat)) {
+    Int32 what;
+    msg->GetWhat(&what);
+    switch (what) {
         case STATE_CHANGED: {
             String inputId;
             IObject::Probe(obj)->ToString(&inputId);
@@ -711,23 +789,19 @@ ECode TvInputHardwareManager::ListenerHandler::HandleMessage(
             break;
         }
         case HARDWARE_DEVICE_ADDED: {
-            AutoPtr<ITvInputHardwareInfo> info = ITvInputHardwareInfo::Probe(obj);
-            mHost->mListener->OnHardwareDeviceAdded(info);
+            mHost->mListener->OnHardwareDeviceAdded(ITvInputHardwareInfo::Probe(obj));
             break;
         }
         case HARDWARE_DEVICE_REMOVED: {
-            AutoPtr<ITvInputHardwareInfo> info = ITvInputHardwareInfo::Probe(obj);
-            mHost->mListener->OnHardwareDeviceRemoved(info);
+            mHost->mListener->OnHardwareDeviceRemoved(ITvInputHardwareInfo::Probe(obj));
             break;
         }
         case HDMI_DEVICE_ADDED: {
-            AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
-            mHost->mListener->OnHdmiDeviceAdded(info);
+            mHost->mListener->OnHdmiDeviceAdded(IHdmiDeviceInfo::Probe(obj));
             break;
         }
         case HDMI_DEVICE_REMOVED: {
-            AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
-            mHost->mListener->OnHdmiDeviceRemoved(info);
+            mHost->mListener->OnHdmiDeviceRemoved(IHdmiDeviceInfo::Probe(obj));
             break;
         }
         case HDMI_DEVICE_UPDATED: {
@@ -763,22 +837,28 @@ TvInputHardwareManager::HdmiHotplugEventListener::HdmiHotplugEventListener(
 ECode TvInputHardwareManager::HdmiHotplugEventListener::OnReceived(
     /* [in] */ IHdmiHotplugEvent* event)
 {
-    {    AutoLock syncLock(mHost->mLock);
-        mHost->mHdmiStateMap->Put(Ptr(event)->Func(event->GetPort), Ptr(event)->Func(event->IsConnected));
+    {
+        AutoLock syncLock(mHost->mLock);
+        Int32 port;
+        event->GetPort(&port);
+        Boolean connected;
+        event->IsConnected(&connected);
+        mHost->mHdmiStateMap->Put(port, connected);
         AutoPtr<ITvInputHardwareInfo> hardwareInfo;
-        mHost->FindHardwareInfoForHdmiPortLocked(Ptr(event)->Func(event->GetPort), (ITvInputHardwareInfo**)&hardwareInfo);
+        mHost->FindHardwareInfoForHdmiPortLocked(port, (ITvInputHardwareInfo**)&hardwareInfo);
         if (hardwareInfo == NULL) {
             return NOERROR;
         }
-        AutoPtr<ICharSequence> inputId;
+        Int32 deviceId;
+        hardwareInfo->GetDeviceId(&deviceId);
         AutoPtr<IInterface> obj;
-        mHost->mHardwareInputIdMap->Get(Ptr(hardwareInfo)->Func(hardwareInfo->GetDeviceId), (IInterface**)&obj);
-        inputId = ICharSequence::Probe(obj);
+        mHost->mHardwareInputIdMap->Get(deviceId, (IInterface**)&obj);
+        AutoPtr<ICharSequence> inputId = ICharSequence::Probe(obj);
         if (inputId == NULL) {
             return NOERROR;
         }
         Int32 state;
-        mHost->ConvertConnectedToState(Ptr(event)->Func(event->IsConnected), &state);
+        mHost->ConvertConnectedToState(connected, &state);
         AutoPtr<IMessage> msg;
         mHost->mHandler->ObtainMessage(ListenerHandler::STATE_CHANGED, state, 0, inputId, (IMessage**)&msg);
         msg->SendToTarget();
@@ -811,8 +891,10 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
         AutoPtr<IObject> obj;
         switch (status) {
             case IHdmiControlManager::DEVICE_EVENT_ADD_DEVICE: {
+                Int32 deviceId;
+                deviceInfo->GetId(&deviceId);
                 AutoPtr<IHdmiDeviceInfo> info;
-                FindHdmiDeviceInfo(Ptr(deviceInfo)->Func(deviceInfo->GetId), (IHdmiDeviceInfo**)&info);
+                FindHdmiDeviceInfo(deviceId, (IHdmiDeviceInfo**)&info);
                 if (info == NULL) {
                     mHost->mHdmiDeviceList->Add(deviceInfo);
                 } else {
@@ -824,8 +906,10 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
                 break;
             }
             case IHdmiControlManager::DEVICE_EVENT_REMOVE_DEVICE: {
+                Int32 deviceId;
+                deviceInfo->GetId(&deviceId);
                 AutoPtr<IHdmiDeviceInfo> originalDeviceInfo;
-                FindHdmiDeviceInfo(Ptr(deviceInfo)->Func(deviceInfo->GetId), (IHdmiDeviceInfo**)&originalDeviceInfo);
+                FindHdmiDeviceInfo(deviceId, (IHdmiDeviceInfo**)&originalDeviceInfo);
                 Boolean b;
                 mHost->mHdmiDeviceList->Remove(originalDeviceInfo, &b);
                 if (!b) {
@@ -837,8 +921,10 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
                 break;
             }
             case IHdmiControlManager::DEVICE_EVENT_UPDATE_DEVICE: {
+                Int32 deviceId;
+                deviceInfo->GetId(&deviceId);
                 AutoPtr<IHdmiDeviceInfo> originalDeviceInfo;
-                FindHdmiDeviceInfo(Ptr(deviceInfo)->Func(deviceInfo->GetId), (IHdmiDeviceInfo**)&originalDeviceInfo);
+                FindHdmiDeviceInfo(deviceId, (IHdmiDeviceInfo**)&originalDeviceInfo);
                 Boolean b;
                 mHost->mHdmiDeviceList->Remove(originalDeviceInfo, &b);
                 if (!b) {
@@ -848,7 +934,7 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
                 mHost->mHdmiDeviceList->Add(deviceInfo);
                 messageType = ListenerHandler::HDMI_DEVICE_UPDATED;
                 AutoPtr<IInterface> obj;
-                mHost->mHdmiInputIdMap->Get(Ptr(deviceInfo)->Func(deviceInfo->GetId), (IInterface**)&obj);
+                mHost->mHdmiInputIdMap->Get(deviceId, (IInterface**)&obj);
                 AutoPtr<ICharSequence> inputId = ICharSequence::Probe(obj);
                 AutoPtr<ISomeArgsHelper> helper;
                 CSomeArgsHelper::AcquireSingleton((ISomeArgsHelper**)&helper);
@@ -862,8 +948,10 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
         }
         AutoPtr<IMessage> msg;
         mHost->mHandler->ObtainMessage(messageType, 0, 0, obj, (IMessage**)&msg);
+        Int32 portId;
+        deviceInfo->GetPortId(&portId);
         AutoPtr<ITvInputHardwareInfo> info;
-        mHost->FindHardwareInfoForHdmiPortLocked(Ptr(deviceInfo)->Func(deviceInfo->GetPortId), (ITvInputHardwareInfo**)&info);
+        mHost->FindHardwareInfoForHdmiPortLocked(portId, (ITvInputHardwareInfo**)&info);
         if (info != NULL) {
             msg->SendToTarget();
         } else {
@@ -877,10 +965,18 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::FindHdmiDeviceInfo(
     /* [in] */ Int32 id,
     /* [out] */ IHdmiDeviceInfo** result)
 {
-    FOR_EACH(iter, mHost->mHdmiDeviceList) {
-        AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (Ptr(info)->Func(info->GetId) == id) {
-            FUNC_RETURN(info);
+    AutoPtr<IIterator> it;
+    mHost->mHdmiDeviceList->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> info;
+        it->GetNext((IInterface**)&info);
+        Int32 deviceId;
+        IHdmiDeviceInfo::Probe(info)->GetId(&deviceId);
+        if (deviceId == id) {
+            *result = IHdmiDeviceInfo::Probe(info);
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
     *result = NULL;
@@ -890,7 +986,8 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::FindHdmiDeviceInfo(
 ECode TvInputHardwareManager::HdmiDeviceEventListener::ToString(
     /* [out] */ String* result)
 {
-    return IObject::Probe(TO_IINTERFACE(this))->ToString(result);
+    *result = "TvInputHardwareManager::HdmiDeviceEventListener";
+    return NOERROR;
 }
 
 //=============================================================================
@@ -907,7 +1004,9 @@ ECode TvInputHardwareManager::HdmiSystemAudioModeChangeListener::OnStatusChanged
     /* [in] */ Boolean enabled)
 {
     AutoLock lock(mHost->mLock);
-    for (Int32 i = 0; i < Ptr(mHost->mConnections)->Func(ISparseArray::GetSize); ++i) {
+    Int32 size;
+    mHost->mConnections->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
         mHost->mConnections->ValueAt(i, (IInterface**)&obj);
         AutoPtr<TvInputHardwareImpl> impl;
@@ -922,7 +1021,8 @@ ECode TvInputHardwareManager::HdmiSystemAudioModeChangeListener::OnStatusChanged
 ECode TvInputHardwareManager::HdmiSystemAudioModeChangeListener::ToString(
     /* [out] */ String* result)
 {
-    return IObject::Probe(TO_IINTERFACE(this))->ToString(result);
+    *result = "TvInputHardwareManager::HdmiSystemAudioModeChangeListener";
+    return NOERROR;
 }
 
 //=============================================================================
@@ -997,7 +1097,9 @@ ECode TvInputHardwareManager::OnBootPhase(
                 if (FAILED(ec)) break;
                 ec = mHdmiControlService->AddSystemAudioModeChangeListener(mHdmiSystemAudioModeChangeListener);
                 if (FAILED(ec)) break;
-                ec = mHdmiDeviceList->AddAll(ICollection::Probe(Ptr(mHdmiControlService)->Func(mHdmiControlService->GetInputDevices)));
+                AutoPtr<IList> devices;
+                mHdmiControlService->GetInputDevices((IList**)&devices);
+                ec = mHdmiDeviceList->AddAll(ICollection::Probe(devices));
             } while(FALSE);
             // } catch (RemoteException e) {
             if (FAILED(ec)) {
@@ -1015,17 +1117,22 @@ ECode TvInputHardwareManager::OnDeviceAvailable(
     /* [in] */ ITvInputHardwareInfo* info,
     /* [in] */ ArrayOf<ITvStreamConfig*>* configs)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<Connection> connection = new Connection(this);
         connection->constructor(info);
         connection->UpdateConfigsLocked(configs);
-        mConnections->Put(Ptr(info)->Func(info->GetDeviceId), TO_IINTERFACE(connection));
+        Int32 deviceId;
+        info->GetDeviceId(&deviceId);
+        mConnections->Put(deviceId, TO_IINTERFACE(connection));
         BuildHardwareListLocked();
         AutoPtr<IMessage> msg;
         mHandler->ObtainMessage(
                 ListenerHandler::HARDWARE_DEVICE_ADDED, 0, 0, info, (IMessage**)&msg);
         msg->SendToTarget();
-        if (Ptr(info)->Func(info->GetType) == ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI) {
+        Int32 type;
+        info->GetType(&type);
+        if (type == ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI) {
             ProcessPendingHdmiDeviceEventsLocked();
         }
     }
@@ -1035,7 +1142,9 @@ ECode TvInputHardwareManager::OnDeviceAvailable(
 ECode TvInputHardwareManager::BuildHardwareListLocked()
 {
     mHardwareList->Clear();
-    for (Int32 i = 0; i < Ptr(mConnections)->Func(mConnections->GetSize); ++i) {
+    Int32 size;
+    mConnections->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
         mConnections->ValueAt(i, (IInterface**)&obj);
         AutoPtr<ITvInputHardwareInfo> info;
@@ -1048,7 +1157,8 @@ ECode TvInputHardwareManager::BuildHardwareListLocked()
 ECode TvInputHardwareManager::OnDeviceUnavailable(
     /* [in] */ Int32 deviceId)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*)IProxyDeathRecipient::Probe(obj);
@@ -1061,11 +1171,20 @@ ECode TvInputHardwareManager::OnDeviceUnavailable(
         BuildHardwareListLocked();
         AutoPtr<ITvInputHardwareInfo> info;
         connection->GetHardwareInfoLocked((ITvInputHardwareInfo**)&info);
-        if (Ptr(info)->Func(info->GetType) == ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI) {
+        Int32 type;
+        info->GetType(&type);
+        if (type == ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI) {
             // Remove HDMI devices linked with this hardware.
-            FOR_EACH(it,mHdmiDeviceList) {
-                AutoPtr<IHdmiDeviceInfo> deviceInfo = IHdmiDeviceInfo::Probe(Ptr(it)->Func(it->GetNext));
-                if (Ptr(deviceInfo)->Func(deviceInfo->GetPortId) == Ptr(info)->Func(info->GetHdmiPortId)) {
+            AutoPtr<IIterator> it;
+            mHdmiDeviceList->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> deviceInfo;
+                it->GetNext((IInterface**)&deviceInfo);
+                Int32 portId, hdmiPortId;
+                IHdmiDeviceInfo::Probe(deviceInfo)->GetPortId(&portId);
+                info->GetHdmiPortId(&hdmiPortId);
+                if (portId == hdmiPortId) {
                     AutoPtr<IMessage> msg;
                     mHandler->ObtainMessage(ListenerHandler::HDMI_DEVICE_REMOVED, 0, 0,
                             deviceInfo, (IMessage**)&msg);
@@ -1086,7 +1205,8 @@ ECode TvInputHardwareManager::OnStreamConfigurationChanged(
     /* [in] */ Int32 deviceId,
     /* [in] */ ArrayOf<ITvStreamConfig*>* configs)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*) IProxyDeathRecipient::Probe(obj);
@@ -1096,7 +1216,9 @@ ECode TvInputHardwareManager::OnStreamConfigurationChanged(
         }
         connection->UpdateConfigsLocked(configs);
         // try {
-        ECode ec = Ptr(connection)->Func(connection->GetCallbackLocked)->OnStreamConfigChanged(configs);
+        AutoPtr<IITvInputHardwareCallback> callback;
+        connection->GetCallbackLocked((IITvInputHardwareCallback**)&callback);
+        ECode ec = callback->OnStreamConfigChanged(configs);
         // } catch (RemoteException e) {
         if (FAILED(ec)) {
             if ((ECode)E_REMOTE_EXCEPTION == ec) {
@@ -1114,7 +1236,8 @@ ECode TvInputHardwareManager::OnFirstFrameCaptured(
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 streamId)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*)IProxyDeathRecipient::Probe(obj);
@@ -1135,7 +1258,8 @@ ECode TvInputHardwareManager::OnFirstFrameCaptured(
 ECode TvInputHardwareManager::GetHardwareList(
     /* [out] */ IList** result)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         return helper->UnmodifiableList(mHardwareList, result);
@@ -1146,7 +1270,8 @@ ECode TvInputHardwareManager::GetHardwareList(
 ECode TvInputHardwareManager::GetHdmiDeviceList(
     /* [out] */ IList** result)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ICollections> helper;
         CCollections::AcquireSingleton((ICollections**)&helper);
         return helper->UnmodifiableList(mHdmiDeviceList, result);
@@ -1167,7 +1292,10 @@ Boolean TvInputHardwareManager::CheckUidChangedLocked(
     if (connectionCallingUid == NULL || connectionResolvedUserId == NULL) {
         return TRUE;
     }
-    if (Ptr(connectionCallingUid)->Func(IInteger32::GetValue) != callingUid || Ptr(connectionResolvedUserId)->Func(IInteger32::GetValue) != resolvedUserId) {
+    Int32 connCallingUid, connUserId;
+    connectionCallingUid->GetValue(&connCallingUid);
+    connectionResolvedUserId->GetValue(&connUserId);
+    if (connCallingUid != callingUid || connUserId != resolvedUserId) {
         return TRUE;
     }
     return FALSE;
@@ -1193,7 +1321,8 @@ ECode TvInputHardwareManager::AddHardwareTvInput(
     /* [in] */ Int32 deviceId,
     /* [in] */ ITvInputInfo* info)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mHardwareInputIdMap->Get(deviceId, (IInterface**)&obj);
         AutoPtr<ICharSequence> oldInputId = ICharSequence::Probe(obj);
@@ -1207,7 +1336,9 @@ ECode TvInputHardwareManager::AddHardwareTvInput(
         info->GetId(&s);
         mHardwareInputIdMap->Put(deviceId, StringUtils::ParseCharSequence(s));
         mInputMap->Put(StringUtils::ParseCharSequence(s), info);
-        for (Int32 i = 0; i < Ptr(mHdmiStateMap)->Func(mHdmiStateMap->GetSize); ++i) {
+        Int32 size;
+        mHdmiStateMap->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
             Int32 key;
             mHdmiStateMap->KeyAt(i, &key);
             AutoPtr<ITvInputHardwareInfo> hardwareInfo;
@@ -1215,11 +1346,15 @@ ECode TvInputHardwareManager::AddHardwareTvInput(
             if (hardwareInfo == NULL) {
                 continue;
             }
+            Int32 deviceId;
+            hardwareInfo->GetDeviceId(&deviceId);
             AutoPtr<IInterface> obj;
-            mHardwareInputIdMap->Get(Ptr(hardwareInfo)->Func(hardwareInfo->GetDeviceId), (IInterface**)&obj);
+            mHardwareInputIdMap->Get(deviceId, (IInterface**)&obj);
             String inputId;
-            IObject::Probe(obj)->ToString(&inputId);
-            if (inputId != NULL && inputId.Equals(Ptr(info)->Func(info->GetId))) {
+            ICharSequence::Probe(obj)->ToString(&inputId);
+            String infoId;
+            info->GetId(&infoId);
+            if (!inputId.IsNull() && inputId.Equals(infoId)) {
                 Boolean value;
                 mHdmiStateMap->ValueAt(i, &value);
                 Int32 state;
@@ -1238,7 +1373,9 @@ ECode TvInputHardwareManager::IndexOfEqualValue(
     /* [in] */ IInterface* value,
     /* [out] */ Int32* result)
 {
-    for (Int32 i = 0; i < Ptr(map)->Func(map->GetSize); ++i) {
+    Int32 size;
+    map->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
         map->ValueAt(i, (IInterface**)&obj);
         Boolean isEquals;
@@ -1256,11 +1393,14 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
     /* [in] */ Int32 id,
     /* [in] */ ITvInputInfo* info)
 {
-    if (Ptr(info)->Func(info->GetType) != ITvInputInfo::TYPE_HDMI) {
+    Int32 type;
+    info->GetType(&type);
+    if (type != ITvInputInfo::TYPE_HDMI) {
         Logger::E(TAG, "info (%s) has non-HDMI type.", TO_CSTR(info));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         String parentId;
         info->GetParentId(&parentId);
         Int32 parentIndex;
@@ -1278,10 +1418,10 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
             Slogger::W(TAG, "Trying to override previous registration: old = %s:%d, new = %s:%d",
                     TO_CSTR(obj), id, TO_CSTR(info), id);
         }
-        AutoPtr<IInteger32> i32;
-        CInteger32::New(id, (IInteger32**)&i32);
-        mHdmiInputIdMap->Put(Ptr(i32)->Func(IInteger32::GetValue), StringUtils::ParseCharSequence(Ptr(info)->Func(info->GetId)));
-        mInputMap->Put(StringUtils::ParseCharSequence(Ptr(info)->Func(info->GetId)), info);
+        String infoId;
+        info->GetId(&infoId);
+        mHdmiInputIdMap->Put(id, StringUtils::ParseCharSequence(infoId));
+        mInputMap->Put(StringUtils::ParseCharSequence(infoId), info);
     }
     return NOERROR;
 }
@@ -1289,7 +1429,8 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
 ECode TvInputHardwareManager::RemoveTvInput(
     /* [in] */ const String& inputId)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mInputMap->Remove(StringUtils::ParseCharSequence(inputId));
         Int32 hardwareIndex;
         IndexOfEqualValue(mHardwareInputIdMap, StringUtils::ParseCharSequence(inputId), &hardwareIndex);
@@ -1319,7 +1460,8 @@ ECode TvInputHardwareManager::AcquireHardware(
     if (callback == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*)IProxyDeathRecipient::Probe(obj);
@@ -1329,8 +1471,10 @@ ECode TvInputHardwareManager::AcquireHardware(
             return NOERROR;
         }
         if (CheckUidChangedLocked(connection, callingUid, resolvedUserId)) {
+            AutoPtr<ITvInputHardwareInfo> hardwareInfo;
+            connection->GetHardwareInfoLocked((ITvInputHardwareInfo**)&hardwareInfo);
             AutoPtr<TvInputHardwareImpl> hardware =
-                    new TvInputHardwareImpl((TvInputHardwareManager*)ITvInputHalCallback::Probe(Ptr(connection)->Func(connection->GetHardwareInfoLocked)));
+                    new TvInputHardwareImpl((TvInputHardwareManager*)ITvInputHalCallback::Probe(hardwareInfo));
             // try {
             AutoPtr<IProxy> proxy = (IProxy*) callback->Probe(EIID_IProxy);
             ECode ec = proxy->LinkToDeath(connection, 0);
@@ -1360,7 +1504,8 @@ ECode TvInputHardwareManager::ReleaseHardware(
     /* [in] */ Int32 callingUid,
     /* [in] */ Int32 resolvedUserId)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*) IObject::Probe(obj);
@@ -1368,7 +1513,9 @@ ECode TvInputHardwareManager::ReleaseHardware(
             Slogger::E(TAG, "Invalid deviceId : %d", deviceId);
             return NOERROR;
         }
-        if (Ptr(connection)->Func(connection->GetHardwareLocked).Get() != hardware
+        AutoPtr<IITvInputHardware> connHardware;
+        connection->GetHardwareLocked((IITvInputHardware**)&connHardware);
+        if (connHardware.Get() != hardware
                 || CheckUidChangedLocked(connection, callingUid, resolvedUserId)) {
             return NOERROR;
         }
@@ -1383,11 +1530,21 @@ ECode TvInputHardwareManager::FindHardwareInfoForHdmiPortLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(iter, mHardwareList) {
-        AutoPtr<ITvInputHardwareInfo> hardwareInfo = ITvInputHardwareInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (Ptr(hardwareInfo)->Func(hardwareInfo->GetType) == ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI
-                && Ptr(hardwareInfo)->Func(hardwareInfo->GetHdmiPortId) == port) {
-            FUNC_RETURN(hardwareInfo);
+    AutoPtr<IIterator> it;
+    mHardwareList->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        ITvInputHardwareInfo* hardwareInfo = ITvInputHardwareInfo::Probe(obj);
+        Int32 type, portId;
+        hardwareInfo->GetType(&type);
+        hardwareInfo->GetHdmiPortId(&portId);
+        if (type == ITvInputHardwareInfo::TV_INPUT_TYPE_HDMI
+                && portId == port) {
+            *result = hardwareInfo;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
     *result = NULL;
@@ -1400,13 +1557,17 @@ ECode TvInputHardwareManager::FindDeviceIdForInputIdLocked(
 {
     VALIDATE_NOT_NULL(result)
 
-    for (Int32 i = 0; i < Ptr(mConnections)->Func(mConnections->GetSize); ++i) {
+    Int32 size;
+    mConnections->GetSize(&size);
+    for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
         mConnections->Get(i, (IInterface**)&obj);
         AutoPtr<Connection> connection = (Connection*) IObject::Probe(obj);
         AutoPtr<ITvInputInfo> info;
         connection->GetInfoLocked((ITvInputInfo**)&info);
-        if (Ptr(info)->Func(ITvInputInfo::GetId).Equals(inputId)) {
+        String infoId;
+        info->GetId(&infoId);
+        if (infoId.Equals(inputId)) {
             *result = i;
             return NOERROR;
         }
@@ -1425,12 +1586,15 @@ ECode TvInputHardwareManager::GetAvailableTvStreamConfigList(
 
     AutoPtr<IList> configsList;
     CArrayList::New((IList**)&configsList);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Int32 deviceId;
         FindDeviceIdForInputIdLocked(inputId, &deviceId);
         if (deviceId < 0) {
             Slogger::E(TAG, "Invalid inputId : %s", inputId.string());
-            FUNC_RETURN(configsList)
+            *result = configsList;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
         AutoPtr<IInterface> obj;
         mConnections->Get(deviceId, (IInterface**)&obj);
@@ -1438,12 +1602,16 @@ ECode TvInputHardwareManager::GetAvailableTvStreamConfigList(
         AutoPtr<ArrayOf<ITvStreamConfig*> > array;
         for (Int32 i = 0; i < array->GetLength(); ++i) {
             AutoPtr<ITvStreamConfig> config = (*array)[i];
-            if (Ptr(config)->Func(config->GetType) == ITvStreamConfig::STREAM_TYPE_BUFFER_PRODUCER) {
+            Int32 type;
+            config->GetType(&type);
+            if (type == ITvStreamConfig::STREAM_TYPE_BUFFER_PRODUCER) {
                 configsList->Add(config);
             }
         }
     }
-    FUNC_RETURN(configsList)
+    *result = configsList;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TvInputHardwareManager::CaptureFrame(
@@ -1456,7 +1624,8 @@ ECode TvInputHardwareManager::CaptureFrame(
 {
     VALIDATE_NOT_NULL(rev)
 
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         Int32 deviceId;
         FindDeviceIdForInputIdLocked(inputId, &deviceId);
         if (deviceId < 0) {
@@ -1492,11 +1661,20 @@ ECode TvInputHardwareManager::CaptureFrame(
 
 ECode TvInputHardwareManager::ProcessPendingHdmiDeviceEventsLocked()
 {
-    FOR_EACH(it,mPendingHdmiDeviceEvents) {
-        AutoPtr<IMessage> msg = IMessage::Probe(Ptr(it)->Func(it->GetNext));
-        AutoPtr<IHdmiDeviceInfo> deviceInfo = IHdmiDeviceInfo::Probe(Ptr(msg)->Func(msg->GetObj));
+    AutoPtr<IIterator> it;
+    mPendingHdmiDeviceEvents->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMessage> msg = IMessage::Probe(obj);
+        obj = NULL;
+        msg->GetObj((IInterface**)&obj);
+        AutoPtr<IHdmiDeviceInfo> deviceInfo = IHdmiDeviceInfo::Probe(obj);
         AutoPtr<ITvInputHardwareInfo> hardwareInfo;
-        FindHardwareInfoForHdmiPortLocked(Ptr(deviceInfo)->Func(deviceInfo->GetPortId), (ITvInputHardwareInfo**)&hardwareInfo);
+        Int32 portId;
+        deviceInfo->GetPortId(&portId);
+        FindHardwareInfoForHdmiPortLocked(portId, (ITvInputHardwareInfo**)&hardwareInfo);
         if (hardwareInfo != NULL) {
             msg->SendToTarget();
             it->Remove();

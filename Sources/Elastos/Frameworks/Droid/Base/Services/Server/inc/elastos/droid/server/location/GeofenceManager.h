@@ -65,7 +65,7 @@ public:
         GeofenceHandler(
             /* [in] */ GeofenceManager* host);
 
-        HandleMessage(
+        CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
     private:

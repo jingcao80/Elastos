@@ -2310,11 +2310,11 @@ Boolean SyncManager::ContainsAccountAndUser(
 {
     Boolean found = FALSE;
     for (Int32 i = 0; i < accounts->GetLength(); i++) {
-        Int32 userId;
-        (*accounts)[i]->GetUserId(&userId);
+        Int32 othUserId;
+        (*accounts)[i]->GetUserId(&othUserId);
         AutoPtr<IAccount> acnt;
         (*accounts)[i]->GetAccount((IAccount**)&acnt);
-        if (userId == userId && Object::Equals(acnt, account)) {
+        if (userId == othUserId && Object::Equals(acnt, account)) {
             found = TRUE;
             break;
         }
@@ -3880,7 +3880,7 @@ Boolean SyncManager::IsSyncStillActive(
     /* [in] */ ActiveSyncContext* activeSyncContext)
 {
     List<AutoPtr<ActiveSyncContext> >::Iterator it;
-    for (it != mActiveSyncContexts.Begin(); it != mActiveSyncContexts.End(); ++it) {
+    for (it = mActiveSyncContexts.Begin(); it != mActiveSyncContexts.End(); ++it) {
         ActiveSyncContext* sync = *it;
         if (sync == activeSyncContext) {
             return TRUE;

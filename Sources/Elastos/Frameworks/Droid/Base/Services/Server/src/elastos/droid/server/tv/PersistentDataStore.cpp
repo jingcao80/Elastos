@@ -21,14 +21,12 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/internal/utility/XmlUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Environment.h>
 #include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Content::CIntent;
@@ -59,6 +57,7 @@ using Elastos::Utility::CCollections;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::ICollections;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Libcore::IO::CIoUtils;
@@ -114,8 +113,9 @@ ECode PersistentDataStore::constructor(
 {
     mContext = context;
     AutoPtr<IFile> userDir = Environment::GetUserSystemDirectory(userId);
-    if (!Ptr(userDir)->Func(IFile::Exists)) {
-        if (!Ptr(userDir)->Func(IFile::Mkdirs)) {
+    Boolean result;
+    if (userDir->Exists(&result), !result) {
+        if (userDir->Mkdirs(&result), !result) {
             Logger::E(TAG, "User dir cannot be created: %s", TO_CSTR(userDir));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -155,11 +155,16 @@ ECode PersistentDataStore::IsRatingBlocked(
     VALIDATE_NOT_NULL(result)
 
     LoadIfNeeded();
-    {    AutoLock syncLock(mBlockedRatings);
-        FOR_EACH(iter, mBlockedRatings) {
-            AutoPtr<ITvContentRating> blcokedRating = ITvContentRating::Probe(Ptr(iter)->Func(iter->GetNext));
+    {
+        AutoLock syncLock(mBlockedRatings);
+        AutoPtr<IIterator> it;
+        mBlockedRatings->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> blockedRating;
+            it->GetNext((IInterface**)&blockedRating);
             Boolean b;
-            rating->Contains(blcokedRating, &b);
+            rating->Contains(ITvContentRating::Probe(blockedRating), &b);
             if (b) {
                 *result = TRUE;
                 return NOERROR;
@@ -176,14 +181,17 @@ ECode PersistentDataStore::GetBlockedRatings(
     VALIDATE_NOT_NULL(result)
 
     LoadIfNeeded();
-    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(Ptr(mBlockedRatings)->Func(mBlockedRatings->GetSize));
+    Int32 size;
+    mBlockedRatings->GetSize(&size);
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(size);
     AutoPtr<ArrayOf<IInterface*> > outArray;
     mBlockedRatings->ToArray(array, (ArrayOf<IInterface*>**)&outArray);
-    Int32 size = outArray->GetLength();
+    size = outArray->GetLength();
     *result = ArrayOf<ITvContentRating*>::Alloc(size);
     REFCOUNT_ADD(*result)
-    for (Int32 i = 0; i < size; ++i)
+    for (Int32 i = 0; i < size; ++i) {
         (*result)->Set(i, ITvContentRating::Probe((*outArray)[i]));
+    }
     return NOERROR;
 }
 
@@ -192,8 +200,7 @@ ECode PersistentDataStore::AddBlockedRating(
 {
     LoadIfNeeded();
     Boolean isContains;
-    mBlockedRatings->Contains(rating, &isContains);
-    if (rating != NULL && !isContains) {
+    if (rating != NULL && (mBlockedRatings->Contains(rating, &isContains), !isContains)) {
         mBlockedRatings->Add(rating);
         mBlockedRatingsChanged = TRUE;
         PostSave();
@@ -206,8 +213,7 @@ ECode PersistentDataStore::RemoveBlockedRating(
 {
     LoadIfNeeded();
     Boolean isContains;
-    mBlockedRatings->Contains(rating, &isContains);
-    if (rating != NULL && !isContains) {
+    if (rating != NULL && (mBlockedRatings->Contains(rating, &isContains), !isContains)) {
         mBlockedRatings->Remove(rating);
         mBlockedRatingsChanged = TRUE;
         PostSave();
@@ -361,10 +367,12 @@ ECode PersistentDataStore::LoadFromXml(
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
     while (XmlUtils::NextElementWithin(parser, outerDepth)) {
-        if (Ptr(parser)->Func(parser->GetName).Equals(TAG_BLOCKED_RATINGS)) {
+        String name;
+        parser->GetName(&name);
+        if (name.Equals(TAG_BLOCKED_RATINGS)) {
             LoadBlockedRatingsFromXml(parser);
         }
-        else if (Ptr(parser)->Func(parser->GetName).Equals(TAG_PARENTAL_CONTROLS)) {
+        else if (name.Equals(TAG_PARENTAL_CONTROLS)) {
             String enabled;
             parser->GetAttributeValue(String(NULL), ATTR_ENABLED, &enabled);
             if (TextUtils::IsEmpty(enabled)) {
@@ -383,7 +391,9 @@ ECode PersistentDataStore::LoadBlockedRatingsFromXml(
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
     while (XmlUtils::NextElementWithin(parser, outerDepth)) {
-        if (Ptr(parser)->Func(parser->GetName).Equals(TAG_RATING)) {
+        String name;
+        parser->GetName(&name);
+        if (name.Equals(TAG_RATING)) {
             String ratingString;
             parser->GetAttributeValue(String(NULL), ATTR_STRING, &ratingString);
             if (TextUtils::IsEmpty(ratingString)) {
@@ -407,11 +417,18 @@ ECode PersistentDataStore::SaveToXml(
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
     serializer->WriteStartTag(String(NULL), TAG_TV_INPUT_MANAGER_STATE);
     serializer->WriteStartTag(String(NULL), TAG_BLOCKED_RATINGS);
-    {    AutoLock syncLock(mBlockedRatings);
-        FOR_EACH(iter, mBlockedRatings) {
-            AutoPtr<ITvContentRating> rating = ITvContentRating::Probe(Ptr(iter)->Func(iter->GetNext));
+    {
+        AutoLock syncLock(mBlockedRatings);
+        AutoPtr<IIterator> it;
+        mBlockedRatings->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> rating;
+            it->GetNext((IInterface**)&rating);
             serializer->WriteStartTag(String(NULL), TAG_RATING);
-            serializer->WriteAttribute(String(NULL), ATTR_STRING, Ptr(rating)->Func(rating->FlattenToString));
+            String str;
+            ITvContentRating::Probe(rating)->FlattenToString(&str);
+            serializer->WriteAttribute(String(NULL), ATTR_STRING, str);
             serializer->WriteEndTag(String(NULL), TAG_RATING);
         }
     }

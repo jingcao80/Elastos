@@ -1862,7 +1862,7 @@ ECode AppWidgetServiceImpl::InnerBroadcastReceiver::constructor()
     return BroadcastReceiver::constructor();
 }
 
-AppWidgetServiceImpl::InnerBroadcastReceiver::constructor(
+ECode AppWidgetServiceImpl::InnerBroadcastReceiver::constructor(
     /* [in] */ IInterface* owner)
 {
     mOwner = (AppWidgetServiceImpl*)IObject::Probe(owner);
@@ -4953,9 +4953,9 @@ void AppWidgetServiceImpl::OnUserStarted(
         Provider* provider = (Provider*)objTmp;
 
         // Send broadcast only to the providers of the user.
-        Int32 userId = 0;
-        provider->GetUserId(&userId);
-        if (userId != userId) {
+        Int32 prvUserId = 0;
+        provider->GetUserId(&prvUserId);
+        if (userId != prvUserId) {
             continue;
         }
 

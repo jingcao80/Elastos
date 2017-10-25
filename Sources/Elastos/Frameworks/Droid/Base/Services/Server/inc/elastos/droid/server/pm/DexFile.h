@@ -159,9 +159,9 @@ public:
     static CARAPI_(Boolean) IsVersionValid(
         /* [in] */ const Byte* magic);
 
-    CARAPI_(const Byte*) Begin() const;
+    const Byte* Begin() const;
 
-    CARAPI_(const size_t) Size() const;
+    CARAPI_(size_t) Size() const;
 
     // Returns the canonical form of the given dex location.
     //

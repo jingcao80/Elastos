@@ -523,10 +523,10 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IMessenger* dstMessenger);
 
-    CARAPI_(void) Dump(
+    CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* pw,
-        /* [in] */ ArrayOf<String> args);
+        /* [in] */ ArrayOf<String>* args);
 
 private:
     CARAPI_(void) SetupNetworkReceiver();

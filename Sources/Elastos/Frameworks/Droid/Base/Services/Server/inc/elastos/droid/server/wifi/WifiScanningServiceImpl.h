@@ -86,8 +86,9 @@ public:
             CARAPI Enter();
 
             // @Override
-            CARAPI_(Boolean) ProcessMessage(
-                /* [in] */ IMessage* msg);
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* msg,
+                /* [out] */ Boolean* result);
 
             CARAPI_(String) GetName()
             {
@@ -112,8 +113,9 @@ public:
             CARAPI Enter();
 
             // @Override
-            CARAPI_(Boolean) ProcessMessage(
-                /* [in] */ IMessage* msg);
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* msg,
+                /* [out] */ Boolean* result);
 
             CARAPI_(String) GetName()
             {
@@ -138,8 +140,9 @@ public:
             CARAPI Enter();
 
             // @Override
-            CARAPI_(Boolean) ProcessMessage(
-                /* [in] */ IMessage* msg);
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* msg,
+                /* [out] */ Boolean* result);
 
             CARAPI_(String) GetName()
             {
@@ -300,8 +303,9 @@ public:
             CARAPI Enter();
 
             // @Override
-            CARAPI_(Boolean) ProcessMessage(
-                /* [in] */ IMessage* msg);
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* msg,
+                /* [out] */ Boolean* result);
 
             CARAPI_(String) GetName()
             {
@@ -325,8 +329,9 @@ public:
             CARAPI Enter();
 
             // @Override
-            CARAPI_(Boolean) ProcessMessage(
-                /* [in] */ IMessage* msg);
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* msg,
+                /* [out] */ Boolean* result);
 
             CARAPI_(String) GetName()
             {
@@ -350,8 +355,9 @@ public:
             CARAPI Enter();
 
             // @Override
-            CARAPI_(Boolean) ProcessMessage(
-                /* [in] */ IMessage* msg);
+            CARAPI ProcessMessage(
+                /* [in] */ IMessage* msg,
+                /* [out] */ Boolean* result);
 
             // @Override
             CARAPI Exit();
@@ -539,6 +545,7 @@ private:
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
         WifiScanningServiceImpl* mOwner;
     };

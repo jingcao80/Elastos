@@ -46,9 +46,10 @@ public:
         /* [in] */ IComponentName* activity,
         /* [in] */ Boolean always);
 
-
     PreferredActivity(
         /* [in] */ IXmlPullParser* parser);
+
+    using IntentFilter::WriteToXml;
 
     CARAPI WriteToXml(
         /* [in] */ IXmlSerializer* serializer,

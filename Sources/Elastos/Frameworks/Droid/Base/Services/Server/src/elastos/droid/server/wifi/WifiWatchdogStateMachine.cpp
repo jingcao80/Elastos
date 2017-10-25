@@ -1084,10 +1084,10 @@ void WifiWatchdogStateMachine::RegisterForSettingsChanges()
             FALSE, contentObserver);
 }
 
-void WifiWatchdogStateMachine::Dump(
+ECode WifiWatchdogStateMachine::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,
-    /* [in] */ ArrayOf<String> args)
+    /* [in] */ ArrayOf<String>* args)
 
 {
     Logger::D("WifiWatchdogStateMachine::Dump", "TODO");
@@ -1098,6 +1098,7 @@ void WifiWatchdogStateMachine::Dump(
     // pw.println("mLinkProperties: [" + mLinkProperties + "]");
     // pw.println("mCurrentSignalLevel: [" + mCurrentSignalLevel + "]");
     // pw.println("mPoorNetworkDetectionEnabled: [" + mPoorNetworkDetectionEnabled + "]");
+    return NOERROR;
 }
 
 Boolean WifiWatchdogStateMachine::IsWatchdogEnabled()

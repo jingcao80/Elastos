@@ -41,6 +41,8 @@ class LightImpl
     friend class LightsService;
 
 public:
+    virtual ~LightImpl();
+
     // @Override
     virtual CARAPI_(void) SetBrightness(
         /* [in] */ Int32 brightness);
@@ -76,8 +78,6 @@ private:
     LightImpl(
         /* [in] */ Int32 id,
         /* [in] */ LightsService* host);
-
-    virtual ~LightImpl();
 
     CARAPI_(void) StopFlashing();
 

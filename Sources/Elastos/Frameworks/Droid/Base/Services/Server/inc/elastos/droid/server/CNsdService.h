@@ -64,8 +64,6 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 
-extern "C" const InterfaceID EIID_NativeEvent;
-
 /**
  * Network Service Discovery Service handles remote service discovery operation requests by
  * implementing the INsdManager interface.
@@ -108,6 +106,7 @@ private:
             /* [in] */ Int32 code,
             /* [in] */ const String& raw,
             /* [in] */ ArrayOf<String>* cooked);
+
     public:
         Int32 mCode;
         String mRaw;

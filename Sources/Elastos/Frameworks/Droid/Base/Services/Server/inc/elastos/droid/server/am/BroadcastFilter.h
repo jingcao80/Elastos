@@ -52,6 +52,8 @@ public:
 
     ~BroadcastFilter();
 
+    using IntentFilter::Dump;
+
     CARAPI_(void) Dump(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ const String& prefix);

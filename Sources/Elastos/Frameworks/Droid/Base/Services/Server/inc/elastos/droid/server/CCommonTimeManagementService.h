@@ -62,7 +62,7 @@ public:
     public:
         IfaceObserver();
 
-        constructor(
+        CARAPI constructor(
             /* [in] */ IBinder* commonTimeManagementService);
 
         CARAPI InterfaceStatusChanged(
@@ -78,6 +78,7 @@ public:
 
         CARAPI InterfaceRemoved(
             /* [in] */ const String& iface);
+
     private:
         CCommonTimeManagementService* mHost;
     };

@@ -20,7 +20,6 @@
 #include <Elastos.Droid.Content.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Build.h>
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/os/UserHandle.h>
@@ -42,6 +41,7 @@ using Elastos::Droid::Utility::TimeUtils;
 using Elastos::IO::IWriter;
 using Elastos::Utility::CArrayDeque;
 using Elastos::Utility::IDeque;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -143,7 +143,9 @@ ECode TrustArchive::LogManagingTrust(
 ECode TrustArchive::AddEvent(
     /* [in] */ Event* e)
 {
-    if (Ptr(mEvents)->Func(mEvents->GetSize) >= HISTORY_LIMIT) {
+    Int32 size;
+    mEvents->GetSize(&size);
+    if (size >= HISTORY_LIMIT) {
         AutoPtr<IInterface> obj;
         IDeque::Probe(mEvents)->RemoveFirst((IInterface**)&obj);
     }
@@ -159,10 +161,13 @@ ECode TrustArchive::Dump(
     /* [in] */ Boolean duplicateSimpleNames)
 {
     Int32 count = 0;
-    AutoPtr<IIterator> iter;
-    IDeque::Probe(mEvents)->GetDescendingIterator((IIterator**)&iter);
-    while (Ptr(iter)->Func(iter->HasNext) && count < limit) {
-        AutoPtr<Event> ev = (Event*) IObject::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    IDeque::Probe(mEvents)->GetDescendingIterator((IIterator**)&it);
+    Boolean hasNext;
+    while ((it->HasNext(&hasNext), hasNext) && count < limit) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<Event> ev = (Event*)IObject::Probe(obj);
         if (userId != IUserHandle::USER_ALL && userId != ev->mUserId) {
             continue;
         }
@@ -181,8 +186,11 @@ ECode TrustArchive::Dump(
         }
         writer->Print(String("agent="));
         if (duplicateSimpleNames) {
-            writer->Print(Ptr(ev->mAgent)->Func(IComponentName::FlattenToShortString));
-        } else {
+            String component;
+            ev->mAgent->FlattenToShortString(&component);
+            writer->Print(component);
+        }
+        else {
             String s;
             GetSimpleName(ev->mAgent, &s);
             writer->Print(s);
@@ -236,7 +244,9 @@ String TrustArchive::FormatElapsed(
     Int64 delta = elapsed - SystemClock::GetElapsedRealtime();
     AutoPtr<ISystem> helper;
     CSystem::AcquireSingleton((ISystem**)&helper);
-    Int64 wallTime = delta + Ptr(helper)->Func(ISystem::GetCurrentTimeMillis);
+    Int64 currTime;
+    helper->GetCurrentTimeMillis(&currTime);
+    Int64 wallTime = delta + currTime;
     return TimeUtils::LogTimeOfDay(wallTime);
 }
 

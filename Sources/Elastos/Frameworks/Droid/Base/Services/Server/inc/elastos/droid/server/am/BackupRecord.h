@@ -38,6 +38,7 @@ public:
         , mBackupMode(backupMode)
     {}
 
+    using Object::ToString;
 
     CARAPI_(String) ToString();
 

@@ -52,6 +52,7 @@
 #include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <Elastos.CoreLibrary.Utility.Zip.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
@@ -61,7 +62,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <libcore/utility/EmptyArray.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IIActivityManager;
@@ -248,6 +248,9 @@ using Libcore::IO::CIoUtils;
 using Libcore::IO::IOs;
 using Libcore::Utility::EmptyArray;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+
 #ifndef HASH_FUNC_FOR_AUTOPTR_ASECINSTALLARGS
 #define HASH_FUNC_FOR_AUTOPTR_ASECINSTALLARGS
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Server::Pm::CPackageManagerService::AsecInstallArgs)
@@ -409,7 +412,7 @@ CPackageManagerService::PackageUsage::WriteThread::WriteThread(
     Thread::constructor(threadName);
 }
 
-CPackageManagerService::PackageUsage::WriteThread::Run()
+ECode CPackageManagerService::PackageUsage::WriteThread::Run()
 {
     // try {
     mHost->WriteInternal();
@@ -1662,6 +1665,9 @@ CPackageManagerService::ServiceIntentResolver::NewArray(
     return ArrayOf<PackageParser::ServiceIntentInfo*>::Alloc(size);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+
 Boolean CPackageManagerService::ServiceIntentResolver::IsFilterStopped(
     /* [in] */ PackageParser::ServiceIntentInfo* filter,
     /* [in] */ Int32 userId)
@@ -1687,6 +1693,9 @@ Boolean CPackageManagerService::ServiceIntentResolver::IsPackageForFilter(
 {
     return packageName.Equals(info->mService->mOwner->mPackageName);
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
 
 AutoPtr<IResolveInfo> CPackageManagerService::ServiceIntentResolver::NewResult(
     /* [in] */ PackageParser::ServiceIntentInfo* info,
@@ -1907,6 +1916,9 @@ CPackageManagerService::ProviderIntentResolver::NewArray(
     return ArrayOf<PackageParser::ProviderIntentInfo*>::Alloc(size);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+
 Boolean CPackageManagerService::ProviderIntentResolver::IsFilterStopped(
     /* [in] */ PackageParser::ProviderIntentInfo* filter,
     /* [in] */ Int32 userId)
@@ -1932,6 +1944,9 @@ Boolean CPackageManagerService::ProviderIntentResolver::IsPackageForFilter(
 {
     return packageName.Equals(info->mProvider->mOwner->mPackageName);
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
 
 AutoPtr<IResolveInfo> CPackageManagerService::ProviderIntentResolver::NewResult(
     /* [in] */ PackageParser::ProviderIntentInfo* info,
@@ -5244,6 +5259,9 @@ AutoPtr< ArrayOf<Int32> > CPackageManagerService::RemoveInts(
     return ret;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+
 AutoPtr<IPackageInfo> CPackageManagerService::GeneratePackageInfo(
     /* [in] */ PackageParser::Package* p,
     /* [in] */ Int32 flags,
@@ -5264,6 +5282,9 @@ AutoPtr<IPackageInfo> CPackageManagerService::GeneratePackageInfo(
             ps->mFirstInstallTime, ps->mLastUpdateTime, &gp->mGrantedPermissions,
             state, userId);
 }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
 
 ECode CPackageManagerService::IsPackageAvailable(
     /* [in] */ const String& packageName,
@@ -13620,7 +13641,7 @@ void CPackageManagerService::GrantPermissionsLPw(
 
     List<String>::Iterator rpit = pkg->mRequestedPermissions.Begin();
     List<Boolean>::Iterator rprit = pkg->mRequestedPermissionsRequired.Begin();
-    for (; rpit != pkg->mRequestedPermissions.End(), rprit != pkg->mRequestedPermissionsRequired.End(); ++rpit, ++rprit) {
+    for (; rpit != pkg->mRequestedPermissions.End() && rprit != pkg->mRequestedPermissionsRequired.End(); ++rpit, ++rprit) {
         String name = *rpit;
         Boolean required = *rprit;
         AutoPtr<BasePermission> bp;
@@ -19036,3 +19057,5 @@ ECode CPackageManagerService::ToString(
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
+
+#pragma clang diagnostic pop

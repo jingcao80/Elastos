@@ -19,9 +19,9 @@
 #include "elastos/droid/server/trust/TrustManagerService.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Net.h>
 #include <elastos/core/Math.h>
 #include <elastos/droid/Manifest.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/utility/logging/Logger.h>
@@ -74,9 +74,9 @@ ECode TrustAgentWrapper::InnerSub_BroadcastReceiver::OnReceive(
     AutoPtr<IParcelable> parcel;
     intent->GetParcelableExtra(EXTRA_COMPONENT_NAME, (IParcelable**)&parcel);
     AutoPtr<IComponentName> component = IComponentName::Probe(parcel);
-    Boolean isEquals;
-    IObject::Probe(mHost->mName)->Equals(component, &isEquals);
-    if (mHost->TRUST_EXPIRED_ACTION.Equals(Ptr(intent)->Func(intent->GetAction)) && isEquals) {
+    String action;
+    intent->GetAction(&action);
+    if (mHost->TRUST_EXPIRED_ACTION.Equals(action) && Object::Equals(mHost->mName, component)) {
         mHost->mHandler->RemoveMessages(MSG_TRUST_TIMEOUT);
         Boolean tmp;
         mHost->mHandler->SendEmptyMessage(MSG_TRUST_TIMEOUT, &tmp);
@@ -98,16 +98,25 @@ ECode TrustAgentWrapper::InnerSub_Handler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     if (what == TrustAgentWrapper::MSG_GRANT_TRUST) {
-        if (!Ptr(mHost)->Func(mHost->IsConnected)) {
+        Boolean connected;
+        if (mHost->IsConnected(&connected), !connected) {
+            String component;
+            mHost->mName->FlattenToShortString(&component);
             Logger::W(TAG, "Agent is not connected, cannot grant trust: %s"
-                    , Ptr(mHost->mName)->Func(IComponentName::FlattenToShortString).string());
+                    , component.string());
             return NOERROR;
         }
         mHost->mTrusted = TRUE;
-        mHost->mMessage = ICharSequence::Probe(Ptr(msg)->Func(msg->GetObj));
-        Boolean initiatedByUser = Ptr(msg)->Func(msg->GetArg1) != 0;
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        mHost->mMessage = ICharSequence::Probe(obj);
+        Int32 arg1;
+        msg->GetArg1(&arg1);
+        Boolean initiatedByUser = arg1 != 0;
+        AutoPtr<IBundle> data;
+        msg->GetData((IBundle**)&data);
         Int64 durationMs;
-        Ptr(msg)->Func(msg->GetData)->GetInt64(DATA_DURATION, &durationMs);
+        data->GetInt64(DATA_DURATION, &durationMs);
         if (durationMs > 0) {
             Int64 duration;
             if (mHost->mMaximumTimeToLock != 0) {
@@ -140,7 +149,11 @@ ECode TrustAgentWrapper::InnerSub_Handler::HandleMessage(
     else if (what == TrustAgentWrapper::MSG_TRUST_TIMEOUT
             || what == TrustAgentWrapper::MSG_REVOKE_TRUST) {
         if (what == TrustAgentWrapper::MSG_TRUST_TIMEOUT) {
-            if (DEBUG) Slogger::V(TAG, "Trust timed out : %s", Ptr(mHost->mName)->Func(mHost->mName->FlattenToShortString).string());
+            if (DEBUG) {
+                String component;
+                mHost->mName->FlattenToShortString(&component);
+                Slogger::V(TAG, "Trust timed out : %s", component.string());
+            }
             mHost->mTrustManagerService->mArchive->LogTrustTimeout(mHost->mUserId, mHost->mName);
             mHost->OnTrustTimeout();
             // Fall through.
@@ -158,9 +171,12 @@ ECode TrustAgentWrapper::InnerSub_Handler::HandleMessage(
         mHost->mTrustManagerService->ResetAgent(mHost->mName, mHost->mUserId);
     }
     else if (what == TrustAgentWrapper::MSG_SET_TRUST_AGENT_FEATURES_COMPLETED) {
-        AutoPtr<IBinder> token = IBinder::Probe(Ptr(msg)->Func(msg->GetObj));
-        Boolean result = Ptr(msg)->Func(msg->GetArg1) != 0;
-        if (mHost->mSetTrustAgentFeaturesToken == token) {
+        AutoPtr<IInterface> token;
+        msg->GetObj((IInterface**)&token);
+        Int32 arg1;
+        msg->GetArg1(&arg1);
+        Boolean result = arg1 != 0;
+        if (mHost->mSetTrustAgentFeaturesToken.Get() == IBinder::Probe(token)) {
             mHost->mSetTrustAgentFeaturesToken = NULL;
             if (mHost->mTrustDisabledByDpm && result) {
                 if (DEBUG) Logger::V(TAG, "Re-enabling agent because it acknowledged "
@@ -175,7 +191,9 @@ ECode TrustAgentWrapper::InnerSub_Handler::HandleMessage(
         }
     }
     else if (what == TrustAgentWrapper::MSG_MANAGING_TRUST) {
-        mHost->mManagingTrust = Ptr(msg)->Func(msg->GetArg1) != 0;
+        Int32 arg1;
+        msg->GetArg1(&arg1);
+        mHost->mManagingTrust = arg1 != 0;
         if (!mHost->mManagingTrust) {
             mHost->mTrusted = FALSE;
             mHost->mMessage = NULL;
@@ -206,7 +224,9 @@ ECode TrustAgentWrapper::InnerSub_ITrustAgentServiceCallback::GrantTrust(
     AutoPtr<IMessage> msg;
     mHost->mHandler->ObtainMessage(
             MSG_GRANT_TRUST, initiatedByUser ? 1 : 0, 0, userMessage, (IMessage**)&msg);
-    Ptr(msg)->Func(msg->GetData)->PutInt64(DATA_DURATION, durationMs);
+    AutoPtr<IBundle> data;
+    msg->GetData((IBundle**)&data);
+    data->PutInt64(DATA_DURATION, durationMs);
     msg->SendToTarget();
     return NOERROR;
 }
@@ -255,7 +275,11 @@ ECode TrustAgentWrapper::InnerSub_ServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    if (DEBUG) Logger::V(TAG, "TrustAgent started : %s", Ptr(name)->Func(name->FlattenToString).string());
+    if (DEBUG) {
+        String component;
+        name->FlattenToShortString(&component);
+        Logger::V(TAG, "TrustAgent started : %s", component.string());
+    }
     mHost->mHandler->RemoveMessages(MSG_RESTART_TIMEOUT);
     mHost->mTrustAgentService = IITrustAgentService::Probe(service);
     mHost->mTrustManagerService->mArchive->LogAgentConnected(mHost->mUserId, name);
@@ -268,7 +292,11 @@ ECode TrustAgentWrapper::InnerSub_ServiceConnection::OnServiceConnected(
 ECode TrustAgentWrapper::InnerSub_ServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    if (DEBUG) Logger::V(TAG, "TrustAgent disconnected : %s", Ptr(name)->Func(name->FlattenToShortString).string());
+    if (DEBUG) {
+        String component;
+        name->FlattenToShortString(&component);
+        Logger::V(TAG, "TrustAgent disconnected : %s", component.string());
+    }
     mHost->mTrustAgentService = NULL;
     mHost->mManagingTrust = FALSE;
     mHost->mSetTrustAgentFeaturesToken = NULL;
@@ -335,10 +363,14 @@ ECode TrustAgentWrapper::constructor(
     AutoPtr<IUri> uri;
     helper->Parse(s, (IUri**)&uri);
     mAlarmIntent->SetData(uri);
-    mAlarmIntent->SetPackage(Ptr(context)->Func(context->GetPackageName));
+    String package;
+    context->GetPackageName(&package);
+    mAlarmIntent->SetPackage(package);
     AutoPtr<IIntentFilter> alarmFilter;
     CIntentFilter::New(TRUST_EXPIRED_ACTION, (IIntentFilter**)&alarmFilter);
-    alarmFilter->AddDataScheme(Ptr(mAlarmIntent)->Func(mAlarmIntent->GetScheme));
+    String scheme;
+    mAlarmIntent->GetScheme(&scheme);
+    alarmFilter->AddDataScheme(scheme);
     String pathUri;
     mAlarmIntent->ToUri(IIntent::URI_INTENT_SCHEME, &pathUri);
     alarmFilter->AddDataPath(pathUri, IPatternMatcher::PATTERN_LITERAL);
@@ -350,7 +382,9 @@ ECode TrustAgentWrapper::constructor(
     ScheduleRestart();
     context->BindServiceAsUser(intent, mConnection, IContext::BIND_AUTO_CREATE, user, &mBound);
     if (!mBound) {
-        Logger::E(TAG, "Can't bind to TrustAgent %s", Ptr(mName)->Func(mName->FlattenToShortString).string());
+        String component;
+        mName->FlattenToShortString(&component);
+        Logger::E(TAG, "Can't bind to TrustAgent %s", component.string());
     }
     return NOERROR;
 }
@@ -365,7 +399,7 @@ ECode TrustAgentWrapper::OnError(
 ECode TrustAgentWrapper::OnTrustTimeout()
 {
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     if (mTrustAgentService != NULL) ec = mTrustAgentService->OnTrustTimeout();
     // } catch (RemoteException e) {
     if (FAILED(ec)) {
@@ -382,7 +416,7 @@ ECode TrustAgentWrapper::OnUnlockAttempt(
     /* [in] */ Boolean successful)
 {
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     if (mTrustAgentService != NULL) ec = mTrustAgentService->OnUnlockAttempt(successful);
     // } catch (RemoteException e) {
     if (FAILED(ec)) {
@@ -399,7 +433,7 @@ ECode TrustAgentWrapper::SetCallback(
     /* [in] */ IITrustAgentServiceCallback* callback)
 {
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     if (mTrustAgentService != NULL) {
         ec = mTrustAgentService->SetCallback(callback);
     }
@@ -422,7 +456,7 @@ ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
     Boolean trustDisabled = FALSE;
     if (DEBUG) Slogger::V(TAG, "updateDevicePolicyFeatures(%s)", TO_CSTR(mName));
     // try {
-    ECode ec;
+    ECode ec = NOERROR;
     do {
         if (mTrustAgentService != NULL) {
             AutoPtr<IInterface> obj;
@@ -438,15 +472,18 @@ ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
                 if (FAILED(ec)) break;
                 trustDisabled = TRUE;
                 if (DEBUG) Slogger::V(TAG, "Detected trust agents disabled. Features = %s", TO_CSTR(features));
-                if (features != NULL && Ptr(features)->Func(IList::GetSize) > 0) {
+                Int32 size;
+                if (features != NULL && (features->GetSize(&size), size > 0)) {
                     AutoPtr<IBundle> bundle;
                     CBundle::New((IBundle**)&bundle);
                     ec = bundle->PutStringArrayList(ITrustAgentService::KEY_FEATURES,
                             IArrayList::Probe(features));
                     if (FAILED(ec)) break;
                     if (DEBUG) {
+                        String component;
+                        mName->FlattenToShortString(&component);
                         Slogger::V(TAG, "TrustAgent %s disabled until it acknowledges %s",
-                                Ptr(mName)->Func(mName->FlattenToShortString).string(), TO_CSTR(features));
+                                component.string(), TO_CSTR(features));
                     }
                     CBinder::New((IBinder**)&mSetTrustAgentFeaturesToken);
                     ec = mTrustAgentService->SetTrustAgentFeaturesEnabled(bundle,
@@ -511,7 +548,9 @@ ECode TrustAgentWrapper::GetMessage(
 {
     VALIDATE_NOT_NULL(result)
 
-    FUNC_RETURN(mMessage);
+    *result = mMessage;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode TrustAgentWrapper::Unbind()
@@ -519,7 +558,11 @@ ECode TrustAgentWrapper::Unbind()
     if (!mBound) {
         return NOERROR;
     }
-    if (DEBUG) Logger::V(TAG, "TrustAgent unbound : %s", Ptr(mName)->Func(mName->FlattenToShortString).string());
+    if (DEBUG) {
+        String component;
+        mName->FlattenToShortString(&component);
+        Logger::V(TAG, "TrustAgent unbound : %s", component.string());
+    }
     mTrustManagerService->mArchive->LogAgentStopped(mUserId, mName);
     mContext->UnbindService(mConnection);
     mBound = FALSE;

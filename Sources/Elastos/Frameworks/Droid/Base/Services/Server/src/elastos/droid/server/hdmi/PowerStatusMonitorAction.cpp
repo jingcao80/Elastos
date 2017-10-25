@@ -21,12 +21,12 @@
 #include "elastos/droid/server/hdmi/PowerStatusMonitorAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Hardware.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Server::Hdmi::IHdmiControlServiceSendMessageCallback;
 using Elastos::Droid::Utility::CSparseInt32Array;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -153,7 +153,10 @@ ECode PowerStatusMonitorAction::ResetPowerStatus(
     /* [in] */ IList* deviceInfos)
 {
     mPowerStatus->Clear();
-    FOR_EACH(it, deviceInfos) {
+    AutoPtr<IIterator> it;
+    deviceInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
@@ -173,7 +176,10 @@ ECode PowerStatusMonitorAction::QueryPowerStatus()
     AutoPtr<IList> deviceInfos;
     ((HdmiCecLocalDeviceTv*) tv.Get())->GetDeviceInfoList(FALSE, (IList**)&deviceInfos);
     ResetPowerStatus(deviceInfos);
-    FOR_EACH(it, deviceInfos) {
+    AutoPtr<IIterator> it;
+    deviceInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);

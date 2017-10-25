@@ -61,7 +61,7 @@ public:
 
         BinderService();
 
-        constructor(
+        CARAPI constructor(
             /* [in] */ ISystemService* dreamManagerService);
 
         //@Override // Binder call

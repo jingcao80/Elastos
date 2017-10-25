@@ -1109,9 +1109,9 @@ ECode CTextServicesManagerService::BindCurrentSpellCheckerService(
         Slogger::E(TAG, "--- bind failed: service or conn was set to NULL, please have a check");
         return NOERROR;
     }
+    mSettings->GetCurrentUserId(&currentUserId);
     AutoPtr<IUserHandle> userHandle;
     CUserHandle::New(currentUserId, (IUserHandle**)&userHandle);
-    mSettings->GetCurrentUserId(&currentUserId);
     return mContext->BindServiceAsUser(service, conn, flags, userHandle, result);
 }
 

@@ -152,7 +152,6 @@ static AutoPtr<IPattern> InitPattern(const String& patternStr)
 Boolean WifiMonitor::DBG = FALSE;
 const Boolean WifiMonitor::VDBG = FALSE;
 String WifiMonitor::TAG("WifiMonitor");
-static const Boolean DBG = FALSE;
 
 const Int32 WifiMonitor::BASE;
 const Int32 WifiMonitor::SUP_CONNECTION_EVENT;

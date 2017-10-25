@@ -22,7 +22,6 @@
 #include <elastos/core/Math.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/internal/utility/ArrayUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -50,6 +49,7 @@ using Elastos::IO::IPrintWriter;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::IDate;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Slogger;
 using Libcore::IO::CIoUtils;
 using Libcore::IO::IIoUtils;
@@ -64,10 +64,6 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Net {
-
-// {49F54C2C-4329-4FBA-B045-5CE35920AD12}
-extern "C" const InterfaceID EIID_NetworkStatsCollection =
-        { 0x49f54c2c, 0x4329, 0x4fba, { 0xb0, 0x45, 0x5c, 0xe3, 0x59, 0x20, 0xad, 0x12 } };
 
 //=============================================================================
 // NetworkStatsCollection::Key
@@ -720,10 +716,14 @@ Boolean NetworkStatsCollection::TemplateMatches(
     /* [in] */ INetworkTemplate* templ,
     /* [in] */ NetworkIdentitySet* identSet)
 {
-    FOR_EACH(iter, identSet) {
-        AutoPtr<INetworkIdentity> ident = INetworkIdentity::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    identSet->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> ident;
+        it->GetNext((IInterface**)&ident);
         Boolean matches;
-        if(templ->Matches(ident, &matches), matches) {
+        if(templ->Matches(INetworkIdentity::Probe(ident), &matches), matches) {
             return TRUE;
         }
     }

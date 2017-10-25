@@ -702,7 +702,7 @@ AutoPtr<IBitmap> TaskPersister::RestoreImage(
     sb += filename;
     AutoPtr<IBitmap> bitmap;
     factory->DecodeFile(sb.ToString(), (IBitmap**)&bitmap);
-    return NOERROR;
+    return bitmap;
 }
 
 } // namespace Am

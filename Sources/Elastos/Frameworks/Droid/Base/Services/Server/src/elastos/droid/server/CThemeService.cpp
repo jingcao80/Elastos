@@ -280,7 +280,7 @@ ECode CThemeService::ResourceProcessingHandler::HandleMessage(
 //-----------------------------------------------------------------------------------
 //                          CThemeService::SettingsObserver
 //-----------------------------------------------------------------------------------
-CThemeService::SettingsObserver::constructor(
+ECode CThemeService::SettingsObserver::constructor(
     /* [in] */ IIThemeService* host)
 {
     mHost = (CThemeService*)host;

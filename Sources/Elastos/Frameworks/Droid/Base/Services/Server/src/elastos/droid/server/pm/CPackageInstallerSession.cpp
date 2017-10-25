@@ -328,7 +328,8 @@ ECode CPackageInstallerSession::SetClientProgress(
 ECode CPackageInstallerSession::AddClientProgress(
     /* [in] */ Float progress)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         SetClientProgress(mClientProgress + progress);
     }
     return NOERROR;
@@ -337,8 +338,8 @@ ECode CPackageInstallerSession::AddClientProgress(
 void CPackageInstallerSession::ComputeProgressLocked(
     /* [in] */ Boolean forcePublish)
 {
-    mProgress = MathUtils::Constrain(mClientProgress * 0.8, 0, 0.8)
-            + MathUtils::Constrain(mInternalProgress * 0.2, 0, 0.2);
+    mProgress = MathUtils::Constrain(mClientProgress * 0.8, 0.0, 0.8)
+            + MathUtils::Constrain(mInternalProgress * 0.2, 0.0, 0.2);
 
     // Only publish when meaningful change
     if (forcePublish || Elastos::Core::Math::Abs(mProgress - mReportedProgress) >= 0.01) {

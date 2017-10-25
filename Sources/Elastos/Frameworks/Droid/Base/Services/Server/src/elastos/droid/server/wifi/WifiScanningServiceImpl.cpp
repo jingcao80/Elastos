@@ -88,9 +88,11 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::Enter()
     return NOERROR;
 }
 
-Boolean WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     if (WifiScanningServiceImpl::DBG) Logger::D(WifiScanningServiceImpl::TAG, "DefaultState got");// + msg);
 
     AutoPtr<IMessenger> replyTo;
@@ -137,7 +139,8 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::DefaultState::Process
             break;
     }
 
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -149,9 +152,11 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Enter()
     return NOERROR;
 }
 
-Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     if (DBG) Logger::D(TAG, "StartedState got" );//+ msg);
 
     AutoPtr<IMessenger> replyTo;
@@ -301,10 +306,12 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::StartedState::Process
             break;
 
         default:
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
     }
 
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -316,9 +323,11 @@ ECode WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::Enter()
     return NOERROR;
 }
 
-Boolean WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     if (DBG) Logger::D(TAG, "PausedState got");// + msg);
 
     Int32 what;
@@ -331,7 +340,8 @@ Boolean WifiScanningServiceImpl::WifiScanningStateMachine::PausedState::ProcessM
             mOwner->DeferMessage(msg);
             break;
     }
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -445,9 +455,11 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::Enter()
     return NOERROR;
 }
 
-Boolean WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     if (DBG) Logger::D(TAG, "DefaultState state got ");// + msg);
     Int32 what;
     msg->GetWhat(&what);
@@ -466,9 +478,11 @@ Boolean WifiScanningServiceImpl::WifiChangeStateMachine::DefaultState::ProcessMe
             mOwner->DeferMessage(msg);
             break;
         default:
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
     }
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -481,9 +495,11 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::Enter()
     return NOERROR;
 }
 
-Boolean WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     if (DBG) Logger::D(TAG, "Stationary state got ");// + msg);
     Int32 what;
     msg->GetWhat(&what);
@@ -521,9 +537,11 @@ Boolean WifiScanningServiceImpl::WifiChangeStateMachine::StationaryState::Proces
             mOwner->DeferMessage(msg);
             break;
         default:
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
     }
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 //=====================================================================
@@ -536,9 +554,11 @@ ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::Enter()
     return NOERROR;
 }
 
-Boolean WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::ProcessMessage(
-    /* [in] */ IMessage* msg)
+ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::ProcessMessage(
+    /* [in] */ IMessage* msg,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     if (DBG) Logger::D(TAG, "MovingState state got ");// + msg);
     Int32 what;
     msg->GetWhat(&what);
@@ -634,9 +654,11 @@ Boolean WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::ProcessMes
             }
             break;
         default:
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
     }
-    return TRUE;
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode WifiScanningServiceImpl::WifiChangeStateMachine::MovingState::Exit()

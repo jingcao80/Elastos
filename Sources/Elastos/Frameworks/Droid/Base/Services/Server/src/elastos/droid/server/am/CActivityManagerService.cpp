@@ -1794,7 +1794,7 @@ ECode CActivityManagerService::DispatchUserSwitchCallback::constructor(
     return NOERROR;
 }
 
-CActivityManagerService::DispatchUserSwitchCallback::SendResult(
+ECode CActivityManagerService::DispatchUserSwitchCallback::SendResult(
     /* [in] */ IBundle* data)
 {
     AutoLock lock(mHost);
@@ -3954,7 +3954,7 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
         if ((intentFlags & IIntent::FLAG_FROM_BACKGROUND) != 0) {
             // If we are in the background, then check to see if this process
             // is bad.  If so, we will just silently fail.
-            if (mBadProcesses->Get(infoProcName, infoUid) != (Int64)NULL) {
+            if (mBadProcesses->Get(infoProcName, infoUid) != NULL) {
                 if (DEBUG_PROCESSES) {
                     Slogger::V(TAG, "Bad process: %d / %s", infoUid, infoProcName.string());
                 }
@@ -3971,7 +3971,7 @@ AutoPtr<ProcessRecord> CActivityManagerService::StartProcessLocked(
                 Slogger::V(TAG, "Clearing bad process: %d / %s", infoUid, infoProcName.string());
             }
             mProcessCrashTimes->Remove(infoProcName, infoUid);
-            if (mBadProcesses->Get(infoProcName, infoUid) != (Int64)NULL) {
+            if (mBadProcesses->Get(infoProcName, infoUid) != NULL) {
 //                EventLog.writeEvent(EventLogTags.AM_PROC_GOOD, UserHandle::GetUserId(info.uid), info.uid,
 //                        info.processName);
                 mBadProcesses->Remove(infoProcName, infoUid);

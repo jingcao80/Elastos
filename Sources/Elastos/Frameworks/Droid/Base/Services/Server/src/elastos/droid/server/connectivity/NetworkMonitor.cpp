@@ -826,7 +826,7 @@ Int32 NetworkMonitor::IsCaptivePortal()
     if (!mIsCaptivePortalCheckEnabled) return 204;
 
     AutoPtr<IURLConnection> conn;
-    IHttpURLConnection* urlConnection;
+    AutoPtr<IHttpURLConnection> urlConnection;
     Int32 httpResponseCode = 599, length;
     Int64 requestTimestamp, responseTimestamp;
     AutoPtr<IInputStream> is;

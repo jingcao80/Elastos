@@ -33,12 +33,10 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/server/hdmi/HdmiCecLocalDevicePlayback.h"
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <Elastos.Droid.View.h>
 #include <elastos/core/AutoLock.h>
 #include <Elastos.CoreLibrary.IO.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::Hardware::Input::CInputManagerHelper;
 using Elastos::Droid::Hardware::Input::IInputManagerHelper;
@@ -411,7 +409,10 @@ Boolean HdmiCecLocalDevice::DispatchMessageToAction(
     /* [in] */ IHdmiCecMessage* message)
 {
     AssertRunOnServiceThread();
-    FOR_EACH(it, mActions) {
+    AutoPtr<IIterator> it;
+    mActions->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecFeatureAction> action = (HdmiCecFeatureAction*) IObject::Probe(obj);
@@ -1060,7 +1061,10 @@ ECode HdmiCecLocalDevice::AddAndStartAction(
 ECode HdmiCecLocalDevice::StartQueuedActions()
 {
     AssertRunOnServiceThread();
-    FOR_EACH(it, mActions) {
+    AutoPtr<IIterator> it;
+    mActions->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecFeatureAction> action = (HdmiCecFeatureAction*) IObject::Probe(obj);
@@ -1083,7 +1087,10 @@ ECode HdmiCecLocalDevice::HasAction(
     *result = FALSE;
 
     AssertRunOnServiceThread();
-    FOR_EACH(it, mActions) {
+    AutoPtr<IIterator> it;
+    mActions->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecFeatureAction> action = (HdmiCecFeatureAction*) IObject::Probe(obj);
@@ -1110,7 +1117,10 @@ ECode HdmiCecLocalDevice::GetActions(
     CCollections::AcquireSingleton((ICollections**)&helper);
     AutoPtr<IList> actions;
     helper->GetEmptyList((IList**)&actions);
-    FOR_EACH(it, mActions) {
+    AutoPtr<IIterator> it;
+    mActions->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecFeatureAction> action = (HdmiCecFeatureAction*) IObject::Probe(obj);
@@ -1153,18 +1163,18 @@ ECode HdmiCecLocalDevice::RemoveActionExcept(
     /* [in] */ HdmiCecFeatureAction* exception)
 {
     AssertRunOnServiceThread();
-    AutoPtr<IIterator> iter;
-    mActions->GetIterator((IIterator**)&iter);
+    AutoPtr<IIterator> it;
+    mActions->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    while (iter->HasNext(&hasNext), hasNext) {
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
-        iter->GetNext((IInterface**)&obj);
+        it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecFeatureAction> action = (HdmiCecFeatureAction*) IObject::Probe(obj);
         ClassID clsid;
         IObject::Probe(TO_IINTERFACE(action))->GetClassID(&clsid);
         if (action.Get() != exception && clsid == clazz) {
             action->Finish(FALSE);
-            iter->Remove();
+            it->Remove();
         }
     }
     CheckIfPendingActionsCleared();
@@ -1357,15 +1367,15 @@ ECode HdmiCecLocalDevice::HandleDisableDeviceTimeout()
     AssertRunOnServiceThread();
     // If all actions are not cleared in DEVICE_CLEANUP_TIMEOUT, enforce to finish them.
     // onCleard will be called at the last action's finish method.
-    AutoPtr<IIterator> iter;
-    mActions->GetIterator((IIterator**)&iter);
+    AutoPtr<IIterator> it;
+    mActions->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    while (iter->HasNext(&hasNext), hasNext) {
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
-        iter->GetNext((IInterface**)&obj);
+        it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecFeatureAction> action = (HdmiCecFeatureAction*) IObject::Probe(obj);
         action->Finish(FALSE);
-        iter->Remove();
+        it->Remove();
     }
     return NOERROR;
 }

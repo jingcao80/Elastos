@@ -48,14 +48,12 @@
 #include <Elastos.Droid.Utility.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Process.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Slogger.h>
 
 // using Elastos::Droid::Hardware::Hdmi::CHdmiDeviceInfo;
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
@@ -106,9 +104,12 @@ HdmiCecLocalDeviceTv::InnerSub_DeviceDiscoveryCallback::InnerSub_DeviceDiscovery
 ECode HdmiCecLocalDeviceTv::InnerSub_DeviceDiscoveryCallback::OnDeviceDiscoveryDone(
     /* [in] */ IList* deviceInfos)
 {
-    FOR_EACH(iter, deviceInfos) {
+    AutoPtr<IIterator> it;
+    deviceInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
-        iter->GetNext((IInterface**)&obj);
+        it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
         mHost->AddCecDevice(info);
     }
@@ -117,7 +118,9 @@ ECode HdmiCecLocalDeviceTv::InnerSub_DeviceDiscoveryCallback::OnDeviceDiscoveryD
     // we should put device info of local device manually here
     AutoPtr<IList> devices;
     ((HdmiControlService*)mHost->mService.Get())->GetAllLocalDevices((IList**)&devices);
-    FOR_EACH(it, devices) {
+    it = NULL;
+    devices->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiCecLocalDevice> device = IHdmiCecLocalDevice::Probe(obj);
@@ -511,7 +514,7 @@ ECode HdmiCecLocalDeviceTv::SendKeyEvent(
     Boolean isSupportedKeycode;
     HdmiCecKeycode::IsSupportedKeycode(keyCode, &isSupportedKeycode);
     if (!isSupportedKeycode) {
-        Slogger::W(TAG, "Unsupported key: " + keyCode);
+        Slogger::W(TAG, "Unsupported key: %d", keyCode);
         return NOERROR;
     }
     AutoPtr<IList> action;
@@ -551,7 +554,7 @@ ECode HdmiCecLocalDeviceTv::InvokeCallback(
     // } catch (RemoteException e) {
     if (FAILED(ec)) {
         if ((ECode)E_REMOTE_EXCEPTION == ec) {
-            Slogger::E(TAG, "Invoking callback failed:%d" + ec);
+            Slogger::E(TAG, "Invoking callback failed:%d", ec);
         }
         else
             return ec;
@@ -807,7 +810,10 @@ ECode HdmiCecLocalDeviceTv::StartNewDeviceAction(
 {
     AutoPtr<IList> actions;
     GetActions(ECLSID_CNewDeviceAction, (IList**)&actions);
-    FOR_EACH(it, actions) {
+    AutoPtr<IIterator> it;
+    actions->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<NewDeviceAction> action = (NewDeviceAction*) IObject::Probe(obj);
@@ -1056,7 +1062,10 @@ ECode HdmiCecLocalDeviceTv::OnNewAvrAdded(
 ECode HdmiCecLocalDeviceTv::ClearDeviceInfoList()
 {
     AssertRunOnServiceThread();
-    FOR_EACH(it, mSafeExternalInputs) {
+    AutoPtr<IIterator> it;
+    mSafeExternalInputs->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
@@ -1769,7 +1778,10 @@ ECode HdmiCecLocalDeviceTv::IsConnectedToCecSwitch(
 {
     VALIDATE_NOT_NULL(result)
 
-    FOR_EACH(it, switches) {
+    AutoPtr<IIterator> it;
+    switches->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         Int32 switchPath;
@@ -1830,7 +1842,10 @@ ECode HdmiCecLocalDeviceTv::IsLocalDeviceAddress(
     AssertRunOnServiceThread();
     AutoPtr<IList> devices;
     ((HdmiControlService*)mService.Get())->GetAllLocalDevices((IList**)&devices);
-    FOR_EACH(it, devices) {
+    AutoPtr<IIterator> it;
+    devices->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<HdmiCecLocalDevice> device = (HdmiCecLocalDevice*) IObject::Probe(obj);
@@ -1898,8 +1913,12 @@ ECode HdmiCecLocalDeviceTv::GetSafeCecDeviceInfo(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(mLock);
-        FOR_EACH(it, mSafeAllDeviceInfos) {
+    {
+        AutoLock syncLock(mLock);
+        AutoPtr<IIterator> it;
+        mSafeAllDeviceInfos->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
             AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
@@ -2029,7 +2048,10 @@ ECode HdmiCecLocalDeviceTv::GetDeviceInfoByPath(
     AssertRunOnServiceThread();
     AutoPtr<IList> infos;
     GetDeviceInfoList(FALSE, (IList**)&infos);
-    FOR_EACH(it, infos) {
+    AutoPtr<IIterator> it;
+    infos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);
@@ -2545,7 +2567,10 @@ ECode HdmiCecLocalDeviceTv::Dump(
     IPrintWriter::Probe(pw)->Println(s);
     IPrintWriter::Probe(pw)->Println(String("CEC devices:"));
     pw->IncreaseIndent();
-    FOR_EACH(it, mSafeAllDeviceInfos) {
+    AutoPtr<IIterator> it;
+    mSafeAllDeviceInfos->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IHdmiDeviceInfo> info = IHdmiDeviceInfo::Probe(obj);

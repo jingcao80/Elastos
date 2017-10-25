@@ -30,7 +30,7 @@ CKeyEventWakeLockReceiver::MyRunnable::MyRunnable(
     : mWeakHost(host)
 {}
 
-CKeyEventWakeLockReceiver::MyRunnable::Run()
+ECode CKeyEventWakeLockReceiver::MyRunnable::Run()
 {
     AutoPtr<IPendingIntentOnFinished> rrObj;
     mWeakHost->Resolve(EIID_IPendingIntentOnFinished, (IInterface**)&rrObj);

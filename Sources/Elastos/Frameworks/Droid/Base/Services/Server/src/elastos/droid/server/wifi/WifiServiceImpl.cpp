@@ -557,7 +557,7 @@ WifiServiceImpl::BatchedScanRequest::BatchedScanRequest(
     /* [in] */ IWorkSource* ws)
     : DeathRecipient(owner, 0, String(NULL), binder, NULL)
 {
-    settings = settings;
+    this->settings = settings;
     uid = Binder::GetCallingUid();
     pid = Binder::GetCallingPid();
     workSource = ws;

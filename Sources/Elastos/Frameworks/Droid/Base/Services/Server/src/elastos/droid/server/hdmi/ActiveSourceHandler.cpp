@@ -19,7 +19,6 @@
 #include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
 #include "elastos/droid/server/hdmi/RoutingControlAction.h"
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
@@ -91,7 +90,9 @@ ECode ActiveSourceHandler::Process(
         // or switch the port back to the one used for the current mode.
         AutoPtr<IHdmiCecLocalDeviceActiveSource> current;
         ((HdmiCecLocalDeviceTv*) tv.Get())->GetActiveSource((IHdmiCecLocalDeviceActiveSource**)&current);
-        if (((HdmiCecLocalDevice::ActiveSource*)current.Get())->mLogicalAddress == Ptr(this)->Func(this->GetSourceAddress)) {
+        Int32 sourceAddress;
+        GetSourceAddress(&sourceAddress);
+        if (((HdmiCecLocalDevice::ActiveSource*)current.Get())->mLogicalAddress == sourceAddress) {
             AutoPtr<IHdmiCecMessage> activeSourceCommand;
             HdmiCecMessageBuilder::BuildActiveSource(
                     ((HdmiCecLocalDevice::ActiveSource*)current.Get())->mLogicalAddress, ((HdmiCecLocalDevice::ActiveSource*)current.Get())->mPhysicalAddress, (IHdmiCecMessage**)&activeSourceCommand);

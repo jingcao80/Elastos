@@ -291,7 +291,7 @@ ECode PermissionMonitor::OnUserRemoved(
 {
     AutoLock lock(this);
     if (user < 0) {
-        Slogger::E(TAG, "Invalid user in OnUserRemoved: " + user);
+        Slogger::E(TAG, "Invalid user in OnUserRemoved: %d", user);
         return NOERROR;
     }
 

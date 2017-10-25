@@ -100,6 +100,8 @@ public:
     static CARAPI_(void) Remove(
         /* [in] */ Int32 pid);
 
+    using Object::ToString;
+
     CARAPI_(String) ToString();
 
 private:

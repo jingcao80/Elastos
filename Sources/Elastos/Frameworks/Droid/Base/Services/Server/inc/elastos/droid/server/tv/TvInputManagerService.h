@@ -343,7 +343,6 @@ private:
         AutoPtr<ISet> mCallbackSet;
     };
 
-    class SessionCallback;
     class ClientState
         : public Object
         , public IProxyDeathRecipient
@@ -379,8 +378,6 @@ private:
     };
 
     class ServiceCallback;
-    class InputServiceConnection;
-    class HardwareListener;
     class ServiceState
         : public Object
     {
@@ -418,7 +415,6 @@ private:
         Boolean mReconnecting;
     };
 
-    class InputServiceConnection;
     class TvInputState
         : public Object
     {
@@ -441,7 +437,6 @@ private:
         Int32 mState;
     };
 
-    class SessionCallback;
     class SessionState
         : public Object
         , public IProxyDeathRecipient

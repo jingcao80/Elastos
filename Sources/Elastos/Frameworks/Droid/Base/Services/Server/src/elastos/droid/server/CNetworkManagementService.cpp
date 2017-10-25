@@ -29,7 +29,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/net/IpPrefix.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/Looper.h>
 #include <elastos/droid/os/Process.h>
@@ -448,8 +447,12 @@ ECode CNetworkManagementService::InnerSub_PhoneStateListener::OnDataConnectionRe
 {
     if (CNetworkManagementService::DBG) Slogger::D(CNetworkManagementService::TAG,
             "onDataConnectionRealTimeInfoChanged: %s", TO_CSTR(dcRtInfo));
+    Int32 state;
+    dcRtInfo->GetDcPowerState(&state);
+    Int64 time;
+    dcRtInfo->GetTime(&time);
     mHost->NotifyInterfaceClassActivity(IConnectivityManager::TYPE_MOBILE,
-            Ptr(dcRtInfo)->Func(dcRtInfo->GetDcPowerState), Ptr(dcRtInfo)->Func(dcRtInfo->GetTime), TRUE);
+            state, time, TRUE);
     return NOERROR;
 }
 
@@ -857,8 +860,10 @@ ECode CNetworkManagementService::NotifyInterfaceClassActivity(
     }
 
     Boolean report = FALSE;
-    {    AutoLock syncLock(mIdleTimerLock);
-        if (Ptr(mActiveIdleTimers)->Func(IHashMap::IsEmpty)) {
+    {
+        AutoLock syncLock(mIdleTimerLock);
+        Boolean empty;
+        if (mActiveIdleTimers->IsEmpty(&empty), empty) {
             // If there are no idle timers, we are not monitoring activity, so we
             // are always considered active.
             isActive = TRUE;
@@ -1049,7 +1054,9 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
 
     if (mBandwidthControlEnabled) {
         // try {
-        ECode ec = Ptr(this)->Func(this->GetBatteryStats)->NoteNetworkStatsEnabled();
+        AutoPtr<IIBatteryStats> stats;
+        GetBatteryStats((IIBatteryStats**)&stats);
+        ECode ec = stats->NoteNetworkStatsEnabled();
         // } catch (RemoteException e) {
         if (FAILED(ec)) {
             if ((ECode)E_REMOTE_EXCEPTION != ec)
@@ -1059,7 +1066,8 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
     }
 
     // push any existing quota or UID rules
-    {    AutoLock syncLock(mQuotaLock);
+    {
+        AutoLock syncLock(mQuotaLock);
         Int32 size;
         mActiveQuotas->GetSize(&size);
         if (size > 0) {
@@ -1067,12 +1075,21 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
             AutoPtr<IHashMap> activeQuotas = mActiveQuotas;
             mActiveQuotas = NULL;
             CHashMap::New((IHashMap**)&mActiveQuotas);
-            FOR_EACH(iter, Ptr(activeQuotas)->Func(activeQuotas->GetEntrySet)) {
-                AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
+            AutoPtr<ISet> entries;
+            activeQuotas->GetEntrySet((ISet**)&entries);
+            AutoPtr<IIterator> it;
+            entries->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
                 AutoPtr<IInterface> key, value;
                 entry->GetKey((IInterface**)&key);
                 entry->GetValue((IInterface**)&value);
-                SetInterfaceQuota(Object::ToString(key), Ptr(IInteger64::Probe(value))->Func(IInteger64::GetValue));
+                Int64 quota;
+                IInteger64::Probe(value)->GetValue(&quota);
+                SetInterfaceQuota(Object::ToString(key), quota);
             }
         }
 
@@ -1082,12 +1099,21 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
             AutoPtr<IHashMap> activeAlerts = mActiveAlerts;
             mActiveAlerts = NULL;
             CHashMap::New((IHashMap**)&mActiveAlerts);
-            FOR_EACH(iter, Ptr(activeAlerts)->Func(activeAlerts->GetEntrySet)) {
-                AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
+            AutoPtr<ISet> entries;
+            activeAlerts->GetEntrySet((ISet**)&entries);
+            AutoPtr<IIterator> it;
+            entries->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
                 AutoPtr<IInterface> key, value;
                 entry->GetKey((IInterface**)&key);
                 entry->GetValue((IInterface**)&value);
-                SetInterfaceAlert(Object::ToString(key), Ptr(IInteger64::Probe(value))->Func(IInteger64::GetValue));
+                Int64 alert;
+                IInteger64::Probe(value)->GetValue(&alert);
+                SetInterfaceAlert(Object::ToString(key), alert);
             }
         }
 
@@ -1097,7 +1123,8 @@ ECode CNetworkManagementService::PrepareNativeDaemon()
             AutoPtr<ISparseBooleanArray> uidRejectOnQuota = mUidRejectOnQuota;
             mUidRejectOnQuota = NULL;
             CSparseBooleanArray::New((ISparseBooleanArray**)&mUidRejectOnQuota);
-            for (Int32 i = 0; i < Ptr(uidRejectOnQuota)->Func(uidRejectOnQuota->GetSize); i++) {
+            uidRejectOnQuota->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
                 Int32 key;
                 Boolean value;
                 uidRejectOnQuota->KeyAt(i, &key);
@@ -1209,13 +1236,15 @@ ECode CNetworkManagementService::GetInterfaceConfig(
     AutoPtr<IInetAddress> addr;
     Int32 prefixLength = 0;
     // try {
-    NetworkUtils::NumericToInetAddress(Ptr(st)->Func(st->GetNextToken), (IInetAddress**)&addr);
+    st->GetNextToken(&nextToken);
+    NetworkUtils::NumericToInetAddress(nextToken, (IInetAddress**)&addr);
     // } catch (IllegalArgumentException iae) {
     //     Slog.e(TAG, "Failed to parse ipaddr", iae);
     // }
 
     // try {
-    prefixLength = atoi(Ptr(st)->Func(st->GetNextToken));
+    st->GetNextToken(&nextToken);
+    prefixLength = atoi(nextToken);
     // } catch (NumberFormatException nfe) {
     //     Slog.e(TAG, "Failed to parse prefixLength", nfe);
     // }
@@ -1223,8 +1252,10 @@ ECode CNetworkManagementService::GetInterfaceConfig(
     AutoPtr<ILinkAddress> linkAddr;
     CLinkAddress::New(addr, prefixLength, (ILinkAddress**)&linkAddr);
     cfg->SetLinkAddress(linkAddr);
-    while (Ptr(st)->Func(st->HasMoreTokens)) {
-        cfg->SetFlag(Ptr(st)->Func(st->GetNextToken));
+    Boolean hasNext;
+    while (st->HasMoreTokens(&hasNext), hasNext) {
+        st->GetNextToken(&nextToken);
+        cfg->SetFlag(nextToken);
     }
     // } catch (NoSuchElementException nsee) {
     //     throw new IllegalStateException("Invalid response from daemon: " + event);
@@ -1762,10 +1793,12 @@ ECode CNetworkManagementService::TetherInterface(
     CArrayList::New((IList**)&routes);
         // The RouteInfo constructor truncates the LinkAddress to a network prefix, thus making it
         // suitable to use as a route destination.
-    AutoPtr<IRouteInfo> routeInfo;
     AutoPtr<IInterfaceConfiguration> interfaceConf;
     GetInterfaceConfig(iface, (IInterfaceConfiguration**)&interfaceConf);
-    CRouteInfo::New(Ptr(interfaceConf)->Func(interfaceConf->GetLinkAddress), NULL, iface, (IRouteInfo**)&routeInfo);
+    AutoPtr<ILinkAddress> address;
+    interfaceConf->GetLinkAddress((ILinkAddress**)&address);
+    AutoPtr<IRouteInfo> routeInfo;
+    CRouteInfo::New(address, NULL, iface, (IRouteInfo**)&routeInfo);
     routes->Add(routeInfo);
     AddInterfaceToLocalNetwork(iface, routes);
     return NOERROR;
@@ -1824,7 +1857,10 @@ ECode CNetworkManagementService::SetDnsForwarders(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
-    Int32 netId = (network != NULL) ? Ptr(network)->Func(network->GetNetId) : IConnectivityManager::NETID_UNSET;
+    Int32 netId = IConnectivityManager::NETID_UNSET;
+    if (network != NULL) {
+        network->GetNetId(&netId);
+    }
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
     args->Set(0, CoreUtils::Convert(String("dns")));
     args->Set(1, CoreUtils::Convert(String("set")));
@@ -1895,8 +1931,10 @@ ECode CNetworkManagementService::ModifyNat(
        internalNetworkInterface->GetInterfaceAddresses((IList**)&list);
        AutoPtr<IList> interfaceAddresses;
        ExcludeLinkLocal(list, (IList**)&interfaceAddresses);
+       Int32 size;
+       interfaceAddresses->GetSize(&size);
        AutoPtr<IInteger32> i32;
-       CInteger32::New(Ptr(interfaceAddresses)->Func(IList::GetSize), (IInteger32**)&i32);
+       CInteger32::New(size, (IInteger32**)&i32);
        cmd->AppendArg(i32);
        AutoPtr<IIterator> emu;
        FAIL_RETURN(interfaceAddresses->GetIterator((IIterator**)&emu));
@@ -2536,8 +2574,8 @@ ECode CNetworkManagementService::GetNetworkStatsTethering(
             CStringTokenizer::New(event->GetMessage(), (IStringTokenizer**)&tok);
             // try {
             do {
-                String ifaceIn;
-                tok->GetNextToken(&ifaceIn);
+                String nextToken;
+                tok->GetNextToken(&nextToken);
                 String ifaceOut;
                 tok->GetNextToken(&ifaceOut);
 
@@ -2547,17 +2585,21 @@ ECode CNetworkManagementService::GetNetworkStatsTethering(
                 entry->SetUid(ITrafficStats::UID_TETHERING);
                 entry->SetSet(INetworkStats::SET_DEFAULT);
                 entry->SetTag(INetworkStats::TAG_NONE);
+                tok->GetNextToken(&nextToken);
                 Int64 i64;
-                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                ec = StringUtils::Parse(nextToken, &i64);
                 if (FAILED(ec)) break;
                 entry->SetRxBytes(i64);
-                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                tok->GetNextToken(&nextToken);
+                ec = StringUtils::Parse(nextToken, &i64);
                 if (FAILED(ec)) break;
                 entry->SetRxPackets(i64);
-                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                tok->GetNextToken(&nextToken);
+                ec = StringUtils::Parse(nextToken, &i64);
                 if (FAILED(ec)) break;
                 entry->SetTxBytes(i64);
-                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                tok->GetNextToken(&nextToken);
+                ec = StringUtils::Parse(nextToken, &i64);
                 if (FAILED(ec)) break;
                 entry->SetTxPackets(i64);
                 stats->CombineValues(entry);
@@ -2586,7 +2628,9 @@ ECode CNetworkManagementService::GetNetworkStatsTethering(
         return ec;
     }
     // }
-    FUNC_RETURN(stats)
+    *result = stats;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CNetworkManagementService::SetDnsServersForNetwork(
@@ -2904,14 +2948,27 @@ ECode CNetworkManagementService::ExcludeLinkLocal(
     /* [in] */ IList* addresses,
     /* [out] */ IList** result)
 {
+    Int32 size;
+    addresses->GetSize(&size);
     AutoPtr<IArrayList> filtered;
-    CArrayList::New(Ptr(addresses)->Func(addresses->GetSize), (IArrayList**)&filtered);
-    FOR_EACH(iter, addresses) {
-        AutoPtr<IInterfaceAddress> ia = IInterfaceAddress::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (!Ptr(ia)->GetPtr(ia->GetAddress)->Func(IInetAddress::IsLinkLocalAddress))
+    CArrayList::New(size, (IArrayList**)&filtered);
+    AutoPtr<IIterator> it;
+    addresses->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IInterfaceAddress* ia = IInterfaceAddress::Probe(obj);
+        AutoPtr<IInetAddress> address;
+        ia->GetAddress((IInetAddress**)&address);
+        Boolean linkLocalAddress;
+        if (address->IsLinkLocalAddress(&linkLocalAddress), !linkLocalAddress) {
             filtered->Add(ia);
+        }
     }
-    FUNC_RETURN(IList::Probe(filtered))
+    *result = IList::Probe(filtered);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CNetworkManagementService::ReportNetworkActive()
@@ -2944,10 +3001,12 @@ ECode CNetworkManagementService::ReportNetworkActive()
 }
 
 ECode CNetworkManagementService::IsNetworkActive(
-        /* [out] */ Boolean* result)
+    /* [out] */ Boolean* result)
 {
-    {    AutoLock syncLock(mNetworkActivityListeners);
-        *result = mNetworkActive || Ptr(mActiveIdleTimers)->Func(IHashMap::IsEmpty);
+    {
+        AutoLock syncLock(mNetworkActivityListeners);
+        Boolean empty;
+        *result = mNetworkActive || (mActiveIdleTimers->IsEmpty(&empty), empty);
     }
     return NOERROR;
 }
@@ -2980,14 +3039,16 @@ void CNetworkManagementService::Dump(
     pw->Print(String("mNetworkActive="));
     pw->Println(mNetworkActive);
 
-    {    AutoLock syncLock(mQuotaLock);
+    {
+        AutoLock syncLock(mQuotaLock);
         pw->Print(String("Active quota ifaces: "));
         pw->Println(Object::ToString(mActiveQuotas));
         pw->Print(String("Active alert ifaces: "));
         pw->Println(Object::ToString(mActiveAlerts));
     }
 
-    {    AutoLock syncLock(mUidRejectOnQuota);
+    {
+        AutoLock syncLock(mUidRejectOnQuota);
         pw->Print(String("UID reject on quota ifaces: ["));
         Int32 size;
         mUidRejectOnQuota->GetSize(&size);
@@ -3000,14 +3061,24 @@ void CNetworkManagementService::Dump(
         pw->Println(String("]"));
     }
 
-    {    AutoLock syncLock(mIdleTimerLock);
+    {
+        AutoLock syncLock(mIdleTimerLock);
         pw->Println(String("Idle timers:"));
-        FOR_EACH(iter, Ptr(mActiveIdleTimers)->Func(mActiveIdleTimers->GetEntrySet)) {
-            AutoPtr<IMapEntry> ent = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
-            pw->Print(String("  "));
-            pw->Print(Ptr(ent)->Func(ent->GetKey));
-            pw->Println(String(":"));
+        AutoPtr<ISet> entries;
+        mActiveIdleTimers->GetEntrySet((ISet**)&entries);
+        AutoPtr<IIterator> it;
+        entries->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> ent = IMapEntry::Probe(obj);
+            pw->Print(String("  "));
+            obj = NULL;
+            ent->GetKey((IInterface**)&obj);
+            pw->Print(obj);
+            pw->Println(String(":"));
+            obj = NULL;
             ent->GetValue((IInterface**)&obj);
             AutoPtr<IdleTimerParams> params = (IdleTimerParams*)IObject::Probe(obj);
             pw->Print(String("    timeout="));
@@ -3026,18 +3097,22 @@ void CNetworkManagementService::Dump(
 ECode CNetworkManagementService::GetBatteryStats(
     /* [out] */ IIBatteryStats** result)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mBatteryStats != NULL) {
-            FUNC_RETURN(mBatteryStats)
+            *result = mBatteryStats;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
         AutoPtr<IServiceManager> helper;
         CServiceManager::AcquireSingleton((IServiceManager**)&helper);
         AutoPtr<IInterface> service;
         helper->GetService(IBatteryStats::SERVICE_NAME, (IInterface**)&service);
         mBatteryStats = IIBatteryStats::Probe(service);
-        FUNC_RETURN(mBatteryStats)
+        *result = mBatteryStats;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
     }
-    return NOERROR;
 }
 
 ECode CNetworkManagementService::CreatePhysicalNetwork(
@@ -3137,10 +3212,22 @@ ECode CNetworkManagementService::AddLegacyRouteForNetId(
     // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
     AutoPtr<ILinkAddress> la;
     routeInfo->GetDestinationLinkAddress((ILinkAddress**)&la);
-    cmd->AppendArg(CoreUtils::Convert(Ptr(routeInfo)->Func(routeInfo->GetInterface)));
-    cmd->AppendArg(CoreUtils::Convert(Ptr(la)->GetPtr(la->GetAddress)->Func(IInetAddress::GetHostAddress) + "/" + StringUtils::ToString(Ptr(la)->Func(la->GetPrefixLength))));
-    if (Ptr(routeInfo)->Func(routeInfo->HasGateway)) {
-        cmd->AppendArg(CoreUtils::Convert(Ptr(routeInfo)->GetPtr(routeInfo->GetGateway)->Func(IInetAddress::GetHostAddress)));
+    String itf;
+    routeInfo->GetInterface(&itf);
+    cmd->AppendArg(CoreUtils::Convert(itf));
+    AutoPtr<IInetAddress> address;
+    la->GetAddress((IInetAddress**)&address);
+    String host;
+    address->GetHostAddress(&host);
+    Int32 length;
+    la->GetPrefixLength(&length);
+    cmd->AppendArg(CoreUtils::Convert(host + "/" + StringUtils::ToString(length)));
+    Boolean hasGateway;
+    if (routeInfo->HasGateway(&hasGateway), hasGateway) {
+        address = NULL;
+        routeInfo->GetGateway((IInetAddress**)&address);
+        address->GetHostAddress(&host);
+        cmd->AppendArg(CoreUtils::Convert(host));
     }
 
     // try {
@@ -3313,10 +3400,16 @@ ECode CNetworkManagementService::AddInterfaceToLocalNetwork(
 {
     ModifyInterfaceInNetwork(String("add"), String("local"), iface);
 
-    FOR_EACH(iter, routes) {
-        AutoPtr<IRouteInfo> route = IRouteInfo::Probe(Ptr(iter)->Func(iter->GetNext));
-        if (!Ptr(route)->Func(route->IsDefaultRoute)) {
-            ModifyRoute(String("add"), String("local"), route);
+    AutoPtr<IIterator> it;
+    routes->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> route;
+        it->GetNext((IInterface**)&route);
+        Boolean defaultRoute;
+        IRouteInfo::Probe(route)->IsDefaultRoute(&defaultRoute);
+        if (!defaultRoute) {
+            ModifyRoute(String("add"), String("local"), IRouteInfo::Probe(route));
         }
     }
     return NOERROR;

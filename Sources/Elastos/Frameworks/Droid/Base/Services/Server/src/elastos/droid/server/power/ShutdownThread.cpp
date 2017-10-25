@@ -450,7 +450,7 @@ ECode ShutdownThread::ShutdownMusicHandler::OnCompletionListener::OnCompletion(
 //          ShutdownThread::ShutdownMusicHandler
 //==============================================================================
 
-ShutdownThread::ShutdownMusicHandler::HandleMessage(
+ECode ShutdownThread::ShutdownMusicHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IInterface> obj;

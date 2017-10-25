@@ -801,7 +801,7 @@ const Byte* DexFile::Begin() const
     return mBegin;
 }
 
-const size_t DexFile::Size() const
+size_t DexFile::Size() const
 {
     return mSize;
 }

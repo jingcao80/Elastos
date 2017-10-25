@@ -2555,6 +2555,9 @@ void Settings::AddPackageToCleanLPw(
     }
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+
 Boolean Settings::ReadLPw(
     /* [in] */ CPackageManagerService* service,
     /* [in] */ IList* users,
@@ -2875,6 +2878,8 @@ Boolean Settings::ReadLPw(
             " packages, " + StringUtils::ToString((Int32)mSharedUsers.GetSize()) + " shared uids\n");
     return TRUE;
 }
+
+#pragma clang diagnostic pop
 
 void Settings::ReadDefaultPreferredAppsLPw(
     /* [in] */ CPackageManagerService* service,

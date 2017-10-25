@@ -16,17 +16,16 @@
 
 #include "elastos/droid/server/net/DelayedDiskWrite.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <Elastos.CoreLibrary.IO.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::IRunnable;
 using Elastos::Core::IThread;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::IO::CBufferedOutputStream;
 using Elastos::IO::CDataOutputStream;
@@ -75,11 +74,14 @@ ECode DelayedDiskWrite::Write(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     /* Do a delayed write to disk on a separate handler thread */
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (++mWriteSequence == 1) {
             CHandlerThread::New(String("DelayedDiskWriteThread"), (IHandlerThread**)&mDiskWriteHandlerThread);
             IThread::Probe(mDiskWriteHandlerThread)->Start();
-            CHandler::New(Ptr(mDiskWriteHandlerThread)->Func(IHandlerThread::GetLooper), (IHandler**)&mDiskWriteHandler);
+            AutoPtr<ILooper> looper;
+            mDiskWriteHandlerThread->GetLooper((ILooper**)&looper);
+            CHandler::New(looper, (IHandler**)&mDiskWriteHandler);
         }
     }
 
@@ -117,9 +119,12 @@ ECode DelayedDiskWrite::DoWrite(
     }
     // }
     // Quit if no more writes sent
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (--mWriteSequence == 0) {
-            Ptr(mDiskWriteHandler)->Func(IHandler::GetLooper)->Quit();
+            AutoPtr<ILooper> looper;
+            mDiskWriteHandler->GetLooper((ILooper**)&looper);
+            looper->Quit();
             mDiskWriteHandler = NULL;
             mDiskWriteHandlerThread = NULL;
         }

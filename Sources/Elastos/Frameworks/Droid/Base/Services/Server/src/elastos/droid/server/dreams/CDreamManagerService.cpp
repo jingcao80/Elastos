@@ -375,7 +375,7 @@ ECode CDreamManagerService::DreamControllerListener::OnDreamStopped(
     /* [in] */ IBinder* token)
 {
     AutoLock lock(mHost->mLock);
-    if (mHost->mCurrentDreamToken == token) {
+    if (mHost->mCurrentDreamToken.Get() == token) {
         mHost->CleanupDreamLocked();
     }
 

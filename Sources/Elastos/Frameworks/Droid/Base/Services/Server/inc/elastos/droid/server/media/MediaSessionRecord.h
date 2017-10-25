@@ -147,6 +147,8 @@ private:
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
+        using Handler::Post;
+
         CARAPI_(void) Post(
             /* [in] */ Int32 what);
 

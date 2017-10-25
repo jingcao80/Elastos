@@ -15,7 +15,6 @@
 //=========================================================================
 
 #include "elastos/droid/server/net/NetworkIdentitySet.h"
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <Elastos.Droid.Net.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
@@ -86,10 +85,13 @@ ECode NetworkIdentitySet::WriteToStream(
     Int32 size;
     GetSize(&size);
     out->WriteInt32(size);
-    AutoPtr<IIterator> iter;
-    GetIterator((IIterator**)&iter);
-    while (Ptr(iter)->Func(iter->HasNext)) {
-        AutoPtr<INetworkIdentity> ident = INetworkIdentity::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        INetworkIdentity* ident = INetworkIdentity::Probe(obj);
         Int32 type;
         ident->GetType(&type);
         out->WriteInt32(type);

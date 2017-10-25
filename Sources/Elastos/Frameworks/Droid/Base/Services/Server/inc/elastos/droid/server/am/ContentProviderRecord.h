@@ -99,6 +99,8 @@ public:
         /* [in] */ const String& prefix,
         /* [in] */ Boolean full);
 
+    using Object::ToString;
+
     CARAPI_(String) ToString();
 
     CARAPI_(String) ToShortString();

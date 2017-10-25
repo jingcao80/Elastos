@@ -40,6 +40,8 @@ public:
 
     CARAPI_(String) GetRawEvent();
 
+    using Object::ToString;
+
     CARAPI_(String) ToString();
 
     CARAPI_(Boolean) IsClassContinue();

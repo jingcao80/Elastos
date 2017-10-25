@@ -130,7 +130,7 @@ CDropBoxManagerService::EntryFile::EntryFile()
 {
 }
 
-CDropBoxManagerService::EntryFile::Init(
+ECode CDropBoxManagerService::EntryFile::Init(
     /* [in] */ IFile* temp,
     /* [in] */ IFile* dir,
     /* [in] */ const String& tag,
@@ -172,7 +172,7 @@ CDropBoxManagerService::EntryFile::Init(
     return NOERROR;
 }
 
-CDropBoxManagerService::EntryFile::Init(
+ECode CDropBoxManagerService::EntryFile::Init(
     /* [in] */ IFile* dir,
     /* [in] */ const String& tag,
     /* [in] */ Int64 timestampMillis)
@@ -196,7 +196,7 @@ CDropBoxManagerService::EntryFile::Init(
     return NOERROR;
 }
 
-CDropBoxManagerService::EntryFile::Init(
+ECode CDropBoxManagerService::EntryFile::Init(
     /* [in] */ IFile* file,
     /* [in] */ Int32 blockSize)
 {
@@ -254,7 +254,7 @@ CDropBoxManagerService::EntryFile::Init(
  * Creates a EntryFile object with only a timestamp for comparison purposes.
  * @param timestampMillis to compare with.
  */
-CDropBoxManagerService::EntryFile::Init(
+ECode CDropBoxManagerService::EntryFile::Init(
     /* [in] */ Int64 millis)
 {
     mTag = NULL;
@@ -419,7 +419,7 @@ ECode CDropBoxManagerService::Stop()
 ECode CDropBoxManagerService::Add(
     /* [in] */ IDropBoxManagerEntry* entry)
 {
-    ECode ec;
+    ECode ec = NOERROR;
     AutoPtr<IFile> temp;
     AutoPtr<IOutputStream> output;
     Boolean isTagEnabled;

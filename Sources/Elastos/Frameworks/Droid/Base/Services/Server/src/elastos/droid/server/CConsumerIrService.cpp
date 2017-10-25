@@ -127,11 +127,12 @@ ECode CConsumerIrService::Transmit(
     FAIL_RETURN(ThrowIfNoIrEmitter())
 
     // Right now there is no mechanism to ensure fair queing of IR requests
-    {    AutoLock syncLock(mHalLock);
+    {
+        AutoLock syncLock(mHalLock);
         Int32 err = HalTransmit(mNativeHal, carrierFrequency, pattern);
 
         if (err < 0) {
-            Slogger::E(TAG, "Error transmitting: " + err);
+            Slogger::E(TAG, "Error transmitting: %d", err);
         }
     }
     return NOERROR;

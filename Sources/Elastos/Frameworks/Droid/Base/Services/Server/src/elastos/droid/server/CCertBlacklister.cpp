@@ -102,7 +102,7 @@ ECode CCertBlacklister::BlacklistObserver::WriteBlacklistThread::Run()
         CFileHelper::AcquireSingleton((IFileHelper**)&helper);
         helper->CreateTempFile(String("journal"), String(""), mHost->mTmpDir, (IFile**)&tmp);
         // mark it -rw-r--r--
-        ec = tmp->SetReadable(TRUE, FALSE);
+        ec = tmp->SetReadable(TRUE, FALSE, &bval);
         FAIL_GOTO(ec, _EXIT_)
 
         // write to it

@@ -20,7 +20,6 @@
 #include "elastos/droid/server/hdmi/HdmiControlService.h"
 #include <Elastos.CoreLibrary.h>
 #include <Elastos.Droid.Utility.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::IRunnable;
@@ -28,6 +27,7 @@ using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Utility::CPairHelper;
 using Elastos::Droid::Utility::IPairHelper;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -225,7 +225,10 @@ ECode HdmiCecFeatureAction::Finish(
         RemoveAction(this);
     }
     if (mOnFinishedCallbacks != NULL) {
-        FOR_EACH(it, mOnFinishedCallbacks) {
+        AutoPtr<IIterator> it;
+        mOnFinishedCallbacks->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
             AutoPtr<IPair> actionCallbackPair = IPair::Probe(obj);

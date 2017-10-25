@@ -42,6 +42,9 @@ SharedUserSetting::SharedUserSetting(
     , mSignatures(new PackageSignatures())
 {}
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+
 PInterface SharedUserSetting::Probe(
     /* [in] */ REIID riid)
 {
@@ -50,6 +53,8 @@ PInterface SharedUserSetting::Probe(
     }
     return GrantedPermissions::Probe(riid);
 }
+
+#pragma clang diagnostic pop
 
 ECode SharedUserSetting::ToString(
     /* [out] */ String* str)

@@ -57,6 +57,9 @@ PackageSetting::PackageSetting(
     , mSharedUser(orig->mSharedUser)
 {}
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreinterpret-base-class"
+
 PInterface PackageSetting::Probe(
     /* [in]  */ REIID riid)
 {
@@ -65,6 +68,8 @@ PInterface PackageSetting::Probe(
     }
     return PackageSettingBase::Probe(riid);
 }
+
+#pragma clang diagnostic pop
 
 ECode PackageSetting::ToString(
     /* [out] */ String* str)

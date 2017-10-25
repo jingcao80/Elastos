@@ -21,7 +21,6 @@
 #include <Elastos.Droid.Os.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/HashSet.h>
@@ -31,6 +30,7 @@ using Elastos::Core::CString;
 using Elastos::Core::IByte;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Droid::Internal::Utility::EIID_IFileRotatorReader;
 using Elastos::Droid::Internal::Utility::EIID_IFileRotatorRewriter;
 using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
 using Elastos::Droid::Net::CNetworkStats;
@@ -235,9 +235,9 @@ ECode NetworkStatsRecorder::GetOrLoadCompleteLocked(
 {
     AutoPtr<NetworkStatsCollection> complete;
     if (mComplete != NULL) {
-        AutoPtr<IInterface> temp;
-        mComplete->Resolve(EIID_IInterface, (IInterface**)&temp);
-        complete = reinterpret_cast<NetworkStatsCollection*>(temp->Probe(EIID_NetworkStatsCollection));
+        AutoPtr<IFileRotatorReader> temp;
+        mComplete->Resolve(EIID_IFileRotatorReader, (IInterface**)&temp);
+        complete = (NetworkStatsCollection*)temp.Get();
     }
     if (complete == NULL) {
         ECode ec;
@@ -258,21 +258,29 @@ ECode NetworkStatsRecorder::GetOrLoadCompleteLocked(
             if ((ECode)E_IO_EXCEPTION == ec) {
                 Slogger::E(TAG, "problem completely reading network stats");
                 RecoverFromWtf();
-                FUNC_RETURN(complete)
+                *result = complete;
+                REFCOUNT_ADD(*result);
+                return NOERROR;
             }
             // }
             // } catch (OutOfMemoryError e) {
             else if ((ECode)E_OUT_OF_MEMORY_ERROR == ec) {
                 Slogger::E(TAG, "problem completely reading network stats");
                 RecoverFromWtf();
-                FUNC_RETURN(complete)
+                *result = complete;
+                REFCOUNT_ADD(*result);
+                return NOERROR;
             }
             // }
-            else
+            else {
+                *result = NULL;
                 return ec;
+            }
         }
     }
-    FUNC_RETURN(complete)
+    *result = complete;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 void NetworkStatsRecorder::RecordSnapshotLocked(
@@ -295,9 +303,9 @@ void NetworkStatsRecorder::RecordSnapshotLocked(
 
     AutoPtr<NetworkStatsCollection> complete;
     if (mComplete != NULL) {
-        AutoPtr<IInterface> temp;
-        mComplete->Resolve(EIID_IInterface, (IInterface**)&temp);
-        complete = reinterpret_cast<NetworkStatsCollection*>(temp->Probe(EIID_NetworkStatsCollection));
+        AutoPtr<IFileRotatorReader> temp;
+        mComplete->Resolve(EIID_IFileRotatorReader, (IInterface**)&temp);
+        complete = (NetworkStatsCollection*)temp.Get();
     }
 
     AutoPtr<INetworkStatsHelper> helper;
@@ -361,7 +369,7 @@ void NetworkStatsRecorder::RecordSnapshotLocked(
 
     mLastSnapshot = snapshot;
 
-    if (LOGV && Ptr(unknownIfaces)->Func(unknownIfaces->GetSize) > 0) {
+    if (LOGV && (unknownIfaces->GetSize(&size), size > 0)) {
         Slogger::W(TAG, "unknown interfaces %s, ignoring those stats", TO_CSTR(unknownIfaces));
     }
 }
@@ -444,9 +452,9 @@ ECode NetworkStatsRecorder::RemoveUidsLocked(
 
     AutoPtr<NetworkStatsCollection> complete;
     if (mComplete != NULL) {
-        AutoPtr<IInterface> temp;
-        mComplete->Resolve(EIID_IInterface, (IInterface**)&temp);
-        complete = reinterpret_cast<NetworkStatsCollection*>(temp->Probe(EIID_NetworkStatsCollection));
+        AutoPtr<IFileRotatorReader> temp;
+        mComplete->Resolve(EIID_IFileRotatorReader, (IInterface**)&temp);
+        complete = (NetworkStatsCollection*)temp.Get();
     }
     if (complete != NULL) {
         complete->RemoveUids(uids);

@@ -50,7 +50,7 @@ CCountryDetectorService::InnerRunnable::InnerRunnable(
     : mHost(host)
 {}
 
-CCountryDetectorService::InnerRunnable::Run()
+ECode CCountryDetectorService::InnerRunnable::Run()
 {
     return mHost->Run();
 }

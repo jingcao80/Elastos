@@ -949,7 +949,7 @@ void DisplayPowerController::AnimateScreenStateChange(
     // If there is already an animation in progress, don't interfere with it.
     Boolean s1, s2;
     if ((on->IsStarted(&s1), s1)
-        || off->IsStarted(&s2), s2) {
+        || (off->IsStarted(&s2), s2)) {
         return;
     }
 

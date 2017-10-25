@@ -21,7 +21,6 @@
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/net/NetworkKey.h>
 #include <elastos/droid/net/NetworkScorerAppManager.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/utility/etl/HashMap.h>
@@ -29,7 +28,6 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
@@ -60,6 +58,7 @@ using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::IList;
 using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -120,41 +119,57 @@ ECode CNetworkScoreService::UpdateScores(
     CHashMap::New((IMap**)&networksByType);
     for (Int32 i = 0; i < networks->GetLength(); ++i) {
         AutoPtr<IScoredNetwork> network = (*networks)[i];
-        AutoPtr<IInterface> obj;
+        AutoPtr<INetworkKey> key;
+        network->GetNetworkKey((INetworkKey**)&key);
+        Int32 keyType;
+        key->GetType(&keyType);
         AutoPtr<IInteger32> type;
-        CInteger32::New(Ptr(network)->GetPtr(network->GetNetworkKey)->Func(INetworkKey::GetType), (IInteger32**)&type);
+        CInteger32::New(keyType, (IInteger32**)&type);
+        AutoPtr<IInterface> obj;
         networksByType->Get(type, (IInterface**)&obj);
         AutoPtr<IList> networkList = IList::Probe(obj);
         if (networkList == NULL) {
             AutoPtr<IInteger32> type;
-            CInteger32::New(Ptr(network)->GetPtr(network->GetNetworkKey)->Func(INetworkKey::GetType), (IInteger32**)&type);
+            CInteger32::New(keyType, (IInteger32**)&type);
             CArrayList::New((IList**)&networkList);
             networksByType->Put(type, networkList);
         }
         networkList->Add(network);
     }
     // Pass the scores of each type down to the appropriate network scorer.
-    FOR_EACH(setIter, Ptr(networksByType)->Func(networksByType->GetEntrySet)) {
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(setIter)->Func(setIter->GetNext));
+    AutoPtr<ISet> entries;
+    networksByType->GetEntrySet((ISet**)&entries);
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
-        mScoreCaches->Get(Ptr(entry)->Func(entry->GetKey), (IInterface**)&obj);
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> key;
+        entry->GetKey((IInterface**)&key);
+        obj = NULL;
+        mScoreCaches->Get(key, (IInterface**)&obj);
         AutoPtr<IINetworkScoreCache> scoreCache = IINetworkScoreCache::Probe(obj);
         if (scoreCache != NULL) {
             // try {
-            ECode ec = scoreCache->UpdateScores(IList::Probe(Ptr(entry)->Func(entry->GetValue)));
+            obj = NULL;
+            entry->GetValue((IInterface**)&obj);
+            ECode ec = scoreCache->UpdateScores(IList::Probe(obj));
             // } catch (RemoteException e) {
             if (FAILED(ec)) {
                 if ((ECode)E_REMOTE_EXCEPTION == ec) {
                     if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
-                        Logger::V(TAG, "Unable to update scores of type %s %d", Object::ToString(Ptr(entry)->Func(entry->GetKey)).string(), ec);
+                        Logger::V(TAG, "Unable to update scores of type %s %d", TO_CSTR(key), ec);
                     }
                 }
-                else
+                else {
                     return ec;
+                }
             }
             // }
         } else if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
-            Logger::V(TAG, "No scorer registered for type %s, discarding", Object::ToString(Ptr(entry)->Func(entry->GetKey)).string());
+            Logger::V(TAG, "No scorer registered for type %s, discarding", TO_CSTR(key));
         }
     }
     *result = TRUE;
@@ -249,8 +264,13 @@ ECode CNetworkScoreService::SetScorerInternal(
 ECode CNetworkScoreService::ClearInternal()
 {
     AutoPtr<ISet> cachesToClear = GetScoreCaches();
-    FOR_EACH(iter, cachesToClear) {
-        AutoPtr<IINetworkScoreCache> scoreCache = IINetworkScoreCache::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    cachesToClear->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IINetworkScoreCache> scoreCache = IINetworkScoreCache::Probe(obj);
         // try {
         ECode ec = scoreCache->ClearScores();
         // } catch (RemoteException e) {
@@ -260,8 +280,9 @@ ECode CNetworkScoreService::ClearInternal()
                     Logger::V(TAG, "Unable to clear scores %d", ec);
                 }
             }
-            else
+            else {
                 return ec;
+            }
         }
         // }
     }
@@ -273,7 +294,8 @@ ECode CNetworkScoreService::RegisterNetworkScoreCache(
     /* [in] */ IINetworkScoreCache* scoreCache)
 {
     mContext->EnforceCallingOrSelfPermission(Manifest::permission::BROADCAST_SCORE_NETWORKS, TAG);
-    {    AutoLock syncLock(mScoreCaches);
+    {
+        AutoLock syncLock(mScoreCaches);
         Boolean containsKey;
         AutoPtr<IInteger32> key;
         CInteger32::New(networkType, (IInteger32**)&key);
@@ -302,11 +324,19 @@ ECode CNetworkScoreService::Dump(
         return NOERROR;
     }
     String s("Current scorer: ");
-    s += Ptr(currentScorer)->Func(currentScorer->GetPackageName);
+    String packageName;
+    currentScorer->GetPackageName(&packageName);
+    s += packageName;
     writer->Println(s);
     IFlushable::Probe(writer)->Flush();
-    FOR_EACH(iter, GetScoreCaches()) {
-        AutoPtr<IINetworkScoreCache> scoreCache = IINetworkScoreCache::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<ISet> caches = GetScoreCaches();
+    AutoPtr<IIterator> it;
+    caches->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IINetworkScoreCache> scoreCache = IINetworkScoreCache::Probe(obj);
         // try {
         ECode ec;
         // TODO: Waiting for Dump
@@ -320,8 +350,9 @@ ECode CNetworkScoreService::Dump(
                     Logger::V(TAG, "Unable to dump score cache %d", ec);
                 }
             }
-            else
+            else {
                 return ec;
+            }
         }
         // }
     }
@@ -331,8 +362,11 @@ ECode CNetworkScoreService::Dump(
 AutoPtr<ISet> CNetworkScoreService::GetScoreCaches()
 {
     AutoPtr<ISet> rev;
-    {    AutoLock syncLock(mScoreCaches);
-        CHashSet::New(Ptr(mScoreCaches)->Func(mScoreCaches->GetValues), (ISet**)&rev);
+    {
+        AutoLock syncLock(mScoreCaches);
+        AutoPtr<ICollection> values;
+        mScoreCaches->GetValues((ICollection**)&values);
+        CHashSet::New(values, (ISet**)&rev);
     }
     return rev;
 }
@@ -340,7 +374,8 @@ AutoPtr<ISet> CNetworkScoreService::GetScoreCaches()
 ECode CNetworkScoreService::ToString(
     /* [out] */ String* result)
 {
-    return IObject::Probe(TO_IINTERFACE(this))->ToString(result);
+    *result = "CNetworkScoreService";
+    return NOERROR;
 }
 
 } // namespace Server

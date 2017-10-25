@@ -20,7 +20,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/R.h>
-#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Build.h>
 #include <elastos/droid/system/Os.h>
 #include <elastos/droid/text/TextUtils.h>
@@ -42,7 +41,6 @@
 
 // using Elastos::Droid::Server::Connectivity::Vpn;
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::INotification;
@@ -58,6 +56,7 @@ using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Net::IVpnConfig;
 using Elastos::Droid::Internal::Net::IVpnProfile;
 using Elastos::Droid::Internal::Utility::IPreconditions;
@@ -88,6 +87,8 @@ using Elastos::Droid::Utility::ISlog;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Objects;
@@ -192,7 +193,9 @@ ECode LockdownVpnTracker::HandleStateChangedLocked()
     if (egressInfo != NULL) {
         AutoPtr<IConnectivityManagerHelper> helper;
         CConnectivityManagerHelper::AcquireSingleton((IConnectivityManagerHelper**)&helper);
-        helper->GetNetworkTypeName(Ptr(egressInfo)->Func(egressInfo->GetType), &egressTypeName);
+        Int32 type;
+        egressInfo->GetType(&type);
+        helper->GetNetworkTypeName(type, &egressTypeName);
     }
     String egressIface(NULL);
     if (egressProp != NULL) {
@@ -277,14 +280,15 @@ ECode LockdownVpnTracker::HandleStateChangedLocked()
         ClearSourceRulesLocked();
 
         ECode ec;
-        AutoPtr<ILinkAddress> addr;
         Int32 uid;
-        AutoPtr<IIterator> iter;
+        AutoPtr<IIterator> it;
         FAIL_GOTO(ec = mNetService->SetFirewallInterfaceRule(iface, TRUE), catch_lable)
-        ICollection::Probe(sourceAddrs)->GetIterator((IIterator**)&iter);
-        while (Ptr(iter)->Func(iter->HasNext)) {
-            addr = ILinkAddress::Probe(Ptr(iter)->Func(iter->GetNext));
-            FAIL_GOTO(ec = SetFirewallEgressSourceRule(addr, TRUE), catch_lable)
+        ICollection::Probe(sourceAddrs)->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> addr;
+            it->GetNext((IInterface**)&addr);
+            FAIL_GOTO(ec = SetFirewallEgressSourceRule(ILinkAddress::Probe(addr), TRUE), catch_lable)
         }
 
         FAIL_GOTO(ec = mNetService->SetFirewallUidRule(ROOT_UID, TRUE), catch_lable)
@@ -342,7 +346,7 @@ ECode LockdownVpnTracker::InitLocked()
     do {
         if (FAILED(ec = mNetService->SetFirewallEgressDestRule(server, 500, TRUE))) break;
         if (FAILED(ec = mNetService->SetFirewallEgressDestRule(server, 4500, TRUE))) break;
-        if (FAILED(ec = mNetService->SetFirewallEgressDestRule(Ptr(mProfile)->Func(mProfile->GetServer), 1701, TRUE))) break;
+        if (FAILED(ec = mNetService->SetFirewallEgressDestRule(server, 1701, TRUE))) break;
     } while(FALSE);
     // } catch (RemoteException e) {
     if (FAILED(ec)) {
@@ -354,7 +358,8 @@ ECode LockdownVpnTracker::InitLocked()
     }
     // }
 
-    {    AutoLock syncLock(mStateLock);
+    {
+        AutoLock syncLock(mStateLock);
         HandleStateChangedLocked();
     }
     return NOERROR;
@@ -407,7 +412,8 @@ ECode LockdownVpnTracker::ShutdownLocked()
 ECode LockdownVpnTracker::Reset()
 {
     Slogger::D(TAG, "reset()");
-    {    AutoLock syncLock(mStateLock);
+    {
+        AutoLock syncLock(mStateLock);
         // cycle tracker, reset error count, and trigger retry
         ShutdownLocked();
         InitLocked();
@@ -425,9 +431,13 @@ ECode LockdownVpnTracker::ClearSourceRulesLocked()
         mAcceptedIface = NULL;
     }
     if (mAcceptedSourceAddr != NULL) {
-        FOR_EACH(iter, mAcceptedSourceAddr) {
-            AutoPtr<ILinkAddress> addr = ILinkAddress::Probe(Ptr(iter)->Func(iter->GetNext));
-            FAIL_GOTO(ec = SetFirewallEgressSourceRule(addr, FALSE), label)
+        AutoPtr<IIterator> it;
+        mAcceptedSourceAddr->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> addr;
+            it->GetNext((IInterface**)&addr);
+            FAIL_GOTO(ec = SetFirewallEgressSourceRule(ILinkAddress::Probe(addr), FALSE), label)
         }
 
         FAIL_GOTO(ec = mNetService->SetFirewallUidRule(ROOT_UID, FALSE), label)
@@ -457,8 +467,10 @@ ECode LockdownVpnTracker::SetFirewallEgressSourceRule(
 {
     // Our source address based firewall rules must only cover our own source address, not the
     // whole subnet
+    AutoPtr<IInetAddress> addr;
+    address->GetAddress((IInetAddress**)&addr);
     String addrString;
-    Ptr(address)->Func(address->GetAddress)->GetHostAddress(&addrString);
+    addr->GetHostAddress(&addrString);
     return mNetService->SetFirewallEgressSourceRule(addrString, allow);
 }
 
@@ -529,8 +541,10 @@ void LockdownVpnTracker::ShowNotification(
     builder->SetOngoing(TRUE);
     mContext->GetString(R::string::reset, &value);
     builder->AddAction(R::drawable::ic_menu_refresh, StringUtils::ParseCharSequence(value), mResetIntent);
+    AutoPtr<IResources> resources;
+    mContext->GetResources((IResources**)&resources);
     Int32 color;
-    Ptr(mContext)->Func(mContext->GetResources)->GetColor(R::color::system_notification_accent_color, &color);
+    resources->GetColor(R::color::system_notification_accent_color, &color);
     builder->SetColor(color);
 
     AutoPtr<INotification> notification;
