@@ -470,7 +470,7 @@ void CInstallFlowAnalytics::WriteToEventLog()
     // }
 }
 
-const Byte CInstallFlowAnalytics::ClipUnsignedValueToUnsignedByte(
+Byte CInstallFlowAnalytics::ClipUnsignedValueToUnsignedByte(
     /* [in] */ Int64 value)
 {
     if (value < 0) {
@@ -484,7 +484,7 @@ const Byte CInstallFlowAnalytics::ClipUnsignedValueToUnsignedByte(
     }
 }
 
-const Int32 CInstallFlowAnalytics::ClipUnsignedLongToUnsignedInt(
+Int32 CInstallFlowAnalytics::ClipUnsignedLongToUnsignedInt(
     /* [in] */ Int64 value)
 {
     if (value < 0) {

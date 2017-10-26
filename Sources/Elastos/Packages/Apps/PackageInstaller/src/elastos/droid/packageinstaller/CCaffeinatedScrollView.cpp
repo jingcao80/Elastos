@@ -49,8 +49,7 @@ ECode CCaffeinatedScrollView::constructor(
     return ScrollView::constructor(context, attrs);
 }
 
-ECode CCaffeinatedScrollView::AwakenScrollBars(
-    /* [out] */ Boolean* result)
+Boolean CCaffeinatedScrollView::AwakenScrollBars()
 {
     return ScrollView::AwakenScrollBars();
 }

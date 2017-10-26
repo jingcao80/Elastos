@@ -88,6 +88,8 @@ public:
 private:
     CARAPI_(void) ShowNextDialog();
 
+    using Activity::ShowDialog;
+
     CARAPI_(void) ShowDialog(
         /* [in] */ ICursor* cursor);
 

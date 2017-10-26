@@ -137,11 +137,15 @@ public:
         /* [in] */ Boolean animLeftRight,
         /* [in] */ Boolean forward);
 
+    using RelativeLayout::OnAnimationEnd;
+
     CARAPI OnAnimationEnd(
         /* [in] */  IAnimation* animation);
 
     CARAPI OnAnimationRepeat(
         /* [in] */  IAnimation* animation);
+
+    using RelativeLayout::OnAnimationStart;
 
     CARAPI OnAnimationStart(
         /* [in] */  IAnimation* animation);
@@ -168,6 +172,8 @@ private:
         /* [in] */ Float alphaFrom,
         /* [in] */ Float alphaTo,
         /* [in] */ Int64 duration);
+
+    using RelativeLayout::StartAnimation;
 
     CARAPI_(void) StartAnimation();
 

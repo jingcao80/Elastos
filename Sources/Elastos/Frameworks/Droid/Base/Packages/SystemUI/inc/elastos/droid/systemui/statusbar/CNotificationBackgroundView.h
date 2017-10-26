@@ -93,6 +93,8 @@ private:
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
+    using View::Draw;
+
     CARAPI_(void) Draw(
         /* [in] */ ICanvas* canvas,
         /* [in] */ IDrawable* drawable);

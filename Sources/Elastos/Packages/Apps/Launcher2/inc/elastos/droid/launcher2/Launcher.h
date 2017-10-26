@@ -1255,6 +1255,8 @@ public:
         /* [in] */ IApplicationInfo* appInfo,
         /* [in] */ IUserHandle* user);
 
+    using Activity::StartActivity;
+
     CARAPI StartActivity(
         /* [in] */ IView* v,
         /* [in] */ IIntent* intent,

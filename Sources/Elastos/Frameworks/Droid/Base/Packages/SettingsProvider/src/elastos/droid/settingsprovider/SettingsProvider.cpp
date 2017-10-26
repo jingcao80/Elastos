@@ -1310,7 +1310,7 @@ ECode SettingsProvider::Call(
         return NOERROR;
     }
 
-    ECode ec;
+    ECode ec = NOERROR;
     AutoPtr<IContentValues> values;
     CContentValues::New((IContentValues**)&values);
     values->Put(ISettingsNameValueTable::NAME, CoreUtils::Convert(request));

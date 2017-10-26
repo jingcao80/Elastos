@@ -1804,10 +1804,8 @@ void CAppsCustomizePagedView::PrepareLoadWidgetPreviewsTask(
         AutoPtr<AppsCustomizeAsyncTask> task =
                 (AppsCustomizeAsyncTask*)IAppsCustomizePagedViewAppsCustomizeAsyncTask::Probe(obj);
         Int32 taskPage = task->mPage;
-        Int32 lowerPageBound;
-        GetAssociatedLowerPageBound(mCurrentPage, &lowerPageBound);
-        Int32 upperPageBound;
-        GetAssociatedUpperPageBound(mCurrentPage, &upperPageBound);
+        Int32 lowerPageBound = GetAssociatedLowerPageBound(mCurrentPage);
+        Int32 upperPageBound = GetAssociatedUpperPageBound(mCurrentPage);
         if (taskPage < lowerPageBound || taskPage > upperPageBound) {
             task->Cancel(FALSE);
             iter->Remove();
@@ -2587,40 +2585,29 @@ ECode CAppsCustomizePagedView::ResetDrawableState()
     return NOERROR;
 }
 
-ECode CAppsCustomizePagedView::GetAssociatedLowerPageBound(
-    /* [in] */ Int32 page,
-    /* [out] */ Int32* result)
+Int32 CAppsCustomizePagedView::GetAssociatedLowerPageBound(
+    /* [in] */ Int32 page)
 {
-    VALIDATE_NOT_NULL(result);
-
     Int32 count;
     GetChildCount(&count);
     Int32 windowSize = Elastos::Core::Math::Min(count, sLookBehindPageCount + sLookAheadPageCount + 1);
     Int32 windowMinIndex = Elastos::Core::Math::Max(Elastos::Core::Math::Min(page - sLookBehindPageCount, count - windowSize), 0);
-    *result = windowMinIndex;
-    return NOERROR;
+    return windowMinIndex;
 }
 
-ECode CAppsCustomizePagedView::GetAssociatedUpperPageBound(
-    /* [in] */ Int32 page,
-    /* [out] */ Int32* result)
+Int32 CAppsCustomizePagedView::GetAssociatedUpperPageBound(
+    /* [in] */ Int32 page)
 {
-    VALIDATE_NOT_NULL(result);
-
     Int32 count;
     GetChildCount(&count);
     Int32 windowSize = Elastos::Core::Math::Min(count, sLookBehindPageCount + sLookAheadPageCount + 1);
     Int32 windowMaxIndex = Elastos::Core::Math::Min(Elastos::Core::Math::Max(page + sLookAheadPageCount, windowSize - 1),
             count - 1);
-    *result = windowMaxIndex;
-    return NOERROR;
+    return windowMaxIndex;
 }
 
-ECode CAppsCustomizePagedView::GetCurrentPageDescription(
-    /* [out] */ String* result)
+String CAppsCustomizePagedView::GetCurrentPageDescription()
 {
-    VALIDATE_NOT_NULL(result);
-
     Int32 page = (mNextPage != INVALID_PAGE) ? mNextPage : mCurrentPage;
     Int32 stringId = Elastos::Droid::Launcher2::R::string::default_scroll_format;
     Int32 count = 0;
@@ -2639,7 +2626,7 @@ ECode CAppsCustomizePagedView::GetCurrentPageDescription(
     GetContext((IContext**)&context);
     String str;
     context->GetString(stringId, &str);
-    return result->AppendFormat(str, page + 1, count);
+    return String::Format(str, page + 1, count);
 }
 
 

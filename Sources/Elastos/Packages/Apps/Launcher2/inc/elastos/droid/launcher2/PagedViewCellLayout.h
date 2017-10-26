@@ -303,14 +303,12 @@ protected:
         /* [in] */ Boolean enabled);
 
     //@Override
-    CARAPI CheckLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) CheckLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
     //@Override
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** params);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
 public:
     static const String TAG;

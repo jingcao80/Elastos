@@ -117,15 +117,12 @@ ECode BubbleTextView::ApplyFromShortcutInfo(
     return SetTag(TO_IINTERFACE(info));
 }
 
-ECode BubbleTextView::SetFrame(
+Boolean BubbleTextView::SetFrame(
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
     /* [in] */ Int32 right,
-    /* [in] */ Int32 bottom,
-    /* [out] */ Boolean* result)
+    /* [in] */ Int32 bottom)
 {
-    VALIDATE_NOT_NULL(result);
-
     Int32 _left;
     GetLeft(&_left);
     Int32 _right;
@@ -141,19 +138,13 @@ ECode BubbleTextView::SetFrame(
     return TextView::SetFrame(left, top, right, bottom);
 }
 
-ECode BubbleTextView::VerifyDrawable(
-    /* [in] */ IDrawable* who,
-    /* [out] */ Boolean* result)
+Boolean BubbleTextView::VerifyDrawable(
+    /* [in] */ IDrawable* who)
 {
-    VALIDATE_NOT_NULL(result);
-
     if (who == mBackground) {
-        *result = TRUE;
-        return NOERROR;
+        return TRUE;
     }
-
-    *result = TextView::VerifyDrawable(who);;
-    return NOERROR;
+    return TextView::VerifyDrawable(who);
 }
 
 ECode BubbleTextView::SetTag(
@@ -498,18 +489,14 @@ ECode BubbleTextView::OnDetachedFromWindow()
     return NOERROR;
 }
 
-ECode BubbleTextView::OnSetAlpha(
-    /* [in] */ Int32 alpha,
-    /* [out] */ Boolean* result)
+Boolean BubbleTextView::OnSetAlpha(
+    /* [in] */ Int32 alpha)
 {
-    VALIDATE_NOT_NULL(result);
-
     if (mPrevAlpha != alpha) {
         mPrevAlpha = alpha;
-        TextView::OnSetAlpha(alpha);
+        return TextView::OnSetAlpha(alpha);
     }
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 ECode BubbleTextView::CancelLongPress()

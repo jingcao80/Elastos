@@ -138,6 +138,8 @@ protected:
         /* [in] */ ICanvas* canvas);
 
 private:
+    using View::OnSizeChanged;
+
     CARAPI OnSizeChanged();
 
     CARAPI_(Boolean) CalculatePage(

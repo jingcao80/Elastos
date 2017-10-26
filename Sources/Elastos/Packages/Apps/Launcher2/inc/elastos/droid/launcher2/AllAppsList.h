@@ -57,10 +57,10 @@ public:
      *
      * If the app is already in the list, doesn't add it.
      */
-    Add(
+    CARAPI Add(
         /* [in] */ ApplicationInfo* info);
 
-    Clear();
+    CARAPI Clear();
 
     CARAPI GetSize(
         /* [out] */ Int32* size);

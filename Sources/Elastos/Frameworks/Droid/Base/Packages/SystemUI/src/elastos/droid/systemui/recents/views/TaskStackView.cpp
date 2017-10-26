@@ -204,7 +204,7 @@ TaskStackView::ReturnAllViewsToPoolRunnable::ReturnAllViewsToPoolRunnable(
     : mHost(host)
 {}
 
-TaskStackView::ReturnAllViewsToPoolRunnable::SetTaskViewExitContext(
+ECode TaskStackView::ReturnAllViewsToPoolRunnable::SetTaskViewExitContext(
     /* [in] */ ViewAnimation::TaskViewExitContext* ctx)
 {
     mTaskViewExitContext = ctx;

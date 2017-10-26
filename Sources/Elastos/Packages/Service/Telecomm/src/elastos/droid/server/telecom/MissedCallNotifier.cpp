@@ -100,7 +100,7 @@ ECode MissedCallNotifier::SubAsyncQueryHandler::constructor(
 
 ECode MissedCallNotifier::SubAsyncQueryHandler::OnQueryComplete(
     /* [in] */ Int32 token,
-    /* [in] */ IObject* cookie,
+    /* [in] */ IInterface* cookie,
     /* [in] */ ICursor* cursor)
 {
     Log::D("MissedCallNotifier", "onQueryComplete()...");

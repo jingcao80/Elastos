@@ -110,7 +110,7 @@ ECode ExpirableCache::Get(
     AutoPtr<IExpirableCacheCachedValue> cachedValue;
     GetCachedValue(key, (IExpirableCacheCachedValue**)&cachedValue);
     Boolean result;
-    if (cachedValue == NULL || cachedValue->IsExpired(&result), result) {
+    if (cachedValue == NULL || (cachedValue->IsExpired(&result), result)) {
         *value = NULL;
     }
     else{

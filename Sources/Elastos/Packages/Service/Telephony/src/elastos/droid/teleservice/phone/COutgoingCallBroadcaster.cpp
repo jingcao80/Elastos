@@ -725,12 +725,9 @@ void COutgoingCallBroadcaster::HandleNonVoiceCapable(
     // or cancels the dialog.
 }
 
-ECode COutgoingCallBroadcaster::OnCreateDialog(
-    /* [in] */ Int32 id,
-    /* [out] */ IDialog** outdialog)
+AutoPtr<IDialog> COutgoingCallBroadcaster::OnCreateDialog(
+    /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(outdialog)
-
     AutoPtr<IAlertDialog> dialog;
     switch(id) {
         case DIALOG_NOT_VOICE_CAPABLE:
@@ -745,13 +742,10 @@ ECode COutgoingCallBroadcaster::OnCreateDialog(
             break;
         }
         default:
-            Logger::W(TAG, "onCreateDialog: unexpected ID %d" + id);
-            dialog = NULL;
-            break;
+            Logger::W(TAG, "onCreateDialog: unexpected ID %d", id);
+            return NULL;
     }
-    *outdialog = IDialog::Probe(dialog);
-    REFCOUNT_ADD(*outdialog)
-    return NOERROR;
+    return IDialog::Probe(dialog);
 }
 
 ECode COutgoingCallBroadcaster::OnClick(

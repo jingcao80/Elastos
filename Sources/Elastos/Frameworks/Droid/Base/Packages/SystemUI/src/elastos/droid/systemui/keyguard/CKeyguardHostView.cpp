@@ -183,8 +183,7 @@ ECode CKeyguardHostView::SavedState::constructor(
 }
 
 ECode CKeyguardHostView::SavedState::WriteToParcel(
-    /* [in] */ IParcel* _out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* _out)
 {
     assert(0);
     //BaseSavedState::WriteToParcel(out, flags);
@@ -1112,11 +1111,8 @@ ECode CKeyguardHostView::CheckAppWidgetConsistency()
     return NOERROR;
 }
 
-ECode CKeyguardHostView::OnSaveInstanceState(
-    /* [out] */ IParcelable** p)
+AutoPtr<IParcelable> CKeyguardHostView::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(p)
-
     if (DEBUG) Logger::D(TAG, "onSaveInstanceState, tstate= %d", mTransportState);
     AutoPtr<IParcelable> superState;
     KeyguardViewBase::OnSaveInstanceState();
@@ -1130,9 +1126,7 @@ ECode CKeyguardHostView::OnSaveInstanceState(
     ss->mTransportState = showing ? TRANSPORT_VISIBLE : mTransportState;
     ss->mAppWidgetToShow = mAppWidgetToShow;
     ss->mInsets->Set(mInsets);
-    *p = IParcelable::Probe(ss);
-    REFCOUNT_ADD(*p);
-    return NOERROR;
+    return IParcelable::Probe(ss);
 }
 
 ECode CKeyguardHostView::OnRestoreInstanceState(

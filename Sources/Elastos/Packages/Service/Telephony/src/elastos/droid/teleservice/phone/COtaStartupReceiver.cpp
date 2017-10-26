@@ -183,7 +183,7 @@ ECode COtaStartupReceiver::OnReceive(
     }
 
     AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
-    Boolean res;
+    Boolean res = FALSE;
     Logger::D(TAG, "TODO Need TelephonyCapabilities::SupportsOtasp");
     //TelephonyCapabilities::SupportsOtasp(phone, &res);
     if (!res) {

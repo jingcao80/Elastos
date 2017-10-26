@@ -804,11 +804,9 @@ ECode RecentsPanelView::OnAnimationStart(
     return NOERROR;
 }
 
-ECode RecentsPanelView::DispatchHoverEvent(
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
+Boolean RecentsPanelView::DispatchHoverEvent(
+    /* [in] */ IMotionEvent* event)
 {
-    VALIDATE_NOT_NULL(result)
     // Ignore hover events outside of this panel bounds since such events
     // generate spurious accessibility events with the panel content when
     // tapping outside of it, thus confusing the user.
@@ -819,10 +817,9 @@ ECode RecentsPanelView::DispatchHoverEvent(
     GetWidth(&w);
     GetHeight(&h);
     if (x >= 0 && x < w && y >= 0 && y < h) {
-        return DispatchHoverEvent(event, result);
+        return FrameLayout::DispatchHoverEvent(event);
     }
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 ECode RecentsPanelView::IsShowing(

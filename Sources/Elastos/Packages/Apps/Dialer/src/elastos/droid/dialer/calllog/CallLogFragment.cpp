@@ -108,7 +108,7 @@ ECode CallLogFragment::CallsFetchedRunnable::Run()
     AutoPtr<IActivity> activity;
     mHost->GetActivity((IActivity**)&activity);
     Boolean isFinishing;
-    if (activity == NULL || activity->IsFinishing(&isFinishing), isFinishing) {
+    if (activity == NULL || (activity->IsFinishing(&isFinishing), isFinishing)) {
         return NOERROR;
     }
     IAbsListView::Probe(mListView)->SmoothScrollToPosition(0);
@@ -477,7 +477,7 @@ ECode CallLogFragment::OnCallsFetched(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     Boolean isFinishing;
-    if (activity == NULL || activity->IsFinishing(&isFinishing), isFinishing) {
+    if (activity == NULL || (activity->IsFinishing(&isFinishing), isFinishing)) {
         // Return false; we did not take ownership of the cursor
         *result = FALSE;
         return NOERROR;
@@ -522,7 +522,7 @@ ECode CallLogFragment::OnVoicemailStatusFetched(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     Boolean isFinishing;
-    if (activity == NULL || activity->IsFinishing(&isFinishing), isFinishing) {
+    if (activity == NULL || (activity->IsFinishing(&isFinishing), isFinishing)) {
         return NOERROR;
     }
     UpdateVoicemailStatusMessage(statusCursor);

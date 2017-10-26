@@ -52,7 +52,7 @@ namespace Phone {
 CAR_INTERFACE_IMPL(CCdmaOptions::MyOnPreferenceClickListener, Object,
         IPreferenceOnPreferenceClickListener)
 
-CCdmaOptions::MyOnPreferenceClickListener::OnPreferenceClick(
+ECode CCdmaOptions::MyOnPreferenceClickListener::OnPreferenceClick(
     /* [in] */ IPreference* preference,
     /* [out] */ Boolean* result)
 {

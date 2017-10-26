@@ -1816,13 +1816,6 @@ void CellLayout::ClearTagCellInfo()
     SetTag((IObject*)cellInfo);
 }
 
-AutoPtr<CellLayout::CellInfo> CellLayout::GetTag()
-{
-    AutoPtr<IInterface> tag;
-    ViewGroup::GetTag((IInterface**)&tag);
-    return (CellInfo*)IObject::Probe(tag);
-}
-
 ECode CellLayout::PointToCellExact(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,

@@ -189,8 +189,7 @@ private:
 
         //@Override
         CARAPI WriteToParcel(
-            /* [in] */ IParcel* out,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* out);
 
     private:
         CARAPI constructor(
@@ -420,8 +419,7 @@ public:
     CARAPI CheckAppWidgetConsistency();
 
     //@Override
-    CARAPI OnSaveInstanceState(
-        /* [out] */ IParcelable** p);
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     //@Override
     CARAPI OnRestoreInstanceState(

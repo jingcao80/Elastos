@@ -66,20 +66,25 @@ CStorageUtils::ConcreteFile::ConcreteFile(
     Elastos::Droid::System::Os::Lstat(path, (IStructStat**)&mStat);
 }
 
-Int32 CStorageUtils::ConcreteFile::GetHashCode()
+ECode CStorageUtils::ConcreteFile::GetHashCode(
+    /* [out] */ Int32* hashCode)
 {
+    VALIDATE_NOT_NULL(hashCode);
     Int32 result = 1;
     Int64 dev = 0, ino = 0;
     mStat->GetDev(&dev);
     mStat->GetIno(&ino);
     result = 31 * result + (Int32) (dev ^ (dev >> 32));
     result = 31 * result + (Int32) (ino ^ (ino >> 32));
-    return result;
+    *hashCode = result;
+    return NOERROR;
 }
 
-Boolean CStorageUtils::ConcreteFile::Equals(
-    /* [in] */ IInterface* o)
+ECode CStorageUtils::ConcreteFile::Equals(
+    /* [in] */ IInterface* o,
+    /* [out] */ Boolean* equals)
 {
+    VALIDATE_NOT_NULL(equals);
     if (o != NULL) {
         AutoPtr<ConcreteFile> f = (ConcreteFile*)(IObject*)o;
         Int64 fDev = 0, dev = 0, fino = 0, ino = 0;
@@ -87,9 +92,11 @@ Boolean CStorageUtils::ConcreteFile::Equals(
         mStat->GetDev(&dev);
         f->mStat->GetIno(&fino);
         mStat->GetIno(&ino);
-        return (fDev == dev) && (fino == ino);
+        *equals = (fDev == dev) && (fino == ino);
+        return NOERROR;
     }
-    return FALSE;
+    *equals = FALSE;
+    return NOERROR;
 }
 
 //===============================================================

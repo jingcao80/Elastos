@@ -51,8 +51,7 @@ public:
       * Make this visible so we can call it
       */
     // @Override
-    CARAPI AwakenScrollBars(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) AwakenScrollBars();
 
     CARAPI SetFullScrollAction(
         /* [in] */ IRunnable* action);

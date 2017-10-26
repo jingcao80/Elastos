@@ -31,7 +31,6 @@ module
     [deprecated]
     interface IContextFunction
     {
-
         Eval(
             [in] ArrayOf<Double>* args,
             [in] IEvalContext* context,
@@ -63,7 +62,6 @@ module
             [in] IComplex* y,
             [in] IEvalContext* context,
             [out] IComplex** complex);
-
     }
 
     } // namespace Arity

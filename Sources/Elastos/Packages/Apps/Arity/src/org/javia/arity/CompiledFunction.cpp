@@ -38,7 +38,7 @@ namespace Arity {
 //                  CompiledFunction::DerivativeFunction
 //==============================================================================
 
-CompiledFunction::DerivativeFunction::Arity(
+ECode CompiledFunction::DerivativeFunction::Arity(
     /* [out] */ Int32* arity)
 {
     VALIDATE_NOT_NULL(arity)
@@ -46,7 +46,7 @@ CompiledFunction::DerivativeFunction::Arity(
     return NOERROR;
 }
 
-CompiledFunction::DerivativeFunction::Eval(
+ECode CompiledFunction::DerivativeFunction::Eval(
     /* [in] */ Double x,
     /* [out] */ Double* result)
 {

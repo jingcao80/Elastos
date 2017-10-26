@@ -602,6 +602,8 @@ public:
         /* [in] */ Boolean forHun,
         /* [out] */ INotificationClicker** clicker);
 
+    using ICommandQueueCallbacks::AnimateCollapsePanels;
+
     CARAPI AnimateCollapsePanels(
         /* [in] */ Int32 flags,
         /* [in] */ Boolean force);
@@ -703,7 +705,8 @@ protected:
 
     virtual CARAPI_(AutoPtr<H>) CreateHandler();
 
-    virtual CARAPI_(AutoPtr<IView>) GetStatusBarView() = 0;
+    virtual CARAPI GetStatusBarView(
+        /* [out] */ IView** view) = 0;
 
     /** Proxy for RecentsComponent */
     virtual CARAPI_(void) ShowRecents(

@@ -236,10 +236,10 @@ private:
 
     CARAPI_(void) WriteToEventLog();
 
-    static const CARAPI_(Byte) ClipUnsignedValueToUnsignedByte(
+    static CARAPI_(Byte) ClipUnsignedValueToUnsignedByte(
         /* [in] */ Int64 value);
 
-    static const CARAPI_(Int32) ClipUnsignedLongToUnsignedInt(
+    static CARAPI_(Int32) ClipUnsignedLongToUnsignedInt(
         /* [in] */ Int64 value);
 
     /**

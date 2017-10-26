@@ -72,13 +72,11 @@ protected:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    CARAPI GenerateLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IViewGroupLayoutParams** result);
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
-    CARAPI CheckLayoutParams(
-        /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) CheckLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
 
 private:
     Int32 mRowCount;

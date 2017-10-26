@@ -378,11 +378,9 @@ ECode CSearchPanelView::Hide(
     return NOERROR;
 }
 
-ECode CSearchPanelView::DispatchHoverEvent(
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
+Boolean CSearchPanelView::DispatchHoverEvent(
+    /* [in] */ IMotionEvent* event)
 {
-    VALIDATE_NOT_NULL(result);
     // Ignore hover events outside of this panel bounds since such events
     // generate spurious accessibility events with the panel content when
     // tapping outside of it, thus confusing the user.
@@ -393,11 +391,9 @@ ECode CSearchPanelView::DispatchHoverEvent(
     const Int32 y = (Int32) value;
     Int32 w = 0, h = 0;
     if (x >= 0 && x < (GetWidth(&w), w) && y >= 0 && y < (GetHeight(&h), h)) {
-        *result = FrameLayout::DispatchHoverEvent(event);
-        return NOERROR;
+        return FrameLayout::DispatchHoverEvent(event);
     }
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 ECode CSearchPanelView::IsShowing(

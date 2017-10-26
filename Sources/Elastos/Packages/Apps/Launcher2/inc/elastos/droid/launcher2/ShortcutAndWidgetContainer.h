@@ -68,6 +68,8 @@ public:
     CARAPI SetInvertIfRtl(
         /* [in] */ Boolean invert);
 
+    using ViewGroup::MeasureChild;
+
     CARAPI MeasureChild(
         /* [in] */ IView* child);
 

@@ -109,7 +109,7 @@ ECode PhoneNumberPickerFragment::OnCreateView(
     FAIL_RETURN(ContactEntryListFragment::OnCreateView(inflater, container))
 
     AutoPtr<IView> paddingView;
-    inflater->Inflate(Elastos::Droid::Dialer::R::layout::contact_detail_list_padding, NULL, FALSE);
+    inflater->Inflate(Elastos::Droid::Dialer::R::layout::contact_detail_list_padding, NULL, FALSE, (IView**)&paddingView);
     AutoPtr<IView> temp;
     paddingView->FindViewById(Elastos::Droid::Dialer::R::id::contact_detail_list_padding, (IView**)&temp);
     mPaddingView = temp;

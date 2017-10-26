@@ -180,28 +180,21 @@ ECode CalculatorPadLayout::GenerateDefaultLayoutParams(
     return NOERROR;
 }
 
-ECode CalculatorPadLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** result)
+AutoPtr<IViewGroupLayoutParams> CalculatorPadLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<MarginLayoutParams> vmp = new ViewGroup::MarginLayoutParams();
     vmp->constructor(p);
-    *result = IViewGroupLayoutParams::Probe(vmp);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return IViewGroupLayoutParams::Probe(vmp);
 }
 
-ECode CalculatorPadLayout::CheckLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ Boolean* result)
+Boolean CalculatorPadLayout::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = FALSE;
     if (IViewGroupLayoutParams::Probe(p)) {
-        *result = TRUE;
+        return TRUE;
     }
-    return NOERROR;
+    return FALSE;
 }
 
 } // namespace Calculator2

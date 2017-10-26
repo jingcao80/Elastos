@@ -240,9 +240,8 @@ protected:
     CARAPI OnResume();
 
     //@Override
-    CARAPI OnCreateDialog(
-        /* [in] */ Int32 id,
-        /* [out] */ IDialog** dialog);
+    CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
+        /* [in] */ Int32 id);
 
     //@Override
     CARAPI_(void) OnPrepareDialog(

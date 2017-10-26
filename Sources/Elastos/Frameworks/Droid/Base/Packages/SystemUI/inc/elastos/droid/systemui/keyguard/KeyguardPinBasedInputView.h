@@ -189,6 +189,8 @@ protected:
     CARAPI OnFinishInflate();
 
 private:
+    using KeyguardAbsKeyInputView::PerformClick;
+
     CARAPI_(void) PerformClick(
         /* [in] */ IView* view);
 

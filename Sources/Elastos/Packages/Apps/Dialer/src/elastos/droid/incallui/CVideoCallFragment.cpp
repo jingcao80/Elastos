@@ -508,7 +508,7 @@ void CVideoCallFragment::SetSurfaceSizeAndTranslation(
 
 AutoPtr<IPoint> CVideoCallFragment::GetScreenSize()
 {
-    return NOERROR;
+    return NULL;
 }
 
 } // namespace InCallUI

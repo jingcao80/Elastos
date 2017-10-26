@@ -656,7 +656,7 @@ AutoPtr<IWifiConfiguration> WifiConfigController::GetConfig()
                             enterpriseConfig->SetPhase2Method(IWifiEnterpriseConfigPhase2::GTC);
                             break;
                         default:
-                            Logger::E(TAG, "Unknown phase2 method" + phase2Method);
+                            Logger::E(TAG, "Unknown phase2 method%d", phase2Method);
                             break;
                     }
                     break;

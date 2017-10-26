@@ -85,6 +85,8 @@ public:
         /* [in] */ IContext* context,
         /* [out] */ ICharSequence** title);
 
+    using ValuesDelta::BuildDiff;
+
     /**
      * Build a possible {@link ContentProviderOperation} to persist any
      * changes to the {@link Groups} or {@link Settings} row described by

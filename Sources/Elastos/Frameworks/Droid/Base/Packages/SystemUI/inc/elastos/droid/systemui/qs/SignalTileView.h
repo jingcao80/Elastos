@@ -64,6 +64,8 @@ private:
     CARAPI_(void) LayoutIndicator(
         /* [in] */ IView* indicator);
 
+    using View::SetVisibility;
+
     CARAPI_(void) SetVisibility(
         /* [in] */ IView* view,
         /* [in] */ Boolean shown,

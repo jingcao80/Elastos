@@ -112,10 +112,12 @@ public:
 
     CARAPI_(AutoPtr<ISortedSet>) GetTestCaseClasses();
 
-    CARAPI_(Boolean) Equals(
-        /* [in] */ IInterface* o);
+    CARAPI Equals(
+        /* [in] */ IInterface* o,
+        /* [out] */ Boolean* result);
 
-    CARAPI_(Int32) GetHashCode();
+    CARAPI GetHashCode(
+        /* [out] */ Int32* hashCode);
 
     /**
      * Include all tests in the given packages and all their sub-packages, unless otherwise

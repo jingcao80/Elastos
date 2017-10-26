@@ -20,6 +20,7 @@
 #include "elastos/droid/contacts/common/list/CGroupDelta.h"
 #include "elastos/droid/contacts/common/list/CCustomContactListFilterActivity.h"
 #include "elastos/droid/contacts/common/util/LocalizedNameResolver.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
@@ -43,6 +44,7 @@ using Elastos::Droid::Provider::IContactsContractGroupsColumns;
 using Elastos::Droid::Provider::IContactsContractGroups;
 using Elastos::Droid::Provider::CContactsContractGroups;
 using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::CInteger32;
 using Elastos::Core::StringUtils;
@@ -198,7 +200,7 @@ ECode CGroupDelta::GetVisible(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IInteger32> integer;
     GetAsInteger(mUngrouped ? IContactsContractSettingsColumns::UNGROUPED_VISIBLE : IContactsContractGroupsColumns::GROUP_VISIBLE,
-            CCustomContactListFilterActivity::DEFAULT_VISIBLE, (IInteger32**)&integer);
+            CoreUtils::Convert(CCustomContactListFilterActivity::DEFAULT_VISIBLE), (IInteger32**)&integer);
     Int32 value;
     integer->GetValue(&value);
     *result = value != 0;

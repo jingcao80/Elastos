@@ -188,7 +188,7 @@ private:
             /* [in] */ Int32 id);
 
         //@Override
-        OnPreferenceChange(
+        CARAPI OnPreferenceChange(
             /* [in] */ IPreference* preference,
             /* [in] */ IInterface* newValue,
             /* [out] */ Boolean* result);

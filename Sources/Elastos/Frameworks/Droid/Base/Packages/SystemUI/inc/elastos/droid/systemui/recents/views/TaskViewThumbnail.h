@@ -151,6 +151,8 @@ public:
     /** Unbinds the thumbnail view from the task */
     CARAPI_(void) UnbindFromTask();
 
+    using View::OnFocusChanged;
+
     /** Handles focus changes. */
     CARAPI_(void) OnFocusChanged(
         /* [in] */ Boolean focused);

@@ -200,7 +200,8 @@ ECode TabsAdapter::OnPageSelected(
     tab->GetRight(&right);
     tab->GetBottom(&bottom);
     mTempRect->Set(left, top, right, bottom);
-    IView::Probe(widget)->RequestRectangleOnScreen(mTempRect, FALSE);
+    Boolean result;
+    IView::Probe(widget)->RequestRectangleOnScreen(mTempRect, FALSE, &result);
 
     // Make sure the scrollbars are visible for a moment after selection
     AutoPtr<IInterface> interfaceTmp;
@@ -210,8 +211,7 @@ ECode TabsAdapter::OnPageSelected(
     AutoPtr<IView> contentView = tabInfo->GetView();
     ICaffeinatedScrollView* isInstanceOf = ICaffeinatedScrollView::Probe(contentView);
     if (isInstanceOf) {
-        Boolean resTmp;
-        ((CCaffeinatedScrollView*)isInstanceOf)->AwakenScrollBars(&resTmp);
+        ((CCaffeinatedScrollView*)isInstanceOf)->AwakenScrollBars();
     }
     return NOERROR;
 }

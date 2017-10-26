@@ -85,12 +85,9 @@ TimeConsumingPreferenceActivity::TimeConsumingPreferenceActivity()
     CArrayList::New((IArrayList**)&mBusyList);
 }
 
-ECode TimeConsumingPreferenceActivity::OnCreateDialog(
-    /* [in] */ Int32 id,
-    /* [out] */ IDialog** outdialog)
+AutoPtr<IDialog> TimeConsumingPreferenceActivity::OnCreateDialog(
+    /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(outdialog)
-
     if (id == BUSY_READING_DIALOG || id == BUSY_SAVING_DIALOG) {
         AutoPtr<IProgressDialog> dialog;
         CProgressDialog::New(this, (IProgressDialog**)&dialog);
@@ -107,9 +104,7 @@ ECode TimeConsumingPreferenceActivity::OnCreateDialog(
                 AutoPtr<ICharSequence> title;
                 GetText(R::string::reading_settings, (ICharSequence**)&title);
                 IAlertDialog::Probe(dialog)->SetMessage(title);
-                *outdialog = IDialog::Probe(dialog);
-                REFCOUNT_ADD(*outdialog)
-                return NOERROR;
+                return IDialog::Probe(dialog);
             }
             case BUSY_SAVING_DIALOG:
             {
@@ -117,13 +112,10 @@ ECode TimeConsumingPreferenceActivity::OnCreateDialog(
                 AutoPtr<ICharSequence> title;
                 GetText(R::string::updating_settings, (ICharSequence**)&title);
                 IAlertDialog::Probe(dialog)->SetMessage(title);
-                *outdialog = IDialog::Probe(dialog);
-                REFCOUNT_ADD(*outdialog)
-                return NOERROR;
+                return IDialog::Probe(dialog);
             }
         }
-        *outdialog = NULL;
-        return NOERROR;
+        return NULL;
     }
 
     if (id == RESPONSE_ERROR || id == RADIO_OFF_ERROR || id == EXCEPTION_ERROR
@@ -171,12 +163,9 @@ ECode TimeConsumingPreferenceActivity::OnCreateDialog(
         IDialog::Probe(dialog)->GetWindow((IWindow**)&window);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
 
-        *outdialog = IDialog::Probe(dialog);
-        REFCOUNT_ADD(*outdialog)
-        return NOERROR;
+        return IDialog::Probe(dialog);
     }
-    *outdialog = NULL;
-    return NOERROR;
+    return NULL;
 }
 
 ECode TimeConsumingPreferenceActivity::OnResume()

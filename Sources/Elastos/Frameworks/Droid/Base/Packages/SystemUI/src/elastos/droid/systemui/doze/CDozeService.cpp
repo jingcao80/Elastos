@@ -79,7 +79,7 @@ ECode CDozeService::DozeBroadcastReceiver::OnReceive(
     if (NOTIFICATION_PULSE_ACTION.Equals(action)) {
         Int64 instance = 0;
         intent->GetInt64Extra(EXTRA_INSTANCE, -1, &instance);
-        if (DEBUG) Logger::D(mHost->mTag, "Received notification pulse intent instance=" + instance);
+        if (DEBUG) Logger::D(mHost->mTag, "Received notification pulse intent instance=%lld", instance);
         DozeLog::TraceNotificationPulse(instance);
         mHost->RequestPulse();
         mHost->RescheduleNotificationPulse(mHost->mNotificationLightOn);
@@ -117,7 +117,7 @@ ECode CDozeService::DozeHostCallback::OnBuzzBeepBlinked()
 ECode CDozeService::DozeHostCallback::OnNotificationLight(
     /* [in] */ Boolean on)
 {
-    if (DEBUG) Logger::D(mHost->mTag, "onNotificationLight on=" + on);
+    if (DEBUG) Logger::D(mHost->mTag, "onNotificationLight on=%d", on);
     if (mHost->mNotificationLightOn == on) return NOERROR;
     mHost->mNotificationLightOn = on;
     if (mHost->mNotificationLightOn) {
@@ -631,7 +631,7 @@ void CDozeService::FinishForCarMode()
 void CDozeService::ListenForPulseSignals(
     /* [in] */ Boolean listen)
 {
-    if (DEBUG) Logger::D(mTag, "ListenForPulseSignals: " + listen);
+    if (DEBUG) Logger::D(mTag, "ListenForPulseSignals: %d", listen);
     mSigMotionSensor->SetListening(listen);
     mPickupSensor->SetListening(listen);
     ListenForBroadcasts(listen);
@@ -693,7 +693,7 @@ void CDozeService::UpdateNotificationPulse()
         return;
     }
     mScheduleResetsRemaining--;
-    if (DEBUG) Logger::D(mTag, "mScheduleResetsRemaining = " + mScheduleResetsRemaining);
+    if (DEBUG) Logger::D(mTag, "mScheduleResetsRemaining = %d", mScheduleResetsRemaining);
     mNotificationPulseTime = now;
     RescheduleNotificationPulse(TRUE /*predicate*/);
 }

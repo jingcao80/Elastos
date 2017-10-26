@@ -287,9 +287,8 @@ protected:
      * Creates dialog that enables users to exit Emergency Callback Mode
      */
     //@Override
-    CARAPI OnCreateDialog(
-        /* [in] */ Int32 id,
-        /* [out] */ IDialog** dialog);
+    CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
+        /* [in] */ Int32 id);
 
 private:
     /**

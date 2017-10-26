@@ -75,7 +75,8 @@ ECode KeyguardViewBase::MyKeyguardActivityLauncher::GetLockPatternUtils(
 
 ECode KeyguardViewBase::MyKeyguardActivityLauncher::RequestDismissKeyguard()
 {
-    return mHost->Dismiss(FALSE);
+    Boolean result;
+    return mHost->Dismiss(FALSE, &result);
 }
 //=======================================================================
 // KeyguardViewBase::InnerCallback

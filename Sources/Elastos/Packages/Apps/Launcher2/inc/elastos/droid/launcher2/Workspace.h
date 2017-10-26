@@ -788,6 +788,8 @@ public:
         /* [in] */ Int32 padding,
         /* [out] */ IBitmap** map);
 
+    using View::StartDrag;
+
     CARAPI StartDrag(
         /* [in] */ ICellLayoutCellInfo* cellInfo);
 
@@ -1131,21 +1133,18 @@ protected:
     CARAPI GetScrollMode(
         /* [out] */ Int32* mode);
 
-    CARAPI ShouldDrawChild(
-        /* [in] */ IView* child,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) ShouldDrawChild(
+        /* [in] */ IView* child);
 
     //@Override
-    CARAPI HitsPreviousPage(
+    CARAPI_(Boolean) HitsPreviousPage(
         /* [in] */ Float x,
-        /* [in] */ Float y,
-        /* [out] */ Boolean* result);
+        /* [in] */ Float y);
 
     //@Override
-    CARAPI HitsNextPage(
+    CARAPI_(Boolean) HitsNextPage(
         /* [in] */ Float x,
-        /* [in] */ Float y,
-        /* [out] */ Boolean* result);
+        /* [in] */ Float y);
 
     CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
@@ -1223,8 +1222,7 @@ protected:
         /* [in] */ ISparseArray* container);
 
     //@Override
-    CARAPI GetCurrentPageDescription(
-        /* [out] */ String* str);
+    CARAPI_(String) GetCurrentPageDescription();
 
     TO_STRING_IMPL("Workspace")
 

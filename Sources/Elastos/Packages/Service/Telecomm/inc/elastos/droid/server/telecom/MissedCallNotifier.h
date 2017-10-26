@@ -60,7 +60,7 @@ private:
         // @Override
         CARAPI OnQueryComplete(
             /* [in] */ Int32 token,
-            /* [in] */ IObject* cookie,
+            /* [in] */ IInterface* cookie,
             /* [in] */ ICursor* cursor);
 
     private:

@@ -57,7 +57,7 @@ ECode ContactInfo::GetHashCode(
     Int32 result = 1;
     Int32 hash;
     result = prime * result +
-            ((mLookupUri == NULL) ? 0 : IObject::Probe(mLookupUri)->GetHashCode(&hash), hash);
+            (mLookupUri == NULL) ? 0 : Object::GetHashCode(mLookupUri);
     result = prime * result + (mName.IsNull() ? 0 : mName.GetHashCode());
     *hashCode = result;
 

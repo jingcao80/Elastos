@@ -102,17 +102,15 @@ public:
 
 protected:
     //@Override
-    CARAPI SetFrame(
+    CARAPI_(Boolean) SetFrame(
         /* [in] */ Int32 left,
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,
-        /* [in] */ Int32 bottom,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 bottom);
 
     //@Override
-    CARAPI VerifyDrawable(
-        /* [in] */ IDrawable* who,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) VerifyDrawable(
+        /* [in] */ IDrawable* who);
 
     //@Override
     CARAPI DrawableStateChanged();
@@ -124,9 +122,8 @@ protected:
     CARAPI OnDetachedFromWindow();
 
     //@Override
-    CARAPI OnSetAlpha(
-        /* [in] */ Int32 alpha,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) OnSetAlpha(
+        /* [in] */ Int32 alpha);
 
 private:
     CARAPI Init();

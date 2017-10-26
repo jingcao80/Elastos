@@ -714,6 +714,8 @@ public:
     // @Override
     CARAPI PreloadPhotosInBackground();
 
+    using ContactPhotoManager::LoadThumbnail;
+
     // @Override
     CARAPI LoadThumbnail(
         /* [in] */ IImageView* view,
@@ -722,6 +724,8 @@ public:
         /* [in] */ Boolean isCircular,
         /* [in] */ IContactPhotoManagerDefaultImageRequest* defaultImageRequest,
         /* [in] */ IContactPhotoManagerDefaultImageProvider* defaultProvider);
+
+    using ContactPhotoManager::LoadPhoto;
 
     // @Override
     CARAPI LoadPhoto(

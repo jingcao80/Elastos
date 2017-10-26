@@ -1471,7 +1471,8 @@ protected:
         /* [in] */ Int32 mode);
 
     // @Override
-    CARAPI_(AutoPtr<IView>) GetStatusBarView();
+    CARAPI GetStatusBarView(
+        /* [out] */ IView** view);
 
     // @Override
     CARAPI_(AutoPtr<IWindowManagerLayoutParams>) GetSearchLayoutParams(

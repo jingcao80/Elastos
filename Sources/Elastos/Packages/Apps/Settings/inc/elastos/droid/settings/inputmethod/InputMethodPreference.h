@@ -144,6 +144,8 @@ public:
 
     CARAPI_(void) UpdatePreferenceViews();
 
+    using SwitchPreference::CompareTo;
+
     CARAPI_(Int32) CompareTo(
         /* [in] */ IInputMethodPreference* rhs,
         /* [in] */ ICollator* collator);

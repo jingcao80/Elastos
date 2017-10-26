@@ -169,9 +169,8 @@ protected:
     CARAPI OnStop();
 
     //@Override
-    CARAPI OnCreateDialog(
-        /* [in] */ Int32 id,
-        /* [out] */ IDialog** dialog);
+    CARAPI_(AutoPtr<IDialog>) OnCreateDialog(
+        /* [in] */ Int32 id);
 
 private:
     /**

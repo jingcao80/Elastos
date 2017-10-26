@@ -105,7 +105,7 @@ Boolean CallDetailActivityQueryHandler::MoveToFirst(
     /* [in] */ ICursor* cursor)
 {
     Boolean succeeded;
-    if (cursor == NULL || cursor->MoveToFirst(&succeeded), !succeeded) {
+    if (cursor == NULL || (cursor->MoveToFirst(&succeeded), !succeeded)) {
         Logger::E(TAG, "Cursor not valid, could not move to first");
         return FALSE;
     }

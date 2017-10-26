@@ -100,7 +100,7 @@ const String LauncherSettings::Favorites::URI("uri");
 
 const String LauncherSettings::Favorites::DISPLAY_MODE("displayMode");
 
-LauncherSettings::Favorites::GetContentUri(
+ECode LauncherSettings::Favorites::GetContentUri(
     /* [in] */ Int64 id,
     /* [in] */ Boolean notify,
     /* [out] */ IUri** uri)

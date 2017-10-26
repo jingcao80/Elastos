@@ -141,7 +141,7 @@ protected:
         /* [out] */ Int32* result);
 
 private:
-    static GetUriFor(
+    static CARAPI GetUriFor(
         /* [in] */ Int32 type,
         /* [in] */ const String& setting,
         /* [out] */ IUri** result);

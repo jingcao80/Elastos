@@ -98,7 +98,7 @@ module
 
     [local]
     interface IRecentsPanelView {
-         NumItemsInOneScreenful(
+        NumItemsInOneScreenful(
             [out] Int32* count);
 
         IsInContentArea(
@@ -132,10 +132,6 @@ module
 
         OnAnimationStart(
             [in] IAnimator* animation);
-
-        DispatchHoverEvent(
-            [in] IMotionEvent* event,
-            [out] Boolean* result);
 
         IsShowing(
             [out] Boolean* result);

@@ -48,6 +48,8 @@ public:
 
     RecentsPackageMonitor();
 
+    using PackageMonitor::Register;
+
     /** Registers the broadcast receivers with the specified callbacks. */
     CARAPI Register(
         /* [in] */ IContext* context,

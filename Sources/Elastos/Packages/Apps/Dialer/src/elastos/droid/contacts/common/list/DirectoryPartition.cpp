@@ -15,10 +15,10 @@
 //=========================================================================
 
 #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
-#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Contacts::Common::List::EIID_IDirectoryPartition;
-using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -148,17 +148,31 @@ ECode DirectoryPartition::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = String("DirectoryPartition{") +
-            "mDirectoryId=" + StringUtils::ToString(mDirectoryId) +
-            ", mContentUri='" + mContentUri + "\'" +
-            ", mDirectoryType='" + mDirectoryType + "\'" +
-            ", mDisplayName='" + mDisplayName + "\'" +
-            ", mStatus=" + StringUtils::ToString(mStatus) +
-            ", mPriorityDirectory=" + StringUtils::ToString(mPriorityDirectory) +
-            ", mPhotoSupported=" + StringUtils::ToString(mPhotoSupported) +
-            ", mResultLimit=" + StringUtils::ToString(mResultLimit) +
-            ", mLabel='" + mLabel + "\'" +
-            '}';
+
+    StringBuilder sb("DirectoryPartition{");
+    sb += "mDirectoryId=";
+    sb += mDirectoryId;
+    sb += ", mContentUri='";
+    sb += mContentUri;
+    sb += "'";
+    sb += ", mDirectoryType='";
+    sb += mDirectoryType;
+    sb += "'";
+    sb += ", mDisplayName='";
+    sb += mDisplayName;
+    sb += "'";
+    sb += ", mStatus=";
+    sb += mStatus;
+    sb += ", mPriorityDirectory=";
+    sb += mPriorityDirectory;
+    sb += ", mPhotoSupported=";
+    sb += mPhotoSupported;
+    sb += ", mResultLimit=";
+    sb += mResultLimit;
+    sb += ", mLabel='";
+    sb += mLabel;
+    sb += "'}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

@@ -84,6 +84,8 @@ public:
     //@Override
     CARAPI OnReject();
 
+    using TelephonyConnection::OnAnswer;
+
     // /@Override
     CARAPI OnAnswer();
 

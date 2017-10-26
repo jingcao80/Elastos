@@ -136,9 +136,8 @@ public:
         /* [in] */ Boolean animate);
 
     // @Override
-    CARAPI DispatchHoverEvent(
-        /* [in] */ IMotionEvent* event,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) DispatchHoverEvent(
+        /* [in] */ IMotionEvent* event);
 
     /**
      * Whether the panel is showing, or, if it's animating, whether it will be

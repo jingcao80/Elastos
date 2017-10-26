@@ -586,7 +586,7 @@ Int32 CCandidateView::MapToItemInPage(
     Int32 nearest = -1;
 
     Vector<AutoPtr<IRectF> >::Iterator ator = mCandRects.Begin();
-    for (Int32 i = 0; ator != mCandRects.End(), i < pageSize; i++, ++ator) {
+    for (Int32 i = 0; ator != mCandRects.End() && i < pageSize; i++, ++ator) {
         AutoPtr<IRectF> r = *ator;
         Float left = 0.f, right = 0.f, top = 0.f, bottom = 0.f;
         r->GetLeft(&left);

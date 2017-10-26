@@ -53,7 +53,7 @@ protected:
     CARAPI OnPostExecute(
         /* [in] */ IInterface* result);
 
-    CARAPI OnPreExecute(
+    virtual CARAPI OnPreExecute(
         /* [in] */ IInterface* target);
 
     virtual CARAPI DoInBackground(
@@ -61,7 +61,7 @@ protected:
         /* [in] */ ArrayOf<IInterface*>* params,
         /* [out] */ IInterface** result) = 0;
 
-    CARAPI OnPostExecute(
+    virtual CARAPI OnPostExecute(
         /* [in] */ IInterface* target,
         /* [in] */ IInterface* result);
 

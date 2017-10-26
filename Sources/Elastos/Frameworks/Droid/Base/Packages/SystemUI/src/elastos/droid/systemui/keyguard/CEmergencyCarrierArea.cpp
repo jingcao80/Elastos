@@ -27,7 +27,7 @@ namespace Keyguard {
 
 CAR_INTERFACE_IMPL(CEmergencyCarrierArea::MyOnClickListener, Object, IViewOnTouchListener)
 
-CEmergencyCarrierArea::MyOnClickListener::OnTouch(
+ECode CEmergencyCarrierArea::MyOnClickListener::OnTouch(
     /* [in] */ IView* v,
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)

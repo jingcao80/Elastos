@@ -688,8 +688,6 @@ public:
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
-    CARAPI_(AutoPtr<CellInfo>) GetTag();
-
     /**
      * Given a point, return the cell that strictly encloses that point
      * @param x X coordinate of the point
@@ -815,6 +813,8 @@ public:
 
     CARAPI GetShortcutsAndWidgets(
         /* [out] */  IShortcutAndWidgetContainer** container);
+
+    using ViewGroup::GetChildAt;
 
     CARAPI GetChildAt(
         /* [in] */ Int32 x,

@@ -40,7 +40,7 @@ namespace Services {
 namespace Telephony {
 namespace Sip {
 
-SipAccountRegistry::MyRunnable::Run()
+ECode SipAccountRegistry::MyRunnable::Run()
 {
     mHost->StartSipProfiles(mContext, mSipUri);
     return NOERROR;

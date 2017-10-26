@@ -93,8 +93,7 @@ public:
         /* [in] */ IMotionEvent* event,
         /* [out] */ Boolean* result);
 
-    CARAPI OnSaveInstanceState(
-        /* [out] */ IParcelable* result);
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     CARAPI SetTextSize(
         /* [in] */ Int32 unit,

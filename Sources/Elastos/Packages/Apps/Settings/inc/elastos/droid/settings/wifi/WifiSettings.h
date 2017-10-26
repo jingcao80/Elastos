@@ -363,6 +363,8 @@ protected:
     CARAPI_(Int32) GetHelpResource();
 
 private:
+    using RestrictedSettingsFragment::ShowDialog;
+
     CARAPI_(void) ShowDialog(
         /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit);

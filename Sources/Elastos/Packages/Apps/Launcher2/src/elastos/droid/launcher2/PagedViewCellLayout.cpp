@@ -45,7 +45,7 @@ PagedViewCellLayout::PagedViewCellLayoutLayoutParams::PagedViewCellLayoutLayoutP
 {
 }
 
-PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor()
+ECode PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor()
 {
     MarginLayoutParams::constructor(IViewGroupLayoutParams::MATCH_PARENT,
             IViewGroupLayoutParams::MATCH_PARENT);
@@ -54,7 +54,7 @@ PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor()
     return NOERROR;
 }
 
-PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
+ECode PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
@@ -64,7 +64,7 @@ PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     return NOERROR;
 }
 
-PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
+ECode PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* source)
 {
     MarginLayoutParams::constructor(source);
@@ -73,7 +73,7 @@ PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     return NOERROR;
 }
 
-PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
+ECode PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     /* [in] */ PagedViewCellLayoutLayoutParams* source)
 {
     MarginLayoutParams::constructor(IViewGroupMarginLayoutParams::Probe(source));
@@ -84,7 +84,7 @@ PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     return NOERROR;
 }
 
-PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
+ECode PagedViewCellLayout::PagedViewCellLayoutLayoutParams::constructor(
     /* [in] */ Int32 cellX,
     /* [in] */ Int32 cellY,
     /* [in] */ Int32 cellHSpan,
@@ -230,7 +230,7 @@ ECode PagedViewCellLayout::constructor(
     return AddView(IView::Probe(mChildren));
 }
 
-PagedViewCellLayout::GetCellWidth(
+ECode PagedViewCellLayout::GetCellWidth(
     /* [out] */ Int32* width)
 {
     VALIDATE_NOT_NULL(width);
@@ -738,28 +738,19 @@ ECode PagedViewCellLayout::GenerateLayoutParams(
     return NOERROR;
 }
 
-ECode PagedViewCellLayout::CheckLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ Boolean* result)
+Boolean PagedViewCellLayout::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(result);
-
-    *result = IPagedViewCellLayoutLayoutParams::Probe(p) != NULL;
-    return NOERROR;
+    return IPagedViewCellLayoutLayoutParams::Probe(p) != NULL;
 }
 
-ECode PagedViewCellLayout::GenerateLayoutParams(
-    /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** params)
+AutoPtr<IViewGroupLayoutParams> PagedViewCellLayout::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
 {
-    VALIDATE_NOT_NULL(params);
-
     AutoPtr<PagedViewCellLayoutLayoutParams> _p =
             new PagedViewCellLayoutLayoutParams();
     _p->constructor(p);
-    *params = (IViewGroupLayoutParams*)_p.Get();
-    REFCOUNT_ADD(*params);
-    return NOERROR;
+    return (IViewGroupLayoutParams*)_p.Get();
 }
 
 } // namespace Launcher2

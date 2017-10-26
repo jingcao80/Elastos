@@ -858,7 +858,7 @@ void AccessPoint::Refresh()
     else if (mConfig != NULL && (((mConfig->GetStatus(&status), status == IWifiConfigurationStatus::DISABLED) &&
             (mConfig->GetDisableReason(&disableReason), disableReason != IWifiConfiguration::DISABLED_UNKNOWN_REASON))
            || (mConfig->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE))) {
-        if (autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE) {
+        if (mConfig->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus >= IWifiConfiguration::AUTO_JOIN_DISABLED_ON_AUTH_FAILURE) {
             if (disableReason == IWifiConfiguration::DISABLED_DHCP_FAILURE) {
                 context->GetString(R::string::wifi_disabled_network_failure, &str);
                 summary.Append(str);
@@ -911,7 +911,7 @@ void AccessPoint::Refresh()
             summary.Append(builder.ToString());
         }
         summary.Append(String(" ") + GetVisibilityStatus());
-        if (mConfig != NULL && autoJoinStatus > 0) {
+        if (mConfig != NULL && (mConfig->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus > 0)) {
             StringBuilder builder;
             builder += " (";
             builder += autoJoinStatus;

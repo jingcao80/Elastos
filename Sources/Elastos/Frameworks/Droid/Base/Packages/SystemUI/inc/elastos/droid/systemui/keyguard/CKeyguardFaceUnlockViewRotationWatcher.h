@@ -43,7 +43,7 @@ public:
 
     CAR_INTERFACE_DECL()
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IKeyguardFaceUnlockView* host);
 
     // @Override

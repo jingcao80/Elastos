@@ -397,8 +397,7 @@ public:
 
 protected:
     //@Override
-    CARAPI OnSaveInstanceState(
-        /* [out] */ IParcelable** p);
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     //@Override
     CARAPI DispatchDraw(

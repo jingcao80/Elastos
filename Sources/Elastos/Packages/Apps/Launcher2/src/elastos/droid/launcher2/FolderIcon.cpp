@@ -563,16 +563,10 @@ ECode FolderIcon::FromXml(
     return NOERROR;
 }
 
-ECode FolderIcon::OnSaveInstanceState(
-    /* [out] */ IParcelable** p)
+AutoPtr<IParcelable> FolderIcon::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(p);
-
     sStaticValuesDirty = TRUE;
-    AutoPtr<IParcelable> _p = LinearLayout::OnSaveInstanceState();
-    *p = _p;
-    REFCOUNT_ADD(*p);
-    return NOERROR;
+    return LinearLayout::OnSaveInstanceState();
 }
 
 ECode FolderIcon::GetFolder(

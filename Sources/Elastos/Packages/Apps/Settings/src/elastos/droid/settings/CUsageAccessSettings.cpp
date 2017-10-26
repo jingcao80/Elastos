@@ -283,7 +283,7 @@ ECode CUsageAccessSettings::AppsRequestingAccessFetcher::DoInBackground(
 }
 
 ECode CUsageAccessSettings::AppsRequestingAccessFetcher::OnPostExecute(
-    /* [in] */ IArrayMap* newEntries)// ArrayMap<String, PackageEntry>
+    /* [in] */ IInterface* _newEntries)// ArrayMap<String, PackageEntry>
 {
     mHost->mLastFetcherTask = NULL;
 
@@ -296,12 +296,13 @@ ECode CUsageAccessSettings::AppsRequestingAccessFetcher::OnPostExecute(
 
     IPreferenceGroup* hostPreferenceScreen = IPreferenceGroup::Probe(mHost->mPreferenceScreen);
 
-    if (newEntries == NULL) {
+    if (_newEntries == NULL) {
         mHost->mPackageEntryMap->Clear();
         hostPreferenceScreen->RemoveAll();
         return NOERROR;
     }
 
+    AutoPtr<IArrayMap> newEntries = IArrayMap::Probe(_newEntries);
     // Find the deleted entries and remove them from the PreferenceScreen.
     Boolean res;
     Int32 oldPackageCount;

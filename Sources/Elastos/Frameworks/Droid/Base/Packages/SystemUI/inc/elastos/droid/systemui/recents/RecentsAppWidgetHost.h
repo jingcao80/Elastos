@@ -42,6 +42,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ Int32 hostId);
 
+    using AppWidgetHost::StartListening;
+
     CARAPI StartListening(
         /* [in] */ IRecentsAppWidgetHostCallbacks* cb);
 

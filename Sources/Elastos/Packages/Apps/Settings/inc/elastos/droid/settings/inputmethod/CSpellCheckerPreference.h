@@ -82,6 +82,8 @@ public:
         /* [in] */ ISpellCheckerInfo* sci,
         /* [in] */ ISpellCheckerPreferenceOnRadioButtonPreferenceListener* onRadioButtonListener);
 
+    using Preference::OnClick;
+
     //@Override
     CARAPI OnClick(
         /* [in] */ IView* v);

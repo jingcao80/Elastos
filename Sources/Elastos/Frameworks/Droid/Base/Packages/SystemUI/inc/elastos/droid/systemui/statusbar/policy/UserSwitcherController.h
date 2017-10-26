@@ -146,7 +146,7 @@ public:
     class SettingsObserver: public ContentObserver
     {
     public:
-        constructor(
+        CARAPI constructor(
             /* [in] */ IUserSwitcherController* host);
 
         CARAPI OnChange(

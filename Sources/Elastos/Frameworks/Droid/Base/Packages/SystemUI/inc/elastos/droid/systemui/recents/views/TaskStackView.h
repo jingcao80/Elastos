@@ -460,6 +460,8 @@ public:
         /* [in] */ ITaskView* tv,
         /* [in] */ Boolean focused);
 
+    using FrameLayout::OnScrollChanged;
+
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/
 
     // @Override

@@ -45,7 +45,7 @@ namespace Phone {
 CAR_INTERFACE_IMPL(CGsmUmtsOptions::MyPreferenceOnPreferenceClickListener, Object,
         IPreferenceOnPreferenceClickListener)
 
-CGsmUmtsOptions::MyPreferenceOnPreferenceClickListener::OnPreferenceClick(
+ECode CGsmUmtsOptions::MyPreferenceOnPreferenceClickListener::OnPreferenceClick(
     /* [in] */ IPreference* preference,
     /* [out] */ Boolean* result)
 {

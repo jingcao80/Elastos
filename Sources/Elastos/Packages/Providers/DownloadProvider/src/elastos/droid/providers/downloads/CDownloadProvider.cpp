@@ -1416,8 +1416,8 @@ void CDownloadProvider::DeleteRequestHeaders(
     AutoPtr<ICursor> cursor;
     db->Query(DB_TABLE, projection, where, whereArgs,
                 String(NULL), String(NULL), String(NULL), String(NULL), (ICursor**)&cursor);
-    Boolean bMF = FALSE, bAL = FALSE, bMN = FALSE;
-    for ((cursor->MoveToFirst(&bMF), bMF); !(cursor->IsAfterLast(&bAL), bAL); (cursor->MoveToNext(&bMN), bMN)) {
+    Boolean result;
+    for (cursor->MoveToFirst(&result); (cursor->IsAfterLast(&result), !result); cursor->MoveToNext(&result)) {
         Int64 id = 0;
         cursor->GetInt64(0, &id);
         StringBuilder sb(IDownloadsImplRequestHeaders::COLUMN_DOWNLOAD_ID);

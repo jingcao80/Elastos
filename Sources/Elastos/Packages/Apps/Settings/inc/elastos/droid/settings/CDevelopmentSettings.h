@@ -229,12 +229,13 @@ private:
     CARAPI_(Boolean) RemovePreferenceForProduction(
         /* [in] */ IPreference* preference);
 
+    using SettingsPreferenceFragment::RemovePreference;
+
     CARAPI_(void) RemovePreference(
         /* [in] */ IPreference* preference);
 
     CARAPI_(void) SetPrefsEnabledState(
         /* [in] */ Boolean enabled);
-
 
     CARAPI_(void) UpdateAllOptions();
 

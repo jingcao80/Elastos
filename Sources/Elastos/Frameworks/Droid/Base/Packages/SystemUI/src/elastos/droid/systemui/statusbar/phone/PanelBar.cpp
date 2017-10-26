@@ -96,21 +96,28 @@ ECode PanelBar::GetBarHeight(
     return NOERROR;
 }
 
-AutoPtr<IPanelView> PanelBar::SelectPanelForTouch(
-    /* [in] */ IMotionEvent* touch)
+ECode PanelBar::SelectPanelForTouch(
+    /* [in] */ IMotionEvent* touch,
+    /* [out] */ IPanelView** view)
 {
+    VALIDATE_NOT_NULL(view);
     Int32 N = mPanels.GetSize();
     Float x;
     touch->GetX(&x);
     Int32 w = 0;
     GetMeasuredWidth(&w);
     Int32 index = (Int32)(N * x / w);
-    return mPanels[index];
+    *view = mPanels[index];
+    REFCOUNT_ADD(*view);
+    return NOERROR;
 }
 
-Boolean PanelBar::PanelsEnabled()
+ECode PanelBar::PanelsEnabled(
+    /* [out] */ Boolean* enabled)
 {
-    return TRUE;
+    VALIDATE_NOT_NULL(enabled);
+    *enabled = TRUE;
+    return NOERROR;
 }
 
 ECode PanelBar::OnTouchEvent(
@@ -121,7 +128,8 @@ ECode PanelBar::OnTouchEvent(
     Int32 action;
     event->GetAction(&action);
     // Allow subclasses to implement enable/disable semantics
-    if (!PanelsEnabled()) {
+    Boolean enabled;
+    if (PanelsEnabled(&enabled), !enabled) {
         if (action == IMotionEvent::ACTION_DOWN) {
             Float x = 0, y = 0;
             event->GetX(&x);
@@ -135,7 +143,8 @@ ECode PanelBar::OnTouchEvent(
 
     // figure out which panel needs to be talked to here
     if (action == IMotionEvent::ACTION_DOWN) {
-        AutoPtr<IPanelView> panel = SelectPanelForTouch(event);
+        AutoPtr<IPanelView> panel;
+        SelectPanelForTouch(event, (IPanelView**)&panel);
         if (panel == NULL) {
             // panel is not there, so we'll eat the gesture
             Float x = 0, y = 0;

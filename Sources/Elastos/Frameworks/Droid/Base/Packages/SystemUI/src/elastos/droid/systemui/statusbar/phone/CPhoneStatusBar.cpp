@@ -2141,9 +2141,13 @@ void CPhoneStatusBar::StartKeyguard()
     keyguardViewMediator->GetViewMediatorCallback((IViewMediatorCallback**)&mKeyguardViewMediatorCallback);
 }
 
-AutoPtr<IView> CPhoneStatusBar::GetStatusBarView()
+ECode CPhoneStatusBar::GetStatusBarView(
+    /* [out] */ IView** view)
 {
-    return IView::Probe(mStatusBarView);
+    VALIDATE_NOT_NULL(view);
+    *view = IView::Probe(mStatusBarView);
+    REFCOUNT_ADD(*view);
+    return NOERROR;
 }
 
 ECode CPhoneStatusBar::GetStatusBarWindow(

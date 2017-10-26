@@ -1954,7 +1954,8 @@ void BaseStatusBar::ShowRecents(
 {
     if (mRecents != NULL) {
         SendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
-        AutoPtr<IView> view = GetStatusBarView();
+        AutoPtr<IView> view;
+        GetStatusBarView((IView**)&view);
         mRecents->ShowRecents(triggeredFromAltTab, view);
     }
 }
@@ -1972,7 +1973,8 @@ void BaseStatusBar::ToggleRecents()
 {
     if (mRecents != NULL) {
         SendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
-        AutoPtr<IView> view = GetStatusBarView();
+        AutoPtr<IView> view;
+        GetStatusBarView((IView**)&view);
         mRecents->ToggleRecents(mDisplay, mLayoutDirection, view);
     }
 }

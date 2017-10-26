@@ -78,6 +78,8 @@ public:
     // @Override
     CARAPI AnimateExpandNotificationsPanel();
 
+    using BaseStatusBar::AnimateCollapsePanels;
+
     // @Override
     CARAPI AnimateCollapsePanels(
         /* [in] */ Int32 flags);

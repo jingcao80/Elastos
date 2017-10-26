@@ -68,7 +68,7 @@ CKeyguardBottomAreaView::IntrinsicSizeDrawable::IntrinsicSizeDrawable()
 {
 }
 
-CKeyguardBottomAreaView::IntrinsicSizeDrawable::constructor(
+ECode CKeyguardBottomAreaView::IntrinsicSizeDrawable::constructor(
     /* [in] */ IDrawable* drawable,
     /* [in] */ Int32 intrinsicWidth,
     /* [in] */ Int32 intrinsicHeight)

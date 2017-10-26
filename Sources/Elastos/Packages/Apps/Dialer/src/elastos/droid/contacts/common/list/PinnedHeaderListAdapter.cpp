@@ -16,10 +16,12 @@
 
 #include "elastos/droid/contacts/common/list/PinnedHeaderListAdapter.h"
 #include "elastos/droid/contacts/common/list/CPinnedHeaderListView.h"
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Contacts::Common::List::EIID_IPinnedHeaderListAdapter;
 using Elastos::Droid::Contacts::Common::List::EIID_IPinnedHeaderAdapter;
 using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos{
 namespace Droid{
@@ -92,7 +94,7 @@ ECode PinnedHeaderListAdapter::GetPinnedHeaderView(
             AutoPtr<IInterface> tag;
             convertView->GetTag((IInterface**)&tag);
             AutoPtr<IInteger32> headerType = IInteger32::Probe(tag);
-            if (headerType != NULL && headerType == PARTITION_HEADER_TYPE) {
+            if (headerType != NULL && CoreUtils::Unbox(headerType) == PARTITION_HEADER_TYPE) {
                 view = convertView;
             }
         }
@@ -100,7 +102,8 @@ ECode PinnedHeaderListAdapter::GetPinnedHeaderView(
             AutoPtr<IContext> ctx;
             GetContext((IContext**)&ctx);
             view = NewHeaderView(ctx, partition, NULL, parent);
-            view->SetTag(PARTITION_HEADER_TYPE);
+
+            view->SetTag(CoreUtils::Convert(PARTITION_HEADER_TYPE));
             view->SetFocusable(FALSE);
             view->SetEnabled(FALSE);
         }

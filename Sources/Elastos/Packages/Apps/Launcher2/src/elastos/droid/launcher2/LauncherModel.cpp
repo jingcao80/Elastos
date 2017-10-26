@@ -2121,7 +2121,7 @@ void LauncherModel::LoaderTask::BindWorkspace(
 void LauncherModel::LoaderTask::LoadAndBindAllApps()
 {
     if (DEBUG_LOADERS) {
-        Slogger::D(TAG, "loadAndBindAllApps mAllAppsLoaded=" + mHost->mAllAppsLoaded);
+        Slogger::D(TAG, "loadAndBindAllApps mAllAppsLoaded=%d", mHost->mAllAppsLoaded);
     }
     if (!mHost->mAllAppsLoaded) {
         LoadAllAppsByBatch();
@@ -3501,7 +3501,7 @@ ECode LauncherModel::StartLoader(
 {
     {    AutoLock syncLock(mLock);
         if (DEBUG_LOADERS) {
-            Slogger::D(TAG, "startLoader isLaunching=" + isLaunching);
+            Slogger::D(TAG, "startLoader isLaunching=%d", isLaunching);
         }
 
         // Clear any deferred bind-runnables from the synchronized load process

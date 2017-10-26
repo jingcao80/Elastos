@@ -119,7 +119,7 @@ private:
          */
         // @Override
         CARAPI OnPostExecute(
-            /* [in] */ ArrayOf<IUri*>* result);
+            /* [in] */ IInterface* result);
     };
 
 public:

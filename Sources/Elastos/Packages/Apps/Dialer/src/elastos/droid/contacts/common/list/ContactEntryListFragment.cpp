@@ -62,7 +62,7 @@ namespace List {
 // ContactEntryListFragment::SIMStateReceiver
 //=================================================================
 
-ContactEntryListFragment::SIMStateReceiver::OnReceive(
+ECode ContactEntryListFragment::SIMStateReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -82,7 +82,7 @@ ContactEntryListFragment::DelayedDirectorySearchHandler::DelayedDirectorySearchH
     Handler::constructor(FALSE);
 }
 
-ContactEntryListFragment::DelayedDirectorySearchHandler::HandleMessage(
+ECode ContactEntryListFragment::DelayedDirectorySearchHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     Int32 what;

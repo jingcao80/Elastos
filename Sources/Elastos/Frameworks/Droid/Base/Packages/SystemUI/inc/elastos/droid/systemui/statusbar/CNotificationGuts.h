@@ -79,6 +79,8 @@ protected:
     CARAPI DrawableStateChanged();
 
 private:
+    using FrameLayout::Draw;
+
     CARAPI_(void) Draw(
         /* [in] */ ICanvas* canvas,
         /* [in] */ IDrawable* drawable);

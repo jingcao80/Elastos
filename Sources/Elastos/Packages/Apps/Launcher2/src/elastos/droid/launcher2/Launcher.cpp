@@ -2654,7 +2654,7 @@ ECode Launcher::OnNewIntent(
         CSystem::AcquireSingleton((ISystem**)&system);
         Int64 ctime;
         system->GetCurrentTimeMillis(&ctime);
-        Slogger::D(TAG, "Time spent in onNewIntent: " + (ctime - startTime));
+        Slogger::D(TAG, "Time spent in onNewIntent: %lld", (ctime - startTime));
     }
     return NOERROR;
 }

@@ -117,6 +117,8 @@ private:
         /* [in] */ IContext* context,
         /* [in] */ IWifiManager* wifiManager); // List<AccessPoint>
 
+    using SettingsPreferenceFragment::ShowDialog;
+
     CARAPI_(void) ShowDialog(
         /* [in] */ IAccessPoint* accessPoint,
         /* [in] */ Boolean edit);

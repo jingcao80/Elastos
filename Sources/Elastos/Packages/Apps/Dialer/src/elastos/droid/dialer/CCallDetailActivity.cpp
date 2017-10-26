@@ -835,7 +835,7 @@ ECode CCallDetailActivity::GetPhoneCallDetailsForUri(
     Int64 date;
     callCursor->GetInt64(DATE_COLUMN_INDEX, &date);
     Int64 duration;
-    callCursor->GetInt64(DURATION_COLUMN_INDEX, &date);
+    callCursor->GetInt64(DURATION_COLUMN_INDEX, &duration);
     Int32 callType;
     callCursor->GetInt32(CALL_TYPE_COLUMN_INDEX, &callType);
     String countryIso;

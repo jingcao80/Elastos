@@ -112,7 +112,7 @@ CKeyButtonRipple::CKeyButtonRipple()
     , mSupportHardware(FALSE)
 {}
 
-CKeyButtonRipple::constructor(
+ECode CKeyButtonRipple::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ IView* targetView)
 {

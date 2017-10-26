@@ -40,7 +40,7 @@ CCdmaCallOptions::CCdmaCallOptions()
 {
 }
 
-CCdmaCallOptions::constructor()
+ECode CCdmaCallOptions::constructor()
 {
     return PreferenceActivity::constructor();
 }

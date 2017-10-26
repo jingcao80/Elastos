@@ -322,7 +322,7 @@ void ServiceMonitor::ContinueStartService()
         Logger::W(mTag, "Error binding to service: %p", mServiceName.Get());
     }
 
-    if (mDebug) Logger::D(mTag, "mBound: " + mBound);
+    if (mDebug) Logger::D(mTag, "mBound: %d", mBound);
 
     if (!mBound) {
         mCallbacks->OnNoService();

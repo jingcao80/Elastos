@@ -188,6 +188,8 @@ public:
     CARAPI SetEnabled(
         /* [in] */ Boolean enabled);
 
+    using AnalyticsFragment::SetLoaderManager;
+
     /**
      * Overrides a loader manager for use in unit tests.
      */
@@ -441,7 +443,7 @@ protected:
 
     CARAPI_(Boolean) LoadPreferences();
 
-    CARAPI OnCreateView(
+    virtual CARAPI OnCreateView(
         /* [in] */ ILayoutInflater* inflater,
         /* [in] */ IViewGroup* container);
 

@@ -393,13 +393,9 @@ void CEmergencyCallbackModeExitDialog::ShowEmergencyCallbackModeExitDialog()
     }
 }
 
-ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
-    /* [in] */ Int32 id,
-    /* [out] */ IDialog** dialog)
+AutoPtr<IDialog> CEmergencyCallbackModeExitDialog::OnCreateDialog(
+    /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(dialog)
-    *dialog = NULL;
-
     switch (id) {
     case EXIT_ECM_BLOCK_OTHERS:
     case EXIT_ECM_DIALOG:
@@ -419,9 +415,7 @@ ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
         builder->SetNegativeButton(Elastos::Droid::TeleService::R::string::alert_dialog_no, listener2);
         builder->Create((IAlertDialog**)&mAlertDialog);
         IDialog::Probe(mAlertDialog)->SetOnDismissListener(this);
-        *dialog = IDialog::Probe(mAlertDialog);
-        REFCOUNT_ADD(*dialog);
-        return NOERROR;
+        return IDialog::Probe(mAlertDialog);
     }
     case EXIT_ECM_IN_EMERGENCY_CALL_DIALOG:
     {
@@ -436,9 +430,7 @@ ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
         builder->SetNeutralButton(Elastos::Droid::TeleService::R::string::alert_dialog_dismiss, listener);
         builder->Create((IAlertDialog**)&mAlertDialog);
         IDialog::Probe(mAlertDialog)->SetOnDismissListener(this);
-        *dialog = IDialog::Probe(mAlertDialog);
-        REFCOUNT_ADD(*dialog);
-        return NOERROR;
+        return IDialog::Probe(mAlertDialog);
     }
     case EXIT_ECM_PROGRESS_DIALOG:
     {
@@ -450,15 +442,11 @@ ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
         IAlertDialog::Probe(mProgressDialog)->SetMessage(cchar);
         mProgressDialog->SetIndeterminate(TRUE);
         IDialog::Probe(mProgressDialog)->SetCancelable(FALSE);
-        *dialog = IDialog::Probe(mProgressDialog);
-        REFCOUNT_ADD(*dialog);
-        return NOERROR;
+        return IDialog::Probe(mProgressDialog);
     }
     default:
-        *dialog = NULL;
-        return NOERROR;
+        return NULL;
     }
-    return NOERROR;
 }
 
 AutoPtr<ICharSequence> CEmergencyCallbackModeExitDialog::GetDialogText(

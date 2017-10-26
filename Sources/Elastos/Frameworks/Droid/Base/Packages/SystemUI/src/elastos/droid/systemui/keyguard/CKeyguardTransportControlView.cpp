@@ -330,8 +330,7 @@ ECode CKeyguardTransportControlView::SavedState::constructor(
 }
 
 ECode CKeyguardTransportControlView::SavedState::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* out)
 {
     assert(0);
     //View::BaseSavedState::WriteToParcel(out, flags);
@@ -637,22 +636,17 @@ ECode CKeyguardTransportControlView::OnDetachedFromWindow()
     return RemoveCallbacks(mUpdateSeekBars, &res);
 }
 
-ECode CKeyguardTransportControlView::OnSaveInstanceState(
-    /* [out] */ IParcelable** p)
+AutoPtr<IParcelable> CKeyguardTransportControlView::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(p)
-
-    AutoPtr<IParcelable> _p = FrameLayout::OnSaveInstanceState();
+    AutoPtr<IParcelable> p = FrameLayout::OnSaveInstanceState();
     AutoPtr<SavedState> ss = new SavedState();
-    ss->constructor(_p);
+    ss->constructor(p);
     ss->mArtist = mMetadata->mArtist;
     ss->mTrackTitle = mMetadata->mTrackTitle;
     ss->mAlbumTitle = mMetadata->mAlbumTitle;
     ss->mDuration = mMetadata->mDuration;
     ss->mBitmap = mMetadata->mBitmap;
-    *p = IParcelable::Probe(ss);
-    REFCOUNT_ADD(*p)
-    return NOERROR;
+    return IParcelable::Probe(ss);
 }
 
 ECode CKeyguardTransportControlView::OnRestoreInstanceState(

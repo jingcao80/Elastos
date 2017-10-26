@@ -509,17 +509,14 @@ protected:
     //@Override
     CARAPI OnPageEndMoving();
 
-    CARAPI GetAssociatedLowerPageBound(
-        /* [in] */ Int32 page,
-        /* [out] */ Int32* result);
+    CARAPI_(Int32) GetAssociatedLowerPageBound(
+        /* [in] */ Int32 page);
 
-    CARAPI GetAssociatedUpperPageBound(
-        /* [in] */ Int32 page,
-        /* [out] */ Int32* result);
+    CARAPI_(Int32) GetAssociatedUpperPageBound(
+        /* [in] */ Int32 page);
 
     //@Override
-    CARAPI GetCurrentPageDescription(
-        /* [out] */ String* result);
+    CARAPI_(String) GetCurrentPageDescription();
 
 private:
     /** Returns the item index of the center item on this page so that we can restore to this

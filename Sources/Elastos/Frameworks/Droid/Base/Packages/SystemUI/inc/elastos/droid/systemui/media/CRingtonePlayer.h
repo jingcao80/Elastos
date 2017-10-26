@@ -65,7 +65,7 @@ public:
             /* [in] */ IAudioAttributes* aa,
             /* [in] */ CRingtonePlayer* host);
 
-        ProxyDied();
+        CARAPI ProxyDied();
 
     public:
         AutoPtr<IBinder> mToken;

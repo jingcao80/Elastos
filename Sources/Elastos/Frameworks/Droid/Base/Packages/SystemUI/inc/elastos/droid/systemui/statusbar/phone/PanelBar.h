@@ -54,10 +54,12 @@ public:
     CARAPI GetBarHeight(
         /* [out] */ Float* result);
 
-    CARAPI_(AutoPtr<IPanelView>) SelectPanelForTouch(
-        /* [in] */ IMotionEvent* touch);
+    CARAPI SelectPanelForTouch(
+        /* [in] */ IMotionEvent* touch,
+        /* [out] */ IPanelView** view);
 
-    CARAPI_(Boolean) PanelsEnabled();
+    CARAPI PanelsEnabled(
+        /* [out] */ Boolean* enabled);
 
     // called from PanelView when self-expanding, too
     CARAPI StartOpeningPanel(

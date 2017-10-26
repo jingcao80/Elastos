@@ -47,6 +47,8 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
+    using DialerPhoneNumberListAdapter::ConfigureLoader;
+
     /**
      * Sets query for the SmartDialCursorLoader.
      */

@@ -68,7 +68,7 @@ public:
 
         CAR_INTERFACE_DECL()
 
-        constructor(
+        CARAPI constructor(
             /* [in] */ IInterface* host);
 
         // @Override

@@ -91,6 +91,8 @@ public:
 
     ~DynamicIndexableContentMonitor();
 
+    using PackageMonitor::Register;
+
     CARAPI Register(
         /* [in] */ IContext* context);
 

@@ -46,7 +46,7 @@ namespace Phone {
 
 CAR_INTERFACE_IMPL(CGetPin2Screen::InnerListener, Object, IViewOnClickListener)
 
-CGetPin2Screen::InnerListener::OnClick(
+ECode CGetPin2Screen::InnerListener::OnClick(
     /* [in] */ IView* v)
 {
     AutoPtr<ICharSequence> cchar;

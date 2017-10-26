@@ -129,10 +129,10 @@ FINALLY:
     mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     mPM = IPowerManager::Probe(obj);
 
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
+    AutoPtr<IContext> context2;
+    GetContext((IContext**)&context2);
     AutoPtr<IInterface> obj2;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj2);
+    context2->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj2);
     AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj2);
     AutoPtr<IView> tmp;
     inflater->Inflate(R::layout::keyguard_num_pad_key, this, TRUE, (IView**)&tmp);

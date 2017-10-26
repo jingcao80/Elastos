@@ -1280,12 +1280,9 @@ ECode Workspace::OnChildViewRemoved(
     return NOERROR;
 }
 
-ECode Workspace::ShouldDrawChild(
-    /* [in] */ IView* child,
-    /* [out] */ Boolean* result)
+Boolean Workspace::ShouldDrawChild(
+    /* [in] */ IView* child)
 {
-    VALIDATE_NOT_NULL(result);
-
     AutoPtr<ICellLayout> cl = ICellLayout::Probe(child);
     if (SmoothPagedView::ShouldDrawChild(child)) {
         AutoPtr<IShortcutAndWidgetContainer> container;
@@ -1293,19 +1290,15 @@ ECode Workspace::ShouldDrawChild(
         Float value;
         IView::Probe(container)->GetAlpha(&value);
         if (value > 0) {
-            *result = TRUE;
-            return NOERROR;
+            return TRUE;
         }
         cl->GetBackgroundAlpha(&value);
         if (value > 0) {
-            *result = TRUE;
-            return NOERROR;
+            return TRUE;
         }
-        *result = FALSE;
-        return NOERROR;
+        return FALSE;
     }
-    *result = FALSE;
-    return NOERROR;
+    return FALSE;
 }
 
 ECode Workspace::GetOpenFolder(
@@ -1502,13 +1495,10 @@ Boolean Workspace::HitsPage(
     return FALSE;
 }
 
-ECode Workspace::HitsPreviousPage(
+Boolean Workspace::HitsPreviousPage(
     /* [in] */ Float x,
-    /* [in] */ Float y,
-    /* [out] */ Boolean* result)
+    /* [in] */ Float y)
 {
-    VALIDATE_NOT_NULL(result);
-
     // mNextPage is set to INVALID_PAGE whenever we are stationary.
     // Calculating "next page" this way ensures that you scroll to whatever page you tap on
     Int32 current = (mNextPage == INVALID_PAGE) ? mCurrentPage : mNextPage;
@@ -1517,18 +1507,13 @@ ECode Workspace::HitsPreviousPage(
     // the active workspace
     Boolean res;
     LauncherApplication::IsScreenLarge(&res);
-
-    *result = res && HitsPage(current - 1, x, y);
-    return NOERROR;
+    return res && HitsPage(current - 1, x, y);
 }
 
-ECode Workspace::HitsNextPage(
+Boolean Workspace::HitsNextPage(
     /* [in] */ Float x,
-    /* [in] */ Float y,
-    /* [out] */ Boolean* result)
+    /* [in] */ Float y)
 {
-    VALIDATE_NOT_NULL(result);
-
     // mNextPage is set to INVALID_PAGE whenever we are stationary.
     // Calculating "next page" this way ensures that you scroll to whatever page you tap on
     Int32 current = (mNextPage == INVALID_PAGE) ? mCurrentPage : mNextPage;
@@ -2555,8 +2540,7 @@ void Workspace::EnableHwLayersOnVisiblePages()
         for (Int32 i = 0; i < screenCount; i++) {
             AutoPtr<IView> view = GetPageAt(i);
             AutoPtr<ICellLayout> layout = ICellLayout::Probe(view);
-            Boolean res;
-            ShouldDrawChild(IView::Probe(layout), &res);
+            Boolean res = ShouldDrawChild(IView::Probe(layout));
             if (!(leftScreen <= i && i <= rightScreen && res)) {
                 layout->DisableHardwareLayers();
             }
@@ -2564,8 +2548,7 @@ void Workspace::EnableHwLayersOnVisiblePages()
         for (Int32 i = 0; i < screenCount; i++) {
             AutoPtr<IView> view = GetPageAt(i);
             AutoPtr<ICellLayout> layout = ICellLayout::Probe(view);
-            Boolean res;
-            ShouldDrawChild(IView::Probe(layout), &res);
+            Boolean res = ShouldDrawChild(IView::Probe(layout));
             if (leftScreen <= i && i <= rightScreen && res) {
                 layout->EnableHardwareLayers();
             }
@@ -4838,7 +4821,7 @@ ECode Workspace::OnDropExternal(
             }
             default:
                 //throw new IllegalStateException("Unknown item type: " + info.itemType);
-                Logger::E(TAG, "Unknown item type: " + info->mItemType);
+                Logger::E(TAG, "Unknown item type: %d", info->mItemType);
                 return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -5870,11 +5853,8 @@ ECode Workspace::SyncPageItems(
     return NOERROR;
 }
 
-ECode Workspace::GetCurrentPageDescription(
-    /* [out] */ String* str)
+String Workspace::GetCurrentPageDescription()
 {
-    VALIDATE_NOT_NULL(str);
-
     Int32 page = (mNextPage != INVALID_PAGE) ? mNextPage : mCurrentPage;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
@@ -5883,7 +5863,7 @@ ECode Workspace::GetCurrentPageDescription(
             Elastos::Droid::Launcher2::R::string::workspace_scroll_format, &_str);
     Int32 count;
     GetChildCount(&count);
-    return str->AppendFormat(_str, page + 1, count);
+    return String::Format(_str, page + 1, count);
 }
 
 ECode Workspace::GetLocationInDragLayer(

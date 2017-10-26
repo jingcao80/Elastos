@@ -187,7 +187,7 @@ void PhoneFavoritesTileAdapter::SetContactCursor(
     /* [in] */ ICursor* cursor)
 {
     Boolean closed;
-    if (!mDelayCursorUpdates && cursor != NULL && cursor->IsClosed(&closed), !closed) {
+    if (!mDelayCursorUpdates && cursor != NULL && (cursor->IsClosed(&closed), !closed)) {
         mNumStarred = GetNumStarredContacts(cursor);
         if (mAwaitingRemove) {
             mDataSetChangedListener->CacheOffsetsForDatasetChange();

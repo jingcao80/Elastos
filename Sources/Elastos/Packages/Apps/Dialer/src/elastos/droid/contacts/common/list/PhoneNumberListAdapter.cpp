@@ -367,7 +367,7 @@ ECode PhoneNumberListAdapter::GetPhoneNumber(
     *displayNumber = String(NULL);
     AutoPtr<IInterface> temp;
     GetItem(position, (IInterface**)&temp);
-    AutoPtr<ICursor> item = ICursor::Probe(item);
+    AutoPtr<ICursor> item = ICursor::Probe(temp);
     if (item != NULL) {
         return item->GetString(PhoneQuery::PHONE_NUMBER, displayNumber);
     }
@@ -384,7 +384,7 @@ ECode PhoneNumberListAdapter::GetDataUri(
     GetPartitionForPosition(position, &partitionIndex);
     AutoPtr<IInterface> temp;
     GetItem(position, (IInterface**)&temp);
-    AutoPtr<ICursor> item = ICursor::Probe(item);
+    AutoPtr<ICursor> item = ICursor::Probe(temp);
     if (item != NULL) {
         return GetDataUri(partitionIndex, item, uri);
     }

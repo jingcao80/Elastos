@@ -37,7 +37,7 @@ namespace TeleService {
 namespace Services {
 namespace Telephony {
 
-TtyManager::TtyBroadcastReceiver::constructor(
+ECode TtyManager::TtyBroadcastReceiver::constructor(
     /* [in] */ ITtyManager* host)
 {
     mHost = (TtyManager*)host;

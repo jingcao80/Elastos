@@ -290,6 +290,7 @@ module
             [in] ArrayOf<Int32>* keys);
     }
 
+    [local]
     interface IActivityInstrumentationTestCase2 {
         /**
          * Get the Activity under test, starting it if necessary.
@@ -310,7 +311,7 @@ module
          * @return the Activity under test
          */
         GetActivity(
-            [out] IInterface** object);
+            [out] IActivity** object);
 
         /**
          * Call this method before the first call to {@link #getActivity} to inject a customized Intent

@@ -318,7 +318,7 @@ CNotificationSettings::MyOnPreferenceChangeListener::MyOnPreferenceChangeListene
     , mId(id)
 {}
 
-CNotificationSettings::MyOnPreferenceChangeListener::OnPreferenceChange(
+ECode CNotificationSettings::MyOnPreferenceChangeListener::OnPreferenceChange(
     /* [in] */ IPreference* preference,
     /* [in] */ IInterface* newValue,
     /* [out] */ Boolean* result)

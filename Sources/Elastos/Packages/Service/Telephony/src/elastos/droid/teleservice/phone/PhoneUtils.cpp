@@ -490,7 +490,7 @@ Boolean PhoneUtils::AnswerCall(
     return answered;
 }
 
-PhoneUtils::HangupAllCalls(
+ECode PhoneUtils::HangupAllCalls(
     /* [in] */ ICallManager* cm)
 {
     AutoPtr<ICall> ringing;

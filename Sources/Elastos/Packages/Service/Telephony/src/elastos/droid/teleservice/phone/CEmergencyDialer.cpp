@@ -839,12 +839,9 @@ AutoPtr<ICharSequence> CEmergencyDialer::CreateErrorMessage(
     return obj;
 }
 
-ECode CEmergencyDialer::OnCreateDialog(
-    /* [in] */ Int32 id,
-    /* [out] */ IDialog** outdialog)
+AutoPtr<IDialog> CEmergencyDialer::OnCreateDialog(
+    /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(outdialog)
-
     AutoPtr<IAlertDialog> dialog;
     if (id == BAD_EMERGENCY_NUMBER_DIALOG) {
         // construct dialog
@@ -866,9 +863,7 @@ ECode CEmergencyDialer::OnCreateDialog(
         window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_SHOW_WHEN_LOCKED);
     }
-    *outdialog = IDialog::Probe(dialog);
-    REFCOUNT_ADD(*outdialog)
-    return NOERROR;
+    return IDialog::Probe(dialog);
 }
 
 void CEmergencyDialer::OnPrepareDialog(

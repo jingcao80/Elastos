@@ -43,7 +43,7 @@ LauncherApplication::MyContentObserver::MyContentObserver()
 {
 }
 
-LauncherApplication::MyContentObserver::constructor(
+ECode LauncherApplication::MyContentObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ ILauncherApplication* host)
 {

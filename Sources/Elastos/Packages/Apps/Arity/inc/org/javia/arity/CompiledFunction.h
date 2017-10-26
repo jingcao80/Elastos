@@ -77,6 +77,8 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    using ContextFunction::Eval;
+
     //@Override
     CARAPI Eval(
         /* [in] */ ArrayOf<Double>* x,

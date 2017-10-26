@@ -178,8 +178,8 @@ ECode CallLogAdapter::ContactInfoRequest::GetHashCode(
     Int32 prime = 31;
     Int32 result = 1;
     Int32 calllogInfoHash;
-    result = prime * result + ((mCallLogInfo == NULL)
-            ? 0 : ((IObject*)mCallLogInfo->Probe(EIID_IObject))->GetHashCode(&calllogInfoHash), calllogInfoHash);
+    result = prime * result + (mCallLogInfo == NULL)
+            ? 0 : Object::GetHashCode(mCallLogInfo);
     result = prime * result + (mCountryIso.IsNull() ? 0 : mCountryIso.GetHashCode());
     result = prime * result + (mCountryIso.IsNull() ? 0 : mNumber.GetHashCode());
     *hashCode = result;
@@ -1105,7 +1105,7 @@ void CallLogAdapter::BindActionButtons(
     AutoPtr<IView> videoCallButtonView = IView::Probe(views->mVideoCallButtonView);
     Boolean isShown;
     if (CallUtil::IsVideoEnabled(mContext) && canPlaceCallToNumber &&
-            views->mPhoneCallDetailsViews->mCallTypeIcons->IsVideoShown(&isShown), isShown) {
+            (views->mPhoneCallDetailsViews->mCallTypeIcons->IsVideoShown(&isShown), isShown)) {
         videoCallButtonView->SetTag(
                 IntentProvider::GetReturnVideoCallIntentProvider(views->mNumber));
         videoCallButtonView->SetVisibility(IView::VISIBLE);

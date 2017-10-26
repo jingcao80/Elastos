@@ -365,13 +365,9 @@ ECode CNetworkSetting::OnDestroy()
     return PreferenceActivity::OnDestroy();
 }
 
-ECode CNetworkSetting::OnCreateDialog(
-    /* [in] */ Int32 id,
-    /* [out] */ IDialog** outdialog)
+AutoPtr<IDialog> CNetworkSetting::OnCreateDialog(
+    /* [in] */ Int32 id)
 {
-    VALIDATE_NOT_NULL(outdialog)
-    *outdialog = NULL;
-
     if ((id == DIALOG_NETWORK_SELECTION) || (id == DIALOG_NETWORK_LIST_LOAD) ||
             (id == DIALOG_NETWORK_AUTO_SELECT)) {
         AutoPtr<IProgressDialog> dialog;
@@ -417,11 +413,9 @@ ECode CNetworkSetting::OnCreateDialog(
                 break;
             }
         }
-        *outdialog = IDialog::Probe(dialog);
-        REFCOUNT_ADD(*outdialog)
-        return NOERROR;
+        return IDialog::Probe(dialog);
     }
-    return NOERROR;
+    return NULL;
 }
 
 void CNetworkSetting::OnPrepareDialog(

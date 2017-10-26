@@ -605,6 +605,8 @@ public:
     CARAPI OnReset(
         /* [in] */ IExpandableView* view);
 
+    using PanelView::OnScrollChanged;
+
     // @Override
     CARAPI OnScrollChanged();
 

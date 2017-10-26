@@ -160,6 +160,8 @@ public:
             /* [in] */ IMediaRouterRouteInfo* route,
             /* [in] */ IWifiDisplay* display);
 
+        using RoutePreference::OnClick;
+
         //@Override
         CARAPI OnClick(
             /* [in] */ IView* v);

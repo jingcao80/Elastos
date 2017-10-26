@@ -361,13 +361,13 @@ public:
     static CARAPI ReleaseRecord(
         /* [in] */ IArgumentList* args);
 
-    static AssignOutputPropery(
+    static CARAPI AssignOutputPropery(
         /* [in] */ const String& signature,
         /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* args,
         /* [in] */ IVariant* property);
 
-    static GetInputPropery(
+    static CARAPI GetInputPropery(
         /* [in] */ Int64 msgArg,
         /* [in] */ const String& signature,
         /* [in] */ IMethodInfo* method,
@@ -379,7 +379,7 @@ private:
     static InterfaceID GetInterfaceIDByTypeId(
         /* [in] */ Char32 typeId);
 
-    static GetInputPropery(
+    static CARAPI GetInputPropery(
         /* [in] */ const String& signature,
         /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* args,
@@ -387,7 +387,7 @@ private:
         /* [in] */ PCarQuintet carQuintet,
         /* [out] */ IVariant** property);
 
-    static AssignOutputPropery(
+    static CARAPI AssignOutputPropery(
         /* [in] */ const String& signature,
         /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* args,

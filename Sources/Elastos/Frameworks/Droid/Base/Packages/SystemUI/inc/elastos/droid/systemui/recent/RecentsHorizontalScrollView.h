@@ -234,8 +234,9 @@ public:
         /* [in] */ IMotionEvent* ev,
         /* [out] */ Boolean* result);
 
-    CARAPI_(Boolean) CanChildBeDismissed(
-        /* [in] */ IView* v);
+    CARAPI CanChildBeDismissed(
+        /* [in] */ IView* v,
+        /* [out] */ Boolean* result);
 
     // @Override
     CARAPI IsAntiFalsingNeeded(
@@ -296,16 +297,19 @@ public:
     CARAPI SetOnScrollListener(
         /* [in] */ IRunnable* listener);
 
-    CARAPI_(Int32) GetVerticalFadingEdgeLength();
+    CARAPI GetVerticalFadingEdgeLength(
+        /* [out] */ Int32* length);
 
-    CARAPI_(Int32) GetHorizontalFadingEdgeLength();
+    CARAPI GetHorizontalFadingEdgeLength(
+        /* [out] */ Int32* length);
 
     CARAPI OnAttachedToWindow();
 
     CARAPI SetAdapter(
         /* [in] */ ITaskDescriptionAdapter* adapter);
 
-    CARAPI_(Int32) NumItemsInOneScreenful();
+    CARAPI NumItemsInOneScreenful(
+        /* [out] */ Int32* number);
 
     CARAPI SetLayoutTransition(
         /* [in] */ ILayoutTransition* transition);

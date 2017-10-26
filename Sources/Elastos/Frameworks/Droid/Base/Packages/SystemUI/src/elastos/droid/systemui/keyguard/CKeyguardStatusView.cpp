@@ -353,7 +353,7 @@ String CKeyguardStatusView::GetOwnerInfo()
     return info;
 }
 
-CKeyguardStatusView::HasOverlappingRendering(
+ECode CKeyguardStatusView::HasOverlappingRendering(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);

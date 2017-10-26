@@ -127,7 +127,7 @@ private:
 
         //@Override
         CARAPI OnPostExecute(
-            /* [in] */ IArrayMap* newEntries);// ArrayMap<String, PackageEntry>
+            /* [in] */ IInterface* newEntries);// ArrayMap<String, PackageEntry>
 
     private:
         CARAPI_(void) UpdatePreference(

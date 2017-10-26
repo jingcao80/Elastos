@@ -1492,8 +1492,8 @@ Boolean CPinyinIME::ProcessStateInput(
         }
     }
 
-    if (keyChar >= 'a' && keyChar <= 'z' || keyChar == '\''
-            && !mDecInfo->CharBeforeCursorIsSeparator()
+    if ((keyChar >= 'a' && keyChar <= 'z') || (keyChar == '\''
+            && !mDecInfo->CharBeforeCursorIsSeparator())
             || keyCode == IKeyEvent::KEYCODE_DEL) {
         if (!realAction) return TRUE;
         return ProcessSurfaceChange(keyChar, keyCode);

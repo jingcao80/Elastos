@@ -55,6 +55,8 @@ public:
         /* [in] */ IIntent* intent,
         /* [out] */ IBinder** b);
 
+    using Service::CheckPermission;
+
     CARAPI CheckPermission();
 
 public:

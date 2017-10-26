@@ -344,10 +344,13 @@ ECode RecentsHorizontalScrollView::OnTouchEvent(
     return NOERROR;
 }
 
-Boolean RecentsHorizontalScrollView::CanChildBeDismissed(
-    /* [in] */ IView* v)
+ECode RecentsHorizontalScrollView::CanChildBeDismissed(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
 {
-    return TRUE;
+    VALIDATE_NOT_NULL(result)
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::IsAntiFalsingNeeded(
@@ -490,7 +493,7 @@ ECode RecentsHorizontalScrollView::OnScrollChanged(
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-    OnScrollChanged(l, t, oldl, oldt);
+    HorizontalScrollView::OnScrollChanged(l, t, oldl, oldt);
     if (mOnScrollListener != NULL) {
         mOnScrollListener->Run();
     }
@@ -504,33 +507,35 @@ ECode RecentsHorizontalScrollView::SetOnScrollListener(
     return NOERROR;
 }
 
-Int32 RecentsHorizontalScrollView::GetVerticalFadingEdgeLength()
+ECode RecentsHorizontalScrollView::GetVerticalFadingEdgeLength(
+    /* [out] */ Int32* length)
 {
-    Int32 i;
+    VALIDATE_NOT_NULL(length)
     if (mFadedEdgeDrawHelper != NULL) {
-        mFadedEdgeDrawHelper->GetVerticalFadingEdgeLength(&i);
+        mFadedEdgeDrawHelper->GetVerticalFadingEdgeLength(length);
     }
     else {
-        i = GetVerticalFadingEdgeLength();
+        HorizontalScrollView::GetVerticalFadingEdgeLength(length);
     }
-    return i;
+    return NOERROR;
 }
 
-Int32 RecentsHorizontalScrollView::GetHorizontalFadingEdgeLength()
+ECode RecentsHorizontalScrollView::GetHorizontalFadingEdgeLength(
+    /* [out] */ Int32* length)
 {
-    Int32 i;
+    VALIDATE_NOT_NULL(length)
     if (mFadedEdgeDrawHelper != NULL) {
-        mFadedEdgeDrawHelper->GetHorizontalFadingEdgeLength(&i);
+        mFadedEdgeDrawHelper->GetHorizontalFadingEdgeLength(length);
     }
     else {
-        i = GetHorizontalFadingEdgeLength();
+        HorizontalScrollView::GetHorizontalFadingEdgeLength(length);
     }
-    return i;
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::OnFinishInflate()
 {
-    OnFinishInflate();
+    HorizontalScrollView::OnFinishInflate();
     SetScrollbarFadingEnabled(TRUE);
     AutoPtr<IView> v;
     FindViewById(R::id::recents_linear_layout, (IView**)&v);
@@ -558,7 +563,7 @@ ECode RecentsHorizontalScrollView::OnAttachedToWindow()
 ECode RecentsHorizontalScrollView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    OnConfigurationChanged(newConfig);
+    HorizontalScrollView::OnConfigurationChanged(newConfig);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<IDisplayMetrics> dm;
@@ -590,7 +595,7 @@ ECode RecentsHorizontalScrollView::OnSizeChanged(
     /* [in] */ Int32 oldw,
     /* [in] */ Int32 oldh)
 {
-    OnSizeChanged(w, h, oldw, oldh);
+    HorizontalScrollView::OnSizeChanged(w, h, oldw, oldh);
 
     // Skip this work if a transition is running; it sets the scroll values independently
     // and should not have those animated values clobbered by this logic
@@ -643,9 +648,12 @@ ECode RecentsHorizontalScrollView::SetAdapter(
     return NOERROR;
 }
 
-Int32 RecentsHorizontalScrollView::NumItemsInOneScreenful()
+ECode RecentsHorizontalScrollView::NumItemsInOneScreenful(
+    /* [out] */ Int32* numItems)
 {
-    return mNumItemsInOneScreenful;
+    VALIDATE_NOT_NULL(numItems)
+    *numItems = mNumItemsInOneScreenful;
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::SetLayoutTransition(

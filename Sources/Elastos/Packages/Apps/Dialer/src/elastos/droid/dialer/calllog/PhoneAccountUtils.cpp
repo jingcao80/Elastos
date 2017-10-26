@@ -86,7 +86,7 @@ AutoPtr<IPhoneAccount> PhoneAccountUtils::GetAccountOrNull(
     AutoPtr<IPhoneAccount> account;
     telecomManager->GetPhoneAccount(phoneAccount, (IPhoneAccount**)&account);
     Boolean result;
-    if (account == NULL || telecomManager->HasMultipleCallCapableAccounts(&result), !result) {
+    if (account == NULL || (telecomManager->HasMultipleCallCapableAccounts(&result), !result)) {
         return NULL;
     }
     return account;

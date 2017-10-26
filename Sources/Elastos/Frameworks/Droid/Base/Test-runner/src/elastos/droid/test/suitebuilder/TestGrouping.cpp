@@ -248,9 +248,11 @@ AutoPtr<ISortedSet> TestGrouping::GetTestCaseClasses()
     return mTestCaseClasses;
 }
 
-Boolean TestGrouping::Equals(
-    /* [in] */ IInterface* o)
+ECode TestGrouping::Equals(
+    /* [in] */ IInterface* o,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     // if (this == o) {
     //     return true;
     // }
@@ -263,14 +265,18 @@ Boolean TestGrouping::Equals(
     // }
     // return this.testCaseClasses.comparator().equals(other.testCaseClasses.comparator());
     assert(0);
-    return FALSE;
+    *result = FALSE;
+    return NOERROR;
 }
 
-Int32 TestGrouping::GetHashCode()
+ECode TestGrouping::GetHashCode(
+    /* [out] */ Int32* hashCode)
 {
+    VALIDATE_NOT_NULL(hashCode);
     // return testCaseClasses.hashCode();
     assert(0);
-    return 0;
+    *hashCode = 0;
+    return NOERROR;
 }
 
 AutoPtr<TestGrouping> TestGrouping::AddPackagesRecursive(

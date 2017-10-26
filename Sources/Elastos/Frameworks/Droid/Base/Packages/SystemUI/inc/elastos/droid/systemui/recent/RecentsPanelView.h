@@ -192,7 +192,7 @@ private:
 
         CAR_INTERFACE_DECL()
 
-        OnLongClick(
+        CARAPI OnLongClick(
             /* [in] */ IView* v,
             /* [out] */ Boolean* result);
 
@@ -213,7 +213,7 @@ private:
             /* [in] */ RecentsPanelView* host,
             /* [in] */ IView* selectedView);
 
-        OnMenuItemClick(
+        CARAPI OnMenuItemClick(
             /* [in] */ IMenuItem* item,
             /* [out] */ Boolean* result);
 
@@ -235,7 +235,7 @@ private:
             /* [in] */ RecentsPanelView* host,
             /* [in] */ IView* thumbnailView);
 
-        OnDismiss(
+        CARAPI OnDismiss(
             /* [in] */ IPopupMenu* item);
 
     public:
@@ -302,18 +302,21 @@ public:
     CARAPI OnAnimationCancel(
         /* [in] */ IAnimator* animation);
 
+    using FrameLayout::OnAnimationEnd;
+
     CARAPI OnAnimationEnd(
         /* [in] */ IAnimator* animation);
 
     CARAPI OnAnimationRepeat(
         /* [in] */ IAnimator* animation);
 
+    using FrameLayout::OnAnimationStart;
+
     CARAPI OnAnimationStart(
         /* [in] */ IAnimator* animation);
 
-    CARAPI DispatchHoverEvent(
-        /* [in] */ IMotionEvent* event,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) DispatchHoverEvent(
+        /* [in] */ IMotionEvent* event);
 
     /**
      * Whether the panel is showing, or, if it's animating, whether it will be

@@ -43,7 +43,7 @@ ECode CKeyguardSimpleHostView::MyKeyguardUpdateMonitorCallback::OnTrustInitiated
     if (mHost->IsAttachedToWindow(&bval), !bval) return NOERROR;
 
     if (mHost->IsVisibleToUser()) {
-        mHost->Dismiss(FALSE /* authenticated */);
+        mHost->Dismiss(FALSE /* authenticated */, &bval);
     }
     else {
         mHost->mViewMediatorCallback->PlayTrustedSound();

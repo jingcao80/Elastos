@@ -127,10 +127,14 @@ ECode CallLogManager::LogCallAsyncTask::DoInBackground(
 }
 
 ECode CallLogManager::LogCallAsyncTask::OnPostExecute(
-    /* [in] */ ArrayOf<IUri*>* result)
+    /* [in] */ IInterface* result)
 {
-    for (Int32 i = 0; i < result->GetLength(); ++i) {
-        AutoPtr<IUri> uri = (*result)[i];
+    AutoPtr<IArrayOf> uriArray = IArrayOf::Probe(result);
+    Int32 N;
+    uriArray->GetLength(&N);
+    for (Int32 i = 0; i < N; ++i) {
+        AutoPtr<IInterface> uri;
+        uriArray->Get(i, (IInterface**)&uri);
         if (uri == NULL) {
             Log::W("CallLogManager", "Failed to write call to the log.");
         }

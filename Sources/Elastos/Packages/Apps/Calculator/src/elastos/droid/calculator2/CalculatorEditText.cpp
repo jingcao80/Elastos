@@ -198,16 +198,13 @@ ECode CalculatorEditText::OnMeasure(
     return NOERROR;
 }
 
-ECode CalculatorEditText::OnSaveInstanceState(
-    /* [out] */ IParcelable* result)
+AutoPtr<IParcelable> CalculatorEditText::OnSaveInstanceState()
 {
-    VALIDATE_NOT_NULL(result);
     AutoPtr<IParcelable> pl = EditText::OnSaveInstanceState();
 
     // EditText will freeze any text with a selection regardless of getFreezesText() ->
     // return null to prevent any state from being preserved at the instance level.
-    result = NULL;
-    return NOERROR;
+    return NULL;
 }
 
 ECode CalculatorEditText::OnTextChanged(

@@ -57,10 +57,12 @@ public:
         ConcreteFile(
             /* [in] */ IFile* file);
 
-        CARAPI_(Int32) GetHashCode();
+        CARAPI GetHashCode(
+            /* [out] */ Int32* hashCode);
 
-        CARAPI_(Boolean) Equals(
-            /* [in] */ IInterface* o);
+        CARAPI Equals(
+            /* [in] */ IInterface* o,
+            /* [out] */ Boolean* equals);
 
     public:
         AutoPtr<IFile> mFile;
