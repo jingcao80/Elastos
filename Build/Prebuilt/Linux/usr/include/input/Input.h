@@ -28,6 +28,7 @@
 #include <utils/String8.h>
 #include <utils/Timers.h>
 #include <utils/Vector.h>
+#include <stdint.h>
 
 /*
  * Additional private constants not defined in ndk/ui/input.h.
@@ -44,6 +45,19 @@ enum {
 };
 
 enum {
+
+    /**
+     * This flag indicates that the window that received this motion event is partly
+     * or wholly obscured by another visible window above it.  This flag is set to true
+     * even if the event did not directly pass through the obscured area.
+     * A security sensitive application can check this flag to identify situations in which
+     * a malicious application may have covered up part of its content for the purpose
+     * of misleading the user or hijacking touches.  An appropriate response might be
+     * to drop the suspect touches or to take additional precautions to confirm the user's
+     * actual intent.
+     */
+    AMOTION_EVENT_FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 0x2,
+
     /* Motion event is inconsistent with previously sent motion events. */
     AMOTION_EVENT_FLAG_TAINTED = 0x80000000,
 };
@@ -111,6 +125,11 @@ enum {
 #define MAX_POINTERS 16
 
 /*
+ * Maximum number of samples supported per motion event.
+ */
+#define MAX_SAMPLES UINT16_MAX
+
+/*
  * Maximum pointer id value supported in a motion event.
  * Smallest pointer id is 0.
  * (This is limited by our use of BitSet32 to track pointer assignments.)
@@ -134,7 +153,7 @@ struct AInputDevice {
 
 namespace android {
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
 class Parcel;
 #endif
 
@@ -149,9 +168,21 @@ enum {
      * NOTE: If you want a flag to be able to set in a keylayout file, then you must add it to
      * InputEventLabels.h as well. */
 
+    // Indicates that the event should wake the device.
     POLICY_FLAG_WAKE = 0x00000001,
+
+    // Indicates that the key is virtual, such as a capacitive button, and should
+    // generate haptic feedback.  Virtual keys may be suppressed for some time
+    // after a recent touch to prevent accidental activation of virtual keys adjacent
+    // to the touch screen during an edge swipe.
     POLICY_FLAG_VIRTUAL = 0x00000002,
+
+    // Indicates that the key is the special function modifier.
     POLICY_FLAG_FUNCTION = 0x00000004,
+
+    // Indicates that the key represents a special gesture that has been detected by
+    // the touch firmware or driver.  Causes touch events from the same device to be canceled.
+    POLICY_FLAG_GESTURE = 0x00000008,
 
     POLICY_FLAG_RAW_MASK = 0x0000ffff,
 
@@ -217,7 +248,7 @@ struct PointerCoords {
         return getAxisValue(AMOTION_EVENT_AXIS_Y);
     }
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
     status_t readFromParcel(Parcel* parcel);
     status_t writeToParcel(Parcel* parcel) const;
 #endif
@@ -366,6 +397,12 @@ public:
     inline void setMetaState(int32_t metaState) { mMetaState = metaState; }
 
     inline int32_t getButtonState() const { return mButtonState; }
+
+    inline void setButtonState(int32_t buttonState) { mButtonState = buttonState; }
+
+    inline int32_t getActionButton() const { return mActionButton; }
+
+    inline void setActionButton(int32_t button) { mActionButton = button; }
 
     inline float getXOffset() const { return mXOffset; }
 
@@ -520,6 +557,7 @@ public:
             int32_t deviceId,
             int32_t source,
             int32_t action,
+            int32_t actionButton,
             int32_t flags,
             int32_t edgeFlags,
             int32_t metaState,
@@ -548,7 +586,7 @@ public:
     // Matrix is in row-major form and compatible with SkMatrix.
     void transform(const float matrix[9]);
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
     status_t readFromParcel(Parcel* parcel);
     status_t writeToParcel(Parcel* parcel) const;
 #endif
@@ -572,6 +610,7 @@ public:
 
 protected:
     int32_t mAction;
+    int32_t mActionButton;
     int32_t mFlags;
     int32_t mEdgeFlags;
     int32_t mMetaState;

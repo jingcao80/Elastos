@@ -31,6 +31,7 @@
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
+#include <GLES3/gl32.h>
 
 // set to 1 for debugging
 #define USE_SLOW_BINDING    0
@@ -55,8 +56,8 @@ namespace android {
 
 #undef GL_ENTRY
 #undef EGL_ENTRY
-#define GL_ENTRY(_r, _api, ...) _r (*_api)(__VA_ARGS__);
-#define EGL_ENTRY(_r, _api, ...) _r (*_api)(__VA_ARGS__);
+#define GL_ENTRY(_r, _api, ...) _r (*(_api))(__VA_ARGS__);
+#define EGL_ENTRY(_r, _api, ...) _r (*(_api))(__VA_ARGS__);
 
 struct egl_t {
     #include "EGL/egl_entries.in"

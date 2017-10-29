@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#if defined(HAVE_PTHREADS)
+#if !defined(_WIN32)
 # include <pthread.h>
 #endif
 
@@ -31,7 +31,7 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-#if defined(HAVE_PTHREADS)
+#if !defined(_WIN32)
 
 /*
  * Simple mutex class.  The implementation is system-dependent.
@@ -47,8 +47,8 @@ public:
     };
 
                 RWLock();
-                RWLock(const char* name);
-                RWLock(int type, const char* name = NULL);
+    explicit    RWLock(const char* name);
+    explicit    RWLock(int type, const char* name = NULL);
                 ~RWLock();
 
     status_t    readLock();
@@ -59,7 +59,7 @@ public:
 
     class AutoRLock {
     public:
-        inline AutoRLock(RWLock& rwlock) : mLock(rwlock)  { mLock.readLock(); }
+        inline explicit AutoRLock(RWLock& rwlock) : mLock(rwlock)  { mLock.readLock(); }
         inline ~AutoRLock() { mLock.unlock(); }
     private:
         RWLock& mLock;
@@ -67,7 +67,7 @@ public:
 
     class AutoWLock {
     public:
-        inline AutoWLock(RWLock& rwlock) : mLock(rwlock)  { mLock.writeLock(); }
+        inline explicit AutoWLock(RWLock& rwlock) : mLock(rwlock)  { mLock.writeLock(); }
         inline ~AutoWLock() { mLock.unlock(); }
     private:
         RWLock& mLock;
@@ -117,7 +117,7 @@ inline void RWLock::unlock() {
     pthread_rwlock_unlock(&mRWLock);
 }
 
-#endif // HAVE_PTHREADS
+#endif // !defined(_WIN32)
 
 // ---------------------------------------------------------------------------
 }; // namespace android

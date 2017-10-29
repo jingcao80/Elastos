@@ -17,19 +17,23 @@
 #ifndef ANDROID_GUI_CONSUMERBASE_H
 #define ANDROID_GUI_CONSUMERBASE_H
 
-#include <gui/BufferQueue.h>
+#include <gui/BufferQueueDefs.h>
+#include <gui/IConsumerListener.h>
+#include <gui/IGraphicBufferConsumer.h>
+#include <gui/OccupancyTracker.h>
 
-#include <ui/GraphicBuffer.h>
+#include <ui/PixelFormat.h>
 
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/threads.h>
-#include <gui/IConsumerListener.h>
+
 
 namespace android {
 // ----------------------------------------------------------------------------
 
 class String8;
+class GraphicBuffer;
 
 // ConsumerBase is a base class for BufferQueue consumer end-points. It
 // handles common tasks like management of the connection to the BufferQueue
@@ -38,15 +42,9 @@ class ConsumerBase : public virtual RefBase,
         protected ConsumerListener {
 public:
     struct FrameAvailableListener : public virtual RefBase {
-        // onFrameAvailable() is called each time an additional frame becomes
-        // available for consumption. This means that frames that are queued
-        // while in asynchronous mode only trigger the callback if no previous
-        // frames are pending. Frames queued while in synchronous mode always
-        // trigger the callback.
-        //
-        // This is called without any lock held and can be called concurrently
-        // by multiple threads.
-        virtual void onFrameAvailable() = 0;
+        // See IConsumerListener::onFrame{Available,Replaced}
+        virtual void onFrameAvailable(const BufferItem& item) = 0;
+        virtual void onFrameReplaced(const BufferItem& /* item */) {}
     };
 
     virtual ~ConsumerBase();
@@ -62,19 +60,41 @@ public:
     // or by OpenGL ES as a texture) then those buffer will remain allocated.
     void abandon();
 
+    // Returns true if the ConsumerBase is in the 'abandoned' state
+    bool isAbandoned();
+
     // set the name of the ConsumerBase that will be used to identify it in
     // log messages.
     void setName(const String8& name);
 
-    // dump writes the current state to a string. Child classes should add
+    // dumpState writes the current state to a string. Child classes should add
     // their state to the dump by overriding the dumpLocked method, which is
     // called by these methods after locking the mutex.
-    void dump(String8& result) const;
-    void dump(String8& result, const char* prefix) const;
+    void dumpState(String8& result) const;
+    void dumpState(String8& result, const char* prefix) const;
 
     // setFrameAvailableListener sets the listener object that will be notified
     // when a new frame becomes available.
     void setFrameAvailableListener(const wp<FrameAvailableListener>& listener);
+
+    // See IGraphicBufferConsumer::detachBuffer
+    status_t detachBuffer(int slot);
+
+    // See IGraphicBufferConsumer::setDefaultBufferSize
+    status_t setDefaultBufferSize(uint32_t width, uint32_t height);
+
+    // See IGraphicBufferConsumer::setDefaultBufferFormat
+    status_t setDefaultBufferFormat(PixelFormat defaultFormat);
+
+    // See IGraphicBufferConsumer::setDefaultBufferDataSpace
+    status_t setDefaultBufferDataSpace(android_dataspace defaultDataSpace);
+
+    // See IGraphicBufferConsumer::getOccupancyHistory
+    status_t getOccupancyHistory(bool forceFlush,
+            std::vector<OccupancyTracker::Segment>* outHistory);
+
+    // See IGraphicBufferConsumer::discardFreeBuffers
+    status_t discardFreeBuffers();
 
 private:
     ConsumerBase(const ConsumerBase&);
@@ -85,7 +105,7 @@ protected:
     // buffers from the given IGraphicBufferConsumer.
     // The controlledByApp flag indicates that this consumer is under the application's
     // control.
-    ConsumerBase(const sp<IGraphicBufferConsumer>& consumer, bool controlledByApp = false);
+    explicit ConsumerBase(const sp<IGraphicBufferConsumer>& consumer, bool controlledByApp = false);
 
     // onLastStrongRef gets called by RefBase just before the dtor of the most
     // derived class.  It is used to clean up the buffers so that ConsumerBase
@@ -101,14 +121,16 @@ protected:
 
     // Implementation of the IConsumerListener interface.  These
     // calls are used to notify the ConsumerBase of asynchronous events in the
-    // BufferQueue.  The onFrameAvailable and onBuffersReleased methods should
-    // not need to be overridden by derived classes, but if they are overridden
-    // the ConsumerBase implementation must be called from the derived class.
-    // The ConsumerBase version of onSidebandStreamChanged does nothing and can
-    // be overriden by derived classes if they want the notification.
-    virtual void onFrameAvailable();
-    virtual void onBuffersReleased();
-    virtual void onSidebandStreamChanged();
+    // BufferQueue.  The onFrameAvailable, onFrameReplaced, and
+    // onBuffersReleased methods should not need to be overridden by derived
+    // classes, but if they are overridden the ConsumerBase implementation must
+    // be called from the derived class. The ConsumerBase version of
+    // onSidebandStreamChanged does nothing and can be overriden by derived
+    // classes if they want the notification.
+    virtual void onFrameAvailable(const BufferItem& item) override;
+    virtual void onFrameReplaced(const BufferItem& item) override;
+    virtual void onBuffersReleased() override;
+    virtual void onSidebandStreamChanged() override;
 
     // freeBufferLocked frees up the given buffer slot.  If the slot has been
     // initialized this will release the reference to the GraphicBuffer in that
@@ -153,8 +175,8 @@ protected:
     // initialization that must take place the first time a buffer is assigned
     // to a slot.  If it is overridden the derived class's implementation must
     // call ConsumerBase::acquireBufferLocked.
-    virtual status_t acquireBufferLocked(IGraphicBufferConsumer::BufferItem *item,
-        nsecs_t presentWhen);
+    virtual status_t acquireBufferLocked(BufferItem *item, nsecs_t presentWhen,
+            uint64_t maxFrameNumber = 0);
 
     // releaseBufferLocked relinquishes control over a buffer, returning that
     // control to the BufferQueue.
@@ -162,7 +184,7 @@ protected:
     // Derived classes should override this method to perform any cleanup that
     // must take place when a buffer is released back to the BufferQueue.  If
     // it is overridden the derived class's implementation must call
-    // ConsumerBase::releaseBufferLocked.e
+    // ConsumerBase::releaseBufferLocked.
     virtual status_t releaseBufferLocked(int slot,
             const sp<GraphicBuffer> graphicBuffer,
             EGLDisplay display, EGLSyncKHR eglFence);
@@ -204,7 +226,7 @@ protected:
     // slot that has not yet been used. The buffer allocated to a slot will also
     // be replaced if the requested buffer usage or geometry differs from that
     // of the buffer allocated to a slot.
-    Slot mSlots[BufferQueue::NUM_BUFFER_SLOTS];
+    Slot mSlots[BufferQueueDefs::NUM_BUFFER_SLOTS];
 
     // mAbandoned indicates that the BufferQueue will no longer be used to
     // consume images buffers pushed to it using the IGraphicBufferProducer
@@ -219,12 +241,18 @@ protected:
 
     // mFrameAvailableListener is the listener object that will be called when a
     // new frame becomes available. If it is not NULL it will be called from
-    // queueBuffer.
+    // queueBuffer. The listener object is protected by mFrameAvailableMutex
+    // (not mMutex).
+    Mutex mFrameAvailableMutex;
     wp<FrameAvailableListener> mFrameAvailableListener;
 
     // The ConsumerBase has-a BufferQueue and is responsible for creating this object
     // if none is supplied
     sp<IGraphicBufferConsumer> mConsumer;
+
+    // The final release fence of the most recent buffer released by
+    // releaseBufferLocked.
+    sp<Fence> mPrevFinalReleaseFence;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of ConsumerBase objects. It must be locked whenever the

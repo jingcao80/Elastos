@@ -18,12 +18,26 @@
 #define ANDROID_UTILS_SINGLETON_H
 
 #include <stdint.h>
+
+// some vendor code assumes they have atoi() after including this file.
+#include <stdlib.h>
+
 #include <sys/types.h>
-#include <utils/threads.h>
+#include <utils/Mutex.h>
 #include <cutils/compiler.h>
 
 namespace android {
 // ---------------------------------------------------------------------------
+
+// Singleton<TYPE> may be used in multiple libraries, only one of which should
+// define the static member variables using ANDROID_SINGLETON_STATIC_INSTANCE.
+// Turn off -Wundefined-var-template so other users don't get:
+// instantiation of variable 'android::Singleton<TYPE>::sLock' required here,
+// but no definition is available
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
 
 template <typename TYPE>
 class ANDROID_API Singleton
@@ -45,8 +59,8 @@ public:
     }
     
 protected:
-    ~Singleton() { };
-    Singleton() { };
+    ~Singleton() { }
+    Singleton() { }
 
 private:
     Singleton(const Singleton&);
@@ -54,6 +68,10 @@ private:
     static Mutex sLock;
     static TYPE* sInstance;
 };
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 /*
  * use ANDROID_SINGLETON_STATIC_INSTANCE(TYPE) in your implementation file
@@ -65,9 +83,10 @@ private:
  */
 
 #define ANDROID_SINGLETON_STATIC_INSTANCE(TYPE)                 \
-    template<> Mutex Singleton< TYPE >::sLock(Mutex::PRIVATE);  \
-    template<> TYPE* Singleton< TYPE >::sInstance(0);           \
-    template class Singleton< TYPE >;
+    template<> ::android::Mutex  \
+        (::android::Singleton< TYPE >::sLock)(::android::Mutex::PRIVATE);  \
+    template<> TYPE* ::android::Singleton< TYPE >::sInstance(0);  \
+    template class ::android::Singleton< TYPE >;
 
 
 // ---------------------------------------------------------------------------

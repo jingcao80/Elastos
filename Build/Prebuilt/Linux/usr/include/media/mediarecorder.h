@@ -1,5 +1,4 @@
 /*
- **
  ** Copyright (C) 2008 The Android Open Source Project
  **
  ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,10 +29,14 @@ namespace android {
 
 class Surface;
 class IMediaRecorder;
-class ICamera;
 class ICameraRecordingProxy;
 class IGraphicBufferProducer;
+struct PersistentSurface;
 class Surface;
+
+namespace hardware {
+class ICamera;
+}
 
 typedef void (*media_completion_f)(status_t status, void *cookie);
 
@@ -71,11 +74,8 @@ enum output_format {
     /* H.264/AAC data encapsulated in MPEG2/TS */
     OUTPUT_FORMAT_MPEG2TS = 8,
 
-   /* VP8/VORBIS data in a WEBM container */
+    /* VP8/VORBIS data in a WEBM container */
     OUTPUT_FORMAT_WEBM = 9,
-
-    OUTPUT_FORMAT_QCP = 20, // QCP file format
-    OUTPUT_FORMAT_WAVE = 21, //WAVE file format
 
     OUTPUT_FORMAT_LIST_END // must be last - used to validate format type
 };
@@ -89,10 +89,6 @@ enum audio_encoder {
     AUDIO_ENCODER_AAC_ELD = 5,
     AUDIO_ENCODER_VORBIS = 6,
 
-    AUDIO_ENCODER_EVRC = 10,
-    AUDIO_ENCODER_QCELP = 11,
-    AUDIO_ENCODER_LPCM = 12,
-
     AUDIO_ENCODER_LIST_END // must be the last - used to validate the audio encoder type
 };
 
@@ -102,7 +98,8 @@ enum video_encoder {
     VIDEO_ENCODER_H264 = 2,
     VIDEO_ENCODER_MPEG_4_SP = 3,
     VIDEO_ENCODER_VP8 = 4,
-    VIDEO_ENCODER_H265 = 5,
+    VIDEO_ENCODER_HEVC = 5,
+
     VIDEO_ENCODER_LIST_END // must be the last - used to validate the video encoder type
 };
 
@@ -127,9 +124,6 @@ enum media_recorder_states {
 
     // Recording is in progress.
     MEDIA_RECORDER_RECORDING             = 1 << 4,
-
-    // Recording is paused.
-    MEDIA_RECORDER_PAUSED                = 1 << 5,
 };
 
 // The "msg" code passed to the listener in notify.
@@ -177,6 +171,8 @@ enum media_recorder_info_type {
 
     MEDIA_RECORDER_INFO_MAX_DURATION_REACHED      = 800,
     MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED      = 801,
+    MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING  = 802,
+    MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED  = 803,
 
     // All track related informtional events start here
     MEDIA_RECORDER_TRACK_INFO_LIST_START           = 1000,
@@ -220,20 +216,21 @@ class MediaRecorder : public BnMediaRecorderClient,
                       public virtual IMediaDeathNotifier
 {
 public:
-    MediaRecorder();
+    MediaRecorder(const String16& opPackageName);
     ~MediaRecorder();
 
     void        died();
     status_t    initCheck();
-    status_t    setCamera(const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy);
+    status_t    setCamera(const sp<hardware::ICamera>& camera,
+            const sp<ICameraRecordingProxy>& proxy);
     status_t    setPreviewSurface(const sp<IGraphicBufferProducer>& surface);
     status_t    setVideoSource(int vs);
     status_t    setAudioSource(int as);
     status_t    setOutputFormat(int of);
     status_t    setVideoEncoder(int ve);
     status_t    setAudioEncoder(int ae);
-    status_t    setOutputFile(const char* path);
-    status_t    setOutputFile(int fd, int64_t offset, int64_t length);
+    status_t    setOutputFile(int fd);
+    status_t    setNextOutputFile(int fd);
     status_t    setVideoSize(int width, int height);
     status_t    setVideoFrameRate(int frames_per_second);
     status_t    setParameters(const String8& params);
@@ -243,13 +240,16 @@ public:
     status_t    getMaxAmplitude(int* max);
     status_t    start();
     status_t    stop();
-    status_t    pause();
     status_t    reset();
+    status_t    pause();
+    status_t    resume();
     status_t    init();
     status_t    close();
     status_t    release();
     void        notify(int msg, int ext1, int ext2);
+    status_t    setInputSurface(const sp<PersistentSurface>& surface);
     sp<IGraphicBufferProducer>     querySurfaceMediaSourceFromMediaServer();
+    status_t    getMetrics(Parcel *reply);
 
 private:
     void                    doCleanUp();

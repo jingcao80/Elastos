@@ -29,13 +29,12 @@ struct ABuffer;
 
 struct MPEG2TSWriter : public MediaWriter {
     MPEG2TSWriter(int fd);
-    MPEG2TSWriter(const char *filename);
 
     MPEG2TSWriter(
             void *cookie,
             ssize_t (*write)(void *cookie, const void *data, size_t size));
 
-    virtual status_t addSource(const sp<MediaSource> &source);
+    virtual status_t addSource(const sp<IMediaSource> &source);
     virtual status_t start(MetaData *param = NULL);
     virtual status_t stop() { return reset(); }
     virtual status_t pause();

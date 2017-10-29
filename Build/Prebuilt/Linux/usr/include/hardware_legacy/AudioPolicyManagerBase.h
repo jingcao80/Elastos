@@ -94,10 +94,10 @@ public:
                                             const audio_offload_info_t *offloadInfo);
         virtual status_t startOutput(audio_io_handle_t output,
                                      AudioSystem::stream_type stream,
-                                     int session = 0);
+                                     audio_session_t session = AUDIO_SESSION_NONE);
         virtual status_t stopOutput(audio_io_handle_t output,
                                     AudioSystem::stream_type stream,
-                                    int session = 0);
+                                    audio_session_t session = AUDIO_SESSION_NONE);
         virtual void releaseOutput(audio_io_handle_t output);
         virtual audio_io_handle_t getInput(int inputSource,
                                             uint32_t samplingRate,
@@ -132,7 +132,7 @@ public:
         virtual status_t registerEffect(const effect_descriptor_t *desc,
                                         audio_io_handle_t io,
                                         uint32_t strategy,
-                                        int session,
+                                        audio_session_t session,
                                         int id);
         virtual status_t unregisterEffect(int id);
         virtual status_t setEffectEnabled(int id, bool enabled);
@@ -244,7 +244,7 @@ protected:
         static const VolumeCurvePoint sDefaultVoiceVolumeCurve[AudioPolicyManagerBase::VOLCNT];
         static const VolumeCurvePoint sSpeakerVoiceVolumeCurve[AudioPolicyManagerBase::VOLCNT];
         // default volume curves per stream and device category. See initializeVolumeCurves()
-        static const VolumeCurvePoint *sVolumeProfiles[AUDIO_STREAM_CNT][DEVICE_CATEGORY_CNT];
+        static const VolumeCurvePoint *sVolumeProfiles[AudioSystem::NUM_STREAM_TYPES][DEVICE_CATEGORY_CNT];
 
         // descriptor for audio outputs. Used to maintain current configuration of each opened audio output
         // and keep track of the usage of this output by each audio stream type.
@@ -287,6 +287,7 @@ protected:
             bool mStrategyMutedByDevice[NUM_STRATEGIES]; // strategies muted because of incompatible
                                                 // device selection. See checkDeviceMuteStrategies()
             uint32_t mDirectOpenCount; // number of clients using this output (direct outputs only)
+            bool mForceRouting; // Next routing for this output will be forced as current device routed is null
         };
 
         // descriptor for audio inputs. Used to maintain current configuration of each opened audio input
@@ -334,7 +335,7 @@ protected:
 
             int mIo;                // io the effect is attached to
             routing_strategy mStrategy; // routing strategy the effect is associated to
-            int mSession;               // audio session the effect is on
+            audio_session_t mSession;   // audio session the effect is on
             effect_descriptor_t mDesc;  // effect descriptor
             bool mEnabled;              // enabled state: CPU load being used or not
         };

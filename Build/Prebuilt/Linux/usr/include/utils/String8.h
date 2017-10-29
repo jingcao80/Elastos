@@ -17,8 +17,9 @@
 #ifndef ANDROID_STRING8_H
 #define ANDROID_STRING8_H
 
+#include <string> // for std::string
+
 #include <utils/Errors.h>
-#include <utils/SharedBuffer.h>
 #include <utils/Unicode.h>
 #include <utils/TypeHelpers.h>
 
@@ -50,7 +51,7 @@ public:
                                 String8(const String8& o);
     explicit                    String8(const char* o);
     explicit                    String8(const char* o, size_t numChars);
-    
+
     explicit                    String8(const String16& o);
     explicit                    String8(const char16_t* o);
     explicit                    String8(const char16_t* o, size_t numChars);
@@ -63,14 +64,20 @@ public:
     static String8              format(const char* fmt, ...) __attribute__((format (printf, 1, 2)));
     static String8              formatV(const char* fmt, va_list args);
 
+    inline  const char*         c_str() const;
     inline  const char*         string() const;
+
+// TODO(b/35363681): remove
+private:
+    static inline std::string   std_string(const String8& str);
+public:
+
     inline  size_t              size() const;
-    inline  size_t              length() const;
     inline  size_t              bytes() const;
     inline  bool                isEmpty() const;
-    
-    inline  const SharedBuffer* sharedBuffer() const;
-    
+
+            size_t              length() const;
+
             void                clear();
 
             void                setTo(const String8& other);
@@ -97,10 +104,10 @@ public:
 
     inline  String8&            operator=(const String8& other);
     inline  String8&            operator=(const char* other);
-    
+
     inline  String8&            operator+=(const String8& other);
     inline  String8             operator+(const String8& other) const;
-    
+
     inline  String8&            operator+=(const char* other);
     inline  String8             operator+(const char* other) const;
 
@@ -112,20 +119,20 @@ public:
     inline  bool                operator!=(const String8& other) const;
     inline  bool                operator>=(const String8& other) const;
     inline  bool                operator>(const String8& other) const;
-    
+
     inline  bool                operator<(const char* other) const;
     inline  bool                operator<=(const char* other) const;
     inline  bool                operator==(const char* other) const;
     inline  bool                operator!=(const char* other) const;
     inline  bool                operator>=(const char* other) const;
     inline  bool                operator>(const char* other) const;
-    
+
     inline                      operator const char*() const;
-    
+
             char*               lockBuffer(size_t size);
             void                unlockBuffer();
             status_t            unlockBuffer(size_t size);
-            
+
             // return the index of the first byte of other in this at or after
             // start, or -1 if not found
             ssize_t             find(const char* other, size_t start = 0) const;
@@ -258,14 +265,18 @@ inline const String8 String8::empty() {
     return String8();
 }
 
+inline const char* String8::c_str() const
+{
+    return mString;
+}
 inline const char* String8::string() const
 {
     return mString;
 }
 
-inline size_t String8::length() const
+inline std::string String8::std_string(const String8& str)
 {
-    return SharedBuffer::sizeFromData(mString)-1;
+    return std::string(str.string());
 }
 
 inline size_t String8::size() const
@@ -280,12 +291,7 @@ inline bool String8::isEmpty() const
 
 inline size_t String8::bytes() const
 {
-    return SharedBuffer::sizeFromData(mString)-1;
-}
-
-inline const SharedBuffer* String8::sharedBuffer() const
-{
-    return SharedBuffer::bufferFromData(mString);
+    return length();
 }
 
 inline bool String8::contains(const char* other) const

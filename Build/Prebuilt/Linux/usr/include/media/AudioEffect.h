@@ -24,8 +24,8 @@
 #include <media/IAudioPolicyService.h>
 #include <media/IEffect.h>
 #include <media/IEffectClient.h>
-#include <hardware/audio_effect.h>
 #include <media/AudioSystem.h>
+#include <system/audio_effect.h>
 
 #include <utils/RefBase.h>
 #include <utils/Errors.h>
@@ -139,7 +139,7 @@ public:
      *               of descriptors to return.
      *               *count is limited to kMaxPreProcessing on return.
      */
-    static status_t queryDefaultPreProcessing(int audioSession,
+    static status_t queryDefaultPreProcessing(audio_session_t audioSession,
                                               effect_descriptor_t *descriptors,
                                               uint32_t *count);
 
@@ -201,8 +201,12 @@ public:
      */
 
     /* Simple Constructor.
+     *
+     * Parameters:
+     *
+     * opPackageName:      The package name used for app op checks.
      */
-    AudioEffect();
+    AudioEffect(const String16& opPackageName);
 
 
     /* Constructor.
@@ -211,6 +215,7 @@ public:
      *
      * type:  type of effect created: can be null if uuid is specified. This corresponds to
      *        the OpenSL ES interface implemented by this effect.
+     * opPackageName:  The package name used for app op checks.
      * uuid:  Uuid of effect created: can be null if type is specified. This uuid corresponds to
      *        a particular implementation of an effect type.
      * priority:    requested priority for effect control: the priority level corresponds to the
@@ -227,11 +232,12 @@ public:
      */
 
     AudioEffect(const effect_uuid_t *type,
+                const String16& opPackageName,
                 const effect_uuid_t *uuid = NULL,
                   int32_t priority = 0,
                   effect_callback_t cbf = NULL,
                   void* user = NULL,
-                  int sessionId = AUDIO_SESSION_OUTPUT_MIX,
+                  audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX,
                   audio_io_handle_t io = AUDIO_IO_HANDLE_NONE
                   );
 
@@ -239,11 +245,12 @@ public:
      *      Same as above but with type and uuid specified by character strings
      */
     AudioEffect(const char *typeStr,
+                    const String16& opPackageName,
                     const char *uuidStr = NULL,
                     int32_t priority = 0,
                     effect_callback_t cbf = NULL,
                     void* user = NULL,
-                    int sessionId = AUDIO_SESSION_OUTPUT_MIX,
+                    audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX,
                     audio_io_handle_t io = AUDIO_IO_HANDLE_NONE
                     );
 
@@ -265,7 +272,7 @@ public:
                             int32_t priority = 0,
                             effect_callback_t cbf = NULL,
                             void* user = NULL,
-                            int sessionId = AUDIO_SESSION_OUTPUT_MIX,
+                            audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX,
                             audio_io_handle_t io = AUDIO_IO_HANDLE_NONE
                             );
 
@@ -398,7 +405,7 @@ public:
 
 protected:
      bool                    mEnabled;           // enable state
-     int32_t                 mSessionId;         // audio session ID
+     audio_session_t         mSessionId;         // audio session ID
      int32_t                 mPriority;          // priority for effect control
      status_t                mStatus;            // effect status
      effect_callback_t       mCbf;               // callback function for status, control and
@@ -406,7 +413,9 @@ protected:
      void*                   mUserData;          // client context for callback function
      effect_descriptor_t     mDescriptor;        // effect descriptor
      int32_t                 mId;                // system wide unique effect engine instance ID
-     Mutex                   mLock;               // Mutex for mEnabled access
+     Mutex                   mLock;              // Mutex for mEnabled access
+
+     String16                mOpPackageName;     // The package name used for app op checks.
 
      // IEffectClient
      virtual void controlStatusChanged(bool controlGranted);
@@ -420,7 +429,8 @@ protected:
 private:
 
      // Implements the IEffectClient interface
-    class EffectClient : public android::BnEffectClient,  public android::IBinder::DeathRecipient
+    class EffectClient :
+        public android::BnEffectClient, public android::IBinder::DeathRecipient
     {
     public:
 
@@ -428,24 +438,39 @@ private:
 
         // IEffectClient
         virtual void controlStatusChanged(bool controlGranted) {
-            mEffect->controlStatusChanged(controlGranted);
+            sp<AudioEffect> effect = mEffect.promote();
+            if (effect != 0) {
+                effect->controlStatusChanged(controlGranted);
+            }
         }
         virtual void enableStatusChanged(bool enabled) {
-            mEffect->enableStatusChanged(enabled);
+            sp<AudioEffect> effect = mEffect.promote();
+            if (effect != 0) {
+                effect->enableStatusChanged(enabled);
+            }
         }
         virtual void commandExecuted(uint32_t cmdCode,
                                      uint32_t cmdSize,
                                      void *pCmdData,
                                      uint32_t replySize,
                                      void *pReplyData) {
-            mEffect->commandExecuted(cmdCode, cmdSize, pCmdData, replySize, pReplyData);
+            sp<AudioEffect> effect = mEffect.promote();
+            if (effect != 0) {
+                effect->commandExecuted(
+                    cmdCode, cmdSize, pCmdData, replySize, pReplyData);
+            }
         }
 
         // IBinder::DeathRecipient
-        virtual void binderDied(const wp<IBinder>& who) {mEffect->binderDied();}
+        virtual void binderDied(const wp<IBinder>& /*who*/) {
+            sp<AudioEffect> effect = mEffect.promote();
+            if (effect != 0) {
+                effect->binderDied();
+            }
+        }
 
     private:
-        AudioEffect *mEffect;
+        wp<AudioEffect> mEffect;
     };
 
     void binderDied();

@@ -23,31 +23,32 @@
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define TCA_ACT_PEDIT 7
 enum {
- TCA_PEDIT_UNSPEC,
- TCA_PEDIT_TM,
+  TCA_PEDIT_UNSPEC,
+  TCA_PEDIT_TM,
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- TCA_PEDIT_PARMS,
- __TCA_PEDIT_MAX
+  TCA_PEDIT_PARMS,
+  TCA_PEDIT_PAD,
+  __TCA_PEDIT_MAX
 };
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define TCA_PEDIT_MAX (__TCA_PEDIT_MAX - 1)
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 struct tc_pedit_key {
- __u32 mask;
- __u32 val;
- __u32 off;
+  __u32 mask;
+  __u32 val;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __u32 at;
- __u32 offmask;
- __u32 shift;
+  __u32 off;
+  __u32 at;
+  __u32 offmask;
+  __u32 shift;
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 };
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 struct tc_pedit_sel {
- tc_gen;
- unsigned char nkeys;
- unsigned char flags;
+  tc_gen;
+  unsigned char nkeys;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- struct tc_pedit_key keys[0];
+  unsigned char flags;
+  struct tc_pedit_key keys[0];
 };
 #define tc_pedit tc_pedit_sel
-#endif
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+#endif

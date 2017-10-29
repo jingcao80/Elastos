@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
  * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,18 +18,18 @@
 
 #define AUDIO_PLAYER_H_
 
+#include <media/IMediaSource.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/TimeSource.h>
 #include <utils/threads.h>
 
 namespace android {
 
-class MediaSource;
+struct AudioPlaybackRate;
 class AudioTrack;
-class AwesomePlayer;
+struct AwesomePlayer;
 
-class AudioPlayer : public TimeSource {
+class AudioPlayer {
 public:
     enum {
         REACHED_EOS,
@@ -47,41 +45,28 @@ public:
     };
 
     AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink,
-                uint32_t flags = 0,
-                AwesomePlayer *audioObserver = NULL);
+                uint32_t flags = 0);
 
     virtual ~AudioPlayer();
 
     // Caller retains ownership of "source".
-    virtual void setSource(const sp<MediaSource> &source);
+    void setSource(const sp<IMediaSource> &source);
 
-    // Return time in us.
-    virtual int64_t getRealTimeUs();
+    status_t start(bool sourceAlreadyStarted = false);
 
-    virtual status_t start(bool sourceAlreadyStarted = false);
+    void pause(bool playPendingSamples = false);
+    status_t resume();
 
-    virtual void pause(bool playPendingSamples = false);
-    virtual status_t resume();
+    status_t seekTo(int64_t time_us);
 
-    // Returns the timestamp of the last buffer played (in us).
-    virtual int64_t getMediaTimeUs();
+    bool isSeeking();
+    bool reachedEOS(status_t *finalStatus);
 
-    // Returns true iff a mapping is established, i.e. the AudioPlayer
-    // has played at least one frame of audio.
-    virtual bool getMediaTimeMapping(int64_t *realtime_us, int64_t *mediatime_us);
-
-    virtual status_t seekTo(int64_t time_us);
-
-    virtual bool isSeeking();
-    virtual bool reachedEOS(status_t *finalStatus);
-
-    status_t setPlaybackRatePermille(int32_t ratePermille);
-
-    void notifyAudioEOS();
+    status_t setPlaybackRate(const AudioPlaybackRate &rate);
+    status_t getPlaybackRate(AudioPlaybackRate *rate /* nonnull */);
 
 private:
-    friend class VideoEditorAudioPlayer;
-    sp<MediaSource> mSource;
+    sp<IMediaSource> mSource;
     sp<AudioTrack> mAudioTrack;
 
     MediaBuffer *mInputBuffer;
@@ -96,7 +81,6 @@ private:
 
     int64_t mPositionTimeMediaUs;
     int64_t mPositionTimeRealUs;
-    int64_t mDurationUs;
 
     bool mSeeking;
     bool mReachedEOS;
@@ -104,22 +88,17 @@ private:
     int64_t mSeekTimeUs;
 
     bool mStarted;
-    bool mSourcePaused;
 
     bool mIsFirstBuffer;
     status_t mFirstBufferResult;
     MediaBuffer *mFirstBuffer;
 
     sp<MediaPlayerBase::AudioSink> mAudioSink;
-    AwesomePlayer *mObserver;
-    int64_t mPinnedTimeUs;
 
     bool mPlaying;
     int64_t mStartPosUs;
     const uint32_t mCreateFlags;
-    bool mPauseRequired;
 
-    bool mUseSmallBufs;
     static void AudioCallback(int event, void *user, void *info);
     void AudioCallback(int event, void *info);
 
@@ -130,11 +109,8 @@ private:
 
     size_t fillBuffer(void *data, size_t size);
 
-    int64_t getRealTimeUsLocked() const;
-
     void reset();
 
-    uint32_t getNumFramesPendingPlayout() const;
     int64_t getOutputPlayPositionUs_l();
 
     bool allowDeepBuffering() const { return (mCreateFlags & ALLOW_DEEP_BUFFERING) != 0; }

@@ -17,14 +17,29 @@
 #ifndef ANDROID_HARDWARE_CAMERA_BASE_H
 #define ANDROID_HARDWARE_CAMERA_BASE_H
 
+#include <android/hardware/ICameraServiceListener.h>
+
 #include <utils/Mutex.h>
-#include <camera/ICameraService.h>
+#include <binder/BinderService.h>
 
 struct camera_frame_metadata;
 
 namespace android {
 
-struct CameraInfo {
+namespace hardware {
+
+
+class ICameraService;
+class ICameraServiceListener;
+
+enum {
+    /** The facing of the camera is opposite to that of the screen. */
+    CAMERA_FACING_BACK = 0,
+    /** The facing of the camera is the same as that of the screen. */
+    CAMERA_FACING_FRONT = 1,
+};
+
+struct CameraInfo : public android::Parcelable {
     /**
      * The direction that the camera faces to. It should be CAMERA_FACING_BACK
      * or CAMERA_FACING_FRONT.
@@ -44,7 +59,38 @@ struct CameraInfo {
      * right of the screen, the value should be 270.
      */
     int orientation;
+
+    virtual status_t writeToParcel(android::Parcel* parcel) const;
+    virtual status_t readFromParcel(const android::Parcel* parcel);
+
 };
+
+/**
+ * Basic status information about a camera device - its name and its current
+ * state.
+ */
+struct CameraStatus : public android::Parcelable {
+    /**
+     * The name of the camera device
+     */
+    String8 cameraId;
+
+    /**
+     * Its current status, one of the ICameraService::STATUS_* fields
+     */
+    int32_t status;
+
+    virtual status_t writeToParcel(android::Parcel* parcel) const;
+    virtual status_t readFromParcel(const android::Parcel* parcel);
+
+    CameraStatus(String8 id, int32_t s) : cameraId(id), status(s) {}
+    CameraStatus() : status(ICameraServiceListener::STATUS_PRESENT) {}
+};
+
+} // namespace hardware
+
+using hardware::CameraInfo;
+
 
 template <typename TCam>
 struct CameraTraits {
@@ -61,7 +107,7 @@ public:
 
     static sp<TCam>      connect(int cameraId,
                                  const String16& clientPackageName,
-                                 int clientUid);
+                                 int clientUid, int clientPid);
     virtual void         disconnect();
 
     void                 setListener(const sp<TCamListener>& listener);
@@ -70,13 +116,7 @@ public:
 
     static status_t      getCameraInfo(int cameraId,
                                        /*out*/
-                                       struct CameraInfo* cameraInfo);
-
-    static status_t      addServiceListener(
-                                    const sp<ICameraServiceListener>& listener);
-
-    static status_t      removeServiceListener(
-                                    const sp<ICameraServiceListener>& listener);
+                                       struct hardware::CameraInfo* cameraInfo);
 
     sp<TCamUser>         remote();
 
@@ -101,7 +141,7 @@ protected:
     virtual void                     binderDied(const wp<IBinder>& who);
 
     // helper function to obtain camera service handle
-    static const sp<ICameraService>& getCameraService();
+    static const sp<::android::hardware::ICameraService> getCameraService();
 
     sp<TCamUser>                     mCamera;
     status_t                         mStatus;

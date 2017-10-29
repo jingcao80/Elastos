@@ -17,18 +17,19 @@
 #ifndef ANDROID_GUI_CPUCONSUMER_H
 #define ANDROID_GUI_CPUCONSUMER_H
 
+#include <system/window.h>
+
 #include <gui/ConsumerBase.h>
+#include <gui/BufferQueue.h>
 
-#include <ui/GraphicBuffer.h>
-
-#include <utils/String8.h>
 #include <utils/Vector.h>
-#include <utils/threads.h>
 
 
 namespace android {
 
 class BufferQueue;
+class GraphicBuffer;
+class String8;
 
 /**
  * CpuConsumer is a BufferQueue consumer endpoint that allows direct CPU
@@ -53,39 +54,51 @@ class CpuConsumer : public ConsumerBase
         uint32_t    transform;
         uint32_t    scalingMode;
         int64_t     timestamp;
+        android_dataspace dataSpace;
         uint64_t    frameNumber;
-        // Values below are only valid when using
-        // HAL_PIXEL_FORMAT_YCbCr_420_888, in which case LockedBuffer::data
+        // this is the same as format, except for formats that are compatible with
+        // a flexible format (e.g. HAL_PIXEL_FORMAT_YCbCr_420_888). In the latter
+        // case this contains that flexible format
+        PixelFormat flexFormat;
+        // Values below are only valid when using HAL_PIXEL_FORMAT_YCbCr_420_888
+        // or compatible format, in which case LockedBuffer::data
         // contains the Y channel, and stride is the Y channel stride. For other
         // formats, these will all be 0.
         uint8_t    *dataCb;
         uint8_t    *dataCr;
         uint32_t    chromaStride;
         uint32_t    chromaStep;
+
+        LockedBuffer() :
+            data(NULL),
+            width(0),
+            height(0),
+            format(PIXEL_FORMAT_NONE),
+            stride(0),
+            crop(Rect::EMPTY_RECT),
+            transform(0),
+            scalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
+            timestamp(0),
+            dataSpace(HAL_DATASPACE_UNKNOWN),
+            frameNumber(0),
+            flexFormat(PIXEL_FORMAT_NONE),
+            dataCb(NULL),
+            dataCr(NULL),
+            chromaStride(0),
+            chromaStep(0)
+        {}
     };
 
     // Create a new CPU consumer. The maxLockedBuffers parameter specifies
     // how many buffers can be locked for user access at the same time.
     CpuConsumer(const sp<IGraphicBufferConsumer>& bq,
-            uint32_t maxLockedBuffers, bool controlledByApp = false);
+            size_t maxLockedBuffers, bool controlledByApp = false);
 
     virtual ~CpuConsumer();
 
     // set the name of the CpuConsumer that will be used to identify it in
     // log messages.
     void setName(const String8& name);
-
-    // setDefaultBufferSize is used to set the size of buffers returned by
-    // requestBuffers when a width and height of zero is requested.
-    // A call to setDefaultBufferSize() may trigger requestBuffers() to
-    // be called from the client. Default size is 1x1.
-    status_t setDefaultBufferSize(uint32_t width, uint32_t height);
-
-    // setDefaultBufferFormat allows CpuConsumer's BufferQueue to create buffers
-    // of a defaultFormat if no format is specified by producer. Formats are
-    // enumerated in graphics.h; the initial default is
-    // HAL_PIXEL_FORMAT_RGBA_8888.
-    status_t setDefaultBufferFormat(uint32_t defaultFormat);
 
     // Gets the next graphics buffer from the producer and locks it for CPU use,
     // filling out the passed-in locked buffer structure with the native pointer
@@ -106,9 +119,9 @@ class CpuConsumer : public ConsumerBase
 
   private:
     // Maximum number of buffers that can be locked at a time
-    uint32_t mMaxLockedBuffers;
+    size_t mMaxLockedBuffers;
 
-    status_t releaseAcquiredBufferLocked(int lockedIdx);
+    status_t releaseAcquiredBufferLocked(size_t lockedIdx);
 
     virtual void freeBufferLocked(int slotIndex);
 
@@ -129,7 +142,7 @@ class CpuConsumer : public ConsumerBase
     Vector<AcquiredBuffer> mAcquiredBuffers;
 
     // Count of currently locked buffers
-    uint32_t mCurrentLockedBuffers;
+    size_t mCurrentLockedBuffers;
 
 };
 

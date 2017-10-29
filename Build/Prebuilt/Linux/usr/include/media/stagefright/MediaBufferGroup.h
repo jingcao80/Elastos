@@ -29,19 +29,31 @@ class MetaData;
 
 class MediaBufferGroup : public MediaBufferObserver {
 public:
-    MediaBufferGroup();
+    MediaBufferGroup(size_t growthLimit = 0);
+
+    // create a media buffer group with preallocated buffers
+    MediaBufferGroup(size_t buffers, size_t buffer_size, size_t growthLimit = 0);
+
     ~MediaBufferGroup();
 
     void add_buffer(MediaBuffer *buffer);
+
+    bool has_buffers();
 
     // If nonBlocking is false, it blocks until a buffer is available and
     // passes it to the caller in *buffer, while returning OK.
     // The returned buffer will have a reference count of 1.
     // If nonBlocking is true and a buffer is not immediately available,
     // buffer is set to NULL and it returns WOULD_BLOCK.
-    status_t acquire_buffer(MediaBuffer **buffer, bool nonBlocking = false);
+    // If requestedSize is 0, any free MediaBuffer will be returned.
+    // If requestedSize is > 0, the returned MediaBuffer should have buffer
+    // size of at least requstedSize.
+    status_t acquire_buffer(
+            MediaBuffer **buffer, bool nonBlocking = false, size_t requestedSize = 0);
 
-protected:
+    size_t buffers() const { return mBuffers.size(); }
+
+    // If buffer is nullptr, have acquire_buffer() check for remote release.
     virtual void signalBufferReturned(MediaBuffer *buffer);
 
 private:
@@ -49,8 +61,8 @@ private:
 
     Mutex mLock;
     Condition mCondition;
-
-    MediaBuffer *mFirstBuffer, *mLastBuffer;
+    size_t mGrowthLimit;  // Do not automatically grow group larger than this.
+    std::list<MediaBuffer *> mBuffers;
 
     MediaBufferGroup(const MediaBufferGroup &);
     MediaBufferGroup &operator=(const MediaBufferGroup &);

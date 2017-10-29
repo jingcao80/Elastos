@@ -19,11 +19,9 @@
 
 #include <unistd.h>
 
-/* Compatibility definitions for non-Linux (i.e., BSD-based) hosts. */
-#ifndef HAVE_OFF64_T
-#if _FILE_OFFSET_BITS < 64
-#error "_FILE_OFFSET_BITS < 64; large files are not supported on this platform"
-#endif /* _FILE_OFFSET_BITS < 64 */
+#if defined(__APPLE__)
+
+/* Mac OS has always had a 64-bit off_t, so it doesn't have off64_t. */
 
 typedef off_t off64_t;
 
@@ -31,20 +29,38 @@ static inline off64_t lseek64(int fd, off64_t offset, int whence) {
     return lseek(fd, offset, whence);
 }
 
-#ifdef HAVE_PREAD
 static inline ssize_t pread64(int fd, void* buf, size_t nbytes, off64_t offset) {
     return pread(fd, buf, nbytes, offset);
 }
-#endif
 
-#endif /* !HAVE_OFF64_T */
+static inline ssize_t pwrite64(int fd, const void* buf, size_t nbytes, off64_t offset) {
+    return pwrite(fd, buf, nbytes, offset);
+}
 
-#if HAVE_PRINTF_ZD
-#  define ZD "%zd"
-#  define ZD_TYPE ssize_t
+static inline int ftruncate64(int fd, off64_t length) {
+    return ftruncate(fd, length);
+}
+
+#endif /* __APPLE__ */
+
+#if defined(_WIN32)
+#define O_CLOEXEC O_NOINHERIT
+#define O_NOFOLLOW 0
+#define DEFFILEMODE 0666
+#endif /* _WIN32 */
+
+#define ZD "%zd"
+#define ZD_TYPE ssize_t
+
+/*
+ * Needed for cases where something should be constexpr if possible, but not
+ * being constexpr is fine if in pre-C++11 code (such as a const static float
+ * member variable).
+ */
+#if __cplusplus >= 201103L
+#define CONSTEXPR constexpr
 #else
-#  define ZD "%ld"
-#  define ZD_TYPE long
+#define CONSTEXPR
 #endif
 
 /*
@@ -60,6 +76,12 @@ static inline ssize_t pread64(int fd, void* buf, size_t nbytes, off64_t offset) 
         _rc = (exp);                       \
     } while (_rc == -1 && errno == EINTR); \
     _rc; })
+#endif
+
+#if defined(_WIN32)
+#define OS_PATH_SEPARATOR '\\'
+#else
+#define OS_PATH_SEPARATOR '/'
 #endif
 
 #endif /* __LIB_UTILS_COMPAT_H */

@@ -47,6 +47,7 @@ __BEGIN_DECLS
 
 #define LOG_PRIMASK 7
 #define LOG_PRI(x) ((x) & LOG_PRIMASK)
+#define LOG_MAKEPRI(fac, pri) ((fac) | (pri))
 
 /* Facilities are currently ignored on Android. */
 #define LOG_KERN     0000
@@ -85,10 +86,14 @@ __BEGIN_DECLS
 #define LOG_PERROR 0x20
 
 void closelog(void);
-void openlog(const char*, int, int);
+void openlog(const char* _Nullable, int, int);
 int setlogmask(int);
-void syslog(int, const char*, ...) __printflike(2, 3);
-void vsyslog(int, const char*, va_list) __printflike(2, 0);
+void syslog(int, const char* _Nonnull, ...) __printflike(2, 3);
+#if defined(__arm__) || defined(__aarch64__) || defined(__x86_64__)
+void vsyslog(int, const char* _Nonnull, va_list) __printflike(2, 0);
+#else /* defined(__mips__) || defined(__i386__) */
+void vsyslog(int, const char* _Nonnull, va_list _Nonnull) __printflike(2, 0);
+#endif
 
 __END_DECLS
 

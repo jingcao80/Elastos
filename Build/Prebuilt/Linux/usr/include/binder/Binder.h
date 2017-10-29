@@ -17,7 +17,7 @@
 #ifndef ANDROID_BINDER_H
 #define ANDROID_BINDER_H
 
-#include <stdatomic.h>
+#include <atomic>
 #include <stdint.h>
 #include <binder/IBinder.h>
 
@@ -71,7 +71,7 @@ private:
 
     class Extras;
 
-    atomic_uintptr_t    mExtras;  // should be atomic<Extras *>
+    std::atomic<Extras*> mExtras;
             void*       mReserved0;
 };
 
@@ -80,7 +80,7 @@ private:
 class BpRefBase : public virtual RefBase
 {
 protected:
-                            BpRefBase(const sp<IBinder>& o);
+    explicit                BpRefBase(const sp<IBinder>& o);
     virtual                 ~BpRefBase();
     virtual void            onFirstRef();
     virtual void            onLastStrongRef(const void* id);
@@ -95,7 +95,7 @@ private:
 
     IBinder* const          mRemote;
     RefBase::weakref_type*  mRefs;
-    volatile int32_t        mState;
+    std::atomic<int32_t>    mState;
 };
 
 }; // namespace android

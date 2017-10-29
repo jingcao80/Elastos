@@ -19,45 +19,43 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/AHandlerReflector.h>
+#include <media/stagefright/foundation/Mutexed.h>
 #include <media/stagefright/MediaSource.h>
-
-#include <media/stagefright/ExtendedStats.h>
-#define RECORDER_STATS(func, ...) \
-    do { \
-        if(mRecorderExtendedStats != NULL) { \
-            mRecorderExtendedStats->func(__VA_ARGS__);} \
-    } \
-    while(0)
+#include <media/stagefright/PersistentSurface.h>
 
 namespace android {
 
-class ALooper;
-class AMessage;
+struct ALooper;
+struct AMessage;
+struct AReplyToken;
 class IGraphicBufferProducer;
-class MediaCodec;
+struct MediaCodec;
 class MetaData;
 
 struct MediaCodecSource : public MediaSource,
                           public MediaBufferObserver {
     enum FlagBits {
         FLAG_USE_SURFACE_INPUT      = 1,
-        FLAG_USE_METADATA_INPUT     = 2,
+        FLAG_PREFER_SOFTWARE_CODEC  = 4,  // used for testing only
     };
 
     static sp<MediaCodecSource> Create(
             const sp<ALooper> &looper,
             const sp<AMessage> &format,
             const sp<MediaSource> &source,
+            const sp<PersistentSurface> &persistentSurface = NULL,
             uint32_t flags = 0);
 
     bool isVideo() const { return mIsVideo; }
     sp<IGraphicBufferProducer> getGraphicBufferProducer();
+    status_t setInputBufferTimeOffset(int64_t timeOffsetUs);
+    int64_t getFirstSampleSystemTimeUs();
 
     // MediaSource
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
-    virtual status_t pause();
-    virtual sp<MetaData> getFormat() { return mMeta; }
+    virtual status_t pause(MetaData *params = NULL);
+    virtual sp<MetaData> getFormat();
     virtual status_t read(
             MediaBuffer **buffer,
             const ReadOptions *options = NULL);
@@ -67,6 +65,12 @@ struct MediaCodecSource : public MediaSource,
 
     // for AHandlerReflector
     void onMessageReceived(const sp<AMessage> &msg);
+
+    // Set GraphicBufferSource stop time. GraphicBufferSource will stop
+    // after receiving a buffer with timestamp larger or equal than stopTimeUs.
+    // All the buffers with timestamp larger or equal to stopTimeUs will be
+    // discarded. stopTimeUs uses SYSTEM_TIME_MONOTONIC time base.
+    status_t setStopStimeUs(int64_t stopTimeUs);
 
 protected:
     virtual ~MediaCodecSource();
@@ -80,57 +84,81 @@ private:
         kWhatStart,
         kWhatStop,
         kWhatPause,
+        kWhatSetInputBufferTimeOffset,
+        kWhatSetStopTimeOffset,
+        kWhatGetFirstSampleSystemTimeUs,
+        kWhatStopStalled,
     };
 
     MediaCodecSource(
             const sp<ALooper> &looper,
             const sp<AMessage> &outputFormat,
             const sp<MediaSource> &source,
+            const sp<PersistentSurface> &persistentSurface,
             uint32_t flags = 0);
 
     status_t onStart(MetaData *params);
+
+    // Pause the source at pauseStartTimeUs. For non-surface input,
+    // buffers will be dropped immediately. For surface input, buffers
+    // with timestamp smaller than pauseStartTimeUs will still be encoded.
+    // Buffers with timestamp larger or queal to pauseStartTimeUs will be
+    // dropped. pauseStartTimeUs uses SYSTEM_TIME_MONOTONIC time base.
+    void onPause(int64_t pauseStartTimeUs);
+
     status_t init();
     status_t initEncoder();
     void releaseEncoder();
     status_t feedEncoderInputBuffers();
-    void suspend();
-    void resume(int64_t skipFramesBeforeUs = -1ll);
+    // Resume GraphicBufferSource at resumeStartTimeUs. Buffers
+    // from GraphicBufferSource with timestamp larger or equal to
+    // resumeStartTimeUs will be encoded. resumeStartTimeUs uses
+    // SYSTEM_TIME_MONOTONIC time base.
+    void resume(int64_t resumeStartTimeUs = -1ll);
     void signalEOS(status_t err = ERROR_END_OF_STREAM);
     bool reachedEOS();
     status_t postSynchronouslyAndReturnError(const sp<AMessage> &msg);
 
-    sp<RecorderExtendedStats> mRecorderExtendedStats;
     sp<ALooper> mLooper;
     sp<ALooper> mCodecLooper;
     sp<AHandlerReflector<MediaCodecSource> > mReflector;
     sp<AMessage> mOutputFormat;
-    sp<MetaData> mMeta;
+    Mutexed<sp<MetaData>> mMeta;
     sp<Puller> mPuller;
     sp<MediaCodec> mEncoder;
     uint32_t mFlags;
-    List<uint32_t> mStopReplyIDQueue;
+    List<sp<AReplyToken>> mStopReplyIDQueue;
     bool mIsVideo;
     bool mStarted;
     bool mStopping;
     bool mDoMoreWorkPending;
+    bool mSetEncoderFormat;
+    int32_t mEncoderFormat;
+    int32_t mEncoderDataSpace;
     sp<AMessage> mEncoderActivityNotify;
     sp<IGraphicBufferProducer> mGraphicBufferProducer;
-    Vector<sp<ABuffer> > mEncoderInputBuffers;
-    Vector<sp<ABuffer> > mEncoderOutputBuffers;
+    sp<PersistentSurface> mPersistentSurface;
     List<MediaBuffer *> mInputBufferQueue;
     List<size_t> mAvailEncoderInputIndices;
     List<int64_t> mDecodingTimeQueue; // decoding time (us) for video
+    int64_t mInputBufferTimeOffsetUs;
+    int64_t mFirstSampleSystemTimeUs;
+    bool mPausePending;
 
     // audio drift time
     int64_t mFirstSampleTimeUs;
     List<int64_t> mDriftTimeQueue;
 
-    // following variables are protected by mOutputBufferLock
-    Mutex mOutputBufferLock;
-    Condition mOutputBufferCond;
-    List<MediaBuffer*> mOutputBufferQueue;
-    bool mEncoderReachedEOS;
-    status_t mErrorCode;
+    struct Output {
+        Output();
+        List<MediaBuffer*> mBufferQueue;
+        bool mEncoderReachedEOS;
+        status_t mErrorCode;
+        Condition mCond;
+    };
+    Mutexed<Output> mOutput;
+
+    int32_t mGeneration;
 
     DISALLOW_EVIL_CONSTRUCTORS(MediaCodecSource);
 };

@@ -47,6 +47,7 @@ typedef enum OMX_AUDIO_CODINGEXTTYPE {
     OMX_AUDIO_CodingAndroidUnused = OMX_AUDIO_CodingKhronosExtensions + 0x00100000,
     OMX_AUDIO_CodingAndroidAC3,         /**< AC3 encoded data */
     OMX_AUDIO_CodingAndroidOPUS,        /**< OPUS encoded data */
+    OMX_AUDIO_CodingAndroidEAC3,        /**< EAC3 encoded data */
 } OMX_AUDIO_CODINGEXTTYPE;
 
 typedef struct OMX_AUDIO_PARAM_ANDROID_AC3TYPE {
@@ -57,6 +58,15 @@ typedef struct OMX_AUDIO_PARAM_ANDROID_AC3TYPE {
     OMX_U32 nSampleRate;           /**< Sampling rate of the source data.  Use 0 for
                                         variable or unknown sampling rate. */
 } OMX_AUDIO_PARAM_ANDROID_AC3TYPE;
+
+typedef struct OMX_AUDIO_PARAM_ANDROID_EAC3TYPE {
+    OMX_U32 nSize;                 /**< size of the structure in bytes */
+    OMX_VERSIONTYPE nVersion;      /**< OMX specification version information */
+    OMX_U32 nPortIndex;            /**< port that this structure applies to */
+    OMX_U32 nChannels;             /**< Number of channels */
+    OMX_U32 nSampleRate;           /**< Sampling rate of the source data.  Use 0 for
+                                        variable or unknown sampling rate. */
+} OMX_AUDIO_PARAM_ANDROID_EAC3TYPE;
 
 typedef struct OMX_AUDIO_PARAM_ANDROID_OPUSTYPE {
     OMX_U32 nSize;            /**< size of the structure in bytes */
@@ -83,6 +93,15 @@ typedef struct OMX_AUDIO_PARAM_ANDROID_AACPRESENTATIONTYPE {
     OMX_S32 nEncodedTargetLevel;   /**< Target reference level assumed at the encoder, between 0 and 127, -1 if unspecified */
     OMX_S32 nPCMLimiterEnable;     /**< Signal level limiting, 0 for disable, 1 for enable, -1 if unspecified */
 } OMX_AUDIO_PARAM_ANDROID_AACPRESENTATIONTYPE;
+
+typedef struct OMX_AUDIO_PARAM_ANDROID_PROFILETYPE {
+   OMX_U32 nSize;
+   OMX_VERSIONTYPE nVersion;
+   OMX_U32 nPortIndex;
+   OMX_U32 eProfile;      /**< type is OMX_AUDIO_AACPROFILETYPE or OMX_AUDIO_WMAPROFILETYPE
+                                 depending on context */
+   OMX_U32 nProfileIndex; /**< Used to query for individual profile support information */
+} OMX_AUDIO_PARAM_ANDROID_PROFILETYPE;
 
 #ifdef __cplusplus
 }

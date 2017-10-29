@@ -9,36 +9,16 @@
 #define SkUtils_DEFINED
 
 #include "SkTypes.h"
+#include "SkMath.h"
 
-///////////////////////////////////////////////////////////////////////////////
-
-/** Similar to memset(), but it assigns a 16bit value into the buffer.
+/** Similar to memset(), but it assigns a 16, 32, or 64-bit value into the buffer.
     @param buffer   The memory to have value copied into it
-    @param value    The 16bit value to be copied into buffer
+    @param value    The value to be copied into buffer
     @param count    The number of times value should be copied into the buffer.
 */
-void sk_memset16(uint16_t dst[], uint16_t value, int count);
-typedef void (*SkMemset16Proc)(uint16_t dst[], uint16_t value, int count);
-SkMemset16Proc SkMemset16GetPlatformProc();
-
-/** Similar to memset(), but it assigns a 32bit value into the buffer.
-    @param buffer   The memory to have value copied into it
-    @param value    The 32bit value to be copied into buffer
-    @param count    The number of times value should be copied into the buffer.
-*/
-void sk_memset32(uint32_t dst[], uint32_t value, int count);
-typedef void (*SkMemset32Proc)(uint32_t dst[], uint32_t value, int count);
-SkMemset32Proc SkMemset32GetPlatformProc();
-
-/** Similar to memcpy(), but it copies count 32bit values from src to dst.
-    @param dst      The memory to have value copied into it
-    @param src      The memory to have value copied from it
-    @param count    The number of values should be copied.
-*/
-void sk_memcpy32(uint32_t dst[], const uint32_t src[], int count);
-typedef void (*SkMemcpy32Proc)(uint32_t dst[], const uint32_t src[], int count);
-SkMemcpy32Proc SkMemcpy32GetPlatformProc();
-
+void sk_memset16(uint16_t buffer[], uint16_t value, int count);
+void sk_memset32(uint32_t buffer[], uint32_t value, int count);
+void sk_memset64(uint64_t buffer[], uint64_t value, int count);
 ///////////////////////////////////////////////////////////////////////////////
 
 #define kMaxBytesInUTF8Sequence     4
@@ -55,7 +35,31 @@ inline int SkUTF8_CountUTF8Bytes(const char utf8[]) {
 }
 
 int         SkUTF8_CountUnichars(const char utf8[]);
-int         SkUTF8_CountUnichars(const char utf8[], size_t byteLength);
+
+/** This function is safe: invalid UTF8 sequences will return -1; */
+int         SkUTF8_CountUnicharsWithError(const char utf8[], size_t byteLength);
+
+/** This function is safe: invalid UTF8 sequences will return 0; */
+inline int  SkUTF8_CountUnichars(const char utf8[], size_t byteLength) {
+    return SkClampPos(SkUTF8_CountUnicharsWithError(utf8, byteLength));
+}
+
+/** This function is safe: invalid UTF8 sequences will return -1
+ *  When -1 is returned, ptr is unchanged.
+ *  Precondition: *ptr < end;
+ */
+SkUnichar SkUTF8_NextUnicharWithError(const char** ptr, const char* end);
+
+/** this version replaces invalid utf-8 sequences with code point U+FFFD. */
+inline SkUnichar SkUTF8_NextUnichar(const char** ptr, const char* end) {
+    SkUnichar val = SkUTF8_NextUnicharWithError(ptr, end);
+    if (val < 0) {
+        *ptr = end;
+        return 0xFFFD;  // REPLACEMENT CHARACTER
+    }
+    return val;
+}
+
 SkUnichar   SkUTF8_ToUnichar(const char utf8[]);
 SkUnichar   SkUTF8_NextUnichar(const char**);
 SkUnichar   SkUTF8_PrevUnichar(const char**);
@@ -96,23 +100,4 @@ inline bool SkUnichar_IsVariationSelector(SkUnichar uni) {
     }
     return true;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-class SkAutoTrace {
-public:
-    /** NOTE: label contents are not copied, just the ptr is
-        retained, so DON'T DELETE IT.
-    */
-    SkAutoTrace(const char label[]) : fLabel(label) {
-        SkDebugf("--- trace: %s Enter\n", fLabel);
-    }
-    ~SkAutoTrace() {
-        SkDebugf("--- trace: %s Leave\n", fLabel);
-    }
-private:
-    const char* fLabel;
-};
-#define SkAutoTrace(...) SK_REQUIRE_LOCAL_VAR(SkAutoTrace)
-
 #endif

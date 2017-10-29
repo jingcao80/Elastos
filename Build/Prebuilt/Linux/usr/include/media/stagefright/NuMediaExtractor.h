@@ -19,6 +19,7 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/MediaSource.h>
+#include <media/IMediaExtractor.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
@@ -27,20 +28,29 @@
 #include <utils/Vector.h>
 
 namespace android {
+namespace media {
+class ICas;
+}
+using namespace media;
 
 struct ABuffer;
 struct AMessage;
-struct DataSource;
+class DataSource;
 struct IMediaHTTPService;
-struct MediaBuffer;
-struct MediaExtractor;
+class MediaBuffer;
+class MediaExtractor;
 struct MediaSource;
-struct MetaData;
+class MetaData;
 
 struct NuMediaExtractor : public RefBase {
     enum SampleFlags {
         SAMPLE_FLAG_SYNC        = 1,
         SAMPLE_FLAG_ENCRYPTED   = 2,
+    };
+
+    // identical to IMediaExtractor::GetTrackMetaDataFlags
+    enum GetTrackFormatFlags {
+        kIncludeExtensiveMetaData = 1, // reads sample table and possibly stream headers
     };
 
     NuMediaExtractor();
@@ -54,8 +64,10 @@ struct NuMediaExtractor : public RefBase {
 
     status_t setDataSource(const sp<DataSource> &datasource);
 
+    status_t setMediaCas(const sp<ICas> &cas);
+
     size_t countTracks() const;
-    status_t getTrackFormat(size_t index, sp<AMessage> *format) const;
+    status_t getTrackFormat(size_t index, sp<AMessage> *format, uint32_t flags = 0) const;
 
     status_t getFileFormat(sp<AMessage> *format) const;
 
@@ -72,6 +84,7 @@ struct NuMediaExtractor : public RefBase {
     status_t getSampleTrackIndex(size_t *trackIndex);
     status_t getSampleTime(int64_t *sampleTimeUs);
     status_t getSampleMeta(sp<MetaData> *sampleMeta);
+    status_t getMetrics(Parcel *reply);
 
     bool getCachedDuration(int64_t *durationUs, bool *eos) const;
 
@@ -83,8 +96,12 @@ private:
         kIsVorbis       = 1,
     };
 
+    enum {
+        kMaxTrackCount = 16384,
+    };
+
     struct TrackInfo {
-        sp<MediaSource> mSource;
+        sp<IMediaSource> mSource;
         size_t mTrackIndex;
         status_t mFinalResult;
         MediaBuffer *mSample;
@@ -97,8 +114,8 @@ private:
 
     sp<DataSource> mDataSource;
 
-    sp<MediaExtractor> mImpl;
-    bool mIsWidevineExtractor;
+    sp<IMediaExtractor> mImpl;
+    sp<ICas> mCas;
 
     Vector<TrackInfo> mSelectedTracks;
     int64_t mTotalBitrate;  // in bits/sec
@@ -112,7 +129,8 @@ private:
     void releaseTrackSamples();
 
     bool getTotalBitrate(int64_t *bitRate) const;
-    void updateDurationAndBitrate();
+    status_t updateDurationAndBitrate();
+    status_t appendVorbisNumPageSamples(TrackInfo *info, const sp<ABuffer> &buffer);
 
     DISALLOW_EVIL_CONSTRUCTORS(NuMediaExtractor);
 };

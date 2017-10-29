@@ -25,11 +25,15 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+
 #ifndef _SYS_PARAM_H_
 #define _SYS_PARAM_H_
 
 #include <limits.h>
 #include <linux/param.h>
+#include <sys/cdefs.h>
+
+#define DEV_BSIZE 512
 
 #define MAXPATHLEN  PATH_MAX
 #define MAXSYMLINKS 8
@@ -42,11 +46,7 @@
 #define powerof2(x)     ((((x)-1)&(x))==0)
 
 /* Macros for min/max. */
-#ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
-#endif
-#ifndef MAX
 #define MAX(a,b) (((a)>(b))?(a):(b))
-#endif
 
 #endif /* _SYS_PARAM_H_ */

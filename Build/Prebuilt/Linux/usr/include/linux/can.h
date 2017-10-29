@@ -16,8 +16,8 @@
  ***
  ****************************************************************************
  ****************************************************************************/
-#ifndef CAN_H
-#define CAN_H
+#ifndef _UAPI_CAN_H
+#define _UAPI_CAN_H
 #include <linux/types.h>
 #include <linux/socket.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
@@ -39,50 +39,57 @@ typedef __u32 can_err_mask_t;
 #define CANFD_MAX_DLC 15
 #define CANFD_MAX_DLEN 64
 struct can_frame {
- canid_t can_id;
+  canid_t can_id;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __u8 can_dlc;
- __u8 data[CAN_MAX_DLEN] __attribute__((aligned(8)));
+  __u8 can_dlc;
+  __u8 __pad;
+  __u8 __res0;
+  __u8 __res1;
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+  __u8 data[CAN_MAX_DLEN] __attribute__((aligned(8)));
 };
 #define CANFD_BRS 0x01
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define CANFD_ESI 0x02
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 struct canfd_frame {
- canid_t can_id;
- __u8 len;
+  canid_t can_id;
+  __u8 len;
+  __u8 flags;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __u8 flags;
- __u8 __res0;
- __u8 __res1;
- __u8 data[CANFD_MAX_DLEN] __attribute__((aligned(8)));
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+  __u8 __res0;
+  __u8 __res1;
+  __u8 data[CANFD_MAX_DLEN] __attribute__((aligned(8)));
 };
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define CAN_MTU (sizeof(struct can_frame))
 #define CANFD_MTU (sizeof(struct canfd_frame))
 #define CAN_RAW 1
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define CAN_BCM 2
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define CAN_TP16 3
 #define CAN_TP20 4
 #define CAN_MCNET 5
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define CAN_ISOTP 6
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define CAN_NPROTO 7
 #define SOL_CAN_BASE 100
 struct sockaddr_can {
+  __kernel_sa_family_t can_family;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __kernel_sa_family_t can_family;
- int can_ifindex;
- union {
- struct { canid_t rx_id, tx_id; } tp;
+  int can_ifindex;
+  union {
+    struct {
+      canid_t rx_id, tx_id;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- } can_addr;
+    } tp;
+  } can_addr;
 };
 struct can_filter {
- canid_t can_id;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- canid_t can_mask;
+  canid_t can_id;
+  canid_t can_mask;
 };
 #define CAN_INV_FILTER 0x20000000U
-#endif
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+#define CAN_RAW_FILTER_MAX 512
+#endif

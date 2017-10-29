@@ -17,9 +17,26 @@
 #ifndef __CUTILS_SCHED_POLICY_H
 #define __CUTILS_SCHED_POLICY_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Check if Linux kernel enables CPUSETS feature.
+ *
+ * Return value: 1 if Linux kernel CONFIG_CPUSETS=y; 0 otherwise.
+ */
+extern bool cpusets_enabled();
+
+/*
+ * Check if Linux kernel enables SCHEDTUNE feature (only available in Android
+ * common kernel or Linaro LSK, not in mainline Linux as of v4.9)
+ *
+ * Return value: 1 if Linux kernel CONFIG_SCHEDTUNE=y; 0 otherwise.
+ */
+extern bool schedboost_enabled();
 
 /* Keep in sync with THREAD_GROUP_* in frameworks/base/core/java/android/os/Process.java */
 typedef enum {
@@ -29,10 +46,13 @@ typedef enum {
     SP_SYSTEM     = 2,  // can't be used with set_sched_policy()
     SP_AUDIO_APP  = 3,
     SP_AUDIO_SYS  = 4,
+    SP_TOP_APP    = 5,
     SP_CNT,
     SP_MAX        = SP_CNT - 1,
     SP_SYSTEM_DEFAULT = SP_FOREGROUND,
 } SchedPolicy;
+
+extern int set_cpuset_policy(int tid, SchedPolicy policy);
 
 /* Assign thread tid to the cgroup associated with the specified policy.
  * If the thread is a thread group leader, that is it's gettid() == getpid(),

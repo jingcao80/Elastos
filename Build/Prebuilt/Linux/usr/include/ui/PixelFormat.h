@@ -25,9 +25,6 @@
 #ifndef UI_PIXELFORMAT_H
 #define UI_PIXELFORMAT_H
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <utils/Errors.h>
 #include <hardware/hardware.h>
 
 namespace android {
@@ -56,74 +53,21 @@ enum {
 
     // real pixel formats supported for rendering -----------------------------
 
-    PIXEL_FORMAT_RGBA_8888   = HAL_PIXEL_FORMAT_RGBA_8888,   // 4x8-bit RGBA
-    PIXEL_FORMAT_RGBX_8888   = HAL_PIXEL_FORMAT_RGBX_8888,   // 4x8-bit RGB0
-    PIXEL_FORMAT_RGB_888     = HAL_PIXEL_FORMAT_RGB_888,     // 3x8-bit RGB
-    PIXEL_FORMAT_RGB_565     = HAL_PIXEL_FORMAT_RGB_565,     // 16-bit RGB
-    PIXEL_FORMAT_BGRA_8888   = HAL_PIXEL_FORMAT_BGRA_8888,   // 4x8-bit BGRA
-    PIXEL_FORMAT_RGBA_5551   = 6,                            // 16-bit ARGB
-    PIXEL_FORMAT_RGBA_4444   = 7,                            // 16-bit ARGB
-    PIXEL_FORMAT_sRGB_A_8888 = HAL_PIXEL_FORMAT_sRGB_A_8888, // 4x8-bit sRGB + A
-    PIXEL_FORMAT_sRGB_X_8888 = HAL_PIXEL_FORMAT_sRGB_X_8888, // 4x8-bit sRGB, no A
+    PIXEL_FORMAT_RGBA_8888    = HAL_PIXEL_FORMAT_RGBA_8888,    // 4x8-bit RGBA
+    PIXEL_FORMAT_RGBX_8888    = HAL_PIXEL_FORMAT_RGBX_8888,    // 4x8-bit RGB0
+    PIXEL_FORMAT_RGB_888      = HAL_PIXEL_FORMAT_RGB_888,      // 3x8-bit RGB
+    PIXEL_FORMAT_RGB_565      = HAL_PIXEL_FORMAT_RGB_565,      // 16-bit RGB
+    PIXEL_FORMAT_BGRA_8888    = HAL_PIXEL_FORMAT_BGRA_8888,    // 4x8-bit BGRA
+    PIXEL_FORMAT_RGBA_5551    = 6,                             // 16-bit ARGB
+    PIXEL_FORMAT_RGBA_4444    = 7,                             // 16-bit ARGB
+    PIXEL_FORMAT_RGBA_FP16    = HAL_PIXEL_FORMAT_RGBA_FP16,    // 64-bit RGBA
+    PIXEL_FORMAT_RGBA_1010102 = HAL_PIXEL_FORMAT_RGBA_1010102, // 32-bit RGBA
 };
 
 typedef int32_t PixelFormat;
 
-#ifdef HAVE_PIXEL_FORMAT_INFO
-struct PixelFormatInfo {
-    enum {
-        INDEX_ALPHA   = 0,
-        INDEX_RED     = 1,
-        INDEX_GREEN   = 2,
-        INDEX_BLUE    = 3
-    };
-
-    enum { // components
-        ALPHA   = 1,
-        RGB     = 2,
-        RGBA    = 3,
-        L       = 4,
-        LA      = 5,
-        OTHER   = 0xFF
-    };
-
-    struct szinfo {
-        uint8_t h;
-        uint8_t l;
-    };
-
-    inline PixelFormatInfo() : version(sizeof(PixelFormatInfo)) { }
-    size_t getScanlineSize(unsigned int width) const;
-    size_t getSize(size_t ci) const {
-        return (ci <= 3) ? (cinfo[ci].h - cinfo[ci].l) : 0;
-    }
-    size_t      version;
-    PixelFormat format;
-    size_t      bytesPerPixel;
-    size_t      bitsPerPixel;
-    union {
-        szinfo      cinfo[4];
-        struct {
-            uint8_t     h_alpha;
-            uint8_t     l_alpha;
-            uint8_t     h_red;
-            uint8_t     l_red;
-            uint8_t     h_green;
-            uint8_t     l_green;
-            uint8_t     h_blue;
-            uint8_t     l_blue;
-        };
-    };
-    uint8_t     components;
-    uint8_t     reserved0[3];
-    uint32_t    reserved1;
-};
-
-status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info);
-#endif
-
-ssize_t bytesPerPixel(PixelFormat format);
-ssize_t bitsPerPixel(PixelFormat format);
+uint32_t bytesPerPixel(PixelFormat format);
+uint32_t bitsPerPixel(PixelFormat format);
 
 }; // namespace android
 

@@ -1,3 +1,5 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 **********************************************************************
 * Copyright (C) 1999-2014, International Business Machines
@@ -1026,13 +1028,13 @@ protected:
 
 #ifndef U_HIDE_INTERNAL_API
     /**
-     * @internal
      * @param id the ID being registered
      * @param factory a function pointer that will be copied and
      * called later when the given ID is passed to createInstance()
      * @param context a context pointer that will be stored and
      * later passed to the factory function when an ID matching
      * the registration ID is being instantiated with this factory.
+     * @internal
      */
     static void _registerFactory(const UnicodeString& id,
                                  Factory factory,

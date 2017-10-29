@@ -36,24 +36,26 @@
 
 __BEGIN_DECLS
 
+/* The kernel header doesn't have these, but POSIX does. */
+#define RLIM_SAVED_CUR RLIM_INFINITY
+#define RLIM_SAVED_MAX RLIM_INFINITY
+
 typedef unsigned long rlim_t;
 
-extern int getrlimit(int, struct rlimit*);
-extern int setrlimit(int, const struct rlimit*);
+int getrlimit(int, struct rlimit*);
+int setrlimit(int, const struct rlimit*);
 
-extern int getrlimit64(int, struct rlimit64*);
-extern int setrlimit64(int, const struct rlimit64*);
+int getrlimit64(int, struct rlimit64*) __INTRODUCED_IN(21);
+int setrlimit64(int, const struct rlimit64*) __INTRODUCED_IN(21);
 
-extern int getpriority(int, int);
-extern int setpriority(int, int, int);
+int getpriority(int, id_t);
+int setpriority(int, id_t, int);
 
-extern int getrusage(int, struct rusage*);
+int getrusage(int, struct rusage*);
 
-#if __LP64__
-/* Implementing prlimit for 32-bit isn't worth the effort. */
-extern int prlimit(pid_t, int, const struct rlimit*, struct rlimit*);
-#endif
-extern int prlimit64(pid_t, int, const struct rlimit64*, struct rlimit64*);
+int prlimit(pid_t, int, const struct rlimit*, struct rlimit*) __INTRODUCED_IN_32(24)
+  __INTRODUCED_IN_64(21);
+int prlimit64(pid_t, int, const struct rlimit64*, struct rlimit64*) __INTRODUCED_IN(21);
 
 __END_DECLS
 

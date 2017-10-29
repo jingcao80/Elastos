@@ -1,6 +1,8 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 *****************************************************************************
-* Copyright (C) 2014, International Business Machines Corporation and
+* Copyright (C) 2014-2016, International Business Machines Corporation and
 * others.
 * All Rights Reserved.
 *****************************************************************************
@@ -13,6 +15,10 @@
 #define __RELDATEFMT_H
 
 #include "unicode/utypes.h"
+#include "unicode/uobject.h"
+#include "unicode/udisplaycontext.h"
+#include "unicode/ureldatefmt.h"
+#include "unicode/locid.h"
 
 /**
  * \file
@@ -21,69 +27,67 @@
 
 #if !UCONFIG_NO_FORMATTING
 
-#include "unicode/locid.h"
-
-#ifndef U_HIDE_DRAFT_API
-
 /**
  * Represents the unit for formatting a relative date. e.g "in 5 days"
  * or "in 3 months"
- * @draft ICU 53
+ * @stable ICU 53
  */
 typedef enum UDateRelativeUnit {
 
     /**
      * Seconds
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_SECONDS,
 
     /**
      * Minutes
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_MINUTES,
 
     /**
      * Hours
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_HOURS,
 
     /**
      * Days
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_DAYS,
 
     /**
      * Weeks
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_WEEKS,
 
     /**
      * Months
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_MONTHS,
 
     /**
      * Years
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_RELATIVE_YEARS,
 
+#ifndef U_HIDE_DEPRECATED_API
     /**
-     * Count of items in this enum.
-     * @draft ICU 53
+     * One more than the highest normal UDateRelativeUnit value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     UDAT_RELATIVE_UNIT_COUNT
+#endif  // U_HIDE_DEPRECATED_API
 } UDateRelativeUnit;
 
 /**
  * Represents an absolute unit.
- * @draft ICU 53
+ * @stable ICU 53
  */
 typedef enum UDateAbsoluteUnit {
 
@@ -91,140 +95,147 @@ typedef enum UDateAbsoluteUnit {
     // Saturday.
     /**
      * Sunday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_SUNDAY,
 
     /**
      * Monday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_MONDAY,
 
     /**
      * Tuesday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_TUESDAY,
 
     /**
      * Wednesday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_WEDNESDAY,
 
     /**
      * Thursday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_THURSDAY,
 
     /**
      * Friday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_FRIDAY,
 
     /**
      * Saturday
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_SATURDAY,
 
     /**
      * Day
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_DAY,
 
     /**
      * Week
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_WEEK,
 
     /**
      * Month
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_MONTH,
 
     /**
      * Year
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_YEAR,
 
     /**
      * Now
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_ABSOLUTE_NOW,
 
+#ifndef U_HIDE_DEPRECATED_API
     /**
-     * Count of items in this enum.
-     * @draft ICU 53
+     * One more than the highest normal UDateAbsoluteUnit value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     UDAT_ABSOLUTE_UNIT_COUNT
+#endif  // U_HIDE_DEPRECATED_API
 } UDateAbsoluteUnit;
 
 /**
  * Represents a direction for an absolute unit e.g "Next Tuesday"
  * or "Last Tuesday"
- * @draft ICU 53
+ * @stable ICU 53
  */
 typedef enum UDateDirection {
 
     /**
      * Two before. Not fully supported in every locale.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_DIRECTION_LAST_2,
 
     /**
      * Last
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_DIRECTION_LAST,
 
     /**
      * This
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_DIRECTION_THIS,
 
     /**
      * Next
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_DIRECTION_NEXT,
 
     /**
      * Two after. Not fully supported in every locale.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_DIRECTION_NEXT_2,
 
     /**
      * Plain, which means the absence of a qualifier.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UDAT_DIRECTION_PLAIN,
 
+#ifndef U_HIDE_DEPRECATED_API
     /**
-     * Count of items in this enum.
-     * @draft ICU 53
+     * One more than the highest normal UDateDirection value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     UDAT_DIRECTION_COUNT
+#endif  // U_HIDE_DEPRECATED_API
 } UDateDirection;
 
+#if !UCONFIG_NO_BREAK_ITERATION
 
 U_NAMESPACE_BEGIN
 
 class RelativeDateTimeCacheData;
 class SharedNumberFormat;
 class SharedPluralRules;
+class SharedBreakIterator;
 class NumberFormat;
+class UnicodeString;
 
 /**
  * Formats simple relative dates. There are two types of relative dates that
@@ -292,22 +303,20 @@ class NumberFormat;
  *
  * The RelativeDateTimeFormatter class is not intended for public subclassing.
  *
- * @draft ICU 53
+ * @stable ICU 53
  */
-
-
 class U_I18N_API RelativeDateTimeFormatter : public UObject {
 public:
 
     /**
      * Create RelativeDateTimeFormatter with default locale.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     RelativeDateTimeFormatter(UErrorCode& status);
 
     /**
      * Create RelativeDateTimeFormatter with given locale.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     RelativeDateTimeFormatter(const Locale& locale, UErrorCode& status);
 
@@ -319,27 +328,49 @@ public:
      *   It is an error for caller to delete this pointer or change its
      *   contents after calling this constructor.
      * @status Any error is returned here.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     RelativeDateTimeFormatter(
         const Locale& locale, NumberFormat *nfToAdopt, UErrorCode& status);
 
     /**
+     * Create RelativeDateTimeFormatter with given locale, NumberFormat,
+     * and capitalization context.
+     *
+     * @param locale the locale
+     * @param nfToAdopt Constructed object takes ownership of this pointer.
+     *   It is an error for caller to delete this pointer or change its
+     *   contents after calling this constructor. Caller may pass NULL for
+     *   this argument if they want default number format behavior.
+     * @param style the format style. The UDAT_RELATIVE bit field has no effect.
+     * @param capitalizationContext A value from UDisplayContext that pertains to
+     * capitalization.
+     * @status Any error is returned here. 
+     * @stable ICU 54
+     */
+    RelativeDateTimeFormatter(
+            const Locale& locale,
+            NumberFormat *nfToAdopt,
+            UDateRelativeDateTimeFormatterStyle style,
+            UDisplayContext capitalizationContext,
+            UErrorCode& status);
+
+    /**
      * Copy constructor.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     RelativeDateTimeFormatter(const RelativeDateTimeFormatter& other);
 
     /**
      * Assignment operator.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     RelativeDateTimeFormatter& operator=(
             const RelativeDateTimeFormatter& other);
 
     /**
      * Destructor.
-     * @draft ICU 53
+     * @stable ICU 53
      */
     virtual ~RelativeDateTimeFormatter();
 
@@ -356,7 +387,7 @@ public:
      *  appended
      * @param status ICU error code returned here.
      * @return appendTo
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UnicodeString& format(
             double quantity,
@@ -375,13 +406,61 @@ public:
      *  no format string is available.
      * @param status ICU error code returned here.
      * @return appendTo
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UnicodeString& format(
             UDateDirection direction,
             UDateAbsoluteUnit unit,
             UnicodeString& appendTo,
             UErrorCode& status) const;
+
+#ifndef U_HIDE_DRAFT_API
+    /**
+     * Format a combination of URelativeDateTimeUnit and numeric offset
+     * using a numeric style, e.g. "1 week ago", "in 1 week",
+     * "5 weeks ago", "in 5 weeks".
+     * 
+     * @param offset    The signed offset for the specified unit. This
+     *                  will be formatted according to this object's
+     *                  NumberFormat object.
+     * @param unit      The unit to use when formatting the relative
+     *                  date, e.g. UDAT_REL_UNIT_WEEK,
+     *                  UDAT_REL_UNIT_FRIDAY.
+     * @param appendTo  The string to which the formatted result will be
+     *                  appended.
+     * @param status    ICU error code returned here.
+     * @return          appendTo
+     * @draft ICU 57
+     */
+    UnicodeString& formatNumeric(
+            double offset,
+            URelativeDateTimeUnit unit,
+            UnicodeString& appendTo,
+            UErrorCode& status) const;
+
+    /**
+     * Format a combination of URelativeDateTimeUnit and numeric offset
+     * using a text style if possible, e.g. "last week", "this week",
+     * "next week", "yesterday", "tomorrow". Falls back to numeric
+     * style if no appropriate text term is available for the specified
+     * offset in the object's locale.
+     *
+     * @param offset    The signed offset for the specified unit.
+     * @param unit      The unit to use when formatting the relative
+     *                  date, e.g. UDAT_REL_UNIT_WEEK,
+     *                  UDAT_REL_UNIT_FRIDAY.
+     * @param appendTo  The string to which the formatted result will be
+     *                  appended.
+     * @param status    ICU error code returned here.
+     * @return          appendTo
+     * @draft ICU 57
+     */
+    UnicodeString& format(
+            double offset,
+            URelativeDateTimeUnit unit,
+            UnicodeString& appendTo,
+            UErrorCode& status) const;
+#endif  /* U_HIDE_DRAFT_API */
 
     /**
      * Combines a relative date string and a time string in this object's
@@ -393,7 +472,7 @@ public:
      * @param appendTo concatenated date and time appended here
      * @param status ICU error code returned here.
      * @return appendTo
-     * @draft ICU 53
+     * @stable ICU 53
      */
     UnicodeString& combineDateAndTime(
             const UnicodeString& relativeDateString,
@@ -404,20 +483,41 @@ public:
     /**
      * Returns the NumberFormat this object is using.
      *
-     * @draft ICU 53
+     * @stable ICU 53
      */
     const NumberFormat& getNumberFormat() const;
 
+    /**
+     * Returns the capitalization context.
+     *
+     * @stable ICU 54
+     */
+    UDisplayContext getCapitalizationContext() const;
+
+    /**
+     * Returns the format style.
+     *
+     * @stable ICU 54
+     */
+    UDateRelativeDateTimeFormatterStyle getFormatStyle() const;
+
 private:
-    const RelativeDateTimeCacheData* cache;
-    const SharedNumberFormat *numberFormat;
-    const SharedPluralRules *pluralRules;
-    void init(const Locale &, NumberFormat *nfToAdopt, UErrorCode &status);
+    const RelativeDateTimeCacheData* fCache;
+    const SharedNumberFormat *fNumberFormat;
+    const SharedPluralRules *fPluralRules;
+    UDateRelativeDateTimeFormatterStyle fStyle;
+    UDisplayContext fContext;
+    const SharedBreakIterator *fOptBreakIterator;
+    Locale fLocale;
+    void init(
+            NumberFormat *nfToAdopt,
+            BreakIterator *brkIter,
+            UErrorCode &status);
+    void adjustForContext(UnicodeString &) const;
 };
 
 U_NAMESPACE_END
 
-#endif /* U_HIDE_DRAFT_API */
-
+#endif /* !UCONFIG_NO_BREAK_ITERATION */
 #endif /* !UCONFIG_NO_FORMATTING */
-#endif
+#endif /* __RELDATEFMT_H */

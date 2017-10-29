@@ -24,6 +24,8 @@
 
 #include <utils/threads.h>
 
+#include <pthread.h>
+
 // ---------------------------------------------------------------------------
 namespace android {
 
@@ -33,6 +35,11 @@ class ProcessState : public virtual RefBase
 {
 public:
     static  sp<ProcessState>    self();
+    /* initWithDriver() can be used to configure libbinder to use
+     * a different binder driver dev node. It must be called *before*
+     * any call to ProcessState::self(). /dev/binder remains the default.
+     */
+    static  sp<ProcessState>    initWithDriver(const char *driver);
 
             void                setContextObject(const sp<IBinder>& object);
             sp<IBinder>         getContextObject(const sp<IBinder>& caller);
@@ -62,34 +69,47 @@ public:
             status_t            setThreadPoolMaxThreadCount(size_t maxThreads);
             void                giveThreadPoolName();
 
+            String8             getDriverName();
+
 private:
     friend class IPCThreadState;
     
-                                ProcessState();
+                                ProcessState(const char* driver);
                                 ~ProcessState();
 
                                 ProcessState(const ProcessState& o);
             ProcessState&       operator=(const ProcessState& o);
             String8             makeBinderThreadName();
-            
+
             struct handle_entry {
                 IBinder* binder;
                 RefBase::weakref_type* refs;
             };
-            
+
             handle_entry*       lookupHandleLocked(int32_t handle);
 
+            String8             mDriverName;
             int                 mDriverFD;
             void*               mVMStart;
-            
+
+            // Protects thread count variable below.
+            pthread_mutex_t     mThreadCountLock;
+            pthread_cond_t      mThreadCountDecrement;
+            // Number of binder threads current executing a command.
+            size_t              mExecutingThreadsCount;
+            // Maximum number for binder threads allowed for this process.
+            size_t              mMaxThreads;
+            // Time when thread pool was emptied
+            int64_t             mStarvationStartTimeMs;
+
     mutable Mutex               mLock;  // protects everything below.
-            
+
             Vector<handle_entry>mHandleToObject;
 
             bool                mManagesContexts;
             context_check_func  mBinderContextCheckFunc;
             void*               mBinderContextUserData;
-            
+
             KeyedVector<String16, sp<IBinder> >
                                 mContexts;
 

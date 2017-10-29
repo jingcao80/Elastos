@@ -1,3 +1,5 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 **********************************************************************
 *   Copyright (C) 2001-2011,2014 IBM and others. All rights reserved.
@@ -96,10 +98,6 @@
  * UTS #10 Unicode Collation Algorithm</a>, specifically the USearchAttribute
  * USEARCH_ELEMENT_COMPARISON and its values.
  * <p>
- * E.g. In English, overlapping matches produces the result 0 and 2 
- * for the pattern "abab" in the text "ababab", where else mutually 
- * exclusive matches only produce the result of 0.
- * <p>
  * Though collator attributes will be taken into consideration while 
  * performing matches, there are no APIs here for setting and getting the 
  * attributes. These attributes can be set by getting the collator
@@ -192,11 +190,13 @@ typedef enum {
      */
     USEARCH_ELEMENT_COMPARISON = 2,
 
+#ifndef U_HIDE_DEPRECATED_API
     /**
-     * Count of attribute types
-     * @stable ICU 2.4
+     * One more than the highest normal USearchAttribute value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     USEARCH_ATTRIBUTE_COUNT = 3
+#endif  // U_HIDE_DEPRECATED_API
 } USearchAttribute;
 
 /**
@@ -266,11 +266,13 @@ typedef enum {
      */
     USEARCH_ANY_BASE_WEIGHT_IS_WILDCARD,
 
+#ifndef U_HIDE_DEPRECATED_API
     /**
-     * Count of attribute values
-     * @stable ICU 2.4
+     * One more than the highest normal USearchAttributeValue value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     USEARCH_ATTRIBUTE_VALUE_COUNT
+#endif  // U_HIDE_DEPRECATED_API
 } USearchAttributeValue;
 
 /* open and close ------------------------------------------------------ */

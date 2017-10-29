@@ -1,6 +1,4 @@
-/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
+/*
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,6 +73,20 @@ typedef enum
     BTHF_CHLD_TYPE_HOLDACTIVE_ACCEPTHELD,    // Hold all active calls and accepts a waiting/held call
     BTHF_CHLD_TYPE_ADDHELDTOCONF,            // Add all held calls to a conference
 } bthf_chld_type_t;
+
+
+/* HF Indicators HFP 1.7 */
+typedef enum
+{
+    BTHF_HF_IND_ENHANCED_DRIVER_SAFETY = 1,
+    BTHF_HF_IND_BATTERY_LEVEL_STATUS = 2,
+} bthf_hf_ind_type_t;
+
+typedef enum
+{
+    BTHF_HF_IND_DISABLED = 0,
+    BTHF_HF_IND_ENABLED,
+} bthf_hf_ind_status_t;
 
 /** Callback for connection state change.
  *  state will have one of the values from BtHfConnectionState
@@ -154,6 +166,15 @@ typedef void (* bthf_unknown_at_cmd_callback)(char *at_string, bt_bdaddr_t *bd_a
  */
 typedef void (* bthf_key_pressed_cmd_callback)(bt_bdaddr_t *bd_addr);
 
+/** Callback for BIND. Pass the remote HF Indicators supported.
+ */
+typedef void (* bthf_bind_cmd_callback)(char *at_string, bt_bdaddr_t *bd_addr);
+
+/** Callback for BIEV. Pass the change in the Remote HF indicator values
+ */
+typedef void (* bthf_biev_cmd_callback)(bthf_hf_ind_type_t ind_id, int ind_value,
+                                        bt_bdaddr_t *bd_addr);
+
 /** BT-HF callback structure. */
 typedef struct {
     /** set to sizeof(BtHfCallbacks) */
@@ -174,6 +195,8 @@ typedef struct {
     bthf_cops_cmd_callback          cops_cmd_cb;
     bthf_clcc_cmd_callback          clcc_cmd_cb;
     bthf_unknown_at_cmd_callback    unknown_at_cmd_cb;
+    bthf_bind_cmd_callback          bind_cb;
+    bthf_biev_cmd_callback          biev_cb;
     bthf_key_pressed_cmd_callback   key_pressed_cmd_cb;
 } bthf_callbacks_t;
 
@@ -229,10 +252,7 @@ typedef struct {
     /**
      * Register the BtHf callbacks
      */
-    bt_status_t (*init)( bthf_callbacks_t* callbacks, int max_hf_clients);
-
-    /** Set the feature bitmask */
-    bt_status_t (*init_features)( int feature_bitmask );
+    bt_status_t (*init)( bthf_callbacks_t* callbacks, int max_hf_clients, bool inband_ringing_supported);
 
     /** connect to headset */
     bt_status_t (*connect)( bt_bdaddr_t *bd_addr );
@@ -275,7 +295,7 @@ typedef struct {
      */
     bt_status_t (*at_response) (bthf_at_response_t response_code, int error_code, bt_bdaddr_t *bd_addr );
 
-    /** response for CLCC command 
+    /** response for CLCC command
      *  Can be iteratively called for each call index
      *  Call index of 0 will be treated as NULL termination (Completes response)
      */
@@ -285,7 +305,7 @@ typedef struct {
                                 bthf_call_addrtype_t type, bt_bdaddr_t *bd_addr );
 
     /** notify of a call state change
-     *  Each update notifies 
+     *  Each update notifies
      *    1. Number of active/held/ringing calls
      *    2. call_state: This denotes the state change that triggered this msg
      *                   This will take one of the values from BtHfCallState
@@ -294,14 +314,15 @@ typedef struct {
     bt_status_t (*phone_state_change) (int num_active, int num_held, bthf_call_state_t call_setup_state,
                                        const char *number, bthf_call_addrtype_t type);
 
-    /** get remote supported features */
-    int (*get_remote_features)(bt_bdaddr_t *bd_addr);
-
     /** Closes the interface. */
     void  (*cleanup)( void );
 
-    /** configureation for the SCO codec */
+    /** configuration for the SCO codec */
     bt_status_t (*configure_wbs)( bt_bdaddr_t *bd_addr ,bthf_wbs_config_t config );
+
+    /** Response for HF Indicator change (+BIND) */
+    bt_status_t (*bind_response)(bthf_hf_ind_type_t ind_id, bthf_hf_ind_status_t ind_status,
+                                 bt_bdaddr_t *bd_addr);
 } bthf_interface_t;
 
 __END_DECLS

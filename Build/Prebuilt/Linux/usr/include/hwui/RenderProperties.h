@@ -13,8 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RENDERNODEPROPERTIES_H
-#define RENDERNODEPROPERTIES_H
+
+#pragma once
+
+#include "Caches.h"
+#include "DeviceInfo.h"
+#include "Rect.h"
+#include "RevealClip.h"
+#include "Outline.h"
+#include "utils/MathUtils.h"
+#include "utils/PaintUtils.h"
+
+#include <SkBlendMode.h>
+#include <SkCamera.h>
+#include <SkMatrix.h>
+#include <SkRegion.h>
 
 #include <algorithm>
 #include <stddef.h>
@@ -22,16 +35,7 @@
 #include <cutils/compiler.h>
 #include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
-
-#include <SkCamera.h>
-#include <SkMatrix.h>
-#include <SkRegion.h>
-
-#include "Animator.h"
-#include "Rect.h"
-#include "RevealClip.h"
-#include "Outline.h"
-#include "utils/MathUtils.h"
+#include <ostream>
 
 class SkBitmap;
 class SkColorFilter;
@@ -45,16 +49,16 @@ class RenderNode;
 class RenderProperties;
 
 // The __VA_ARGS__ will be executed if a & b are not equal
-#define RP_SET(a, b, ...) (a != b ? (a = b, ##__VA_ARGS__, true) : false)
+#define RP_SET(a, b, ...) ((a) != (b) ? ((a) = (b), ##__VA_ARGS__, true) : false)
 #define RP_SET_AND_DIRTY(a, b) RP_SET(a, b, mPrimitiveFields.mMatrixOrPivotDirty = true)
 
 // Keep in sync with View.java:LAYER_TYPE_*
-enum LayerType {
-    kLayerTypeNone = 0,
+enum class LayerType {
+    None = 0,
     // Although we cannot build the software layer directly (must be done at
     // record time), this information is used when applying alpha.
-    kLayerTypeSoftware = 1,
-    kLayerTypeRenderLayer = 2,
+    Software = 1,
+    RenderLayer = 2,
     // TODO: LayerTypeSurfaceTexture? Maybe?
 };
 
@@ -73,10 +77,6 @@ public:
         return false;
     }
 
-    LayerType type() const {
-        return mType;
-    }
-
     bool setOpaque(bool opaque) {
         return RP_SET(mOpaque, opaque);
     }
@@ -93,11 +93,11 @@ public:
         return mAlpha;
     }
 
-    bool setXferMode(SkXfermode::Mode mode) {
+    bool setXferMode(SkBlendMode mode) {
         return RP_SET(mMode, mode);
     }
 
-    SkXfermode::Mode xferMode() const {
+    SkBlendMode xferMode() const {
         return mMode;
     }
 
@@ -122,14 +122,19 @@ private:
     ~LayerProperties();
     void reset();
 
+    // Private since external users should go through properties().effectiveLayerType()
+    LayerType type() const {
+        return mType;
+    }
+
     friend class RenderProperties;
 
-    LayerType mType;
+    LayerType mType = LayerType::None;
     // Whether or not that Layer's content is opaque, doesn't include alpha
     bool mOpaque;
     uint8_t mAlpha;
-    SkXfermode::Mode mMode;
-    SkColorFilter* mColorFilter;
+    SkBlendMode mMode;
+    SkColorFilter* mColorFilter = nullptr;
 };
 
 /*
@@ -156,6 +161,32 @@ public:
         }
     }
 
+    /**
+     * Set internal layer state based on whether this layer
+     *
+     * Additionally, returns true if child RenderNodes with functors will need to use a layer
+     * to support clipping.
+     */
+    bool prepareForFunctorPresence(bool willHaveFunctor, bool ancestorDictatesFunctorsNeedLayer) {
+        // parent may have already dictated that a descendant layer is needed
+        bool functorsNeedLayer = ancestorDictatesFunctorsNeedLayer
+
+                // Round rect clipping forces layer for functors
+                || CC_UNLIKELY(getOutline().willRoundRectClip())
+                || CC_UNLIKELY(getRevealClip().willClip())
+
+                // Complex matrices forces layer, due to stencil clipping
+                || CC_UNLIKELY(getTransformMatrix() && !getTransformMatrix()->isScaleTranslate())
+                || CC_UNLIKELY(getAnimationMatrix() && !getAnimationMatrix()->isScaleTranslate())
+                || CC_UNLIKELY(getStaticMatrix() && !getStaticMatrix()->isScaleTranslate());
+
+        mComputedFields.mNeedLayerForFunctors = (willHaveFunctor && functorsNeedLayer);
+
+        // If on a layer, will have consumed the need for isolating functors from stencil.
+        // Thus, it's safe to reset the flag until some descendent sets it.
+        return CC_LIKELY(effectiveLayerType() == LayerType::None) && functorsNeedLayer;
+    }
+
     RenderProperties& operator=(const RenderProperties& other);
 
     bool setClipToBounds(bool clipToBounds) {
@@ -175,8 +206,8 @@ public:
         return RP_SET(mPrimitiveFields.mProjectBackwards, shouldProject);
     }
 
-    bool setProjectionReceiver(bool shouldRecieve) {
-        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldRecieve);
+    bool setProjectionReceiver(bool shouldReceive) {
+        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldReceive);
     }
 
     bool isProjectionReceiver() const {
@@ -188,7 +219,7 @@ public:
         if (matrix) {
             mStaticMatrix = new SkMatrix(*matrix);
         } else {
-            mStaticMatrix = NULL;
+            mStaticMatrix = nullptr;
         }
         return true;
     }
@@ -203,7 +234,7 @@ public:
         if (matrix) {
             mAnimationMatrix = new SkMatrix(*matrix);
         } else {
-            mAnimationMatrix = NULL;
+            mAnimationMatrix = nullptr;
         }
         return true;
     }
@@ -389,7 +420,7 @@ public:
         return false;
     }
 
-    float getLeft() const {
+    int getLeft() const {
         return mPrimitiveFields.mLeft;
     }
 
@@ -404,7 +435,7 @@ public:
         return false;
     }
 
-    float getTop() const {
+    int getTop() const {
         return mPrimitiveFields.mTop;
     }
 
@@ -419,7 +450,7 @@ public:
         return false;
     }
 
-    float getRight() const {
+    int getRight() const {
         return mPrimitiveFields.mRight;
     }
 
@@ -434,7 +465,7 @@ public:
         return false;
     }
 
-    float getBottom() const {
+    int getBottom() const {
         return mPrimitiveFields.mBottom;
     }
 
@@ -513,11 +544,15 @@ public:
         return mPrimitiveFields.mClippingFlags & CLIP_TO_BOUNDS;
     }
 
+    const Rect& getClipBounds() const {
+        return mPrimitiveFields.mClipBounds;
+    }
+
     void getClippingRectForFlags(uint32_t flags, Rect* outRect) const {
         if (flags & CLIP_TO_BOUNDS) {
             outRect->set(0, 0, getWidth(), getHeight());
             if (flags & CLIP_TO_CLIP_BOUNDS) {
-                outRect->intersect(mPrimitiveFields.mClipBounds);
+                outRect->doIntersect(mPrimitiveFields.mClipBounds);
             }
         } else {
             outRect->set(mPrimitiveFields.mClipBounds);
@@ -540,7 +575,7 @@ public:
         return mPrimitiveFields.mProjectBackwards;
     }
 
-    void debugOutputProperties(const int level) const;
+    void debugOutputProperties(std::ostream& output, const int level) const;
 
     void updateMatrix();
 
@@ -570,33 +605,50 @@ public:
     }
 
     bool hasShadow() const {
-        return getZ() >= 0.0f
-                && getOutline().getPath() != NULL
+        return getZ() > 0.0f
+                && getOutline().getPath() != nullptr
                 && getOutline().getAlpha() != 0.0f;
+    }
+
+    bool fitsOnLayer() const {
+        const DeviceInfo* deviceInfo = DeviceInfo::get();
+        return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
+                        && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
+    }
+
+    bool promotedToLayer() const {
+        return mLayerProperties.mType == LayerType::None
+                && fitsOnLayer()
+                && (mComputedFields.mNeedLayerForFunctors
+                        || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
+                                && mPrimitiveFields.mAlpha < 1
+                                && mPrimitiveFields.mHasOverlappingRendering));
+    }
+
+    LayerType effectiveLayerType() const {
+        return CC_UNLIKELY(promotedToLayer()) ? LayerType::RenderLayer : mLayerProperties.mType;
     }
 
 private:
     // Rendering properties
     struct PrimitiveFields {
-        PrimitiveFields();
-
+        int mLeft = 0, mTop = 0, mRight = 0, mBottom = 0;
+        int mWidth = 0, mHeight = 0;
+        int mClippingFlags = CLIP_TO_BOUNDS;
+        float mAlpha = 1;
+        float mTranslationX = 0, mTranslationY = 0, mTranslationZ = 0;
+        float mElevation = 0;
+        float mRotation = 0, mRotationX = 0, mRotationY = 0;
+        float mScaleX = 1, mScaleY = 1;
+        float mPivotX = 0, mPivotY = 0;
+        bool mHasOverlappingRendering = false;
+        bool mPivotExplicitlySet = false;
+        bool mMatrixOrPivotDirty = false;
+        bool mProjectBackwards = false;
+        bool mProjectionReceiver = false;
+        Rect mClipBounds;
         Outline mOutline;
         RevealClip mRevealClip;
-        int mClippingFlags;
-        bool mProjectBackwards;
-        bool mProjectionReceiver;
-        float mAlpha;
-        bool mHasOverlappingRendering;
-        float mElevation;
-        float mTranslationX, mTranslationY, mTranslationZ;
-        float mRotation, mRotationX, mRotationY;
-        float mScaleX, mScaleY;
-        float mPivotX, mPivotY;
-        int mLeft, mTop, mRight, mBottom;
-        int mWidth, mHeight;
-        bool mPivotExplicitlySet;
-        bool mMatrixOrPivotDirty;
-        Rect mClipBounds;
     } mPrimitiveFields;
 
     SkMatrix* mStaticMatrix;
@@ -620,10 +672,11 @@ private:
         SkMatrix* mTransformMatrix;
 
         Sk3DView mTransformCamera;
+
+        // Force layer on for functors to enable render features they don't yet support (clipping)
+        bool mNeedLayerForFunctors = false;
     } mComputedFields;
 };
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* RENDERNODEPROPERTIES_H */

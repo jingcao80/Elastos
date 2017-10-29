@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DEFERREDLAYERUPDATE_H_
-#define DEFERREDLAYERUPDATE_H_
+
+#pragma once
 
 #include <cutils/compiler.h>
 #include <gui/GLConsumer.h>
@@ -22,13 +22,17 @@
 #include <SkMatrix.h>
 #include <utils/StrongPointer.h>
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include "Layer.h"
 #include "Rect.h"
-#include "RenderNode.h"
 #include "renderthread/RenderThread.h"
 
 namespace android {
 namespace uirenderer {
+
+class RenderState;
 
 // Container to hold the properties a layer should be set to at the start
 // of a render pass
@@ -36,10 +40,15 @@ class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer);
+    typedef std::function<Layer*(RenderState& renderState, uint32_t layerWidth,
+            uint32_t layerHeight, SkColorFilter* colorFilter, int alpha,
+            SkBlendMode mode, bool blend)> CreateLayerFn;
+    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState,
+            CreateLayerFn createLayerFn, Layer::Api layerApi);
+
     ANDROID_API ~DeferredLayerUpdater();
 
-    ANDROID_API bool setSize(uint32_t width, uint32_t height) {
+    ANDROID_API bool setSize(int width, int height) {
         if (mWidth != width || mHeight != height) {
             mWidth = width;
             mHeight = height;
@@ -47,6 +56,9 @@ public:
         }
         return false;
     }
+
+    int getWidth() { return mWidth; }
+    int getHeight() { return mHeight; }
 
     ANDROID_API bool setBlend(bool blend) {
         if (blend != mBlend) {
@@ -56,10 +68,13 @@ public:
         return false;
     }
 
-    ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture, bool needsAttach) {
+    ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture) {
         if (texture.get() != mSurfaceTexture.get()) {
-            mNeedsGLContextAttach = needsAttach;
             mSurfaceTexture = texture;
+
+            GLenum target = texture->getCurrentTextureTarget();
+            LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
+                    "set unsupported GLConsumer with target %x", target);
         }
     }
 
@@ -69,41 +84,53 @@ public:
 
     ANDROID_API void setTransform(const SkMatrix* matrix) {
         delete mTransform;
-        mTransform = matrix ? new SkMatrix(*matrix) : 0;
+        mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
+    }
+
+    SkMatrix* getTransform() {
+        return mTransform;
     }
 
     ANDROID_API void setPaint(const SkPaint* paint);
 
-    ANDROID_API bool apply();
+    void apply();
 
-    ANDROID_API Layer* backingLayer() {
+    Layer* backingLayer() {
         return mLayer;
     }
 
-    ANDROID_API void detachSurfaceTexture();
+    void detachSurfaceTexture();
+
+    void updateLayer(bool forceFilter, const float* textureTransform);
+
+    void destroyLayer();
+
+    Layer::Api getBackingLayerApi() {
+        return mLayerApi;
+    }
 
 private:
-    // Generic properties
-    uint32_t mWidth;
-    uint32_t mHeight;
-    bool mBlend;
-    SkColorFilter* mColorFilter;
-    int mAlpha;
-    SkXfermode::Mode mMode;
+    RenderState& mRenderState;
 
+    // Generic properties
+    int mWidth = 0;
+    int mHeight = 0;
+    bool mBlend = false;
+    SkColorFilter* mColorFilter = nullptr;
+    int mAlpha = 255;
+    SkBlendMode mMode = SkBlendMode::kSrcOver;
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;
-    bool mNeedsGLContextAttach;
+    bool mGLContextAttached;
     bool mUpdateTexImage;
 
     Layer* mLayer;
-    Caches& mCaches;
-    renderthread::RenderThread& mRenderThread;
+    Layer::Api mLayerApi;
+    CreateLayerFn mCreateLayerFn;
 
     void doUpdateTexImage();
+    void doUpdateVkTexImage();
 };
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* DEFERREDLAYERUPDATE_H_ */

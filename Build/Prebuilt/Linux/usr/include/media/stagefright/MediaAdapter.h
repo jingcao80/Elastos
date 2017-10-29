@@ -56,8 +56,6 @@ public:
     // deep copy, such that after pushBuffer return, the buffer can be re-used.
     status_t pushBuffer(MediaBuffer *buffer);
 
-    virtual void notifyError(status_t err);
-
 private:
     Mutex mAdapterLock;
     // Make sure the read() wait for the incoming buffer.
@@ -69,8 +67,6 @@ private:
 
     bool mStarted;
     sp<MetaData> mOutputFormat;
-
-    status_t mStatus;
 
     DISALLOW_EVIL_CONSTRUCTORS(MediaAdapter);
 };

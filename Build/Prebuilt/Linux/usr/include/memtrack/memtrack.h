@@ -19,7 +19,6 @@
 
 #include <sys/types.h>
 #include <stddef.h>
-#include <cutils/compiler.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,16 +33,6 @@ extern "C" {
  * memtrack_proc_get.
  */
 struct memtrack_proc;
-
-/**
- * memtrack_init
- *
- * Must be called once before calling any other functions.  After this function
- * is called, everything else is thread-safe.
- *
- * Returns 0 on success, -errno on error.
- */
-int memtrack_init(void);
 
 /**
  * memtrack_proc_new
@@ -121,7 +110,7 @@ ssize_t memtrack_proc_gl_total(struct memtrack_proc *p);
 ssize_t memtrack_proc_gl_pss(struct memtrack_proc *p);
 
 /**
- * memtrack_proc_gl_total
+ * memtrack_proc_other_total
  *
  * Same as memtrack_proc_graphics_total, but counts miscellaneous memory
  * not tracked by gl or graphics calls above.
@@ -131,7 +120,7 @@ ssize_t memtrack_proc_gl_pss(struct memtrack_proc *p);
 ssize_t memtrack_proc_other_total(struct memtrack_proc *p);
 
 /**
- * memtrack_proc_gl_pss
+ * memtrack_proc_other_pss
  *
  * Same as memtrack_proc_graphics_total, but counts miscellaneous memory
  * not tracked by gl or graphics calls above.

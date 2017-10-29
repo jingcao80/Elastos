@@ -17,8 +17,10 @@
 #ifndef ANDROID_GUI_BUFFERQUEUECORE_H
 #define ANDROID_GUI_BUFFERQUEUECORE_H
 
+#include <gui/BufferItem.h>
 #include <gui/BufferQueueDefs.h>
 #include <gui/BufferSlot.h>
+#include <gui/OccupancyTracker.h>
 
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
@@ -29,11 +31,14 @@
 #include <utils/Trace.h>
 #include <utils/Vector.h>
 
-#define BQ_LOGV(x, ...) ALOGV("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
-#define BQ_LOGD(x, ...) ALOGD("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
-#define BQ_LOGI(x, ...) ALOGI("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
-#define BQ_LOGW(x, ...) ALOGW("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
-#define BQ_LOGE(x, ...) ALOGE("[%s] "x, mConsumerName.string(), ##__VA_ARGS__)
+#include <list>
+#include <set>
+
+#define BQ_LOGV(x, ...) ALOGV("[%s] " x, mConsumerName.string(), ##__VA_ARGS__)
+#define BQ_LOGD(x, ...) ALOGD("[%s] " x, mConsumerName.string(), ##__VA_ARGS__)
+#define BQ_LOGI(x, ...) ALOGI("[%s] " x, mConsumerName.string(), ##__VA_ARGS__)
+#define BQ_LOGW(x, ...) ALOGW("[%s] " x, mConsumerName.string(), ##__VA_ARGS__)
+#define BQ_LOGE(x, ...) ALOGE("[%s] " x, mConsumerName.string(), ##__VA_ARGS__)
 
 #define ATRACE_BUFFER_INDEX(index)                                   \
     if (ATRACE_ENABLED()) {                                          \
@@ -45,9 +50,7 @@
 
 namespace android {
 
-class BufferItem;
 class IConsumerListener;
-class IGraphicBufferAlloc;
 class IProducerListener;
 
 class BufferQueueCore : public virtual RefBase {
@@ -58,74 +61,85 @@ class BufferQueueCore : public virtual RefBase {
 public:
     // Used as a placeholder slot number when the value isn't pointing to an
     // existing buffer.
-    enum { INVALID_BUFFER_SLOT = -1 }; // TODO: Extract from IGBC::BufferItem
+    enum { INVALID_BUFFER_SLOT = BufferItem::INVALID_BUFFER_SLOT };
 
     // We reserve two slots in order to guarantee that the producer and
     // consumer can run asynchronously.
     enum { MAX_MAX_ACQUIRED_BUFFERS = BufferQueueDefs::NUM_BUFFER_SLOTS - 2 };
 
-    // The default API number used to indicate that no producer is connected
-    enum { NO_CONNECTED_API = 0 };
+    enum {
+        // The API number used to indicate the currently connected producer
+        CURRENTLY_CONNECTED_API = -1,
+
+        // The API number used to indicate that no producer is connected
+        NO_CONNECTED_API        = 0,
+    };
 
     typedef Vector<BufferItem> Fifo;
 
     // BufferQueueCore manages a pool of gralloc memory slots to be used by
-    // producers and consumers. allocator is used to allocate all the needed
-    // gralloc buffers.
-    BufferQueueCore(const sp<IGraphicBufferAlloc>& allocator = NULL);
+    // producers and consumers.
+    BufferQueueCore();
     virtual ~BufferQueueCore();
 
 private:
     // Dump our state in a string
-    void dump(String8& result, const char* prefix) const;
+    void dumpState(const String8& prefix, String8* outResult) const;
 
     // getMinUndequeuedBufferCountLocked returns the minimum number of buffers
     // that must remain in a state other than DEQUEUED. The async parameter
     // tells whether we're in asynchronous mode.
-    int getMinUndequeuedBufferCountLocked(bool async) const;
+    int getMinUndequeuedBufferCountLocked() const;
 
     // getMinMaxBufferCountLocked returns the minimum number of buffers allowed
     // given the current BufferQueue state. The async parameter tells whether
     // we're in asynchonous mode.
-    int getMinMaxBufferCountLocked(bool async) const;
+    int getMinMaxBufferCountLocked() const;
 
     // getMaxBufferCountLocked returns the maximum number of buffers that can be
     // allocated at once. This value depends on the following member variables:
     //
-    //     mDequeueBufferCannotBlock
+    //     mMaxDequeuedBufferCount
     //     mMaxAcquiredBufferCount
-    //     mDefaultMaxBufferCount
-    //     mOverrideMaxBufferCount
-    //     async parameter
+    //     mMaxBufferCount
+    //     mAsyncMode
+    //     mDequeueBufferCannotBlock
     //
     // Any time one of these member variables is changed while a producer is
     // connected, mDequeueCondition must be broadcast.
-    int getMaxBufferCountLocked(bool async) const;
+    int getMaxBufferCountLocked() const;
 
-    // setDefaultMaxBufferCountLocked sets the maximum number of buffer slots
-    // that will be used if the producer does not override the buffer slot
-    // count. The count must be between 2 and NUM_BUFFER_SLOTS, inclusive. The
-    // initial default is 2.
-    status_t setDefaultMaxBufferCountLocked(int count);
+    // This performs the same computation but uses the given arguments instead
+    // of the member variables for mMaxBufferCount, mAsyncMode, and
+    // mDequeueBufferCannotBlock.
+    int getMaxBufferCountLocked(bool asyncMode,
+            bool dequeueBufferCannotBlock, int maxBufferCount) const;
 
-    // freeBufferLocked frees the GraphicBuffer and sync resources for the
+    // clearBufferSlotLocked frees the GraphicBuffer and sync resources for the
     // given slot.
-    void freeBufferLocked(int slot);
+    void clearBufferSlotLocked(int slot);
 
     // freeAllBuffersLocked frees the GraphicBuffer and sync resources for
-    // all slots.
+    // all slots, even if they're currently dequeued, queued, or acquired.
     void freeAllBuffersLocked();
 
-    // stillTracking returns true iff the buffer item is still being tracked
-    // in one of the slots.
-    bool stillTracking(const BufferItem* item) const;
+    // discardFreeBuffersLocked releases all currently-free buffers held by the
+    // queue, in order to reduce the memory consumption of the queue to the
+    // minimum possible without discarding data.
+    void discardFreeBuffersLocked();
+
+    // If delta is positive, makes more slots available. If negative, takes
+    // away slots. Returns false if the request can't be met.
+    bool adjustAvailableSlotsLocked(int delta);
 
     // waitWhileAllocatingLocked blocks until mIsAllocating is false.
     void waitWhileAllocatingLocked() const;
 
-    // mAllocator is the connection to SurfaceFlinger that is used to allocate
-    // new GraphicBuffer objects.
-    sp<IGraphicBufferAlloc> mAllocator;
+#if DEBUG_ONLY_CODE
+    // validateConsistencyLocked ensures that the free lists are in sync with
+    // the information stored in mSlots
+    void validateConsistencyLocked() const;
+#endif
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of BufferQueueCore objects. It must be locked whenever any
@@ -158,13 +172,23 @@ private:
     // GraphicBuffers.
     uint32_t mConsumerUsageBits;
 
+    // mConsumerIsProtected indicates the consumer is ready to handle protected
+    // buffer.
+    bool mConsumerIsProtected;
+
     // mConnectedApi indicates the producer API that is currently connected
     // to this BufferQueue. It defaults to NO_CONNECTED_API, and gets updated
     // by the connect and disconnect methods.
     int mConnectedApi;
+    // PID of the process which last successfully called connect(...)
+    pid_t mConnectedPid;
 
-    // mConnectedProducerToken is used to set a binder death notification on
+    // mLinkedToDeath is used to set a binder death notification on
     // the producer.
+    sp<IProducerListener> mLinkedToDeath;
+
+    // mConnectedProducerListener is used to handle the onBufferReleased
+    // notification.
     sp<IProducerListener> mConnectedProducerListener;
 
     // mSlots is an array of buffer slots that must be mirrored on the producer
@@ -177,20 +201,24 @@ private:
     // mQueue is a FIFO of queued buffers used in synchronous mode.
     Fifo mQueue;
 
-    // mOverrideMaxBufferCount is the limit on the number of buffers that will
-    // be allocated at one time. This value is set by the producer by calling
-    // setBufferCount. The default is 0, which means that the producer doesn't
-    // care about the number of buffers in the pool. In that case,
-    // mDefaultMaxBufferCount is used as the limit.
-    int mOverrideMaxBufferCount;
+    // mFreeSlots contains all of the slots which are FREE and do not currently
+    // have a buffer attached.
+    std::set<int> mFreeSlots;
+
+    // mFreeBuffers contains all of the slots which are FREE and currently have
+    // a buffer attached.
+    std::list<int> mFreeBuffers;
+
+    // mUnusedSlots contains all slots that are currently unused. They should be
+    // free and not have a buffer attached.
+    std::list<int> mUnusedSlots;
+
+    // mActiveBuffers contains all slots which have a non-FREE buffer attached.
+    std::set<int> mActiveBuffers;
 
     // mDequeueCondition is a condition variable used for dequeueBuffer in
     // synchronous mode.
     mutable Condition mDequeueCondition;
-
-    // mUseAsyncBuffer indicates whether an extra buffer is used in async mode
-    // to prevent dequeueBuffer from blocking.
-    bool mUseAsyncBuffer;
 
     // mDequeueBufferCannotBlock indicates whether dequeueBuffer is allowed to
     // block. This flag is set during connect when both the producer and
@@ -199,21 +227,24 @@ private:
 
     // mDefaultBufferFormat can be set so it will override the buffer format
     // when it isn't specified in dequeueBuffer.
-    uint32_t mDefaultBufferFormat;
+    PixelFormat mDefaultBufferFormat;
 
     // mDefaultWidth holds the default width of allocated buffers. It is used
     // in dequeueBuffer if a width and height of 0 are specified.
-    int mDefaultWidth;
+    uint32_t mDefaultWidth;
 
     // mDefaultHeight holds the default height of allocated buffers. It is used
     // in dequeueBuffer if a width and height of 0 are specified.
-    int mDefaultHeight;
+    uint32_t mDefaultHeight;
 
-    // mDefaultMaxBufferCount is the default limit on the number of buffers that
-    // will be allocated at one time. This default limit is set by the consumer.
-    // The limit (as opposed to the default limit) may be overriden by the
-    // producer.
-    int mDefaultMaxBufferCount;
+    // mDefaultBufferDataSpace holds the default dataSpace of queued buffers.
+    // It is used in queueBuffer if a dataspace of 0 (HAL_DATASPACE_UNKNOWN)
+    // is specified.
+    android_dataspace mDefaultBufferDataSpace;
+
+    // mMaxBufferCount is the limit on the number of buffers that will be
+    // allocated at one time. This limit can be set by the consumer.
+    int mMaxBufferCount;
 
     // mMaxAcquiredBufferCount is the number of buffers that the consumer may
     // acquire at one time. It defaults to 1, and can be changed by the consumer
@@ -221,6 +252,11 @@ private:
     // producer is connected to the BufferQueue. This value is used to derive
     // the value returned for the MIN_UNDEQUEUED_BUFFERS query to the producer.
     int mMaxAcquiredBufferCount;
+
+    // mMaxDequeuedBufferCount is the number of buffers that the producer may
+    // dequeue at one time. It defaults to 1, and can be changed by the producer
+    // via setMaxDequeuedBufferCount.
+    int mMaxDequeuedBufferCount;
 
     // mBufferHasBeenQueued is true once a buffer has been queued. It is reset
     // when something causes all buffers to be freed (e.g., changing the buffer
@@ -246,6 +282,60 @@ private:
     // mIsAllocatingCondition is a condition variable used by producers to wait until mIsAllocating
     // becomes false.
     mutable Condition mIsAllocatingCondition;
+
+    // mAllowAllocation determines whether dequeueBuffer is allowed to allocate
+    // new buffers
+    bool mAllowAllocation;
+
+    // mBufferAge tracks the age of the contents of the most recently dequeued
+    // buffer as the number of frames that have elapsed since it was last queued
+    uint64_t mBufferAge;
+
+    // mGenerationNumber stores the current generation number of the attached
+    // producer. Any attempt to attach a buffer with a different generation
+    // number will fail.
+    uint32_t mGenerationNumber;
+
+    // mAsyncMode indicates whether or not async mode is enabled.
+    // In async mode an extra buffer will be allocated to allow the producer to
+    // enqueue buffers without blocking.
+    bool mAsyncMode;
+
+    // mSharedBufferMode indicates whether or not shared buffer mode is enabled.
+    bool mSharedBufferMode;
+
+    // When shared buffer mode is enabled, this indicates whether the consumer
+    // should acquire buffers even if BufferQueue doesn't indicate that they are
+    // available.
+    bool mAutoRefresh;
+
+    // When shared buffer mode is enabled, this tracks which slot contains the
+    // shared buffer.
+    int mSharedBufferSlot;
+
+    // Cached data about the shared buffer in shared buffer mode
+    struct SharedBufferCache {
+        SharedBufferCache(Rect _crop, uint32_t _transform,
+                uint32_t _scalingMode, android_dataspace _dataspace)
+        : crop(_crop),
+          transform(_transform),
+          scalingMode(_scalingMode),
+          dataspace(_dataspace) {
+        }
+
+        Rect crop;
+        uint32_t transform;
+        uint32_t scalingMode;
+        android_dataspace dataspace;
+    } mSharedBufferCache;
+
+    // The slot of the last queued buffer
+    int mLastQueuedSlot;
+
+    OccupancyTracker mOccupancyTracker;
+
+    const uint64_t mUniqueId;
+
 }; // class BufferQueueCore
 
 } // namespace android

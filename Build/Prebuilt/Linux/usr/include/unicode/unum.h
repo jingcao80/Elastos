@@ -1,6 +1,8 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 *******************************************************************************
-* Copyright (C) 1997-2014, International Business Machines Corporation and others.
+* Copyright (C) 1997-2015, International Business Machines Corporation and others.
 * All Rights Reserved.
 * Modification History:
 *
@@ -18,6 +20,7 @@
 
 #include "unicode/localpointer.h"
 #include "unicode/uloc.h"
+#include "unicode/ucurr.h"
 #include "unicode/umisc.h"
 #include "unicode/parseerr.h"
 #include "unicode/uformattable.h"
@@ -147,69 +150,107 @@ typedef enum UNumberFormatStyle {
      */
     UNUM_DECIMAL=1,
     /**
-     * Currency format with a currency symbol, e.g., "$1.00".
+     * Currency format (generic).
+     * Defaults to UNUM_CURRENCY_STANDARD style
+     * (using currency symbol, e.g., "$1.00", with non-accounting
+     * style for negative values e.g. using minus sign).
+     * The specific style may be specified using the -cf- locale key.
      * @stable ICU 2.0
      */
-    UNUM_CURRENCY,
+    UNUM_CURRENCY=2,
     /**
      * Percent format
      * @stable ICU 2.0
      */
-    UNUM_PERCENT,
+    UNUM_PERCENT=3,
     /**
      * Scientific format
      * @stable ICU 2.1
      */
-    UNUM_SCIENTIFIC,
+    UNUM_SCIENTIFIC=4,
     /**
-     * Spellout rule-based format
+     * Spellout rule-based format. The default ruleset can be specified/changed using
+     * unum_setTextAttribute with UNUM_DEFAULT_RULESET; the available public rulesets
+     * can be listed using unum_getTextAttribute with UNUM_PUBLIC_RULESETS.
      * @stable ICU 2.0
      */
-    UNUM_SPELLOUT,
+    UNUM_SPELLOUT=5,
     /** 
-     * Ordinal rule-based format 
+     * Ordinal rule-based format . The default ruleset can be specified/changed using
+     * unum_setTextAttribute with UNUM_DEFAULT_RULESET; the available public rulesets
+     * can be listed using unum_getTextAttribute with UNUM_PUBLIC_RULESETS.
      * @stable ICU 3.0
      */
-    UNUM_ORDINAL,
+    UNUM_ORDINAL=6,
     /** 
      * Duration rule-based format 
      * @stable ICU 3.0
      */
-    UNUM_DURATION,
+    UNUM_DURATION=7,
     /** 
      * Numbering system rule-based format
      * @stable ICU 4.2
      */
-    UNUM_NUMBERING_SYSTEM,
+    UNUM_NUMBERING_SYSTEM=8,
     /** 
      * Rule-based format defined by a pattern string.
      * @stable ICU 3.0
      */
-    UNUM_PATTERN_RULEBASED,
+    UNUM_PATTERN_RULEBASED=9,
     /**
      * Currency format with an ISO currency code, e.g., "USD1.00".
      * @stable ICU 4.8
      */
-    UNUM_CURRENCY_ISO,
+    UNUM_CURRENCY_ISO=10,
     /**
      * Currency format with a pluralized currency name,
      * e.g., "1.00 US dollar" and "3.00 US dollars".
      * @stable ICU 4.8
      */
-    UNUM_CURRENCY_PLURAL,
-#ifndef U_HIDE_DRAFT_API
+    UNUM_CURRENCY_PLURAL=11,
     /**
      * Currency format for accounting, e.g., "($3.00)" for
      * negative currency amount instead of "-$3.00" ({@link #UNUM_CURRENCY}).
-     * @draft ICU 53
+     * Overrides any style specified using -cf- key in locale.
+     * @stable ICU 53
      */
-    UNUM_CURRENCY_ACCOUNTING = UNUM_CURRENCY_PLURAL+1,
-#endif /* U_HIDE_DRAFT_API */
+    UNUM_CURRENCY_ACCOUNTING=12,
     /**
-     * One more than the highest number format style constant.
-     * @stable ICU 4.8
+     * Currency format with a currency symbol given CASH usage, e.g., 
+     * "NT$3" instead of "NT$3.23".
+     * @stable ICU 54
      */
-    UNUM_FORMAT_STYLE_COUNT = UNUM_CURRENCY_PLURAL+2,
+    UNUM_CASH_CURRENCY=13,
+    /**
+     * Decimal format expressed using compact notation
+     * (short form, corresponds to UNumberCompactStyle=UNUM_SHORT)
+     * e.g. "23K", "45B"
+     * @stable ICU 56
+     */
+    UNUM_DECIMAL_COMPACT_SHORT=14,
+    /**
+     * Decimal format expressed using compact notation
+     * (long form, corresponds to UNumberCompactStyle=UNUM_LONG)
+     * e.g. "23 thousand", "45 billion"
+     * @stable ICU 56
+     */
+    UNUM_DECIMAL_COMPACT_LONG=15,
+    /**
+     * Currency format with a currency symbol, e.g., "$1.00",
+     * using non-accounting style for negative values (e.g. minus sign).
+     * Overrides any style specified using -cf- key in locale.
+     * @stable ICU 56
+     */
+    UNUM_CURRENCY_STANDARD=16,
+
+#ifndef U_HIDE_DEPRECATED_API
+    /**
+     * One more than the highest normal UNumberFormatStyle value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
+     */
+    UNUM_FORMAT_STYLE_COUNT=17,
+#endif  // U_HIDE_DEPRECATED_API
+
     /**
      * Default format
      * @stable ICU 2.0
@@ -284,7 +325,13 @@ enum UCurrencySpacing {
     UNUM_CURRENCY_SURROUNDING_MATCH,
     /** @stable ICU 4.8 */
     UNUM_CURRENCY_INSERT,
-    /** @stable ICU 4.8 */
+
+    // Do not conditionalize the following with #ifndef U_HIDE_DEPRECATED_API,
+    // it is needed for layout of DecimalFormatSymbols object.
+    /**
+     * One more than the highest normal UCurrencySpacing value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
+     */
     UNUM_CURRENCY_SPACING_COUNT
 };
 typedef enum UCurrencySpacing UCurrencySpacing; /**< @stable ICU 4.8 */
@@ -318,8 +365,13 @@ typedef enum UNumberFormatFields {
     UNUM_PERMILL_FIELD,
     /** @stable ICU 49 */
     UNUM_SIGN_FIELD,
-    /** @stable ICU 49 */
+#ifndef U_HIDE_DEPRECATED_API
+    /**
+     * One more than the highest normal UNumberFormatFields value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
+     */
     UNUM_FIELD_COUNT
+#endif  // U_HIDE_DEPRECATED_API
 } UNumberFormatFields;
 
 
@@ -571,7 +623,6 @@ unum_formatDoubleCurrency(const UNumberFormat* fmt,
                           UFieldPosition* pos,
                           UErrorCode* status);
 
-#ifndef U_HIDE_DRAFT_API
 /**
  * Format a UFormattable into a string.
  * @param fmt the formatter to use
@@ -590,20 +641,21 @@ unum_formatDoubleCurrency(const UNumberFormat* fmt,
  * @return the total buffer size needed; if greater than resultLength,
  * the output was truncated. Will return 0 on error.
  * @see unum_parseToUFormattable
- * @draft ICU 52
+ * @stable ICU 52
  */
-U_DRAFT int32_t U_EXPORT2
+U_STABLE int32_t U_EXPORT2
 unum_formatUFormattable(const UNumberFormat* fmt,
                         const UFormattable *number,
                         UChar *result,
                         int32_t resultLength,
                         UFieldPosition *pos,
                         UErrorCode *status);
-#endif  /* U_HIDE_DRAFT_API */
 
 /**
 * Parse a string into an integer using a UNumberFormat.
 * The string will be parsed according to the UNumberFormat's locale.
+* Note: parsing is not supported for styles UNUM_DECIMAL_COMPACT_SHORT
+* and UNUM_DECIMAL_COMPACT_LONG.
 * @param fmt The formatter to use.
 * @param text The text to parse.
 * @param textLength The length of text, or -1 if null-terminated.
@@ -628,6 +680,8 @@ unum_parse(    const   UNumberFormat*  fmt,
 /**
 * Parse a string into an int64 using a UNumberFormat.
 * The string will be parsed according to the UNumberFormat's locale.
+* Note: parsing is not supported for styles UNUM_DECIMAL_COMPACT_SHORT
+* and UNUM_DECIMAL_COMPACT_LONG.
 * @param fmt The formatter to use.
 * @param text The text to parse.
 * @param textLength The length of text, or -1 if null-terminated.
@@ -652,6 +706,8 @@ unum_parseInt64(const UNumberFormat*  fmt,
 /**
 * Parse a string into a double using a UNumberFormat.
 * The string will be parsed according to the UNumberFormat's locale.
+* Note: parsing is not supported for styles UNUM_DECIMAL_COMPACT_SHORT
+* and UNUM_DECIMAL_COMPACT_LONG.
 * @param fmt The formatter to use.
 * @param text The text to parse.
 * @param textLength The length of text, or -1 if null-terminated.
@@ -680,6 +736,8 @@ unum_parseDouble(    const   UNumberFormat*  fmt,
 * The syntax of the output is a "numeric string"
 * as defined in the Decimal Arithmetic Specification, available at
 * http://speleotrove.com/decimal
+* Note: parsing is not supported for styles UNUM_DECIMAL_COMPACT_SHORT
+* and UNUM_DECIMAL_COMPACT_LONG.
 * @param fmt The formatter to use.
 * @param text The text to parse.
 * @param textLength The length of text, or -1 if null-terminated.
@@ -735,11 +793,12 @@ unum_parseDoubleCurrency(const UNumberFormat* fmt,
                          UChar* currency,
                          UErrorCode* status);
 
-#ifndef U_HIDE_DRAFT_API
 /**
  * Parse a UChar string into a UFormattable.
  * Example code:
  * \snippet test/cintltst/cnumtst.c unum_parseToUFormattable
+ * Note: parsing is not supported for styles UNUM_DECIMAL_COMPACT_SHORT
+ * and UNUM_DECIMAL_COMPACT_LONG.
  * @param fmt the formatter to use
  * @param result the UFormattable to hold the result. If NULL, a new UFormattable will be allocated (which the caller must close with ufmt_close).
  * @param text the text to parse
@@ -752,16 +811,15 @@ unum_parseDoubleCurrency(const UNumberFormat* fmt,
  * @return the UFormattable.  Will be ==result unless NULL was passed in for result, in which case it will be the newly opened UFormattable.
  * @see ufmt_getType
  * @see ufmt_close
- * @draft ICU 52
+ * @stable ICU 52
  */
-U_DRAFT UFormattable* U_EXPORT2
+U_STABLE UFormattable* U_EXPORT2
 unum_parseToUFormattable(const UNumberFormat* fmt,
                          UFormattable *result,
                          const UChar* text,
                          int32_t textLength,
                          int32_t* parsePos, /* 0 = start */
                          UErrorCode* status);
-#endif  /* U_HIDE_DRAFT_API */
 
 /**
  * Set the pattern used by a UNumberFormat.  This can only be used
@@ -826,6 +884,9 @@ typedef enum UNumberFormatAttributeValue {
   UNUM_YES = 1,
   /** @internal */
   UNUM_MAYBE = 2
+#else
+  /** @internal */
+  UNUM_FORMAT_ATTRIBUTE_VALUE_HIDDEN
 #endif /* U_HIDE_INTERNAL_API */
 } UNumberFormatAttributeValue;
 #endif
@@ -882,7 +943,7 @@ typedef enum UNumberFormatAttribute {
    * This is an internal ICU API. Do not use.
    * @internal
    */
-  UNUM_PARSE_ALL_INPUT = UNUM_LENIENT_PARSE + 1,
+  UNUM_PARSE_ALL_INPUT = 20,
 #endif
   /** 
     * Scale, which adjusts the position of the
@@ -893,13 +954,25 @@ typedef enum UNumberFormatAttribute {
     * <p>Example: setting the scale to -4, 123 formats as "0.0123"
     *
    * @stable ICU 51 */
-  UNUM_SCALE = UNUM_LENIENT_PARSE + 2,
-
+  UNUM_SCALE = 21,
 #ifndef U_HIDE_INTERNAL_API
-  /** Count of "regular" numeric attributes.
-   * @internal */
-  UNUM_NUMERIC_ATTRIBUTE_COUNT = UNUM_LENIENT_PARSE + 3,
+  /**
+   * Minimum grouping digits, technology preview.
+   * See DecimalFormat::getMinimumGroupingDigits().
+   *
+   * @internal technology preview
+   */
+  UNUM_MINIMUM_GROUPING_DIGITS = 22,
+  /* TODO: test C API when it becomes @draft */
 #endif  /* U_HIDE_INTERNAL_API */
+
+  /** 
+   * if this attribute is set to 0, it is set to UNUM_CURRENCY_STANDARD purpose,
+   * otherwise it is UNUM_CURRENCY_CASH purpose
+   * Default: 0 (UNUM_CURRENCY_STANDARD purpose)
+   * @stable ICU 54
+   */
+  UNUM_CURRENCY_USAGE = 23,
 
   /* The following cannot be #ifndef U_HIDE_INTERNAL_API, needed in .h file variable declararions */
   /** One below the first bitfield-boolean item.
@@ -921,10 +994,20 @@ typedef enum UNumberFormatAttribute {
    */
   UNUM_PARSE_NO_EXPONENT,
 
+  /** 
+   * if this attribute is set to 1, specifies that, if the pattern contains a 
+   * decimal mark the input is required to have one. If this attribute is set to 0,
+   * specifies that input does not have to contain a decimal mark.
+   * Has no effect on formatting.
+   * Default: 0 (unset)
+   * @stable ICU 54
+   */
+  UNUM_PARSE_DECIMAL_MARK_REQUIRED = 0x1002,
+
   /* The following cannot be #ifndef U_HIDE_INTERNAL_API, needed in .h file variable declararions */
   /** Limit of boolean attributes.
    * @internal */
-  UNUM_LIMIT_BOOLEAN_ATTRIBUTE
+  UNUM_LIMIT_BOOLEAN_ATTRIBUTE = 0x1003
 } UNumberFormatAttribute;
 
 /**
@@ -935,7 +1018,7 @@ typedef enum UNumberFormatAttribute {
 * UNUM_DECIMAL_ALWAYS_SHOWN, UNUM_MAX_INTEGER_DIGITS, UNUM_MIN_INTEGER_DIGITS, UNUM_INTEGER_DIGITS,
 * UNUM_MAX_FRACTION_DIGITS, UNUM_MIN_FRACTION_DIGITS, UNUM_FRACTION_DIGITS, UNUM_MULTIPLIER,
 * UNUM_GROUPING_SIZE, UNUM_ROUNDING_MODE, UNUM_FORMAT_WIDTH, UNUM_PADDING_POSITION, UNUM_SECONDARY_GROUPING_SIZE,
-* UNUM_SCALE.
+* UNUM_SCALE, UNUM_MINIMUM_GROUPING_DIGITS.
 * @return The value of attr.
 * @see unum_setAttribute
 * @see unum_getDoubleAttribute
@@ -958,7 +1041,7 @@ unum_getAttribute(const UNumberFormat*          fmt,
 * UNUM_DECIMAL_ALWAYS_SHOWN, UNUM_MAX_INTEGER_DIGITS, UNUM_MIN_INTEGER_DIGITS, UNUM_INTEGER_DIGITS,
 * UNUM_MAX_FRACTION_DIGITS, UNUM_MIN_FRACTION_DIGITS, UNUM_FRACTION_DIGITS, UNUM_MULTIPLIER,
 * UNUM_GROUPING_SIZE, UNUM_ROUNDING_MODE, UNUM_FORMAT_WIDTH, UNUM_PADDING_POSITION, UNUM_SECONDARY_GROUPING_SIZE,
-* UNUM_LENIENT_PARSE, or UNUM_SCALE.
+* UNUM_LENIENT_PARSE, UNUM_SCALE, UNUM_MINIMUM_GROUPING_DIGITS.
 * @param newValue The new value of attr.
 * @see unum_getAttribute
 * @see unum_getDoubleAttribute
@@ -1025,14 +1108,20 @@ typedef enum UNumberFormatTextAttribute {
   /** The ISO currency code */
   UNUM_CURRENCY_CODE,
   /**
-   * The default rule set.  This is only available with rule-based formatters.
+   * The default rule set, such as "%spellout-numbering-year:", "%spellout-cardinal:",
+   * "%spellout-ordinal-masculine-plural:", "%spellout-ordinal-feminine:", or
+   * "%spellout-ordinal-neuter:". The available public rulesets can be listed using
+   * unum_getTextAttribute with UNUM_PUBLIC_RULESETS. This is only available with
+   * rule-based formatters.
    * @stable ICU 3.0
    */
   UNUM_DEFAULT_RULESET,
   /**
    * The public rule sets.  This is only available with rule-based formatters.
    * This is a read-only attribute.  The public rulesets are returned as a
-   * single string, with each ruleset name delimited by ';' (semicolon).
+   * single string, with each ruleset name delimited by ';' (semicolon). See the
+   * CLDR LDML spec for more information about RBNF rulesets:
+   * http://www.unicode.org/reports/tr35/tr35-numbers.html#Rule-Based_Number_Formatting
    * @stable ICU 3.0
    */
   UNUM_PUBLIC_RULESETS
@@ -1190,8 +1279,19 @@ typedef enum UNumberFormatSymbol {
    * @stable ICU 4.6
    */
   UNUM_NINE_DIGIT_SYMBOL = 26,
-  /** count symbol constants */
-  UNUM_FORMAT_SYMBOL_COUNT = 27
+
+  /** Multiplication sign
+   * @stable ICU 54
+   */
+  UNUM_EXPONENT_MULTIPLICATION_SYMBOL = 27,
+
+#ifndef U_HIDE_DEPRECATED_API
+    /**
+     * One more than the highest normal UNumberFormatSymbol value.
+     * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
+     */
+  UNUM_FORMAT_SYMBOL_COUNT = 28
+#endif  // U_HIDE_DEPRECATED_API
 } UNumberFormatSymbol;
 
 /**
@@ -1252,16 +1352,15 @@ unum_getLocaleByType(const UNumberFormat *fmt,
                      ULocDataLocaleType type,
                      UErrorCode* status); 
 
-#ifndef U_HIDE_DRAFT_API
 /**
  * Set a particular UDisplayContext value in the formatter, such as
  * UDISPCTX_CAPITALIZATION_FOR_STANDALONE.
  * @param fmt The formatter for which to set a UDisplayContext value.
  * @param value The UDisplayContext value to set.
  * @param status A pointer to an UErrorCode to receive any errors
- * @draft ICU 53
+ * @stable ICU 53
  */
-U_DRAFT void U_EXPORT2
+U_STABLE void U_EXPORT2
 unum_setContext(UNumberFormat* fmt, UDisplayContext value, UErrorCode* status);
 
 /**
@@ -1271,12 +1370,10 @@ unum_setContext(UNumberFormat* fmt, UDisplayContext value, UErrorCode* status);
  * @param type The UDisplayContextType whose value to return
  * @param status A pointer to an UErrorCode to receive any errors
  * @return The UDisplayContextValue for the specified type.
- * @draft ICU 53
+ * @stable ICU 53
  */
-U_DRAFT UDisplayContext U_EXPORT2
+U_STABLE UDisplayContext U_EXPORT2
 unum_getContext(const UNumberFormat *fmt, UDisplayContextType type, UErrorCode* status);
-
-#endif  /* U_HIDE_DRAFT_API */
 
 #endif /* #if !UCONFIG_NO_FORMATTING */
 

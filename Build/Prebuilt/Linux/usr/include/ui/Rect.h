@@ -18,7 +18,11 @@
 #define ANDROID_UI_RECT
 
 #include <utils/Flattenable.h>
+#include <utils/Log.h>
 #include <utils/TypeHelpers.h>
+#include <log/log.h>
+
+#include <ui/FloatRect.h>
 #include <ui/Point.h>
 
 #include <android/rect.h>
@@ -30,16 +34,25 @@ class Rect : public ARect, public LightFlattenablePod<Rect>
 public:
     typedef ARect::value_type value_type;
 
+    static const Rect INVALID_RECT;
+    static const Rect EMPTY_RECT;
+
     // we don't provide copy-ctor and operator= on purpose
     // because we want the compiler generated versions
 
-    inline Rect() {
-    }
+    inline Rect() : Rect(INVALID_RECT) {}
 
-    inline Rect(int32_t w, int32_t h) {
+    template <typename T>
+    inline Rect(T w, T h) {
+        if (w > INT32_MAX) {
+            w = INT32_MAX;
+        }
+        if (h > INT32_MAX) {
+            h = INT32_MAX;
+        }
         left = top = 0;
-        right = w;
-        bottom = h;
+        right = static_cast<int32_t>(w);
+        bottom = static_cast<int32_t>(h);
     }
 
     inline Rect(int32_t l, int32_t t, int32_t r, int32_t b) {
@@ -163,11 +176,15 @@ public:
     // this calculates (Region(*this) - exclude).bounds() efficiently
     Rect reduce(const Rect& exclude) const;
 
-
     // for backward compatibility
     inline int32_t width() const { return getWidth(); }
     inline int32_t height() const { return getHeight(); }
     inline void set(const Rect& rhs) { operator = (rhs); }
+
+    FloatRect toFloatRect() const {
+        return {static_cast<float>(left), static_cast<float>(top),
+                static_cast<float>(right), static_cast<float>(bottom)};
+    }
 };
 
 ANDROID_BASIC_TYPES_TRAITS(Rect)

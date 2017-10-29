@@ -40,6 +40,12 @@ inline static const T divUp(const T &nom, const T &den) {
     }
 }
 
+/* == ceil(nom / den) * den. T must be integer type, alignment must be positive power of 2 */
+template<class T, class U>
+inline static const T align(const T &nom, const U &den) {
+    return (nom + (T)(den - 1)) & (T)~(den - 1);
+}
+
 template<class T>
 inline static T abs(const T &a) {
     return a < 0 ? -a : a;
@@ -62,6 +68,7 @@ void ENSURE_UNSIGNED_TYPE() {
 
 // needle is in range [hayStart, hayStart + haySize)
 template<class T, class U>
+__attribute__((no_sanitize("integer")))
 inline static bool isInRange(const T &hayStart, const U &haySize, const T &needle) {
     ENSURE_UNSIGNED_TYPE<U>();
     return (T)(hayStart + haySize) >= hayStart && needle >= hayStart && (U)(needle - hayStart) < haySize;
@@ -69,6 +76,7 @@ inline static bool isInRange(const T &hayStart, const U &haySize, const T &needl
 
 // [needleStart, needleStart + needleSize) is in range [hayStart, hayStart + haySize)
 template<class T, class U>
+__attribute__((no_sanitize("integer")))
 inline static bool isInRange(
         const T &hayStart, const U &haySize, const T &needleStart, const U &needleSize) {
     ENSURE_UNSIGNED_TYPE<U>();

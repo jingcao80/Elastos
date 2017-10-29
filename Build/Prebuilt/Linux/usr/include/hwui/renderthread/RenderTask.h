@@ -47,7 +47,7 @@ namespace renderthread {
 
 class ANDROID_API RenderTask {
 public:
-    ANDROID_API RenderTask() : mNext(0), mRunAt(0) {}
+    ANDROID_API RenderTask() : mNext(nullptr), mRunAt(0) {}
     ANDROID_API virtual ~RenderTask() {}
 
     ANDROID_API virtual void run() = 0;
@@ -60,26 +60,28 @@ class SignalingRenderTask : public RenderTask {
 public:
     // Takes ownership of task, caller owns lock and signal
     SignalingRenderTask(RenderTask* task, Mutex* lock, Condition* signal)
-            : mTask(task), mLock(lock), mSignal(signal) {}
-    virtual void run();
+            : mTask(task), mLock(lock), mSignal(signal), mHasRun(false) {}
+    virtual void run() override;
+    bool hasRun() const { return mHasRun; }
 
 private:
     RenderTask* mTask;
     Mutex* mLock;
     Condition* mSignal;
+    bool mHasRun;
 };
 
 typedef void* (*RunnableMethod)(void* data);
 
 class MethodInvokeRenderTask : public RenderTask {
 public:
-    MethodInvokeRenderTask(RunnableMethod method)
-        : mMethod(method), mReturnPtr(0) {}
+    explicit MethodInvokeRenderTask(RunnableMethod method)
+        : mMethod(method), mReturnPtr(nullptr) {}
 
     void* payload() { return mData; }
     void setReturnPtr(void** retptr) { mReturnPtr = retptr; }
 
-    virtual void run() {
+    virtual void run() override {
         void* retval = mMethod(mData);
         if (mReturnPtr) {
             *mReturnPtr = retval;

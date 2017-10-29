@@ -22,27 +22,27 @@
 #include <linux/netlink.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 struct ifaddrmsg {
- __u8 ifa_family;
- __u8 ifa_prefixlen;
- __u8 ifa_flags;
+  __u8 ifa_family;
+  __u8 ifa_prefixlen;
+  __u8 ifa_flags;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __u8 ifa_scope;
- __u32 ifa_index;
+  __u8 ifa_scope;
+  __u32 ifa_index;
 };
 enum {
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- IFA_UNSPEC,
- IFA_ADDRESS,
- IFA_LOCAL,
- IFA_LABEL,
+  IFA_UNSPEC,
+  IFA_ADDRESS,
+  IFA_LOCAL,
+  IFA_LABEL,
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- IFA_BROADCAST,
- IFA_ANYCAST,
- IFA_CACHEINFO,
- IFA_MULTICAST,
+  IFA_BROADCAST,
+  IFA_ANYCAST,
+  IFA_CACHEINFO,
+  IFA_MULTICAST,
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- IFA_FLAGS,
- __IFA_MAX,
+  IFA_FLAGS,
+  __IFA_MAX,
 };
 #define IFA_MAX (__IFA_MAX - 1)
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
@@ -59,15 +59,17 @@ enum {
 #define IFA_F_PERMANENT 0x80
 #define IFA_F_MANAGETEMPADDR 0x100
 #define IFA_F_NOPREFIXROUTE 0x200
+#define IFA_F_MCAUTOJOIN 0x400
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+#define IFA_F_STABLE_PRIVACY 0x800
 struct ifa_cacheinfo {
+  __u32 ifa_prefered;
+  __u32 ifa_valid;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __u32 ifa_prefered;
- __u32 ifa_valid;
- __u32 cstamp;
- __u32 tstamp;
-/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+  __u32 cstamp;
+  __u32 tstamp;
 };
-#define IFA_RTA(r) ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
-#define IFA_PAYLOAD(n) NLMSG_PAYLOAD(n,sizeof(struct ifaddrmsg))
-#endif
+#define IFA_RTA(r) ((struct rtattr *) (((char *) (r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+#define IFA_PAYLOAD(n) NLMSG_PAYLOAD(n, sizeof(struct ifaddrmsg))
+#endif

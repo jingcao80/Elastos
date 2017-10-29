@@ -32,6 +32,8 @@
 
 namespace android {
 
+extern const char *kMaxEncoderInputBuffers;
+
 struct AMessage;
 
 struct MediaCodecList : public BnMediaCodecList {
@@ -45,15 +47,50 @@ struct MediaCodecList : public BnMediaCodecList {
     virtual size_t countCodecs() const;
 
     virtual sp<MediaCodecInfo> getCodecInfo(size_t index) const {
+        if (index >= mCodecInfos.size()) {
+            ALOGE("b/24445127");
+            return NULL;
+        }
         return mCodecInfos.itemAt(index);
     }
+
+    virtual const sp<AMessage> getGlobalSettings() const;
 
     // to be used by MediaPlayerService alone
     static sp<IMediaCodecList> getLocalInstance();
 
+    // only to be used by getLocalInstance
+    static void *profilerThreadWrapper(void * /*arg*/);
+
+    // only to be used by MediaPlayerService
+    void parseTopLevelXMLFile(const char *path, bool ignore_errors = false);
+
+    enum Flags {
+        kPreferSoftwareCodecs   = 1,
+        kHardwareCodecsOnly     = 2,
+    };
+
+    static void findMatchingCodecs(
+            const char *mime,
+            bool createEncoder,
+            uint32_t flags,
+            Vector<AString> *matching);
+
+    static uint32_t getQuirksFor(const char *mComponentName);
+
+    static bool isSoftwareCodec(const AString &componentName);
+
+
 private:
+    class BinderDeathObserver : public IBinder::DeathRecipient {
+        void binderDied(const wp<IBinder> &the_late_who __unused);
+    };
+
+    static sp<BinderDeathObserver> sBinderDeathObserver;
+
     enum Section {
         SECTION_TOPLEVEL,
+        SECTION_SETTINGS,
         SECTION_DECODERS,
         SECTION_DECODER,
         SECTION_DECODER_TYPE,
@@ -68,20 +105,22 @@ private:
 
     status_t mInitCheck;
     Section mCurrentSection;
+    bool mUpdate;
     Vector<Section> mPastSections;
     int32_t mDepth;
     AString mHrefBase;
 
+    sp<AMessage> mGlobalSettings;
+    KeyedVector<AString, CodecSettings> mOverrides;
+
     Vector<sp<MediaCodecInfo> > mCodecInfos;
     sp<MediaCodecInfo> mCurrentInfo;
-    sp<IOMX> mOMX;
 
     MediaCodecList();
     ~MediaCodecList();
 
     status_t initCheck() const;
     void parseXMLFile(const char *path);
-    void parseTopLevelXMLFile(const char *path);
 
     static void StartElementHandlerWrapper(
             void *me, const char *name, const char **attrs);
@@ -92,8 +131,11 @@ private:
     void endElementHandler(const char *name);
 
     status_t includeXMLFile(const char **attrs);
+    status_t addSettingFromAttributes(const char **attrs);
     status_t addMediaCodecFromAttributes(bool encoder, const char **attrs);
     void addMediaCodec(bool encoder, const char *name, const char *type = NULL);
+
+    void setCurrentCodecInfo(bool encoder, const char *name, const char *type);
 
     status_t addQuirk(const char **attrs);
     status_t addTypeFromAttributes(const char **attrs);

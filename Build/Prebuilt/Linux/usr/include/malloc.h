@@ -17,23 +17,30 @@
 #ifndef LIBC_INCLUDE_MALLOC_H_
 #define LIBC_INCLUDE_MALLOC_H_
 
-/*
- * Declaration of malloc routines. Bionic uses dlmalloc (see
- * upstream-dlmalloc) but doesn't directly include it here to keep the
- * defined malloc.h interface small.
- */
 #include <sys/cdefs.h>
 #include <stddef.h>
+#include <stdio.h>
 
 __BEGIN_DECLS
 
-extern void* malloc(size_t byte_count) __mallocfunc __wur __attribute__((alloc_size(1)));
-extern void* calloc(size_t item_count, size_t item_size) __mallocfunc __wur __attribute__((alloc_size(1,2)));
-extern void* realloc(void* p, size_t byte_count) __wur __attribute__((alloc_size(2)));
-extern void free(void* p);
+#if defined(__clang__)
+/* clang should support alloc_size in the nearish future. */
+#if __has_attribute(alloc_size)
+#error "We should enable alloc_size for clang."
+#else
+#define __BIONIC_ALLOC_SIZE(...)
+#endif
+#else
+#define __BIONIC_ALLOC_SIZE(...) __attribute__((__alloc_size__(__VA_ARGS__)))
+#endif
 
-extern void* memalign(size_t alignment, size_t byte_count) __mallocfunc __wur __attribute__((alloc_size(2)));
-extern size_t malloc_usable_size(const void* p);
+void* malloc(size_t byte_count) __mallocfunc __BIONIC_ALLOC_SIZE(1) __wur;
+void* calloc(size_t item_count, size_t item_size) __mallocfunc __BIONIC_ALLOC_SIZE(1,2) __wur;
+void* realloc(void* p, size_t byte_count) __BIONIC_ALLOC_SIZE(2) __wur;
+void free(void* p);
+
+void* memalign(size_t alignment, size_t byte_count) __mallocfunc __BIONIC_ALLOC_SIZE(2) __wur;
+size_t malloc_usable_size(const void* p) __INTRODUCED_IN(17);
 
 #ifndef STRUCT_MALLINFO_DECLARED
 #define STRUCT_MALLINFO_DECLARED 1
@@ -51,7 +58,33 @@ struct mallinfo {
 };
 #endif  /* STRUCT_MALLINFO_DECLARED */
 
-extern struct mallinfo mallinfo(void);
+struct mallinfo mallinfo(void);
+
+/*
+ * XML structure for malloc_info(3) is in the following format:
+ *
+ * <malloc version="jemalloc-1">
+ *   <heap nr="INT">
+ *     <allocated-large>INT</allocated-large>
+ *     <allocated-huge>INT</allocated-huge>
+ *     <allocated-bins>INT</allocated-bins>
+ *     <bins-total>INT</bins-total>
+ *     <bin nr="INT">
+ *       <allocated>INT</allocated>
+ *       <nmalloc>INT</nmalloc>
+ *       <ndalloc>INT</ndalloc>
+ *     </bin>
+ *     <!-- more bins -->
+ *   </heap>
+ *   <!-- more heaps -->
+ * </malloc>
+ */
+int malloc_info(int, FILE*) __INTRODUCED_IN(23);
+
+/* mallopt options */
+#define M_DECAY_TIME -100
+
+int mallopt(int, int) __INTRODUCED_IN(26);
 
 __END_DECLS
 

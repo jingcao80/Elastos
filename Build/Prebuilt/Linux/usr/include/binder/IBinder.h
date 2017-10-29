@@ -23,8 +23,12 @@
 #include <utils/Vector.h>
 
 
+// linux/binder.h already defines this, but we can't just include it from there
+// because there are host builds that include this file.
+#ifndef B_PACK_CHARS
 #define B_PACK_CHARS(c1, c2, c3, c4) \
     ((((c1)<<24)) | (((c2)<<16)) | (((c3)<<8)) | (c4))
+#endif  // B_PACK_CHARS
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -33,6 +37,8 @@ class BBinder;
 class BpBinder;
 class IInterface;
 class Parcel;
+class IResultReceiver;
+class IShellCallback;
 
 /**
  * Base class and low-level protocol for a remotable object.
@@ -50,6 +56,7 @@ public:
 
         PING_TRANSACTION        = B_PACK_CHARS('_','P','N','G'),
         DUMP_TRANSACTION        = B_PACK_CHARS('_','D','M','P'),
+        SHELL_COMMAND_TRANSACTION = B_PACK_CHARS('_','C','M','D'),
         INTERFACE_TRANSACTION   = B_PACK_CHARS('_', 'N', 'T', 'F'),
         SYSPROPS_TRANSACTION    = B_PACK_CHARS('_', 'S', 'P', 'R'),
 
@@ -75,17 +82,32 @@ public:
     virtual bool            isBinderAlive() const = 0;
     virtual status_t        pingBinder() = 0;
     virtual status_t        dump(int fd, const Vector<String16>& args) = 0;
+    static  status_t        shellCommand(const sp<IBinder>& target, int in, int out, int err,
+                                         Vector<String16>& args, const sp<IShellCallback>& callback,
+                                         const sp<IResultReceiver>& resultReceiver);
 
     virtual status_t        transact(   uint32_t code,
                                         const Parcel& data,
                                         Parcel* reply,
                                         uint32_t flags = 0) = 0;
 
+    // DeathRecipient is pure abstract, there is no virtual method
+    // implementation to put in a translation unit in order to silence the
+    // weak vtables warning.
+    #if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wweak-vtables"
+    #endif
+
     class DeathRecipient : public virtual RefBase
     {
     public:
         virtual void binderDied(const wp<IBinder>& who) = 0;
     };
+
+    #if defined(__clang__)
+    #pragma clang diagnostic pop
+    #endif
 
     /**
      * Register the @a recipient for a notification if this binder

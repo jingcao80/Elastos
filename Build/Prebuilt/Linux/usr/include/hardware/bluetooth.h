@@ -1,7 +1,4 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution
- *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +35,7 @@ __BEGIN_DECLS
 #define BT_STACK_TEST_MODULE_ID "bluetooth_test"
 
 
-/* Bluetooth profile interface IDs */
+/** Bluetooth profile interface IDs */
 
 #define BT_PROFILE_HANDSFREE_ID "handsfree"
 #define BT_PROFILE_HANDSFREE_CLIENT_ID "handsfree_client"
@@ -50,12 +47,13 @@ __BEGIN_DECLS
 #define BT_PROFILE_HIDDEV_ID "hiddev"
 #define BT_PROFILE_PAN_ID "pan"
 #define BT_PROFILE_MAP_CLIENT_ID "map_client"
-
+#define BT_PROFILE_SDP_CLIENT_ID "sdp"
 #define BT_PROFILE_GATT_ID "gatt"
 #define BT_PROFILE_AV_RC_ID "avrcp"
-#define WIPOWER_PROFILE_ID "wipower"
-
 #define BT_PROFILE_AV_RC_CTRL_ID "avrcp_ctrl"
+
+/** Bluetooth test interface IDs */
+#define BT_TEST_INTERFACE_MCAP_ID "mcap_test"
 
 /** Bluetooth Address */
 typedef struct {
@@ -95,8 +93,10 @@ typedef enum {
     BT_STATUS_UNHANDLED,
     BT_STATUS_AUTH_FAILURE,
     BT_STATUS_RMT_DEV_DOWN,
-    BT_STATUS_AUTH_REJECTED
-
+    BT_STATUS_AUTH_REJECTED,
+    BT_STATUS_JNI_ENVIRONMENT_ERROR,
+    BT_STATUS_JNI_THREAD_ATTACH_ERROR,
+    BT_STATUS_WAKELOCK_ERROR
 } bt_status_t;
 
 /** Bluetooth PinKey Code */
@@ -112,6 +112,12 @@ typedef struct {
     uint64_t idle_time;     /* in ms */
     uint64_t energy_used;   /* a product of mA, V and ms */
 } __attribute__((packed))bt_activity_energy_info;
+
+typedef struct {
+    int32_t app_uid;
+    uint64_t tx_bytes;
+    uint64_t rx_bytes;
+} __attribute__((packed))bt_uid_traffic_t;
 
 /** Bluetooth Adapter Discovery state */
 typedef enum {
@@ -138,6 +144,7 @@ typedef struct
    char name[256]; // what's the maximum length
 } bt_service_record_t;
 
+
 /** Bluetooth Remote Version info */
 typedef struct
 {
@@ -148,25 +155,23 @@ typedef struct
 
 typedef struct
 {
+    uint16_t version_supported;
     uint8_t local_privacy_enabled;
     uint8_t max_adv_instance;
     uint8_t rpa_offload_supported;
     uint8_t max_irk_list_size;
     uint8_t max_adv_filter_supported;
-    uint8_t scan_result_storage_size_lobyte;
-    uint8_t scan_result_storage_size_hibyte;
     uint8_t activity_energy_info_supported;
+    uint16_t scan_result_storage_size;
+    uint16_t total_trackable_advertisers;
+    bool extended_scan_support;
+    bool debug_logging_supported;
+    bool le_2m_phy_supported;
+    bool le_coded_phy_supported;
+    bool le_extended_advertising_supported;
+    bool le_periodic_advertising_supported;
+    uint16_t le_maximum_advertising_data_length;
 }bt_local_le_features_t;
-
-/* Bluetooth Remote DI record */
-typedef struct
-{
-    int       vendor;
-    int       vendor_id_source;
-    int       product;
-    int       version;
-    int       spec_id;
-} bt_remote_di_record_t;
 
 /* Bluetooth Adapter and Remote Device property types */
 typedef enum {
@@ -257,21 +262,6 @@ typedef enum {
      */
     BT_PROPERTY_LOCAL_LE_FEATURES,
 
-   /**
-    * Description - Trust value of the remote device
-    * Access mode - GET and SET
-    * Data type   - boolean.
-    */
-    BT_PROPERTY_REMOTE_TRUST_VALUE = 0xFD,
-
-    /* Properties unique to remote device */
-    /**
-     * Description - DI Record of the remote device
-     * Access mode - GET
-     * Data type   - bt_remote_di_record_t.
-     */
-    BT_PROPERTY_REMOTE_DI_RECORD = 0xFE,
-
     BT_PROPERTY_REMOTE_DEVICE_TIMESTAMP = 0xFF,
 } bt_property_type_t;
 
@@ -282,6 +272,20 @@ typedef struct
     int len;
     void *val;
 } bt_property_t;
+
+/** Bluetooth Out Of Band data for bonding */
+typedef struct
+{
+   uint8_t le_bt_dev_addr[7]; /* LE Bluetooth Device Address */
+   uint8_t c192[16]; /* Simple Pairing Hash C-192 */
+   uint8_t r192[16]; /* Simple Pairing Randomizer R-192 */
+   uint8_t c256[16]; /* Simple Pairing Hash C-256 */
+   uint8_t r256[16]; /* Simple Pairing Randomizer R-256 */
+   uint8_t sm_tk[16]; /* Security Manager TK Value */
+   uint8_t le_sc_c[16]; /* LE Secure Connections Confirmation Value */
+   uint8_t le_sc_r[16]; /* LE Secure Connections Random Value */
+} bt_out_of_band_data_t;
+
 
 
 /** Bluetooth Device Type */
@@ -345,7 +349,7 @@ typedef void (*discovery_state_changed_callback)(bt_discovery_state_t state);
 
 /** Bluetooth Legacy PinKey Request callback */
 typedef void (*pin_request_callback)(bt_bdaddr_t *remote_bd_addr,
-                                        bt_bdname_t *bd_name, uint32_t cod, uint8_t secure);
+                                        bt_bdname_t *bd_name, uint32_t cod, bool min_16_digit);
 
 /** Bluetooth SSP Request callback - Just Works & Numeric Comparison*/
 /** pass_key - Shall be 0 for BT_SSP_PAIRING_VARIANT_CONSENT &
@@ -367,20 +371,6 @@ typedef void (*bond_state_changed_callback)(bt_status_t status,
 /** Bluetooth ACL connection state changed callback */
 typedef void (*acl_state_changed_callback)(bt_status_t status, bt_bdaddr_t *remote_bd_addr,
                                             bt_acl_state_t state);
-/**  Callback invoked when write rssi threshold command complete */
-typedef void (*le_lpp_write_rssi_thresh_callback) (bt_bdaddr_t *bda, int status);
-
-/**  Callback invoked when read rssi threshold command complete */
-typedef void (*le_lpp_read_rssi_thresh_callback)(bt_bdaddr_t *bda, int low, int upper,
-                                                 int alert, int status);
-
-/**  Callback invoked when enable or disable rssi monitor command complete */
-typedef void (*le_lpp_enable_rssi_monitor_callback)(bt_bdaddr_t *bda,
-                                                    int enable, int status);
-
-/**  Callback triggered when rssi threshold event reported */
-typedef void (*le_lpp_rssi_threshold_evt_callback)(bt_bdaddr_t *bda,
-                                                   int evt_type, int rssi);
 
 typedef enum {
     ASSOCIATE_JVM,
@@ -406,8 +396,12 @@ typedef void (*le_test_mode_callback)(bt_status_t status, uint16_t num_packets);
  * If the ctrl_state value is 0, it means the API call failed
  * Time values-In milliseconds as returned by the controller
  * Energy used-Value as returned by the controller
- * Status-Provides the status of the read_energy_info API call */
-typedef void (*energy_info_callback)(bt_activity_energy_info *energy_info);
+ * Status-Provides the status of the read_energy_info API call
+ * uid_data provides an array of bt_uid_traffic_t, where the array is terminated by an element with
+ * app_uid set to -1.
+ */
+typedef void (*energy_info_callback)(bt_activity_energy_info *energy_info,
+                                     bt_uid_traffic_t *uid_data);
 
 /** TODO: Add callbacks for Link Up/Down and other generic
   *  notifications/callbacks */
@@ -429,10 +423,6 @@ typedef struct {
     dut_mode_recv_callback dut_mode_recv_cb;
     le_test_mode_callback le_test_mode_cb;
     energy_info_callback energy_info_cb;
-    le_lpp_write_rssi_thresh_callback          le_lpp_write_rssi_thresh_cb;
-    le_lpp_read_rssi_thresh_callback           le_lpp_read_rssi_thresh_cb;
-    le_lpp_enable_rssi_monitor_callback        le_lpp_enable_rssi_monitor_cb;
-    le_lpp_rssi_threshold_evt_callback         le_lpp_rssi_threshold_evt_cb;
 } bt_callbacks_t;
 
 typedef void (*alarm_cb)(void *data);
@@ -482,20 +472,14 @@ typedef struct {
      */
     int (*init)(bt_callbacks_t* callbacks );
 
-    /*adds callbacks for QC related calls to the btif env*/
-    int (*initq)(bt_callbacks_t* callbacks);
-
     /** Enable Bluetooth. */
-    int (*enable)(void);
+    int (*enable)(bool guest_mode);
 
     /** Disable Bluetooth. */
     int (*disable)(void);
 
     /** Closes the interface. */
     void (*cleanup)(void);
-
-    /** SSR cleanup. */
-    void (*ssrcleanup)(void);
 
     /** Get all Bluetooth Adapter properties at init */
     int (*get_adapter_properties)(void);
@@ -536,6 +520,10 @@ typedef struct {
     /** Create Bluetooth Bonding */
     int (*create_bond)(const bt_bdaddr_t *bd_addr, int transport);
 
+    /** Create Bluetooth Bond using out of band data */
+    int (*create_bond_out_of_band)(const bt_bdaddr_t *bd_addr, int transport,
+                                   const bt_out_of_band_data_t *oob_data);
+
     /** Remove Bond */
     int (*remove_bond)(const bt_bdaddr_t *bd_addr);
 
@@ -575,9 +563,6 @@ typedef struct {
     /* opcode MUST be one of: LE_Receiver_Test, LE_Transmitter_Test, LE_Test_End */
     int (*le_test_mode)(uint16_t opcode, uint8_t *buf, uint8_t len);
 
-    /* enable or disable bluetooth HCI snoop log */
-    int (*config_hci_snoop_log)(uint8_t enable);
-
     /** Sets the OS call-out functions that bluedroid needs for alarms and wake locks.
       * This should be called immediately after a successful |init|.
       */
@@ -587,13 +572,31 @@ typedef struct {
       * Success indicates that the VSC command was sent to controller
       */
     int (*read_energy_info)();
-    /** BT stack Test interface */
-    const void* (*get_testapp_interface)(int test_app_profile);
-    /** rssi monitoring */
-    bt_status_t (*le_lpp_write_rssi_threshold)(const bt_bdaddr_t *remote_bda, char min, char max);
-    bt_status_t (*le_lpp_enable_rssi_monitor)(const bt_bdaddr_t *remote_bda, int enable);
-    bt_status_t (*le_lpp_read_rssi_threshold)(const bt_bdaddr_t *remote_bda);
 
+    /**
+     * Native support for dumpsys function
+     * Function is synchronous and |fd| is owned by caller.
+     * |arguments| are arguments which may affect the output, encoded as
+     * UTF-8 strings.
+     */
+    void (*dump)(int fd, const char **arguments);
+
+    /**
+     * Clear /data/misc/bt_config.conf and erase all stored connections
+     */
+    int (*config_clear)(void);
+
+    /**
+     * Clear (reset) the dynamic portion of the device interoperability database.
+     */
+    void (*interop_database_clear)(void);
+
+    /**
+     * Add a new device interoperability workaround for a remote device whose
+     * first |len| bytes of the its device address match |addr|.
+     * NOTE: |feature| has to match an item defined in interop_feature_t (interop.h).
+     */
+    void (*interop_database_add)(uint16_t feature, const bt_bdaddr_t *addr, size_t len);
 } bt_interface_t;
 
 /** TODO: Need to add APIs for Service Discovery, Service authorization and
@@ -606,6 +609,8 @@ typedef struct {
 } bluetooth_device_t;
 
 typedef bluetooth_device_t bluetooth_module_t;
+
+
 __END_DECLS
 
 #endif /* ANDROID_INCLUDE_BLUETOOTH_H */

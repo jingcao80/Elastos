@@ -18,16 +18,19 @@
 #define ANDROID_CLIENT_CAMERA2_CAMERAMETADATA_CPP
 
 #include "system/camera_metadata.h"
+
 #include <utils/String8.h>
 #include <utils/Vector.h>
+#include <binder/Parcelable.h>
 
 namespace android {
-class Parcel;
+
+class VendorTagDescriptor;
 
 /**
  * A convenience wrapper around the C-based camera_metadata_t library.
  */
-class CameraMetadata {
+class CameraMetadata: public Parcelable {
   public:
     /** Creates an empty object; best used when expecting to acquire contents
      * from elsewhere */
@@ -56,7 +59,7 @@ class CameraMetadata {
      * thread-safety, it simply prevents the camera_metadata_t pointer returned
      * here from being accidentally invalidated by CameraMetadata operations.
      */
-    const camera_metadata_t* getAndLock();
+    const camera_metadata_t* getAndLock() const;
 
     /**
      * Unlock the CameraMetadata for use again. After this unlock, the pointer
@@ -64,7 +67,7 @@ class CameraMetadata {
      * from getAndLock must be provided to guarantee that the right object is
      * being unlocked.
      */
-    status_t unlock(const camera_metadata_t *buffer);
+    status_t unlock(const camera_metadata_t *buffer) const;
 
     /**
      * Release a raw metadata buffer to the caller. After this call,
@@ -137,6 +140,8 @@ class CameraMetadata {
             const camera_metadata_rational_t *data, size_t data_count);
     status_t update(uint32_t tag,
             const String8 &string);
+    status_t update(const camera_metadata_ro_entry &entry);
+
 
     template<typename T>
     status_t update(uint32_t tag, Vector<T> data) {
@@ -186,8 +191,8 @@ class CameraMetadata {
      */
 
     // Metadata object is unchanged when reading from parcel fails.
-    status_t readFromParcel(Parcel *parcel);
-    status_t writeToParcel(Parcel *parcel) const;
+    virtual status_t readFromParcel(const Parcel *parcel) override;
+    virtual status_t writeToParcel(Parcel *parcel) const override;
 
     /**
       * Caller becomes the owner of the new metadata
@@ -206,9 +211,18 @@ class CameraMetadata {
     static status_t writeToParcel(Parcel &parcel,
                                   const camera_metadata_t* metadata);
 
+    /**
+     * Find tag id for a given tag name, also checking vendor tags if available.
+     * On success, returns OK and writes the tag id into tag.
+     *
+     * This is a slow method.
+     */
+    static status_t getTagFromName(const char *name,
+            const VendorTagDescriptor* vTags, uint32_t *tag);
+
   private:
     camera_metadata_t *mBuffer;
-    bool               mLocked;
+    mutable bool       mLocked;
 
     /**
      * Check if tag has a given type
@@ -227,6 +241,15 @@ class CameraMetadata {
 
 };
 
-}; // namespace android
+namespace hardware {
+namespace camera2 {
+namespace impl {
+using ::android::CameraMetadata;
+typedef CameraMetadata CameraMetadataNative;
+}
+}
+}
+
+} // namespace android
 
 #endif

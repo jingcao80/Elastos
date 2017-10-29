@@ -19,32 +19,56 @@
 #define ANDROID_IOMX_H_
 
 #include <binder/IInterface.h>
-#include <gui/IGraphicBufferProducer.h>
-#include <ui/GraphicBuffer.h>
 #include <utils/List.h>
 #include <utils/String8.h>
+#include <cutils/native_handle.h>
+
+#include <list>
+
+#include <hidl/HybridInterface.h>
+#include <media/hardware/MetadataBufferType.h>
+#include <android/hardware/media/omx/1.0/IOmxNode.h>
 
 #include <OMX_Core.h>
 #include <OMX_Video.h>
 
 namespace android {
 
+class IGraphicBufferProducer;
+class IGraphicBufferSource;
 class IMemory;
+class IOMXBufferSource;
+class IOMXNode;
 class IOMXObserver;
-class IOMXRenderer;
-class Surface;
+class NativeHandle;
+class OMXBuffer;
+struct omx_message;
+
+using hardware::media::omx::V1_0::IOmxNode;
 
 class IOMX : public IInterface {
 public:
     DECLARE_META_INTERFACE(OMX);
 
     typedef uint32_t buffer_id;
-    typedef uint32_t node_id;
 
-    // Given a node_id and the calling process' pid, returns true iff
-    // the implementation of the OMX interface lives in the same
-    // process.
-    virtual bool livesLocally(node_id node, pid_t pid) = 0;
+    enum {
+        kFenceTimeoutMs = 1000
+    };
+
+    enum PortMode {
+        kPortModePresetStart = 0,
+        kPortModePresetByteBuffer,
+        kPortModePresetANWBuffer,
+        kPortModePresetSecureBuffer,
+        kPortModePresetEnd,
+
+        kPortModeDynamicStart = 100,
+        kPortModeDynamicANWBuffer,      // uses metadata mode kMetadataBufferTypeANWBuffer
+                                        // or kMetadataBufferTypeGrallocSource
+        kPortModeDynamicNativeHandle,   // uses metadata mode kMetadataBufferTypeNativeHandleSource
+        kPortModeDynamicEnd,
+    };
 
     struct ComponentInfo {
         String8 mName;
@@ -54,108 +78,98 @@ public:
 
     virtual status_t allocateNode(
             const char *name, const sp<IOMXObserver> &observer,
-            node_id *node) = 0;
-
-    virtual status_t freeNode(node_id node) = 0;
-
-    virtual status_t sendCommand(
-            node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param) = 0;
-
-    virtual status_t getParameter(
-            node_id node, OMX_INDEXTYPE index,
-            void *params, size_t size) = 0;
-
-    virtual status_t setParameter(
-            node_id node, OMX_INDEXTYPE index,
-            const void *params, size_t size) = 0;
-
-    virtual status_t getConfig(
-            node_id node, OMX_INDEXTYPE index,
-            void *params, size_t size) = 0;
-
-    virtual status_t setConfig(
-            node_id node, OMX_INDEXTYPE index,
-            const void *params, size_t size) = 0;
-
-    virtual status_t getState(
-            node_id node, OMX_STATETYPE* state) = 0;
-
-    virtual status_t storeMetaDataInBuffers(
-            node_id node, OMX_U32 port_index, OMX_BOOL enable) = 0;
-
-    virtual status_t prepareForAdaptivePlayback(
-            node_id node, OMX_U32 portIndex, OMX_BOOL enable,
-            OMX_U32 maxFrameWidth, OMX_U32 maxFrameHeight) = 0;
-
-   virtual status_t configureVideoTunnelMode(
-            node_id node, OMX_U32 portIndex, OMX_BOOL tunneled,
-            OMX_U32 audioHwSync, native_handle_t **sidebandHandle) = 0;
-
-    virtual status_t enableGraphicBuffers(
-            node_id node, OMX_U32 port_index, OMX_BOOL enable) = 0;
-
-    virtual status_t getGraphicBufferUsage(
-            node_id node, OMX_U32 port_index, OMX_U32* usage) = 0;
-
-    virtual status_t useBuffer(
-            node_id node, OMX_U32 port_index, const sp<IMemory> &params,
-            buffer_id *buffer) = 0;
-
-    virtual status_t useGraphicBuffer(
-            node_id node, OMX_U32 port_index,
-            const sp<GraphicBuffer> &graphicBuffer, buffer_id *buffer) = 0;
-
-    virtual status_t updateGraphicBufferInMeta(
-            node_id node, OMX_U32 port_index,
-            const sp<GraphicBuffer> &graphicBuffer, buffer_id buffer) = 0;
+            sp<IOMXNode> *omxNode) = 0;
 
     virtual status_t createInputSurface(
-            node_id node, OMX_U32 port_index,
-            sp<IGraphicBufferProducer> *bufferProducer) = 0;
+            sp<IGraphicBufferProducer> *bufferProducer,
+            sp<IGraphicBufferSource> *bufferSource) = 0;
+};
 
-    virtual status_t signalEndOfInputStream(node_id node) = 0;
+class IOMXNode : public IInterface {
+public:
+    DECLARE_HYBRID_META_INTERFACE(OMXNode, IOmxNode);
 
-    // This API clearly only makes sense if the caller lives in the
-    // same process as the callee, i.e. is the media_server, as the
-    // returned "buffer_data" pointer is just that, a pointer into local
-    // address space.
-    virtual status_t allocateBuffer(
-            node_id node, OMX_U32 port_index, size_t size,
-            buffer_id *buffer, void **buffer_data) = 0;
+    typedef IOMX::buffer_id buffer_id;
 
-    virtual status_t allocateBufferWithBackup(
-            node_id node, OMX_U32 port_index, const sp<IMemory> &params,
-            buffer_id *buffer) = 0;
+    virtual status_t freeNode() = 0;
 
+    virtual status_t sendCommand(
+            OMX_COMMANDTYPE cmd, OMX_S32 param) = 0;
+
+    virtual status_t getParameter(
+            OMX_INDEXTYPE index, void *params, size_t size) = 0;
+
+    virtual status_t setParameter(
+            OMX_INDEXTYPE index, const void *params, size_t size) = 0;
+
+    virtual status_t getConfig(
+            OMX_INDEXTYPE index, void *params, size_t size) = 0;
+
+    virtual status_t setConfig(
+            OMX_INDEXTYPE index, const void *params, size_t size) = 0;
+
+    virtual status_t setPortMode(
+            OMX_U32 port_index, IOMX::PortMode mode) = 0;
+
+    virtual status_t prepareForAdaptivePlayback(
+            OMX_U32 portIndex, OMX_BOOL enable,
+            OMX_U32 maxFrameWidth, OMX_U32 maxFrameHeight) = 0;
+
+    virtual status_t configureVideoTunnelMode(
+            OMX_U32 portIndex, OMX_BOOL tunneled,
+            OMX_U32 audioHwSync, native_handle_t **sidebandHandle) = 0;
+
+    virtual status_t getGraphicBufferUsage(
+            OMX_U32 port_index, OMX_U32* usage) = 0;
+
+    virtual status_t setInputSurface(
+            const sp<IOMXBufferSource> &bufferSource) = 0;
+
+    // Allocate an opaque buffer as a native handle. If component supports returning native
+    // handles, those are returned in *native_handle. Otherwise, the allocated buffer is
+    // returned in *buffer_data. This clearly only makes sense if the caller lives in the
+    // same process as the callee, i.e. is the media_server, as the returned "buffer_data"
+    // pointer is just that, a pointer into local address space.
+    virtual status_t allocateSecureBuffer(
+            OMX_U32 port_index, size_t size, buffer_id *buffer,
+            void **buffer_data, sp<NativeHandle> *native_handle) = 0;
+
+    // Instructs the component to use the buffer passed in via |omxBuf| on the
+    // specified port. Returns in |*buffer| the buffer id that the component
+    // assigns to this buffer. |omxBuf| must be one of:
+    // 1) OMXBuffer::sPreset for meta-mode,
+    // 2) type kBufferTypeANWBuffer for non-meta-graphic buffer mode,
+    // 3) type kBufferTypeSharedMem for bytebuffer mode.
+    virtual status_t useBuffer(
+            OMX_U32 port_index, const OMXBuffer &omxBuf, buffer_id *buffer) = 0;
+
+    // Frees the buffer on the specified port with buffer id |buffer|.
     virtual status_t freeBuffer(
-            node_id node, OMX_U32 port_index, buffer_id buffer) = 0;
+            OMX_U32 port_index, buffer_id buffer) = 0;
 
-    virtual status_t fillBuffer(node_id node, buffer_id buffer) = 0;
+    // Calls OMX_FillBuffer on buffer. Passes |fenceFd| to component if it
+    // supports fences. Otherwise, it waits on |fenceFd| before calling
+    // OMX_FillBuffer. Takes ownership of |fenceFd| even if this call fails.
+    // If the port is in metadata mode, the buffer will be updated to point
+    // to the new buffer passed in via |omxBuf| before OMX_FillBuffer is called.
+    // Otherwise info in the |omxBuf| is not used.
+    virtual status_t fillBuffer(
+            buffer_id buffer, const OMXBuffer &omxBuf, int fenceFd = -1) = 0;
 
+    // Calls OMX_EmptyBuffer on buffer. Passes |fenceFd| to component if it
+    // supports fences. Otherwise, it waits on |fenceFd| before calling
+    // OMX_EmptyBuffer. Takes ownership of |fenceFd| even if this call fails.
+    // If the port is in metadata mode, the buffer will be updated to point
+    // to the new buffer passed in via |omxBuf| before OMX_EmptyBuffer is called.
     virtual status_t emptyBuffer(
-            node_id node,
-            buffer_id buffer,
-            OMX_U32 range_offset, OMX_U32 range_length,
-            OMX_U32 flags, OMX_TICKS timestamp) = 0;
+            buffer_id buffer, const OMXBuffer &omxBuf,
+            OMX_U32 flags, OMX_TICKS timestamp, int fenceFd = -1) = 0;
 
     virtual status_t getExtensionIndex(
-            node_id node,
             const char *parameter_name,
             OMX_INDEXTYPE *index) = 0;
 
-    enum InternalOptionType {
-        INTERNAL_OPTION_SUSPEND,  // data is a bool
-        INTERNAL_OPTION_REPEAT_PREVIOUS_FRAME_DELAY,  // data is an int64_t
-        INTERNAL_OPTION_MAX_TIMESTAMP_GAP, // data is int64_t
-        INTERNAL_OPTION_START_TIME, // data is an int64_t
-        INTERNAL_OPTION_TIME_LAPSE, // data is an int64_t[2]
-    };
-    virtual status_t setInternalOption(
-            node_id node,
-            OMX_U32 port_index,
-            InternalOptionType type,
-            const void *data,
-            size_t size) = 0;
+    virtual status_t dispatchMessage(const omx_message &msg) = 0;
 };
 
 struct omx_message {
@@ -163,10 +177,10 @@ struct omx_message {
         EVENT,
         EMPTY_BUFFER_DONE,
         FILL_BUFFER_DONE,
-
+        FRAME_RENDERED,
     } type;
 
-    IOMX::node_id node;
+    int fenceFd; // used for EMPTY_BUFFER_DONE and FILL_BUFFER_DONE; client must close this
 
     union {
         // if type == EVENT
@@ -174,6 +188,8 @@ struct omx_message {
             OMX_EVENTTYPE event;
             OMX_U32 data1;
             OMX_U32 data2;
+            OMX_U32 data3;
+            OMX_U32 data4;
         } event_data;
 
         // if type == EMPTY_BUFFER_DONE
@@ -190,6 +206,11 @@ struct omx_message {
             OMX_TICKS timestamp;
         } extended_buffer_data;
 
+        // if type == FRAME_RENDERED
+        struct {
+            OMX_TICKS timestamp;
+            OMX_S64 nanoTime;
+        } render_data;
     } u;
 };
 
@@ -197,7 +218,8 @@ class IOMXObserver : public IInterface {
 public:
     DECLARE_META_INTERFACE(OMXObserver);
 
-    virtual void onMessage(const omx_message &msg) = 0;
+    // Handle (list of) messages.
+    virtual void onMessages(const std::list<omx_message> &messages) = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -209,16 +231,24 @@ public:
             uint32_t flags = 0);
 };
 
+class BnOMXNode : public BnInterface<IOMXNode> {
+public:
+    virtual status_t onTransact(
+            uint32_t code, const Parcel &data, Parcel *reply,
+            uint32_t flags = 0);
+
+protected:
+    // check if the codec is secure.
+    virtual bool isSecure() const {
+        return false;
+    }
+};
+
 class BnOMXObserver : public BnInterface<IOMXObserver> {
 public:
     virtual status_t onTransact(
             uint32_t code, const Parcel &data, Parcel *reply,
             uint32_t flags = 0);
-};
-
-struct CodecProfileLevel {
-    OMX_U32 mProfile;
-    OMX_U32 mLevel;
 };
 
 }  // namespace android

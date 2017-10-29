@@ -1,9 +1,6 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
  *
- * Copyright (c) 2009-2013, The Linux Foundation. All rights reserved.
- * Not a Contribution
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +22,7 @@
 
 #include <stdint.h>
 
+#include <binder/Parcel.h>
 #include <utils/RefBase.h>
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
@@ -51,11 +49,11 @@ enum {
     kKeyChannelCount      = '#chn',  // int32_t
     kKeyChannelMask       = 'chnm',  // int32_t
     kKeySampleRate        = 'srte',  // int32_t (audio sampling rate Hz)
+    kKeyPcmEncoding       = 'PCMe',  // int32_t (audio encoding enum)
     kKeyFrameRate         = 'frmR',  // int32_t (video frame rate fps)
     kKeyBitRate           = 'brte',  // int32_t (bps)
-    kKeyCodecId           = 'cdid',  // int32_t
-    kKeyBitsPerSample     = 'sbit',  // int32_t (DUPE of kKeySampleBits)
-    kKeySampleFormat      = 'sfmt',  // int32_t
+    kKeyMaxBitRate        = 'mxBr',  // int32_t (bps)
+    kKeyStreamHeader      = 'stHd',  // raw data
     kKeyESDS              = 'esds',  // raw data
     kKeyAACProfile        = 'aacp',  // int32_t
     kKeyAVCC              = 'avcc',  // raw data
@@ -66,6 +64,7 @@ enum {
     kKeyOpusHeader        = 'ohdr',  // raw data
     kKeyOpusCodecDelay    = 'ocod',  // uint64_t (codec delay in ns)
     kKeyOpusSeekPreRoll   = 'ospr',  // uint64_t (seek preroll in ns)
+    kKeyVp9CodecPrivate   = 'vp9p',  // raw data (vp9 csd information)
     kKeyWantsNALFragments = 'NALf',
     kKeyIsSyncFrame       = 'sync',  // int32_t (bool)
     kKeyIsCodecConfig     = 'conf',  // int32_t (bool)
@@ -76,11 +75,15 @@ enum {
     kKeyDriftTime         = 'dftT',  // int64_t (usecs)
     kKeyAnchorTime        = 'ancT',  // int64_t (usecs)
     kKeyDuration          = 'dura',  // int64_t (usecs)
-    kKeyColorFormat       = 'colf',
+    kKeyPixelFormat       = 'pixf',  // int32_t
+    kKeyColorFormat       = 'colf',  // int32_t
+    kKeyColorSpace        = 'cols',  // int32_t
     kKeyPlatformPrivate   = 'priv',  // pointer
     kKeyDecoderComponent  = 'decC',  // cstring
     kKeyBufferID          = 'bfID',
     kKeyMaxInputSize      = 'inpS',
+    kKeyMaxWidth          = 'maxW',
+    kKeyMaxHeight         = 'maxH',
     kKeyThumbnailTime     = 'thbT',  // int64_t (usecs)
     kKeyTrackID           = 'trID',
     kKeyIsDRM             = 'idrm',  // int32_t (bool)
@@ -104,6 +107,7 @@ enum {
     kKeyCompilation       = 'cpil',  // cstring
     kKeyLocation          = 'loc ',  // cstring
     kKeyTimeScale         = 'tmsl',  // int32_t
+    kKeyCaptureFramerate  = 'capF',  // float (capture fps)
 
     // video profile and level
     kKeyVideoProfile      = 'vprf',  // int32_t
@@ -131,23 +135,6 @@ enum {
     kKeyValidSamples      = 'valD',  // int32_t
 
     kKeyIsUnreadable      = 'unre',  // bool (int32_t)
-
-    kKeyRawCodecSpecificData = 'rcsd',  // raw data - added to support mmParser
-    kKeyDivXVersion       = 'DivX',  // int32_t
-    kKeyDivXDrm           = 'QDrm',  // void *
-    kKeyWMAEncodeOpt      = 'eopt',  // int32_t
-    kKeyWMABlockAlign     = 'blka',  // int32_t
-    kKeyWMAVersion        = 'wmav',  // int32_t
-    kKeyWMAAdvEncOpt1     = 'ade1',  // int16_t
-    kKeyWMAAdvEncOpt2     = 'ade2',  // int32_t
-    kKeyWMAFormatTag      = 'fmtt',  // int64_t
-    kKeyWMABitspersample  = 'bsps',  // int64_t
-    kKeyWMAVirPktSize     = 'vpks',  // int64_t
-    kKeyWMVProfile        = 'wmvp',  // int32_t
-
-    kKeyWMVVersion        = 'wmvv',  // int32_t
-    kKeyRVVersion         = '#rvv',  // int32_t
-    kKeyBlockAlign        = 'blk',   // int32_t , should be different from kKeyWMABlockAlign
 
     // An indication that a video buffer has been rendered.
     kKeyRendered          = 'rend',  // bool (int32_t)
@@ -189,6 +176,8 @@ enum {
     kKeyCryptoDefaultIVSize = 'cryS',  // int32_t
 
     kKeyPssh              = 'pssh',  // raw data
+    kKeyCASystemID        = 'caid',  // int32_t
+    kKeyCASessionID       = 'seid',  // raw data
 
     // Please see MediaFormat.KEY_IS_AUTOSELECT.
     kKeyTrackIsAutoselect = 'auto', // bool (int32_t)
@@ -197,10 +186,28 @@ enum {
     // Similar to MediaFormat.KEY_IS_FORCED_SUBTITLE but pertains to av tracks as well.
     kKeyTrackIsForced     = 'frcd', // bool (int32_t)
 
-    kKeyTunnelException   = 'Ntnl', // not tunnel
-    // Indicate if it is OK to hold on to the MediaBuffer and not
-    // release it immediately
-    kKeyCanDeferRelease   = 'drel', // bool (int32_t)
+    // H264 supplemental enhancement information offsets/sizes
+    kKeySEI               = 'sei ', // raw data
+
+    // MPEG user data offsets
+    kKeyMpegUserData      = 'mpud', // size_t[]
+
+    // Size of NALU length in mkv/mp4
+    kKeyNalLengthSize     = 'nals', // int32_t
+
+    // HDR related
+    kKeyHdrStaticInfo    = 'hdrS', // HDRStaticInfo
+
+    // color aspects
+    kKeyColorRange       = 'cRng', // int32_t, color range, value defined by ColorAspects.Range
+    kKeyColorPrimaries   = 'cPrm', // int32_t,
+                                   // color Primaries, value defined by ColorAspects.Primaries
+    kKeyTransferFunction = 'tFun', // int32_t,
+                                   // transfer Function, value defined by ColorAspects.Transfer.
+    kKeyColorMatrix      = 'cMtx', // int32_t,
+                                   // color Matrix, value defined by ColorAspects.MatrixCoeffs.
+    kKeyTemporalLayerId  = 'iLyr', // int32_t, temporal layer-id. 0-based (0 => base layer)
+    kKeyTemporalLayerCount = 'cLyr', // int32_t, number of temporal layers encoded
 };
 
 enum {
@@ -208,32 +215,6 @@ enum {
     kTypeAVCC        = 'avcc',
     kTypeHVCC        = 'hvcc',
     kTypeD263        = 'd263',
-};
-
-enum {
-    kTypeDivXVer_3_11,
-    kTypeDivXVer_4,
-    kTypeDivXVer_5,
-    kTypeDivXVer_6,
-};
-
-enum {
-    kTypeWMA,
-    kTypeWMAPro,
-    kTypeWMALossLess,
-};
-
-enum {
-    kTypeWMVVer_7, // WMV1
-    kTypeWMVVer_8, // WMV2
-    kTypeWMVVer_9, // WMV3
-};
-
-// http://en.wikipedia.org/wiki/RealVideo
-enum {
-    kTypeRVVer_G2, // rv20: RealVideo G2
-    kTypeRVVer_8,  // rv30: RealVideo 8
-    kTypeRVVer_9,  // rv40: RealVideo 9
 };
 
 class MetaData : public RefBase {
@@ -283,7 +264,12 @@ public:
 
     bool hasData(uint32_t key) const;
 
+    String8 toString() const;
     void dumpToLog() const;
+
+    status_t writeToParcel(Parcel &parcel);
+    status_t updateFromParcel(const Parcel &parcel);
+    static sp<MetaData> createFromParcel(const Parcel &parcel);
 
 protected:
     virtual ~MetaData();
@@ -299,7 +285,8 @@ private:
         void clear();
         void setData(uint32_t type, const void *data, size_t size);
         void getData(uint32_t *type, const void **data, size_t *size) const;
-        String8 asString() const;
+        // may include hexdump of binary data if verbose=true
+        String8 asString(bool verbose) const;
 
     private:
         uint32_t mType;
@@ -314,7 +301,7 @@ private:
             return mSize <= sizeof(u.reservoir);
         }
 
-        void allocateStorage(size_t size);
+        void *allocateStorage(size_t size);
         void freeStorage();
 
         void *storage() {

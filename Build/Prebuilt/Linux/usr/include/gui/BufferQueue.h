@@ -17,14 +17,11 @@
 #ifndef ANDROID_GUI_BUFFERQUEUE_H
 #define ANDROID_GUI_BUFFERQUEUE_H
 
+#include <gui/BufferItem.h>
 #include <gui/BufferQueueDefs.h>
 #include <gui/IGraphicBufferConsumer.h>
 #include <gui/IGraphicBufferProducer.h>
 #include <gui/IConsumerListener.h>
-
-// These are only required to keep other parts of the framework with incomplete
-// dependencies building successfully
-#include <gui/IGraphicBufferAlloc.h>
 
 namespace android {
 
@@ -34,7 +31,7 @@ public:
     // Attempts at runtime to increase the number of buffers past this will fail.
     enum { NUM_BUFFER_SLOTS = BufferQueueDefs::NUM_BUFFER_SLOTS };
     // Used as a placeholder slot# when the value isn't pointing to an existing buffer.
-    enum { INVALID_BUFFER_SLOT = IGraphicBufferConsumer::BufferItem::INVALID_BUFFER_SLOT };
+    enum { INVALID_BUFFER_SLOT = BufferItem::INVALID_BUFFER_SLOT };
     // Alias to <IGraphicBufferConsumer.h> -- please scope from there in future code!
     enum {
         NO_BUFFER_AVAILABLE = IGraphicBufferConsumer::NO_BUFFER_AVAILABLE,
@@ -47,7 +44,6 @@ public:
 
     // for backward source compatibility
     typedef ::android::ConsumerListener ConsumerListener;
-    typedef IGraphicBufferConsumer::BufferItem BufferItem;
 
     // ProxyConsumerListener is a ConsumerListener implementation that keeps a weak
     // reference to the actual consumer object.  It forwards all calls to that
@@ -60,11 +56,16 @@ public:
     // weak references.
     class ProxyConsumerListener : public BnConsumerListener {
     public:
-        ProxyConsumerListener(const wp<ConsumerListener>& consumerListener);
+        explicit ProxyConsumerListener(const wp<ConsumerListener>& consumerListener);
         virtual ~ProxyConsumerListener();
-        virtual void onFrameAvailable();
-        virtual void onBuffersReleased();
-        virtual void onSidebandStreamChanged();
+        void onDisconnect() override;
+        void onFrameAvailable(const BufferItem& item) override;
+        void onFrameReplaced(const BufferItem& item) override;
+        void onBuffersReleased() override;
+        void onSidebandStreamChanged() override;
+        void addAndGetFrameTimestamps(
+                const NewFrameEventsEntry* newTimestamps,
+                FrameEventHistoryDelta* outDelta) override;
     private:
         // mConsumerListener is a weak reference to the IConsumerListener.  This is
         // the raison d'etre of ProxyConsumerListener.
@@ -76,9 +77,9 @@ public:
     // needed gralloc buffers.
     static void createBufferQueue(sp<IGraphicBufferProducer>* outProducer,
             sp<IGraphicBufferConsumer>* outConsumer,
-            const sp<IGraphicBufferAlloc>& allocator = NULL);
-private:
-    BufferQueue(); // Create through createBufferQueue
+            bool consumerIsSurfaceFlinger = false);
+
+    BufferQueue() = delete; // Create through createBufferQueue
 };
 
 // ----------------------------------------------------------------------------

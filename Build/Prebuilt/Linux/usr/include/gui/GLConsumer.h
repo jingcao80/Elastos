@@ -20,10 +20,10 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include <gui/IGraphicBufferProducer.h>
-#include <gui/BufferQueue.h>
+#include <gui/BufferQueueDefs.h>
 #include <gui/ConsumerBase.h>
 
+#include <ui/FenceTime.h>
 #include <ui/GraphicBuffer.h>
 
 #include <utils/String8.h>
@@ -110,12 +110,7 @@ public:
     // when the current buffer is released by updateTexImage(). Multiple
     // fences can be set for a given buffer; they will be merged into a single
     // union fence.
-    void setReleaseFence(const sp<Fence>& fence);
-
-    // setDefaultMaxBufferCount sets the default limit on the maximum number
-    // of buffers that will be allocated at one time. The image producer may
-    // override the limit.
-    status_t setDefaultMaxBufferCount(int bufferCount);
+    virtual void setReleaseFence(const sp<Fence>& fence);
 
     // getTransformMatrix retrieves the 4x4 texture coordinate transform matrix
     // associated with the texture image set by the most recent call to
@@ -137,6 +132,12 @@ public:
     // functions.
     void getTransformMatrix(float mtx[16]);
 
+    // Computes the transform matrix documented by getTransformMatrix
+    // from the BufferItem sub parts.
+    static void computeTransformMatrix(float outTransform[16],
+            const sp<GraphicBuffer>& buf, const Rect& cropRect,
+            uint32_t transform, bool filtering);
+
     // getTimestamp retrieves the timestamp associated with the texture image
     // set by the most recent call to updateTexImage.
     //
@@ -145,12 +146,16 @@ public:
     // documented by the source.
     int64_t getTimestamp();
 
+    // getDataSpace retrieves the DataSpace associated with the texture image
+    // set by the most recent call to updateTexImage.
+    android_dataspace getCurrentDataSpace();
+
     // getFrameNumber retrieves the frame number associated with the texture
     // image set by the most recent call to updateTexImage.
     //
     // The frame number is an incrementing counter set to 0 at the creation of
     // the BufferQueue associated with this consumer.
-    int64_t getFrameNumber();
+    uint64_t getFrameNumber();
 
     // setDefaultBufferSize is used to set the size of buffers returned by
     // requestBuffers when a with and height of zero is requested.
@@ -167,7 +172,9 @@ public:
     void setFilteringEnabled(bool enabled);
 
     // getCurrentBuffer returns the buffer associated with the current image.
-    sp<GraphicBuffer> getCurrentBuffer() const;
+    // When outSlot is not nullptr, the current buffer slot index is also
+    // returned.
+    sp<GraphicBuffer> getCurrentBuffer(int* outSlot = nullptr) const;
 
     // getCurrentTextureTarget returns the texture target of the current
     // texture as returned by updateTexImage().
@@ -175,11 +182,6 @@ public:
 
     // getCurrentCrop returns the cropping rectangle of the current buffer.
     Rect getCurrentCrop() const;
-
-#ifdef QCOM_BSP
-    // getDirtyRegion returns the dirty rect associated with the current buffer.
-    Rect getCurrentDirtyRect() const;
-#endif
 
     // getCurrentTransform returns the transform of the current buffer.
     uint32_t getCurrentTransform() const;
@@ -190,6 +192,10 @@ public:
     // getCurrentFence returns the fence indicating when the current buffer is
     // ready to be read from.
     sp<Fence> getCurrentFence() const;
+
+    // getCurrentFence returns the FenceTime indicating when the current
+    // buffer is ready to be read from.
+    std::shared_ptr<FenceTime> getCurrentFenceTime() const;
 
     // doGLFenceWait inserts a wait command into the OpenGL ES command stream
     // to ensure that it is safe for future OpenGL ES commands to access the
@@ -202,9 +208,11 @@ public:
 
     // These functions call the corresponding BufferQueue implementation
     // so the refactoring can proceed smoothly
-    status_t setDefaultBufferFormat(uint32_t defaultFormat);
+    status_t setDefaultBufferFormat(PixelFormat defaultFormat);
+    status_t setDefaultBufferDataSpace(android_dataspace defaultDataSpace);
     status_t setConsumerUsageBits(uint32_t usage);
     status_t setTransformHint(uint32_t hint);
+    status_t setMaxAcquiredBufferCount(int maxAcquiredBuffers);
 
     // detachFromContext detaches the GLConsumer from the calling thread's
     // current OpenGL ES context.  This context must be the same as the context
@@ -245,26 +253,41 @@ protected:
 
     // acquireBufferLocked overrides the ConsumerBase method to update the
     // mEglSlots array in addition to the ConsumerBase behavior.
-    virtual status_t acquireBufferLocked(BufferQueue::BufferItem *item,
-        nsecs_t presentWhen);
+    virtual status_t acquireBufferLocked(BufferItem *item, nsecs_t presentWhen,
+            uint64_t maxFrameNumber = 0) override;
 
     // releaseBufferLocked overrides the ConsumerBase method to update the
     // mEglSlots array in addition to the ConsumerBase.
     virtual status_t releaseBufferLocked(int slot,
             const sp<GraphicBuffer> graphicBuffer,
-            EGLDisplay display, EGLSyncKHR eglFence);
+            EGLDisplay display, EGLSyncKHR eglFence) override;
 
     status_t releaseBufferLocked(int slot,
             const sp<GraphicBuffer> graphicBuffer, EGLSyncKHR eglFence) {
         return releaseBufferLocked(slot, graphicBuffer, mEglDisplay, eglFence);
     }
 
-    static bool isExternalFormat(uint32_t format);
+    static bool isExternalFormat(PixelFormat format);
+
+    struct PendingRelease {
+        PendingRelease() : isPending(false), currentTexture(-1),
+                graphicBuffer(), display(nullptr), fence(nullptr) {}
+
+        bool isPending;
+        int currentTexture;
+        sp<GraphicBuffer> graphicBuffer;
+        EGLDisplay display;
+        EGLSyncKHR fence;
+    };
 
     // This releases the buffer in the slot referenced by mCurrentTexture,
     // then updates state to refer to the BufferItem, which must be a
-    // newly-acquired buffer.
-    status_t updateAndReleaseLocked(const BufferQueue::BufferItem& item);
+    // newly-acquired buffer. If pendingRelease is not null, the parameters
+    // which would have been passed to releaseBufferLocked upon the successful
+    // completion of the method will instead be returned to the caller, so that
+    // it may call releaseBufferLocked itself later.
+    status_t updateAndReleaseLocked(const BufferItem& item,
+            PendingRelease* pendingRelease = nullptr);
 
     // Binds mTexName and the current buffer to mTexTarget.  Uses
     // mCurrentTexture if it's set, mCurrentTextureImage if not.  If the
@@ -374,12 +397,6 @@ private:
     // It gets set each time updateTexImage is called.
     Rect mCurrentCrop;
 
-#ifdef QCOM_BSP
-    //mCurrentDirtyRect is the dirty rectangle associated with the current
-    //buffer.
-    Rect mCurrentDirtyRect;
-#endif
-
     // mCurrentTransform is the transform identifier for the current texture. It
     // gets set each time updateTexImage is called.
     uint32_t mCurrentTransform;
@@ -391,6 +408,9 @@ private:
     // mCurrentFence is the fence received from BufferQueue in updateTexImage.
     sp<Fence> mCurrentFence;
 
+    // The FenceTime wrapper around mCurrentFence.
+    std::shared_ptr<FenceTime> mCurrentFenceTime{FenceTime::NO_FENCE};
+
     // mCurrentTransformMatrix is the transform matrix for the current texture.
     // It gets computed by computeTransformMatrix each time updateTexImage is
     // called.
@@ -400,9 +420,13 @@ private:
     // gets set each time updateTexImage is called.
     int64_t mCurrentTimestamp;
 
+    // mCurrentDataSpace is the dataspace for the current texture. It
+    // gets set each time updateTexImage is called.
+    android_dataspace mCurrentDataSpace;
+
     // mCurrentFrameNumber is the frame counter for the current texture.
     // It gets set each time updateTexImage is called.
-    int64_t mCurrentFrameNumber;
+    uint64_t mCurrentFrameNumber;
 
     uint32_t mDefaultWidth, mDefaultHeight;
 
@@ -465,7 +489,7 @@ private:
     // slot that has not yet been used. The buffer allocated to a slot will also
     // be replaced if the requested buffer usage or geometry differs from that
     // of the buffer allocated to a slot.
-    EglSlot mEglSlots[BufferQueue::NUM_BUFFER_SLOTS];
+    EglSlot mEglSlots[BufferQueueDefs::NUM_BUFFER_SLOTS];
 
     // mCurrentTexture is the buffer slot index of the buffer that is currently
     // bound to the OpenGL texture. It is initialized to INVALID_BUFFER_SLOT,

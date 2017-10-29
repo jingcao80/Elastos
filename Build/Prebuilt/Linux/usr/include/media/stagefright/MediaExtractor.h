@@ -18,33 +18,28 @@
 
 #define MEDIA_EXTRACTOR_H_
 
-#include <utils/RefBase.h>
-#include <media/stagefright/DataSource.h>
+#include <media/IMediaExtractor.h>
+#include <media/IMediaSource.h>
+#include <media/MediaAnalyticsItem.h>
 
 namespace android {
-
-class MediaSource;
+namespace media {
+class ICas;
+};
+using namespace media;
+class DataSource;
+struct MediaSource;
 class MetaData;
 
-class MediaExtractor : public RefBase {
+class MediaExtractor : public BnMediaExtractor {
 public:
-    typedef MediaExtractor *(*CreateFunc)(const sp<DataSource> &source,
-            const char *mime, const sp<AMessage> &meta);
-
-    struct Plugin {
-        DataSource::SnifferFunc sniff;
-        CreateFunc create;
-    };
-
-    static Plugin *getPlugin() {
-        return &sPlugin;
-    }
-
-    static sp<MediaExtractor> Create(
+    static sp<IMediaExtractor> Create(
+            const sp<DataSource> &source, const char *mime = NULL);
+    static sp<MediaExtractor> CreateFromService(
             const sp<DataSource> &source, const char *mime = NULL);
 
     virtual size_t countTracks() = 0;
-    virtual sp<MediaSource> getTrack(size_t index) = 0;
+    virtual sp<IMediaSource> getTrack(size_t index) = 0;
 
     enum GetTrackMetaDataFlags {
         kIncludeExtensiveMetaData = 1
@@ -55,6 +50,8 @@ public:
     // Return container specific meta-data. The default implementation
     // returns an empty metadata object.
     virtual sp<MetaData> getMetaData();
+
+    status_t getMetrics(Parcel *reply);
 
     enum Flags {
         CAN_SEEK_BACKWARD  = 1,  // the "seek 10secs back button"
@@ -68,25 +65,44 @@ public:
     virtual uint32_t flags() const;
 
     // for DRM
-    void setDrmFlag(bool flag) {
-        mIsDrm = flag;
-    };
-    bool getDrmFlag() {
-        return mIsDrm;
-    }
-    virtual char* getDrmTrackInfo(size_t trackID, int *len) {
+    virtual char* getDrmTrackInfo(size_t /*trackID*/, int * /*len*/) {
         return NULL;
     }
-    virtual void setUID(uid_t uid) {
+    virtual void setUID(uid_t /*uid*/) {
+    }
+    virtual status_t setMediaCas(const sp<ICas> &cas) override {
+        return INVALID_OPERATION;
     }
 
+    virtual const char * name() { return "<unspecified>"; }
+
 protected:
-    MediaExtractor() : mIsDrm(false) {}
-    virtual ~MediaExtractor() {}
+    MediaExtractor();
+    virtual ~MediaExtractor();
+
+    MediaAnalyticsItem *mAnalyticsItem;
+
+    virtual void populateMetrics();
 
 private:
-    bool mIsDrm;
-    static Plugin sPlugin;
+
+    typedef bool (*SnifferFunc)(
+            const sp<DataSource> &source, String8 *mimeType,
+            float *confidence, sp<AMessage> *meta);
+
+    static Mutex gSnifferMutex;
+    static List<SnifferFunc> gSniffers;
+    static bool gSniffersRegistered;
+
+    // The sniffer can optionally fill in "meta" with an AMessage containing
+    // a dictionary of values that helps the corresponding extractor initialize
+    // its state without duplicating effort already exerted by the sniffer.
+    static void RegisterSniffer_l(SnifferFunc func);
+
+    static bool sniff(const sp<DataSource> &source,
+            String8 *mimeType, float *confidence, sp<AMessage> *meta);
+
+    static void RegisterDefaultSniffers();
 
     MediaExtractor(const MediaExtractor &);
     MediaExtractor &operator=(const MediaExtractor &);

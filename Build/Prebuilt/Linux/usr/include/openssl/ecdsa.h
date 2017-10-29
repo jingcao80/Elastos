@@ -1,17 +1,12 @@
-/* crypto/ecdsa/ecdsa.h */
-/**
- * \file   crypto/ecdsa/ecdsa.h Include file for the OpenSSL ECDSA functions
- * \author Written by Nils Larsch for the OpenSSL project
- */
 /* ====================================================================
- * Copyright (c) 2000-2005 The OpenSSL Project.  All rights reserved.
+ * Copyright (c) 1998-2005 The OpenSSL Project.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -26,7 +21,7 @@
  * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
  *    endorse or promote products derived from this software without
  *    prior written permission. For written permission, please contact
- *    licensing@OpenSSL.org.
+ *    openssl-core@OpenSSL.org.
  *
  * 5. Products derived from this software may not be called "OpenSSL"
  *    nor may "OpenSSL" appear in their names without prior written
@@ -53,209 +48,170 @@
  *
  * This product includes cryptographic software written by Eric Young
  * (eay@cryptsoft.com).  This product includes software written by Tim
- * Hudson (tjh@cryptsoft.com).
- *
- */
-#ifndef HEADER_ECDSA_H
-#define HEADER_ECDSA_H
+ * Hudson (tjh@cryptsoft.com). */
 
-#include <openssl/opensslconf.h>
+#ifndef OPENSSL_HEADER_ECDSA_H
+#define OPENSSL_HEADER_ECDSA_H
 
-#ifdef OPENSSL_NO_ECDSA
-#error ECDSA is disabled.
-#endif
+#include <openssl/base.h>
 
-#include <openssl/ec.h>
-#include <openssl/ossl_typ.h>
-#ifndef OPENSSL_NO_DEPRECATED
-#include <openssl/bn.h>
-#endif
+#include <openssl/ec_key.h>
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-typedef struct ECDSA_SIG_st
-	{
-	BIGNUM *r;
-	BIGNUM *s;
-	} ECDSA_SIG;
 
-/** Allocates and initialize a ECDSA_SIG structure
- *  \return pointer to a ECDSA_SIG structure or NULL if an error occurred
- */
-ECDSA_SIG *ECDSA_SIG_new(void);
-
-/** frees a ECDSA_SIG structure
- *  \param  sig  pointer to the ECDSA_SIG structure
- */
-void	  ECDSA_SIG_free(ECDSA_SIG *sig);
-
-/** DER encode content of ECDSA_SIG object (note: this function modifies *pp
- *  (*pp += length of the DER encoded signature)).
- *  \param  sig  pointer to the ECDSA_SIG object
- *  \param  pp   pointer to a unsigned char pointer for the output or NULL
- *  \return the length of the DER encoded ECDSA_SIG object or 0 
- */
-int	  i2d_ECDSA_SIG(const ECDSA_SIG *sig, unsigned char **pp);
-
-/** Decodes a DER encoded ECDSA signature (note: this function changes *pp
- *  (*pp += len)). 
- *  \param  sig  pointer to ECDSA_SIG pointer (may be NULL)
- *  \param  pp   memory buffer with the DER encoded signature
- *  \param  len  length of the buffer
- *  \return pointer to the decoded ECDSA_SIG structure (or NULL)
- */
-ECDSA_SIG *d2i_ECDSA_SIG(ECDSA_SIG **sig, const unsigned char **pp, long len);
-
-/** Computes the ECDSA signature of the given hash value using
- *  the supplied private key and returns the created signature.
- *  \param  dgst      pointer to the hash value
- *  \param  dgst_len  length of the hash value
- *  \param  eckey     EC_KEY object containing a private EC key
- *  \return pointer to a ECDSA_SIG structure or NULL if an error occurred
- */
-ECDSA_SIG *ECDSA_do_sign(const unsigned char *dgst,int dgst_len,EC_KEY *eckey);
-
-/** Computes ECDSA signature of a given hash value using the supplied
- *  private key (note: sig must point to ECDSA_size(eckey) bytes of memory).
- *  \param  dgst     pointer to the hash value to sign
- *  \param  dgstlen  length of the hash value
- *  \param  kinv     BIGNUM with a pre-computed inverse k (optional)
- *  \param  rp       BIGNUM with a pre-computed rp value (optioanl), 
- *                   see ECDSA_sign_setup
- *  \param  eckey    EC_KEY object containing a private EC key
- *  \return pointer to a ECDSA_SIG structure or NULL if an error occurred
- */
-ECDSA_SIG *ECDSA_do_sign_ex(const unsigned char *dgst, int dgstlen, 
-		const BIGNUM *kinv, const BIGNUM *rp, EC_KEY *eckey);
-
-/** Verifies that the supplied signature is a valid ECDSA
- *  signature of the supplied hash value using the supplied public key.
- *  \param  dgst      pointer to the hash value
- *  \param  dgst_len  length of the hash value
- *  \param  sig       ECDSA_SIG structure
- *  \param  eckey     EC_KEY object containing a public EC key
- *  \return 1 if the signature is valid, 0 if the signature is invalid
- *          and -1 on error
- */
-int	  ECDSA_do_verify(const unsigned char *dgst, int dgst_len,
-		const ECDSA_SIG *sig, EC_KEY* eckey);
-
-const ECDSA_METHOD *ECDSA_OpenSSL(void);
-
-/** Sets the default ECDSA method
- *  \param  meth  new default ECDSA_METHOD
- */
-void	  ECDSA_set_default_method(const ECDSA_METHOD *meth);
-
-/** Returns the default ECDSA method
- *  \return pointer to ECDSA_METHOD structure containing the default method
- */
-const ECDSA_METHOD *ECDSA_get_default_method(void);
-
-/** Sets method to be used for the ECDSA operations
- *  \param  eckey  EC_KEY object
- *  \param  meth   new method
- *  \return 1 on success and 0 otherwise 
- */
-int 	  ECDSA_set_method(EC_KEY *eckey, const ECDSA_METHOD *meth);
-
-/** Returns the maximum length of the DER encoded signature
- *  \param  eckey  EC_KEY object
- *  \return numbers of bytes required for the DER encoded signature
- */
-int	  ECDSA_size(const EC_KEY *eckey);
-
-/** Precompute parts of the signing operation
- *  \param  eckey  EC_KEY object containing a private EC key
- *  \param  ctx    BN_CTX object (optional)
- *  \param  kinv   BIGNUM pointer for the inverse of k
- *  \param  rp     BIGNUM pointer for x coordinate of k * generator
- *  \return 1 on success and 0 otherwise
- */
-int 	  ECDSA_sign_setup(EC_KEY *eckey, BN_CTX *ctx, BIGNUM **kinv, 
-		BIGNUM **rp);
-
-/** Computes ECDSA signature of a given hash value using the supplied
- *  private key (note: sig must point to ECDSA_size(eckey) bytes of memory).
- *  \param  type     this parameter is ignored
- *  \param  dgst     pointer to the hash value to sign
- *  \param  dgstlen  length of the hash value
- *  \param  sig      memory for the DER encoded created signature
- *  \param  siglen   pointer to the length of the returned signature
- *  \param  eckey    EC_KEY object containing a private EC key
- *  \return 1 on success and 0 otherwise
- */
-int	  ECDSA_sign(int type, const unsigned char *dgst, int dgstlen, 
-		unsigned char *sig, unsigned int *siglen, EC_KEY *eckey);
+/* ECDSA contains functions for signing and verifying with the Digital Signature
+ * Algorithm over elliptic curves. */
 
 
-/** Computes ECDSA signature of a given hash value using the supplied
- *  private key (note: sig must point to ECDSA_size(eckey) bytes of memory).
- *  \param  type     this parameter is ignored
- *  \param  dgst     pointer to the hash value to sign
- *  \param  dgstlen  length of the hash value
- *  \param  sig      buffer to hold the DER encoded signature
- *  \param  siglen   pointer to the length of the returned signature
- *  \param  kinv     BIGNUM with a pre-computed inverse k (optional)
- *  \param  rp       BIGNUM with a pre-computed rp value (optioanl), 
- *                   see ECDSA_sign_setup
- *  \param  eckey    EC_KEY object containing a private EC key
- *  \return 1 on success and 0 otherwise
- */
-int	  ECDSA_sign_ex(int type, const unsigned char *dgst, int dgstlen, 
-		unsigned char *sig, unsigned int *siglen, const BIGNUM *kinv,
-		const BIGNUM *rp, EC_KEY *eckey);
+/* Signing and verifying. */
 
-/** Verifies that the given signature is valid ECDSA signature
- *  of the supplied hash value using the specified public key.
- *  \param  type     this parameter is ignored
- *  \param  dgst     pointer to the hash value 
- *  \param  dgstlen  length of the hash value
- *  \param  sig      pointer to the DER encoded signature
- *  \param  siglen   length of the DER encoded signature
- *  \param  eckey    EC_KEY object containing a public EC key
- *  \return 1 if the signature is valid, 0 if the signature is invalid
- *          and -1 on error
- */
-int 	  ECDSA_verify(int type, const unsigned char *dgst, int dgstlen, 
-		const unsigned char *sig, int siglen, EC_KEY *eckey);
+/* ECDSA_sign signs |digest_len| bytes from |digest| with |key| and writes the
+ * resulting signature to |sig|, which must have |ECDSA_size(key)| bytes of
+ * space. On successful exit, |*sig_len| is set to the actual number of bytes
+ * written. The |type| argument should be zero. It returns one on success and
+ * zero otherwise. */
+OPENSSL_EXPORT int ECDSA_sign(int type, const uint8_t *digest,
+                              size_t digest_len, uint8_t *sig,
+                              unsigned int *sig_len, const EC_KEY *key);
 
-/* the standard ex_data functions */
-int 	  ECDSA_get_ex_new_index(long argl, void *argp, CRYPTO_EX_new 
-		*new_func, CRYPTO_EX_dup *dup_func, CRYPTO_EX_free *free_func);
-int 	  ECDSA_set_ex_data(EC_KEY *d, int idx, void *arg);
-void 	  *ECDSA_get_ex_data(EC_KEY *d, int idx);
+/* ECDSA_verify verifies that |sig_len| bytes from |sig| constitute a valid
+ * signature by |key| of |digest|. (The |type| argument should be zero.) It
+ * returns one on success or zero if the signature is invalid or an error
+ * occurred. */
+OPENSSL_EXPORT int ECDSA_verify(int type, const uint8_t *digest,
+                                size_t digest_len, const uint8_t *sig,
+                                size_t sig_len, const EC_KEY *key);
+
+/* ECDSA_size returns the maximum size of an ECDSA signature using |key|. It
+ * returns zero on error. */
+OPENSSL_EXPORT size_t ECDSA_size(const EC_KEY *key);
 
 
-/* BEGIN ERROR CODES */
-/* The following lines are auto generated by the script mkerr.pl. Any changes
- * made after this point may be overwritten when the script is next run.
- */
-void ERR_load_ECDSA_strings(void);
+/* Low-level signing and verification.
+ *
+ * Low-level functions handle signatures as |ECDSA_SIG| structures which allow
+ * the two values in an ECDSA signature to be handled separately. */
 
-/* Error codes for the ECDSA functions. */
+struct ecdsa_sig_st {
+  BIGNUM *r;
+  BIGNUM *s;
+};
 
-/* Function codes. */
-#define ECDSA_F_ECDSA_CHECK				 104
-#define ECDSA_F_ECDSA_DATA_NEW_METHOD			 100
-#define ECDSA_F_ECDSA_DO_SIGN				 101
-#define ECDSA_F_ECDSA_DO_VERIFY				 102
-#define ECDSA_F_ECDSA_SIGN_SETUP			 103
+/* ECDSA_SIG_new returns a fresh |ECDSA_SIG| structure or NULL on error. */
+OPENSSL_EXPORT ECDSA_SIG *ECDSA_SIG_new(void);
 
-/* Reason codes. */
-#define ECDSA_R_BAD_SIGNATURE				 100
-#define ECDSA_R_DATA_TOO_LARGE_FOR_KEY_SIZE		 101
-#define ECDSA_R_ERR_EC_LIB				 102
-#define ECDSA_R_MISSING_PARAMETERS			 103
-#define ECDSA_R_NEED_NEW_SETUP_VALUES			 106
-#define ECDSA_R_NONCE_CANNOT_BE_PRECOMPUTED		 108
-#define ECDSA_R_NON_FIPS_METHOD				 107
-#define ECDSA_R_RANDOM_NUMBER_GENERATION_FAILED		 104
-#define ECDSA_R_SIGNATURE_MALLOC_FAILED			 105
+/* ECDSA_SIG_free frees |sig| its member |BIGNUM|s. */
+OPENSSL_EXPORT void ECDSA_SIG_free(ECDSA_SIG *sig);
 
-#ifdef  __cplusplus
-}
+/* ECDSA_do_sign signs |digest_len| bytes from |digest| with |key| and returns
+ * the resulting signature structure, or NULL on error. */
+OPENSSL_EXPORT ECDSA_SIG *ECDSA_do_sign(const uint8_t *digest,
+                                        size_t digest_len, const EC_KEY *key);
+
+/* ECDSA_do_verify verifies that |sig| constitutes a valid signature by |key|
+ * of |digest|. It returns one on success or zero if the signature is invalid
+ * or on error. */
+OPENSSL_EXPORT int ECDSA_do_verify(const uint8_t *digest, size_t digest_len,
+                                   const ECDSA_SIG *sig, const EC_KEY *key);
+
+
+/* Signing with precomputation.
+ *
+ * Parts of the ECDSA signature can be independent of the message to be signed
+ * thus it's possible to precompute them and reduce the signing latency.
+ *
+ * TODO(fork): remove support for this as it cannot support safe-randomness. */
+
+/* ECDSA_sign_setup precomputes parts of an ECDSA signing operation. It sets
+ * |*kinv| and |*rp| to the precomputed values and uses the |ctx| argument, if
+ * not NULL. It returns one on success and zero otherwise. */
+OPENSSL_EXPORT int ECDSA_sign_setup(const EC_KEY *eckey, BN_CTX *ctx,
+                                    BIGNUM **kinv, BIGNUM **rp);
+
+/* ECDSA_do_sign_ex is the same as |ECDSA_do_sign| but takes precomputed values
+ * as generated by |ECDSA_sign_setup|. */
+OPENSSL_EXPORT ECDSA_SIG *ECDSA_do_sign_ex(const uint8_t *digest,
+                                           size_t digest_len,
+                                           const BIGNUM *kinv, const BIGNUM *rp,
+                                           const EC_KEY *eckey);
+
+/* ECDSA_sign_ex is the same as |ECDSA_sign| but takes precomputed values as
+ * generated by |ECDSA_sign_setup|. */
+OPENSSL_EXPORT int ECDSA_sign_ex(int type, const uint8_t *digest,
+                                 size_t digest_len, uint8_t *sig,
+                                 unsigned int *sig_len, const BIGNUM *kinv,
+                                 const BIGNUM *rp, const EC_KEY *eckey);
+
+
+/* ASN.1 functions. */
+
+/* ECDSA_SIG_parse parses a DER-encoded ECDSA-Sig-Value structure from |cbs| and
+ * advances |cbs|. It returns a newly-allocated |ECDSA_SIG| or NULL on error. */
+OPENSSL_EXPORT ECDSA_SIG *ECDSA_SIG_parse(CBS *cbs);
+
+/* ECDSA_SIG_from_bytes parses |in| as a DER-encoded ECDSA-Sig-Value structure.
+ * It returns a newly-allocated |ECDSA_SIG| structure or NULL on error. */
+OPENSSL_EXPORT ECDSA_SIG *ECDSA_SIG_from_bytes(const uint8_t *in,
+                                               size_t in_len);
+
+/* ECDSA_SIG_marshal marshals |sig| as a DER-encoded ECDSA-Sig-Value and appends
+ * the result to |cbb|. It returns one on success and zero on error. */
+OPENSSL_EXPORT int ECDSA_SIG_marshal(CBB *cbb, const ECDSA_SIG *sig);
+
+/* ECDSA_SIG_to_bytes marshals |sig| as a DER-encoded ECDSA-Sig-Value and, on
+ * success, sets |*out_bytes| to a newly allocated buffer containing the result
+ * and returns one. Otherwise, it returns zero. The result should be freed with
+ * |OPENSSL_free|. */
+OPENSSL_EXPORT int ECDSA_SIG_to_bytes(uint8_t **out_bytes, size_t *out_len,
+                                      const ECDSA_SIG *sig);
+
+/* ECDSA_SIG_max_len returns the maximum length of a DER-encoded ECDSA-Sig-Value
+ * structure for a group whose order is represented in |order_len| bytes, or
+ * zero on overflow. */
+OPENSSL_EXPORT size_t ECDSA_SIG_max_len(size_t order_len);
+
+
+/* Deprecated functions. */
+
+/* d2i_ECDSA_SIG parses an ASN.1, DER-encoded, signature from |len| bytes at
+ * |*inp|. If |out| is not NULL then, on exit, a pointer to the result is in
+ * |*out|. Note that, even if |*out| is already non-NULL on entry, it will not
+ * be written to. Rather, a fresh |ECDSA_SIG| is allocated and the previous one
+ * is freed. On successful exit, |*inp| is advanced past the DER structure. It
+ * returns the result or NULL on error. */
+OPENSSL_EXPORT ECDSA_SIG *d2i_ECDSA_SIG(ECDSA_SIG **out, const uint8_t **inp,
+                                        long len);
+
+/* i2d_ECDSA_SIG marshals a signature from |sig| to an ASN.1, DER
+ * structure. If |outp| is not NULL then the result is written to |*outp| and
+ * |*outp| is advanced just past the output. It returns the number of bytes in
+ * the result, whether written or not, or a negative value on error. */
+OPENSSL_EXPORT int i2d_ECDSA_SIG(const ECDSA_SIG *sig, uint8_t **outp);
+
+
+#if defined(__cplusplus)
+}  /* extern C */
+
+extern "C++" {
+
+namespace bssl {
+
+BORINGSSL_MAKE_DELETER(ECDSA_SIG, ECDSA_SIG_free)
+
+}  // namespace bssl
+
+}  /* extern C++ */
+
 #endif
-#endif
+
+#define ECDSA_R_BAD_SIGNATURE 100
+#define ECDSA_R_MISSING_PARAMETERS 101
+#define ECDSA_R_NEED_NEW_SETUP_VALUES 102
+#define ECDSA_R_NOT_IMPLEMENTED 103
+#define ECDSA_R_RANDOM_NUMBER_GENERATION_FAILED 104
+#define ECDSA_R_ENCODE_ERROR 105
+
+#endif  /* OPENSSL_HEADER_ECDSA_H */

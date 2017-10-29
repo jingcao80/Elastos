@@ -49,7 +49,7 @@ typedef int (*Looper_callbackFunc)(int fd, int events, void* data);
  */
 struct Message {
     Message() : what(0) { }
-    Message(int what) : what(what) { }
+    Message(int w) : what(w) { }
 
     /* The message type. (interpretation is left up to the handler) */
     int what;
@@ -66,7 +66,7 @@ struct Message {
  */
 class MessageHandler : public virtual RefBase {
 protected:
-    virtual ~MessageHandler() { }
+    virtual ~MessageHandler();
 
 public:
     /**
@@ -97,7 +97,7 @@ private:
  */
 class LooperCallback : public virtual RefBase {
 protected:
-    virtual ~LooperCallback() { }
+    virtual ~LooperCallback();
 
 public:
     /**
@@ -386,11 +386,12 @@ public:
     void removeMessages(const sp<MessageHandler>& handler, int what);
 
     /**
-     * Return whether this looper's thread is currently idling -- that is, whether it
-     * stopped waiting for more work to do.  Note that this is intrinsically racy, since
-     * its state can change before you get the result back.
+     * Returns whether this looper's thread is currently polling for more work to do.
+     * This is a good signal that the loop is still alive rather than being stuck
+     * handling a callback.  Note that this method is intrinsically racy, since the
+     * state of the loop can change before you get the result back.
      */
-    bool isIdling() const;
+    bool isPolling() const;
 
     /**
      * Prepares a looper associated with the calling thread, and returns it.
@@ -419,8 +420,12 @@ private:
     struct Request {
         int fd;
         int ident;
+        int events;
+        int seq;
         sp<LooperCallback> callback;
         void* data;
+
+        void initEventItem(struct epoll_event* eventItem) const;
     };
 
     struct Response {
@@ -431,8 +436,8 @@ private:
     struct MessageEnvelope {
         MessageEnvelope() : uptime(0) { }
 
-        MessageEnvelope(nsecs_t uptime, const sp<MessageHandler> handler,
-                const Message& message) : uptime(uptime), handler(handler), message(message) {
+        MessageEnvelope(nsecs_t u, const sp<MessageHandler> h,
+                const Message& m) : uptime(u), handler(h), message(m) {
         }
 
         nsecs_t uptime;
@@ -442,8 +447,7 @@ private:
 
     const bool mAllowNonCallbacks; // immutable
 
-    int mWakeReadPipeFd;  // immutable
-    int mWakeWritePipeFd; // immutable
+    int mWakeEventFd;  // immutable
     Mutex mLock;
 
     Vector<MessageEnvelope> mMessageEnvelopes; // guarded by mLock
@@ -451,12 +455,14 @@ private:
 
     // Whether we are currently waiting for work.  Not protected by a lock,
     // any use of it is racy anyway.
-    volatile bool mIdling;
+    volatile bool mPolling;
 
-    int mEpollFd; // immutable
+    int mEpollFd; // guarded by mLock but only modified on the looper thread
+    bool mEpollRebuildRequired; // guarded by mLock
 
     // Locked list of file descriptor monitoring requests.
     KeyedVector<int, Request> mRequests;  // guarded by mLock
+    int mNextRequestSeq;
 
     // This state is only used privately by pollOnce and does not require a lock since
     // it runs on a single thread.
@@ -465,11 +471,15 @@ private:
     nsecs_t mNextMessageUptime; // set to LLONG_MAX when none
 
     int pollInner(int timeoutMillis);
+    int removeFd(int fd, int seq);
     void awoken();
     void pushResponse(int events, const Request& request);
+    void rebuildEpollLocked();
+    void scheduleEpollRebuildLocked();
 
     static void initTLSKey();
     static void threadDestructor(void *st);
+    static void initEpollEvent(struct epoll_event* eventItem);
 };
 
 } // namespace android

@@ -1,3 +1,5 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 * Copyright (C) 2007-2013, International Business Machines Corporation and
 * others. All Rights Reserved.
@@ -1064,7 +1066,6 @@ private:
      */
     class U_I18N_API DummyFormat : public Format {
     public:
-        using Format::format;
         virtual UBool operator==(const Format&) const;
         virtual Format* clone() const;
         virtual UnicodeString& format(const Formattable& obj,

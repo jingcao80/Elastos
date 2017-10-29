@@ -20,12 +20,12 @@
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
+#include <map>
 
 #include <GLES2/gl2.h>
 
 #include "Debug.h"
 #include "Program.h"
-#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
@@ -40,7 +40,7 @@ namespace uirenderer {
  */
 class ProgramCache {
 public:
-    ProgramCache();
+    explicit ProgramCache(Extensions& extensions);
     ~ProgramCache();
 
     Program* get(const ProgramDescription& description);
@@ -51,14 +51,15 @@ private:
     Program* generateProgram(const ProgramDescription& description, programid key);
     String8 generateVertexShader(const ProgramDescription& description);
     String8 generateFragmentShader(const ProgramDescription& description);
-    void generateBlend(String8& shader, const char* name, SkXfermode::Mode mode);
+    void generateBlend(String8& shader, const char* name, SkBlendMode mode);
     void generateTextureWrap(String8& shader, GLenum wrapS, GLenum wrapT);
 
     void printLongString(const String8& shader) const;
 
-    KeyedVector<programid, Program*> mCache;
+    std::map<programid, std::unique_ptr<Program>> mCache;
 
     const bool mHasES3;
+    const bool mHasLinearBlending;
 }; // class ProgramCache
 
 }; // namespace uirenderer

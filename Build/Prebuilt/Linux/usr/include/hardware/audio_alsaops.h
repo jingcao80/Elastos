@@ -37,7 +37,7 @@ __BEGIN_DECLS
 static inline enum pcm_format pcm_format_from_audio_format(audio_format_t format)
 {
     switch (format) {
-#ifdef HAVE_BIG_ENDIAN
+#if HAVE_BIG_ENDIAN
     case AUDIO_FORMAT_PCM_16_BIT:
         return PCM_FORMAT_S16_BE;
     case AUDIO_FORMAT_PCM_24_BIT_PACKED:
@@ -58,6 +58,7 @@ static inline enum pcm_format pcm_format_from_audio_format(audio_format_t format
 #endif
     case AUDIO_FORMAT_PCM_FLOAT:  /* there is no equivalent for float */
     default:
+        LOG_ALWAYS_FATAL("pcm_format_from_audio_format: invalid audio format %#x", format);
         return 0;
     }
 }
@@ -71,7 +72,7 @@ static inline enum pcm_format pcm_format_from_audio_format(audio_format_t format
 static inline audio_format_t audio_format_from_pcm_format(enum pcm_format format)
 {
     switch (format) {
-#ifdef HAVE_BIG_ENDIAN
+#if HAVE_BIG_ENDIAN
     case PCM_FORMAT_S16_BE:
         return AUDIO_FORMAT_PCM_16_BIT;
     case PCM_FORMAT_S24_3BE:
@@ -91,6 +92,7 @@ static inline audio_format_t audio_format_from_pcm_format(enum pcm_format format
         return AUDIO_FORMAT_PCM_32_BIT;
 #endif
     default:
+        LOG_ALWAYS_FATAL("audio_format_from_pcm_format: invalid pcm format %#x", format);
         return 0;
     }
 }

@@ -17,24 +17,27 @@
 #ifndef ANDROID_HWUI_GRADIENT_CACHE_H
 #define ANDROID_HWUI_GRADIENT_CACHE_H
 
+#include <memory>
+
 #include <GLES3/gl3.h>
 
 #include <SkShader.h>
 
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
 
-#include "Texture.h"
+#include "FloatColor.h"
 
 namespace android {
 namespace uirenderer {
 
+class Texture;
+
 struct GradientCacheEntry {
     GradientCacheEntry() {
         count = 0;
-        colors = NULL;
-        positions = NULL;
+        colors = nullptr;
+        positions = nullptr;
     }
 
     GradientCacheEntry(uint32_t* colors, float* positions, uint32_t count) {
@@ -42,20 +45,12 @@ struct GradientCacheEntry {
     }
 
     GradientCacheEntry(const GradientCacheEntry& entry) {
-        copy(entry.colors, entry.positions, entry.count);
-    }
-
-    ~GradientCacheEntry() {
-        delete[] colors;
-        delete[] positions;
+        copy(entry.colors.get(), entry.positions.get(), entry.count);
     }
 
     GradientCacheEntry& operator=(const GradientCacheEntry& entry) {
         if (this != &entry) {
-            delete[] colors;
-            delete[] positions;
-
-            copy(entry.colors, entry.positions, entry.count);
+            copy(entry.colors.get(), entry.positions.get(), entry.count);
         }
 
         return *this;
@@ -73,18 +68,18 @@ struct GradientCacheEntry {
         return compare(*this, other) != 0;
     }
 
-    uint32_t* colors;
-    float* positions;
+    std::unique_ptr<uint32_t[]> colors;
+    std::unique_ptr<float[]> positions;
     uint32_t count;
 
 private:
     void copy(uint32_t* colors, float* positions, uint32_t count) {
         this->count = count;
-        this->colors = new uint32_t[count];
-        this->positions = new float[count];
+        this->colors.reset(new uint32_t[count]);
+        this->positions.reset(new float[count]);
 
-        memcpy(this->colors, colors, count * sizeof(uint32_t));
-        memcpy(this->positions, positions, count * sizeof(float));
+        memcpy(this->colors.get(), colors, count * sizeof(uint32_t));
+        memcpy(this->positions.get(), positions, count * sizeof(float));
     }
 
 }; // GradientCacheEntry
@@ -110,15 +105,14 @@ inline hash_t hash_type(const GradientCacheEntry& entry) {
  */
 class GradientCache: public OnEntryRemoved<GradientCacheEntry, Texture*> {
 public:
-    GradientCache();
-    GradientCache(uint32_t maxByteSize);
+    explicit GradientCache(Extensions& extensions);
     ~GradientCache();
 
     /**
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(GradientCacheEntry& shader, Texture*& texture);
+    void operator()(GradientCacheEntry& shader, Texture*& texture) override;
 
     /**
      * Returns the texture associated with the specified shader.
@@ -130,10 +124,6 @@ public:
      */
     void clear();
 
-    /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
     /**
      * Returns the maximum size of the cache in bytes.
      */
@@ -151,7 +141,8 @@ private:
     Texture* addLinearGradient(GradientCacheEntry& gradient,
             uint32_t* colors, float* positions, int count);
 
-    void generateTexture(uint32_t* colors, float* positions, Texture* texture);
+    void generateTexture(uint32_t* colors, float* positions,
+            const uint32_t width, const uint32_t height, Texture* texture);
 
     struct GradientInfo {
         uint32_t width;
@@ -161,36 +152,26 @@ private:
     void getGradientInfo(const uint32_t* colors, const int count, GradientInfo& info);
 
     size_t bytesPerPixel() const;
+    size_t sourceBytesPerPixel() const;
 
-    struct GradientColor {
-        float r;
-        float g;
-        float b;
-        float a;
-    };
-
-    typedef void (GradientCache::*ChannelSplitter)(uint32_t inColor,
-            GradientColor& outColor) const;
-
-    void splitToBytes(uint32_t inColor, GradientColor& outColor) const;
-    void splitToFloats(uint32_t inColor, GradientColor& outColor) const;
-
-    typedef void (GradientCache::*ChannelMixer)(GradientColor& start, GradientColor& end,
+    typedef void (GradientCache::*ChannelMixer)(const FloatColor& start, const FloatColor& end,
             float amount, uint8_t*& dst) const;
 
-    void mixBytes(GradientColor& start, GradientColor& end, float amount, uint8_t*& dst) const;
-    void mixFloats(GradientColor& start, GradientColor& end, float amount, uint8_t*& dst) const;
+    void mixBytes(const FloatColor& start, const FloatColor& end,
+            float amount, uint8_t*& dst) const;
+    void mixFloats(const FloatColor& start, const FloatColor& end,
+            float amount, uint8_t*& dst) const;
 
     LruCache<GradientCacheEntry, Texture*> mCache;
 
     uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
 
     GLint mMaxTextureSize;
     bool mUseFloatTexture;
     bool mHasNpot;
+    bool mHasLinearBlending;
 
-    Vector<SkShader*> mGarbage;
     mutable Mutex mLock;
 }; // class GradientCache
 

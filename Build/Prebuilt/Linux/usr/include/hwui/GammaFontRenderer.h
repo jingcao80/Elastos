@@ -17,51 +17,17 @@
 #ifndef ANDROID_HWUI_GAMMA_FONT_RENDERER_H
 #define ANDROID_HWUI_GAMMA_FONT_RENDERER_H
 
-#include <SkPaint.h>
-
 #include "FontRenderer.h"
-#include "Program.h"
 
 namespace android {
 namespace uirenderer {
 
 class GammaFontRenderer {
 public:
-    virtual ~GammaFontRenderer();
-
-    virtual void clear() = 0;
-    virtual void flush() = 0;
-
-    virtual FontRenderer& getFontRenderer(const SkPaint* paint) = 0;
-
-    virtual uint32_t getFontRendererCount() const = 0;
-    virtual uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const = 0;
-
-    virtual void describe(ProgramDescription& description, const SkPaint* paint) const = 0;
-    virtual void setupProgram(ProgramDescription& description, Program* program) const = 0;
-
-    virtual void endPrecaching() = 0;
-
-    static GammaFontRenderer* createRenderer();
-
-protected:
     GammaFontRenderer();
 
-    int mBlackThreshold;
-    int mWhiteThreshold;
-
-    float mGamma;
-};
-
-class ShaderGammaFontRenderer: public GammaFontRenderer {
-public:
-    ~ShaderGammaFontRenderer() {
-        delete mRenderer;
-    }
-
     void clear() {
-        delete mRenderer;
-        mRenderer = NULL;
+        mRenderer.reset(nullptr);
     }
 
     void flush() {
@@ -70,133 +36,36 @@ public:
         }
     }
 
-    FontRenderer& getFontRenderer(const SkPaint* paint) {
+    FontRenderer& getFontRenderer() {
         if (!mRenderer) {
-            mRenderer = new FontRenderer;
+            const uint8_t* table = nullptr;
+#ifndef ANDROID_ENABLE_LINEAR_BLENDING
+            table = &mGammaTable[0];
+#endif
+            mRenderer.reset(new FontRenderer(table));
         }
         return *mRenderer;
     }
 
-    uint32_t getFontRendererCount() const {
-        return 1;
-    }
-
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
-        return mRenderer ? mRenderer->getCacheSize(format) : 0;
-    }
-
-    void describe(ProgramDescription& description, const SkPaint* paint) const;
-    void setupProgram(ProgramDescription& description, Program* program) const;
-
-    void endPrecaching();
-
-private:
-    ShaderGammaFontRenderer(bool multiGamma);
-
-    FontRenderer* mRenderer;
-    bool mMultiGamma;
-
-    friend class GammaFontRenderer;
-};
-
-class LookupGammaFontRenderer: public GammaFontRenderer {
-public:
-    ~LookupGammaFontRenderer() {
-        delete mRenderer;
-    }
-
-    void clear() {
-        delete mRenderer;
-        mRenderer = NULL;
-    }
-
-    void flush() {
+    void dumpMemoryUsage(String8& log) const {
         if (mRenderer) {
-            mRenderer->flushLargeCaches();
+            mRenderer->dumpMemoryUsage(log);
+        } else {
+            log.appendFormat("FontRenderer doesn't exist.\n");
         }
     }
 
-    FontRenderer& getFontRenderer(const SkPaint* paint) {
-        if (!mRenderer) {
-            mRenderer = new FontRenderer;
-            mRenderer->setGammaTable(&mGammaTable[0]);
-        }
-        return *mRenderer;
-    }
-
-    uint32_t getFontRendererCount() const {
-        return 1;
-    }
-
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
-        return mRenderer ? mRenderer->getCacheSize(format) : 0;
-    }
-
-    void describe(ProgramDescription& description, const SkPaint* paint) const {
-    }
-
-    void setupProgram(ProgramDescription& description, Program* program) const {
+    uint32_t getSize() const {
+        return mRenderer ? mRenderer->getSize() : 0;
     }
 
     void endPrecaching();
 
 private:
-    LookupGammaFontRenderer();
-
-    FontRenderer* mRenderer;
+    std::unique_ptr<FontRenderer> mRenderer;
+#ifndef ANDROID_ENABLE_LINEAR_BLENDING
     uint8_t mGammaTable[256];
-
-    friend class GammaFontRenderer;
-};
-
-class Lookup3GammaFontRenderer: public GammaFontRenderer {
-public:
-    ~Lookup3GammaFontRenderer();
-
-    void clear();
-    void flush();
-
-    FontRenderer& getFontRenderer(const SkPaint* paint);
-
-    uint32_t getFontRendererCount() const {
-        return kGammaCount;
-    }
-
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
-        if (fontRenderer >= kGammaCount) return 0;
-
-        FontRenderer* renderer = mRenderers[fontRenderer];
-        if (!renderer) return 0;
-
-        return renderer->getCacheSize(format);
-    }
-
-    void describe(ProgramDescription& description, const SkPaint* paint) const {
-    }
-
-    void setupProgram(ProgramDescription& description, Program* program) const {
-    }
-
-    void endPrecaching();
-
-private:
-    Lookup3GammaFontRenderer();
-
-    enum Gamma {
-        kGammaDefault = 0,
-        kGammaBlack = 1,
-        kGammaWhite = 2,
-        kGammaCount = 3
-    };
-
-    FontRenderer* getRenderer(Gamma gamma);
-
-    uint32_t mRenderersUsageCount[kGammaCount];
-    FontRenderer* mRenderers[kGammaCount];
-
-    uint8_t mGammaTable[256 * kGammaCount];
-
-    friend class GammaFontRenderer;
+#endif
 };
 
 }; // namespace uirenderer

@@ -25,6 +25,7 @@
 
 namespace android {
 
+class DataSource;
 struct IMediaHTTPService;
 
 // Abstract base class
@@ -40,6 +41,7 @@ public:
             const KeyedVector<String8, String8> *headers = NULL) = 0;
 
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
+    virtual status_t setDataSource(const sp<DataSource>& source) = 0;
     virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) = 0;
     virtual MediaAlbumArt* extractAlbumArt() = 0;
     virtual const char* extractMetadata(int keyCode) = 0;
@@ -52,9 +54,9 @@ public:
     MediaMetadataRetrieverInterface() {}
 
     virtual             ~MediaMetadataRetrieverInterface() {}
-    virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) { return NULL; }
+    virtual VideoFrame* getFrameAtTime(int64_t /*timeUs*/, int /*option*/) { return NULL; }
     virtual MediaAlbumArt* extractAlbumArt() { return NULL; }
-    virtual const char* extractMetadata(int keyCode) { return NULL; }
+    virtual const char* extractMetadata(int /*keyCode*/) { return NULL; }
 };
 
 }; // namespace android

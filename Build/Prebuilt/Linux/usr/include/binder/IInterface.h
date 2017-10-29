@@ -28,9 +28,9 @@ class IInterface : public virtual RefBase
 {
 public:
             IInterface();
-            sp<IBinder>         asBinder();
-            sp<const IBinder>   asBinder() const;
-            
+            static sp<IBinder>  asBinder(const IInterface*);
+            static sp<IBinder>  asBinder(const sp<IInterface>&);
+
 protected:
     virtual                     ~IInterface();
     virtual IBinder*            onAsBinder() = 0;
@@ -63,7 +63,7 @@ template<typename INTERFACE>
 class BpInterface : public INTERFACE, public BpRefBase
 {
 public:
-                                BpInterface(const sp<IBinder>& remote);
+    explicit                    BpInterface(const sp<IBinder>& remote);
 
 protected:
     virtual IBinder*            onAsBinder();
@@ -72,24 +72,24 @@ protected:
 // ----------------------------------------------------------------------
 
 #define DECLARE_META_INTERFACE(INTERFACE)                               \
-    static const android::String16 descriptor;                          \
-    static android::sp<I##INTERFACE> asInterface(                       \
-            const android::sp<android::IBinder>& obj);                  \
-    virtual const android::String16& getInterfaceDescriptor() const;    \
+    static const ::android::String16 descriptor;                        \
+    static ::android::sp<I##INTERFACE> asInterface(                     \
+            const ::android::sp<::android::IBinder>& obj);              \
+    virtual const ::android::String16& getInterfaceDescriptor() const;  \
     I##INTERFACE();                                                     \
     virtual ~I##INTERFACE();                                            \
 
 
 #define IMPLEMENT_META_INTERFACE(INTERFACE, NAME)                       \
-    const android::String16 I##INTERFACE::descriptor(NAME);             \
-    const android::String16&                                            \
+    const ::android::String16 I##INTERFACE::descriptor(NAME);           \
+    const ::android::String16&                                          \
             I##INTERFACE::getInterfaceDescriptor() const {              \
         return I##INTERFACE::descriptor;                                \
     }                                                                   \
-    android::sp<I##INTERFACE> I##INTERFACE::asInterface(                \
-            const android::sp<android::IBinder>& obj)                   \
+    ::android::sp<I##INTERFACE> I##INTERFACE::asInterface(              \
+            const ::android::sp<::android::IBinder>& obj)               \
     {                                                                   \
-        android::sp<I##INTERFACE> intr;                                 \
+        ::android::sp<I##INTERFACE> intr;                               \
         if (obj != NULL) {                                              \
             intr = static_cast<I##INTERFACE*>(                          \
                 obj->queryLocalInterface(                               \
@@ -105,7 +105,7 @@ protected:
 
 
 #define CHECK_INTERFACE(interface, data, reply)                         \
-    if (!data.checkInterface(this)) { return PERMISSION_DENIED; }       \
+    if (!(data).checkInterface(this)) { return PERMISSION_DENIED; }     \
 
 
 // ----------------------------------------------------------------------

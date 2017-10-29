@@ -1,7 +1,4 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
  * Copyright (C) 2008-2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,27 +48,56 @@ public:
     static const char * const keyFrameCount;
     static const char * const keyInputSource;
     static const char * const keyScreenState;
-    static const char * const keySSR;
-    static const char * const keyADSPStatus;
 
-    String8 toString();
+    //  keyBtNrec: BT SCO Noise Reduction + Echo Cancellation parameters
+    //  keyHwAvSync: get HW synchronization source identifier from a device
+    //  keyMonoOutput: Enable mono audio playback
+    //  keyStreamHwAvSync: set HW synchronization source identifier on a stream
+    static const char * const keyBtNrec;
+    static const char * const keyHwAvSync;
+    static const char * const keyMonoOutput;
+    static const char * const keyStreamHwAvSync;
+
+    //  keyStreamConnect / Disconnect: value is an int in audio_devices_t
+    static const char * const keyStreamConnect;
+    static const char * const keyStreamDisconnect;
+
+    // For querying stream capabilities. All the returned values are lists.
+    //   keyStreamSupportedFormats: audio_format_t
+    //   keyStreamSupportedChannels: audio_channel_mask_t
+    //   keyStreamSupportedSamplingRates: sampling rate values
+    static const char * const keyStreamSupportedFormats;
+    static const char * const keyStreamSupportedChannels;
+    static const char * const keyStreamSupportedSamplingRates;
+
+    static const char * const valueOn;
+    static const char * const valueOff;
+
+    static const char * const valueListSeparator;
+
+    String8 toString() const { return toStringImpl(true); }
+    String8 keysToString() const { return toStringImpl(false); }
 
     status_t add(const String8& key, const String8& value);
     status_t addInt(const String8& key, const int value);
+    status_t addKey(const String8& key);
     status_t addFloat(const String8& key, const float value);
 
     status_t remove(const String8& key);
 
-    status_t get(const String8& key, String8& value);
-    status_t getInt(const String8& key, int& value);
-    status_t getFloat(const String8& key, float& value);
-    status_t getAt(size_t index, String8& key, String8& value);
+    status_t get(const String8& key, String8& value) const;
+    status_t getInt(const String8& key, int& value) const;
+    status_t getFloat(const String8& key, float& value) const;
+    status_t getAt(size_t index, String8& key) const;
+    status_t getAt(size_t index, String8& key, String8& value) const;
 
-    size_t size() { return mParameters.size(); }
+    size_t size() const { return mParameters.size(); }
 
 private:
     String8 mKeyValuePairs;
     KeyedVector <String8, String8> mParameters;
+
+    String8 toStringImpl(bool useValues) const;
 };
 
 };  // namespace android

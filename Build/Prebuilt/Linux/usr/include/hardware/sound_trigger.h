@@ -39,7 +39,8 @@ __BEGIN_DECLS
 
 
 #define SOUND_TRIGGER_DEVICE_API_VERSION_1_0 HARDWARE_DEVICE_API_VERSION(1, 0)
-#define SOUND_TRIGGER_DEVICE_API_VERSION_CURRENT SOUND_TRIGGER_DEVICE_API_VERSION_1_0
+#define SOUND_TRIGGER_DEVICE_API_VERSION_1_1 HARDWARE_DEVICE_API_VERSION(1, 1)
+#define SOUND_TRIGGER_DEVICE_API_VERSION_CURRENT SOUND_TRIGGER_DEVICE_API_VERSION_1_1
 
 /**
  * List of known sound trigger HAL modules. This is the base name of the sound_trigger HAL
@@ -106,7 +107,13 @@ struct sound_trigger_hw_device {
      * The implementation does not have to call the callback when stopped via this method.
      */
     int (*stop_recognition)(const struct sound_trigger_hw_device *dev,
-                           sound_model_handle_t sound_model_handle);
+                            sound_model_handle_t sound_model_handle);
+
+    /* Stop recognition on all models.
+     * Only supported for device api versions SOUND_TRIGGER_DEVICE_API_VERSION_1_1 or above.
+     * If no implementation is provided, stop_recognition will be called for each running model.
+     */
+    int (*stop_all_recognitions)(const struct sound_trigger_hw_device* dev);
 };
 
 typedef struct sound_trigger_hw_device sound_trigger_hw_device_t;
@@ -117,7 +124,7 @@ static inline int sound_trigger_hw_device_open(const struct hw_module_t* module,
                                        struct sound_trigger_hw_device** device)
 {
     return module->methods->open(module, SOUND_TRIGGER_HARDWARE_INTERFACE,
-                                 (struct hw_device_t**)device);
+                                 TO_HW_DEVICE_T_OPEN(device));
 }
 
 static inline int sound_trigger_hw_device_close(struct sound_trigger_hw_device* device)

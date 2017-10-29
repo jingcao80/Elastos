@@ -19,24 +19,48 @@
 
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
+#include <binder/Parcelable.h>
 #include <camera/CameraMetadata.h>
 
 namespace android {
 
 class Surface;
 
-struct CaptureRequest : public virtual RefBase {
-public:
+namespace hardware {
+namespace camera2 {
+
+struct CaptureRequest : public Parcelable {
+
+    // those are needed so we can use a forward declaration of Surface, otherwise
+    // the type is incomplete when the ctor/dtors are generated. This has the added
+    // benefit that ctor/dtors are not inlined, which is good because they're not trivial
+    // (because of the vtable and Vector<>)
+    CaptureRequest();
+    CaptureRequest(const CaptureRequest& rhs);
+    CaptureRequest(CaptureRequest&& rhs) noexcept;
+    virtual ~CaptureRequest();
 
     CameraMetadata          mMetadata;
     Vector<sp<Surface> >    mSurfaceList;
+    bool                    mIsReprocess;
 
     /**
      * Keep impl up-to-date with CaptureRequest.java in frameworks/base
      */
-    status_t                readFromParcel(Parcel* parcel);
-    status_t                writeToParcel(Parcel* parcel) const;
+    status_t                readFromParcel(const android::Parcel* parcel) override;
+    status_t                writeToParcel(android::Parcel* parcel) const override;
 };
-}; // namespace android
+
+} // namespace camera2
+} // namespace hardware
+
+struct CaptureRequest :
+        public RefBase, public hardware::camera2::CaptureRequest {
+  public:
+    // Same as android::hardware::camera2::CaptureRequest, except that you can
+    // put this in an sp<>
+};
+
+} // namespace android
 
 #endif

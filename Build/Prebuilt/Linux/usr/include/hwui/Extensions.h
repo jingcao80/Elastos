@@ -17,12 +17,6 @@
 #ifndef ANDROID_HWUI_EXTENSIONS_H
 #define ANDROID_HWUI_EXTENSIONS_H
 
-#include <cutils/compiler.h>
-
-#include <utils/Singleton.h>
-#include <utils/SortedVector.h>
-#include <utils/String8.h>
-
 namespace android {
 namespace uirenderer {
 
@@ -30,50 +24,38 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class ANDROID_API Extensions: public Singleton<Extensions> {
+class Extensions {
 public:
+    Extensions();
+
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
-    inline bool hasDebugLabel() const { return mHasDebugLabel; }
-    inline bool hasTiledRendering() const { return mHasTiledRendering; }
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
-    inline bool hasNvSystemTime() const { return mHasNvSystemTime; }
-    inline bool hasUnpackRowLength() const { return mVersionMajor >= 3; }
+    inline bool hasUnpackRowLength() const { return mVersionMajor >= 3 || mHasUnpackSubImage; }
     inline bool hasPixelBufferObjects() const { return mVersionMajor >= 3; }
     inline bool hasOcclusionQueries() const { return mVersionMajor >= 3; }
     inline bool hasFloatTextures() const { return mVersionMajor >= 3; }
+    inline bool hasSRGB() const { return mHasSRGB; }
+    inline bool hasSRGBWriteControl() const { return hasSRGB() && mHasSRGBWriteControl; }
+    inline bool hasLinearBlending() const { return hasSRGB() && mHasLinearBlending; }
 
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
 
-    bool hasGlExtension(const char* extension) const;
-    bool hasEglExtension(const char* extension) const;
-
-    void dump() const;
-
 private:
-    Extensions();
-    ~Extensions();
-
-    void findExtensions(const char* extensions, SortedVector<String8>& list) const;
-
-    friend class Singleton<Extensions>;
-
-    SortedVector<String8> mGlExtensionList;
-    SortedVector<String8> mEglExtensionList;
-
     bool mHasNPot;
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;
-    bool mHasDebugLabel;
-    bool mHasTiledRendering;
     bool mHas1BitStencil;
     bool mHas4BitStencil;
-    bool mHasNvSystemTime;
+    bool mHasUnpackSubImage;
+    bool mHasSRGB;
+    bool mHasSRGBWriteControl;
+    bool mHasLinearBlending;
 
     int mVersionMajor;
     int mVersionMinor;

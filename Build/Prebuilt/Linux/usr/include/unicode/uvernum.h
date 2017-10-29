@@ -1,6 +1,8 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 *******************************************************************************
-*   Copyright (C) 2000-2014, International Business Machines
+*   Copyright (C) 2000-2016, International Business Machines
 *   Corporation and others.  All Rights Reserved.
 *******************************************************************************
 *
@@ -32,13 +34,12 @@
   *  by running the UNIX makefile target 'update-windows-makefiles' in icu/source.
   *
   *
-  * source/common/common.vcproj - update 'Output file name' on the link tab so
+  * source/common/common.vcxproj - update 'Output file name' on the link tab so
   *                   that it contains the new major/minor combination
-  * source/i18n/i18n.vcproj - same as for the common.vcproj
-  * source/layout/layout.vcproj - same as for the common.vcproj
+  * source/i18n/i18n.vcxproj - same as for the common.vcxproj
   * source/layoutex/layoutex.vcproj - same
-  * source/stubdata/stubdata.vcproj - same as for the common.vcproj
-  * source/io/io.vcproj - same as for the common.vcproj
+  * source/stubdata/stubdata.vcproj - same as for the common.vcxproj
+  * source/io/io.vcproj - same as for the common.vcxproj
   * source/data/makedata.mak - change U_ICUDATA_NAME so that it contains
   *                            the new major/minor combination and the Unicode version.
   */
@@ -51,19 +52,19 @@
  *  @stable ICU 2.4
  */
 #define U_COPYRIGHT_STRING \
-  " Copyright (C) 2014, International Business Machines Corporation and others. All Rights Reserved. "
+  " Copyright (C) 2016 and later: Unicode, Inc. and others. License & terms of use: http://www.unicode.org/copyright.html "
 
 /** The current ICU major version as an integer.
  *  This value will change in the subsequent releases of ICU
  *  @stable ICU 2.4
  */
-#define U_ICU_VERSION_MAJOR_NUM 53
+#define U_ICU_VERSION_MAJOR_NUM 58
 
 /** The current ICU minor version as an integer.
  *  This value will change in the subsequent releases of ICU
  *  @stable ICU 2.6
  */
-#define U_ICU_VERSION_MINOR_NUM 1
+#define U_ICU_VERSION_MINOR_NUM 2
 
 /** The current ICU patchlevel version as an integer.
  *  This value will change in the subsequent releases of ICU
@@ -76,16 +77,14 @@
  *  @stable ICU 4.0
  */
 #ifndef U_ICU_VERSION_BUILDLEVEL_NUM
-/* BEGIN Android patch - update for non-trivial change from standard ICU release */
-#define U_ICU_VERSION_BUILDLEVEL_NUM 1
-/* END Android patch */
+#define U_ICU_VERSION_BUILDLEVEL_NUM 0
 #endif
 
 /** Glued version suffix for renamers
  *  This value will change in the subsequent releases of ICU
  *  @stable ICU 2.6
  */
-#define U_ICU_VERSION_SUFFIX _53
+#define U_ICU_VERSION_SUFFIX _58
 
 /**
  * \def U_DEF2_ICU_ENTRY_POINT_RENAME
@@ -120,23 +119,19 @@
  *  This value will change in the subsequent releases of ICU
  *  @stable ICU 2.4
  */
-
-/* TODO FIX THIS WHEN BUILD level is updated */
-/* BEGIN Android patch */
-#define U_ICU_VERSION "53.1.0.1"
-/* END Android patch */
+#define U_ICU_VERSION "58.2"
 
 /** The current ICU library major/minor version as a string without dots, for library name suffixes.
  *  This value will change in the subsequent releases of ICU
  *  @stable ICU 2.6
  */
-#define U_ICU_VERSION_SHORT "53"
+#define U_ICU_VERSION_SHORT "58"
 
 #ifndef U_HIDE_INTERNAL_API
 /** Data version in ICU4C.
  * @internal ICU 4.4 Internal Use Only
  **/
-#define U_ICU_DATA_VERSION "53.1"
+#define U_ICU_DATA_VERSION "58.2"
 #endif  /* U_HIDE_INTERNAL_API */
 
 /*===========================================================================
@@ -152,7 +147,7 @@
  * This value may change in subsequent releases of ICU.
  * @stable ICU 2.4
  */
-#define UCOL_RUNTIME_VERSION 8
+#define UCOL_RUNTIME_VERSION 9
 
 /**
  * Collation builder code version.
@@ -163,11 +158,14 @@
  */
 #define UCOL_BUILDER_VERSION 9
 
+#ifndef U_HIDE_DEPRECATED_API
 /**
- * This is the version of collation tailorings.
- * This value may change in subsequent releases of ICU.
- * @stable ICU 2.4
+ * Constant 1.
+ * This was intended to be the version of collation tailorings,
+ * but instead the tailoring data carries a version number.
+ * @deprecated ICU 54
  */
 #define UCOL_TAILORINGS_VERSION 1
+#endif  /* U_HIDE_DEPRECATED_API */
 
 #endif

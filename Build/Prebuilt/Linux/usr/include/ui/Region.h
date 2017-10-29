@@ -28,13 +28,14 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-class SharedBuffer;
 class String8;
 
 // ---------------------------------------------------------------------------
 class Region : public LightFlattenable<Region>
 {
 public:
+    static const Region INVALID_REGION;
+
                         Region();
                         Region(const Region& rhs);
     explicit            Region(const Rect& rhs);
@@ -55,11 +56,12 @@ public:
 
             // the region becomes its bounds
             Region&     makeBoundsSelf();
-    
+
             void        clear();
             void        set(const Rect& r);
+            void        set(int32_t w, int32_t h);
             void        set(uint32_t w, uint32_t h);
-        
+
             Region&     orSelf(const Rect& rhs);
             Region&     xorSelf(const Rect& rhs);
             Region&     andSelf(const Rect& rhs);
@@ -110,14 +112,14 @@ public:
     inline  Region&     operator -= (const Region& rhs);
     inline  Region&     operator += (const Point& pt);
 
-    
+
     // returns true if the regions share the same underlying storage
     bool isTriviallyEqual(const Region& region) const;
 
 
     /* various ways to access the rectangle list */
 
-    
+
     // STL-like iterators
     typedef Rect const* const_iterator;
     const_iterator begin() const;
@@ -127,13 +129,8 @@ public:
     // Region object.
     Rect const* getArray(size_t* count) const;
 
-    // returns a SharedBuffer as well as the number of rects.
-    // ownership is transfered to the caller.
-    // the caller must call SharedBuffer::release() to free the memory.
-    SharedBuffer const* getSharedBuffer(size_t* count) const;
-
     /* no user serviceable parts here... */
-            
+
             // add a rectangle to the internal list. This rectangle must
             // be sorted in Y and X and must not make the region invalid.
             void        addRectUnchecked(int l, int t, int r, int b);
@@ -149,22 +146,22 @@ public:
 private:
     class rasterizer;
     friend class rasterizer;
-    
-    Region& operationSelf(const Rect& r, int op);
-    Region& operationSelf(const Region& r, int op);
-    Region& operationSelf(const Region& r, int dx, int dy, int op);
-    const Region operation(const Rect& rhs, int op) const;
-    const Region operation(const Region& rhs, int op) const;
-    const Region operation(const Region& rhs, int dx, int dy, int op) const;
 
-    static void boolean_operation(int op, Region& dst,
+    Region& operationSelf(const Rect& r, uint32_t op);
+    Region& operationSelf(const Region& r, uint32_t op);
+    Region& operationSelf(const Region& r, int dx, int dy, uint32_t op);
+    const Region operation(const Rect& rhs, uint32_t op) const;
+    const Region operation(const Region& rhs, uint32_t op) const;
+    const Region operation(const Region& rhs, int dx, int dy, uint32_t op) const;
+
+    static void boolean_operation(uint32_t op, Region& dst,
             const Region& lhs, const Region& rhs, int dx, int dy);
-    static void boolean_operation(int op, Region& dst,
+    static void boolean_operation(uint32_t op, Region& dst,
             const Region& lhs, const Rect& rhs, int dx, int dy);
 
-    static void boolean_operation(int op, Region& dst,
+    static void boolean_operation(uint32_t op, Region& dst,
             const Region& lhs, const Region& rhs);
-    static void boolean_operation(int op, Region& dst,
+    static void boolean_operation(uint32_t op, Region& dst,
             const Region& lhs, const Rect& rhs);
 
     static void translate(Region& reg, int dx, int dy);
@@ -172,7 +169,7 @@ private:
 
     static bool validate(const Region& reg,
             const char* name, bool silent = false);
-    
+
     // mStorage is a (manually) sorted array of Rects describing the region
     // with an extra Rect as the last element which is set to the
     // bounds of the region. However, if the region is

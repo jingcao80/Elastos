@@ -18,25 +18,26 @@
 #define MINIKIN_FONT_H
 
 #include <string>
+#include <memory>
 
-#include <minikin/MinikinRefCounted.h>
 #include <minikin/FontFamily.h>
+#include <minikin/Hyphenator.h>
 
 // An abstraction for platform fonts, allowing Minikin to be used with
 // multiple actual implementations of fonts.
 
-namespace android {
+namespace minikin {
 
 class MinikinFont;
 
 // Possibly move into own .h file?
 // Note: if you add a field here, either add it to LayoutCacheKey or to skipCache()
 struct MinikinPaint {
-    MinikinPaint() : font(0), size(0), scaleX(0), skewX(0), letterSpacing(0), paintFlags(0),
-            fakery(), fontFeatureSettings() { }
+    MinikinPaint() : font(nullptr), size(0), scaleX(0), skewX(0), letterSpacing(0), wordSpacing(0),
+            paintFlags(0), fakery(), hyphenEdit(), fontFeatureSettings() { }
 
     bool skipCache() const {
-      return !fontFeatureSettings.empty();
+        return !fontFeatureSettings.empty();
     }
 
     MinikinFont *font;
@@ -44,8 +45,10 @@ struct MinikinPaint {
     float scaleX;
     float skewX;
     float letterSpacing;
+    float wordSpacing;
     uint32_t paintFlags;
     FontFakery fakery;
+    HyphenEdit hyphenEdit;
     std::string fontFeatureSettings;
 };
 
@@ -78,11 +81,14 @@ struct MinikinRect {
     void join(const MinikinRect& r);
 };
 
-class MinikinFontFreeType;
+// Callback for freeing data
+typedef void (*MinikinDestroyFunc) (void* data);
 
-class MinikinFont : public MinikinRefCounted {
+class MinikinFont {
 public:
-    virtual bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const = 0;
+    explicit MinikinFont(int32_t uniqueId) : mUniqueId(uniqueId) {}
+
+    virtual ~MinikinFont();
 
     virtual float GetHorizontalAdvance(uint32_t glyph_id,
         const MinikinPaint &paint) const = 0;
@@ -90,17 +96,39 @@ public:
     virtual void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint &paint) const = 0;
 
-    // If buf is NULL, just update size
-    virtual bool GetTable(uint32_t tag, uint8_t *buf, size_t *size) = 0;
+    // Override if font can provide access to raw data
+    virtual const void* GetFontData() const {
+        return nullptr;
+    }
 
-    virtual int32_t GetUniqueId() const = 0;
+    // Override if font can provide access to raw data
+    virtual size_t GetFontSize() const {
+        return 0;
+    }
+
+    // Override if font can provide access to raw data.
+    // Returns index within OpenType collection
+    virtual int GetFontIndex() const {
+        return 0;
+    }
+
+    virtual const std::vector<minikin::FontVariation>& GetAxes() const = 0;
+
+    virtual std::shared_ptr<MinikinFont> createFontWithVariation(
+            const std::vector<FontVariation>&) const {
+        return nullptr;
+    }
 
     static uint32_t MakeTag(char c1, char c2, char c3, char c4) {
         return ((uint32_t)c1 << 24) | ((uint32_t)c2 << 16) |
             ((uint32_t)c3 << 8) | (uint32_t)c4;
     }
+
+    int32_t GetUniqueId() const { return mUniqueId; }
+private:
+    const int32_t mUniqueId;
 };
 
-}  // namespace android
+}  // namespace minikin
 
 #endif  // MINIKIN_FONT_H

@@ -23,12 +23,13 @@
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 #include <system/audio.h>
+#include <media/BufferingSettings.h>
 #include <media/MediaPlayerInterface.h>
 
 namespace android {
 
 #define FOURCC(c1, c2, c3, c4) \
-    (c1 << 24 | c2 << 16 | c3 << 8 | c4)
+    ((c1) << 24 | (c2) << 16 | (c3) << 8 | (c4))
 
 uint16_t U16_AT(const uint8_t *ptr);
 uint32_t U32_AT(const uint8_t *ptr);
@@ -41,12 +42,17 @@ uint64_t U64LE_AT(const uint8_t *ptr);
 uint64_t ntoh64(uint64_t x);
 uint64_t hton64(uint64_t x);
 
-struct MetaData;
+class MetaData;
 struct AMessage;
 status_t convertMetaDataToMessage(
         const sp<MetaData> &meta, sp<AMessage> *format);
 void convertMessageToMetaData(
         const sp<AMessage> &format, sp<MetaData> &meta);
+
+// Returns a pointer to the next NAL start code in buffer of size |length| starting at |data|, or
+// a pointer to the end of the buffer if the start code is not found.
+// TODO: combine this with avc_utils::getNextNALUnit
+const uint8_t *findNextNalStartCode(const uint8_t *data, size_t length);
 
 AString MakeUserAgent();
 
@@ -60,11 +66,35 @@ void mapAACProfileToAudioFormat(audio_format_t& format, uint64_t eAacProfile);
 status_t sendMetaDataToHal(sp<MediaPlayerBase::AudioSink>& sink, const sp<MetaData>& meta);
 
 // Check whether the stream defined by meta can be offloaded to hardware
-bool canOffloadStream(const sp<MetaData>& meta, bool hasVideo, const sp<MetaData>& vMeta,
+bool canOffloadStream(const sp<MetaData>& meta, bool hasVideo,
                       bool isStreaming, audio_stream_type_t streamType);
-void printFileName(int fd);
 
 AString uriDebugString(const AString &uri, bool incognito = false);
+
+struct HLSTime {
+    int32_t mSeq;
+    int64_t mTimeUs;
+    sp<AMessage> mMeta;
+
+    explicit HLSTime(const sp<AMessage> &meta = NULL);
+    int64_t getSegmentTimeUs() const;
+};
+
+bool operator <(const HLSTime &t0, const HLSTime &t1);
+
+// read and write various object to/from AMessage
+
+void writeToAMessage(const sp<AMessage> &msg, const AudioPlaybackRate &rate);
+void readFromAMessage(const sp<AMessage> &msg, AudioPlaybackRate *rate /* nonnull */);
+
+void writeToAMessage(const sp<AMessage> &msg, const AVSyncSettings &sync, float videoFpsHint);
+void readFromAMessage(
+        const sp<AMessage> &msg, AVSyncSettings *sync /* nonnull */, float *videoFps /* nonnull */);
+
+void writeToAMessage(const sp<AMessage> &msg, const BufferingSettings &buffering);
+void readFromAMessage(const sp<AMessage> &msg, BufferingSettings *buffering /* nonnull */);
+
+AString nameForFd(int fd);
 
 }  // namespace android
 

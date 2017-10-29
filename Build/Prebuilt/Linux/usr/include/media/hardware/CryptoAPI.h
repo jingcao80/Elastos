@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include <media/stagefright/MediaErrors.h>
 #include <utils/Errors.h>
+#include <utils/Vector.h>
 
 #ifndef CRYPTO_API_H_
 
@@ -44,15 +46,23 @@ struct CryptoPlugin {
     enum Mode {
         kMode_Unencrypted = 0,
         kMode_AES_CTR     = 1,
-
-        // Neither key nor iv are being used in this mode.
-        // Each subsample is encrypted w/ an iv of all zeroes.
-        kMode_AES_WV      = 2,  // FIX constant
+        kMode_AES_WV      = 2,
+        kMode_AES_CBC     = 3,
     };
 
     struct SubSample {
         uint32_t mNumBytesOfClearData;
         uint32_t mNumBytesOfEncryptedData;
+    };
+
+    struct Pattern {
+        // Number of blocks to be encrypted in the pattern. If zero, pattern
+        // encryption is inoperative.
+        uint32_t mEncryptBlocks;
+
+        // Number of blocks to be skipped (left clear) in the pattern. If zero,
+        // pattern encryption is inoperative.
+        uint32_t mSkipBlocks;
     };
 
     CryptoPlugin() {}
@@ -68,7 +78,18 @@ struct CryptoPlugin {
     // the resolution of the video being decrypted.  The media player should
     // call this method when the resolution is determined and any time it
     // is subsequently changed.
-    virtual void notifyResolution(uint32_t width, uint32_t height) {}
+
+    virtual void notifyResolution(uint32_t /* width */, uint32_t /* height */) {}
+
+    // A MediaDrm session may be associated with a MediaCrypto session.  The
+    // associated MediaDrm session is used to load decryption keys
+    // into the crypto/drm plugin.  The keys are then referenced by key-id
+    // in the 'key' parameter to the decrypt() method.
+    // Should return NO_ERROR on success, ERROR_DRM_SESSION_NOT_OPENED if
+    // the session is not opened and a code from MediaErrors.h otherwise.
+    virtual status_t setMediaDrmSession(const Vector<uint8_t> & /*sessionId */) {
+        return ERROR_UNSUPPORTED;
+    }
 
     // If the error returned falls into the range
     // ERROR_DRM_VENDOR_MIN..ERROR_DRM_VENDOR_MAX, errorDetailMsg should be
@@ -83,6 +104,7 @@ struct CryptoPlugin {
             const uint8_t key[16],
             const uint8_t iv[16],
             Mode mode,
+            const Pattern &pattern,
             const void *srcPtr,
             const SubSample *subSamples, size_t numSubSamples,
             void *dstPtr,

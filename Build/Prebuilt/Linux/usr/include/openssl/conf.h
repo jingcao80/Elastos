@@ -1,25 +1,24 @@
-/* crypto/conf/conf.h */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
  * This package is an SSL implementation written
  * by Eric Young (eay@cryptsoft.com).
  * The implementation was written so as to conform with Netscapes SSL.
- * 
+ *
  * This library is free for commercial and non-commercial use as long as
  * the following conditions are aheared to.  The following conditions
  * apply to all code found in this distribution, be it the RC4, RSA,
  * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
  * included with this distribution is covered by the same copyright terms
  * except that the holder is Tim Hudson (tjh@cryptsoft.com).
- * 
+ *
  * Copyright remains Eric Young's, and as such any Copyright notices in
  * the code are not to be removed.
  * If this package is used in a product, Eric Young should be given attribution
  * as the author of the parts of the library used.
  * This can be in the form of a textual message at program startup or
  * in documentation (online or textual) provided with the package.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -34,10 +33,10 @@
  *     Eric Young (eay@cryptsoft.com)"
  *    The word 'cryptographic' can be left out if the rouines from the library
  *    being used are not cryptographic related :-).
- * 4. If you include any Windows specific code (or a derivative thereof) from 
+ * 4. If you include any Windows specific code (or a derivative thereof) from
  *    the apps directory (application code) you must include an acknowledgement:
  *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,215 +48,138 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- * 
+ *
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
- * [including the GNU Public Licence.]
- */
+ * [including the GNU Public Licence.] */
 
-#ifndef  HEADER_CONF_H
-#define HEADER_CONF_H
+#ifndef OPENSSL_HEADER_CONF_H
+#define OPENSSL_HEADER_CONF_H
 
-#include <openssl/bio.h>
-#include <openssl/lhash.h>
+#include <openssl/base.h>
+
 #include <openssl/stack.h>
-#include <openssl/safestack.h>
-#include <openssl/e_os2.h>
+#include <openssl/lhash.h>
 
-#include <openssl/ossl_typ.h>
-
-#ifdef  __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-typedef struct
-	{
-	char *section;
-	char *name;
-	char *value;
-	} CONF_VALUE;
 
-DECLARE_STACK_OF(CONF_VALUE)
-DECLARE_LHASH_OF(CONF_VALUE);
+/* Config files look like:
+ *
+ *   # Comment
+ *
+ *   # This key is in the default section.
+ *   key=value
+ *
+ *   [section_name]
+ *   key2=value2
+ *
+ * Config files are represented by a |CONF|. */
 
-struct conf_st;
-struct conf_method_st;
-typedef struct conf_method_st CONF_METHOD;
+struct conf_value_st {
+  char *section;
+  char *name;
+  char *value;
+};
 
-struct conf_method_st
-	{
-	const char *name;
-	CONF *(*create)(CONF_METHOD *meth);
-	int (*init)(CONF *conf);
-	int (*destroy)(CONF *conf);
-	int (*destroy_data)(CONF *conf);
-	int (*load_bio)(CONF *conf, BIO *bp, long *eline);
-	int (*dump)(const CONF *conf, BIO *bp);
-	int (*is_number)(const CONF *conf, char c);
-	int (*to_int)(const CONF *conf, char c);
-	int (*load)(CONF *conf, const char *name, long *eline);
-	};
+struct conf_st {
+  LHASH_OF(CONF_VALUE) *data;
+};
 
-/* Module definitions */
 
-typedef struct conf_imodule_st CONF_IMODULE;
-typedef struct conf_module_st CONF_MODULE;
+/* NCONF_new returns a fresh, empty |CONF|, or NULL on error. The |method|
+ * argument must be NULL. */
+OPENSSL_EXPORT CONF *NCONF_new(void *method);
 
-DECLARE_STACK_OF(CONF_MODULE)
-DECLARE_STACK_OF(CONF_IMODULE)
+/* NCONF_free frees all the data owned by |conf| and then |conf| itself. */
+OPENSSL_EXPORT void NCONF_free(CONF *conf);
 
-/* DSO module function typedefs */
-typedef int conf_init_func(CONF_IMODULE *md, const CONF *cnf);
-typedef void conf_finish_func(CONF_IMODULE *md);
+/* NCONF_load parses the file named |filename| and adds the values found to
+ * |conf|. It returns one on success and zero on error. In the event of an
+ * error, if |out_error_line| is not NULL, |*out_error_line| is set to the
+ * number of the line that contained the error. */
+int NCONF_load(CONF *conf, const char *filename, long *out_error_line);
 
-#define	CONF_MFLAGS_IGNORE_ERRORS	0x1
-#define CONF_MFLAGS_IGNORE_RETURN_CODES	0x2
-#define CONF_MFLAGS_SILENT		0x4
-#define CONF_MFLAGS_NO_DSO		0x8
-#define CONF_MFLAGS_IGNORE_MISSING_FILE	0x10
-#define CONF_MFLAGS_DEFAULT_SECTION	0x20
+/* NCONF_load_bio acts like |NCONF_load| but reads from |bio| rather than from
+ * a named file. */
+int NCONF_load_bio(CONF *conf, BIO *bio, long *out_error_line);
 
-int CONF_set_default_method(CONF_METHOD *meth);
-void CONF_set_nconf(CONF *conf,LHASH_OF(CONF_VALUE) *hash);
-LHASH_OF(CONF_VALUE) *CONF_load(LHASH_OF(CONF_VALUE) *conf,const char *file,
-				long *eline);
-#ifndef OPENSSL_NO_FP_API
-LHASH_OF(CONF_VALUE) *CONF_load_fp(LHASH_OF(CONF_VALUE) *conf, FILE *fp,
-				   long *eline);
+/* NCONF_get_section returns a stack of values for a given section in |conf|.
+ * If |section| is NULL, the default section is returned. It returns NULL on
+ * error. */
+STACK_OF(CONF_VALUE) *NCONF_get_section(const CONF *conf, const char *section);
+
+/* NCONF_get_string returns the value of the key |name|, in section |section|.
+ * The |section| argument may be NULL to indicate the default section. It
+ * returns the value or NULL on error. */
+const char *NCONF_get_string(const CONF *conf, const char *section,
+                             const char *name);
+
+
+/* Utility functions */
+
+/* CONF_parse_list takes a list separated by 'sep' and calls |list_cb| giving
+ * the start and length of each member, optionally stripping leading and
+ * trailing whitespace. This can be used to parse comma separated lists for
+ * example. If |list_cb| returns <= 0, then the iteration is halted and that
+ * value is returned immediately. Otherwise it returns one. Note that |list_cb|
+ * may be called on an empty member. */
+int CONF_parse_list(const char *list, char sep, int remove_whitespace,
+                    int (*list_cb)(const char *elem, int len, void *usr),
+                    void *arg);
+
+
+/* Deprecated functions */
+
+/* These defines do nothing but are provided to make old code easier to
+ * compile. */
+#define CONF_MFLAGS_DEFAULT_SECTION 0
+#define CONF_MFLAGS_IGNORE_MISSING_FILE 0
+
+typedef struct conf_must_be_null_st CONF_MUST_BE_NULL;
+
+/* CONF_modules_load_file returns one. |filename| was originally a string, with
+ * NULL indicating the default. BoringSSL does not support configuration files,
+ * so this stub emulates the "default" no-op file but intentionally breaks
+ * compilation of consumers actively attempting to use this subsystem. */
+OPENSSL_EXPORT int CONF_modules_load_file(CONF_MUST_BE_NULL *filename,
+                                          const char *appname,
+                                          unsigned long flags);
+
+/* CONF_modules_free does nothing. */
+OPENSSL_EXPORT void CONF_modules_free(void);
+
+/* OPENSSL_config does nothing. */
+OPENSSL_EXPORT void OPENSSL_config(CONF_MUST_BE_NULL *config_name);
+
+/* OPENSSL_no_config does nothing. */
+OPENSSL_EXPORT void OPENSSL_no_config(void);
+
+
+#if defined(__cplusplus)
+}  /* extern C */
+
+extern "C++" {
+
+namespace bssl {
+
+BORINGSSL_MAKE_DELETER(CONF, NCONF_free)
+
+}  // namespace bssl
+
+}  /* extern C++ */
+
 #endif
-LHASH_OF(CONF_VALUE) *CONF_load_bio(LHASH_OF(CONF_VALUE) *conf, BIO *bp,long *eline);
-STACK_OF(CONF_VALUE) *CONF_get_section(LHASH_OF(CONF_VALUE) *conf,
-				       const char *section);
-char *CONF_get_string(LHASH_OF(CONF_VALUE) *conf,const char *group,
-		      const char *name);
-long CONF_get_number(LHASH_OF(CONF_VALUE) *conf,const char *group,
-		     const char *name);
-void CONF_free(LHASH_OF(CONF_VALUE) *conf);
-int CONF_dump_fp(LHASH_OF(CONF_VALUE) *conf, FILE *out);
-int CONF_dump_bio(LHASH_OF(CONF_VALUE) *conf, BIO *out);
 
-void OPENSSL_config(const char *config_name);
-void OPENSSL_no_config(void);
+#define CONF_R_LIST_CANNOT_BE_NULL 100
+#define CONF_R_MISSING_CLOSE_SQUARE_BRACKET 101
+#define CONF_R_MISSING_EQUAL_SIGN 102
+#define CONF_R_NO_CLOSE_BRACE 103
+#define CONF_R_UNABLE_TO_CREATE_NEW_SECTION 104
+#define CONF_R_VARIABLE_HAS_NO_VALUE 105
+#define CONF_R_VARIABLE_EXPANSION_TOO_LONG 106
 
-/* New conf code.  The semantics are different from the functions above.
-   If that wasn't the case, the above functions would have been replaced */
-
-struct conf_st
-	{
-	CONF_METHOD *meth;
-	void *meth_data;
-	LHASH_OF(CONF_VALUE) *data;
-	};
-
-CONF *NCONF_new(CONF_METHOD *meth);
-CONF_METHOD *NCONF_default(void);
-CONF_METHOD *NCONF_WIN32(void);
-#if 0 /* Just to give you an idea of what I have in mind */
-CONF_METHOD *NCONF_XML(void);
-#endif
-void NCONF_free(CONF *conf);
-void NCONF_free_data(CONF *conf);
-
-int NCONF_load(CONF *conf,const char *file,long *eline);
-#ifndef OPENSSL_NO_FP_API
-int NCONF_load_fp(CONF *conf, FILE *fp,long *eline);
-#endif
-int NCONF_load_bio(CONF *conf, BIO *bp,long *eline);
-STACK_OF(CONF_VALUE) *NCONF_get_section(const CONF *conf,const char *section);
-char *NCONF_get_string(const CONF *conf,const char *group,const char *name);
-int NCONF_get_number_e(const CONF *conf,const char *group,const char *name,
-		       long *result);
-int NCONF_dump_fp(const CONF *conf, FILE *out);
-int NCONF_dump_bio(const CONF *conf, BIO *out);
-
-#if 0 /* The following function has no error checking,
-	 and should therefore be avoided */
-long NCONF_get_number(CONF *conf,char *group,char *name);
-#else
-#define NCONF_get_number(c,g,n,r) NCONF_get_number_e(c,g,n,r)
-#endif
-  
-/* Module functions */
-
-int CONF_modules_load(const CONF *cnf, const char *appname,
-		      unsigned long flags);
-int CONF_modules_load_file(const char *filename, const char *appname,
-			   unsigned long flags);
-void CONF_modules_unload(int all);
-void CONF_modules_finish(void);
-void CONF_modules_free(void);
-int CONF_module_add(const char *name, conf_init_func *ifunc,
-		    conf_finish_func *ffunc);
-
-const char *CONF_imodule_get_name(const CONF_IMODULE *md);
-const char *CONF_imodule_get_value(const CONF_IMODULE *md);
-void *CONF_imodule_get_usr_data(const CONF_IMODULE *md);
-void CONF_imodule_set_usr_data(CONF_IMODULE *md, void *usr_data);
-CONF_MODULE *CONF_imodule_get_module(const CONF_IMODULE *md);
-unsigned long CONF_imodule_get_flags(const CONF_IMODULE *md);
-void CONF_imodule_set_flags(CONF_IMODULE *md, unsigned long flags);
-void *CONF_module_get_usr_data(CONF_MODULE *pmod);
-void CONF_module_set_usr_data(CONF_MODULE *pmod, void *usr_data);
-
-char *CONF_get1_default_config_file(void);
-
-int CONF_parse_list(const char *list, int sep, int nospc,
-	int (*list_cb)(const char *elem, int len, void *usr), void *arg);
-
-void OPENSSL_load_builtin_modules(void);
-
-/* BEGIN ERROR CODES */
-/* The following lines are auto generated by the script mkerr.pl. Any changes
- * made after this point may be overwritten when the script is next run.
- */
-void ERR_load_CONF_strings(void);
-
-/* Error codes for the CONF functions. */
-
-/* Function codes. */
-#define CONF_F_CONF_DUMP_FP				 104
-#define CONF_F_CONF_LOAD				 100
-#define CONF_F_CONF_LOAD_BIO				 102
-#define CONF_F_CONF_LOAD_FP				 103
-#define CONF_F_CONF_MODULES_LOAD			 116
-#define CONF_F_CONF_PARSE_LIST				 119
-#define CONF_F_DEF_LOAD					 120
-#define CONF_F_DEF_LOAD_BIO				 121
-#define CONF_F_MODULE_INIT				 115
-#define CONF_F_MODULE_LOAD_DSO				 117
-#define CONF_F_MODULE_RUN				 118
-#define CONF_F_NCONF_DUMP_BIO				 105
-#define CONF_F_NCONF_DUMP_FP				 106
-#define CONF_F_NCONF_GET_NUMBER				 107
-#define CONF_F_NCONF_GET_NUMBER_E			 112
-#define CONF_F_NCONF_GET_SECTION			 108
-#define CONF_F_NCONF_GET_STRING				 109
-#define CONF_F_NCONF_LOAD				 113
-#define CONF_F_NCONF_LOAD_BIO				 110
-#define CONF_F_NCONF_LOAD_FP				 114
-#define CONF_F_NCONF_NEW				 111
-#define CONF_F_STR_COPY					 101
-
-/* Reason codes. */
-#define CONF_R_ERROR_LOADING_DSO			 110
-#define CONF_R_LIST_CANNOT_BE_NULL			 115
-#define CONF_R_MISSING_CLOSE_SQUARE_BRACKET		 100
-#define CONF_R_MISSING_EQUAL_SIGN			 101
-#define CONF_R_MISSING_FINISH_FUNCTION			 111
-#define CONF_R_MISSING_INIT_FUNCTION			 112
-#define CONF_R_MODULE_INITIALIZATION_ERROR		 109
-#define CONF_R_NO_CLOSE_BRACE				 102
-#define CONF_R_NO_CONF					 105
-#define CONF_R_NO_CONF_OR_ENVIRONMENT_VARIABLE		 106
-#define CONF_R_NO_SECTION				 107
-#define CONF_R_NO_SUCH_FILE				 114
-#define CONF_R_NO_VALUE					 108
-#define CONF_R_UNABLE_TO_CREATE_NEW_SECTION		 103
-#define CONF_R_UNKNOWN_MODULE_NAME			 113
-#define CONF_R_VARIABLE_HAS_NO_VALUE			 104
-
-#ifdef  __cplusplus
-}
-#endif
-#endif
+#endif  /* OPENSSL_HEADER_THREAD_H */

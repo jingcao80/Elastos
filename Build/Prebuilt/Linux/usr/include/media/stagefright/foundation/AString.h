@@ -23,14 +23,14 @@
 
 namespace android {
 
-struct String8;
-struct Parcel;
+class String8;
+class Parcel;
 
 struct AString {
     AString();
-    AString(const char *s);
+    AString(const char *s);  // NOLINT, implicit conversion
     AString(const char *s, size_t size);
-    AString(const String8 &from);
+    AString(const String8 &from);  // NOLINT, implicit conversion
     AString(const AString &from);
     AString(const AString &from, size_t offset, size_t n);
     ~AString();
@@ -102,7 +102,7 @@ private:
     void makeMutable();
 };
 
-AString StringPrintf(const char *format, ...);
+AString AStringPrintf(const char *format, ...);
 
 }  // namespace android
 

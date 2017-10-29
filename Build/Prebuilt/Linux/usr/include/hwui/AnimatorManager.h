@@ -21,7 +21,6 @@
 #include <cutils/compiler.h>
 #include <utils/StrongPointer.h>
 
-#include "TreeInfo.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -30,20 +29,23 @@ namespace uirenderer {
 class AnimationHandle;
 class BaseRenderNodeAnimator;
 class RenderNode;
+class TreeInfo;
 
 // Responsible for managing the animators for a single RenderNode
 class AnimatorManager {
     PREVENT_COPY_AND_ASSIGN(AnimatorManager);
 public:
-    AnimatorManager(RenderNode& parent);
+    explicit AnimatorManager(RenderNode& parent);
     ~AnimatorManager();
 
     void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
+    void removeAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
     void setAnimationHandle(AnimationHandle* handle);
     bool hasAnimationHandle() { return mAnimationHandle; }
 
     void pushStaging();
+    void onAnimatorTargetChanged(BaseRenderNodeAnimator* animator);
 
     // Returns the combined dirty mask of all animators run
     uint32_t animate(TreeInfo& info);
@@ -66,9 +68,8 @@ private:
     AnimationHandle* mAnimationHandle;
 
     // To improve the efficiency of resizing & removing from the vector
-    // use manual ref counting instead of sp<>.
-    std::vector<BaseRenderNodeAnimator*> mNewAnimators;
-    std::vector<BaseRenderNodeAnimator*> mAnimators;
+    std::vector< sp<BaseRenderNodeAnimator> > mNewAnimators;
+    std::vector< sp<BaseRenderNodeAnimator> > mAnimators;
 };
 
 } /* namespace uirenderer */

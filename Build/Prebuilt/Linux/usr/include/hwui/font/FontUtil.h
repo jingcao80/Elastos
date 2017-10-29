@@ -30,34 +30,22 @@
 #define DEFAULT_TEXT_LARGE_CACHE_WIDTH 2048
 #define DEFAULT_TEXT_LARGE_CACHE_HEIGHT 512
 
-#define TEXTURE_BORDER_SIZE 1
-#if TEXTURE_BORDER_SIZE != 1
-# error TEXTURE_BORDER_SIZE other than 1 is not currently supported
+#ifdef TEXTURE_BORDER_SIZE
+  #if TEXTURE_BORDER_SIZE != 1
+    #error TEXTURE_BORDER_SIZE other than 1 is not currently supported
+  #endif
+#else
+  #define TEXTURE_BORDER_SIZE 1
 #endif
 
 #define CACHE_BLOCK_ROUNDING_SIZE 4
 
-#if RENDER_TEXT_AS_GLYPHS
-    typedef uint16_t glyph_t;
-    #define TO_GLYPH(g) g
-    #define GET_METRICS(cache, glyph) cache->getGlyphIDMetrics(glyph)
-    #define GET_GLYPH(text) nextGlyph((const uint16_t**) &text)
-    #define IS_END_OF_STRING(glyph) false
+typedef uint16_t glyph_t;
+#define GET_METRICS(cache, glyph) cache->getGlyphIDMetrics(glyph)
+#define IS_END_OF_STRING(glyph) false
 
-    static glyph_t __attribute__((__unused__)) nextGlyph(const uint16_t** srcPtr) {
-        const uint16_t* src = *srcPtr;
-        glyph_t g = *src++;
-        *srcPtr = src;
-        return g;
-    }
-#else
-    typedef SkUnichar glyph_t;
-    #define TO_GLYPH(g) ((SkUnichar) g)
-    #define GET_METRICS(cache, glyph) cache->getUnicharMetrics(glyph)
-    #define GET_GLYPH(text) SkUTF16_NextUnichar((const uint16_t**) &text)
-    #define IS_END_OF_STRING(glyph) glyph < 0
-#endif
-
-#define AUTO_KERN(prev, next) (((next) - (prev) + 32) >> 6 << 16)
+// prev, next are assumed to be signed x.6 fixed-point numbers with range
+// [-1, 1]. Result is an integral float.
+#define AUTO_KERN(prev, next) static_cast<float>(((next) - (prev) + 32) >> 6)
 
 #endif // ANDROID_HWUI_FONT_UTIL_H

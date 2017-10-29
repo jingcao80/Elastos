@@ -18,6 +18,7 @@
 
 #define SKIP_CUT_BUFFER_H_
 
+#include <media/MediaCodecBuffer.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/foundation/ABuffer.h>
 
@@ -29,15 +30,17 @@ namespace android {
  */
 class SkipCutBuffer: public RefBase {
  public:
-    // 'skip' is the number of bytes to skip from the beginning
-    // 'cut' is the number of bytes to cut from the end
-    SkipCutBuffer(int32_t skip, int32_t cut);
+    // 'skip' is the number of frames to skip from the beginning
+    // 'cut' is the number of frames to cut from the end
+    // 'num16BitChannels' is the number of channels, which are assumed to be 16 bit wide each
+    SkipCutBuffer(size_t skip, size_t cut, size_t num16Channels);
 
     // Submit one MediaBuffer for skipping and cutting. This may consume all or
     // some of the data in the buffer, or it may add data to it.
     // After this, the caller should continue processing the buffer as usual.
     void submit(MediaBuffer *buffer);
     void submit(const sp<ABuffer>& buffer);    // same as above, but with an ABuffer
+    void submit(const sp<MediaCodecBuffer>& buffer);    // same as above, but with an ABuffer
     void clear();
     size_t size(); // how many bytes are currently stored in the buffer
 
@@ -47,6 +50,8 @@ class SkipCutBuffer: public RefBase {
  private:
     void write(const char *src, size_t num);
     size_t read(char *dst, size_t num);
+    template <typename T>
+    void submitInternal(const sp<T>& buffer);
     int32_t mSkip;
     int32_t mFrontPadding;
     int32_t mBackPadding;

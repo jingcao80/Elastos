@@ -57,7 +57,7 @@ public:
 
 private:
     friend class AnimationContext;
-    AnimationHandle(AnimationContext& context);
+    explicit AnimationHandle(AnimationContext& context);
     AnimationHandle(RenderNode& animatingNode, AnimationContext& context);
     ~AnimationHandle();
 
@@ -75,7 +75,7 @@ private:
 class AnimationContext {
     PREVENT_COPY_AND_ASSIGN(AnimationContext);
 public:
-    ANDROID_API AnimationContext(renderthread::TimeLord& clock);
+    ANDROID_API explicit AnimationContext(renderthread::TimeLord& clock);
     ANDROID_API virtual ~AnimationContext();
 
     nsecs_t frameTimeMs() { return mFrameTimeMs; }
@@ -99,6 +99,8 @@ public:
     ANDROID_API virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener);
 
     ANDROID_API virtual void destroy();
+
+    ANDROID_API virtual void pauseAnimators() {}
 
 private:
     friend class AnimationHandle;

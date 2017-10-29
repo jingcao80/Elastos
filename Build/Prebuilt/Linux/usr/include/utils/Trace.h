@@ -17,26 +17,19 @@
 #ifndef ANDROID_TRACE_H
 #define ANDROID_TRACE_H
 
-#ifdef HAVE_ANDROID_OS
+#if defined(__ANDROID__)
 
-#include <fcntl.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
-#include <cutils/compiler.h>
-#include <utils/threads.h>
 #include <cutils/trace.h>
 
 // See <cutils/trace.h> for more ATRACE_* macros.
 
-// ATRACE_NAME traces the beginning and end of the current scope.  To trace
-// the correct start and end times this macro should be declared first in the
-// scope body.
-#define ATRACE_NAME(name) android::ScopedTrace ___tracer(ATRACE_TAG, name)
+// ATRACE_NAME traces from its location until the end of its enclosing scope.
+#define _PASTE(x, y) x ## y
+#define PASTE(x, y) _PASTE(x,y)
+#define ATRACE_NAME(name) android::ScopedTrace PASTE(___tracer, __LINE__) (ATRACE_TAG, name)
+
 // ATRACE_CALL is an ATRACE_NAME that uses the current function name.
 #define ATRACE_CALL() ATRACE_NAME(__FUNCTION__)
 
@@ -44,14 +37,13 @@ namespace android {
 
 class ScopedTrace {
 public:
-inline ScopedTrace(uint64_t tag, const char* name)
-    : mTag(tag) {
-    atrace_begin(mTag,name);
-}
+    inline ScopedTrace(uint64_t tag, const char* name) : mTag(tag) {
+        atrace_begin(mTag, name);
+    }
 
-inline ~ScopedTrace() {
-    atrace_end(mTag);
-}
+    inline ~ScopedTrace() {
+        atrace_end(mTag);
+    }
 
 private:
     uint64_t mTag;
@@ -59,11 +51,11 @@ private:
 
 }; // namespace android
 
-#else // HAVE_ANDROID_OS
+#else // !__ANDROID__
 
 #define ATRACE_NAME(...)
 #define ATRACE_CALL()
 
-#endif // HAVE_ANDROID_OS
+#endif // __ANDROID__
 
 #endif // ANDROID_TRACE_H

@@ -16,38 +16,43 @@
  ***
  ****************************************************************************
  ****************************************************************************/
-#ifndef CAN_BCM_H
-#define CAN_BCM_H
+#ifndef _UAPI_CAN_BCM_H
+#define _UAPI_CAN_BCM_H
 #include <linux/types.h>
 #include <linux/can.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
-struct bcm_msg_head {
- __u32 opcode;
- __u32 flags;
- __u32 count;
+struct bcm_timeval {
+  long tv_sec;
+  long tv_usec;
+};
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- struct timeval ival1, ival2;
- canid_t can_id;
- __u32 nframes;
- struct can_frame frames[0];
+struct bcm_msg_head {
+  __u32 opcode;
+  __u32 flags;
+  __u32 count;
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
+  struct bcm_timeval ival1, ival2;
+  canid_t can_id;
+  __u32 nframes;
+  struct can_frame frames[0];
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 };
 enum {
- TX_SETUP = 1,
- TX_DELETE,
+  TX_SETUP = 1,
+  TX_DELETE,
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- TX_READ,
- TX_SEND,
- RX_SETUP,
- RX_DELETE,
+  TX_READ,
+  TX_SEND,
+  RX_SETUP,
+  RX_DELETE,
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- RX_READ,
- TX_STATUS,
- TX_EXPIRED,
- RX_STATUS,
+  RX_READ,
+  TX_STATUS,
+  TX_EXPIRED,
+  RX_STATUS,
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- RX_TIMEOUT,
- RX_CHANGED
+  RX_TIMEOUT,
+  RX_CHANGED
 };
 #define SETTIMER 0x0001
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
@@ -63,4 +68,6 @@ enum {
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define TX_RESET_MULTI_IDX 0x0200
 #define RX_RTR_FRAME 0x0400
+#define CAN_FD_FRAME 0x0800
 #endif
+/* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */

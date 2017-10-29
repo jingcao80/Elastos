@@ -32,54 +32,54 @@
 #define SEM_STAT 18
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define SEM_INFO 19
-struct semid_ds {
- struct ipc_perm sem_perm;
- __kernel_time_t sem_otime;
+struct __kernel_legacy_semid_ds {
+  struct __kernel_legacy_ipc_perm sem_perm;
+  __kernel_time_t sem_otime;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- __kernel_time_t sem_ctime;
- struct sem *sem_base;
- struct sem_queue *sem_pending;
- struct sem_queue **sem_pending_last;
+  __kernel_time_t sem_ctime;
+  struct sem * sem_base;
+  struct sem_queue * sem_pending;
+  struct sem_queue * * sem_pending_last;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- struct sem_undo *undo;
- unsigned short sem_nsems;
+  struct sem_undo * undo;
+  unsigned short sem_nsems;
 };
 #include <asm/sembuf.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 struct sembuf {
- unsigned short sem_num;
- short sem_op;
- short sem_flg;
+  unsigned short sem_num;
+  short sem_op;
+  short sem_flg;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 };
 union semun {
- int val;
- struct semid_ds __user *buf;
+  int val;
+  struct __kernel_legacy_semid_ds __user * buf;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- unsigned short __user *array;
- struct seminfo __user *__buf;
- void __user *__pad;
+  unsigned short __user * array;
+  struct seminfo __user * __buf;
+  void __user * __pad;
 };
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 struct seminfo {
- int semmap;
- int semmni;
- int semmns;
+  int semmap;
+  int semmni;
+  int semmns;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- int semmnu;
- int semmsl;
- int semopm;
- int semume;
+  int semmnu;
+  int semmsl;
+  int semopm;
+  int semume;
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
- int semusz;
- int semvmx;
- int semaem;
+  int semusz;
+  int semvmx;
+  int semaem;
 };
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
-#define SEMMNI 128
-#define SEMMSL 250
-#define SEMMNS (SEMMNI*SEMMSL)
-#define SEMOPM 32
+#define SEMMNI 32000
+#define SEMMSL 32000
+#define SEMMNS (SEMMNI * SEMMSL)
+#define SEMOPM 500
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define SEMVMX 32767
 #define SEMAEM SEMVMX

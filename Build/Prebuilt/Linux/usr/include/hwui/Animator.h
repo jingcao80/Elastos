@@ -16,20 +16,24 @@
 #ifndef ANIMATOR_H
 #define ANIMATOR_H
 
+#include <memory>
 #include <cutils/compiler.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
+#include <utils/Timers.h>
 
-#include "CanvasProperty.h"
-#include "Interpolator.h"
-#include "TreeInfo.h"
 #include "utils/Macros.h"
+
+#include <vector>
 
 namespace android {
 namespace uirenderer {
 
 class AnimationContext;
 class BaseRenderNodeAnimator;
+class CanvasPropertyPrimitive;
+class CanvasPropertyPaint;
+class Interpolator;
 class RenderNode;
 class RenderProperties;
 
@@ -38,6 +42,12 @@ public:
     ANDROID_API virtual void onAnimationFinished(BaseRenderNodeAnimator*) = 0;
 protected:
     ANDROID_API virtual ~AnimationListener() {}
+};
+
+enum class RepeatMode {
+    // These are the same values as the RESTART and REVERSE in ValueAnimator.java.
+    Restart = 1,
+    Reverse = 2
 };
 
 class BaseRenderNodeAnimator : public VirtualLightRefBase {
@@ -57,48 +67,83 @@ public:
         mMayRunAsync = mayRunAsync;
     }
     bool mayRunAsync() { return mMayRunAsync; }
-    ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
-    ANDROID_API void end() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
+    ANDROID_API void start();
+    ANDROID_API virtual void reset();
+    ANDROID_API void reverse();
+    // Terminates the animation at its current progress.
+    ANDROID_API void cancel();
+
+    // Terminates the animation and skip to the end of the animation.
+    ANDROID_API virtual void end();
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
-    void detach() { mTarget = 0; }
-    void pushStaging(AnimationContext& context);
-    bool animate(AnimationContext& context);
+    void detach() { mTarget = nullptr; }
+    ANDROID_API void pushStaging(AnimationContext& context);
+    ANDROID_API bool animate(AnimationContext& context);
 
-    bool isRunning() { return mPlayState == RUNNING; }
-    bool isFinished() { return mPlayState == FINISHED; }
+    // Returns the remaining time in ms for the animation. Note this should only be called during
+    // an animation on RenderThread.
+    ANDROID_API nsecs_t getRemainingPlayTime();
+
+    bool isRunning() { return mPlayState == PlayState::Running
+            || mPlayState == PlayState::Reversing; }
+    bool isFinished() { return mPlayState == PlayState::Finished; }
     float finalValue() { return mFinalValue; }
 
     ANDROID_API virtual uint32_t dirtyMask() = 0;
 
     void forceEndNow(AnimationContext& context);
+    RenderNode* target() { return mTarget; }
+    RenderNode* stagingTarget() { return mStagingTarget; }
 
 protected:
-    BaseRenderNodeAnimator(float finalValue);
+    // PlayState is used by mStagingPlayState and mPlayState to track the state initiated from UI
+    // thread and Render Thread animation state, respectively.
+    // From the UI thread, mStagingPlayState transition looks like
+    // NotStarted -> Running/Reversing -> Finished
+    //                ^                     |
+    //                |                     |
+    //                ----------------------
+    // Note: For mStagingState, the Finished state (optional) is only set when the animation is
+    // terminated by user.
+    //
+    // On Render Thread, mPlayState transition:
+    // NotStart -> Running/Reversing-> Finished
+    //                ^                 |
+    //                |                 |
+    //                ------------------
+    // Note that if the animation is in Running/Reversing state, calling start or reverse again
+    // would do nothing if the animation has the same play direction as the request; otherwise,
+    // the animation would start from where it is and change direction (i.e. Reversing <-> Running)
+
+    enum class PlayState {
+        NotStarted,
+        Running,
+        Reversing,
+        Finished,
+    };
+
+    explicit BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();
 
     virtual float getValue(RenderNode* target) const = 0;
     virtual void setValue(RenderNode* target, float value) = 0;
-    RenderNode* target() { return mTarget; }
 
     void callOnFinishedListener(AnimationContext& context);
 
     virtual void onStagingPlayStateChanged() {}
-
-    enum PlayState {
-        NOT_STARTED,
-        RUNNING,
-        FINISHED,
-    };
+    virtual void onPlayTimeChanged(nsecs_t playTime) {}
+    virtual void onPushStaging() {}
 
     RenderNode* mTarget;
+    RenderNode* mStagingTarget;
 
     float mFinalValue;
     float mDeltaValue;
     float mFromValue;
 
-    Interpolator* mInterpolator;
+    std::unique_ptr<Interpolator> mInterpolator;
     PlayState mStagingPlayState;
     PlayState mPlayState;
     bool mHasStartValue;
@@ -106,13 +151,39 @@ protected:
     nsecs_t mDuration;
     nsecs_t mStartDelay;
     bool mMayRunAsync;
+    // Play Time tracks the progress of animation, it should always be [0, mDuration], 0 being
+    // the beginning of the animation, will reach mDuration at the end of an animation.
+    nsecs_t mPlayTime;
 
     sp<AnimationListener> mListener;
 
 private:
+    enum class Request {
+        Start,
+        Reverse,
+        Reset,
+        Cancel,
+        End
+    };
+
+    // Defines different actions upon finish.
+    enum class Action {
+        // For animations that got canceled or finished normally. no more action needs to be done.
+        None,
+        // For animations that get reset, the reset will happen in the next animation pulse.
+        Reset,
+        // For animations being ended, in the next animation pulse the animation will skip to end.
+        End
+    };
+
     inline void checkMutable();
     virtual void transitionToRunning(AnimationContext& context);
     void doSetStartValue(float value);
+    bool updatePlayTime(nsecs_t playTime);
+    void resolveStagingRequest(Request request);
+
+    std::vector<Request> mStagingRequests;
+    Action mPendingActionUponFinish = Action::None;
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {
@@ -137,10 +208,11 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
-    virtual void onAttached();
-    virtual void onStagingPlayStateChanged();
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
+    virtual void onAttached() override;
+    virtual void onStagingPlayStateChanged() override;
+    virtual void onPushStaging() override;
 
 private:
     typedef bool (RenderProperties::*SetFloatProperty)(float value);
@@ -150,6 +222,8 @@ private:
     const PropertyAccessors* mPropertyAccess;
 
     static const PropertyAccessors PROPERTY_ACCESSOR_LUT[];
+    bool mShouldSyncPropertyFields = false;
+    bool mShouldUpdateStagingProperties = false;
 };
 
 class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {
@@ -160,8 +234,8 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
 private:
     sp<CanvasPropertyPrimitive> mProperty;
 };
@@ -179,8 +253,8 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
 private:
     sp<CanvasPropertyPaint> mProperty;
     PaintField mField;
@@ -194,8 +268,8 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
 
 private:
     int mCenterX, mCenterY;

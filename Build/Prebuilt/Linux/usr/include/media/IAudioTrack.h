@@ -24,9 +24,9 @@
 #include <utils/Errors.h>
 #include <binder/IInterface.h>
 #include <binder/IMemory.h>
-#include <utils/LinearTransform.h>
 #include <utils/String8.h>
 #include <media/AudioTimestamp.h>
+#include <media/VolumeShaper.h>
 
 namespace android {
 
@@ -67,24 +67,6 @@ public:
      */
     virtual status_t    attachAuxEffect(int effectId) = 0;
 
-
-    /* Allocate a shared memory buffer suitable for holding timed audio
-       samples */
-    virtual status_t    allocateTimedBuffer(size_t size,
-                                            sp<IMemory>* buffer) = 0;
-
-    /* Queue a buffer obtained via allocateTimedBuffer for playback at the given
-       timestamp */
-    virtual status_t    queueTimedBuffer(const sp<IMemory>& buffer,
-                                         int64_t pts) = 0;
-
-    /* Define the linear transform that will be applied to the timestamps
-       given to queueTimedBuffer (which are expressed in media time).
-       Target specifies whether this transform converts media time to local time
-       or Tungsten time. The values for target are defined in AudioTrack.h */
-    virtual status_t    setMediaTimeTransform(const LinearTransform& xform,
-                                              int target) = 0;
-
     /* Send parameters to the audio hardware */
     virtual status_t    setParameters(const String8& keyValuePairs) = 0;
 
@@ -93,6 +75,14 @@ public:
 
     /* Signal the playback thread for a change in control block */
     virtual void        signal() = 0;
+
+    /* Sets the volume shaper */
+    virtual VolumeShaper::Status applyVolumeShaper(
+            const sp<VolumeShaper::Configuration>& configuration,
+            const sp<VolumeShaper::Operation>& operation) = 0;
+
+    /* gets the volume shaper state */
+    virtual sp<VolumeShaper::State> getVolumeShaperState(int id) = 0;
 };
 
 // ----------------------------------------------------------------------------

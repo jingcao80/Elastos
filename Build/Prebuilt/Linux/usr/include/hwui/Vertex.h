@@ -19,6 +19,9 @@
 
 #include "Vector.h"
 
+#include "FloatColor.h"
+#include "utils/Macros.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -35,12 +38,11 @@ struct Vertex {
      */
     static float GeometryFudgeFactor() { return 0.0656f; }
 
-
     float x, y;
 
     static inline void set(Vertex* vertex, float x, float y) {
-        vertex[0].x = x;
-        vertex[0].y = y;
+        vertex->x = x;
+        vertex->y = y;
     }
 
     static inline void set(Vertex* vertex, Vector2 val) {
@@ -53,6 +55,8 @@ struct Vertex {
 
 }; // struct Vertex
 
+REQUIRE_COMPATIBLE_LAYOUT(Vertex);
+
 /**
  * Simple structure to describe a vertex with a position and texture UV.
  */
@@ -61,10 +65,7 @@ struct TextureVertex {
     float u, v;
 
     static inline void set(TextureVertex* vertex, float x, float y, float u, float v) {
-        vertex[0].x = x;
-        vertex[0].y = y;
-        vertex[0].u = u;
-        vertex[0].v = v;
+        *vertex = { x, y, u, v };
     }
 
     static inline void setUV(TextureVertex* vertex, float u, float v) {
@@ -73,45 +74,49 @@ struct TextureVertex {
     }
 }; // struct TextureVertex
 
+REQUIRE_COMPATIBLE_LAYOUT(TextureVertex);
+
 /**
- * Simple structure to describe a vertex with a position, texture UV and ARGB color.
+ * Simple structure to describe a vertex with a position, texture UV and an
+ * sRGB color with alpha. The color is stored pre-multiplied in linear space.
  */
-struct ColorTextureVertex : TextureVertex {
-    float r, g, b, a;
+struct ColorTextureVertex {
+    float x, y;
+    float u, v;
+    float r, g, b, a; // pre-multiplied linear
 
     static inline void set(ColorTextureVertex* vertex, float x, float y,
-            float u, float v, int color) {
-        TextureVertex::set(vertex, x, y, u, v);
-
-        const float a = ((color >> 24) & 0xff) / 255.0f;
-        vertex[0].r = a * ((color >> 16) & 0xff) / 255.0f;
-        vertex[0].g = a * ((color >>  8) & 0xff) / 255.0f;
-        vertex[0].b = a * ((color      ) & 0xff) / 255.0f;
-        vertex[0].a = a;
+            float u, float v, uint32_t color) {
+        FloatColor c;
+        c.set(color);
+        *vertex = { x, y, u, v, c.r, c.g, c.b, c.a };
     }
 }; // struct ColorTextureVertex
+
+REQUIRE_COMPATIBLE_LAYOUT(ColorTextureVertex);
 
 /**
  * Simple structure to describe a vertex with a position and an alpha value.
  */
-struct AlphaVertex : Vertex {
+struct AlphaVertex {
+    float x, y;
     float alpha;
 
     static inline void set(AlphaVertex* vertex, float x, float y, float alpha) {
-        Vertex::set(vertex, x, y);
-        vertex[0].alpha = alpha;
+        *vertex = { x, y, alpha };
     }
 
     static inline void copyWithOffset(AlphaVertex* vertex, const AlphaVertex& src,
             float x, float y) {
-        Vertex::set(vertex, src.x + x, src.y + y);
-        vertex[0].alpha = src.alpha;
+        AlphaVertex::set(vertex, src.x + x, src.y + y, src.alpha);
     }
 
     static inline void setColor(AlphaVertex* vertex, float alpha) {
         vertex[0].alpha = alpha;
     }
 }; // struct AlphaVertex
+
+REQUIRE_COMPATIBLE_LAYOUT(AlphaVertex);
 
 }; // namespace uirenderer
 }; // namespace android

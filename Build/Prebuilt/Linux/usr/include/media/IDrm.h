@@ -34,7 +34,8 @@ struct IDrm : public IInterface {
 
     virtual bool isCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType) = 0;
 
-    virtual status_t createPlugin(const uint8_t uuid[16]) = 0;
+    virtual status_t createPlugin(const uint8_t uuid[16],
+                                  const String8 &appPackageName) = 0;
 
     virtual status_t destroyPlugin() = 0;
 
@@ -47,7 +48,8 @@ struct IDrm : public IInterface {
                       Vector<uint8_t> const &initData,
                       String8 const &mimeType, DrmPlugin::KeyType keyType,
                       KeyedVector<String8, String8> const &optionalParameters,
-                      Vector<uint8_t> &request, String8 &defaultUrl) = 0;
+                      Vector<uint8_t> &request, String8 &defaultUrl,
+                      DrmPlugin::KeyRequestType *keyRequestType) = 0;
 
     virtual status_t provideKeyResponse(Vector<uint8_t> const &sessionId,
                                         Vector<uint8_t> const &response,
@@ -70,11 +72,11 @@ struct IDrm : public IInterface {
                                               Vector<uint8_t> &certificate,
                                               Vector<uint8_t> &wrappedKey) = 0;
 
-    virtual status_t unprovisionDevice() = 0;
-
     virtual status_t getSecureStops(List<Vector<uint8_t> > &secureStops) = 0;
+    virtual status_t getSecureStop(Vector<uint8_t> const &ssid, Vector<uint8_t> &secureStop) = 0;
 
     virtual status_t releaseSecureStops(Vector<uint8_t> const &ssRelease) = 0;
+    virtual status_t releaseAllSecureStops() = 0;
 
     virtual status_t getPropertyString(String8 const &name, String8 &value) const = 0;
     virtual status_t getPropertyByteArray(String8 const &name,
@@ -137,4 +139,3 @@ private:
 }  // namespace android
 
 #endif // ANDROID_IDRM_H_
-

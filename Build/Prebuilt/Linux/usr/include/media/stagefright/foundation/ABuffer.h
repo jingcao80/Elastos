@@ -30,10 +30,8 @@ struct AMessage;
 class MediaBufferBase;
 
 struct ABuffer : public RefBase {
-    ABuffer(size_t capacity);
+    explicit ABuffer(size_t capacity);
     ABuffer(void *data, size_t capacity);
-
-    void setFarewellMessage(const sp<AMessage> msg);
 
     uint8_t *base() { return (uint8_t *)mData; }
     uint8_t *data() { return (uint8_t *)mData + mRangeOffset; }
@@ -58,7 +56,6 @@ protected:
     virtual ~ABuffer();
 
 private:
-    sp<AMessage> mFarewell;
     sp<AMessage> mMeta;
 
     MediaBufferBase *mMediaBufferBase;

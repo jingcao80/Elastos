@@ -22,11 +22,13 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <SkXfermode.h>
+#include <SkBlendMode.h>
 
 #include "Debug.h"
+#include "FloatColor.h"
 #include "Matrix.h"
 #include "Properties.h"
+#include "utils/Color.h"
 
 namespace android {
 namespace uirenderer {
@@ -53,11 +55,12 @@ namespace uirenderer {
 #define PROGRAM_KEY_COLOR_MATRIX        0x20
 #define PROGRAM_KEY_COLOR_BLEND         0x40
 #define PROGRAM_KEY_BITMAP_NPOT         0x80
-
-#define PROGRAM_KEY_SWAP_SRC_DST      0x2000
+#define PROGRAM_KEY_BITMAP_EXTERNAL    0x100
 
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK  0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
+
+#define PROGRAM_KEY_SWAP_SRC_DST_SHIFT 13
 
 // Encode the xfermodes on 6 bits
 #define PROGRAM_MAX_XFERMODE 0x1f
@@ -77,15 +80,19 @@ namespace uirenderer {
 #define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 38
 #define PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT 39
 
-#define PROGRAM_HAS_GAMMA_CORRECTION 40
+#define PROGRAM_IS_SIMPLE_GRADIENT 40
 
-#define PROGRAM_IS_SIMPLE_GRADIENT 41
+#define PROGRAM_HAS_COLORS 41
 
-#define PROGRAM_HAS_COLORS 42
+#define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
+#define PROGRAM_HAS_ROUND_RECT_CLIP 43
 
-#define PROGRAM_HAS_DEBUG_HIGHLIGHT 43
-#define PROGRAM_EMULATE_STENCIL 44
-#define PROGRAM_HAS_ROUND_RECT_CLIP 45
+#define PROGRAM_HAS_GAMMA_CORRECTION 44
+#define PROGRAM_HAS_LINEAR_TEXTURE 45
+
+#define PROGRAM_HAS_COLOR_SPACE_CONVERSION 46
+#define PROGRAM_TRANSFER_FUNCTION 47 // 2 bits for transfer function
+#define PROGRAM_HAS_TRANSLUCENT_CONVERSION 49
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -103,13 +110,13 @@ typedef uint64_t programid;
  * A ProgramDescription must be used in conjunction with a ProgramCache.
  */
 struct ProgramDescription {
-    enum ColorModifier {
-        kColorNone = 0,
-        kColorMatrix,
-        kColorBlend
+    enum class ColorFilterMode : int8_t {
+        None = 0,
+        Matrix,
+        Blend
     };
 
-    enum Gradient {
+    enum Gradient : int8_t {
         kGradientLinear = 0,
         kGradientCircular,
         kGradientSweep
@@ -133,7 +140,8 @@ struct ProgramDescription {
 
     // Shaders
     bool hasBitmap;
-    bool isBitmapNpot;
+    bool isShaderBitmapExternal;
+    bool useShaderBasedWrap;
 
     bool hasVertexAlpha;
     bool useShadowAlphaInterp;
@@ -142,27 +150,33 @@ struct ProgramDescription {
     Gradient gradientType;
     bool isSimpleGradient;
 
-    SkXfermode::Mode shadersMode;
+    SkBlendMode shadersMode;
 
     bool isBitmapFirst;
     GLenum bitmapWrapS;
     GLenum bitmapWrapT;
 
     // Color operations
-    ColorModifier colorOp;
-    SkXfermode::Mode colorMode;
+    ColorFilterMode colorOp;
+    SkBlendMode colorMode;
 
     // Framebuffer blending (requires Extensions.hasFramebufferFetch())
-    // Ignored for all values < SkXfermode::kPlus_Mode
-    SkXfermode::Mode framebufferMode;
+    // Ignored for all values < SkBlendMode::kPlus
+    SkBlendMode framebufferMode;
     bool swapSrcDst;
 
-    bool hasGammaCorrection;
-    float gamma;
-
     bool hasDebugHighlight;
-    bool emulateStencil;
     bool hasRoundRectClip;
+
+    // Extra gamma correction used for text
+    bool hasGammaCorrection;
+    // Set when sampling an image in linear space
+    bool hasLinearTexture;
+
+    bool hasColorSpaceConversion;
+    TransferFunctionType transferFunction;
+    // Indicates whether the bitmap to convert between color spaces is translucent
+    bool hasTranslucentConversion;
 
     /**
      * Resets this description. All fields are reset back to the default
@@ -182,30 +196,34 @@ struct ProgramDescription {
         modulate = false;
 
         hasBitmap = false;
-        isBitmapNpot = false;
+        isShaderBitmapExternal = false;
+        useShaderBasedWrap = false;
 
         hasGradient = false;
         gradientType = kGradientLinear;
         isSimpleGradient = false;
 
-        shadersMode = SkXfermode::kClear_Mode;
+        shadersMode = SkBlendMode::kClear;
 
         isBitmapFirst = false;
         bitmapWrapS = GL_CLAMP_TO_EDGE;
         bitmapWrapT = GL_CLAMP_TO_EDGE;
 
-        colorOp = kColorNone;
-        colorMode = SkXfermode::kClear_Mode;
+        colorOp = ColorFilterMode::None;
+        colorMode = SkBlendMode::kClear;
 
-        framebufferMode = SkXfermode::kClear_Mode;
+        framebufferMode = SkBlendMode::kClear;
         swapSrcDst = false;
 
-        hasGammaCorrection = false;
-        gamma = 2.2f;
-
         hasDebugHighlight = false;
-        emulateStencil = false;
         hasRoundRectClip = false;
+
+        hasGammaCorrection = false;
+        hasLinearTexture = false;
+
+        hasColorSpaceConversion = false;
+        transferFunction = TransferFunctionType::None;
+        hasTranslucentConversion = false;
     }
 
     /**
@@ -238,42 +256,48 @@ struct ProgramDescription {
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
         if (hasBitmap) {
             key |= PROGRAM_KEY_BITMAP;
-            if (isBitmapNpot) {
+            if (useShaderBasedWrap) {
                 key |= PROGRAM_KEY_BITMAP_NPOT;
                 key |= getEnumForWrap(bitmapWrapS) << PROGRAM_BITMAP_WRAPS_SHIFT;
                 key |= getEnumForWrap(bitmapWrapT) << PROGRAM_BITMAP_WRAPT_SHIFT;
+            }
+            if (isShaderBitmapExternal) {
+                key |= PROGRAM_KEY_BITMAP_EXTERNAL;
             }
         }
         if (hasGradient) key |= PROGRAM_KEY_GRADIENT;
         key |= programid(gradientType) << PROGRAM_GRADIENT_TYPE_SHIFT;
         if (isBitmapFirst) key |= PROGRAM_KEY_BITMAP_FIRST;
         if (hasBitmap && hasGradient) {
-            key |= (shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
+            key |= ((int)shadersMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_SHADER_SHIFT;
         }
         switch (colorOp) {
-            case kColorMatrix:
+            case ColorFilterMode::Matrix:
                 key |= PROGRAM_KEY_COLOR_MATRIX;
                 break;
-            case kColorBlend:
+            case ColorFilterMode::Blend:
                 key |= PROGRAM_KEY_COLOR_BLEND;
-                key |= (colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
+                key |= ((int) colorMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_COLOR_OP_SHIFT;
                 break;
-            case kColorNone:
+            case ColorFilterMode::None:
                 break;
         }
-        key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
-        if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
-        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
-        if (hasVertexAlpha) key |= programid(0x1) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
-        if (useShadowAlphaInterp) key |= programid(0x1) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
-        if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
-        if (hasTextureTransform) key |= programid(0x1) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
-        if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
-        if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
-        if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
-        if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
-        if (emulateStencil) key |= programid(0x1) << PROGRAM_EMULATE_STENCIL;
-        if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;
+        key |= ((int) framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
+        key |= programid(swapSrcDst) << PROGRAM_KEY_SWAP_SRC_DST_SHIFT;
+        key |= programid(modulate) << PROGRAM_MODULATE_SHIFT;
+        key |= programid(hasVertexAlpha) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
+        key |= programid(useShadowAlphaInterp) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
+        key |= programid(hasExternalTexture) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
+        key |= programid(hasTextureTransform) << PROGRAM_HAS_TEXTURE_TRANSFORM_SHIFT;
+        key |= programid(isSimpleGradient) << PROGRAM_IS_SIMPLE_GRADIENT;
+        key |= programid(hasColors) << PROGRAM_HAS_COLORS;
+        key |= programid(hasDebugHighlight) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
+        key |= programid(hasRoundRectClip) << PROGRAM_HAS_ROUND_RECT_CLIP;
+        key |= programid(hasGammaCorrection) << PROGRAM_HAS_GAMMA_CORRECTION;
+        key |= programid(hasLinearTexture) << PROGRAM_HAS_LINEAR_TEXTURE;
+        key |= programid(hasColorSpaceConversion) << PROGRAM_HAS_COLOR_SPACE_CONVERSION;
+        key |= programid(transferFunction) << PROGRAM_TRANSFER_FUNCTION;
+        key |= programid(hasTranslucentConversion) << PROGRAM_HAS_TRANSLUCENT_CONVERSION;
         return key;
     }
 
@@ -367,15 +391,10 @@ public:
     /**
      * Sets the color associated with this shader.
      */
-    void setColor(const float r, const float g, const float b, const float a);
+    void setColor(FloatColor color);
 
     /**
-     * Name of the position attribute.
-     */
-    int position;
-
-    /**
-     * Name of the texCoords attribute if it exists, -1 otherwise.
+     * Name of the texCoords attribute if it exists (kBindingTexCoords), -1 otherwise.
      */
     int texCoords;
 

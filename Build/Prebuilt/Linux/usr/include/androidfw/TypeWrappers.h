@@ -18,18 +18,19 @@
 #define __TYPE_WRAPPERS_H
 
 #include <androidfw/ResourceTypes.h>
+#include <utils/ByteOrder.h>
 
 namespace android {
 
 struct TypeVariant {
-    TypeVariant(const ResTable_type* data)
-        : data(data) {}
+    TypeVariant(const ResTable_type* data);
 
     class iterator {
     public:
         iterator& operator=(const iterator& rhs) {
             mTypeVariant = rhs.mTypeVariant;
             mIndex = rhs.mIndex;
+            return *this;
         }
 
         bool operator==(const iterator& rhs) const {
@@ -70,10 +71,13 @@ struct TypeVariant {
     }
 
     iterator endEntries() const {
-        return iterator(this, dtohl(data->entryCount));
+        return iterator(this, mLength);
     }
 
     const ResTable_type* data;
+
+private:
+    size_t mLength;
 };
 
 } // namespace android

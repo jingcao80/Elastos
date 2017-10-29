@@ -18,22 +18,17 @@
 #define ANDROID_HWUI_PROPERTIES_H
 
 #include <cutils/properties.h>
-#include <stdlib.h>
 
 /**
- * This file contains the list of system properties used to configure
- * the OpenGLRenderer.
+ * This file contains the list of system properties used to configure libhwui.
  */
+
+namespace android {
+namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Compile-time properties
 ///////////////////////////////////////////////////////////////////////////////
-
-// If turned on, text is interpreted as glyphs instead of UTF-16
-#define RENDER_TEXT_AS_GLYPHS 1
-
-// Indicates whether to remove the biggest layers first, or the smaller ones
-#define LAYER_REMOVE_BIGGEST_FIRST 0
 
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
@@ -83,12 +78,6 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
 
 /**
- * Used to enable/disable PerfHUD ES profiling. The accepted values
- * are "true" and "false". The default value is "false".
- */
-#define PROPERTY_DEBUG_NV_PROFILING "debug.hwui.nv_profiling"
-
-/**
  *  System property used to enable or disable hardware rendering profiling.
  * The default value of this property is assumed to be false.
  *
@@ -105,20 +94,6 @@ enum DebugLevel {
 #define PROPERTY_PROFILE_VISUALIZE_BARS "visual_bars"
 
 /**
- * System property used to specify the number of frames to be used
- * when doing hardware rendering profiling.
- * The default value of this property is #PROFILE_MAX_FRAMES.
- *
- * When profiling is enabled, the adb shell dumpsys gfxinfo command will
- * output extra information about the time taken to execute by the last
- * frames.
- *
- * Possible values:
- * "60", to set the limit of frames to 60
- */
-#define PROPERTY_PROFILE_MAXFRAMES "debug.hwui.profile.maxframes"
-
-/**
  * Used to enable/disable non-rectangular clipping debugging.
  *
  * The accepted values are:
@@ -133,6 +108,15 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_STENCIL_CLIP "debug.hwui.show_non_rect_clip"
 
 /**
+ * Turn on to draw dirty regions every other frame.
+ *
+ * Possible values:
+ * "true", to enable dirty regions debugging
+ * "false", to disable dirty regions debugging
+ */
+#define PROPERTY_DEBUG_SHOW_DIRTY_REGIONS "debug.hwui.show_dirty_regions"
+
+/**
  * Disables draw operation deferral if set to "true", forcing draw
  * commands to be issued to OpenGL in order, and processed in sequence
  * with state-manipulation canvas commands.
@@ -145,6 +129,35 @@ enum DebugLevel {
  */
 #define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
 
+/**
+ * Setting this property will enable or disable the dropping of frames with
+ * empty damage. Default is "true".
+ */
+#define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
+
+/**
+ * Controls whether or not HWUI will use the EGL_EXT_buffer_age extension
+ * to do partial invalidates. Setting this to "false" will fall back to
+ * using BUFFER_PRESERVED instead
+ * Default is "true"
+ */
+#define PROPERTY_USE_BUFFER_AGE "debug.hwui.use_buffer_age"
+
+/**
+ * Setting this to "false" will force HWUI to always do full-redraws of the surface.
+ * This will disable the use of EGL_EXT_buffer_age and BUFFER_PRESERVED.
+ * Default is "true"
+ */
+#define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.use_partial_updates"
+
+#define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
+
+/**
+ * Allows to set rendering pipeline mode to OpenGL (default), Skia OpenGL
+ * or Vulkan.
+ */
+#define PROPERTY_RENDERER "debug.hwui.renderer"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,7 +166,7 @@ enum DebugLevel {
  * Used to enable/disable scissor optimization. The accepted values are
  * "true" and "false". The default value is "false".
  *
- * When scissor optimization is enabled, OpenGLRenderer will attempt to
+ * When scissor optimization is enabled, libhwui will attempt to
  * minimize the use of scissor by selectively enabling and disabling the
  * GL scissor test.
  * When the optimization is disabled, OpenGLRenderer will keep the GL
@@ -190,30 +203,8 @@ enum DebugLevel {
 #define PROPERTY_TEXT_LARGE_CACHE_WIDTH "ro.hwui.text_large_cache_width"
 #define PROPERTY_TEXT_LARGE_CACHE_HEIGHT "ro.hwui.text_large_cache_height"
 
-// Indicates whether gamma correction should be applied in the shaders
-// or in lookup tables. Accepted values:
-//
-//     - "lookup3", correction based on lookup tables. Gamma correction
-//        is different for black and white text (see thresholds below)
-//
-//     - "lookup", correction based on a single lookup table
-//
-//     - "shader3", correction applied by a GLSL shader. Gamma correction
-//        is different for black and white text (see thresholds below)
-//
-//     - "shader", correction applied by a GLSL shader
-//
-// See PROPERTY_TEXT_GAMMA, PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD and
-// PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD for more control.
-#define PROPERTY_TEXT_GAMMA_METHOD "hwui.text_gamma_correction"
-#define DEFAULT_TEXT_GAMMA_METHOD "lookup"
-
-// Gamma (>= 1.0, <= 10.0)
+// Gamma (>= 1.0, <= 3.0)
 #define PROPERTY_TEXT_GAMMA "hwui.text_gamma"
-// Luminance threshold below which black gamma correction is applied. Range: [0..255]
-#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "hwui.text_gamma.black_threshold"
-// Lumincance threshold above which white gamma correction is applied. Range: [0..255]
-#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "hwui.text_gamma.white_threshold"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Default property values
@@ -222,34 +213,129 @@ enum DebugLevel {
 #define DEFAULT_TEXTURE_CACHE_SIZE 24.0f
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
 #define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
-#define DEFAULT_PATH_CACHE_SIZE 10.0f
+#define DEFAULT_PATH_CACHE_SIZE 4.0f
 #define DEFAULT_VERTEX_CACHE_SIZE 1.0f
-#define DEFAULT_PATCH_CACHE_SIZE 128 // in kB
+#define DEFAULT_PATCH_CACHE_SIZE 128.0f // in kB
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
 #define DEFAULT_FBO_CACHE_SIZE 0
 
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
 
-#define DEFAULT_TEXT_GAMMA 1.4f
-#define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
-#define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
+#define DEFAULT_TEXT_GAMMA 1.45f // Match design tools
+
+// cap to 256 to limite paths in the path cache
+#define DEFAULT_PATH_TEXTURE_CAP 256
 
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
 
 // Converts a number of mega-bytes into bytes
-#define MB(s) s * 1024 * 1024
+#define MB(s) ((s) * 1024 * 1024)
 // Converts a number of kilo-bytes into bytes
-#define KB(s) s * 1024
+#define KB(s) ((s) * 1024)
 
-static DebugLevel __attribute__((__unused__)) readDebugLevel() {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG, property, NULL) > 0) {
-        return (DebugLevel) atoi(property);
-    }
-    return kDebugDisabled;
-}
+enum class ProfileType {
+    None,
+    Console,
+    Bars
+};
+
+enum class OverdrawColorSet {
+    Default = 0,
+    Deuteranomaly
+};
+
+enum class StencilClipDebug {
+    Hide,
+    ShowHighlight,
+    ShowRegion
+};
+
+enum class RenderPipelineType {
+    OpenGL = 0,
+    SkiaGL,
+    SkiaVulkan,
+    NotInitialized = 128
+};
+
+/**
+ * Renderthread-only singleton which manages several static rendering properties. Most of these
+ * are driven by system properties which are queried once at initialization, and again if init()
+ * is called.
+ */
+class Properties {
+public:
+    static bool load();
+
+    static bool drawDeferDisabled;
+    static bool drawReorderDisabled;
+    static bool debugLayersUpdates;
+    static bool debugOverdraw;
+    static bool showDirtyRegions;
+    // TODO: Remove after stabilization period
+    static bool skipEmptyFrames;
+    static bool useBufferAge;
+    static bool enablePartialUpdates;
+
+    static float textGamma;
+
+    static int fboCacheSize;
+    static int gradientCacheSize;
+    static int layerPoolSize;
+    static int patchCacheSize;
+    static int pathCacheSize;
+    static int renderBufferCacheSize;
+    static int tessellationCacheSize;
+    static int textDropShadowCacheSize;
+    static int textureCacheSize;
+    static float textureCacheFlushRate;
+
+    static DebugLevel debugLevel;
+    static OverdrawColorSet overdrawColorSet;
+    static StencilClipDebug debugStencilClip;
+
+    // Override the value for a subset of properties in this class
+    static void overrideProperty(const char* name, const char* value);
+
+    static float overrideLightRadius;
+    static float overrideLightPosY;
+    static float overrideLightPosZ;
+    static float overrideAmbientRatio;
+    static int overrideAmbientShadowStrength;
+    static int overrideSpotShadowStrength;
+
+    static ProfileType getProfileType();
+    static RenderPipelineType getRenderPipelineType();
+    static bool isSkiaEnabled();
+
+    // Should be used only by test apps
+    static bool waitForGpuCompletion;
+    static bool forceDrawFrame;
+
+    // Should only be set by automated tests to try and filter out
+    // any overhead they add
+    static bool filterOutTestOverhead;
+
+    // Workaround a device lockup in edge cases by switching to async mode
+    // instead of the default vsync (b/38372997). Only system_server should hit this.
+    // Any existing RenderProxy & Surface combination will be unaffected, only things
+    // created after changing this.
+    static bool disableVsync;
+
+    // Used for testing only to change the render pipeline.
+#ifdef HWUI_GLES_WRAP_ENABLED
+    static void overrideRenderPipelineType(RenderPipelineType);
+#endif
+
+private:
+    static ProfileType sProfileType;
+    static bool sDisableProfileBars;
+    static RenderPipelineType sRenderPipelineType;
+}; // class Caches
+
+}; // namespace uirenderer
+}; // namespace android
 
 #endif // ANDROID_HWUI_PROPERTIES_H

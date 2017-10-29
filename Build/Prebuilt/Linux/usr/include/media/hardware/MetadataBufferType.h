@@ -77,28 +77,65 @@ typedef enum {
      * GRalloc buffer. The encoder needs to interpret this GRalloc handle
      * and encode the frames.
      * --------------------------------------------------------------
-     * |  kMetadataBufferTypeGrallocSource | sizeof(buffer_handle_t) |
+     * |  kMetadataBufferTypeGrallocSource | buffer_handle_t buffer |
      * --------------------------------------------------------------
+     *
+     * See the VideoGrallocMetadata structure.
      */
     kMetadataBufferTypeGrallocSource = 1,
 
     /*
      * kMetadataBufferTypeGraphicBuffer is used to indicate that
      * the payload of the metadata buffers can be interpreted as
-     * a GraphicBuffer.  It is only to be used by software encoders.
+     * an ANativeWindowBuffer, and that a fence is provided.
+     *
+     * In this case, the metadata will have a byte stream that consists of three parts:
+     * 1. First, there is an integer indicating that the metadata
+     * contains an ANativeWindowBuffer (kMetadataBufferTypeANWBuffer)
+     * 2. This is followed by the pointer to the ANativeWindowBuffer.
+     * Codec must not free this buffer as it does not actually own this buffer.
+     * 3. Finally, there is an integer containing a fence file descriptor.
+     * The codec must wait on the fence before encoding or decoding into this
+     * buffer. When the buffer is returned, codec must replace this file descriptor
+     * with a new fence, that will be waited on before the buffer is replaced
+     * (encoder) or read (decoder).
+     * ---------------------------------
+     * |  kMetadataBufferTypeANWBuffer |
+     * ---------------------------------
+     * |  ANativeWindowBuffer *buffer  |
+     * ---------------------------------
+     * |  int fenceFd                  |
+     * ---------------------------------
+     *
+     * See the VideoNativeMetadata structure.
+     */
+    kMetadataBufferTypeANWBuffer = 2,
+
+    /*
+     * kMetadataBufferTypeNativeHandleSource is used to indicate that
+     * the payload of the metadata buffers can be interpreted as
+     * a native_handle_t.
+     *
      * In this case, the metadata that the encoder receives
      * will have a byte stream that consists of two parts:
-     * 1. First, there is an integer indicating that the metadata
-     * contains a GraphicBuffer (kMetadataBufferTypeGraphicBuffer)
-     * 2. This is followed by the pointer to the GraphicBuffer that
-     * is to be encoded.  Encoder must not create a sp<> from this
-     * graphic buffer, or free it, as it does not actually own this
-     * buffer.
-     * --------------------------------------------------------------
-     * |  kMetadataBufferTypeGraphicBuffer | sizeof(GraphicBuffer *) |
-     * --------------------------------------------------------------
+     * 1. First, there is an integer indicating that the metadata contains a
+     * native handle (kMetadataBufferTypeNativeHandleSource).
+     * 2. This is followed by a pointer to native_handle_t. The encoder needs
+     * to interpret this native handle and encode the frame. The encoder must
+     * not free this native handle as it does not actually own this native
+     * handle. The handle will be freed after the encoder releases the buffer
+     * back to camera.
+     * ----------------------------------------------------------------
+     * |  kMetadataBufferTypeNativeHandleSource | native_handle_t* nh |
+     * ----------------------------------------------------------------
+     *
+     * See the VideoNativeHandleMetadata structure.
      */
-    kMetadataBufferTypeGraphicBuffer = 2,
+    kMetadataBufferTypeNativeHandleSource = 3,
+
+    /* This value is used by framework, but is never used inside a metadata buffer  */
+    kMetadataBufferTypeInvalid = -1,
+
 
     // Add more here...
 

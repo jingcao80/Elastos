@@ -21,11 +21,10 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <cutils/log.h>
-
+#include <log/log.h>
+#include <utils/Errors.h>
 #include <utils/SortedVector.h>
 #include <utils/TypeHelpers.h>
-#include <utils/Errors.h>
 
 // ---------------------------------------------------------------------------
 
@@ -97,13 +96,6 @@ private:
             SortedVector< key_value_pair_t<KEY, VALUE> >    mVector;
 };
 
-// KeyedVector<KEY, VALUE> can be trivially moved using memcpy() because its
-// underlying SortedVector can be trivially moved.
-template<typename KEY, typename VALUE> struct trait_trivial_move<KeyedVector<KEY, VALUE> > {
-    enum { value = trait_trivial_move<SortedVector< key_value_pair_t<KEY, VALUE> > >::value };
-};
-
-
 // ---------------------------------------------------------------------------
 
 /**
@@ -164,7 +156,7 @@ template<typename KEY, typename VALUE> inline
 VALUE& KeyedVector<KEY,VALUE>::editValueFor(const KEY& key) {
     ssize_t i = this->indexOfKey(key);
     LOG_ALWAYS_FATAL_IF(i<0, "%s: key not found", __PRETTY_FUNCTION__);
-    return mVector.editItemAt(i).value;
+    return mVector.editItemAt(static_cast<size_t>(i)).value;
 }
 
 template<typename KEY, typename VALUE> inline
@@ -188,7 +180,7 @@ template<typename KEY, typename VALUE> inline
 ssize_t KeyedVector<KEY,VALUE>::replaceValueAt(size_t index, const VALUE& item) {
     if (index<size()) {
         mVector.editItemAt(index).value = item;
-        return index;
+        return static_cast<ssize_t>(index);
     }
     return BAD_INDEX;
 }

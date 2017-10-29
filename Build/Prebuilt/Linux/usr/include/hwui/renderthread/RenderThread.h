@@ -19,16 +19,17 @@
 
 #include "RenderTask.h"
 
-#include <memory>
-#include <set>
+#include "../JankTracker.h"
+#include "TimeLord.h"
 
+#include <GrContext.h>
 #include <cutils/compiler.h>
+#include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
-#include <utils/Mutex.h>
-#include <utils/Singleton.h>
 #include <utils/Thread.h>
 
-#include "TimeLord.h"
+#include <memory>
+#include <set>
 
 namespace android {
 
@@ -36,7 +37,9 @@ class DisplayEventReceiver;
 
 namespace uirenderer {
 
+class Readback;
 class RenderState;
+class TestUtils;
 
 namespace renderthread {
 
@@ -44,6 +47,7 @@ class CanvasContext;
 class DispatchFrameCallbacks;
 class EglManager;
 class RenderProxy;
+class VulkanManager;
 
 class TaskQueue {
 public:
@@ -69,41 +73,55 @@ protected:
     ~IFrameCallback() {}
 };
 
-class ANDROID_API RenderThread : public Thread, protected Singleton<RenderThread> {
+class ANDROID_API RenderThread : public Thread {
+    PREVENT_COPY_AND_ASSIGN(RenderThread);
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
     ANDROID_API void queue(RenderTask* task);
+    ANDROID_API void queueAndWait(RenderTask* task);
     ANDROID_API void queueAtFront(RenderTask* task);
-    void queueDelayed(RenderTask* task, int delayMs);
+    void queueAt(RenderTask* task, nsecs_t runAtNs);
     void remove(RenderTask* task);
 
     // Mimics android.view.Choreographer
     void postFrameCallback(IFrameCallback* callback);
-    void removeFrameCallback(IFrameCallback* callback);
+    bool removeFrameCallback(IFrameCallback* callback);
     // If the callback is currently registered, it will be pushed back until
     // the next vsync. If it is not currently registered this does nothing.
     void pushBackFrameCallback(IFrameCallback* callback);
 
     TimeLord& timeLord() { return mTimeLord; }
-    RenderState& renderState() { return *mRenderState; }
-    EglManager& eglManager() { return *mEglManager; }
+    RenderState& renderState() const { return *mRenderState; }
+    EglManager& eglManager() const { return *mEglManager; }
+    JankTracker& jankTracker() { return *mJankTracker; }
+    Readback& readback();
+
+    const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
+
+    GrContext* getGrContext() const { return mGrContext.get(); }
+    void setGrContext(GrContext* cxt) { mGrContext.reset(cxt); }
+
+    VulkanManager& vulkanManager() { return *mVkManager; }
 
 protected:
-    virtual bool threadLoop();
+    virtual bool threadLoop() override;
 
 private:
-    friend class Singleton<RenderThread>;
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
+    friend class android::uirenderer::TestUtils;
 
     RenderThread();
     virtual ~RenderThread();
 
+    static bool hasInstance();
+    static RenderThread& getInstance();
+
     void initThreadLocals();
     void initializeDisplayEventReceiver();
     static int displayEventReceiverCallback(int fd, int events, void* data);
-    void drainDisplayEventQueue(bool skipCallbacks = false);
+    void drainDisplayEventQueue();
     void dispatchFrameCallbacks();
     void requestVsync();
 
@@ -117,6 +135,8 @@ private:
 
     nsecs_t mNextWakeup;
     TaskQueue mQueue;
+
+    DisplayInfo mDisplayInfo;
 
     DisplayEventReceiver* mDisplayEventReceiver;
     bool mVsyncRequested;
@@ -132,6 +152,12 @@ private:
     TimeLord mTimeLord;
     RenderState* mRenderState;
     EglManager* mEglManager;
+
+    JankTracker* mJankTracker = nullptr;
+    Readback* mReadback = nullptr;
+
+    sk_sp<GrContext> mGrContext;
+    VulkanManager* mVkManager;
 };
 
 } /* namespace renderthread */

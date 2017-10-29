@@ -18,11 +18,13 @@
 
 #define A_BASE_H_
 
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*(a)))
+#endif
 
 #define DISALLOW_EVIL_CONSTRUCTORS(name) \
     name(const name &); \
-    name &operator=(const name &)
+    name &operator=(const name &) /* NOLINT */
 
 /* Returns true if the size parameter is safe for new array allocation (32-bit)
  *

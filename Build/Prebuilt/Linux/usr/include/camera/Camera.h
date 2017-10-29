@@ -18,13 +18,15 @@
 #define ANDROID_HARDWARE_CAMERA_H
 
 #include <utils/Timers.h>
+
+#include <android/hardware/ICameraService.h>
+
 #include <gui/IGraphicBufferProducer.h>
 #include <system/camera.h>
-#include <camera/ICameraClient.h>
 #include <camera/ICameraRecordingProxy.h>
 #include <camera/ICameraRecordingProxyListener.h>
-#include <camera/ICameraService.h>
-#include <camera/ICamera.h>
+#include <camera/android/hardware/ICamera.h>
+#include <camera/android/hardware/ICameraClient.h>
 #include <camera/CameraBase.h>
 
 namespace android {
@@ -41,6 +43,10 @@ public:
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr,
                           camera_frame_metadata_t *metadata) = 0;
     virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr) = 0;
+    virtual void postRecordingFrameHandleTimestamp(nsecs_t timestamp, native_handle_t* handle) = 0;
+    virtual void postRecordingFrameHandleTimestampBatch(
+            const std::vector<nsecs_t>& timestamps,
+            const std::vector<native_handle_t*>& handles) = 0;
 };
 
 class Camera;
@@ -48,31 +54,35 @@ class Camera;
 template <>
 struct CameraTraits<Camera>
 {
-    typedef CameraListener        TCamListener;
-    typedef ICamera               TCamUser;
-    typedef ICameraClient         TCamCallbacks;
-    typedef status_t (ICameraService::*TCamConnectService)(const sp<ICameraClient>&,
-                                                           int, const String16&, int,
-                                                           /*out*/
-                                                           sp<ICamera>&);
+    typedef CameraListener                     TCamListener;
+    typedef ::android::hardware::ICamera       TCamUser;
+    typedef ::android::hardware::ICameraClient TCamCallbacks;
+    typedef ::android::binder::Status(::android::hardware::ICameraService::*TCamConnectService)
+        (const sp<::android::hardware::ICameraClient>&,
+        int, const String16&, int, int,
+        /*out*/
+        sp<::android::hardware::ICamera>*);
     static TCamConnectService     fnConnectService;
 };
 
 
 class Camera :
     public CameraBase<Camera>,
-    public BnCameraClient
+    public ::android::hardware::BnCameraClient
 {
 public:
     enum {
-        USE_CALLING_UID = ICameraService::USE_CALLING_UID
+        USE_CALLING_UID = ::android::hardware::ICameraService::USE_CALLING_UID
+    };
+    enum {
+        USE_CALLING_PID = ::android::hardware::ICameraService::USE_CALLING_PID
     };
 
             // construct a camera client from an existing remote
-    static  sp<Camera>  create(const sp<ICamera>& camera);
+    static  sp<Camera>  create(const sp<::android::hardware::ICamera>& camera);
     static  sp<Camera>  connect(int cameraId,
                                 const String16& clientPackageName,
-                                int clientUid);
+                                int clientUid, int clientPid);
 
     static  status_t  connectLegacy(int cameraId, int halVersion,
                                      const String16& clientPackageName,
@@ -108,6 +118,13 @@ public:
             // release a recording frame
             void        releaseRecordingFrame(const sp<IMemory>& mem);
 
+            // release a recording frame handle
+            void        releaseRecordingFrameHandle(native_handle_t *handle);
+
+            // release a batch of recording frame handles
+            void        releaseRecordingFrameHandleBatch(
+                    const std::vector<native_handle_t*> handles);
+
             // autoFocus - status returned from callback
             status_t    autoFocus();
 
@@ -126,8 +143,15 @@ public:
             // send command to camera driver
             status_t    sendCommand(int32_t cmd, int32_t arg1, int32_t arg2);
 
-            // tell camera hal to store meta data or real YUV in video buffers.
-            status_t    storeMetaDataInBuffers(bool enabled);
+            // Tell camera how to pass video buffers. videoBufferMode is one of VIDEO_BUFFER_MODE_*.
+            // Returns OK if the specified video buffer mode is supported. If videoBufferMode is
+            // VIDEO_BUFFER_MODE_BUFFER_QUEUE, setVideoTarget() must be called before starting
+            // video recording.
+            status_t    setVideoBufferMode(int32_t videoBufferMode);
+
+            // Set the video buffer producer for camera to use in VIDEO_BUFFER_MODE_BUFFER_QUEUE
+            // mode.
+            status_t    setVideoTarget(const sp<IGraphicBufferProducer>& bufferProducer);
 
             void        setListener(const sp<CameraListener>& listener);
             void        setRecordingProxyListener(const sp<ICameraRecordingProxyListener>& listener);
@@ -148,23 +172,31 @@ public:
     virtual void        dataCallback(int32_t msgType, const sp<IMemory>& dataPtr,
                                      camera_frame_metadata_t *metadata);
     virtual void        dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void        recordingFrameHandleCallbackTimestamp(nsecs_t timestamp, native_handle_t* handle);
+    virtual void        recordingFrameHandleCallbackTimestampBatch(
+                                const std::vector<nsecs_t>& timestamps,
+                                const std::vector<native_handle_t*>& handles);
+
 
     class RecordingProxy : public BnCameraRecordingProxy
     {
     public:
-        RecordingProxy(const sp<Camera>& camera);
+        explicit RecordingProxy(const sp<Camera>& camera);
 
         // ICameraRecordingProxy interface
         virtual status_t startRecording(const sp<ICameraRecordingProxyListener>& listener);
         virtual void stopRecording();
         virtual void releaseRecordingFrame(const sp<IMemory>& mem);
+        virtual void releaseRecordingFrameHandle(native_handle_t* handle);
+        virtual void releaseRecordingFrameHandleBatch(
+                const std::vector<native_handle_t*>& handles);
 
     private:
         sp<Camera>         mCamera;
     };
 
 protected:
-                        Camera(int cameraId);
+    explicit            Camera(int cameraId);
                         Camera(const Camera&);
                         Camera& operator=(const Camera);
 

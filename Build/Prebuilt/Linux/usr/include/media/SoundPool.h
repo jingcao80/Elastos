@@ -37,7 +37,7 @@ class SoundPool;
 // for queued events
 class SoundPoolEvent {
 public:
-    SoundPoolEvent(int msg, int arg1=0, int arg2=0) :
+    explicit SoundPoolEvent(int msg, int arg1=0, int arg2=0) :
         mMsg(msg), mArg1(arg1), mArg2(arg2) {}
     int         mMsg;
     int         mArg1;
@@ -52,7 +52,6 @@ typedef void SoundPoolCallback(SoundPoolEvent event, SoundPool* soundPool, void*
 class Sample  : public RefBase {
 public:
     enum sample_state { UNLOADED, LOADING, READY, UNLOADING };
-    Sample(int sampleID, const char* url);
     Sample(int sampleID, int fd, int64_t offset, int64_t length);
     ~Sample();
     int sampleID() { return mSampleID; }
@@ -66,12 +65,6 @@ public:
     void startLoad() { mState = LOADING; }
     sp<IMemory> getIMemory() { return mData; }
 
-    // hack
-    void init(int numChannels, int sampleRate, audio_format_t format, size_t size,
-            sp<IMemory> data ) {
-        mNumChannels = numChannels; mSampleRate = sampleRate; mFormat = format; mSize = size;
-            mData = data; }
-
 private:
     void init();
 
@@ -79,13 +72,12 @@ private:
     volatile int32_t    mRefCount;
     uint16_t            mSampleID;
     uint16_t            mSampleRate;
-    uint8_t             mState : 3;
-    uint8_t             mNumChannels : 2;
+    uint8_t             mState;
+    uint8_t             mNumChannels;
     audio_format_t      mFormat;
     int                 mFd;
     int64_t             mOffset;
     int64_t             mLength;
-    char*               mUrl;
     sp<IMemory>         mData;
     sp<MemoryHeapBase>  mHeap;
 };
@@ -122,13 +114,14 @@ class SoundChannel : public SoundEvent {
 public:
     enum state { IDLE, RESUMING, STOPPING, PAUSED, PLAYING };
     SoundChannel() : mState(IDLE), mNumChannels(1),
-            mPos(0), mToggle(0), mAutoPaused(false) {}
+            mPos(0), mToggle(0), mAutoPaused(false), mMuted(false) {}
     ~SoundChannel();
     void init(SoundPool* soundPool);
     void play(const sp<Sample>& sample, int channelID, float leftVolume, float rightVolume,
             int priority, int loop, float rate);
     void setVolume_l(float leftVolume, float rightVolume);
     void setVolume(float leftVolume, float rightVolume);
+    void mute(bool muting);
     void stop_l();
     void stop();
     void pause();
@@ -144,6 +137,7 @@ public:
     void nextEvent();
     int nextChannelID() { return mNextEvent.channelID(); }
     void dump();
+    int getPrevSampleID(void) { return mPrevSampleID; }
 
 private:
     static void callback(int event, void* user, void *info);
@@ -160,6 +154,8 @@ private:
     int                 mAudioBufferSize;
     unsigned long       mToggle;
     bool                mAutoPaused;
+    int                 mPrevSampleID;
+    bool                mMuted;
 };
 
 // application object for managing a pool of sounds
@@ -169,12 +165,12 @@ class SoundPool {
 public:
     SoundPool(int maxChannels, const audio_attributes_t* pAttributes);
     ~SoundPool();
-    int load(const char* url, int priority);
     int load(int fd, int64_t offset, int64_t length, int priority);
     bool unload(int sampleID);
     int play(int sampleID, float leftVolume, float rightVolume, int priority,
             int loop, float rate);
     void pause(int channelID);
+    void mute(bool muting);
     void autoPause();
     void resume(int channelID);
     void autoResume();
@@ -187,6 +183,7 @@ public:
 
     // called from SoundPoolThread
     void sampleLoaded(int sampleID);
+    sp<Sample> findSample(int sampleID);
 
     // called from AudioTrack thread
     void done_l(SoundChannel* channel);
@@ -198,11 +195,10 @@ public:
 private:
     SoundPool() {} // no default constructor
     bool startThreads();
-    void doLoad(sp<Sample>& sample);
-    sp<Sample> findSample(int sampleID) { return mSamples.valueFor(sampleID); }
+    sp<Sample> findSample_l(int sampleID);
     SoundChannel* findChannel (int channelID);
     SoundChannel* findNextChannel (int channelID);
-    SoundChannel* allocateChannel_l(int priority);
+    SoundChannel* allocateChannel_l(int priority, int sampleID);
     void moveToFront_l(SoundChannel* channel);
     void notify(SoundPoolEvent event);
     void dump();
@@ -229,6 +225,7 @@ private:
     int                     mNextSampleID;
     int                     mNextChannelID;
     bool                    mQuit;
+    bool                    mMuted;
 
     // callback
     Mutex                   mCallbackLock;

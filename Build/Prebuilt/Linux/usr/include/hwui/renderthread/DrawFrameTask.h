@@ -25,13 +25,14 @@
 #include "RenderTask.h"
 
 #include "../Rect.h"
+#include "../FrameInfo.h"
 #include "../TreeInfo.h"
 
 namespace android {
 namespace uirenderer {
 
 class DeferredLayerUpdater;
-class DisplayListData;
+class DisplayList;
 class RenderNode;
 
 namespace renderthread {
@@ -39,14 +40,18 @@ namespace renderthread {
 class CanvasContext;
 class RenderThread;
 
-enum SyncResult {
-    kSync_OK = 0,
-    kSync_UIRedrawRequired = 1 << 0,
+namespace SyncResult {
+enum {
+    OK = 0,
+    UIRedrawRequired = 1 << 0,
+    LostSurfaceRewardIfFound = 1 << 1,
+    ContextIsStopped = 1 << 2,
 };
+}
 
 /*
  * This is a special Super Task. It is re-used multiple times by RenderProxy,
- * and contains state (such as layer updaters & new DisplayListDatas) that is
+ * and contains state (such as layer updaters & new DisplayLists) that is
  * tracked across many frames not just a single frame.
  * It is the sync-state task, and will kick off the post-sync draw
  */
@@ -55,15 +60,16 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(RenderThread* thread, CanvasContext* context);
+    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
 
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
 
-    void setDensity(float density) { mDensity = density; }
-    int drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos);
+    int drawFrame();
 
-    virtual void run();
+    int64_t* frameInfo() { return mFrameInfo; }
+
+    virtual void run() override;
 
 private:
     void postAndWait();
@@ -75,16 +81,17 @@ private:
 
     RenderThread* mRenderThread;
     CanvasContext* mContext;
+    RenderNode* mTargetNode = nullptr;
 
     /*********************************************
      *  Single frame data
      *********************************************/
-    nsecs_t mFrameTimeNanos;
-    nsecs_t mRecordDurationNanos;
-    float mDensity;
     std::vector< sp<DeferredLayerUpdater> > mLayers;
 
     int mSyncResult;
+    int64_t mSyncQueued;
+
+    int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 };
 
 } /* namespace renderthread */

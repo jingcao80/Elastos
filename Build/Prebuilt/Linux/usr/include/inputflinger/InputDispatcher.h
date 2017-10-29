@@ -89,7 +89,7 @@ struct InputTarget {
         /* This flag indicates that the event is being delivered to a foreground application. */
         FLAG_FOREGROUND = 1 << 0,
 
-        /* This flag indicates that the target of a MotionEvent is partly or wholly
+        /* This flag indicates that the MotionEvent falls within the area of the target
          * obscured by another visible window above it.  The motion event should be
          * delivered with flag AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED. */
         FLAG_WINDOW_IS_OBSCURED = 1 << 1,
@@ -139,6 +139,12 @@ struct InputTarget {
                 | FLAG_DISPATCH_AS_HOVER_EXIT
                 | FLAG_DISPATCH_AS_SLIPPERY_EXIT
                 | FLAG_DISPATCH_AS_SLIPPERY_ENTER,
+
+        /* This flag indicates that the target of a MotionEvent is partly or wholly
+         * obscured by another visible window above it.  The motion event should be
+         * delivered with flag AMOTION_EVENT_FLAG_WINDOW_IS_PARTIALLY_OBSCURED. */
+        FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 1 << 14,
+
     };
 
     // The input channel to be targeted.
@@ -449,7 +455,7 @@ private:
     };
 
     struct ConfigurationChangedEntry : EventEntry {
-        ConfigurationChangedEntry(nsecs_t eventTime);
+        explicit ConfigurationChangedEntry(nsecs_t eventTime);
         virtual void appendDescription(String8& msg) const;
 
     protected:
@@ -504,6 +510,7 @@ private:
         int32_t deviceId;
         uint32_t source;
         int32_t action;
+        int32_t actionButton;
         int32_t flags;
         int32_t metaState;
         int32_t buttonState;
@@ -518,10 +525,10 @@ private:
 
         MotionEntry(nsecs_t eventTime,
                 int32_t deviceId, uint32_t source, uint32_t policyFlags,
-                int32_t action, int32_t flags,
+                int32_t action, int32_t actionButton, int32_t flags,
                 int32_t metaState, int32_t buttonState, int32_t edgeFlags,
-                float xPrecision, float yPrecision,
-                nsecs_t downTime, int32_t displayId, uint32_t pointerCount,
+                float xPrecision, float yPrecision, nsecs_t downTime,
+                int32_t displayId, uint32_t pointerCount,
                 const PointerProperties* pointerProperties, const PointerCoords* pointerCoords,
                 float xOffset, float yOffset);
         virtual void appendDescription(String8& msg) const;
@@ -584,7 +591,7 @@ private:
 
     class Connection;
     struct CommandEntry : Link<CommandEntry> {
-        CommandEntry(Command command);
+        explicit CommandEntry(Command command);
         ~CommandEntry();
 
         Command command;
@@ -856,6 +863,8 @@ private:
     Queue<EventEntry> mRecentQueue;
     Queue<CommandEntry> mCommandQueue;
 
+    DropReason mLastDropReason;
+
     void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
 
     // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
@@ -1045,6 +1054,7 @@ private:
             const InjectionState* injectionState);
     bool isWindowObscuredAtPointLocked(const sp<InputWindowHandle>& windowHandle,
             int32_t x, int32_t y) const;
+    bool isWindowObscuredLocked(const sp<InputWindowHandle>& windowHandle) const;
     String8 getApplicationWindowLabelLocked(const sp<InputApplicationHandle>& applicationHandle,
             const sp<InputWindowHandle>& windowHandle);
 
@@ -1073,6 +1083,7 @@ private:
 
     void synthesizeCancelationEventsForAllConnectionsLocked(
             const CancelationOptions& options);
+    void synthesizeCancelationEventsForMonitorsLocked(const CancelationOptions& options);
     void synthesizeCancelationEventsForInputChannelLocked(const sp<InputChannel>& channel,
             const CancelationOptions& options);
     void synthesizeCancelationEventsForConnectionLocked(const sp<Connection>& connection,

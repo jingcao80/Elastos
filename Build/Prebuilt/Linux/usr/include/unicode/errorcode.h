@@ -1,3 +1,5 @@
+// Copyright (C) 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 *******************************************************************************
 *
@@ -36,8 +38,6 @@ U_NAMESPACE_BEGIN
  * does an assert(), logs an error, etc.
  * This is not an abstract base class. This class can be used and instantiated
  * by itself, although it will be more useful when subclassed.
- *
- * Inside Google, this class is modified to use Google error logging.
  *
  * Features:
  * - The constructor initializes the internal UErrorCode to U_ZERO_ERROR,
@@ -131,7 +131,6 @@ protected:
      * Throw an exception, log an error, terminate the program, or similar.
      * @stable ICU 4.2
      */
-
     virtual void handleFailure() const {}
 };
 
