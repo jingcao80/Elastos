@@ -41,10 +41,6 @@ public:
 
     CARAPI constructor(
         /* [in] */ Int32 opColor);
-
-private:
-    static CARAPI_(Int64) NativeCreate(
-        /* [in] */ Int32 opColor);
 };
 
 } // namespace Graphics

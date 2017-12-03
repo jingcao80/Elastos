@@ -17,23 +17,18 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/Xfermode.h"
-#include <SkXfermode.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-CAR_INTERFACE_IMPL(Xfermode, Object, IXfermode);
-Xfermode::~Xfermode()
-{
-    Finalizer(mNativeInstance);
-}
+const Int32 Xfermode::DEFAULT = PorterDuffMode_SRC_OVER;
 
-void Xfermode::Finalizer(
-    /* [in] */ Int64 nativeInstance)
-{
-    SkSafeUnref(reinterpret_cast<SkXfermode*>(nativeInstance));
-}
+CAR_INTERFACE_IMPL(Xfermode, Object, IXfermode);
+
+Xfermode::Xfermode()
+    : mPorterDuffMode(Xfermode::DEFAULT)
+{}
 
 } // namespace Graphics
 } // namepsace Droid

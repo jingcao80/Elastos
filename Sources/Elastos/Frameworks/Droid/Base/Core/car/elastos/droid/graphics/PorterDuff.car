@@ -49,17 +49,17 @@ module
         PorterDuffMode_XOR         = 0x0b,
         /** [Sa + Da - Sa*Da,
              Sc*(1 - Da) + Dc*(1 - Sa) + min(Sc, Dc)] */
-        PorterDuffMode_DARKEN      = 0x0c,
+        PorterDuffMode_DARKEN      = 0x10,
         /** [Sa + Da - Sa*Da,
              Sc*(1 - Da) + Dc*(1 - Sa) + max(Sc, Dc)] */
-        PorterDuffMode_LIGHTEN     = 0x0d,
+        PorterDuffMode_LIGHTEN     = 0x11,
         /** [Sa * Da, Sc * Dc] */
-        PorterDuffMode_MULTIPLY    = 0x0e,
+        PorterDuffMode_MULTIPLY    = 0x0d,
         /** [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] */
-        PorterDuffMode_SCREEN      = 0x0f,
+        PorterDuffMode_SCREEN      = 0x0e,
         /** Saturate(S + D) */
-        PorterDuffMode_ADD         = 0x10,
-        PorterDuffMode_OVERLAY     = 0x11,
+        PorterDuffMode_ADD         = 0x0c,
+        PorterDuffMode_OVERLAY     = 0x0f,
     }
 
     } // namespace Graphics

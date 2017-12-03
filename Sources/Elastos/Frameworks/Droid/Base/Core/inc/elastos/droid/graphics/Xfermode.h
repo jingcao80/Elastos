@@ -21,12 +21,9 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
-
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
-
-extern const InterfaceID EIID_Xfermode;
 
 /**
  * Xfermode is the base class for objects that are called to implement custom
@@ -39,19 +36,15 @@ class Xfermode
     : public Object
     , public IXfermode
 {
-    friend class Paint;
-
 public:
     CAR_INTERFACE_DECL()
 
-    virtual ~Xfermode();
-
-private:
-    static CARAPI_(void) Finalizer(
-        /* [in] */ Int64 nativeInstance);
+    Xfermode();
 
 public:
-    Int64 mNativeInstance;
+    static const Int32 DEFAULT;
+
+    Int32 mPorterDuffMode;
 };
 
 } // namespace Graphics

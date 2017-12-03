@@ -56,12 +56,6 @@ public:
         /* [in] */ Int32 opColor,
         /* [in] */ Int32 tolerance,
         /* [in] */ Int32 mode);
-
-private:
-    static CARAPI_(Int64) NativeCreate(
-        /* [in] */ Int32 opColor,
-        /* [in] */ Int32 tolerance,
-        /* [in] */ Int32 nativeMode);
 };
 
 } // namespace Graphics

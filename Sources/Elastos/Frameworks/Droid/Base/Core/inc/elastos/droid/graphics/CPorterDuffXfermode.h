@@ -43,13 +43,6 @@ public:
 
     CARAPI GetMode(
         /* [out] */ PorterDuffMode* mode);
-
-private:
-    static CARAPI_(Int64) NativeCreateXfermode(
-        /* [in] */ PorterDuffMode mode);
-
-public:
-    PorterDuffMode mMode;
 };
 
 } // namespace Graphics
