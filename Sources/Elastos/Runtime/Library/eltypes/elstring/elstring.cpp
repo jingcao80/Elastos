@@ -175,15 +175,17 @@ String::~String()
 
 Int32 String::GetHashCode() const
 {
-    Int64 h = 0;
+    // BKDR Hash Function
+    UInt32 seed = 31; // 31 131 1313 13131 131313 etc..
+    UInt32 hash = 0;
 
     const char* string = mString;
     if (string) {
         for ( ; *string; ++string) {
-            h = 5 * h + *string;
+            hash = hash * seed + (*string);
         }
     }
-    return (Int32)h;
+    return (hash & 0x7FFFFFFF);
 }
 
 void String::SetCounted(Int32 charCount) const

@@ -109,12 +109,15 @@ ECode CString::GetHashCode(
 {
     VALIDATE_NOT_NULL(hashCode)
 
-    Int64 h = 0;
+    // BKDR Hash Function
+    UInt32 seed = 31; // 31 131 1313 13131 131313 etc..
+    UInt32 hash = 0;
+
     const char *string = mString.string();
     for ( ; *string; ++string) {
-        h = 5 * h + *string;
+        hash = hash * seed + (*string);
     }
-    *hashCode = (Int32)h;
+    *hashCode = (hash & 0x7FFFFFFF);
     return NOERROR;
 }
 

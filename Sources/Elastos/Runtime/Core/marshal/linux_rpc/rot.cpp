@@ -33,14 +33,17 @@ static UInt32 Hash(const String& key)
 {
     assert(!key.IsNull());
 
+    // BKDR Hash Function
+    UInt32 seed = 31; // 31 131 1313 13131 131313 etc..
+    UInt32 hash = 0;
+
     const char* s = key.string();
-    UInt32 h = 0;
     if (s != NULL) {
         for ( ; *s; ++s) {
-            h = 5 * h + *s;
+            hash = hash * seed + (*s);
         }
     }
-    return h % ROT_HASHTABLE_SIZE;
+    return hash % ROT_HASHTABLE_SIZE;
 }
 
 ECode InitROT_RPC()
