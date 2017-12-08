@@ -32,21 +32,6 @@ namespace Elastosx {
 namespace Security {
 namespace Cert {
 
-CAR_INTERFACE_IMPL(X509Certificate, Certificate, IX509Certificate)
-
-ECode X509Certificate::PrepairConstructor()
-{
-    String classname(NULL);
-    AutoPtr<ISecurity> security;
-    CSecurity::AcquireSingleton((ISecurity**)&security);
-    FAIL_RETURN(security->GetProperty(String("cert.provider.x509v1"), &classname));
-    const String moduleName("/data/data/com.elastos.runtime/elastos/Elastos.CoreLibrary.eco");
-
-    FAIL_RETURN(_CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&X509Certificate::sModuleInfo));
-
-    return X509Certificate::sModuleInfo->GetClassInfo(classname, (IClassInfo**)&X509Certificate::sClassInfo);
-}
-
 // static {
     // try {
         // String classname = Security.getProperty("cert.provider.x509v1");
@@ -55,9 +40,25 @@ ECode X509Certificate::PrepairConstructor()
     // } catch (Throwable e) {
     // }
 // }
-AutoPtr<IModuleInfo> X509Certificate::sModuleInfo = NULL;
-AutoPtr<IClassInfo> X509Certificate::sClassInfo = NULL;
-const ECode X509Certificate::sConstructorState = PrepairConstructor();
+AutoPtr<IConstructorInfo> X509Certificate::sConstructor;
+
+AutoPtr<IConstructorInfo> X509Certificate::StaticInitialize()
+{
+    AutoPtr<ISecurity> security;
+    CSecurity::AcquireSingleton((ISecurity**)&security);
+    String classname;
+    security->GetProperty(String("cert.provider.x509v1"), &classname);
+    if (classname.IsNull()) return NULL;
+    AutoPtr<IModuleInfo> module;
+    CReflector::AcquireModuleInfo(String("Elastos.CoreLibrary.eco"), (IModuleInfo**)&module);
+    AutoPtr<IClassInfo> klass;
+    module->GetClassInfo(classname, (IClassInfo**)&klass);
+    if (klass == NULL) return NULL;
+    assert(0);
+    return NULL;
+}
+
+CAR_INTERFACE_IMPL(X509Certificate, Certificate, IX509Certificate)
 
 ECode X509Certificate::GetInstance(
     /* [in] */ IInputStream* inStream,
@@ -70,17 +71,14 @@ ECode X509Certificate::GetInstance(
         // throw new CertificateException("inStream == null");
         return E_CERTIFICATE_EXCEPTION;
     }
-    if (SUCCEEDED(sConstructorState)) {
+    if (sConstructor != NULL) {
         AutoPtr<IInterface> object;
-        AutoPtr<IMethodInfo> methodInfo;
         AutoPtr<IArgumentList> argumentList;
         AutoPtr<IInterface> tmpObject;
-        FAIL_GOTO(sClassInfo->CreateObject((IInterface**)&object), ERROR_PROCESS_1);
-        FAIL_GOTO(sClassInfo->GetMethodInfo(String("New"), String("(LElastos/IO/InputStream;*LElastosx/Security/Cert/X590Centificate;**)E"), (IMethodInfo**)&methodInfo), ERROR_PROCESS_1);
-        FAIL_GOTO(methodInfo->CreateArgumentList((IArgumentList**)&argumentList), ERROR_PROCESS_1);
+        FAIL_GOTO(sConstructor->CreateArgumentList((IArgumentList**)&argumentList), ERROR_PROCESS_1);
         FAIL_GOTO(argumentList->SetInputArgumentOfObjectPtr(0, inStream), ERROR_PROCESS_1);
         FAIL_GOTO(argumentList->SetOutputArgumentOfObjectPtrPtr(1, (IInterface**)&tmpObject), ERROR_PROCESS_1);
-        FAIL_GOTO(methodInfo->Invoke(object, argumentList), ERROR_PROCESS_1);
+        FAIL_GOTO(sConstructor->CreateObject(argumentList, (IInterface**)&object), ERROR_PROCESS_1);
         *rev = IX509Certificate::Probe(tmpObject);
         REFCOUNT_ADD(*rev);
         return NOERROR;

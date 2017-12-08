@@ -5436,19 +5436,21 @@ ECode View::NotifySubtreeAccessibilityStateChangedIfNeeded()
         return NOERROR;
     }
 
+    ECode ec = NOERROR;
     if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
         mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
-        //try {
-        ECode ec = mParent->NotifySubtreeAccessibilityStateChanged(
-                this, this, IAccessibilityEvent::CONTENT_CHANGE_TYPE_SUBTREE);
-        //} catch (AbstractMethodError e) {
-        //    Log.e(TAG, mParent.getClass().getSimpleName() +
-        //            " does not fully implement ViewParent", e);
-        //}
-        return ec;
+        if (mParent != NULL) {
+            //try {
+            ec = mParent->NotifySubtreeAccessibilityStateChanged(
+                    this, this, IAccessibilityEvent::CONTENT_CHANGE_TYPE_SUBTREE);
+            //} catch (AbstractMethodError e) {
+            //    Log.e(TAG, mParent.getClass().getSimpleName() +
+            //            " does not fully implement ViewParent", e);
+            //}
+        }
     }
 
-    return NOERROR;
+    return ec;
 }
 
 ECode View::ResetSubtreeAccessibilityStateChanged()
@@ -13406,9 +13408,9 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     AutoPtr<IHardwareCanvas> canvas;
     renderNode->Start(width, height, (IHardwareCanvas**)&canvas);
     //try {
-        drawable->Draw(ICanvas::Probe(canvas));
+    drawable->Draw(ICanvas::Probe(canvas));
     //} finally {
-        renderNode->End(canvas);
+    renderNode->End(canvas);
     //}
 
     // Set up drawable properties that are view-independent.

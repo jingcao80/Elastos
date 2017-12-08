@@ -131,6 +131,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::ViewTreeObserver;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashSet;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Core::CString;
@@ -6216,6 +6217,9 @@ AutoPtr<IView> ViewRootImpl::GetCommonPredecessor(
     /* [in] */ IView* first,
     /* [in] */ IView* second)
 {
+    if (mTempHashSet == NULL) {
+        CHashSet::New((IHashSet**)&mTempHashSet);
+    }
     mTempHashSet->Clear();
     AutoPtr<IView>firstCurrent = first;
     while (firstCurrent != NULL) {

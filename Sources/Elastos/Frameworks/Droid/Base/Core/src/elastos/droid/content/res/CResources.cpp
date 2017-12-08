@@ -1031,7 +1031,7 @@ ECode CResources::GetDrawable(
         else {
             mTmpValue = NULL;
         }
-        GetValue(id, value, TRUE, supportComposedIcons);
+        FAIL_RETURN(GetValue(id, value, TRUE, supportComposedIcons));
     }
 
     AutoPtr<IDrawable> res;
@@ -1044,7 +1044,7 @@ ECode CResources::GetDrawable(
         if (supportComposedIcons && mComposedIconInfo != NULL && info != NULL &&
                 (info->GetThemedIcon(&themedIcon), themedIcon == 0)) {
             Logger::E(TAG, "Failed to retrieve composed icon. 0x%08x", ec);
-            GetValue(id, value, TRUE, FALSE);
+            FAIL_RETURN(GetValue(id, value, TRUE, FALSE));
             LoadDrawable(value, id, theme, (IDrawable**)&res);
         }
         else {

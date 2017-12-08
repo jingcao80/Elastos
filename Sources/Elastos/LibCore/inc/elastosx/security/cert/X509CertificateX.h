@@ -252,11 +252,10 @@ public:
         /* [out, callee] */ ArrayOf<Byte>** params) = 0;
 
 private:
-    // private static Constructor constructor;
-    static CARAPI PrepairConstructor();
-    static AutoPtr<IModuleInfo> sModuleInfo;
-    static AutoPtr<IClassInfo> sClassInfo;
-    static const CARAPI sConstructorState;
+    static CARAPI_(AutoPtr<IConstructorInfo>) StaticInitialize();
+
+private:
+    static AutoPtr<IConstructorInfo> sConstructor;
 };
 
 } // end Cert

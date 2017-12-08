@@ -124,7 +124,11 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
     AutoLock _l(sProxyLock);
 
     // Someone else's...  do we know about it?
-    AutoPtr<BinderProxy> object = (BinderProxy*)val->findObject(&gBinderProxyOffsets);
+    IWeakReference* ref = (IWeakReference*)val->findObject(&gBinderProxyOffsets);
+    AutoPtr<IBinder> object;
+    if (ref != NULL) {
+        ref->Resolve(EIID_IBinder, (IInterface**)&object);
+    }
     if (object != NULL) {
         // jobject res = env->CallObjectMethod(object, gWeakReferenceOffsets.mGet);
         // if (res != NULL) {
@@ -135,35 +139,33 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
         // android_atomic_dec(&gNumProxyRefs);
         // val->detachObject(&gBinderProxyOffsets);
         // env->DeleteGlobalRef(object);
-        return IBinder::Probe(object);
+        return object;
     }
 
-    object = new BinderProxy();
-    if (object != NULL) {
-        // LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object.Get());
-        // The proxy holds a reference to the native object.
-        object->mObject = (Int32)val.get();
-        val->incStrong(object.Get());
+    AutoPtr<BinderProxy> proxy = new BinderProxy();
+    // LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object.Get());
+    // The proxy holds a reference to the native object.
+    proxy->mObject = (Int32)val.get();
+    val->incStrong(proxy.Get());
 
-        // The native object needs to hold a weak reference back to the
-        // proxy, so we can retrieve the same proxy if it is still active.
-        BinderProxy* refObject = object; //env->NewGlobalRef(
-        //        env->GetObjectField(object, gBinderProxyOffsets.mSelf));
-        val->attachObject(&gBinderProxyOffsets, refObject,
-                NULL/*jnienv_to_javavm(env)*/, NULL/*proxy_cleanup*/);
-        refObject->AddRef();
+    // The native object needs to hold a weak reference back to the
+    // proxy, so we can retrieve the same proxy if it is still active.
+    AutoPtr<IWeakReference> wr;
+    proxy->GetWeakReference((IWeakReference**)&wr);
+    val->attachObject(&gBinderProxyOffsets, wr.Get(),
+            NULL/*jnienv_to_javavm(env)*/, NULL/*proxy_cleanup*/);
+    wr->AddRef();
 
-        // Also remember the death recipients registered on this proxy
-        // sp<DeathRecipientList> drl = new DeathRecipientList;
-        // drl->incStrong((void*)javaObjectForIBinder);
-        // env->SetIntField(object, gBinderProxyOffsets.mOrgue, reinterpret_cast<jint>(drl.get()));
+    // Also remember the death recipients registered on this proxy
+    // sp<DeathRecipientList> drl = new DeathRecipientList;
+    // drl->incStrong((void*)javaObjectForIBinder);
+    // env->SetIntField(object, gBinderProxyOffsets.mOrgue, reinterpret_cast<jint>(drl.get()));
 
-        // Note that a new object reference has been created.
-        // android_atomic_inc(&gNumProxyRefs);
-        // incRefsCreated(env);
-    }
+    // Note that a new object reference has been created.
+    // android_atomic_inc(&gNumProxyRefs);
+    // incRefsCreated(env);
 
-    return object;
+    return proxy.Get();
 }
 
 android::sp<android::IBinder> IBinderForDroidObject(IBinder* obj)

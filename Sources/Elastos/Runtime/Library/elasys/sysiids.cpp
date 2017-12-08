@@ -32,7 +32,7 @@ EXTERN_C ECO_PUBLIC const EMuid CLSID_CustomMarshal =
 
 EXTERN_C ECO_PUBLIC const _ELASTOS ClassID ECLSID_CClassObject =
     {{0x0000110A,0x0000,0x0000,{0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x66}},
-    (char *)"Elastos.Runtime.eco"};
+    (char *)"Elastos.Runtime.eco", 0x28311c9a};
 
 // IID
 //
