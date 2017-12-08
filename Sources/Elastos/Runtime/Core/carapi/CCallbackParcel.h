@@ -157,6 +157,9 @@ public:
     CARAPI ReadFileDescriptor(
         /* [out] */ Int32* fd);
 
+    CARAPI ReadValue(
+        /* [out] */ IInterface** value);
+
     CARAPI Clone(
         /* [in] */ IParcel* srcParcel);
 

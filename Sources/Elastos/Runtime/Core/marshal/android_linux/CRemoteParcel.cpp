@@ -732,6 +732,12 @@ ECode CRemoteParcel::ReadFileDescriptor(
     return ReadValue((PVoid)fd, Type_Fd);
 }
 
+ECode CRemoteParcel::ReadValue(
+    /* [out] */ IInterface** value)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CRemoteParcel::WriteByte(
     /* [in] */ Byte value)
 {

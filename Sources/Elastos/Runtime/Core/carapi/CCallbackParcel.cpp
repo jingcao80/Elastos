@@ -621,6 +621,12 @@ ECode CCallbackParcel::ReadFileDescriptor(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CCallbackParcel::ReadValue(
+    /* [out] */ IInterface** value)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CCallbackParcel::WriteByte(
     /* [in] */ Byte value)
 {

@@ -170,6 +170,12 @@ ECode CParcel::ReadFileDescriptor(
     return mData->ReadFileDescriptor(fd);
 }
 
+ECode CParcel::ReadValue(
+    /* [out] */ IInterface** value)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CParcel::WriteByte(
     /* [in] */ Byte value)
 {

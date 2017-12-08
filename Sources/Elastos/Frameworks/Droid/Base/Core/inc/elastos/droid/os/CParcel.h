@@ -163,6 +163,9 @@ public:
     CARAPI ReadFileDescriptor(
         /* [out] */ Int32* fd);
 
+    CARAPI ReadValue(
+        /* [out] */ IInterface** value);
+
     CARAPI Clone(
         /* [in] */ IParcel* srcParcel);
 
@@ -185,7 +188,7 @@ public:
         /* [in] */ Int32 capacity);
 
     CARAPI GetDataPayload(
-        /* [ouy] */ Handle32* buffer);
+        /* [out] */ Handle32* buffer);
 
 public:
     static CARAPI OpenFileDescriptor(
