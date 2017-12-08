@@ -227,10 +227,10 @@ public:
         /* [in] */ Int32 inputFeatures);
 
     CARAPI GetUserActivityTimeout(
-        /* [out] */ Int32* userActivityTimeout);
+        /* [out] */ Int64* userActivityTimeout);
 
     CARAPI SetUserActivityTimeout(
-        /* [in] */ Int32 userActivityTimeout);
+        /* [in] */ Int64 userActivityTimeout);
 
     CARAPI GetBlurMaskAlphaThreshold(
     /* [out] */ Float* blurMaskAlphaThreshold);

@@ -11794,7 +11794,7 @@ void CWindowManagerService::HandleNotObscuredLocked(
                 && mInnerFields->mButtonBrightness < 0) {
             mInnerFields->mButtonBrightness = buttonBrightness;
         }
-        Int32 timeout = 0;
+        Int64 timeout = 0;
         if (!mInnerFields->mSyswin
                 && (attrs->GetUserActivityTimeout(&timeout), timeout >= 0)
                 && mInnerFields->mUserActivityTimeout < 0) {
