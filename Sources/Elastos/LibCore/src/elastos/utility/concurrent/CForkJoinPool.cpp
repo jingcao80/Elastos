@@ -478,11 +478,11 @@ Int32 CForkJoinPool::mCommonParallelism;
 
 Int32 CForkJoinPool::mPoolNumberSequence;
 
-Int64 CForkJoinPool::IDLE_TIMEOUT      = 2000L * 1000L * 1000L; // 2sec
+Int64 CForkJoinPool::IDLE_TIMEOUT      = 2000ll * 1000ll * 1000ll; // 2sec
 
-Int64 CForkJoinPool::FAST_IDLE_TIMEOUT =  200L * 1000L * 1000L;
+Int64 CForkJoinPool::FAST_IDLE_TIMEOUT =  200ll * 1000ll * 1000ll;
 
-Int64 CForkJoinPool::TIMEOUT_SLOP = 2000000L;
+Int64 CForkJoinPool::TIMEOUT_SLOP = 2000000ll;
 
 Int32 CForkJoinPool::MAX_HELP = 64;
 
@@ -503,13 +503,13 @@ Int32 CForkJoinPool::SHORT_SIGN = 1 << 15;
 Int32 CForkJoinPool::INT_SIGN   = 1 << 31;
 
 // masks
-Int64 CForkJoinPool::STOP_BIT   = 0x0001L << ST_SHIFT;
+Int64 CForkJoinPool::STOP_BIT   = 0x0001ll << ST_SHIFT;
 Int64 CForkJoinPool::AC_MASK    = ((Int64)SMASK) << AC_SHIFT;
 Int64 CForkJoinPool::TC_MASK    = ((Int64)SMASK) << TC_SHIFT;
 
 // units for incrementing and decrementing
-Int64 CForkJoinPool::TC_UNIT    = 1L << TC_SHIFT;
-Int64 CForkJoinPool::AC_UNIT    = 1L << AC_SHIFT;
+Int64 CForkJoinPool::TC_UNIT    = 1ll << TC_SHIFT;
+Int64 CForkJoinPool::AC_UNIT    = 1ll << AC_SHIFT;
 
 // masks and units for dealing with u = (int)(ctl >>> 32)
 Int32 CForkJoinPool::UAC_SHIFT  = AC_SHIFT - 32;

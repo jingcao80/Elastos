@@ -299,7 +299,7 @@ String IntegralToString::ConvertInt64(
      * "Hacker's Delight" 10-20, http://www.hackersdelight.org/divcMore.pdf
      */
     //Int64 newN = (n - low) / 1000000000;
-    n = (((UInt64)(n - low)) >> 9) * 0x8E47CE423A2E9C6DL;
+    n = (((UInt64)(n - low)) >> 9) * 0x8E47CE423A2E9C6Dll;
 
     /*
      * If the remaining digits fit in an Int32, emit them using a

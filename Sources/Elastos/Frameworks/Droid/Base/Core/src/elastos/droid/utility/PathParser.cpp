@@ -559,11 +559,11 @@ Int32 PathParser::NextStart(
     /* [in] */ const String& s,
     /* [in] */ Int32 end)
 {
-    Char32 c;
+    Int32 c;
 
     while (end < s.GetLength()) {
         c = s.GetChar(end);
-        if ((Int32((c - 'A') * (c - 'Z')) <= 0) || (Int32((c - 'a') * (c - 'z')) <= 0)) {
+        if (((c - 'A') * (c - 'Z') <= 0) || ((c - 'a') * (c - 'z') <= 0)) {
             return end;
         }
         end++;

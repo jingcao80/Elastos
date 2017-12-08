@@ -34,13 +34,13 @@ static
 void multiplyMM(Float* r, const Float* lhs, const Float* rhs)
 {
     for (int i=0 ; i<4 ; i++) {
-        register const Float rhs_i0 = rhs[ I(i,0) ];
-        register Float ri0 = lhs[ I(0,0) ] * rhs_i0;
-        register Float ri1 = lhs[ I(0,1) ] * rhs_i0;
-        register Float ri2 = lhs[ I(0,2) ] * rhs_i0;
-        register Float ri3 = lhs[ I(0,3) ] * rhs_i0;
+        const Float rhs_i0 = rhs[ I(i,0) ];
+        Float ri0 = lhs[ I(0,0) ] * rhs_i0;
+        Float ri1 = lhs[ I(0,1) ] * rhs_i0;
+        Float ri2 = lhs[ I(0,2) ] * rhs_i0;
+        Float ri3 = lhs[ I(0,3) ] * rhs_i0;
         for (int j=1 ; j<4 ; j++) {
-            register const Float rhs_ij = rhs[ I(i,j) ];
+            const Float rhs_ij = rhs[ I(i,j) ];
             ri0 += lhs[ I(j,0) ] * rhs_ij;
             ri1 += lhs[ I(j,1) ] * rhs_ij;
             ri2 += lhs[ I(j,2) ] * rhs_ij;
