@@ -34,6 +34,20 @@ public:
         printf(" == Delete %p...\n", this);
     }
 
+    UInt32 AddRef()
+    {
+        UInt32 count = Object::AddRef();
+        printf(" == call AddRef %p, count: %d...\n", this, count);
+        return count;
+    }
+
+    UInt32 Release()
+    {
+        UInt32 count = Object::Release();
+        printf(" == call Release %p, count: %d...\n", this, count);
+        return count;
+    }
+
     void Print(const char* msg = NULL)
     {
         if (NULL != msg) {
@@ -78,6 +92,12 @@ void f4(AutoPtr<C1> & v1)
     printf("==== return from f4 ====\n");
 }
 
+C1* f5(C1* v1)
+{
+    v1->Print();
+    return v1;
+}
+
 void testAutoPtr()
 {
     printf("==== call f1 ====\n");
@@ -114,6 +134,10 @@ void testAutoPtr()
         f4(v);
     }
     printf("==== call f4 end ====\n");
+
+    printf("\n==== call f5 ====\n");
+    AutoPtr<C1> v = f5(f2());
+    printf("\n==== call f5 end ====\n");
 }
 
 void testArrayOf()

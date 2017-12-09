@@ -16,7 +16,7 @@
 
 module
 {
-//    interface Elastos.IO.Channels.IFileChannel;
+    interface Elastos.IO.Channels.IFileChannel;
     interface Elastos.IO.IFileDescriptor;
 
     namespace Elastos {
@@ -44,8 +44,8 @@ module
          *
          * @sa FileChannel
          */
-//        GetChannel(
-//            [out] IFileChannel** channel);
+        GetChannel(
+            [out] IFileChannel** channel);
 
         /**
          * Returns the underlying file descriptor.

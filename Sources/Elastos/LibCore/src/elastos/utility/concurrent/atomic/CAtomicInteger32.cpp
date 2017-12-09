@@ -25,7 +25,7 @@ namespace Utility {
 namespace Concurrent {
 namespace Atomic {
 
-Int64 CAtomicInteger32::mSerialVersionUID = 6214790243416807050L;
+Int64 CAtomicInteger32::mSerialVersionUID = 6214790243416807050ll;
 
 Int64 CAtomicInteger32::mValueOffset = 0;
 

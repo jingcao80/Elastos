@@ -2577,8 +2577,8 @@ ECode CKXmlParser::Require(
     GetNamespace(&theNs);
     GetName(&theNm);
     if (type != mType
-            || (!ns.IsNull() && ns.Equals(theNs))
-            || (!name.IsNull() && name.Equals(theNm))) {
+            || (!ns.IsNull() && !ns.Equals(theNs))
+            || (!name.IsNull() && !name.Equals(theNm))) {
         Logger::E("CKXmlParser", "expected: %s {%s} %s",
              TYPES[type].string(), ns.string(), name.string());
         return E_XML_PULL_PARSER_EXCEPTION;

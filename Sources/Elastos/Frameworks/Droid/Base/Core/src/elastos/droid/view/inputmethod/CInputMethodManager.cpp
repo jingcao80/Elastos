@@ -216,6 +216,8 @@ ECode CInputMethodManager::PendingEvent::Run()
 //========================================================================================
 //              CInputMethodManager::
 //========================================================================================
+Object CInputMethodManager::sLock;
+
 CAR_INTERFACE_IMPL(CInputMethodManager, Object, IInputMethodManager)
 
 CAR_OBJECT_IMPL(CInputMethodManager)
@@ -263,7 +265,7 @@ ECode CInputMethodManager::constructor(
 
 AutoPtr<IInputMethodManager> CInputMethodManager::GetInstance()
 {
-//     AutoLock lock(CInputMethodManager.class);
+    AutoLock lock(sLock);
 
     if (sInstance == NULL) {
         AutoPtr<IIInputMethodManager> service =

@@ -19,6 +19,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Os_CServiceManager.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Singleton.h>
 #include <elastos/utility/etl/HashMap.h>
 

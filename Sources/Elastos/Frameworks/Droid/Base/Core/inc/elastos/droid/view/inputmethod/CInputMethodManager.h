@@ -881,6 +881,8 @@ public:
     AutoPtr<IInputConnection> mDummyInputConnection;
 
 private:
+    static Object sLock;
+
     /**
      * Represents an invalid action notification sequence number. {@link InputMethodManagerService}
      * always issues a positive integer for action notification sequence numbers. Thus -1 is

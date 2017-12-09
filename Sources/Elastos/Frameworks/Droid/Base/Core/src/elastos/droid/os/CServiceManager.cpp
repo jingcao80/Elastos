@@ -26,6 +26,9 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::ISet;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 
@@ -199,8 +202,22 @@ ECode CServiceManager::InitServiceCache(
 //        throw new IllegalStateException("setServiceCache may only be called once");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-//    sCache.putAll(cache);
-    assert(0);
+    AutoPtr<ISet> entries;
+    services->GetEntrySet((ISet**)&entries);
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IMapEntry* entry = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> key, value;
+        entry->GetKey((IInterface**)&key);
+        entry->GetValue((IInterface**)&value);
+        String keyStr;
+        ICharSequence::Probe(key)->ToString(&keyStr);
+        mServiceCache[keyStr] = value;
+    }
     return NOERROR;
 }
 

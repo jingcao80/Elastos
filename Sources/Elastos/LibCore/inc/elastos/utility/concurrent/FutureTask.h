@@ -93,7 +93,6 @@ public:
 
     virtual CARAPI Run();
 
-
     /**
      * Sets the result of this future to the given value unless
      * this future has already been set or has been cancelled.

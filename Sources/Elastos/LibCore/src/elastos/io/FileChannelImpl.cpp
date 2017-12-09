@@ -192,8 +192,7 @@ ECode FileChannelImpl::CheckOpen()
 {
     Boolean bOpenFlag;
     FileChannel::IsOpen(&bOpenFlag);
-    if (!bOpenFlag)
-    {
+    if (!bOpenFlag) {
         return E_CLOSED_CHANNEL_EXCEPTION;
     }
     return NOERROR;
@@ -204,8 +203,7 @@ ECode FileChannelImpl::CheckReadable()
     Int32 accMode = OsConstants::_O_ACCMODE;
     Int32 wrOnly = OsConstants::_O_WRONLY;
 
-    if ((mMode & accMode) == wrOnly)
-    {
+    if ((mMode & accMode) == wrOnly) {
         return E_NON_READABLE_CHANNEL_EXCEPTION;
     }
     return NOERROR;
@@ -239,24 +237,19 @@ ECode FileChannelImpl::BasicLock(
     Int32 RDONLY = OsConstants::_O_RDONLY;
     Int32 WRONLY = OsConstants::_O_WRONLY;
     Int32 accessMode = mMode & ACCMOD;
-    if (RDONLY == accessMode)
-    {
-        if (!shared)
-        {
+    if (RDONLY == accessMode) {
+        if (!shared) {
             return E_NON_WRITABLE_CHANNEL_EXCEPTION;
         }
 
     }
-    else if (WRONLY == accessMode)
-    {
-        if (shared)
-        {
+    else if (WRONLY == accessMode) {
+        if (shared) {
             return E_NON_WRITABLE_CHANNEL_EXCEPTION;
         }
     }
 
-    if(position < 0 || size < 0)
-    {
+    if(position < 0 || size < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -303,7 +296,7 @@ ECode FileChannelImpl::Lock(
     VALIDATE_NOT_NULL(lock)
 
     FAIL_RETURN(CheckOpen());
-    AutoPtr<IFileLock> resultLock = NULL;
+    AutoPtr<IFileLock> resultLock;
     {
         Boolean completed = FALSE;
         // try {
@@ -400,47 +393,38 @@ ECode FileChannelImpl::Map(
     /* [in] */ Int64 size,
     /* [out] */ IMappedByteBuffer** buffer)
 {
-    ECode ecRet;
-    ecRet = CheckOpen();
-
+    FAIL_RETURN(CheckOpen());
     assert(mode >= Elastos::IO::Channels::FileChannelMapMode_READ_ONLY &&
-          mode <= Elastos::IO::Channels::FileChannelMapMode_PRIVATE);
+           mode <= Elastos::IO::Channels::FileChannelMapMode_PRIVATE);
 
-    if(position < 0 || size < 0 || size > Elastos::Core::Math::INT32_MAX_VALUE)
-    {
-       return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    if (position < 0 || size < 0 || size > Elastos::Core::Math::INT32_MAX_VALUE) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     Int32 ACCESSMODE = OsConstants::_O_ACCMODE;
     Int32 RDONLY = OsConstants::_O_RDONLY;
     Int32 WRONLY = OsConstants::_O_WRONLY;
     Int32 accessMode = (mode & ACCESSMODE);
-    if(accessMode == RDONLY)
-    {
-       if(mode != Elastos::IO::Channels::FileChannelMapMode_READ_ONLY)
-       {
-           return E_NON_WRITABLE_CHANNEL_EXCEPTION;
-       }
-    } else if(accessMode == WRONLY) {
-       return E_NON_READABLE_CHANNEL_EXCEPTION;
+    if (accessMode == RDONLY) {
+        if (mode != Elastos::IO::Channels::FileChannelMapMode_READ_ONLY) {
+            return E_NON_WRITABLE_CHANNEL_EXCEPTION;
+        }
+    }
+    else if (accessMode == WRONLY) {
+        return E_NON_READABLE_CHANNEL_EXCEPTION;
     }
 
     Int64 nSize;
-    ecRet = GetSize(&nSize);
-
-    if(position + size > nSize)
-    {
-        ecRet = CLibcore::sOs->Ftruncate(mFd, position + size);
-        if(NOERROR != ecRet)
-           return ecRet;
+    GetSize(&nSize);
+    if (position + size > nSize) {
+        FAIL_RETURN(CLibcore::sOs->Ftruncate(mFd, position + size));
     }
 
     Int32 SC_PAGE_SIZE = OsConstants::__SC_PAGE_SIZE;
     Int64 nPageSize = 0;
-    assert(NOERROR == ecRet);
 
-    ecRet = CLibcore::sOs->Sysconf(SC_PAGE_SIZE, &nPageSize);
-    assert(NOERROR == ecRet);
+    ECode ec = CLibcore::sOs->Sysconf(SC_PAGE_SIZE, &nPageSize);
+    assert(NOERROR == ec);
 
     Int64 alignment = position - position % nPageSize;
     Int32 offset = (Int32)(position - alignment);
@@ -453,7 +437,6 @@ ECode FileChannelImpl::Map(
     AutoPtr<IMappedByteBuffer> mbb = IMappedByteBuffer::Probe(db);
     *buffer = mbb;
     REFCOUNT_ADD(*buffer);
-
     return NOERROR;
 }
 

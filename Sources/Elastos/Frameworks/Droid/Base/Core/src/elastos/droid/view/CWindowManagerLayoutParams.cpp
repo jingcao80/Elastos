@@ -719,7 +719,7 @@ ECode CWindowManagerLayoutParams::SetInputFeatures(
 }
 
 ECode CWindowManagerLayoutParams::GetUserActivityTimeout(
-    /* [out] */ Int32* userActivityTimeout)
+    /* [out] */ Int64* userActivityTimeout)
 {
     VALIDATE_NOT_NULL(userActivityTimeout);
     *userActivityTimeout = mUserActivityTimeout;
@@ -727,7 +727,7 @@ ECode CWindowManagerLayoutParams::GetUserActivityTimeout(
 }
 
 ECode CWindowManagerLayoutParams::SetUserActivityTimeout(
-    /* [in] */ Int32 userActivityTimeout)
+    /* [in] */ Int64 userActivityTimeout)
 {
     mUserActivityTimeout = userActivityTimeout;
     return NOERROR;

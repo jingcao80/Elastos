@@ -164,6 +164,9 @@ library
         ReadFileDescriptor(
             [out] Int32* fd);
 
+        ReadValue(
+            [out] IInterface** value);
+
         Clone(
             [in] IParcel* srcParcel);
 

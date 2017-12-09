@@ -32,6 +32,8 @@ namespace IO {
 MappedByteBuffer::MappedByteBuffer()
 {}
 
+CAR_INTERFACE_IMPL(MappedByteBuffer, ByteBuffer, IMappedByteBuffer)
+
 ECode MappedByteBuffer::constructor(
     /* [in] */ MemoryBlock* block,
     /* [in] */ Int32 capacity,

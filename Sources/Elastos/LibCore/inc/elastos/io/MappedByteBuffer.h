@@ -41,9 +41,12 @@ namespace IO {
  */
 class MappedByteBuffer
     : public ByteBuffer
+    , public IMappedByteBuffer
 {
 public:
     MappedByteBuffer();
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ MemoryBlock* block,
