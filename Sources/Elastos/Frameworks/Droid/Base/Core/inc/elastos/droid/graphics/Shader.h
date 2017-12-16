@@ -66,6 +66,10 @@ public:
     virtual CARAPI Copy(
         /* [out] */ IShader** shader);
 
+
+    virtual CARAPI_(Int64) CreateNativeInstance(
+        /* [in] */ IMatrix* matrix);
+
 protected:
     /**
      * Initialization step that should be called by subclasses in their
@@ -87,14 +91,10 @@ private:
     static CARAPI_(void) NativeDestructor(
         /* [in] */ Int64 shader);
 
-    static CARAPI_(void) NativeSetLocalMatrix(
-        /* [in] */ Int64 shader,
-        /* [in] */ Int64 matrix);
-
 public:
     Int64 mNativeInstance;
 
-private:
+protected:
     AutoPtr<IMatrix> mLocalMatrix;
 };
 

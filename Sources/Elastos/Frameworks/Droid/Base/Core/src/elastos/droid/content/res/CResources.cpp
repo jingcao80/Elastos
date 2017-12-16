@@ -2481,6 +2481,9 @@ AutoPtr<IDrawable> CResources::GetCachedDrawableLocked(
     return NULL;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode CResources::LoadColorStateList(
     /* [in] */ ITypedValue* value,
     /* [in] */ Int32 id,

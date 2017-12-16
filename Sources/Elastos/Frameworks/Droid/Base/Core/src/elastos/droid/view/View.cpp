@@ -15937,6 +15937,9 @@ ECode View::ForceLayout()
  *
  * @see #onMeasure(int, int)
  */
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode View::Measure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)

@@ -20,6 +20,8 @@ TARGET_TYPE= lib
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/config
 
 include $(MAKEDIR)/../../../../../../../../sources.inc
 

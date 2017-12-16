@@ -263,6 +263,9 @@ String IntegralToString::ToString(
     return String((const char*)buf->GetPayload() + cursor, bufLen - cursor);
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 String IntegralToString::ConvertInt64(
     /* [in] */ Int64 n)
 {

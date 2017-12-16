@@ -16,28 +16,35 @@
 
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/FontFamily.h"
-#include "elastos/droid/graphics/MinikinSkia.h"
+#include "elastos/droid/graphics/FontUtils.h"
 #include "elastos/droid/graphics/Utils.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include <elastos/utility/logging/Logger.h>
 #include <skia/core/SkTypeface.h>
+#include <skia/ports/SkFontMgr.h>
 #include <androidfw/AssetManager.h>
+#include <minikin/FontFamily.h>
+#include <utils/FatVector.h>
+#include <hwui/MinikinSkia.h>
 
-using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Content::Res::CAssetManager;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::IBuffer;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::IMappedByteBuffer;
+using Elastos::IO::Channels::FileChannelMapMode_READ_ONLY;
+using Elastos::IO::Channels::IFileChannel;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
 CAR_INTERFACE_IMPL(FontFamily, Object, IFontFamily);
+
 FontFamily::FontFamily()
 {
-    mNativePtr = NativeCreateFamily(String(NULL), 0);
-    if (mNativePtr == 0) {
-        // throw new IllegalStateException("error creating native FontFamily");
-        assert(0 && "error creating native FontFamily");
-    }
+    mBuilderPtr = NativeCreateBuilder(String(NULL), 0);
 }
 
 FontFamily::FontFamily(
@@ -50,145 +57,343 @@ FontFamily::FontFamily(
     } else if (variant.Equals("elegant")) {
         varEnum = 2;
     }
-    mNativePtr = NativeCreateFamily(lang, varEnum);
-    if (mNativePtr == 0) {
-        // throw new IllegalStateException("error creating native FontFamily");
-        assert(0 && "error creating native FontFamily");
-    }
+    mBuilderPtr = NativeCreateBuilder(lang, varEnum);
 }
 
 FontFamily::~FontFamily()
 {
     NativeUnrefFamily(mNativePtr);
+    NativeAbort(mBuilderPtr);
 }
 
 ECode FontFamily::AddFont(
     /* [in] */ const String& path,
+    /* [in] */ Int32 ttcIndex,
+    /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 italic,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NativeAddFont(mNativePtr, path);
+    AutoPtr<IFileInputStream> file;
+    CFileInputStream::New(path, (IFileInputStream**)&file);
+    AutoPtr<IFileChannel> fileChannel;
+    file->GetChannel((IFileChannel**)&fileChannel);
+    Int64 fontSize;
+    fileChannel->GetSize(&fontSize);
+    AutoPtr<IMappedByteBuffer> mbb;
+    fileChannel->Map(FileChannelMapMode_READ_ONLY, 0, fontSize, (IMappedByteBuffer**)&mbb);
+    IByteBuffer* fontBuffer = IByteBuffer::Probe(mbb);
+    if (axes != NULL) {
+        for (Int32 i = 0; i < axes->GetLength(); i++) {
+            AutoPtr<IFontVariationAxis> axis = (*axes)[i];
+            Int32 tagValue;
+            axis->GetOpenTypeTagValue(&tagValue);
+            Float styleValue;
+            axis->GetStyleValue(&styleValue);
+            NativeAddAxisValue(mBuilderPtr, tagValue, styleValue);
+        }
+    }
+    *result = NativeAddFont(mBuilderPtr, fontBuffer, ttcIndex, weight, italic);
     return NOERROR;
 }
 
-ECode FontFamily::AddFontWeightStyle(
-    /* [in] */ const String& path,
+ECode FontFamily::AddFontFromBuffer(
+    /* [in] */ IByteBuffer* font,
+    /* [in] */ Int32 ttcIndex,
+    /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
     /* [in] */ Int32 weight,
-    /* [in] */ Boolean style,
+    /* [in] */ Int32 italic,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NativeAddFontWeightStyle(mNativePtr, path, weight, style);
+    if (mBuilderPtr == 0) {
+        // throw new IllegalStateException("Unable to call addFontWeightStyle after freezing.");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    if (axes != NULL) {
+        for (Int32 i = 0; i < axes->GetLength(); i++) {
+            AutoPtr<IFontVariationAxis> axis = (*axes)[i];
+            Int32 tagValue;
+            axis->GetOpenTypeTagValue(&tagValue);
+            Float styleValue;
+            axis->GetStyleValue(&styleValue);
+            NativeAddAxisValue(mBuilderPtr, tagValue, styleValue);
+        }
+    }
+    *result = NativeAddFontWeightStyle(mBuilderPtr, font, ttcIndex, weight, italic);
     return NOERROR;
 }
 
 ECode FontFamily::AddFontFromAsset(
     /* [in] */ IAssetManager* mgr,
     /* [in] */ const String& path,
+    /* [in] */ Int32 cookie,
+    /* [in] */ Boolean isAsset,
+    /* [in] */ Int32 ttcIndex,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 isItalic,
+    /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NativeAddFontFromAsset(mNativePtr, mgr, path);
+    if (mBuilderPtr == 0) {
+        // throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    if (axes != NULL) {
+        for (Int32 i = 0; i < axes->GetLength(); i++) {
+            AutoPtr<IFontVariationAxis> axis = (*axes)[i];
+            Int32 tagValue;
+            axis->GetOpenTypeTagValue(&tagValue);
+            Float styleValue;
+            axis->GetStyleValue(&styleValue);
+            NativeAddAxisValue(mBuilderPtr, tagValue, styleValue);
+        }
+    }
+    *result = NativeAddFontFromAsset(mNativePtr, mgr, path, cookie, isAsset, ttcIndex, weight,
+            isItalic);
     return NOERROR;
 }
 
-Int64 FontFamily::NativeCreateFamily(
+ECode FontFamily::Freeze(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mBuilderPtr == 0) {
+        // throw new IllegalStateException("Unable to call freeze after freezing.");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    mNativePtr = NativeCreateFamily(mBuilderPtr);
+    mBuilderPtr = 0;
+    *result = mNativePtr != 0;
+    return NOERROR;
+}
+
+ECode FontFamily::AbortCreation()
+{
+    if (mBuilderPtr == 0) {
+        // throw new IllegalStateException("Unable to call abortCreation after freezing.");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    NativeAbort(mBuilderPtr);
+    mBuilderPtr = 0;
+    return NOERROR;
+}
+
+struct NativeFamilyBuilder
+{
+    NativeFamilyBuilder(uint32_t langId, int variant)
+        : langId(langId), variant(variant), allowUnsupportedFont(false) {}
+    uint32_t langId;
+    int variant;
+    bool allowUnsupportedFont;
+    std::vector<minikin::Font> fonts;
+    std::vector<minikin::FontVariation> axes;
+};
+
+Int64 FontFamily::NativeCreateBuilder(
     /* [in] */ const String& lang,
     /* [in] */ Int32 variant)
 {
-    android::FontLanguage fontLanguage;
+    NativeFamilyBuilder* builder;
     if (!lang.IsNull()) {
-        fontLanguage = android::FontLanguage(lang.string(), lang.GetLength());
+        builder = new NativeFamilyBuilder(
+                minikin::FontStyle::registerLanguageList(lang.string()), variant);
+    } else {
+        builder = new NativeFamilyBuilder(minikin::FontStyle::registerLanguageList(""), variant);
     }
-    android::FontFamily* family = new android::FontFamily(fontLanguage, variant);
-    return reinterpret_cast<Int64>(family);
+    return reinterpret_cast<Int64>(builder);
+}
+
+void FontFamily::NativeAbort(
+    /* [in] */ Int64 builderPtr)
+{
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    delete builder;
+}
+
+Int64 FontFamily::NativeCreateFamily(
+    /* [in] */ Int64 builderPtr)
+{
+    if (builderPtr == 0) {
+        return 0;
+    }
+    std::unique_ptr<NativeFamilyBuilder> builder(
+            reinterpret_cast<NativeFamilyBuilder*>(builderPtr));
+    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
+            builder->langId, builder->variant, std::move(builder->fonts));
+    if (family->getCoverage().length() == 0 && !builder->allowUnsupportedFont) {
+        return 0;
+    }
+    return reinterpret_cast<Int64>(new FontFamilyWrapper(std::move(family)));
 }
 
 void FontFamily::NativeUnrefFamily(
     /* [in] */ Int64 familyPtr)
 {
-    android::FontFamily* fontFamily = reinterpret_cast<android::FontFamily*>(familyPtr);
-    fontFamily->Unref();
+    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
+    delete family;
 }
 
-static Boolean addSkTypeface(
-    /* [in] */ android::FontFamily* family,
-    /* [in] */ SkTypeface* face)
+static void release_global_ref(const void* /*data*/, void* context)
 {
-    MinikinFont* minikinFont = new MinikinFontSkia(face);
-    bool result = family->addFont(minikinFont);
-    minikinFont->Unref();
-    return result ? TRUE : FALSE;
+    IByteBuffer* font = reinterpret_cast<IByteBuffer*>(context);
+    REFCOUNT_RELEASE(font);
 }
 
-Boolean FontFamily::NativeAddFont(
-    /* [in] */ Int64 familyPtr,
-    /* [in] */ const String& path)
+static Boolean AddSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
+        Int32 givenWeight, Boolean givenItalic)
 {
-    if (path.IsNull()) {
-        return FALSE;
+    android::uirenderer::FatVector<SkFontMgr::FontParameters::Axis, 2> skiaAxes;
+    for (const auto& axis : builder->axes) {
+        skiaAxes.emplace_back(SkFontMgr::FontParameters::Axis{axis.axisTag, axis.value});
     }
-    SkTypeface* face = SkTypeface::CreateFromFile(path.string());
+
+    const size_t fontSize = data->size();
+    const void* fontPtr = data->data();
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
+
+    SkFontMgr::FontParameters params;
+    params.setCollectionIndex(ttcIndex);
+    params.setAxes(skiaAxes.data(), skiaAxes.size());
+
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
     if (face == NULL) {
-        Logger::E(String("FontFamily"), String("addFont failed to create font %s"), path.string());
+        Logger::E("fontFamily", "addFont failed to create font, invalid request");
+        builder->axes.clear();
         return FALSE;
     }
-    android::FontFamily* fontFamily = reinterpret_cast<android::FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, face);
-}
+    std::shared_ptr<minikin::MinikinFont> minikinFont =
+            std::make_shared<android::MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
+                    builder->axes);
 
-Boolean FontFamily::NativeAddFontWeightStyle(
-    /* [in] */ Int64 familyPtr,
-    /* [in] */ const String& path,
-    /* [in] */ Int32 weight,
-    /* [in] */ Boolean isItalic)
-{
-    if (path.IsNull()) {
-        return FALSE;
-    }
-    SkTypeface* face = SkTypeface::CreateFromFile(path.string());
-    if (face == NULL) {
-        Logger::E(String("FontFamily"), String("addFont failed to create font %s"), path.string());
-        return FALSE;
-    }
-    android::FontFamily* fontFamily = reinterpret_cast<android::FontFamily*>(familyPtr);
-    MinikinFont* minikinFont = new MinikinFontSkia(face);
-    fontFamily->addFont(minikinFont, android::FontStyle(weight / 100, isItalic));
-    minikinFont->Unref();
+    int weight = givenWeight / 100;
+    bool italic = givenItalic;
+
+    builder->fonts.push_back(minikin::Font(minikinFont, minikin::FontStyle(weight, italic)));
+    builder->axes.clear();
     return TRUE;
 }
 
-Boolean FontFamily::NativeAddFontFromAsset(
-    /* [in] */ Int64 familyPtr,
-    /* [in] */ IAssetManager* assetMgr,
-    /* [in] */ const String& path)
+Boolean FontFamily::NativeAddFont(
+    /* [in] */ Int64 builderPtr,
+    /* [in] */ IByteBuffer* font,
+    /* [in] */ Int32 ttcIndex,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 isItalic)
 {
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    Handle64 address;
+    IBuffer::Probe(font)->GetEffectiveDirectAddress(&address);
+    const void* fontPtr = reinterpret_cast<void*>(address);
+    if (fontPtr == NULL) {
+        Logger::E("FontFamily", "addFont failed to create font, buffer invalid");
+        builder->axes.clear();
+        return FALSE;
+    }
+    Int32 fontSize;
+    IBuffer::Probe(font)->GetCapacity(&fontSize);
+    if (fontSize < 0) {
+        Logger::E("FontFamily", "addFont failed to create font, buffer size invalid");
+        builder->axes.clear();
+        return FALSE;
+    }
+    REFCOUNT_ADD(font);
+    sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
+            release_global_ref, reinterpret_cast<void*>(font)));
+    return AddSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
+}
+
+Boolean FontFamily::NativeAddFontWeightStyle(
+    /* [in] */ Int64 builderPtr,
+    /* [in] */ IByteBuffer* font,
+    /* [in] */ Int32 ttcIndex,
+    /* [in] */ Int32 weight,
+    /* [in] */ Boolean isItalic)
+{
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    Handle64 address;
+    IBuffer::Probe(font)->GetEffectiveDirectAddress(&address);
+    const void* fontPtr = reinterpret_cast<void*>(address);
+    if (fontPtr == NULL) {
+        Logger::E("FontFamily", "addFont failed to create font, buffer invalid");
+        builder->axes.clear();
+        return FALSE;
+    }
+    Int32 fontSize;
+    IBuffer::Probe(font)->GetCapacity(&fontSize);
+    if (fontSize < 0) {
+        Logger::E("FontFamily", "addFont failed to create font, buffer size invalid");
+        builder->axes.clear();
+        return FALSE;
+    }
+    REFCOUNT_ADD(font);
+    sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
+            release_global_ref, reinterpret_cast<void*>(font)));
+    return AddSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
+}
+
+static void releaseAsset(const void* ptr, void* context)
+{
+    delete static_cast<android::Asset*>(context);
+}
+
+Boolean FontFamily::NativeAddFontFromAsset(
+    /* [in] */ Int64 builderPtr,
+    /* [in] */ IAssetManager* assetMgr,
+    /* [in] */ const String& path,
+    /* [in] */ Int32 cookie,
+    /* [in] */ Boolean isAsset,
+    /* [in] */ Int32 ttcIndex,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 isItalic)
+{
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     if (assetMgr == NULL || path.IsNull()) {
+        builder->axes.clear();
         return FALSE;
     }
 
     android::AssetManager* mgr = (android::AssetManager*)((CAssetManager*)assetMgr)->Ni();
     if (NULL == mgr) {
+        builder->axes.clear();
         return FALSE;
     }
 
-    android::Asset* asset = mgr->open(path.string(), android::Asset::ACCESS_BUFFER);
+    android::Asset* asset;
+    if (isAsset) {
+        asset = mgr->open(path.string(), android::Asset::ACCESS_BUFFER);
+    }
+    else {
+        asset = cookie ? mgr->openNonAsset(static_cast<int32_t>(cookie), path.string(),
+                android::Asset::ACCESS_BUFFER) : mgr->openNonAsset(path.string(), android::Asset::ACCESS_BUFFER);
+    }
+
     if (NULL == asset) {
+        builder->axes.clear();
         return FALSE;
     }
 
-    SkStream* stream = new AssetStreamAdaptor(asset,
-                                              AssetStreamAdaptor::kYes_OwnAsset,
-                                              AssetStreamAdaptor::kYes_HasMemoryBase);
-    SkTypeface* face = SkTypeface::CreateFromStream(stream);
-    // Note: SkTypeface::CreateFromStream holds its own reference to the stream
-    stream->unref();
-    if (face == NULL) {
-        Logger::E(String("FontFamily"), String("addFontFromAsset failed to create font %s"), path.string());
+    const void* buf = asset->getBuffer(false);
+    if (NULL == buf) {
+        delete asset;
+        builder->axes.clear();
         return FALSE;
     }
-    android::FontFamily* fontFamily = reinterpret_cast<android::FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, face);
+
+    sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset, asset));
+    return AddSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
+}
+
+void FontFamily::NativeAddAxisValue(
+    /* [in] */ Int64 builderPtr,
+    /* [in] */ Int32 tag,
+    /* [in] */ Float value)
+{
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    builder->axes.push_back({static_cast<minikin::AxisTag>(tag), value});
 }
 
 } // namespace Graphics

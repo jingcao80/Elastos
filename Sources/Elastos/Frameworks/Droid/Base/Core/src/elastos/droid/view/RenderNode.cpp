@@ -31,12 +31,11 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
-#include "elastos/droid/graphics/NativePaint.h"
 #include "elastos/droid/view/RenderNodeAnimator.h"
 
 #include <hwui/RenderNode.h>
 #include <hwui/Animator.h>
-#include <hwui/DisplayListRenderer.h>
+#include <hwui/hwui/Paint.h>
 
 using Elastos::Droid::Graphics::COutline;
 using Elastos::Droid::Graphics::CPath;
@@ -44,16 +43,11 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Graphics::Matrix;
 using Elastos::Droid::Graphics::Paint;
-using Elastos::Droid::Graphics::NativePaint;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
-using android::uirenderer::DisplayListData;
-using android::uirenderer::LayerType;
-using android::uirenderer::RenderPropertyAnimator;
-
-#define NRenderNode android::uirenderer::RenderNode
+typedef android::uirenderer::RenderNode NRenderNode;
 
 #define SET_AND_DIRTY(prop, val, dirtyFlag) \
     (reinterpret_cast<NRenderNode*>(renderNodePtr)->mutateStagingProperties().prop(val) \
@@ -69,7 +63,6 @@ CAR_INTERFACE_IMPL(RenderNode, Object, IRenderNode)
 RenderNode::RenderNode(
     /* [in] */ const String& name,
     /* [in] */ IView* owningView)
-    : mValid(FALSE)
 {
     mNativeRenderNode = nCreate(name);
     if (owningView != NULL) {
@@ -80,8 +73,7 @@ RenderNode::RenderNode(
 
 RenderNode::RenderNode(
     /* [in] */ Int64 nativePtr)
-    : mValid(FALSE)
-    , mNativeRenderNode(nativePtr)
+    : mNativeRenderNode(nativePtr)
 {
 }
 
@@ -98,7 +90,7 @@ ECode RenderNode::Start(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    AutoPtr<IHardwareCanvas> canvas = GLES20RecordingCanvas::Obtain(this);
+    AutoPtr<IHardwareCanvas> canvas = GLES20RecordingCanvas::Obtain(this, width, height);
     ICanvas::Probe(canvas)->SetViewport(width, height);
     // The dirty rect should always be null for a display list
     Int32 r;
@@ -123,16 +115,12 @@ ECode RenderNode::End(
     canvas->FinishRecording(&renderNodeData);
     nSetDisplayListData(mNativeRenderNode, renderNodeData);
     canvas->Recycle();
-    mValid = TRUE;
     return NOERROR;
 }
 
 ECode RenderNode::DestroyDisplayListData()
 {
-    if (!mValid) return NOERROR;
-
     nSetDisplayListData(mNativeRenderNode, 0);
-    mValid = FALSE;
     return NOERROR;
 }
 
@@ -140,7 +128,7 @@ ECode RenderNode::IsValid(
     /* [out] */ Boolean* isValid)
 {
     VALIDATE_NOT_NULL(isValid)
-    *isValid = mValid;
+    *isValid = nIsValid(mNativeRenderNode);
     return NOERROR;
 }
 
@@ -150,7 +138,8 @@ ECode RenderNode::GetNativeDisplayList(
     VALIDATE_NOT_NULL(list)
     *list = 0;
 
-    if (!mValid) {
+    Boolean isValid;
+    if (IsValid(&isValid), !isValid) {
         Logger::E("RenderNode", "The display list is not valid.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
@@ -996,7 +985,9 @@ ECode RenderNode::ToString(
     sb += ", nativeRenderNode=";
     sb += StringUtils::ToHexString(mNativeRenderNode);
     sb += ", isValid=";
-    sb += mValid;
+    Boolean isValid;
+    IsValid(&isValid);
+    sb += isValid;
     if (mOwningView != NULL) {
         AutoPtr<IView> owningView;
         mOwningView->Resolve(EIID_IView, (IInterface**)&owningView);
@@ -1038,7 +1029,7 @@ void RenderNode::nSetDisplayListData(
     /* [in] */ Int64 newDataPtr)
 {
     NRenderNode* renderNode = reinterpret_cast<NRenderNode*>(renderNodePtr);
-    DisplayListData* newData = reinterpret_cast<DisplayListData*>(newDataPtr);
+    android::uirenderer::DisplayList* newData = reinterpret_cast<android::uirenderer::DisplayList*>(newDataPtr);
     renderNode->setStagingDisplayList(newData);
 }
 
@@ -1139,7 +1130,7 @@ Boolean RenderNode::nSetLeft(
     /* [in] */ Int64 renderNodePtr,
     /* [in] */ Int32 left)
 {
-    return SET_AND_DIRTY(setTop, left, NRenderNode::X);
+    return SET_AND_DIRTY(setLeft, left, NRenderNode::X);
 }
 
 Boolean RenderNode::nSetCameraDistance(
@@ -1167,7 +1158,7 @@ Boolean RenderNode::nSetLayerType(
     /* [in] */ Int64 renderNodePtr,
     /* [in] */ Int32 layerType)
 {
-    LayerType nlayerType = static_cast<LayerType>(layerType);
+    android::uirenderer::LayerType nlayerType = static_cast<android::uirenderer::LayerType>(layerType);
     return SET_AND_DIRTY(mutateLayerProperties().setType, nlayerType, NRenderNode::GENERIC);
 }
 
@@ -1175,7 +1166,7 @@ Boolean RenderNode::nSetLayerPaint(
     /* [in] */ Int64 renderNodePtr,
     /* [in] */ Int64 paintPtr)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintPtr);
     return SET_AND_DIRTY(mutateLayerProperties().setFromPaint, paint, NRenderNode::GENERIC);
 }
 
@@ -1291,7 +1282,7 @@ Boolean RenderNode::nSetRevealClip(
     renderNode->mutateStagingProperties().mutableRevealClip().set(
             shouldClip, x, y, radius);
     renderNode->setPropertyFieldsDirty(NRenderNode::GENERIC);
-    return true;
+    return TRUE;
 }
 
 Boolean RenderNode::nSetAlpha(
@@ -1525,7 +1516,7 @@ void RenderNode::nAddAnimator(
     /* [in] */ Int64 animatorPtr)
 {
     NRenderNode* renderNode = reinterpret_cast<NRenderNode*>(renderNodePtr);
-    RenderPropertyAnimator* animator = reinterpret_cast<RenderPropertyAnimator*>(animatorPtr);
+    android::uirenderer::RenderPropertyAnimator* animator = reinterpret_cast<android::uirenderer::RenderPropertyAnimator*>(animatorPtr);
     renderNode->addAnimator(animator);
 }
 
@@ -1534,6 +1525,13 @@ void RenderNode::nEndAllAnimators(
 {
     NRenderNode* renderNode = reinterpret_cast<NRenderNode*>(renderNodePtr);
     renderNode->animators().endAllStagingAnimators();
+}
+
+Boolean RenderNode::nIsValid(
+    /* [in] */ Int64 renderNodePtr)
+{
+    NRenderNode* renderNode = reinterpret_cast<NRenderNode*>(renderNodePtr);
+    return (Boolean)renderNode->isValid();
 }
 
 } // view

@@ -8478,6 +8478,13 @@ ECode CActivityManagerService::ActivityDestroyed(
     return NOERROR;
 }
 
+ECode CActivityManagerService::ActivityRelaunched(
+    /* [in] */ IBinder* token)
+{
+    assert(0);
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CActivityManagerService::BackgroundResourcesReleased(
     /* [in] */ IBinder* token)
 {
@@ -25070,6 +25077,12 @@ ECode CActivityManagerService::ToString(
 {
     VALIDATE_NOT_NULL(str)
     *str = "CActivityManagerService";
+    return NOERROR;
+}
+
+ECode CActivityManagerService::SetRenderThread(
+    /* [in] */ Int32 tid)
+{
     return NOERROR;
 }
 

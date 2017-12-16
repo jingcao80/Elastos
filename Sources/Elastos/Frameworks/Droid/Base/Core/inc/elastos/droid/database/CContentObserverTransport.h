@@ -18,9 +18,10 @@
 #define __ELASTOS_DROID_DATABASE_CCONTENTOBSERVERTRANSPORT_H__
 
 #include "_Elastos_Droid_Database_CContentObserverTransport.h"
-#include <elastos/core/Object.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Database.h>
+#include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Net::IUri;
@@ -57,6 +58,9 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     AutoPtr<IWeakReference> mWeakContentObserver;   // IContentObserver

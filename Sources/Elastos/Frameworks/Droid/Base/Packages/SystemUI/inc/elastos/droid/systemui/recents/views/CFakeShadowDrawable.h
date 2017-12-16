@@ -112,7 +112,7 @@ public:
     // used to calculate content padding
     static const Double COS_45;
 
-    static const Float SHADOW_MULTIPLIER = 1.5f;
+    static constexpr Float SHADOW_MULTIPLIER = 1.5f;
 
     Float mInsetShadow; // extra shadow to avoid gaps between card and shadow
 

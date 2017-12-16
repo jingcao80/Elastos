@@ -47,7 +47,7 @@ ECode CBlurMaskFilter::NativeConstructor(
     *outfilter = 0;
 
     SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(radius);
-    SkMaskFilter* filter = SkBlurMaskFilter::Create((SkBlurStyle)blurStyle, sigma);
+    SkMaskFilter* filter = SkBlurMaskFilter::Make((SkBlurStyle)blurStyle, sigma).release();
     if (filter == NULL) {
         Slogger::E("CBlurMaskFilter", "IllegalArgumentException: radius:%.2f, blurStyle:%d, sigma: %d",
             radius, blurStyle, sigma);

@@ -56,6 +56,8 @@ ECode CViewRootImplW::constructor(
     viewRoot->GetWeakReference((IWeakReference**)&mViewAncestor);
     mWindowSession = viewRoot->mWindowSession;
 
+    mBBinder = NULL;
+
     return NOERROR;
 }
 

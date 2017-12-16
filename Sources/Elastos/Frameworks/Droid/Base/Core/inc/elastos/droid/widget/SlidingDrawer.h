@@ -339,10 +339,10 @@ private:
 private:
     static const String TAG;
     static const Int32 TAP_THRESHOLD = 6;
-    static const Float MAXIMUM_TAP_VELOCITY = 100.0f;
-    static const Float MAXIMUM_MINOR_VELOCITY = 150.0f;
-    static const Float MAXIMUM_MAJOR_VELOCITY = 200.0f;
-    static const Float MAXIMUM_ACCELERATION = 2000.0f;
+    static constexpr Float MAXIMUM_TAP_VELOCITY = 100.0f;
+    static constexpr Float MAXIMUM_MINOR_VELOCITY = 150.0f;
+    static constexpr Float MAXIMUM_MAJOR_VELOCITY = 200.0f;
+    static constexpr Float MAXIMUM_ACCELERATION = 2000.0f;
     static const Int32 VELOCITY_UNITS = 1000;
     static const Int32 MSG_ANIMATE = 1000;
     static const Int32 ANIMATION_FRAME_DURATION = 1000 / 60;

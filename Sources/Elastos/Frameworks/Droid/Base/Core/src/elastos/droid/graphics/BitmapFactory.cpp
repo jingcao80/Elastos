@@ -22,7 +22,6 @@
 #include "elastos/droid/graphics/CreateOutputStreamAdaptor.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
 #include "elastos/droid/graphics/Utils.h"
-#include "elastos/droid/graphics/AutoDecoderCancel.h"
 #include "elastos/droid/graphics/NinePatchPeeker.h"
 #include "elastos/droid/graphics/NBitmapFactory.h"
 #include "elastos/droid/content/res/CAssetManager.h"
@@ -32,16 +31,17 @@
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>
 #include <skia/core/SkBitmap.h>
-#include <skia/core/SkTemplates.h>
+#include <skia/private/SkTemplates.h>
 #include <skia/core/SkCanvas.h>
 #include <skia/core/SkPixelRef.h>
 #include <skia/core/SkStream.h>
 #include <skia/utils/SkFrontBufferedStream.h>
-#include <skia/core/SkImageDecoder.h>
+#include <skia/codec/SkAndroidCodec.h>
 #include <skia/core/SkMath.h>
 #include <skia/core/SkUtils.h>
 #include <skia/core/SkMath.h>
 #include <sys/stat.h>
+#include <hwui/hwui/Bitmap.h>
 
 using Elastos::Droid::Content::Res::IAssetInputStream;
 using Elastos::Droid::Content::Res::CAssetManager;
@@ -477,7 +477,7 @@ public:
         /* [in] */ SkColorTable* ctable)
     {
         const SkImageInfo& info = bitmap->info();
-        if (info.fColorType == kUnknown_SkColorType) {
+        if (info.colorType() == kUnknown_SkColorType) {
             ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
             return false;
         }
@@ -511,43 +511,72 @@ private:
     const unsigned int mSize;
 };
 
+// Necessary for decodes when the native decoder cannot scale to appropriately match the sampleSize
+// (for example, RAW). If the sampleSize divides evenly into the dimension, we require that the
+// scale matches exactly. If sampleSize does not divide evenly, we allow the decoder to choose how
+// best to round.
+static Boolean NeedsFineScale(const Int32 fullSize, const Int32 decodedSize, const Int32 sampleSize)
+{
+    if (fullSize % sampleSize == 0 && fullSize / sampleSize != decodedSize) {
+        return TRUE;
+    } else if ((fullSize / sampleSize + 1) != decodedSize &&
+               (fullSize / sampleSize) != decodedSize) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static Boolean NeedsFineScale(const SkISize fullSize, const SkISize decodedSize,
+                           const Int32 sampleSize)
+{
+    return NeedsFineScale(fullSize.width(), decodedSize.width(), sampleSize) ||
+           NeedsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
+}
+
 static AutoPtr<IBitmap> DoDecode(
     /* [in] */ SkStreamRewindable* stream,
     /* [in] */ IRect* padding,
     /* [in] */ IBitmapFactoryOptions* options)
 {
+    // This function takes ownership of the input stream.  Since the SkAndroidCodec
+    // will take ownership of the stream, we don't necessarily need to take ownership
+    // here.  This is a precaution - if we were to return before creating the codec,
+    // we need to make sure that we delete the stream.
+    std::unique_ptr<SkStreamRewindable> streamDeleter(stream);
+
+    // Set default values for the options parameters.
     Int32 sampleSize = 1;
-
-    SkImageDecoder::Mode decodeMode = SkImageDecoder::kDecodePixels_Mode;
+    Boolean onlyDecodeSize = FALSE;
     SkColorType prefColorType = kN32_SkColorType;
-
-    Boolean doDither = TRUE;
+    Boolean isHardware = FALSE;
     Boolean isMutable = FALSE;
     Float scale = 1.0f;
-    Boolean preferQualityOverSpeed = FALSE;
     Boolean requireUnpremultiplied = FALSE;
-
-
     AutoPtr<IBitmap> bmpObj;
+    sk_sp<SkColorSpace> prefColorSpace = nullptr;
 
+    // Update with options supplied by the client.
     if (options != NULL) {
         options->GetInSampleSize(&sampleSize);
+        // Correct a non-positive sampleSize.  sampleSize defaults to zero within the
+        // options object, which is strange.
+        if (sampleSize <= 0) {
+            sampleSize = 1;
+        }
+
         if (OptionsJustBounds(options)) {
-            decodeMode = SkImageDecoder::kDecodeBounds_Mode;
+            onlyDecodeSize = TRUE;
         }
 
         // initialize these, in case we fail later on
         options->SetOutWidth(-1);
         options->SetOutHeight(-1);
-        // env->SetObjectField(options, gOptions_mimeFieldID, 0);
         options->SetOutMimeType(String(NULL));
 
         BitmapConfig config = -1;
         options->GetInPreferredConfig(&config);
         prefColorType = GraphicsNative::GetNativeBitmapColorType(config);
         options->GetInMutable(&isMutable);
-        options->GetInDither(&doDither);
-        options->GetInPreferQualityOverSpeed(&preferQualityOverSpeed);
         options->GetInPremultiplied(&requireUnpremultiplied);
         requireUnpremultiplied = !requireUnpremultiplied;
         options->GetInBitmap((IBitmap**)&bmpObj);
@@ -567,102 +596,178 @@ static AutoPtr<IBitmap> DoDecode(
         }
     }
 
-    const Boolean willScale = scale != 1.0f;
-
-    SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
-    if (decoder == NULL) {
-        // return nullObjectReturn("SkImageDecoder::Factory returned null");
-        Logger::W("BitmapFactory", String("SkImageDecoder::Factory returned null"));
+    if (isMutable && isHardware) {
+        Logger::W("BitmapFactory", "Cannot create mutable hardware bitmap");
         return NULL;
     }
 
-    decoder->setSampleSize(sampleSize);
-    decoder->setDitherImage(doDither);
-    decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
-    decoder->setRequireUnpremultipliedColors(requireUnpremultiplied);
-
-    SkBitmap* outputBitmap = NULL;
-    UInt32 existingBufferSize = 0;
-    if (bmpObj != NULL) {
-        Handle64 nativeBitmatp = ((CBitmap*)bmpObj.Get())->mNativeBitmap;
-        outputBitmap = reinterpret_cast<SkBitmap*>(nativeBitmatp);
-        if (outputBitmap->isImmutable()) {
-            Logger::W("BitmapFactory", String("Unable to reuse an immutable bitmap as an image decoder target."));
-            bmpObj = NULL;
-            outputBitmap = NULL;
-        } else {
-            existingBufferSize = GraphicsNative::GetBitmapAllocationByteCount(bmpObj);
-        }
-    }
-
-    SkAutoTDelete<SkBitmap> adb(outputBitmap == NULL ? new SkBitmap : NULL);
-    if (outputBitmap == NULL) outputBitmap = adb.get();
-
-    NinePatchPeeker peeker(decoder);
-    decoder->setPeeker(&peeker);
-
-    GraphicsNative::DroidPixelAllocator droidAllocator;
-    RecyclingPixelAllocator recyclingAllocator(outputBitmap->pixelRef(), existingBufferSize);
-    ScaleCheckingAllocator scaleCheckingAllocator(scale, existingBufferSize);
-    SkBitmap::Allocator* outputAllocator = (bmpObj != NULL) ?
-            (SkBitmap::Allocator*)&recyclingAllocator : (SkBitmap::Allocator*)&droidAllocator;
-    if (decodeMode != SkImageDecoder::kDecodeBounds_Mode) {
-        if (!willScale) {
-            // If the java allocator is being used to allocate the pixel memory, the decoder
-            // need not write zeroes, since the memory is initialized to 0.
-            decoder->setSkipWritingZeroes(outputAllocator == &droidAllocator);
-            decoder->setAllocator(outputAllocator);
-        } else if (bmpObj != NULL) {
-            // check for eventual scaled bounds at allocation time, so we don't decode the bitmap
-            // only to find the scaled result too large to fit in the allocation
-            decoder->setAllocator(&scaleCheckingAllocator);
-        }
-    }
-
-    // Only setup the decoder to be deleted after its stack-based, refcounted
-    // components (allocators, peekers, etc) are declared. This prevents RefCnt
-    // asserts from firing due to the order objects are deleted from the stack.
-    SkAutoTDelete<SkImageDecoder> add(decoder);
-
-    AutoDecoderCancel adc(options, decoder);
-
-    // To fix the race condition in case "requestCancelDecode"
-    // happens earlier than AutoDecoderCancel object is added
-    // to the gAutoDecoderCancelMutex linked list.
-    Boolean cancel = FALSE;
-    if (options != NULL && (options->GetCancel(&cancel), cancel)) {
-        // return nullObjectReturn("gOptions_mCancelID");
-        Logger::W("BitmapFactory", String("gOptions_mCancelID"));
+    // Create the codec.
+    NinePatchPeeker peeker;
+    std::unique_ptr<SkAndroidCodec> codec(SkAndroidCodec::NewFromStream(
+            streamDeleter.release(), &peeker));
+    if (!codec.get()) {
+        Logger::W("BitmapFactory", "SkAndroidCodec::NewFromStream returned null");
         return NULL;
     }
 
-    SkBitmap decodingBitmap;
-    if (!decoder->decode(stream, &decodingBitmap, prefColorType, decodeMode)) {
-        // return nullObjectReturn("decoder->decode returned false");
-        Logger::W("BitmapFactory", String("decoder->decode returned false"));
-        decoder->setAllocator(NULL);
-        return NULL;
+    // Do not allow ninepatch decodes to 565.  In the past, decodes to 565
+    // would dither, and we do not want to pre-dither ninepatches, since we
+    // know that they will be stretched.  We no longer dither 565 decodes,
+    // but we continue to prevent ninepatches from decoding to 565, in order
+    // to maintain the old behavior.
+    if (peeker.mPatch && kRGB_565_SkColorType == prefColorType) {
+        prefColorType = kN32_SkColorType;
     }
 
-    decoder->setAllocator(NULL);
-    Int32 scaledWidth = decodingBitmap.width();
-    Int32 scaledHeight = decodingBitmap.height();
+    // Determine the output size.
+    SkISize size = codec->getSampledDimensions(sampleSize);
 
-    if (willScale && decodeMode != SkImageDecoder::kDecodeBounds_Mode) {
-        scaledWidth = Int32(scaledWidth * scale + 0.5f);
-        scaledHeight = Int32(scaledHeight * scale + 0.5f);
+    Int32 scaledWidth = size.width();
+    Int32 scaledHeight = size.height();
+    Boolean willScale = FALSE;
+
+    // Apply a fine scaling step if necessary.
+    if (NeedsFineScale(codec->getInfo().dimensions(), size, sampleSize)) {
+        willScale = TRUE;
+        scaledWidth = codec->getInfo().width() / sampleSize;
+        scaledHeight = codec->getInfo().height() / sampleSize;
     }
 
-    // update options (if any)
+    // Set the decode colorType
+    SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
+    sk_sp<SkColorSpace> decodeColorSpace = codec->computeOutputColorSpace(
+            decodeColorType, prefColorSpace);
+
+    // Set the options and return if the client only wants the size.
     if (options != NULL) {
+        String mimeType = NBitmapFactory::EncodedFormatToString(
+                (SkEncodedImageFormat)codec->getEncodedFormat());
         options->SetOutWidth(scaledWidth);
         options->SetOutHeight(scaledHeight);
-        options->SetOutMimeType(NBitmapFactory::GetMimeTypeString(decoder->getFormat()));
+        options->SetOutMimeType(mimeType);
+
+        SkColorType outColorType = decodeColorType;
+        // Scaling can affect the output color type
+        if (willScale || scale != 1.0f) {
+            outColorType = ColorTypeForScaledOutput(outColorType);
+        }
+
+        if (onlyDecodeSize) {
+            return NULL;
+        }
     }
 
-    // if we're in justBounds mode, return now (skip the java bitmap)
-    if (decodeMode == SkImageDecoder::kDecodeBounds_Mode) {
+    // Scale is necessary due to density differences.
+    if (scale != 1.0f) {
+        willScale = TRUE;
+        scaledWidth = static_cast<int>(scaledWidth * scale + 0.5f);
+        scaledHeight = static_cast<int>(scaledHeight * scale + 0.5f);
+    }
+
+    android::Bitmap* reuseBitmap = nullptr;
+    Int32 existingBufferSize = 0;
+    if (bmpObj != NULL) {
+        assert(0);
+        reuseBitmap = (android::Bitmap*)((CBitmap*)bmpObj.Get())->mNativeBitmap;
+        if (reuseBitmap->isImmutable()) {
+            Logger::W(TAG, "Unable to reuse an immutable bitmap as an image decoder target.");
+            bmpObj = NULL;
+            reuseBitmap = nullptr;
+        }
+        else {
+            bmpObj->GetAllocationByteCount(&existingBufferSize);
+        }
+    }
+
+    HeapAllocator defaultAllocator;
+    RecyclingPixelAllocator recyclingAllocator(reuseBitmap, existingBufferSize);
+    ScaleCheckingAllocator scaleCheckingAllocator(scale, existingBufferSize);
+    SkBitmap::HeapAllocator heapAllocator;
+    SkBitmap::Allocator* decodeAllocator;
+    if (bmpObj != NULL && willScale) {
+        // This will allocate pixels using a HeapAllocator, since there will be an extra
+        // scaling step that copies these pixels into Java memory.  This allocator
+        // also checks that the recycled javaBitmap is large enough.
+        decodeAllocator = &scaleCheckingAllocator;
+    }
+    else if (bmpObj != NULL) {
+        decodeAllocator = &recyclingAllocator;
+    }
+    else if (willScale || isHardware) {
+        // This will allocate pixels using a HeapAllocator,
+        // for scale case: there will be an extra scaling step.
+        // for hardware case: there will be extra swizzling & upload to gralloc step.
+        decodeAllocator = &heapAllocator;
+    }
+    else {
+        decodeAllocator = &defaultAllocator;
+    }
+
+    // Construct a color table for the decode if necessary
+    sk_sp<SkColorTable> colorTable(nullptr);
+    SkPMColor* colorPtr = nullptr;
+    int* colorCount = nullptr;
+    int maxColors = 256;
+    SkPMColor colors[256];
+    if (kIndex_8_SkColorType == decodeColorType) {
+        colorTable.reset(new SkColorTable(colors, maxColors));
+
+        // SkColorTable expects us to initialize all of the colors before creating an
+        // SkColorTable.  However, we are using SkBitmap with an Allocator to allocate
+        // memory for the decode, so we need to create the SkColorTable before decoding.
+        // It is safe for SkAndroidCodec to modify the colors because this SkBitmap is
+        // not being used elsewhere.
+        colorPtr = const_cast<SkPMColor*>(colorTable->readColors());
+        colorCount = &maxColors;
+    }
+
+    SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
+
+    const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
+            decodeColorType, alphaType, decodeColorSpace);
+
+    // For wide gamut images, we will leave the color space on the SkBitmap.  Otherwise,
+    // use the default.
+    SkImageInfo bitmapInfo = decodeInfo;
+    if (decodeInfo.colorSpace() && decodeInfo.colorSpace()->isSRGB()) {
+        bitmapInfo = bitmapInfo.makeColorSpace(GraphicsNative::ColorSpaceForType(decodeColorType));
+    }
+
+    if (decodeColorType == kGray_8_SkColorType) {
+        // The legacy implementation of BitmapFactory used kAlpha8 for
+        // grayscale images (before kGray8 existed).  While the codec
+        // recognizes kGray8, we need to decode into a kAlpha8 bitmap
+        // in order to avoid a behavior change.
+        bitmapInfo =
+                bitmapInfo.makeColorType(kAlpha_8_SkColorType).makeAlphaType(kPremul_SkAlphaType);
+    }
+    SkBitmap decodingBitmap;
+    if (!decodingBitmap.setInfo(bitmapInfo) ||
+            !decodingBitmap.tryAllocPixels(decodeAllocator, colorTable.get())) {
+        // SkAndroidCodec should recommend a valid SkImageInfo, so setInfo()
+        // should only only fail if the calculated value for rowBytes is too
+        // large.
+        // tryAllocPixels() can fail due to OOM on the Java heap, OOM on the
+        // native heap, or the recycled javaBitmap being too small to reuse.
         return NULL;
+    }
+
+    // Use SkAndroidCodec to perform the decode.
+    SkAndroidCodec::AndroidOptions codecOptions;
+    codecOptions.fZeroInitialized = decodeAllocator == &defaultAllocator ?
+            SkCodec::kYes_ZeroInitialized : SkCodec::kNo_ZeroInitialized;
+    codecOptions.fColorPtr = colorPtr;
+    codecOptions.fColorCount = colorCount;
+    codecOptions.fSampleSize = sampleSize;
+    SkCodec::Result result = codec->getAndroidPixels(decodeInfo, decodingBitmap.getPixels(),
+            decodingBitmap.rowBytes(), &codecOptions);
+    switch (result) {
+        case SkCodec::kSuccess:
+        case SkCodec::kIncompleteInput:
+            break;
+        default:
+            Logger::E(TAG, "codec->getAndroidPixels() failed.");
+            return NULL;
     }
 
     AutoPtr<ArrayOf<Byte> > ninePatchChunk;
@@ -674,15 +779,13 @@ static AutoPtr<IBitmap> DoDecode(
         size_t ninePatchArraySize = peeker.mPatch->serializedSize();
         ninePatchChunk = ArrayOf<Byte>::Alloc(ninePatchArraySize);
         if (ninePatchChunk == NULL) {
-            // return nullObjectReturn("ninePatchChunk == null");
-            Logger::W("BitmapFactory", String("ninePatchChunk == null"));
+            Logger::W("BitmapFactory", "ninePatchChunk == null");
             return NULL;
         }
 
         Byte* array = ninePatchChunk->GetPayload();
         if (array == NULL) {
-            // return nullObjectReturn("primitive array == null");
-            Logger::W("BitmapFactory", String("primitive array == null"));
+            Logger::W("BitmapFactory", "primitive array == null");
             return NULL;
         }
 
@@ -696,8 +799,7 @@ static AutoPtr<IBitmap> DoDecode(
                 peeker.mOutlineInsets[0], peeker.mOutlineInsets[1], peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
                 peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
         if (ninePatchInsets == NULL) {
-            // return nullObjectReturn("nine patch insets == null");
-            Logger::W("BitmapFactory", String("nine patch insets == null"));
+            Logger::W("BitmapFactory", "nine patch insets == null");
             return NULL;
         }
         if (bmpObj != NULL) {
@@ -705,6 +807,7 @@ static AutoPtr<IBitmap> DoDecode(
         }
     }
 
+    SkBitmap outputBitmap;
     if (willScale) {
         // This is weird so let me explain: we could use the scale parameter
         // directly, but for historical reasons this is how the corresponding
@@ -714,33 +817,40 @@ static AutoPtr<IBitmap> DoDecode(
         const float sx = scaledWidth / float(decodingBitmap.width());
         const float sy = scaledHeight / float(decodingBitmap.height());
 
+        // Set the allocator for the outputBitmap.
+        SkBitmap::Allocator* outputAllocator;
+        if (bmpObj != NULL) {
+            outputAllocator = &recyclingAllocator;
+        }
+        else {
+            outputAllocator = &defaultAllocator;
+        }
+
         // TODO: avoid copying when scaled size equals decodingBitmap size
-        SkColorType colorType = ColorTypeForScaledOutput(decodingBitmap.colorType());
+        SkColorType scaledColorType = ColorTypeForScaledOutput(decodingBitmap.colorType());
         // FIXME: If the alphaType is kUnpremul and the image has alpha, the
         // colors may not be correct, since Skia does not yet support drawing
         // to/from unpremultiplied bitmaps.
-        outputBitmap->setInfo(SkImageInfo::Make(scaledWidth, scaledHeight,
-                colorType, decodingBitmap.alphaType()));
-        if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
+        outputBitmap.setInfo(
+                bitmapInfo.makeWH(scaledWidth, scaledHeight).makeColorType(scaledColorType));
+        if (!outputBitmap.tryAllocPixels(outputAllocator, NULL)) {
             // return nullObjectReturn("allocation failed for scaled bitmap");
-            Logger::W("BitmapFactory", String("allocation failed for scaled bitmap"));
+            Logger::W("BitmapFactory", "allocation failed for scaled bitmap");
             return NULL;
         }
 
-        // If outputBitmap's pixels are newly allocated by Java, there is no need
-        // to erase to 0, since the pixels were initialized to 0.
-        if (outputAllocator != &droidAllocator) {
-            outputBitmap->eraseColor(0);
-        }
-
         SkPaint paint;
-        paint.setFilterLevel(SkPaint::kLow_FilterLevel);
+        // kSrc_Mode instructs us to overwrite the uninitialized pixels in
+        // outputBitmap.  Otherwise we would blend by default, which is not
+        // what we want.
+        paint.setBlendMode(SkBlendMode::kSrc);
+        paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
-        SkCanvas canvas(*outputBitmap);
+        SkCanvas canvas(outputBitmap, SkCanvas::ColorBehavior::kLegacy);
         canvas.scale(sx, sy);
         canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
     } else {
-        outputBitmap->swap(decodingBitmap);
+        outputBitmap.swap(decodingBitmap);
     }
 
     if (padding) {
@@ -753,36 +863,39 @@ static AutoPtr<IBitmap> DoDecode(
         }
     }
 
-    // if we get here, we're in kDecodePixels_Mode and will therefore
-    // already have a pixelref installed.
-    if (outputBitmap->pixelRef() == NULL) {
+    // If we get here, the outputBitmap should have an installed pixelref.
+    if (outputBitmap.pixelRef() == NULL) {
         // return nullObjectReturn("Got null SkPixelRef");
-        Logger::W("BitmapFactory", String("Got null SkPixelRef"));
+        Logger::W("BitmapFactory", "Got null SkPixelRef");
         return NULL;
     }
 
     if (!isMutable && bmpObj == NULL) {
         // promise we will never change our pixels (great for sharing and pictures)
-        outputBitmap->setImmutable();
+        outputBitmap.setImmutable();
     }
 
-    // detach bitmap from its autodeleter, since we want to own it now
-    adb.detach();
-
+    Boolean isPremultiplied = !requireUnpremultiplied;
     if (bmpObj != NULL) {
-        Boolean isPremultiplied = !requireUnpremultiplied;
-        GraphicsNative::ReinitBitmap(bmpObj, outputBitmap, isPremultiplied);
-        outputBitmap->notifyPixelsChanged();
+        GraphicsNative::ReinitBitmap(bmpObj, outputBitmap.info(), isPremultiplied);
+        // bitmap::reinitBitmap(env, javaBitmap, outputBitmap.info(), isPremultiplied);
+        outputBitmap.notifyPixelsChanged();
         // If a java bitmap was passed in for reuse, pass it back
         return bmpObj;
     }
 
     Int32 bitmapCreateFlags = 0x0;
     if (isMutable) bitmapCreateFlags |= GraphicsNative::kBitmapCreateFlag_Mutable;
-    if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsNative::kBitmapCreateFlag_Premultiplied;
+    if (isPremultiplied) bitmapCreateFlags |= GraphicsNative::kBitmapCreateFlag_Premultiplied;
 
+//    if (isHardware) {
+//        sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(outputBitmap);
+//        return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
+//                ninePatchChunk, ninePatchInsets, -1);
+//    }
+//
     // now create the java bitmap
-    return GraphicsNative::CreateBitmap(outputBitmap, droidAllocator.getStorageObj(),
+    return GraphicsNative::CreateBitmap(defaultAllocator.getStorageObjAndReset(),
             bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 
@@ -800,13 +913,13 @@ AutoPtr<IBitmap> BitmapFactory::NativeDecodeStream(
     /* [in] */ IBitmapFactoryOptions* opts)
 {
     AutoPtr<IBitmap> bitmap;
-    SkAutoTUnref<SkStream> stream(CreateInputStreamAdaptor(is, storage));
+    std::unique_ptr<SkStream> stream(CreateInputStreamAdaptor(is, storage));
 
     if (stream.get()) {
-        SkAutoTUnref<SkStreamRewindable> bufferedStream(
-                SkFrontBufferedStream::Create(stream, BYTES_TO_BUFFER));
+        std::unique_ptr<SkStreamRewindable> bufferedStream(
+                SkFrontBufferedStream::Create(stream.release(), BYTES_TO_BUFFER));
         SkASSERT(bufferedStream.get() != NULL);
-        bitmap = DoDecode(bufferedStream, outPadding, opts);
+        bitmap = DoDecode(bufferedStream.release(), outPadding, opts);
     }
     return bitmap;
 }
@@ -842,16 +955,15 @@ AutoPtr<IBitmap> BitmapFactory::NativeDecodeFileDescriptor(
         return NULL;
     }
 
-    SkAutoTUnref<SkFILEStream> fileStream(new SkFILEStream(file,
-                         SkFILEStream::kCallerRetains_Ownership));
+    std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
 
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
-    SkAutoTUnref<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream,
+    std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.release(),
             BYTES_TO_BUFFER));
 
-    return DoDecode(stream, padding, opts);
+    return DoDecode(stream.release(), padding, opts);
 }
 
 AutoPtr<IBitmap> BitmapFactory::NativeDecodeAsset(
@@ -862,9 +974,9 @@ AutoPtr<IBitmap> BitmapFactory::NativeDecodeAsset(
     android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    SkAutoTUnref<SkStreamRewindable> stream(new AssetStreamAdaptor(asset,
+    std::unique_ptr<SkStreamRewindable> stream(new AssetStreamAdaptor(asset,
             AssetStreamAdaptor::kNo_OwnAsset, AssetStreamAdaptor::kNo_HasMemoryBase));
-    return DoDecode(stream, padding, opts);
+    return DoDecode(stream.release(), padding, opts);
 }
 
 AutoPtr<IBitmap> BitmapFactory::NativeDecodeByteArray(
@@ -873,9 +985,8 @@ AutoPtr<IBitmap> BitmapFactory::NativeDecodeByteArray(
     /* [in] */ Int32 length,
     /* [in] */ IBitmapFactoryOptions* options)
 {
-    SkMemoryStream* stream = new SkMemoryStream(data->GetPayload() + offset, length, false);
-    SkAutoUnref aur(stream);
-    return DoDecode(stream, NULL, options);
+    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(data->GetPayload() + offset, length, false));
+    return DoDecode(stream.release(), NULL, options);
 }
 
 Boolean BitmapFactory::NativeIsSeekable(

@@ -319,10 +319,10 @@ public:
 
 private:
     static const String TAG;
-    static const Float CLIP_CARD_BARELY_HIDDEN_RATIO = 0.001f;
-    static const Float CLIP_CARD_MOSTLY_HIDDEN_RATIO = 0.9f;
+    static constexpr Float CLIP_CARD_BARELY_HIDDEN_RATIO = 0.001f;
+    static constexpr Float CLIP_CARD_MOSTLY_HIDDEN_RATIO = 0.9f;
     // Fade out 5x faster than the hidden ratio.
-    static const Float CLIP_CARD_OPACITY_RATIO = 5.0f;
+    static constexpr Float CLIP_CARD_OPACITY_RATIO = 5.0f;
 
     AutoPtr<CallLogAdapter> mCallLogAdapter;
 

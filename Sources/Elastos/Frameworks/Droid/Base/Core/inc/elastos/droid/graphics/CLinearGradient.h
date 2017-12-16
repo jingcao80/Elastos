@@ -73,8 +73,21 @@ public:
         /* [in] */ Int32 color1,
         /* [in] */ ShaderTileMode tile);
 
+protected:
+    /**
+     * @hide
+     */
+    // @Override
+    CARAPI Copy(
+        /* [out] */ IShader** shader);
+
+    // @Override
+    CARAPI_(Int64) CreateNativeInstance(
+        /* [in] */ IMatrix* matrix);
+
 private:
     CARAPI_(Int64) NativeCreate1(
+        /* [in] */ Int64 nativeMatrix,
         /* [in] */ Float x0,
         /* [in] */ Float y0,
         /* [in] */ Float x1,
@@ -84,6 +97,7 @@ private:
         /* [in] */ ShaderTileMode tileMode);
 
     CARAPI_(Int64) NativeCreate2(
+        /* [in] */ Int64 nativeMatrix,
         /* [in] */ Float x0,
         /* [in] */ Float y0,
         /* [in] */ Float x1,
@@ -91,14 +105,6 @@ private:
         /* [in] */ Int32 color0,
         /* [in] */ Int32 color1,
         /* [in] */ ShaderTileMode tileMode);
-
-protected:
-    /**
-     * @hide
-     */
-    // @Override
-    CARAPI Copy(
-        /* [out] */ IShader** shader);
 
 private:
     static const Int32 TYPE_COLORS_AND_POSITIONS;

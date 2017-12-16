@@ -48,15 +48,6 @@ public:
 
     CARAPI AddLayer(
         /* [in] */ IPaint* paint);
-
-private:
-    static CARAPI_(Int64) NativeConstructor();
-
-    static CARAPI_(void) NativeAddLayer(
-        /* [in] */ Int64 nativeLayer,
-        /* [in] */ Int64 nativePaint,
-        /* [in] */ Float dx,
-        /* [in] */ Float dy);
 };
 
 } // namespace Graphics

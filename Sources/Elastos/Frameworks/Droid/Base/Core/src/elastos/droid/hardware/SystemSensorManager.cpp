@@ -26,9 +26,8 @@
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/content/CIntent.h"
 #include <elastos/core/AutoLock.h>
-#include <android/sensor.h>
-#include <gui/Sensor.h>
-#include <gui/SensorManager.h>
+#include <sensor/Sensor.h>
+#include <sensor/SensorManager.h>
 #include <unistd.h>
 
 using Elastos::Droid::Content::CIntent;
@@ -66,12 +65,12 @@ CAR_INTERFACE_IMPL(SystemSensorManager, SensorManager, ISystemSensorManager);
 
 SystemSensorManager::BaseEventQueue::BaseEventQueue(
     /* [in] */ ILooper* looper,
-    /* [in] */ ISystemSensorManager* manager)
+    /* [in] */ SystemSensorManager* manager)
 {
     AutoPtr<IMessageQueue> queue;
     looper->GetQueue((IMessageQueue**)&queue);
     mScratch = ArrayOf<Float>::Alloc(16);
-    nSensorEventQueue = NativeInitBaseEventQueue(this, queue, mScratch);
+    nSensorEventQueue = NativeInitBaseEventQueue(manager->mNativeInstance, this, queue, mScratch);
 
     AutoPtr<ICloseGuardHelper> cgHelper;
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&cgHelper);
@@ -250,14 +249,14 @@ ECode SystemSensorManager::BaseEventQueue::DisableSensor(
 }
 
 Int64 SystemSensorManager::BaseEventQueue::NativeInitBaseEventQueue(
+    /* [in] */ Int64 sensorManager,
     /* [in] */ BaseEventQueue* eventQ,
     /* [in] */ IMessageQueue* msgQ,
     /* [in] */ ArrayOf<Float>* scratch)
 {
-    android::SensorManager& mgr(android::SensorManager::getInstance());
-    android::sp<android::SensorEventQueue> queue(mgr.createEventQueue());
+    android::SensorManager* mgr = reinterpret_cast<android::SensorManager*>(sensorManager);
+    android::sp<android::SensorEventQueue> queue(mgr->createEventQueue());
 
-    // android::sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
     Handle64 handle;
     msgQ->GetNativeMessageQueue(&handle);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(handle);
@@ -267,7 +266,7 @@ Int64 SystemSensorManager::BaseEventQueue::NativeInitBaseEventQueue(
     }
 
     android::sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQ, scratch);
-    receiver->incStrong((void*)&NativeInitBaseEventQueue);
+    receiver->incStrong(NULL);
     return reinterpret_cast<Int64>(receiver.get());
 }
 
@@ -296,7 +295,7 @@ void SystemSensorManager::BaseEventQueue::NativeDestroySensorEventQueue(
 {
     android::sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     receiver->destroy();
-    receiver->decStrong((void*)&NativeInitBaseEventQueue);
+    receiver->decStrong(NULL);
 }
 
 Int32 SystemSensorManager::BaseEventQueue::NativeFlushSensor(
@@ -413,7 +412,7 @@ int SystemSensorManager::Receiver::handleEvent(
 SystemSensorManager::SensorEventQueue::SensorEventQueue(
     /* [in] */ ISensorEventListener* listener,
     /* [in] */ ILooper* looper,
-    /* [in] */ ISystemSensorManager* manager)
+    /* [in] */ SystemSensorManager* manager)
     : BaseEventQueue(looper, manager)
     , mListener(listener)
 {
@@ -493,7 +492,7 @@ void SystemSensorManager::SensorEventQueue::DispatchFlushCompleteEvent(
 SystemSensorManager::TriggerEventQueue::TriggerEventQueue(
     /* [in] */ ITriggerEventListener* listener,
     /* [in] */ ILooper* looper,
-    /* [in] */ ISystemSensorManager* manager)
+    /* [in] */ SystemSensorManager* manager)
     : BaseEventQueue(looper, manager)
     , mListener(listener)
 {
@@ -568,8 +567,12 @@ ECode SystemSensorManager::constructor(
 {
     mMainLooper = mainLooper;
     AutoPtr<IApplicationInfo> info;
-    FAIL_RETURN(context->GetApplicationInfo((IApplicationInfo**)&info))
-    FAIL_RETURN(info->GetTargetSdkVersion(&mTargetSdkLevel))
+    context->GetApplicationInfo((IApplicationInfo**)&info);
+    info->GetTargetSdkVersion(&mTargetSdkLevel);
+    String opPackageName;
+    context->GetOpPackageName(&opPackageName);
+    mNativeInstance = NativeCreate(opPackageName);
+
     {
         AutoLock syncLock(sSensorModuleLock);
         if (!sSensorModuleInitialized) {
@@ -583,7 +586,7 @@ ECode SystemSensorManager::constructor(
             do {
                 AutoPtr<ISensor> sensor;
                 CSensor::New((ISensor**)&sensor);
-                i = NativeGetNextSensor(sensor, i);
+                i = NativeGetNextSensor(mNativeInstance, sensor, i);
                 if (i>=0) {
                     //Log.d(TAG, "found sensor: " + sensor.getName() +
                     //        ", handle=" + sensor.getHandle());
@@ -823,16 +826,25 @@ void SystemSensorManager::NativeClassInit()
 {
 }
 
+Int64 SystemSensorManager::NativeCreate(
+    /* [in] */ const String& opPackageName)
+{
+    return reinterpret_cast<Int64>(
+            &android::SensorManager::getInstanceForPackage(android::String16(opPackageName.string())));
+}
+
 Int32 SystemSensorManager::NativeGetNextSensor(
+    /* [in] */ Int64 nativeInstance,
     /* [in] */ ISensor* sensorObj,
     /* [in] */ Int32 iNext)
 {
+    android::SensorManager* mgr = reinterpret_cast<android::SensorManager*>(nativeInstance);
+
     CSensor* sensor = (CSensor*)sensorObj;
     size_t next = size_t(iNext);
-    android::SensorManager& mgr(android::SensorManager::getInstance());
 
     android::Sensor const* const* sensorList;
-    size_t count = mgr.getSensorList(&sensorList);
+    size_t count = mgr->getSensorList(&sensorList);
     if (next >= count)
         return -1;
 

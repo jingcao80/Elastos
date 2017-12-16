@@ -133,11 +133,13 @@ ECode CTypefaceHelper::CreateFromFamilies(
 }
 
 ECode CTypefaceHelper::CreateFromFamiliesWithDefault(
-    /* [in]*/ ArrayOf<IFontFamily*>* families,
+    /* [in] */ ArrayOf<IFontFamily*>* families,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 italic,
     /* [out]*/ ITypeface** typeface)
 {
     VALIDATE_NOT_NULL(typeface);
-    return Typeface::CreateFromFamiliesWithDefault(families, typeface);
+    return Typeface::CreateFromFamiliesWithDefault(families, weight, italic, typeface);
 }
 
 } // namespace Graphics

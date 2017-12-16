@@ -26,13 +26,10 @@
 #include <dlfcn.h>
 #include <elastos/utility/logging/Slogger.h>
 
-namespace android {
-extern void setGLDebugLevel(int level);
-}
-
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
+
 CAR_SINGLETON_IMPL(CGLUtils)
 
 CAR_INTERFACE_IMPL(CGLUtils, Object, IGLUtils)
@@ -189,7 +186,6 @@ ECode CGLUtils::GetEGLErrorString(
 ECode CGLUtils::SetTracingLevel(
     /* [in] */ Int32 level)
 {
-    android::setGLDebugLevel(level);
     return NOERROR;
 }
 
@@ -318,9 +314,8 @@ Int32  CGLUtils::Native_texImage2D(
         if (data) {
             void* const pixels = (char*)data + palette_size;
             SkColorTable* ctable = skBitmap.getColorTable();
-            memcpy(data, ctable->lockColors(), ctable->count() * sizeof(SkPMColor));
+            memcpy(data, ctable->readColors(), ctable->count() * sizeof(SkPMColor));
             memcpy(pixels, p, size);
-            ctable->unlockColors();
             glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
             free(data);
         } else {

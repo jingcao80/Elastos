@@ -1125,6 +1125,9 @@ Int32 Arrays::GetHashCode(
 }
 
 template<typename T>
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 Int32 Arrays::GetHashCode(
     /* [in] */ ArrayOf<T *> * array)
 {

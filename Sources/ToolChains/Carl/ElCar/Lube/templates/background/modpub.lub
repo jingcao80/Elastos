@@ -342,6 +342,9 @@ void HashTable::Clear()
     mCount = 0;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 UInt32 HashTable::Hash(
     /* [in] */ REMuid key)
 {

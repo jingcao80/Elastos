@@ -20,6 +20,7 @@
 #include "_Elastos_Droid_View_InputMethod_CIInputMethodClient.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 namespace Elastos {
 namespace Droid {
@@ -56,6 +57,9 @@ public:
 
     CARAPI SetUserActionNotificationSequenceNumber(
         /* [in] */ Int32 sequenceNumber);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     CInputMethodManager* mHost;

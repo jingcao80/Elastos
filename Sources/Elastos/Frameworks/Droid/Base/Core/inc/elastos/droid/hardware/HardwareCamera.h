@@ -983,6 +983,14 @@ public:
             /* [in] */ int32_t msgType,
             /* [in] */ const android::sp<android::IMemory>& dataPtr);
 
+        virtual void postRecordingFrameHandleTimestamp(
+            /* [in] */ nsecs_t timestamp,
+            /* [in] */ native_handle_t* handle);
+
+        virtual void postRecordingFrameHandleTimestampBatch(
+            /* [in] */ const std::vector<nsecs_t>& timestamps,
+            /* [in] */ const std::vector<native_handle_t*>& handles);
+
         void postMetadata(
             /* [in] */ int32_t msgType,
             /* [in] */ camera_frame_metadata_t *metadata);

@@ -48,3 +48,6 @@ SOURCES += CInputMethodSubtypeBuilder.cpp
 SOURCES += CInputMethodSubtypeHelper.cpp
 SOURCES += CInputMethodSubtypeArray.cpp
 SOURCES += CSparseRectFArray.cpp
+
+SOURCES += IInputMethodClient.cpp
+SOURCES += IInputContext.cpp

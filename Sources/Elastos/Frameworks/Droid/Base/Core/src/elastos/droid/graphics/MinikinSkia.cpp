@@ -38,18 +38,16 @@
 
 #include "elastos/droid/graphics/MinikinSkia.h"
 
-using android::MinikinFont;
+using minikin::MinikinFont;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-MinikinFontSkia::MinikinFontSkia(SkTypeface *typeface) :
-    mTypeface(typeface) {
-}
-
-MinikinFontSkia::~MinikinFontSkia() {
-    SkSafeUnref(mTypeface);
+MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface)
+    : minikin::MinikinFont(typeface->uniqueID())
+    , mTypeface(std::move(typeface))
+{
 }
 
 bool MinikinFontSkia::GetGlyph(uint32_t codepoint, uint32_t *glyph) const {
@@ -111,11 +109,19 @@ bool MinikinFontSkia::GetTable(uint32_t tag, uint8_t *buf, size_t *size) {
 }
 
 SkTypeface *MinikinFontSkia::GetSkTypeface() const {
+    return mTypeface.get();
+}
+
+sk_sp<SkTypeface> MinikinFontSkia::RefSkTypeface() const {
     return mTypeface;
 }
 
 int32_t MinikinFontSkia::GetUniqueId() const {
     return mTypeface->uniqueID();
+}
+
+const std::vector<minikin::FontVariation>& MinikinFontSkia::GetAxes() const {
+    return mAxes;
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
@@ -136,7 +142,7 @@ void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
 }
 
 void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery) {
-    paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->GetSkTypeface());
+    paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->RefSkTypeface());
     paint->setFakeBoldText(paint->isFakeBoldText() || fakery.isFakeBold());
     if (fakery.isFakeItalic()) {
         paint->setTextSkewX(paint->getTextSkewX() - 0.25f);

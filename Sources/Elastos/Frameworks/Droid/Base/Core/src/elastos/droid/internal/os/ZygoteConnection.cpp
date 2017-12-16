@@ -145,7 +145,7 @@ ECode ZygoteConnection::Arguments::ParseArgs(
         else if (arg.Equals("--enable-assert")) {
             mDebugFlags |= IZygote::DEBUG_ENABLE_ASSERT;
         }
-        else if (arg.Equals("--runtime-init")) {
+        else if (arg.Equals("--runtime-args")) {
             mRuntimeInit = TRUE;
         }
         else if (arg.StartWith("--seinfo=")) {

@@ -268,7 +268,7 @@ private:
     android::sp<NativeRemoteDisplayClient> mClient;
 };
 
-Handle32 CRemoteDisplay::NativeListen(
+Int64 CRemoteDisplay::NativeListen(
     /* [in] */ const String& iface)
 {
     android::sp<android::IServiceManager> sm = android::defaultServiceManager();
@@ -280,32 +280,33 @@ Handle32 CRemoteDisplay::NativeListen(
     }
 
     android::sp<NativeRemoteDisplayClient> client = new NativeRemoteDisplayClient(this);
-    android::sp<android::IRemoteDisplay> display = service->listenForRemoteDisplay(client, android::String8(iface.string()));
+    android::sp<android::IRemoteDisplay> display = service->listenForRemoteDisplay(
+            android::String16(""), client, android::String8(iface.string()));
     if (display == NULL) {
          Logger::E("RemoteDisplay", "Media player service rejected request to listen for remote display '%s'.", iface.string());
          return 0;
     }
 
     AutoPtr<NativeRemoteDisplay> wrapper = new NativeRemoteDisplay(display.get(), client);
-    return (Handle32)wrapper.Get();
+    return (Int64)wrapper.Get();
 }
 
 void CRemoteDisplay::NativeDispose(
-    /* [in] */ Handle32 ptr)
+    /* [in] */ Int64 ptr)
 {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     delete wrapper;
 }
 
 void CRemoteDisplay::NativePause(
-    /* [in] */ Handle32 ptr)
+    /* [in] */ Int64 ptr)
 {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     wrapper->pause();
 }
 
 void CRemoteDisplay::NativeResume(
-    /* [in] */ Handle32 ptr)
+    /* [in] */ Int64 ptr)
 {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     wrapper->pause();

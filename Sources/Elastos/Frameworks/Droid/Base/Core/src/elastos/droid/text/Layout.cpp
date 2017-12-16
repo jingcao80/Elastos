@@ -64,14 +64,6 @@ namespace Elastos {
 namespace Droid {
 namespace Text {
 
-Int32 Layout::MIN_EMOJI;
-Int32 Layout::MAX_EMOJI;
-Object Layout::sTempRectLock;
-
-const Int32 Layout::TAB_INCREMENT;
-const Char32 Layout::ELLIPSIS_NORMAL[] = { 0x2026 }; // this is "..."
-const Char32 Layout::ELLIPSIS_TWO_DOTS[] = { 0x2025 }; // this is ".."
-
 //========================================================================
 //          Layout::Ellipsizer
 //========================================================================
@@ -355,6 +347,12 @@ ECode Layout::SpannedEllipsizer::SubSequence(
 // Layout
 //========================================================================
 
+Object Layout::sTempRectLock;
+
+const Int32 Layout::TAB_INCREMENT;
+const Char32 Layout::ELLIPSIS_NORMAL[] = { 0x2026 }; // this is "..."
+const Char32 Layout::ELLIPSIS_TWO_DOTS[] = { 0x2025 }; // this is ".."
+
 static AutoPtr<CRect> InitsTempRect()
 {
     AutoPtr<CRect> tmp;
@@ -384,24 +382,7 @@ static AutoPtr<ILayoutDirections> InitDIRS_ALL_RIGHT_TO_LEFT()
     return obj;
 }
 
-
-static AutoPtr<IEmojiFactory> InitEMOJI()
-{
-    AutoPtr<IEmojiFactory> ef;
-    EmojiFactory::NewAvailableInstance((IEmojiFactory**)&ef);
-    if (ef != NULL) {
-        ef->GetMinimumAndroidPua(&(Layout::MIN_EMOJI));
-        ef->GetMaximumAndroidPua(&(Layout::MAX_EMOJI));
-    }
-    else {
-        Layout::MIN_EMOJI = -1;
-        Layout::MAX_EMOJI = -1;
-    }
-    return ef;
-}
-
 AutoPtr< ArrayOf<IInterface*> > Layout::NO_PARA_SPANS = ArrayOf<IInterface*>::Alloc(0);
-AutoPtr<IEmojiFactory> Layout::EMOJI_FACTORY = InitEMOJI();
 AutoPtr<IRect> Layout::sTempRect = InitsTempRect();
 AutoPtr<ILayoutDirections> Layout::DIRS_ALL_LEFT_TO_RIGHT = InitDIRS_ALL_LEFT_TO_RIGHT();
 AutoPtr<ILayoutDirections> Layout::DIRS_ALL_RIGHT_TO_LEFT = InitDIRS_ALL_RIGHT_TO_LEFT();

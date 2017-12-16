@@ -627,13 +627,13 @@ protected:
     static const Int32 PAGE_SNAP_ANIMATION_DURATION = 550;
     static const Int32 MAX_PAGE_SNAP_DURATION = 750;
     static const Int32 SLOW_PAGE_SNAP_ANIMATION_DURATION = 950;
-    static const Float NANOTIME_DIV = 1000000000.0f;
+    static constexpr Float NANOTIME_DIV = 1000000000.0f;
 
     static const Int32 TOUCH_STATE_REST = 0;
     static const Int32 TOUCH_STATE_SCROLLING = 1;
     static const Int32 TOUCH_STATE_PREV_PAGE = 2;
     static const Int32 TOUCH_STATE_NEXT_PAGE = 3;
-    static const Float ALPHA_QUANTIZE_LEVEL = 0.0001f;
+    static constexpr Float ALPHA_QUANTIZE_LEVEL = 0.0001f;
 
     static const Int32 INVALID_POINTER = -1;
 
@@ -723,12 +723,12 @@ private:
     // the min drag distance for a fling to register, to prevent random page shifts
     static const Int32 MIN_LENGTH_FOR_FLING = 25;
 
-    static const Float OVERSCROLL_ACCELERATE_FACTOR = 2;
-    static const Float OVERSCROLL_DAMP_FACTOR = 0.14f;
+    static constexpr Float OVERSCROLL_ACCELERATE_FACTOR = 2;
+    static constexpr Float OVERSCROLL_DAMP_FACTOR = 0.14f;
 
-    static const Float RETURN_TO_ORIGINAL_PAGE_THRESHOLD = 0.33f;
+    static constexpr Float RETURN_TO_ORIGINAL_PAGE_THRESHOLD = 0.33f;
     // The page is moved more than halfway, automatically move to the next page on touch up.
-    static const Float SIGNIFICANT_MOVE_THRESHOLD = 0.4f;
+    static constexpr Float SIGNIFICANT_MOVE_THRESHOLD = 0.4f;
 
     // The following constants need to be scaled based on density. The scaled versions will be
     // assigned to the corresponding member variables below.

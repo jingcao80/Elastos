@@ -32,9 +32,6 @@
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/graphics/DrawFilter.h"
 #include "elastos/droid/graphics/NinePatch.h"
-#include "elastos/droid/graphics/NativePaint.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
-#include "elastos/droid/graphics/MinikinUtils.h"
 #include "elastos/droid/graphics/TemporaryBuffer.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -43,19 +40,21 @@
 #include <elastos/utility/logging/Logger.h>
 #include <skia/core/SkCanvas.h>
 #include <skia/core/SkBitmap.h>
+#include <skia/core/SkBlendMode.h>
 #include <skia/core/SkPaint.h>
 #include <skia/core/SkRect.h>
-#include <skia/core/SkDevice.h>
 #include <skia/core/SkScalar.h>
 #include <skia/core/SkMatrix.h>
 #include <skia/core/SkGraphics.h>
 #include <skia/core/SkShader.h>
-#include <skia/core/SkTemplates.h>
 #include <skia/core/SkDrawFilter.h>
-#include <skia/effects/SkPorterDuff.h>
+#include <skia/core/SkRegion.h>
+#include <skia/private/SkTemplates.h>
 #include <utils/RefBase.h>
 #include <minikin/Layout.h>
 #include <minikin/MinikinFont.h>
+#include <hwui/Canvas.h>
+#include <hwui/hwui/Paint.h>
 
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::ISpannedString;
@@ -65,7 +64,7 @@ using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IString;
 using Elastos::Utility::Logging::Logger;
-using android::Layout;
+using minikin::Layout;
 
 namespace Elastos {
 namespace Droid {
@@ -74,74 +73,6 @@ namespace Graphics {
 #ifndef TO_PAINT
 #define TO_PAINT(obj) ((Paint*)obj)
 #endif
-
-//=======================================================================
-// DrawTextOnPathFunctor
-//=======================================================================
-class DrawTextOnPathFunctor {
-public:
-    DrawTextOnPathFunctor(const Layout& layout, NativeCanvas* canvas, float hOffset,
-                float vOffset, const NativePaint& paint, const SkPath& path)
-            : layout(layout), canvas(canvas), hOffset(hOffset), vOffset(vOffset),
-                paint(paint), path(path) {
-    }
-    void operator()(size_t start, size_t end) {
-        uint16_t glyphs[1];
-        for (size_t i = start; i < end; i++) {
-            glyphs[0] = layout.getGlyphId(i);
-            float x = hOffset + layout.getX(i);
-            float y = vOffset + layout.getY(i);
-            canvas->drawTextOnPath(glyphs, 1, path, x, y, paint);
-        }
-    }
-private:
-    const Layout& layout;
-    NativeCanvas* canvas;
-    float hOffset;
-    float vOffset;
-    const NativePaint& paint;
-    const SkPath& path;
-};
-
-//=======================================================================
-// DrawTextFunctor
-//=======================================================================
-class DrawTextFunctor {
-public:
-    DrawTextFunctor(const Layout& layout, NativeCanvas* canvas, uint16_t* glyphs, float* pos,
-                    const SkPaint& paint, float x, float y, MinikinRect& bounds)
-            : layout(layout), canvas(canvas), glyphs(glyphs), pos(pos), paint(paint),
-              x(x), y(y), bounds(bounds) { }
-
-    void operator()(size_t start, size_t end) {
-        if (canvas->drawTextAbsolutePos()) {
-            for (size_t i = start; i < end; i++) {
-                glyphs[i] = layout.getGlyphId(i);
-                pos[2 * i] = x + layout.getX(i);
-                pos[2 * i + 1] = y + layout.getY(i);
-            }
-        } else {
-            for (size_t i = start; i < end; i++) {
-                glyphs[i] = layout.getGlyphId(i);
-                pos[2 * i] = layout.getX(i);
-                pos[2 * i + 1] = layout.getY(i);
-            }
-        }
-
-        size_t glyphCount = end - start;
-        canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
-                         bounds.mLeft , bounds.mTop , bounds.mRight , bounds.mBottom);
-    }
-private:
-    const Layout& layout;
-    NativeCanvas* canvas;
-    uint16_t* glyphs;
-    float* pos;
-    const SkPaint& paint;
-    float x;
-    float y;
-    MinikinRect& bounds;
-};
 
 //=======================================================================
 // Canvas
@@ -166,7 +97,7 @@ ECode Canvas::constructor()
     Boolean is = FALSE;
     if (IsHardwareAccelerated(&is), !is) {
         // 0 means no native bitmap
-        mNativeCanvas = InitRaster(0);
+        mNativeCanvas = InitRaster(NULL);
     }
     return NOERROR;
 }
@@ -180,8 +111,7 @@ ECode Canvas::constructor(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     FAIL_RETURN(ThrowIfCannotDraw(bitmap));
-    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
-    mNativeCanvas = InitRaster(nativeBitmap);
+    mNativeCanvas = InitRaster(bitmap);
     mBitmap = bitmap;
     mBitmap->GetDensity(&mDensity);
     return NOERROR;
@@ -231,7 +161,7 @@ ECode Canvas::SetBitmap(
 
 
     if (bitmap == NULL) {
-        NativeSetBitmap(mNativeCanvas, 0, FALSE);
+        NativeSetBitmap(mNativeCanvas, NULL, FALSE);
         mDensity = IBitmap::DENSITY_NONE;
     }
     else {
@@ -243,19 +173,11 @@ ECode Canvas::SetBitmap(
         }
         FAIL_RETURN(ThrowIfCannotDraw(bitmap));
 
-        Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
-        NativeSetBitmap(mNativeCanvas, nativeBitmap, TRUE);
+        NativeSetBitmap(mNativeCanvas, bitmap, TRUE);
         mDensity = ((CBitmap*)bitmap)->mDensity;
     }
 
     mBitmap = bitmap;
-    return NOERROR;
-}
-
-ECode Canvas::SetNativeBitmap(
-    /* [in] */ Int64 bitmapHandle)
-{
-    NativeSetBitmap(mNativeCanvas, bitmapHandle, FALSE);
     return NOERROR;
 }
 
@@ -794,10 +716,7 @@ ECode Canvas::ClipRegion(
     /* [out] */ Boolean* isNotEmpty)
 {
     VALIDATE_NOT_NULL(isNotEmpty)
-    assert(region != NULL);
-
-    Int64 nativeRegion = ((CRegion*)region)->mNativeRegion;
-    *isNotEmpty = NativeClipRegion(mNativeCanvas, nativeRegion, op);
+    *isNotEmpty = FALSE;
     return NOERROR;
 }
 
@@ -1746,37 +1665,49 @@ void Canvas::FreeTextLayoutCaches()
     Layout::purgeCaches();
 }
 
-Int64 Canvas::GetNativeCanvasWrapper()
-{
-    return mNativeCanvas;
-}
-
 Boolean Canvas::IsRecordingFor(
     /* [in] */ IInterface* o)
 {
     return FALSE;
 }
 
-static NativeCanvas* get_canvas(
-    /* [in] */ Int64 canvasHandle)
+Int64 Canvas::InitRaster(
+    /* [in] */ IBitmap* bitmapObj)
 {
-    return reinterpret_cast<NativeCanvas*>(canvasHandle);
+    SkBitmap bitmap;
+    if (bitmapObj != 0) {
+        GraphicsNative::GetNativeBitmap(bitmapObj, &bitmap);
+    }
+    return reinterpret_cast<Int64>(android::Canvas::create_canvas(bitmap));
 }
 
-Int64 Canvas::InitRaster(
+static android::Canvas* get_canvas(
+    /* [in] */ Int64 canvasHandle)
+{
+    return reinterpret_cast<android::Canvas*>(canvasHandle);
+}
+
+ECode Canvas::SetNativeBitmap(
     /* [in] */ Int64 bitmapHandle)
 {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    return reinterpret_cast<Int64>(NativeCanvas::create_canvas(bitmap));
+    SkBitmap bitmap;
+    if (bitmapHandle != 0) {
+        reinterpret_cast<BitmapWrapper*>(bitmapHandle)->getSkBitmap(&bitmap);
+    }
+    get_canvas(mNativeCanvas)->setBitmap(bitmap);
+    return NOERROR;
 }
 
 void Canvas::NativeSetBitmap(
     /* [in] */ Int64 canvasHandle,
-    /* [in] */ Int64 bitmapHandle,
+    /* [in] */ IBitmap* bitmapObj,
     /* [in] */ Boolean copyState)
 {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    get_canvas(canvasHandle)->setBitmap(bitmap, copyState);
+    SkBitmap bitmap;
+    if (bitmapObj != NULL) {
+        GraphicsNative::GetNativeBitmap(bitmapObj, &bitmap);
+    }
+    get_canvas(canvasHandle)->setBitmap(bitmap);
 }
 
 Boolean Canvas::NativeIsOpaque(
@@ -1801,7 +1732,7 @@ Int32 Canvas::NativeSave(
     /* [in] */ Int64 canvasHandle,
     /* [in] */ Int32 saveFlags)
 {
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(saveFlags);
+    android::SaveFlags::Flags flags = static_cast<android::SaveFlags::Flags>(saveFlags);
     return static_cast<Int32>(get_canvas(canvasHandle)->save(flags));
 }
 
@@ -1814,8 +1745,8 @@ Int32 Canvas::NativeSaveLayer(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Int32 flagsHandle)
 {
-    NativePaint* paint  = reinterpret_cast<NativePaint*>(paintHandle);
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    android::Paint* paint  = reinterpret_cast<android::Paint*>(paintHandle);
+    android::SaveFlags::Flags flags = static_cast<android::SaveFlags::Flags>(flagsHandle);
     return static_cast<Int32>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
 }
 
@@ -1828,14 +1759,14 @@ Int32 Canvas::NativeSaveLayerAlpha(
     /* [in] */ Int32 alpha,
     /* [in] */ Int32 flagsHandle)
 {
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    android::SaveFlags::Flags flags = static_cast<android::SaveFlags::Flags>(flagsHandle);
     return static_cast<Int32>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
 }
 
 void Canvas::NativeRestore(
     /* [in] */ Int64 canvasHandle)
 {
-    NativeCanvas* canvas = get_canvas(canvasHandle);
+    android::Canvas* canvas = get_canvas(canvasHandle);
     if (canvas->getSaveCount() <= 1) {  // cannot restore anymore
         // doThrowISE(env, "Underflow in restore");
         return;
@@ -1847,7 +1778,7 @@ void Canvas::NativeRestoreToCount(
     /* [in] */ Int64 canvasHandle,
     /* [in] */ Int32 restoreCount)
 {
-    NativeCanvas* canvas = get_canvas(canvasHandle);
+    android::Canvas* canvas = get_canvas(canvasHandle);
     if (restoreCount < 1 || restoreCount > canvas->getSaveCount()) {
         // doThrowIAE(env, "Underflow in restoreToCount");
         return;
@@ -1916,9 +1847,9 @@ Boolean Canvas::NativeClipRect(
     /* [in] */ Float b,
     /* [in] */ RegionOp opHandle)
 {
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool emptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b, op);
-    return emptyClip ? FALSE : TRUE;
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b,
+            GraphicsNative::OpHandleToClipOp(opHandle));
+    return nonEmptyClip ? TRUE : FALSE;
 }
 
 Boolean Canvas::NativeClipPath(
@@ -1927,20 +1858,9 @@ Boolean Canvas::NativeClipPath(
     /* [in] */ RegionOp opHandle)
 {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool emptyClip = get_canvas(canvasHandle)->clipPath(path, op);
-    return emptyClip ? FALSE : TRUE;
-}
-
-Boolean Canvas::NativeClipRegion(
-    /* [in] */ Int64 canvasHandle,
-    /* [in] */ Int64 deviceRgnHandle,
-    /* [in] */ RegionOp opHandle)
-{
-    SkRegion* deviceRgn = reinterpret_cast<SkRegion*>(deviceRgnHandle);
-    SkRegion::Op op = static_cast<SkRegion::Op>(opHandle);
-    bool emptyClip = get_canvas(canvasHandle)->clipRegion(deviceRgn, op);
-    return emptyClip ? FALSE : TRUE;
+    bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path,
+            GraphicsNative::OpHandleToClipOp(opHandle));
+    return nonEmptyClip ? TRUE : FALSE;
 }
 
 void Canvas::NativeSetDrawFilter(
@@ -2000,15 +1920,15 @@ void Canvas::NativeDrawColor(
     /* [in] */ Int32 color,
     /* [in] */ Int32 modeHandle)
 {
-    SkPorterDuff::Mode mode = static_cast<SkPorterDuff::Mode>(modeHandle);
-    get_canvas(canvasHandle)->drawColor(color, SkPorterDuff::ToXfermodeMode(mode));
+    SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
+    get_canvas(canvasHandle)->drawColor(color, mode);
 }
 
 void Canvas::NativeDrawPaint(
     /* [in] */ Int64 canvasHandle,
     /* [in] */ Int64 paintHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawPaint(*paint);
 }
 
@@ -2018,7 +1938,7 @@ void Canvas::NativeDrawPoint(
     /* [in] */ Float y,
     /* [in] */ Int64 paintHandle)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawPoint(x, y, *paint);
 }
 
@@ -2040,7 +1960,7 @@ void Canvas::NativeDrawPoints(
         return;
     }
 
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawPoints(floats + offset, count, *paint);
 }
 
@@ -2052,7 +1972,7 @@ void Canvas::NativeDrawLine(
     /* [in] */ Float stopY,
     /* [in] */ Int64 paintHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawLine(startX, startY, stopX, stopY, *paint);
 }
 
@@ -2074,7 +1994,7 @@ void Canvas::NativeDrawLines(
         return;
     }
 
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawLines(floats + offset, count, *paint);
 }
 
@@ -2086,7 +2006,7 @@ void Canvas::NativeDrawRect(
     /* [in] */ Float bottom,
     /* [in] */ Int64 paintHandle)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawRect(left, top, right, bottom, *paint);
 }
 
@@ -2098,7 +2018,7 @@ void Canvas::NativeDrawOval(
     /* [in] */ Float bottom,
     /* [in] */ Int64 paintHandle)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawOval(left, top, right, bottom, *paint);
 }
 
@@ -2109,7 +2029,7 @@ void Canvas::NativeDrawCircle(
     /* [in] */ Float radius,
     /* [in] */ Int64 paintHandle)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawCircle(cx, cy, radius, *paint);
 }
 
@@ -2124,7 +2044,7 @@ void Canvas::NativeDrawArc(
     /* [in] */ Boolean useCenter,
     /* [in] */ Int64 paintHandle)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawArc(left, top, right, bottom, startAngle, sweepAngle,
                                        useCenter, *paint);
 }
@@ -2139,7 +2059,7 @@ void Canvas::NativeDrawRoundRect(
     /* [in] */ Float ry,
     /* [in] */ Int64 paintHandle)
 {
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawRoundRect(left, top, right, bottom, rx, ry, *paint);
 }
 
@@ -2149,7 +2069,7 @@ void Canvas::NativeDrawPath(
     /* [in] */ Int64 paintHandle)
 {
     const SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawPath(*path, *paint);
 }
 
@@ -2163,36 +2083,36 @@ void Canvas::NativeDrawBitmap(
     /* [in] */ Int32 screenDensity,
     /* [in] */ Int32 bitmapDensity)
 {
-    NativeCanvas* canvas = get_canvas(canvasHandle);
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Canvas* canvas = get_canvas(canvasHandle);
+    android::Bitmap& bitmap = reinterpret_cast<BitmapWrapper*>(bitmapHandle)->bitmap();
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
 
     if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
         if (screenDensity != 0 && screenDensity != bitmapDensity) {
-            NativePaint filteredPaint;
+            android::Paint filteredPaint;
             if (paint) {
                 filteredPaint = *paint;
             }
-            filteredPaint.setFilterLevel(NativePaint::kLow_FilterLevel);
-            canvas->drawBitmap(*bitmap, left, top, &filteredPaint);
+            filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+            canvas->drawBitmap(bitmap, left, top, &filteredPaint);
         }
         else {
-            canvas->drawBitmap(*bitmap, left, top, paint);
+            canvas->drawBitmap(bitmap, left, top, paint);
         }
     }
     else {
-        canvas->save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas->save(android::SaveFlags::MatrixClip);
         SkScalar scale = canvasDensity / (float)bitmapDensity;
         canvas->translate(left, top);
         canvas->scale(scale, scale);
 
-        NativePaint filteredPaint;
+        android::Paint filteredPaint;
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterLevel(NativePaint::kLow_FilterLevel);
+        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
 
-        canvas->drawBitmap(*bitmap, 0, 0, &filteredPaint);
+        canvas->drawBitmap(bitmap, 0, 0, &filteredPaint);
         canvas->restore();
     }
 }
@@ -2212,20 +2132,20 @@ void Canvas::NativeDrawBitmap(
     /* [in] */ Int32 screenDensity,
     /* [in] */ Int32 bitmapDensity)
 {
-    NativeCanvas* canvas = get_canvas(canvasHandle);
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Canvas* canvas = get_canvas(canvasHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
 
+    android::Bitmap& bitmap = reinterpret_cast<BitmapWrapper*>(bitmapHandle)->bitmap();
     if (screenDensity != 0 && screenDensity != bitmapDensity) {
-        NativePaint filteredPaint;
+        android::Paint filteredPaint;
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterLevel(NativePaint::kLow_FilterLevel);
-        canvas->drawBitmap(*bitmap, srcLeft, srcTop, srcRight, srcBottom,
+        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+        canvas->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
                            dstLeft, dstTop, dstRight, dstBottom, &filteredPaint);
     } else {
-        canvas->drawBitmap(*bitmap, srcLeft, srcTop, srcRight, srcBottom,
+        canvas->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
                            dstLeft, dstTop, dstRight, dstBottom, paint);
     }
 }
@@ -2244,11 +2164,12 @@ void Canvas::NativeDrawBitmap(
 {
     // Note: If hasAlpha is false, kRGB_565_SkColorType will be used, which will
     // correct the alphaType to kOpaque_SkAlphaType.
-    SkImageInfo info = SkImageInfo::Make(width, height,
-                           hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
-                           kPremul_SkAlphaType);
+    SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType,
+           GraphicsNative::DefaultColorSpace());
     SkBitmap bitmap;
-    if (!bitmap.allocPixels(info)) {
+    bitmap.setInfo(info);
+    sk_sp<android::Bitmap> androidBitmap = android::Bitmap::allocateHeapBitmap(&bitmap, NULL);
+    if (!androidBitmap) {
         return;
     }
 
@@ -2256,8 +2177,8 @@ void Canvas::NativeDrawBitmap(
         return;
     }
 
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    get_canvas(canvasHandle)->drawBitmap(bitmap, x, y, paint);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    get_canvas(canvasHandle)->drawBitmap(*androidBitmap, x, y, paint);
 }
 
 void Canvas::NativeDrawBitmapMatrix(
@@ -2266,10 +2187,10 @@ void Canvas::NativeDrawBitmapMatrix(
     /* [in] */ Int64 matrixHandle,
     /* [in] */ Int64 paintHandle)
 {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    get_canvas(canvasHandle)->drawBitmap(*bitmap, *matrix, paint);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Bitmap& bitmap = reinterpret_cast<BitmapWrapper*>(bitmapHandle)->bitmap();
+    get_canvas(canvasHandle)->drawBitmap(bitmap, *matrix, paint);
 }
 
 void Canvas::NativeDrawBitmapMesh(
@@ -2286,9 +2207,10 @@ void Canvas::NativeDrawBitmapMesh(
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     AutoFloatArray vertA(_verts, vertIndex + (ptCount << 1));
     AutoInt32Array colorA(colors, colorIndex + ptCount);
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    get_canvas(canvasHandle)->drawBitmapMesh(*bitmap, meshWidth, meshHeight,
+
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Bitmap& bitmap = reinterpret_cast<BitmapWrapper*>(bitmapHandle)->bitmap();
+    get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
                                              vertA.ptr(), colorA.ptr(), paint);
 }
 
@@ -2325,77 +2247,9 @@ void Canvas::NativeDrawVertices(
     }
 
     SkCanvas::VertexMode mode = static_cast<SkCanvas::VertexMode>(modeHandle);
-    const NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawVertices(mode, vertexCount, verts, texs, colors,
                                            indices, indexCount, *paint);
-}
-
-// Same values used by Skia
-#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
-#define kStdUnderline_Offset    (1.0f / 9.0f)
-#define kStdUnderline_Thickness (1.0f / 18.0f)
-
-void drawTextDecorations(NativeCanvas* canvas, float x, float y, float length, const SkPaint& paint) {
-    uint32_t flags;
-    SkDrawFilter* drawFilter = canvas->getDrawFilter();
-    if (drawFilter) {
-        SkPaint paintCopy(paint);
-        drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
-        flags = paintCopy.getFlags();
-    } else {
-        flags = paint.getFlags();
-    }
-    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
-        SkScalar left = x;
-        SkScalar right = x + length;
-        float textSize = paint.getTextSize();
-        float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
-        if (flags & SkPaint::kUnderlineText_Flag) {
-            SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
-            SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
-            canvas->drawRect(left, top, right, bottom, paint);
-        }
-        if (flags & SkPaint::kStrikeThruText_Flag) {
-            SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
-            SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
-            canvas->drawRect(left, top, right, bottom, paint);
-        }
-    }
-}
-
-void drawText(
-    /* [in] */ NativeCanvas* canvas,
-    /* [in] */ const uint16_t* text,
-    /* [in] */ int start,
-    /* [in] */ int count,
-    /* [in] */ int contextCount,
-    /* [in] */ float x,
-    /* [in] */ float y, int bidiFlags,
-    /* [in] */ const NativePaint& origPaint,
-    /* [in] */ TypefaceImpl* typeface)
-{
-    // minikin may modify the original paint
-    NativePaint paint(origPaint);
-
-    Layout layout;
-    MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, start, count, contextCount);
-
-    size_t nGlyphs = layout.nGlyphs();
-    uint16_t* glyphs = new uint16_t[nGlyphs];
-    float* pos = new float[nGlyphs * 2];
-
-    x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
-
-    MinikinRect bounds;
-    layout.getBounds(&bounds);
-
-    DrawTextFunctor f(layout, canvas, glyphs, pos, paint, x, y, bounds);
-    MinikinUtils::forFontRun(layout, &paint, f);
-
-    drawTextDecorations(canvas, x, y, layout.getAdvance(), paint);
-
-    delete[] glyphs;
-    delete[] pos;
 }
 
 void Canvas::NativeDrawText(
@@ -2409,12 +2263,12 @@ void Canvas::NativeDrawText(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Int64 typefaceHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
     AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
-    drawText(get_canvas(canvasHandle), chars->GetPayload() + index, 0, count, count, x, y,
-        bidiFlags, *paint, typeface);
+    get_canvas(canvasHandle)->drawText(chars->GetPayload() + index, 0, count, count, x, y,
+                                       bidiFlags, *paint, typeface);
 }
 
 void Canvas::NativeDrawText(
@@ -2428,13 +2282,12 @@ void Canvas::NativeDrawText(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Int64 typefaceHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     const int count = end - start;
     const AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
-    drawText(get_canvas(canvasHandle), chars->GetPayload() + start, 0, count, count, x, y,
-        bidiFlags, *paint, typeface);
-    // env->ReleaseStringChars(text, jchars);
+    get_canvas(canvasHandle)->drawText(chars->GetPayload() + start, 0, count, count, x, y,
+                                       bidiFlags, *paint, typeface);
 }
 
 void Canvas::NativeDrawTextRun(
@@ -2450,16 +2303,15 @@ void Canvas::NativeDrawTextRun(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Int64 typefaceHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
-    int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
     Int32 count = end - start;
     Int32 contextCount = contextEnd - contextStart;
     AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
-    drawText(get_canvas(canvasHandle), chars->GetPayload() + contextStart,
-        start - contextStart, count, contextCount, x, y, bidiFlags, *paint, typeface);
-    // env->ReleaseStringChars(text, jchars);
+    get_canvas(canvasHandle)->drawText(chars->GetPayload() + contextStart, start - contextStart, count,
+                                       contextCount, x, y, bidiFlags, *paint, typeface);
 }
 
 void Canvas::NativeDrawTextRun(
@@ -2475,31 +2327,13 @@ void Canvas::NativeDrawTextRun(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Int64 typefaceHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
-    const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    const int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
     AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text);
-    drawText(get_canvas(canvasHandle), chars->GetPayload() + contextIndex,
-        index - contextIndex, count, contextCount, x, y, bidiFlags, *paint, typeface);
-    // env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
-}
-
-static void drawTextOnPath(NativeCanvas* canvas, const uint16_t* text, int count, int bidiFlags,
-                           const SkPath& path, float hOffset, float vOffset,
-                           const NativePaint& paint, TypefaceImpl* typeface) {
-    NativePaint paintCopy(paint);
-    Layout layout;
-    MinikinUtils::doLayout(&layout, &paintCopy, bidiFlags, typeface, text, 0, count, count);
-    hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
-
-    // Set align to left for drawing, as we don't want individual
-    // glyphs centered or right-aligned; the offset above takes
-    // care of all alignment.
-    paintCopy.setTextAlign(NativePaint::kLeft_Align);
-
-    DrawTextOnPathFunctor f(layout, canvas, hOffset, vOffset, paintCopy, path);
-    MinikinUtils::forFontRun(layout, &paintCopy, f);
+    get_canvas(canvasHandle)->drawText(chars->GetPayload() + contextIndex, index - contextIndex, count,
+                                       contextCount, x, y, bidiFlags, *paint, typeface);
 }
 
 void Canvas::NativeDrawTextOnPath(
@@ -2515,14 +2349,12 @@ void Canvas::NativeDrawTextOnPath(
     /* [in] */ Int64 typefaceHandle)
 {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
     AutoPtr<ArrayOf<Char16> > chars = ArrayUtils::ToChar16Array(text, index, count);
-    drawTextOnPath(get_canvas(canvasHandle), chars->GetPayload(), count, bidiFlags, *path,
-        hOffset, vOffset, *paint, typeface);
-
-    // env->ReleaseCharArrayElements(text, jchars, 0);
+    get_canvas(canvasHandle)->drawTextOnPath(chars->GetPayload(), count, bidiFlags, *path,
+                   hOffset, vOffset, *paint, typeface);
 }
 
 void Canvas::NativeDrawTextOnPath(
@@ -2536,16 +2368,14 @@ void Canvas::NativeDrawTextOnPath(
     /* [in] */ Int64 typefaceHandle)
 {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
     const AutoPtr<ArrayOf<Char16> > chars = text.GetChar16s();
     int count = text.GetLength();
 
-    drawTextOnPath(get_canvas(canvasHandle), chars->GetPayload(), count, bidiFlags, *path,
-        hOffset, vOffset, *paint, typeface);
-
-    // env->ReleaseStringChars(text, jchars);
+    get_canvas(canvasHandle)->drawTextOnPath(chars->GetPayload(), count, bidiFlags, *path,
+                   hOffset, vOffset, *paint, typeface);
 }
 
 void Canvas::NativeFinalizer(

@@ -17,7 +17,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/CLightingColorFilter.h"
-#include <skia/core/SkColorFilter.h>
+#include <skia/effects/SkColorMatrixFilter.h>
 
 namespace Elastos {
 namespace Droid {
@@ -82,7 +82,7 @@ Int64 CLightingColorFilter::NativeCreateLightingFilter(
     /* [in] */ Int32 mul,
     /* [in] */ Int32 add)
 {
-    return reinterpret_cast<Int64>(SkColorFilter::CreateLightingFilter(mul, add));
+    return reinterpret_cast<Int64>(SkColorMatrixFilter::MakeLightingFilter(mul, add).release());
 }
 
 } // namespace Graphics

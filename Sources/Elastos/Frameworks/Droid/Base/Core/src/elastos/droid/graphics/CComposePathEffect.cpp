@@ -41,7 +41,8 @@ Int64 CComposePathEffect::NativeCreate(
 {
     SkPathEffect* outer = reinterpret_cast<SkPathEffect*>(outerHandle);
     SkPathEffect* inner = reinterpret_cast<SkPathEffect*>(innerHandle);
-    SkPathEffect* effect = SkComposePathEffect::Create(outer, inner);
+    SkPathEffect* effect = SkPathEffect::MakeCompose(sk_ref_sp(outer),
+                sk_ref_sp(inner)).release();
     return reinterpret_cast<Int64>(effect);
 }
 

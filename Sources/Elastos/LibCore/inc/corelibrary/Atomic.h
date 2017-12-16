@@ -19,7 +19,6 @@
 
 #include "coredef.h"
 #include <cutils/atomic.h>          /* use common Android atomic ops */
-#include <cutils/atomic-inline.h>   /* and some uncommon ones */
 
 /*
  * If the value at "addr" is equal to "oldvalue", replace it with "newvalue"

@@ -116,14 +116,6 @@ android::status_t JavaDataSourceBridge::getSize(
 //==========================================================================
 const String CMediaExtractor::TAG("CMediaExtractor");
 
-static Boolean NativeInit()
-{
-    android::DataSource::RegisterDefaultSniffers();
-    return TRUE;
-}
-
-const Boolean CMediaExtractor::INIT = NativeInit();
-
 android::sp<android::NuMediaExtractor> CMediaExtractor::mImpl;
 
 android::sp<android::NuMediaExtractor> CMediaExtractor::SetMediaExtractor(

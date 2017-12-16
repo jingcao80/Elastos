@@ -366,7 +366,7 @@ private:
     friend class TextView;
 
     // TODO: Add an option to configure this
-    static const Float MARQUEE_DELTA_MAX = 0.07f;
+    static constexpr Float MARQUEE_DELTA_MAX = 0.07f;
     static const Int32 MARQUEE_DELAY = 1200;
     static const Int32 MARQUEE_RESTART_DELAY = 1200;
     static const Int32 MARQUEE_DP_PER_SECOND = 30;

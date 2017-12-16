@@ -20,6 +20,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_View_CWindowManagerGlobalSessionCallback.h"
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::IBinder;
 
@@ -47,6 +48,9 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* info);
+
+public:
+    android::IBinder* mBBinder;
 };
 
 } // namespace View

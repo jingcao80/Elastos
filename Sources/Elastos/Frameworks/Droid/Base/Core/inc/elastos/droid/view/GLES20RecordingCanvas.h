@@ -36,7 +36,14 @@ public:
     CAR_INTERFACE_DECL()
 
     static CARAPI_(AutoPtr<IHardwareCanvas>) Obtain(
-        /* [in] */ IRenderNode* node);
+        /* [in] */ IRenderNode* node,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
+
+    CARAPI constructor(
+        /* [in] */ IRenderNode* node,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
 
     CARAPI Recycle();
 
@@ -47,6 +54,7 @@ public:
         /* [in] */ IInterface* o,
         /* [out] */ Boolean* res);
 
+public:
     AutoPtr<IRenderNode> mNode;
 
     static const Int32 POOL_LIMIT = 25;

@@ -156,15 +156,7 @@ private:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-
-    CARAPI nGetLayer(
-        /* [in] */ Int64 layerUpdater,
-        /* [in] */ Int64* res);
-
-    CARAPI nGetTexName(
-        /* [in] */ Int64 layerUpdater,
-        /* [in] */ Int32* res);
-
+private:
     AutoPtr<IHardwareRenderer> mRenderer;
     AutoPtr<IVirtualRefBasePtr> mFinalizer;
 };

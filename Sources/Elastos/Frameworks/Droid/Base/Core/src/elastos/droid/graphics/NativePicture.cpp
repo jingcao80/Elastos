@@ -16,10 +16,8 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
 #include "elastos/droid/graphics/NativePicture.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "SkStream.h"
+#include <skia/core/SkStream.h>
 
 namespace Elastos {
 namespace Droid {
@@ -32,11 +30,12 @@ NativePicture::NativePicture(
         mWidth = src->GetWidth();
         mHeight = src->GetHeight();
         if (NULL != src->mPicture.get()) {
-            mPicture.reset(SkRef(src->mPicture.get()));
+            mPicture = src->mPicture;
         }
         if (NULL != src->mRecorder.get()) {
-            mPicture.reset(src->MakePartialCopy());
+            mPicture = src->MakePartialCopy();
         }
+        Validate();
     }
     else {
         mWidth = 0;
@@ -44,7 +43,7 @@ NativePicture::NativePicture(
     }
 }
 
-NativeCanvas* NativePicture::BeginRecording(
+android::Canvas* NativePicture::BeginRecording(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -52,39 +51,28 @@ NativeCanvas* NativePicture::BeginRecording(
     mRecorder.reset(new SkPictureRecorder);
     mWidth = width;
     mHeight = height;
-    SkCanvas* canvas = mRecorder->beginRecording(width, height, NULL, 0);
-    // the java side will wrap this guy in a Canvas.java, which will call
-    // unref in its finalizer, so we have to ref it here, so that both that
-    // Canvas.java and our picture can both be owners
-    canvas->ref();
-    return NativeCanvas::create_canvas(canvas);
+    SkCanvas* canvas = mRecorder->beginRecording(SkIntToScalar(width), SkIntToScalar(height));
+    return android::Canvas::create_canvas(canvas, android::Canvas::XformToSRGB::kDefer);
 }
 
 void NativePicture::EndRecording()
 {
     if (NULL != mRecorder.get()) {
-        mPicture.reset(mRecorder->endRecording());
+        mPicture = mRecorder->finishRecordingAsPicture();
+        Validate();
         mRecorder.reset(NULL);
     }
 }
 
 Int32 NativePicture::GetWidth() const
 {
-    if (NULL != mPicture.get()) {
-        SkASSERT(mPicture->width() == mWidth);
-        SkASSERT(mPicture->height() == mHeight);
-    }
-
+    Validate();
     return mWidth;
 }
 
 Int32 NativePicture::GetHeight() const
 {
-    if (NULL != mPicture.get()) {
-        SkASSERT(mPicture->width() == mWidth);
-        SkASSERT(mPicture->height() == mHeight);
-    }
-
+    Validate();
     return mHeight;
 }
 
@@ -93,10 +81,13 @@ NativePicture* NativePicture::CreateFromStream(
 {
     NativePicture* newPict = new NativePicture;
 
-    newPict->mPicture.reset(SkPicture::CreateFromStream(stream));
-    if (NULL != newPict->mPicture.get()) {
-        newPict->mWidth = newPict->mPicture->width();
-        newPict->mHeight = newPict->mPicture->height();
+    sk_sp<SkPicture> skPicture = SkPicture::MakeFromStream(stream);
+    if (NULL != skPicture) {
+        newPict->mPicture = skPicture;
+
+        const SkIRect cullRect = skPicture->cullRect().roundOut();
+        newPict->mWidth = cullRect.width();
+        newPict->mHeight = cullRect.height();
     }
 
     return newPict;
@@ -106,32 +97,34 @@ void NativePicture::Serialize(
     /* [in] */ SkWStream* stream) const
 {
     if (NULL != mRecorder.get()) {
-        SkAutoTDelete<SkPicture> tempPict(this->MakePartialCopy());
-        tempPict->serialize(stream);
+        MakePartialCopy()->serialize(stream);
     }
     else if (NULL != mPicture.get()) {
+        Validate();
         mPicture->serialize(stream);
     }
     else {
-        SkPicture empty;
-        empty.serialize(stream);
+        // serialize "empty" picture
+        SkPictureRecorder recorder;
+        recorder.beginRecording(0, 0);
+        recorder.finishRecordingAsPicture()->serialize(stream);
     }
 }
 
 void NativePicture::Draw(
-    /* [in] */ NativeCanvas* canvas)
+    /* [in] */ android::Canvas* canvas)
 {
     if (NULL != mRecorder.get()) {
         EndRecording();
         SkASSERT(NULL != mPicture.get());
     }
+    Validate();
     if (NULL != mPicture.get()) {
-        // TODO: remove this const_cast once pictures are immutable
-        const_cast<SkPicture*>(mPicture.get())->draw(canvas->getSkCanvas());
+        mPicture->playback(canvas->asSkCanvas());
     }
 }
 
-SkPicture* NativePicture::MakePartialCopy() const
+sk_sp<SkPicture> NativePicture::MakePartialCopy() const
 {
     SkASSERT(NULL != mRecorder.get());
 
@@ -139,7 +132,18 @@ SkPicture* NativePicture::MakePartialCopy() const
 
     SkCanvas* canvas = reRecorder.beginRecording(mWidth, mHeight, NULL, 0);
     mRecorder->partialReplay(canvas);
-    return reRecorder.endRecording();
+    return reRecorder.finishRecordingAsPicture();
+}
+
+void NativePicture::Validate() const
+{
+#ifdef SK_DEBUG
+    if (NULL != mPicture.get()) {
+        SkRect cullRect = mPicture->cullRect();
+        SkRect myRect = SkRect::MakeWH(SkIntToScalar(mWidth), SkIntToScalar(mHeight));
+        SkASSERT(cullRect == myRect);
+    }
+#endif
 }
 
 } // namespace Graphics

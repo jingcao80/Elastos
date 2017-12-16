@@ -45,11 +45,16 @@ protected:
      * @hide
      */
     // @Override
-    virtual CARAPI Copy(
+    CARAPI Copy(
         /* [out] */ IShader** shader);
+
+    // @Override
+    CARAPI_(Int64) CreateNativeInstance(
+        /* [in] */ IMatrix* matrix);
 
 private:
     static CARAPI_(Int64) NativeCreate(
+        /* [in] */ Int64 nMatrix,
         /* [in] */ Int64 nBitmap,
         /* [in] */ ShaderTileMode tileModeX,
         /* [in] */ ShaderTileMode tileModeY);

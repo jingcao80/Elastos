@@ -55,8 +55,8 @@ Int64 CEmbossMaskFilter::NativeConstructor(
     }
 
     SkScalar sigma = SkBlurMask::ConvertRadiusToSigma(blurRadius);
-    SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(sigma,
-            direction, ambient, specular);
+    SkMaskFilter* filter =  SkBlurMaskFilter::MakeEmboss(sigma,
+                direction, ambient, specular).release();
     assert(filter != NULL);
     return reinterpret_cast<Int64>(filter);
 }

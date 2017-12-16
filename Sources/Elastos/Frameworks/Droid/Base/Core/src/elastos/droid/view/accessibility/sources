@@ -51,3 +51,7 @@ SOURCES += CAccessibilityWindowInfoHelper.cpp
 SOURCES += CaptioningManager.cpp
 SOURCES += CCaptioningManagerCaptionStyle.cpp
 SOURCES += CCaptioningManagerCaptionStyleHelper.cpp
+
+SOURCES += IAccessibilityManager.cpp
+SOURCES += IAccessibilityManagerClient.cpp
+SOURCES += IAccessibilityInteractionConnection.cpp

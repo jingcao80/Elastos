@@ -119,6 +119,9 @@ module
     // merge("view/IDisplayManagerAw.car");
     // merge("view/DispList.car");
 
+    merge("view/IGraphicsStats.car");
+    merge("view/IGraphicsStatsCallback.car");
+
     merge("view/accessibility/AccessibilityCache.car");
     merge("view/accessibility/AccessibilityEvent.car");
     merge("view/accessibility/AccessibilityEventSource.car");
@@ -470,7 +473,7 @@ module
 
     class CInputQueue {
         constructor();
-        
+
         interface IInputQueue;
     }
 

@@ -33,6 +33,7 @@
 #include "elastos/droid/content/pm/CInstrumentationInfo.h"
 #include "elastos/droid/content/pm/CApplicationInfo.h"
 #include "elastos/droid/content/pm/CActivityInfo.h"
+#include "elastos/droid/content/pm/IPackageManager.h"
 #include "elastos/droid/content/res/CConfigurationHelper.h"
 #include "elastos/droid/graphics/Canvas.h"
 #include "elastos/droid/graphics/CCanvas.h"
@@ -99,6 +100,7 @@ using Elastos::Droid::Content::Pm::IInstrumentationInfo;
 using Elastos::Droid::Content::Pm::CInstrumentationInfo;
 using Elastos::Droid::Content::Pm::CActivityInfo;
 using Elastos::Droid::Content::Pm::CApplicationInfo;
+using Elastos::Droid::Content::Pm::IPackageManagerProxy;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::CAssetManager;
 using Elastos::Droid::Content::Res::CConfiguration;
@@ -1290,9 +1292,8 @@ AutoPtr<IIPackageManager> CActivityThread::GetPackageManager()
         // Slogger::V("PackageManager", "returning cur default = %s", TO_CSTR(sPackageManager));
         return sPackageManager;
     }
-    AutoPtr<IInterface> b = ServiceManager::GetService(String("package"));
-    assert(b != NULL);
-    sPackageManager = IIPackageManager::Probe(b);
+    android::sp<android::IBinder> pm = ServiceManager::GetAndroidService(String("package"));
+    sPackageManager = new IPackageManagerProxy(pm);
     assert(sPackageManager != NULL);
     return sPackageManager;
 }
@@ -4389,6 +4390,14 @@ ECode CActivityThread::RequestRelaunchActivity(
                     }
                 }
 
+                // For each relaunch request, activity manager expects an answer
+                if (!r->mOnlyLocalRequest && fromServer) {
+                    // try {
+                    ActivityManagerNative::GetDefault()->ActivityRelaunched(token);
+                    // } catch (RemoteException e) {
+                    //     throw e.rethrowFromSystemServer();
+                    // }
+                }
                 break;
             }
         }
@@ -4506,6 +4515,13 @@ ECode CActivityThread::HandleRelaunchActivity(
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(tmp->mToken);
     if (DEBUG_CONFIGURATION) Slogger::V(TAG, "Handling relaunch of %s", TO_CSTR(r));
     if (r == NULL) {
+        if (!tmp->mOnlyLocalRequest) {
+            // try {
+            ActivityManagerNative::GetDefault()->ActivityRelaunched(tmp->mToken);
+            // } catch (RemoteException e) {
+            //     throw e.rethrowFromSystemServer();
+            // }
+        }
         return NOERROR;
     }
 
@@ -4552,6 +4568,17 @@ ECode CActivityThread::HandleRelaunchActivity(
     r->mStartsNotResumed = tmp->mStartsNotResumed;
 
     HandleLaunchActivity(r, currentIntent);
+
+    if (!tmp->mOnlyLocalRequest) {
+        // try {
+        ActivityManagerNative::GetDefault()->ActivityRelaunched(r->mToken);
+        // if (r.window != null) {
+        //     r.window.reportActivityRelaunched();
+        // }
+        // } catch (RemoteException e) {
+        //     throw e.rethrowFromSystemServer();
+        // }
+    }
     return NOERROR;
 }
 
@@ -5213,7 +5240,7 @@ ECode CActivityThread::HandleBindApplication(
     /**
      * Initialize the default http proxy in this process for the reasons we set the time zone.
      */
-    AutoPtr<IInterface> b = ServiceManager::GetService(IContext::CONNECTIVITY_SERVICE);
+    android::sp<android::IBinder> b = ServiceManager::GetAndroidService(IContext::CONNECTIVITY_SERVICE);
     if (b != NULL) {
         // In pre-boot mode (doing initial launch to collect password), not
         // all system is up.  This includes the connectivity service, so don't

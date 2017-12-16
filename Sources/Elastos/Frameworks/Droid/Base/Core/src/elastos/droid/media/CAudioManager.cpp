@@ -15,15 +15,16 @@
 //=========================================================================
 
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/media/AudioSystem.h"
 #include "elastos/droid/media/CAudioManager.h"
 #include "elastos/droid/media/CAudioManagerAudioFocusDispatcher.h"
 #include "elastos/droid/media/CAudioHandle.h"
 #include "elastos/droid/media/CAudioPort.h"
 #include "elastos/droid/media/CAudioPortConfig.h"
+#include "elastos/droid/media/IAudioService.h"
 #include "elastos/droid/media/session/CMediaSessionLegacyHelper.h"
-#include "elastos/droid/media/AudioSystem.h"
 #include "elastos/droid/os/CBinder.h"
-#include "elastos/droid/os/CServiceManager.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -51,14 +52,13 @@ using Elastos::Droid::Media::CAudioPortConfig;
 using Elastos::Droid::Media::Session::CMediaSessionLegacyHelper;
 using Elastos::Droid::Media::Session::IMediaSessionLegacyHelper;
 using Elastos::Droid::Os::CBinder;
-using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::ILooperHelper;
-using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Provider::ISettingsSystem;
@@ -201,11 +201,8 @@ AutoPtr<IIAudioService> CAudioManager::GetService()
         return sService;
     }
 
-    AutoPtr<IServiceManager> serviceManager;
-    CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-    AutoPtr<IInterface> obj;
-    serviceManager->GetService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
-    sService = IIAudioService::Probe(obj.Get());
+    android::sp<android::IBinder> as = ServiceManager::GetAndroidService(IContext::AUDIO_SERVICE);
+    sService = new IAudioServiceProxy(as);
 
     if (sService == NULL) {
         Logger::E(TAG, "AudioService is not ready!");

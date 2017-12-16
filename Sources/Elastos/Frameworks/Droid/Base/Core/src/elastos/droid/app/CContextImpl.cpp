@@ -67,6 +67,7 @@
 #include "elastos/droid/os/CSystemVibrator.h"
 // #include "elastos/droid/os/CDropBoxManager.h"
 #include "elastos/droid/os/CUserManager.h"
+#include "elastos/droid/os/IPowerManager.h"
 #include "elastos/droid/os/storage/CStorageManager.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CIntent.h"
@@ -222,6 +223,7 @@ using Elastos::Droid::Os::IIUserManager;
 using Elastos::Droid::Os::CPowerManager;
 using Elastos::Droid::Os::CBatteryManager;
 using Elastos::Droid::Os::IBatteryManager;
+using Elastos::Droid::Os::IPowerManagerProxy;
 using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::CStorageManager;
@@ -2578,8 +2580,8 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::POWER_SERVICE.Equals(name)) {
-        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::POWER_SERVICE);
-        AutoPtr<IIPowerManager> powerService = IIPowerManager::Probe(service);
+        android::sp<android::IBinder> service = ServiceManager::GetAndroidService(IContext::POWER_SERVICE);
+        AutoPtr<IIPowerManager> powerService = new IPowerManagerProxy(service);
         AutoPtr<IPowerManager> powerManager;
         CPowerManager::New(GetOuterContext(), powerService, mMainThread->GetHandler(),
             (IPowerManager**)&powerManager);

@@ -324,7 +324,6 @@ private:
 private:
     static android::sp<android::NuMediaExtractor> mImpl;
     static const String TAG;
-    static const Boolean INIT;
     Int64 mNativeContext;
 };
 

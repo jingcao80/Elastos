@@ -358,7 +358,7 @@ $URN_LENGTH=$URN_LENGTH + 1;
     print "\" ";
     print "\}\;\n";
     print "\n";
-    print "int g_pDllCarCode = (int)&DllCarCode;\n";
+    print "long long g_pDllCarCode = (long long)&DllCarCode;\n";
 
 close(W_FILE);
 

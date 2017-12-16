@@ -17,7 +17,6 @@
 #include "elastos/droid/view/HardwareLayer.h"
 #include "elastos/droid/graphics/Matrix.h"
 #include "elastos/droid/graphics/Paint.h"
-#include "elastos/droid/graphics/NativePaint.h"
 #include "elastos/droid/graphics/CSurfaceTexture.h"
 #include "elastos/droid/internal/utility/CVirtualRefBasePtr.h"
 
@@ -26,25 +25,15 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
-#include <SkXfermode.h>
 
-#include <DeferredLayerUpdater.h>
-#include <LayerRenderer.h>
-#include <SkiaShader.h>
-#include <Rect.h>
-#include <RenderNode.h>
-
-#include "Elastos.Droid.View.h"
+#include <hwui/DeferredLayerUpdater.h>
+#include <hwui/hwui/Paint.h>
 
 using Elastos::Droid::Graphics::Matrix;
 using Elastos::Droid::Graphics::Paint;
-using Elastos::Droid::Graphics::NativePaint;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Internal::Utility::CVirtualRefBasePtr;
 using Elastos::Droid::View::IHardwareLayer;
-
-using namespace android;
-using namespace android::uirenderer;
 
 namespace Elastos {
 namespace Droid {
@@ -172,7 +161,7 @@ ECode HardwareLayer::GetLayer(
 {
     Int64 ptr;
     mFinalizer->Get(&ptr);
-    return nGetLayer(ptr, result);
+    return NOERROR;
 }
 
 ECode HardwareLayer::SetSurfaceTexture(
@@ -216,7 +205,8 @@ ECode HardwareLayer::nPrepare(
     /* [in] */ Boolean isOpaque,
     /* [out] */ Boolean* res)
 {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
+    android::uirenderer::DeferredLayerUpdater* layer =
+            reinterpret_cast<android::uirenderer::DeferredLayerUpdater*>(layerUpdaterPtr);
     Boolean changed = FALSE;
     changed |= layer->setSize(width, height);
     changed |= layer->setBlend(!isOpaque);
@@ -228,9 +218,10 @@ ECode HardwareLayer::nSetLayerPaint(
     /* [in] */ Int64 layerUpdaterPtr,
     /* [in] */ Int64 paintPtr)
 {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
+    android::uirenderer::DeferredLayerUpdater* layer =
+            reinterpret_cast<android::uirenderer::DeferredLayerUpdater*>(layerUpdaterPtr);
     if (layer) {
-        NativePaint* paint = reinterpret_cast<NativePaint*>(paintPtr);
+        android::Paint* paint = reinterpret_cast<android::Paint*>(paintPtr);
         layer->setPaint(paint);
     }
     return NOERROR;
@@ -240,7 +231,8 @@ ECode HardwareLayer::nSetTransform(
     /* [in] */ Int64 layerUpdaterPtr,
     /* [in] */ Int64 matrixPtr)
 {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
+    android::uirenderer::DeferredLayerUpdater* layer =
+            reinterpret_cast<android::uirenderer::DeferredLayerUpdater*>(layerUpdaterPtr);
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixPtr);
     layer->setTransform(matrix);
     return NOERROR;
@@ -251,17 +243,19 @@ ECode HardwareLayer::nSetSurfaceTexture(
     /* [in] */ ISurfaceTexture* surface,
     /* [in] */ Boolean isAlreadyAttached)
 {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
+    android::uirenderer::DeferredLayerUpdater* layer =
+            reinterpret_cast<android::uirenderer::DeferredLayerUpdater*>(layerUpdaterPtr);
     CSurfaceTexture* texture = (CSurfaceTexture*)surface;
-    sp<GLConsumer> surfaceTexture((GLConsumer*)texture->mSurfaceTexture);
-    layer->setSurfaceTexture(surfaceTexture, !isAlreadyAttached);
+    android::sp<android::GLConsumer> surfaceTexture((android::GLConsumer*)texture->mSurfaceTexture);
+    layer->setSurfaceTexture(surfaceTexture);
     return NOERROR;
 }
 
 ECode HardwareLayer::nUpdateSurfaceTexture(
     /* [in] */ Int64 layerUpdaterPtr)
 {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
+    android::uirenderer::DeferredLayerUpdater* layer =
+            reinterpret_cast<android::uirenderer::DeferredLayerUpdater*>(layerUpdaterPtr);
     layer->updateTexImage();
     return NOERROR;
 }
@@ -274,24 +268,6 @@ ECode HardwareLayer::nUpdateRenderLayer(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    return NOERROR;
-}
-
-ECode HardwareLayer::nGetLayer(
-    /* [in] */ Int64 layerUpdaterPtr,
-    /* [out] */ Int64* res)
-{
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    *res = reinterpret_cast<Int64>( layer->backingLayer() );
-    return NOERROR;
-}
-
-ECode HardwareLayer::nGetTexName(
-    /* [in] */ Int64 layerUpdaterPtr,
-    /* [out] */ Int32* res)
-{
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    *res = layer->backingLayer()->getTexture();
     return NOERROR;
 }
 

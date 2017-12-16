@@ -47,31 +47,31 @@ int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
 int ifc_reset_connections(const char *ifname, int reset_mask);
 
-int dhcp_do_request(const char * const ifname,
-                    const char *ipaddr,
-                    const char *gateway,
-                    uint32_t *prefixLength,
-                    const char *dns[],
-                    const char *server,
-                    uint32_t *lease,
-                    const char *vendorInfo,
-                    const char *domains,
-                    const char *mtu);
+// int dhcp_do_request(const char * const ifname,
+//                     const char *ipaddr,
+//                     const char *gateway,
+//                     uint32_t *prefixLength,
+//                     const char *dns[],
+//                     const char *server,
+//                     uint32_t *lease,
+//                     const char *vendorInfo,
+//                     const char *domains,
+//                     const char *mtu);
 
-int dhcp_do_request_renew(const char * const ifname,
-                    const char *ipaddr,
-                    const char *gateway,
-                    uint32_t *prefixLength,
-                    const char *dns[],
-                    const char *server,
-                    uint32_t *lease,
-                    const char *vendorInfo,
-                    const char *domains,
-                    const char *mtu);
+// int dhcp_do_request_renew(const char * const ifname,
+//                     const char *ipaddr,
+//                     const char *gateway,
+//                     uint32_t *prefixLength,
+//                     const char *dns[],
+//                     const char *server,
+//                     uint32_t *lease,
+//                     const char *vendorInfo,
+//                     const char *domains,
+//                     const char *mtu);
 
-int dhcp_stop(const char *ifname);
-int dhcp_release_lease(const char *ifname);
-char *dhcp_get_errmsg();
+// int dhcp_stop(const char *ifname);
+// int dhcp_release_lease(const char *ifname);
+// char *dhcp_get_errmsg();
 }
 
 namespace Elastos {
@@ -127,9 +127,10 @@ ECode NetworkUtils::StopDhcp(
 {
     VALIDATE_NOT_NULL(result);
 
-    const char *nameStr = interfaceName.string();
-    int res = ::dhcp_stop(nameStr);
-    *result = (Boolean)(res == 0);
+    assert(0);
+    // const char *nameStr = interfaceName.string();
+    // int res = ::dhcp_stop(nameStr);
+    // *result = (Boolean)(res == 0);
     return NOERROR;
 }
 
@@ -139,9 +140,10 @@ ECode NetworkUtils::ReleaseDhcpLease(
 {
     VALIDATE_NOT_NULL(result);
 
-    const char *nameStr = interfaceName.string();
-    int res = ::dhcp_release_lease(nameStr);
-    *result = (Boolean)(res == 0);
+    assert(0);
+    // const char *nameStr = interfaceName.string();
+    // int res = ::dhcp_release_lease(nameStr);
+    // *result = (Boolean)(res == 0);
     return NOERROR;
 }
 
@@ -150,7 +152,8 @@ ECode NetworkUtils::GetDhcpError(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = String(::dhcp_get_errmsg());
+    assert(0);
+    // *result = String(::dhcp_get_errmsg());
     return NOERROR;
 }
 
@@ -519,79 +522,81 @@ Boolean NetworkUtils::NativeRunDhcpCommon(
     /* [in] */ IDhcpResults* dhcpResults,
     /* [in] */ Boolean renew)
 {
-    Int32 num;
-    char  ipaddr[PROPERTY_VALUE_MAX];
-    uint32_t prefixLength;
-    char gateway[PROPERTY_VALUE_MAX];
-    char    dns1[PROPERTY_VALUE_MAX];
-    char    dns2[PROPERTY_VALUE_MAX];
-    char    dns3[PROPERTY_VALUE_MAX];
-    char    dns4[PROPERTY_VALUE_MAX];
-    const char *dns[5] = {dns1, dns2, dns3, dns4, NULL};
-    char  server[PROPERTY_VALUE_MAX];
-    uint32_t lease;
-    char vendorInfo[PROPERTY_VALUE_MAX];
-    char domains[PROPERTY_VALUE_MAX];
-    char mtu[PROPERTY_VALUE_MAX];
+    assert(0);
+    return FALSE;
+    // Int32 num;
+    // char  ipaddr[PROPERTY_VALUE_MAX];
+    // uint32_t prefixLength;
+    // char gateway[PROPERTY_VALUE_MAX];
+    // char    dns1[PROPERTY_VALUE_MAX];
+    // char    dns2[PROPERTY_VALUE_MAX];
+    // char    dns3[PROPERTY_VALUE_MAX];
+    // char    dns4[PROPERTY_VALUE_MAX];
+    // const char *dns[5] = {dns1, dns2, dns3, dns4, NULL};
+    // char  server[PROPERTY_VALUE_MAX];
+    // uint32_t lease;
+    // char vendorInfo[PROPERTY_VALUE_MAX];
+    // char domains[PROPERTY_VALUE_MAX];
+    // char mtu[PROPERTY_VALUE_MAX];
 
-    const char *nameStr = ifname.string();
-    if (nameStr == NULL) {
-        return FALSE;
-    }
-    if (renew) {
-        num = ::dhcp_do_request_renew(nameStr, ipaddr, gateway, &prefixLength,
-                dns, server, &lease, vendorInfo, domains, mtu);
-    }
-    else {
-        num = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
-                dns, server, &lease, vendorInfo, domains, mtu);
-    }
-    if (num != 0) {
-        Logger::D(TAG, "dhcp_do_request failed : %s (%s)", nameStr, renew ? "renew" : "new");
-    }
+    // const char *nameStr = ifname.string();
+    // if (nameStr == NULL) {
+    //     return FALSE;
+    // }
+    // if (renew) {
+    //     num = ::dhcp_do_request_renew(nameStr, ipaddr, gateway, &prefixLength,
+    //             dns, server, &lease, vendorInfo, domains, mtu);
+    // }
+    // else {
+    //     num = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
+    //             dns, server, &lease, vendorInfo, domains, mtu);
+    // }
+    // if (num != 0) {
+    //     Logger::D(TAG, "dhcp_do_request failed : %s (%s)", nameStr, renew ? "renew" : "new");
+    // }
 
-    Boolean b;
-    if (num == 0) {
-        dhcpResults->Clear();
-        // set the linkAddress
-        // dhcpResults->addLinkAddress(inetAddress, prefixLength)
-        num = dhcpResults->SetIpAddress(String(ipaddr), prefixLength, &b);
-    }
-    if (num == 0) {
-        // set the gateway
-        num = dhcpResults->SetGateway(String(gateway), &b);
-    }
-    if (num == 0) {
-        // dhcpResults->addDns(new InetAddress(dns1))
-        num = dhcpResults->AddDns(String(dns1), &b);
-    }
+    // Boolean b;
+    // if (num == 0) {
+    //     dhcpResults->Clear();
+    //     // set the linkAddress
+    //     // dhcpResults->addLinkAddress(inetAddress, prefixLength)
+    //     num = dhcpResults->SetIpAddress(String(ipaddr), prefixLength, &b);
+    // }
+    // if (num == 0) {
+    //     // set the gateway
+    //     num = dhcpResults->SetGateway(String(gateway), &b);
+    // }
+    // if (num == 0) {
+    //     // dhcpResults->addDns(new InetAddress(dns1))
+    //     num = dhcpResults->AddDns(String(dns1), &b);
+    // }
 
-    if (num == 0) {
-        dhcpResults->SetDomains(String(domains));
+    // if (num == 0) {
+    //     dhcpResults->SetDomains(String(domains));
 
-        num = dhcpResults->AddDns(String(dns2), &b);
+    //     num = dhcpResults->AddDns(String(dns2), &b);
 
-        if (num == 0) {
-            num = dhcpResults->AddDns(String(dns3), &b);
-            if (num == 0) {
-                num = dhcpResults->AddDns(String(dns4), &b);
-            }
-        }
-    }
+    //     if (num == 0) {
+    //         num = dhcpResults->AddDns(String(dns3), &b);
+    //         if (num == 0) {
+    //             num = dhcpResults->AddDns(String(dns4), &b);
+    //         }
+    //     }
+    // }
 
-    if (num == 0) {
-        // dhcpResults->setServerAddress(new InetAddress(server))
-        num = dhcpResults->SetServerAddress(String(server), &b);
-    }
+    // if (num == 0) {
+    //     // dhcpResults->setServerAddress(new InetAddress(server))
+    //     num = dhcpResults->SetServerAddress(String(server), &b);
+    // }
 
-    if (num == 0) {
-        // dhcpResults->setLeaseDuration(lease)
-        dhcpResults->SetLeaseDuration(lease);
+    // if (num == 0) {
+    //     // dhcpResults->setLeaseDuration(lease)
+    //     dhcpResults->SetLeaseDuration(lease);
 
-        // dhcpResults->setVendorInfo(vendorInfo)
-        dhcpResults->SetVendorInfo(String(vendorInfo));
-    }
-    return (Boolean)(num == 0);
+    //     // dhcpResults->setVendorInfo(vendorInfo)
+    //     dhcpResults->SetVendorInfo(String(vendorInfo));
+    // }
+    // return (Boolean)(num == 0);
 }
 
 } // namespace Net

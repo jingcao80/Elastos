@@ -19,6 +19,7 @@
 
 #include "_Elastos_Droid_App_CApplicationThread.h"
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
@@ -352,6 +353,9 @@ private:
         /* [in] */ Boolean checkin,
         /* [in] */ Boolean dumpFullInfo,
         /* [in] */ Boolean dumpDalvik);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     static const String ONE_COUNT_COLUMN;

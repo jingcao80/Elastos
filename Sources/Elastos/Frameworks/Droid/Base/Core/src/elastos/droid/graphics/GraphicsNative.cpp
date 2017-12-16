@@ -22,11 +22,14 @@
 #include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/BitmapRegionDecoder.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/Paint.h"
-#include <skia/core/SkDither.h>
 #include <elastos/utility/logging/Logger.h>
+
+#include <sys/mman.h>
+#include <cutils/ashmem.h>
+#include <skia/core/SkDither.h>
+#include <skia/core/SkRegion.h>
 
 using Elastos::Utility::Logging::Logger;
 
@@ -34,21 +37,106 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
+BitmapWrapper::BitmapWrapper(android::Bitmap* bitmap)
+    : mBitmap(bitmap) { }
+
+void BitmapWrapper::freePixels() {
+    mInfo = mBitmap->info();
+    mHasHardwareMipMap = mBitmap->hasHardwareMipMap();
+    mAllocationSize = mBitmap->getAllocationByteCount();
+    mRowBytes = mBitmap->rowBytes();
+    mGenerationId = mBitmap->getGenerationID();
+    mIsHardware = mBitmap->isHardware();
+    mBitmap.reset();
+}
+
+bool BitmapWrapper::valid() {
+    return mBitmap;
+}
+
+android::Bitmap& BitmapWrapper::bitmap() {
+    assertValid();
+    return *mBitmap;
+}
+
+void BitmapWrapper::assertValid() {
+    LOG_ALWAYS_FATAL_IF(!valid(), "Error, cannot access an invalid/free'd bitmap here!");
+}
+
+void BitmapWrapper::getSkBitmap(SkBitmap* outBitmap) {
+    assertValid();
+    mBitmap->getSkBitmap(outBitmap);
+}
+
+bool BitmapWrapper::hasHardwareMipMap() {
+    if (mBitmap) {
+        return mBitmap->hasHardwareMipMap();
+    }
+    return mHasHardwareMipMap;
+}
+
+void BitmapWrapper::setHasHardwareMipMap(bool hasMipMap) {
+    assertValid();
+    mBitmap->setHasHardwareMipMap(hasMipMap);
+}
+
+void BitmapWrapper::setAlphaType(SkAlphaType alphaType) {
+    assertValid();
+    mBitmap->setAlphaType(alphaType);
+}
+
+const SkImageInfo& BitmapWrapper::info() {
+    if (mBitmap) {
+        return mBitmap->info();
+    }
+    return mInfo;
+}
+
+size_t BitmapWrapper::getAllocationByteCount() const {
+    if (mBitmap) {
+        return mBitmap->getAllocationByteCount();
+    }
+    return mAllocationSize;
+}
+
+size_t BitmapWrapper::rowBytes() const {
+    if (mBitmap) {
+        return mBitmap->rowBytes();
+    }
+    return mRowBytes;
+}
+
+uint32_t BitmapWrapper::getGenerationID() const {
+    if (mBitmap) {
+        return mBitmap->getGenerationID();
+    }
+    return mGenerationId;
+}
+
+bool BitmapWrapper::isHardware() {
+    if (mBitmap) {
+        return mBitmap->isHardware();
+    }
+    return mIsHardware;
+}
+
+BitmapWrapper::~BitmapWrapper() { }
+
+
 // Assert that bitmap's SkAlphaType is consistent with isPremultiplied.
 static void assert_premultiplied(
-    /* [in] */ const SkBitmap& bitmap,
+    /* [in] */ const SkImageInfo& info,
     /* [in] */ Boolean isPremultiplied)
 {
     // kOpaque_SkAlphaType and kIgnore_SkAlphaType mean that isPremultiplied is
     // irrelevant. This just tests to ensure that the SkAlphaType is not
     // opposite of isPremultiplied.
     if (isPremultiplied) {
-        SkASSERT(bitmap.alphaType() != kUnpremul_SkAlphaType);
+        SkASSERT(info.alphaType() != kUnpremul_SkAlphaType);
     } else {
-        SkASSERT(bitmap.alphaType() != kPremul_SkAlphaType);
+        SkASSERT(info.alphaType() != kPremul_SkAlphaType);
     }
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -270,25 +358,12 @@ void GraphicsNative::SkIPoint2IPoint(
     obj->Set(point.fX, point.fY);
 }
 
-SkBitmap* GraphicsNative::GetNativeBitmap(
-    /* [in] */ IBitmap* bitmap)
+void GraphicsNative::GetNativeBitmap(
+    /* [in] */ IBitmap* bitmap,
+    /* [out] */ SkBitmap* outBitmap)
 {
-    SkBitmap* b = (SkBitmap*)((CBitmap*)bitmap)->mNativeBitmap;
-    SkASSERT(b);
-    return b;
-}
-
-SkBitmap::Config GraphicsNative::GetNativeBitmapConfig(
-    /* [in] */ BitmapConfig config)
-{
-    if (-1 == config) {
-        return SkBitmap::kNo_Config;
-    }
-    Int32 c = config;
-    if (c < 0 || c >= SkBitmap::kConfigCount) {
-        c = SkBitmap::kNo_Config;
-    }
-    return static_cast<SkBitmap::Config>(c);
+    BitmapWrapper* bitmapWrapper = reinterpret_cast<BitmapWrapper*>(((CBitmap*)bitmap)->mNativeBitmap);
+    bitmapWrapper->getSkBitmap(outBitmap);
 }
 
 SkColorType GraphicsNative::GetNativeBitmapColorType(
@@ -353,40 +428,37 @@ Int32 GraphicsNative::ColorTypeToLegacyBitmapConfig(
 }
 
 AutoPtr<IBitmap> GraphicsNative::CreateBitmap(
-    /* [in] */ SkBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* buffer,
+    /* [in] */ android::Bitmap* bitmap,
     /* [in] */ Int32 bitmapCreateFlags,
     /* [in] */ ArrayOf<Byte>* ninePatchChunk,
     /* [in] */ INinePatchInsetStruct* ninePatchInsets,
     /* [in] */ Int32 density)
 {
-    SkASSERT(bitmap);
-    SkASSERT(bitmap->pixelRef());
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
-
     // The caller needs to have already set the alpha type properly, so the
     // native SkBitmap stays in sync with the Java Bitmap.
-    assert_premultiplied(*bitmap, isPremultiplied);
-
+    assert_premultiplied(bitmap->info(), isPremultiplied);
+    BitmapWrapper* bitmapWrapper = new BitmapWrapper(bitmap);
     AutoPtr<IBitmap> obj;
-    ECode ec = CBitmap::New(reinterpret_cast<Int64>(bitmap), buffer,
+    ECode ec = CBitmap::New(reinterpret_cast<Int64>(bitmapWrapper), NULL,
             bitmap->width(), bitmap->height(), density, isMutable, isPremultiplied,
             ninePatchChunk, ninePatchInsets, (IBitmap**)&obj);
     if (FAILED(ec)) {
         //write log;
+        return NULL;
     }
     // hasException(env); // For the side effect of logging.
     return obj;
 }
 
 AutoPtr<IBitmap> GraphicsNative::CreateBitmap(
-    /* [in] */ SkBitmap* bitmap,
+    /* [in] */ android::Bitmap* bitmap,
     /* [in] */ Int32 bitmapCreateFlags,
     /* [in] */ ArrayOf<Byte>* ninePatchChunk,
     /* [in] */ Int32 density)
 {
-    return CreateBitmap(bitmap, NULL, bitmapCreateFlags, ninePatchChunk, NULL, density);
+    return CreateBitmap(bitmap, bitmapCreateFlags, ninePatchChunk, NULL, density);
 }
 
 ECode GraphicsNative::CreateBitmapRegionDecoder(
@@ -411,7 +483,7 @@ ECode GraphicsNative::AllocateDroidPixelRef(
     *pixelRef = NULL;
 
     const SkImageInfo& info = bitmap->info();
-    if (info.fColorType == kUnknown_SkColorType) {
+    if (info.colorType() == kUnknown_SkColorType) {
         Logger::E("GraphicsNative", "AllocateDroidPixelRef: unknown bitmap configuration.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -439,14 +511,14 @@ ECode GraphicsNative::AllocateDroidPixelRef(
 
 void GraphicsNative::ReinitBitmap(
     /* [in] */ IBitmap* bitmapObj,
-    /* [in] */ SkBitmap* bitmap,
+    /* [in] */ const SkImageInfo& info,
     /* [in] */ Boolean isPremultiplied)
 {
     // The caller needs to have already set the alpha type properly, so the
     // native SkBitmap stays in sync with the Java Bitmap.
-    assert_premultiplied(*bitmap, isPremultiplied);
+    assert_premultiplied(info, isPremultiplied);
 
-    bitmapObj->Reinit(bitmap->width(), bitmap->height(), isPremultiplied);
+    bitmapObj->Reinit(info.width(), info.height(), isPremultiplied);
 }
 
 Int32 GraphicsNative::GetBitmapAllocationByteCount(
@@ -457,35 +529,43 @@ Int32 GraphicsNative::GetBitmapAllocationByteCount(
     return count;
 }
 
-SkCanvas* GraphicsNative::GetNativeCanvas(
+android::Canvas* GraphicsNative::GetNativeCanvas(
     /* [in] */ ICanvas* canvas)
 {
-    SkASSERT(canvas);
-    // SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
-    Int64 canvasHandle = ((CCanvas*)canvas)->GetNativeCanvasWrapper();
-    SkCanvas* c = reinterpret_cast<NativeCanvas*>(canvasHandle)->getSkCanvas();
-    SkASSERT(c);
-    return c;
+    return reinterpret_cast<android::Canvas*>(((Canvas*)canvas)->mNativeCanvas);
 }
 
-NativePaint* GraphicsNative::GetNativePaint(
+android::Paint* GraphicsNative::GetNativePaint(
     /* [in] */ IPaint* paint)
 {
     SkASSERT(paint);
-    // SkASSERT(env->IsInstanceOf(paint, gPaint_class));
-    NativePaint* p = reinterpret_cast<NativePaint*>(((Paint*)paint)->mNativePaint);
+    android::Paint* p = reinterpret_cast<android::Paint*>(((Paint*)paint)->mNativePaint);
     SkASSERT(p);
     return p;
 }
 
-TypefaceImpl* GraphicsNative::GetNativeTypeface(
+android::Typeface* GraphicsNative::GetNativeTypeface(
     /* [in] */ IPaint* paint)
 {
     SkASSERT(paint);
-    // SkASSERT(env->IsInstanceOf(paint, gPaint_class));
     Int64 typefaceHandle = ((Paint*)paint)->GetNativeTypeface();
-    TypefaceImpl* p = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Typeface* p = reinterpret_cast<android::Typeface*>(typefaceHandle);
     return p;
+}
+
+SkClipOp GraphicsNative::OpHandleToClipOp(
+    /* [in] */ Int32 opHandle)
+{
+    // The opHandle is defined in Canvas.java to be Region::Op
+    SkRegion::Op rgnOp = static_cast<SkRegion::Op>(opHandle);
+
+    // In the future, when we no longer support the wide range of ops (e.g. Union, Xor)
+    // this function can perform a range check and throw an unsupported-exception.
+    // e.g. if (rgnOp != kIntersect && rgnOp != kDifference) throw...
+
+    // Skia now takes a different type, SkClipOp, as the parameter to clipping calls
+    // This type is binary compatible with SkRegion::Op, so a static_cast<> is safe.
+    return static_cast<SkClipOp>(rgnOp);
 }
 
 AutoFloatArray::AutoFloatArray(
@@ -502,15 +582,10 @@ AutoFloatArray::AutoFloatArray(
         }
         fPtr = array->GetPayload();
     }
-    // fReleaseMode = (access == kRO_JNIAccess) ? JNI_ABORT : 0;
 }
 
 AutoFloatArray::~AutoFloatArray()
-{
-    // if (fPtr) {
-    //     fEnv->ReleaseFloatArrayElements(fArray, fPtr, fReleaseMode);
-    // }
-}
+{}
 
 AutoInt32Array::AutoInt32Array(
     /* [in] */ ArrayOf<Int32>* array,
@@ -528,11 +603,7 @@ AutoInt32Array::AutoInt32Array(
 }
 
 AutoInt32Array::~AutoInt32Array()
-{
-    // if (fPtr) {
-    //     fEnv->ReleaseIntArrayElements(fArray, fPtr, 0);
-    // }
-}
+{}
 
 AutoShortArray::AutoShortArray(
     /* [in] */ ArrayOf<short>* array,
@@ -548,15 +619,10 @@ AutoShortArray::AutoShortArray(
         }
         fPtr = array->GetPayload();
     }
-    // fReleaseMode = (access == kRO_JNIAccess) ? JNI_ABORT : 0;
 }
 
 AutoShortArray::~AutoShortArray()
-{
-    // if (fPtr) {
-    //     fEnv->ReleaseShortArrayElements(fArray, fPtr, fReleaseMode);
-    // }
-}
+{}
 
 AutoByteArray::AutoByteArray(
     /* [in] */ ArrayOf<Byte>* array,
@@ -574,10 +640,179 @@ AutoByteArray::AutoByteArray(
 }
 
 AutoByteArray::~AutoByteArray()
+{}
+
+///////////////////////////////////////////////////////////////////////////////
+
+android::Bitmap* GraphicsNative::MapAshmemBitmap(SkBitmap* bitmap,
+        SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly)
 {
-    // if (fPtr) {
-    //     fEnv->ReleaseByteArrayElements(fArray, fPtr, 0);
-    // }
+    const SkImageInfo& info = bitmap->info();
+    if (info.colorType() == kUnknown_SkColorType) {
+        Logger::E("GraphicsNative", "unknown bitmap configuration");
+        return NULL;
+    }
+
+    if (!addr) {
+        // Map existing ashmem region if not already mapped.
+        int flags = readOnly ? (PROT_READ) : (PROT_READ | PROT_WRITE);
+        size = ashmem_get_size_region(fd);
+        addr = mmap(NULL, size, flags, MAP_SHARED, fd, 0);
+        if (addr == MAP_FAILED) {
+            return NULL;
+        }
+    }
+
+    // we must respect the rowBytes value already set on the bitmap instead of
+    // attempting to compute our own.
+    const size_t rowBytes = bitmap->rowBytes();
+
+    auto wrapper = new android::Bitmap(addr, fd, size, info, rowBytes, ctable);
+    wrapper->getSkBitmap(bitmap);
+    if (readOnly) {
+        bitmap->pixelRef()->setImmutable();
+    }
+    // since we're already allocated, we lockPixels right away
+    // HeapAllocator behaves this way too
+    bitmap->lockPixels();
+
+    return wrapper;
+}
+
+sk_sp<SkColorSpace> GraphicsNative::DefaultColorSpace()
+{
+#ifdef ANDROID_ENABLE_LINEAR_BLENDING
+    return SkColorSpace::MakeSRGB();
+#else
+    return nullptr;
+#endif
+}
+
+sk_sp<SkColorSpace> GraphicsNative::LinearColorSpace()
+{
+    return SkColorSpace::MakeSRGBLinear();
+}
+
+sk_sp<SkColorSpace> GraphicsNative::ColorSpaceForType(
+    /* [in] */ SkColorType type)
+{
+    switch (type) {
+        case kRGBA_F16_SkColorType:
+            return LinearColorSpace();
+        default:
+            return DefaultColorSpace();
+    }
+}
+
+Boolean GraphicsNative::IsColorSpaceSRGB(
+    /* [in] */ SkColorSpace* colorSpace)
+{
+    return colorSpace == nullptr || colorSpace->isSRGB();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    mStorage = android::Bitmap::allocateHeapBitmap(bitmap, ctable);
+    return !!mStorage;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(
+        android::Bitmap* recycledBitmap, size_t recycledBytes)
+    : mRecycledBitmap(recycledBitmap)
+    , mRecycledBytes(recycledBytes)
+    , mSkiaBitmap(nullptr)
+    , mNeedsCopy(false)
+{}
+
+RecyclingClippingPixelAllocator::~RecyclingClippingPixelAllocator() {}
+
+bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable)
+{
+    // Ensure that the caller did not pass in a NULL bitmap to the constructor or this
+    // function.
+    LOG_ALWAYS_FATAL_IF(!mRecycledBitmap);
+    LOG_ALWAYS_FATAL_IF(!bitmap);
+    mSkiaBitmap = bitmap;
+
+    // This behaves differently than the RecyclingPixelAllocator.  For backwards
+    // compatibility, the original color type of the recycled bitmap must be maintained.
+    if (mRecycledBitmap->info().colorType() != bitmap->colorType()) {
+        return false;
+    }
+
+    // The Skia bitmap specifies the width and height needed by the decoder.
+    // mRecycledBitmap specifies the width and height of the bitmap that we
+    // want to reuse.  Neither can be changed.  We will try to find a way
+    // to reuse the memory.
+    const int maxWidth = SkTMax(bitmap->width(), mRecycledBitmap->info().width());
+    const int maxHeight = SkTMax(bitmap->height(), mRecycledBitmap->info().height());
+    const SkImageInfo maxInfo = bitmap->info().makeWH(maxWidth, maxHeight);
+    const size_t rowBytes = maxInfo.minRowBytes();
+    const size_t bytesNeeded = maxInfo.getSafeSize(rowBytes);
+    if (bytesNeeded <= mRecycledBytes) {
+        // Here we take advantage of reconfigure() to reset the rowBytes and ctable
+        // of mRecycledBitmap.  It is very important that we pass in
+        // mRecycledBitmap->info() for the SkImageInfo.  According to the
+        // specification for BitmapRegionDecoder, we are not allowed to change
+        // the SkImageInfo.
+        // We can (must) preserve the color space since it doesn't affect the
+        // storage needs
+        mRecycledBitmap->reconfigure(
+                mRecycledBitmap->info().makeColorSpace(bitmap->refColorSpace()),
+                rowBytes, ctable);
+
+        // Give the bitmap the same pixelRef as mRecycledBitmap.
+        // skbug.com/4538: We also need to make sure that the rowBytes on the pixel ref
+        //                 match the rowBytes on the bitmap.
+        bitmap->setInfo(bitmap->info(), rowBytes);
+        mRecycledBitmap->ref();
+        bitmap->setPixelRef(mRecycledBitmap)->unref();
+
+        // Make sure that the recycled bitmap has the correct alpha type.
+        mRecycledBitmap->setAlphaType(bitmap->alphaType());
+
+        bitmap->notifyPixelsChanged();
+        bitmap->lockPixels();
+        mNeedsCopy = false;
+
+        // TODO: If the dimensions of the SkBitmap are smaller than those of
+        // mRecycledBitmap, should we zero the memory in mRecycledBitmap?
+        return true;
+    }
+
+    // In the event that mRecycledBitmap is not large enough, allocate new memory
+    // on the heap.
+    SkBitmap::HeapAllocator heapAllocator;
+
+    // We will need to copy from heap memory to mRecycledBitmap's memory after the
+    // decode is complete.
+    mNeedsCopy = true;
+
+    return heapAllocator.allocPixelRef(bitmap, ctable);
+}
+
+void RecyclingClippingPixelAllocator::copyIfNecessary()
+{
+    if (mNeedsCopy) {
+        mRecycledBitmap->ref();
+        SkPixelRef* recycledPixels = mRecycledBitmap;
+        void* dst = recycledPixels->pixels();
+        const size_t dstRowBytes = mRecycledBitmap->rowBytes();
+        const size_t bytesToCopy = std::min(mRecycledBitmap->info().minRowBytes(),
+                mSkiaBitmap->info().minRowBytes());
+        const int rowsToCopy = std::min(mRecycledBitmap->info().height(),
+                mSkiaBitmap->info().height());
+        for (int y = 0; y < rowsToCopy; y++) {
+            memcpy(dst, mSkiaBitmap->getAddr(0, y), bytesToCopy);
+            dst = SkTAddOffset<void>(dst, dstRowBytes);
+        }
+        recycledPixels->notifyPixelsChanged();
+        recycledPixels->unref();
+    }
+    mRecycledBitmap = nullptr;
+    mSkiaBitmap = nullptr;
 }
 
 } // namespace Graphics

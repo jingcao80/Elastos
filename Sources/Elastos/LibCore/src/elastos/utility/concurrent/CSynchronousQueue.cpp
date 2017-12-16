@@ -21,7 +21,6 @@
 #include "CReentrantLock.h"
 #include "CSystem.h"
 #include <cutils/atomic.h>
-#include <cutils/atomic-inline.h>
 #include "CLibcore.h"
 #include <elastos/droid/system/OsConstants.h>
 

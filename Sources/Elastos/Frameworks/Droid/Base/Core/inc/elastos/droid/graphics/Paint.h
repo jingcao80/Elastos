@@ -1351,10 +1351,6 @@ private:
         /* [in] */ Int64 nObj,
         /* [in] */ Int64 typeface);
 
-    static CARAPI_(Int64) NativeSetRasterizer(
-        /* [in] */ Int64 nObj,
-        /* [in] */ Int64 rasterizer);
-
     static CARAPI_(Int32) NativeGetTextAlign(
         /* [in] */ Int64 nObj);
 
@@ -1364,7 +1360,7 @@ private:
 
     static CARAPI_(void) NativeSetTextLocale(
         /* [in] */ Int64 nObj,
-        /* [in] */ const String& locale);
+        /* [in] */ ILocale* locale);
 
     static CARAPI_(Int32) NativeGetTextWidths(
         /* [in] */ Int64 nObj,
@@ -1420,6 +1416,7 @@ private:
 
     static CARAPI_(Int32) NativeGetTextRunCursor(
         /* [in] */ Int64 paint,
+        /* [in] */ Int64 native_typeface,
         /* [in] */ const String& text,
         /* [in] */ Int32 contextStart,
         /* [in] */ Int32 contextEnd,
@@ -1429,6 +1426,7 @@ private:
 
     static CARAPI_(Int32) NativeGetTextRunCursor(
         /* [in] */ Int64 paint,
+        /* [in] */ Int64 native_typeface,
         /* [in] */ ArrayOf<Char32>* text,
         /* [in] */ Int32 contextStart,
         /* [in] */ Int32 contextCount,
@@ -1559,7 +1557,6 @@ private:
     AutoPtr<IColorFilter> mColorFilter;
     AutoPtr<IMaskFilter> mMaskFilter;
     AutoPtr<IPathEffect> mPathEffect;
-    AutoPtr<IRasterizer> mRasterizer;
     AutoPtr<IShader> mShader;
     AutoPtr<ITypeface> mTypeface;
     AutoPtr<IXfermode> mXfermode;

@@ -213,7 +213,7 @@ AutoPtr<IList> FontListConverter::ConvertFonts(
         Int32 weight = i < WEIGHTS->GetLength() ? (*WEIGHTS)[i] : DEFAULT_WEIGHT;
         Boolean isItalic = i < ITALICS->GetLength() ? (*ITALICS)[i] : FALSE;
 
-        AutoPtr<FontListParser::Font> font = new FontListParser::Font(fullpath, weight, isItalic);
+        AutoPtr<FontListParser::Font> font = new FontListParser::Font(fullpath, 0, NULL, weight, isItalic);
         fonts->Add((IObject*)font);
     }
 

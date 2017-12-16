@@ -66,13 +66,6 @@ module
         RemoveClient(
             [in] IInputMethodClient* client);
 
-        StartInput(
-            [in] IInputMethodClient* client,
-            [in] IIInputContext* inputContext,
-            [in] IEditorInfo* attribute,
-            [in] Int32 controlFlags,
-            [out] IInputBindResult** result);
-
         FinishInput(
             [in] IInputMethodClient* client);
 
@@ -90,7 +83,8 @@ module
 
         // Report that a window has gained focus.  If 'attribute' is non-null,
         // this will also do a startInput.
-        WindowGainedFocus(
+        StartInputOrWindowGainedFocus(
+            [in] Int32 startInputReason,
             [in] IInputMethodClient* client,
             [in] IBinder* windowToken,
             [in] Int32 controlFlags,

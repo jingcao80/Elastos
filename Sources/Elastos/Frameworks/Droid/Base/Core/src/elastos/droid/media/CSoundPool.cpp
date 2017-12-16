@@ -35,7 +35,6 @@
 #include <elastos/core/StringUtils.h>
 #include <media/SoundPool.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::App::IAppOpsManager;
@@ -505,8 +504,25 @@ Int32 CSoundPool::SoundPoolImpl::_Load(
     /* [in] */ const String& uri,
     /* [in] */ Int32 priority)
 {
-    android::SoundPool* ap = reinterpret_cast<android::SoundPool*>(mNativeContext);
-    return ap->load(uri.string(), priority);
+    Int32 id = 0;
+    // try {
+    AutoPtr<IFile> f;
+    CFile::New(uri, (IFile**)&f);
+    AutoPtr<IParcelFileDescriptor> pfd;
+    CParcelFileDescriptor::Open(f, IParcelFileDescriptor::MODE_READ_ONLY,
+            (IParcelFileDescriptor**)&pfd);
+    if (pfd != NULL) {
+        AutoPtr<IFileDescriptor> fd;
+        pfd->GetFileDescriptor((IFileDescriptor**)&fd);
+        Int64 length;
+        f->GetLength(&length);
+        id = _Load(fd, 0, length, priority);
+        ICloseable::Probe(fd)->Close();
+    }
+    // } catch (java.io.IOException e) {
+    //     Log.e(TAG, "error loading " + path);
+    // }
+    return id;
 }
 
 Int32 CSoundPool::SoundPoolImpl::_Load(

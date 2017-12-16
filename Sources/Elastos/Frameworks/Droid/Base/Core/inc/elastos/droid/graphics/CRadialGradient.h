@@ -77,8 +77,13 @@ protected:
     CARAPI Copy(
         /* [out] */ IShader** shader);
 
+    // @Override
+    CARAPI_(Int64) CreateNativeInstance(
+        /* [in] */ IMatrix* matrix);
+
 private:
     static CARAPI_(Int64) NativeCreate1(
+        /* [in] */ Int64 nativeMatrix,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float radius,
@@ -87,6 +92,7 @@ private:
         /* [in] */ ShaderTileMode tile);
 
     static CARAPI_(Int64) NativeCreate2(
+        /* [in] */ Int64 nativeMatrix,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float radius,

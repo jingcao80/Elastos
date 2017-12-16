@@ -31,6 +31,16 @@ using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 namespace TextService {
 
@@ -160,6 +170,8 @@ private:
         /* [in] */ const String& extraValue);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     static const String TAG;
     static const String EXTRA_VALUE_PAIR_SEPARATOR;
     static const String EXTRA_VALUE_KEY_VALUE_SEPARATOR;

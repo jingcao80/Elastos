@@ -83,14 +83,17 @@ private:
     {
     public:
         StartInputRunnable(
-            /* [in] */ CInputMethodManager* service)
+            /* [in] */ CInputMethodManager* service,
+            /* [in] */ Int32 startInputReason)
             : mHost(service)
+            , mStartInputReason(startInputReason)
         {}
 
         CARAPI Run();
 
     private:
         CInputMethodManager* mHost;
+        Int32 mStartInputReason;
     };
 
     class ImeInputEventSender
@@ -394,6 +397,7 @@ public:
         /* [in] */ IView* view);
 
     CARAPI_(Boolean) StartInputInner(
+        /* [in] */ Int32 startInputReason,
         /* [in] */ IBinder* windowGainingFocus,
         /* [in] */ Int32 controlFlags,
         /* [in] */ Int32 softInputMode,
@@ -879,6 +883,17 @@ public:
     AutoPtr<IInputMethodClient> mClient;
 
     AutoPtr<IInputConnection> mDummyInputConnection;
+
+    static const Int32 START_INPUT_REASON_UNSPECIFIED;
+    static const Int32 START_INPUT_REASON_WINDOW_FOCUS_GAIN;
+    static const Int32 START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY;
+    static const Int32 START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API;
+    static const Int32 START_INPUT_REASON_CHECK_FOCUS;
+    static const Int32 START_INPUT_REASON_BOUND_TO_IMMS;
+    static const Int32 START_INPUT_REASON_UNBOUND_FROM_IMMS;
+    static const Int32 START_INPUT_REASON_ACTIVATED_BY_IMMS;
+    static const Int32 START_INPUT_REASON_DEACTIVATED_BY_IMMS;
+    static const Int32 START_INPUT_REASON_SESSION_CREATED_BY_IME;
 
 private:
     static Object sLock;

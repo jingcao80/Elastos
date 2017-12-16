@@ -20,8 +20,8 @@
 #include <elastos/core/Thread.h>
 #include <elastos/core/AutoLock.h>
 
-#include "MediaMtp/MtpServer.h"
-#include "MediaMtp/MtpStorage.h"
+#include "media/mtp/MtpServer.h"
+#include "media/mtp/MtpStorage.h"
 #include <fcntl.h>
 
 using namespace android;
@@ -117,17 +117,12 @@ void CMtpServer::NativeSetup(
     /* [in] */ IMtpDatabase* database,
     /* [in] */ Boolean usePtp)
 {
-    Int32 fd = open("/dev/mtp_usb", O_RDWR);
-    if (fd >= 0) {
-        Int64 db;
-        database->GetNativeContext(&db);
-        MtpServer* server = new MtpServer(fd, (MtpDatabase*)db,
-            usePtp, 1015/*AID_MEDIA_RW*/, 0664, 0775);
-        mNativeContext = (Int32)server;
-    }
-    else {
-        Logger::E(TAG, "could not open MTP driver, errno: %d", errno);
-    }
+    Int64 db;
+    database->GetNativeContext(&db);
+    MtpServer* server = new MtpServer((MtpDatabase*)db,
+        usePtp, 1015/*AID_MEDIA_RW*/, 0664, 0775,
+        MtpString(""), MtpString(""), MtpString(""), MtpString(""));
+    mNativeContext = (Int64)server;
 }
 
 void CMtpServer::NativeRun()

@@ -632,8 +632,9 @@ Int32 CVisualizer::Native_Setup(
     }
 
     // create the native Visualizer object
-    lpVisualizer = new android::Visualizer(0,
-        elastos_media_visualizer_effect_callback, lpJniStorage, sessionId);
+    lpVisualizer = new android::Visualizer(android::String16(""), 0,
+            elastos_media_visualizer_effect_callback, lpJniStorage,
+            (audio_session_t)sessionId);
 
     if (lpVisualizer == NULL) {
         ALOGE("Error creating Visualizer");
@@ -676,7 +677,6 @@ void CVisualizer::Native_Finalize()
     // delete the Visualizer object
     android::Visualizer* lpVisualizer = (android::Visualizer *)mNativeVisualizer;
     if (lpVisualizer) {
-        lpVisualizer->cancelCaptureCallBack();
         delete lpVisualizer;
     }
 

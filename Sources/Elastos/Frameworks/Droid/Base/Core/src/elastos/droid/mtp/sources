@@ -24,7 +24,7 @@ include $(MAKEDIR)/../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
-INCLUDES += $(PREBUILD_INC)/MediaMtp
+INCLUDES += $(PREBUILD_INC)/media/mtp
 INCLUDES += $(PREBUILD_INC)/libexif
 
 SOURCES = CMtpConstants.cpp

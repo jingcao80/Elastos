@@ -17,23 +17,24 @@
 #ifndef __ELASTOS_DROID_HARDWARE_SYSTEMSENSORMANAGER_H__
 #define __ELASTOS_DROID_HARDWARE_SYSTEMSENSORMANAGER_H__
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/hardware/SensorManager.h"
-#include <elastos/core/Runnable.h>
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/NativeMessageQueue.h"
+#include <elastos/core/Runnable.h>
 #include <elastos/utility/etl/List.h>
 #include <utils/Looper.h>
-#include <gui/SensorEventQueue.h>
+#include <sensor/SensorEventQueue.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::ILocalSocket;
 using Elastos::Droid::Os::Handler;
-using Elastos::Core::Runnable;
 using Elastos::Droid::Os::IMessageQueue;
 using Elastos::Droid::Os::MessageQueue;
 using Elastos::Droid::Os::NativeMessageQueue;
 using Elastos::Core::IThread;
 using Elastos::Core::ICloseGuard;
+using Elastos::Core::Runnable;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::Utility::Etl::List;
@@ -70,7 +71,7 @@ private:
     public:
         BaseEventQueue(
             /* [in] */ ILooper* looper,
-            /* [in] */ ISystemSensorManager* manager);
+            /* [in] */ SystemSensorManager* manager);
 
         virtual ~BaseEventQueue();
 
@@ -125,6 +126,7 @@ private:
             /* [out] */ Int32* result);
 
         CARAPI_(Int64) NativeInitBaseEventQueue(
+            /* [in] */ Int64 sensorManager,
             /* [in] */ BaseEventQueue* eventQ,
             /* [in] */ IMessageQueue* msgQ,
             /* [in] */ ArrayOf<Float>* scratch);
@@ -200,7 +202,7 @@ private:
         SensorEventQueue(
             /* [in] */ ISensorEventListener* listener,
             /* [in] */ ILooper* looper,
-            /* [in] */ ISystemSensorManager* manager);
+            /* [in] */ SystemSensorManager* manager);
 
         //@Override
         CARAPI_(void) AddSensorEvent(
@@ -237,7 +239,7 @@ private:
         TriggerEventQueue(
             /* [in] */ ITriggerEventListener* listener,
             /* [in] */ ILooper* looper,
-            /* [in] */ ISystemSensorManager* manager);
+            /* [in] */ SystemSensorManager* manager);
 
         //@Override
         CARAPI_(void) AddSensorEvent(
@@ -307,7 +309,6 @@ protected:
         /* [in] */ ISensor* sensor,
         /* [out] */ Boolean* result);
 
-
     /** @hide */
     //@Override
     CARAPI CancelTriggerSensorImpl(
@@ -321,9 +322,13 @@ protected:
         /* [out] */ Boolean* result);
 
 private:
-    static  CARAPI_(void) NativeClassInit();
+    static CARAPI_(void) NativeClassInit();
+
+    static CARAPI_(Int64) NativeCreate(
+        /* [in] */ const String& opPackageName);
 
     static CARAPI_(Int32) NativeGetNextSensor(
+        /* [in] */ Int64 nativeInstance,
         /* [in] */ ISensor* sensor,
         /* [in] */ Int32 next);
 
@@ -342,6 +347,7 @@ private:
     // Looper associated with the context in which this instance was created.
     AutoPtr<ILooper> mMainLooper;
     Int32 mTargetSdkLevel;
+    Int64 mNativeInstance;
 };
 
 } // namespace Hardware

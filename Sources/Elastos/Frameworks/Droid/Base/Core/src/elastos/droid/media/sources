@@ -21,6 +21,10 @@ include $(MAKEDIR)/../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
+INCLUDES += $(PREBUILD_INC)/harfbuzz_ng
+INCLUDES += $(PREBUILD_INC)/skia/codec
+INCLUDES += $(PREBUILD_INC)/skia/config
+INCLUDES += $(PREBUILD_INC)/skia/core
 INCLUDES += $(PREBUILD_INC)/media/openmax
 
 C_DEFINES += -DDROID_CORE
@@ -175,6 +179,8 @@ SOURCES += CMediaScanner.cpp
 SOURCES += CMediaRouterHelper.cpp
 SOURCES += Media_Utils.cpp
 SOURCES += media.cpp
+
+SOURCES += IAudioService.cpp
 
 ELASTOS_LIBS += audiofx/audiofx.lib
 ELASTOS_LIBS += audiopolicy/audiopolicy.lib

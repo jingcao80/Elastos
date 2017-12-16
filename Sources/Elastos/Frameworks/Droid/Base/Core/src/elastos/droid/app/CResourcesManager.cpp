@@ -18,6 +18,7 @@
 #include "elastos/droid/app/ApplicationPackageManager.h"
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/app/CContextImpl.h"
+#include "elastos/droid/content/pm/IPackageManager.h"
 #include "elastos/droid/content/pm/ThemeUtils.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/content/res/CAssetManager.h"
@@ -41,6 +42,7 @@ using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CContextImpl;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IPackageManagerProxy;
 using Elastos::Droid::Content::Pm::IThemeUtils;
 using Elastos::Droid::Content::Pm::ThemeUtils;
 using Elastos::Droid::Content::Res::CConfiguration;
@@ -716,8 +718,8 @@ AutoPtr<IIPackageManager> CResourcesManager::GetPackageManager()
     if (sPackageManager != NULL) {
         return sPackageManager;
     }
-    AutoPtr<IInterface> b = ServiceManager::GetService(String("package"));
-    sPackageManager = IIPackageManager::Probe(b);
+    android::sp<android::IBinder> pm = ServiceManager::GetAndroidService(String("package"));
+    sPackageManager = new IPackageManagerProxy(pm);
     return sPackageManager;
 }
 

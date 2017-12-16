@@ -21,7 +21,8 @@ INCLUDES += ../
 #INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc
 INCLUDES += $(MAKEDIR)/../../../../../inc
 #INCLUDES += $(PREBUILD_INC)/skia/utils
-#INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/config
 
 include $(MAKEDIR)/../../../../../../../../sources.inc
 

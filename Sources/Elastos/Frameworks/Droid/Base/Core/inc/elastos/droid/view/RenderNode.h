@@ -36,6 +36,7 @@ class RenderNode
     , public IRenderNode
 {
     friend class ThreadedRenderer;
+    friend class GLES20Canvas;
 
 public:
     CAR_INTERFACE_DECL()
@@ -822,8 +823,10 @@ private:
     static CARAPI_(void) nEndAllAnimators(
         /* [in] */ Int64 renderNode);
 
+    static CARAPI_(Boolean) nIsValid(
+        /* [in] */ Int64 renderNode);
+
 private:
-    Boolean mValid;
     // Do not access directly unless you are ThreadedRenderer
     Int64 mNativeRenderNode;
     AutoPtr<IWeakReference> mOwningView;

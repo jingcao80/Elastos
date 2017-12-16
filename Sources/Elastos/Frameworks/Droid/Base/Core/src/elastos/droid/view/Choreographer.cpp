@@ -310,6 +310,8 @@ Choreographer::Choreographer(
     : mFrameScheduled(FALSE)
     , mCallbacksRunning(FALSE)
 {
+    mFrameInfo = new FrameInfo();
+
     mLooper = looper;
     mHandler = new FrameHandler(looper, this);
 
@@ -614,6 +616,7 @@ void Choreographer::DoFrame(
             return; // no work to do
         }
 
+        Int64 intendedFrameTimeNanos = frameTimeNanos;
         system->GetNanoTime(&startNanos);
         const Int64 jitterNanos = startNanos - frameTimeNanos;
         if (jitterNanos >= mFrameIntervalNanos) {
@@ -643,12 +646,18 @@ void Choreographer::DoFrame(
             return;
         }
 
+        mFrameInfo->SetVsync(intendedFrameTimeNanos, frameTimeNanos);
         mFrameScheduled = FALSE;
         mLastFrameTimeNanos = frameTimeNanos;
     }
 
+    mFrameInfo->MarkInputHandlingStart();
     DoCallbacks(Choreographer::CALLBACK_INPUT, frameTimeNanos);
+
+    mFrameInfo->MarkAnimationsStart();
     DoCallbacks(Choreographer::CALLBACK_ANIMATION, frameTimeNanos);
+
+    mFrameInfo->MarkPerformTraversalsStart();
     DoCallbacks(Choreographer::CALLBACK_TRAVERSAL, frameTimeNanos);
 
     if (DEBUG) {

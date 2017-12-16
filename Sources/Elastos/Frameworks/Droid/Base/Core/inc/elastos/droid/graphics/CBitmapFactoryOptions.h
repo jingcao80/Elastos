@@ -156,9 +156,6 @@ public:
     CARAPI GetCancel(
         /* [out] */ Boolean* cancel);
 
-private:
-    CARAPI_(void) RequestCancel();
-
 public:
     /**
      * If set, decode methods that take the Options object will attempt to

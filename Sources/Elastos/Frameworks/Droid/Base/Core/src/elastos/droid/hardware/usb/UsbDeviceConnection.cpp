@@ -29,6 +29,8 @@ namespace Droid {
 namespace Hardware {
 namespace Usb {
 
+static const int USB_CONTROL_READ_TIMEOUT_MS = 200;
+
 const String UsbDeviceConnection::TAG("UsbDeviceConnection");
 
 CAR_INTERFACE_IMPL(UsbDeviceConnection, Object, IUsbDeviceConnection);
@@ -444,7 +446,7 @@ AutoPtr<IUsbRequest> UsbDeviceConnection::NativeRequestWait()
         return NULL;
     }
 
-    struct usb_request* request = usb_request_wait(device);
+    struct usb_request* request = usb_request_wait(device, -1);
 
     AutoPtr<IUsbRequest> result;
     if (request){
@@ -463,7 +465,7 @@ String UsbDeviceConnection::NativeGetSerial()
         return String("");
     }
 
-    char* serial = usb_device_get_serial(device);
+    char* serial = usb_device_get_serial(device, USB_CONTROL_READ_TIMEOUT_MS);
     if (!serial){
         return String("");
     }

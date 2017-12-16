@@ -36,6 +36,16 @@ using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 namespace TextService {
 
@@ -149,6 +159,8 @@ public:
         /* [out] */ ISpellCheckerSubtype** subtype);
 
 private:
+    friend Elastos::Droid::Os::AndroidParcelUtils;
+
     static const CString TAG;
     AutoPtr<IResolveInfo> mService;
     String mId;

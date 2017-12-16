@@ -54,6 +54,9 @@ ECode Random::constructor(
     return SetSeed(seed);
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 Int32 Random::Next(
     /* [in] */ Int32 bits)
 {

@@ -42,6 +42,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_ICharSequence;
 using Elastos::Core::EIID_IArrayOf;
 using Elastos::Core::CString;
+using Elastos::Core::UniquePtr;
 using Elastos::Utility::TimeZone;
 using Elastos::Utility::ITimeZone;
 using Elastos::Utility::ILocaleHelper;

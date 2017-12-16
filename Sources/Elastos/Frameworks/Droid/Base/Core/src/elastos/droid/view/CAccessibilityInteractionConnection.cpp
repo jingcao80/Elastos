@@ -30,6 +30,7 @@ ECode CAccessibilityInteractionConnection::constructor(
     /* [in] */ IWeakReference* viewRootImpl)
 {
     mViewRootImpl = viewRootImpl;
+    mBBinder = NULL;
     return NOERROR;
 }
 

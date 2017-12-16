@@ -462,40 +462,7 @@ ECode StaticLayout::Generate(
                         w = tabStops->NextDefaultStop(w, TAB_INCREMENT);
                     }
                 }
-                else if (c >= CHAR_FIRST_HIGH_SURROGATE && c <= CHAR_LAST_LOW_SURROGATE
-                        && j + 1 < spanEnd) {
-                    assert(0 && "TODO");
-                    Int32 emoji = 0;
-//                    Int32 emoji = Character.codePointAt(chs, j - paraStart);
-                    if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
-                        AutoPtr<IBitmap> bm;
-                        EMOJI_FACTORY->GetBitmapFromAndroidPua(emoji, (IBitmap**)&bm);
-                        if (bm != NULL) {
-                            AutoPtr<IPaint> whichPaint;
-                            if (spanned == NULL) {
-                                whichPaint = p;
-                            } else {
-                                whichPaint = IPaint::Probe(mWorkPaint);
-                            }
-
-                            Int32 width, height;
-                            bm->GetWidth(&width);
-                            bm->GetHeight(&height);
-                            Float ascent;
-                            whichPaint->Ascent(&ascent);
-                            Float wid = width * -ascent / height;
-
-                            w += wid;
-                            hasTabOrEmoji = TRUE;
-                            j++;
-                        } else {
-                            w += (*widths)[j - paraStart];
-                        }
-
-                    } else {
-                        w += (*widths)[j - paraStart];
-                    }
-                } else {
+                else {
                     w += (*widths)[j - paraStart];
                 }
 

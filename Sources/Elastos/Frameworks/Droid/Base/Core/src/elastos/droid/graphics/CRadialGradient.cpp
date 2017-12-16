@@ -17,6 +17,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/CRadialGradient.h"
+#include "elastos/droid/graphics/Matrix.h"
 #include <skia/effects/SkGradientShader.h>
 
 namespace Elastos {
@@ -66,7 +67,8 @@ ECode CRadialGradient::constructor(
     mColors = colors;
     mPositions = positions;
     mTileMode = tile;
-    Init(NativeCreate1(x, y, radius, colors, positions, tile));
+
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
@@ -89,7 +91,8 @@ ECode CRadialGradient::constructor(
     mCenterColor = centerColor;
     mEdgeColor = edgeColor;
     mTileMode = tile;
-    Init(NativeCreate2(x, y, radius, centerColor, edgeColor, tile));
+
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
@@ -125,7 +128,24 @@ ECode CRadialGradient::Copy(
     return NOERROR;
 }
 
+Int64 CRadialGradient::CreateNativeInstance(
+    /* [in] */ IMatrix* matrix)
+{
+    Int64 nativeMatrix = matrix == NULL ? 0 :
+            ((Matrix*)matrix)->mNativeMatrix;
+    if (mType == TYPE_COLORS_AND_POSITIONS) {
+        return NativeCreate1(nativeMatrix, mX, mY, mRadius,
+                mColors, mPositions, mTileMode);
+    } else { // TYPE_COLOR_CENTER_AND_COLOR_EDGE
+        return NativeCreate2(nativeMatrix, mX, mY, mRadius,
+                mCenterColor, mEdgeColor, mTileMode);
+    }
+}
+
+static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColorsInPremul_Flag;
+
 Int64 CRadialGradient::NativeCreate1(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float radius,
@@ -133,6 +153,7 @@ Int64 CRadialGradient::NativeCreate1(
     /* [in] */ ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tile)
 {
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
     SkPoint center;
     center.set(x, y);
 
@@ -145,18 +166,22 @@ Int64 CRadialGradient::NativeCreate1(
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::CreateRadial(center, radius,
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeRadial(center, radius,
             reinterpret_cast<const SkColor*>(colorValues), pos, count,
-            static_cast<SkShader::TileMode>(tile));
-    // env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues),
-    //                              JNI_ABORT);
+            static_cast<SkShader::TileMode>(tile), sGradientShaderFlags, NULL);
 
-    // ThrowIAE_IfNull(env, shader);
-    assert(shader != NULL);
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+
     return reinterpret_cast<Int64>(shader);
 }
 
 Int64 CRadialGradient::NativeCreate2(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float radius,
@@ -164,6 +189,7 @@ Int64 CRadialGradient::NativeCreate2(
     /* [in] */ Int32 color1,
     /* [in] */ ShaderTileMode tile)
 {
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
     SkPoint center;
     center.set(x, y);
 
@@ -171,10 +197,16 @@ Int64 CRadialGradient::NativeCreate2(
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::CreateRadial(center, radius, colors, NULL,
-            2, (SkShader::TileMode)tile);
-    assert(s != NULL);
-    return reinterpret_cast<Int64>(s);
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeRadial(center, radius, colors, NULL, 2,
+            static_cast<SkShader::TileMode>(tile), sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+    return reinterpret_cast<Int64>(shader);
 }
 
 } // namespace Graphics

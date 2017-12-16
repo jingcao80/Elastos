@@ -18,11 +18,10 @@
 #include "elastos/droid/os/CDebugMemoryInfo.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <cutils/debugger.h>
 #include <utils/CallStack.h>
 
 #include "utils/misc.h"
-#include "cutils/debugger.h"
+#include <debuggerd/client.h>
 #include <memtrack/memtrack.h>
 #include <cutils/log.h>
 #include <fcntl.h>
@@ -550,24 +549,11 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
     return 0;
 }
 
-static bool memtrackLoaded = false;
-
 /*
  * Retrieves the graphics memory that is unaccounted for in /proc/pid/smaps.
  */
 static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_mem)
 {
-    if (!memtrackLoaded) {
-        int err = memtrack_init();
-        if (err != 0) {
-            memtrackLoaded = false;
-            Slogger::E("Debug", "failed to load memtrack module: %d", err);
-            return -1;
-        } else {
-            memtrackLoaded = true;
-        }
-    }
-
     struct memtrack_proc* p = memtrack_proc_new();
     if (p == NULL) {
         Slogger::W("Debug", "failed to create memtrack_proc");
@@ -664,7 +650,7 @@ ECode Debug::DumpNativeBacktraceToFile(
     if (lseek(fd, 0, SEEK_END) < 0) {
         fprintf(stderr, "lseek: %s\n", strerror(errno));
     } else {
-        dump_backtrace_to_file(pid, fd);
+        dump_backtrace_to_file_timeout(pid, fd, 0);
     }
 
     close(fd);

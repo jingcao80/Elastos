@@ -48,7 +48,7 @@ Int64 CDashPathEffect::NativeCreate(
 #else
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
-    SkPathEffect* effect = SkDashPathEffect::Create(intervals, count, phase);
+    SkPathEffect* effect = SkDashPathEffect::Make(intervals, count, phase).release();
     return reinterpret_cast<Int64>(effect);
 }
 

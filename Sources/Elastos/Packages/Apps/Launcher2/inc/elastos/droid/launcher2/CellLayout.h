@@ -1532,7 +1532,7 @@ public:
 private:
     static const Boolean DESTRUCTIVE_REORDER;
     static const Boolean DEBUG_VISUALIZE_OCCUPIED;
-    static const Float REORDER_HINT_MAGNITUDE = 0.12f;
+    static constexpr Float REORDER_HINT_MAGNITUDE = 0.12f;
     static const Int32 REORDER_ANIMATION_DURATION = 150;
     static const Int32 INVALID_DIRECTION = -100;
 

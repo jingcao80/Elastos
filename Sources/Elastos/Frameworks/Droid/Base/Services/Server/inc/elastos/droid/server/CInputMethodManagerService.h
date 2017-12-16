@@ -555,6 +555,17 @@ public:
         /* [in] */ IResultReceiver* resultReceiver,
         /* [out] */ Boolean* state);
 
+    CARAPI StartInputOrWindowGainedFocus(
+        /* [in] */ Int32 startInputReason,
+        /* [in] */ IInputMethodClient* client,
+        /* [in] */ IBinder* windowToken,
+        /* [in] */ Int32 controlFlags,
+        /* [in] */ Int32 softInputMode,
+        /* [in] */ Int32 windowFlags,
+        /* [in] */ IEditorInfo* attribute,
+        /* [in] */ IIInputContext* inputContext,
+        /* [out] */ IInputBindResult** result);
+
     /* packaged */ CARAPI_(Boolean) HideCurrentInputLocked(
         /* [in] */ Int32 flags,
         /* [in] */ IResultReceiver* resultReceiver);
@@ -656,6 +667,7 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
 private:
     CARAPI_(void) ResetDefaultImeLocked(
         /* [in] */ IContext* context);

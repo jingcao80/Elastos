@@ -35,6 +35,8 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+class AndroidParcelUtils;
+
 /**
  * A mapping from String values to various types.
  */
@@ -473,6 +475,8 @@ public:
     AutoPtr<IArrayMap> mMap;//ArrayMap<String, Object> mMap = null;
 
 protected:
+    friend class AndroidParcelUtils;
+
     static const Boolean DEBUG;// = false;
 
     static const Int32 BUNDLE_MAGIC;// = 0x4C444E42; // 'B' 'N' 'D' 'L'

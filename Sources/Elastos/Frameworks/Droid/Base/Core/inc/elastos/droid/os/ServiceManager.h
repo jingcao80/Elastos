@@ -18,6 +18,7 @@
 #define __ELASTOS_DROID_OS_SERVICEMANAGER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <binder/Binder.h>
 
 namespace Elastos {
 namespace Droid {
@@ -33,6 +34,9 @@ public:
      * @return a reference to the service, or <code>null</code> if the service doesn't exist
      */
     static CARAPI_(AutoPtr<IInterface>) GetService(
+        /* [in] */ const String& name);
+
+    static android::sp<android::IBinder> GetAndroidService(
         /* [in] */ const String& name);
 
     /**

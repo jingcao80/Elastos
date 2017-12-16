@@ -50,7 +50,7 @@ public:
 
 public:
     static const Int32 TAP_TIMEOUT_MSEC = 300;
-    static const Float TAP_MOTION_SLOP_INCHES = 0.125f;
+    static constexpr Float TAP_MOTION_SLOP_INCHES = 0.125f;
 
     Int32 mMotionSlop;
     Float mDownX;

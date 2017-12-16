@@ -27,7 +27,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <camera/Camera.h>
-#include <camera/ICameraService.h>
+#include <android/hardware/ICameraService.h>
 #include <gui/Surface.h>
 #include <hardware/camera.h>
 #include <media/mediarecorder.h>
@@ -624,7 +624,7 @@ ECode CMediaRecorder::NativeSetOutputFile(
     Int32 rawFd;
     fd->GetDescriptor(&rawFd);
     android::sp<android::MediaRecorder> mr = getMediaRecorder(this);
-    android::status_t opStatus = mr->setOutputFile(rawFd, offset, length);
+    android::status_t opStatus = mr->setOutputFile(rawFd);
     return process_media_recorder_call(opStatus,
         E_IO_EXCEPTION, "setOutputFile failed.");
 }
@@ -759,8 +759,9 @@ ECode CMediaRecorder::ReleaseResources()
 ECode CMediaRecorder::NativeSetup(
     /* [in] */ const String& packageName)
 {
-    //ALOGV("setup");
-    android::sp<android::MediaRecorder> mr = new android::MediaRecorder();
+    Logger::V(TAG, "setup");
+    android::sp<android::MediaRecorder> mr = new android::MediaRecorder(
+            android::String16(""));
     if (mr == NULL) {
         Logger::E(TAG, "Out of memory.");
         return E_RUNTIME_EXCEPTION;
@@ -777,7 +778,7 @@ ECode CMediaRecorder::NativeSetup(
     android::sp<JNIMediaRecorderListener> listener = new JNIMediaRecorderListener(wr);
     mr->setListener(listener);
 
-   // Convert client name jstring to String16
+    // Convert client name jstring to String16
     android::String16 clientName(packageName.string(), packageName.GetLength());
 
     // pass client package name for permissions tracking

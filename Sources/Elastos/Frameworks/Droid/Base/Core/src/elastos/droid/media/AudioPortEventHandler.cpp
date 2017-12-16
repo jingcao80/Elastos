@@ -40,16 +40,16 @@ const Int32 AudioPortEventHandler::AUDIOPORT_EVENT_SERVICE_DIED = 3;
 const Int32 AudioPortEventHandler::AUDIOPORT_EVENT_NEW_LISTENER = 4;
 
 //===================================================================================
-//              JNIAudioPortCallback
+//              NativeAudioPortCallback
 //===================================================================================
 
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
-class JNIAudioPortCallback: public android::AudioSystem::AudioPortCallback
+class NativeAudioPortCallback: public android::AudioSystem::AudioPortCallback
 {
 public:
-    JNIAudioPortCallback(IWeakReference* weak_thiz);
-    ~JNIAudioPortCallback();
+    NativeAudioPortCallback(IWeakReference* weak_thiz);
+    ~NativeAudioPortCallback();
 
     virtual void onAudioPortListUpdate();
     virtual void onAudioPatchListUpdate();
@@ -61,33 +61,33 @@ private:
     AutoPtr<IWeakReference> mObject;    // Weak ref to AudioPortEventHandlerDelegate Java object to call on
 };
 
-JNIAudioPortCallback::JNIAudioPortCallback(IWeakReference* weak_thiz)
+NativeAudioPortCallback::NativeAudioPortCallback(IWeakReference* weak_thiz)
 {
     // We use a weak reference so the SoundTriggerModule object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject = weak_thiz;
 }
 
-JNIAudioPortCallback::~JNIAudioPortCallback()
+NativeAudioPortCallback::~NativeAudioPortCallback()
 {
 }
 
-void JNIAudioPortCallback::sendEvent(int event)
+void NativeAudioPortCallback::sendEvent(int event)
 {
     AudioPortEventHandler::PostEventFromNative(mObject, event, 0, 0, NULL);
 }
 
-void JNIAudioPortCallback::onAudioPortListUpdate()
+void NativeAudioPortCallback::onAudioPortListUpdate()
 {
     sendEvent(AudioPortEventHandler::AUDIOPORT_EVENT_PORT_LIST_UPDATED);
 }
 
-void JNIAudioPortCallback::onAudioPatchListUpdate()
+void NativeAudioPortCallback::onAudioPatchListUpdate()
 {
     sendEvent(AudioPortEventHandler::AUDIOPORT_EVENT_PATCH_LIST_UPDATED);
 }
 
-void JNIAudioPortCallback::onServiceDied()
+void NativeAudioPortCallback::onServiceDied()
 {
     sendEvent(AudioPortEventHandler::AUDIOPORT_EVENT_SERVICE_DIED);
 }
@@ -286,18 +286,25 @@ ECode AudioPortEventHandler::Handler(
 ECode AudioPortEventHandler::NativeSetup(
     /* [in] */ IWeakReference* weak_this)
 {
-    android::sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(weak_this);
-    android::AudioSystem::setAudioPortCallback(callback);
+    android::sp<NativeAudioPortCallback> callback = new NativeAudioPortCallback(weak_this);
+
+    if (android::AudioSystem::addAudioPortCallback(callback) == android::NO_ERROR) {
+        AutoLock lock(this);
+        callback->incStrong(NULL);
+        mNativeCallback = reinterpret_cast<Int64>(callback.get());
+    }
     return NOERROR;
 }
 
 ECode AudioPortEventHandler::NativeFinalize()
 {
-    // this function maybe called in AudioPortEventHandler::PostEventFromNative.
-    // so, in order to avoid AudioSystem::gLock dead lock, the following codes
-    // should not be called.
-    // android::sp<JNIAudioPortCallback> callback;
-    // android::AudioSystem::setAudioPortCallback(callback);
+    AutoLock lock(this);
+    android::sp<NativeAudioPortCallback> callback =
+            reinterpret_cast<NativeAudioPortCallback*>(mNativeCallback);
+    if (callback != 0) {
+        callback->decStrong(NULL);
+    }
+    mNativeCallback = 0;
     return NOERROR;
 }
 

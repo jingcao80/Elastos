@@ -21,8 +21,8 @@
 #include "elastos/droid/graphics/Matrix.h"
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/CCanvas.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
 #include <skia/utils/SkCamera.h>
+#include <hwui/Canvas.h>
 
 namespace Elastos {
 namespace Droid {
@@ -163,7 +163,7 @@ ECode CCamera::ApplyToCanvas(
         GetMatrix(mMatrix);
         canvas->Concat(mMatrix);
     } else {
-        NativeApplyToCanvas(((CCanvas*)canvas)->GetNativeCanvasWrapper());
+        NativeApplyToCanvas(((CCanvas*)canvas)->mNativeCanvas);
     }
     return NOERROR;
 }
@@ -210,7 +210,7 @@ void CCamera::NativeGetMatrix(
 void CCamera::NativeApplyToCanvas(
     /* [in] */ Int64 canvasHandle)
 {
-    SkCanvas* canvas = reinterpret_cast<NativeCanvas*>(canvasHandle)->getSkCanvas();
+    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->asSkCanvas();
     Sk3DView* v = reinterpret_cast<Sk3DView*>(mNativeInstance);
     v->applyToCanvas(canvas);
 }

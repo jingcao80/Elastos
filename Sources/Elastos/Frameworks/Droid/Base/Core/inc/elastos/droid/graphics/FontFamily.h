@@ -22,6 +22,8 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::Res::IAssetManager;
+using Elastos::Droid::Graphics::Fonts::IFontVariationAxis;
+using Elastos::IO::IByteBuffer;
 
 namespace Elastos {
 namespace Droid {
@@ -49,47 +51,86 @@ public:
 
     CARAPI AddFont(
         /* [in] */ const String& path,
+        /* [in] */ Int32 ttcIndex,
+        /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 italic,
         /* [out] */ Boolean* result);
 
-    CARAPI AddFontWeightStyle(
-        /* [in] */ const String& path,
+    CARAPI AddFontFromBuffer(
+        /* [in] */ IByteBuffer* font,
+        /* [in] */ Int32 ttcIndex,
+        /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
         /* [in] */ Int32 weight,
-        /* [in] */ Boolean style,
+        /* [in] */ Int32 italic,
         /* [out] */ Boolean* result);
 
     CARAPI AddFontFromAsset(
         /* [in] */ IAssetManager* mgr,
         /* [in] */ const String& path,
+        /* [in] */ Int32 cookie,
+        /* [in] */ Boolean isAsset,
+        /* [in] */ Int32 ttcIndex,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 isItalic,
+        /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
         /* [out] */ Boolean* result);
 
+    CARAPI Freeze(
+        /* [out] */ Boolean* result);
+
+    CARAPI AbortCreation();
+
 private:
-    static CARAPI_(Int64) NativeCreateFamily(
+    static CARAPI_(Int64) NativeCreateBuilder(
         /* [in] */ const String& lang,
         /* [in] */ Int32 variant);
+
+    static CARAPI_(void) NativeAbort(
+        /* [in] */ Int64 builderPtr);
+
+    static CARAPI_(Int64) NativeCreateFamily(
+        /* [in] */ Int64 builderPtr);
 
     static CARAPI_(void) NativeUnrefFamily(
         /* [in] */ Int64 nativePtr);
 
     static CARAPI_(Boolean) NativeAddFont(
-        /* [in] */ Int64 nativeFamily,
-        /* [in] */ const String& path);
+        /* [in] */ Int64 builderPtr,
+        /* [in] */ IByteBuffer* font,
+        /* [in] */ Int32 ttcIndex,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 isItalic);
 
     static CARAPI_(Boolean) NativeAddFontWeightStyle(
-        /* [in] */ Int64 nativeFamily,
-        /* [in] */ const String& path,
+        /* [in] */ Int64 builderPtr,
+        /* [in] */ IByteBuffer* font,
+        /* [in] */ Int32 ttcIndex,
         /* [in] */ Int32 weight,
         /* [in] */ Boolean isItalic);
 
     static CARAPI_(Boolean) NativeAddFontFromAsset(
-        /* [in] */ Int64 nativeFamily,
+        /* [in] */ Int64 builderPtr,
         /* [in] */ IAssetManager* mgr,
-        /* [in] */ const String& path);
+        /* [in] */ const String& path,
+        /* [in] */ Int32 cookie,
+        /* [in] */ Boolean isAsset,
+        /* [in] */ Int32 ttcIndex,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 isItalic);
+
+    static CARAPI_(void) NativeAddAxisValue(
+        /* [in] */ Int64 builderPtr,
+        /* [in] */ Int32 tag,
+        /* [in] */ Float value);
 
 public:
     /**
      * @hide
      */
     Int64 mNativePtr;
+
+    Int64 mBuilderPtr;
 };
 
 } // namespace Graphics

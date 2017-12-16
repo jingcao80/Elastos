@@ -218,16 +218,9 @@ void TextLine::Draw(
 
             if (mHasTabs && j < runLimit) {
                 codept = (*(mChars.Get()))[j];
-                if (codept >= 0xd800 && codept < 0xdc00 && j + 1 < runLimit) {
-                    assert(0 && "TODO");
-//                    codept = Character::CodePointAt(mChars, j);
-                    if (codept >= Layout::MIN_EMOJI && codept <= Layout::MAX_EMOJI) {
-                        Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept, (IBitmap**)&bm);
-                    }
-                    else if (codept > 0xffff) {
-                        ++j;
-                        continue;
-                    }
+                if (codept > 0xffff) {
+                    ++j;
+                    continue;
                 }
             }
 
@@ -307,14 +300,9 @@ Float TextLine::Measure(
 
             if (mHasTabs && j < runLimit) {
                 codept = (*chars)[j];
-                if (codept >= 0xd800 && codept < 0xdc00 && j + 1 < runLimit) {
-                    if (codept >= Layout::MIN_EMOJI && codept <= Layout::MAX_EMOJI) {
-                        Layout::EMOJI_FACTORY->GetBitmapFromAndroidPua(codept, (IBitmap**)&bm);
-                    }
-                    else if (codept > 0xffff) {
-                        ++j;
-                        continue;
-                    }
+                if (codept > 0xffff) {
+                    ++j;
+                    continue;
                 }
             }
 

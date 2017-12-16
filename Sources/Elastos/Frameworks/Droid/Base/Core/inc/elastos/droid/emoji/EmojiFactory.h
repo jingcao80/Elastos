@@ -203,41 +203,6 @@ public:
         /* [out] */ Int32* RetValue);
 
 private:
-    CARAPI_(void) NativeDestructor(
-        /* [in] */ Int64 nativeEmojiFactory);
-
-    static CARAPI_(AutoPtr<IBitmap>) NativeGetBitmapFromAndroidPua(
-       /* [in] */ Int64 nativeEmojiFactory,
-       /* [in] */ Int32 AndroidPua);
-
-    static CARAPI_(Int32) NativeGetAndroidPuaFromVendorSpecificSjis(
-       /* [in] */ Int64 nativeEmojiFactory,
-       /* [in] */ Char32 sjis);
-
-    static CARAPI_(Int32) NativeGetVendorSpecificSjisFromAndroidPua(
-       /* [in] */ Int64 nativeEmojiFactory,
-       /* [in] */ Int32 pua);
-
-    static CARAPI_(Int32) NativeGetAndroidPuaFromVendorSpecificPua(
-       /* [in] */ Int64 nativeEmojiFactory,
-       /* [in] */ Int32 vsp);
-
-    static CARAPI_(Int32) NativeGetVendorSpecificPuaFromAndroidPua(
-       /* [in] */ Int64 nativeEmojiFactory,
-       /* [in] */ Int32 pua);
-
-    static CARAPI_(Int32) NativeGetMaximumVendorSpecificPua(
-       /* [in] */ Int64 nativeEmojiFactory);
-
-    static CARAPI_(Int32) NativeGetMinimumVendorSpecificPua(
-       /* [in] */ Int64 nativeEmojiFactory);
-
-    static CARAPI_(Int32) NativeGetMaximumAndroidPua(
-       /* [in] */ Int64 nativeEmojiFactory);
-
-    static CARAPI_(Int32) NativeGetMinimumAndroidPua(
-        /* [in] */ Int64 nativeEmojiFactory);
-
 //     /*
 //      // Returns binary image data corresponding to "pua". The size of binary is
 //      // stored to "size". Returns NULL if there's no mapping from the "pua" to a

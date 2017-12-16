@@ -815,7 +815,7 @@ private:
      * .75 is hardwired into the program, which uses cheap shifts in place of
      * expensive division.
      */
-    ECO_LOCAL static const Float DEFAULT_LOAD_FACTOR = 0.75F;
+    ECO_LOCAL static constexpr Float DEFAULT_LOAD_FACTOR = 0.75F;
 
     /**
      * A rough estimate of the number of characters per entry, for use

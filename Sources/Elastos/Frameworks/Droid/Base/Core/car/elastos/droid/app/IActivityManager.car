@@ -276,6 +276,9 @@ module
         ActivityDestroyed(
             [in] IBinder* token);
 
+        ActivityRelaunched(
+            [in] IBinder* token);
+
         GetCallingPackage(
             [in] IBinder* token,
             [out] String* pkg);
@@ -1073,6 +1076,9 @@ module
         /* package */
         TestIsSystemReady(
             [out] Boolean* ready);
+
+        SetRenderThread(
+            [in] Int32 tid);
     }
 
     /** Information you can retrieve about a particular application. */

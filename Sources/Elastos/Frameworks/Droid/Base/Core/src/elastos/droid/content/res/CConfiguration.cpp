@@ -929,6 +929,9 @@ ECode CConfiguration::Equals(
     return NOERROR;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode CConfiguration::GetHashCode(
     /* [out] */ Int32* hash)
 {

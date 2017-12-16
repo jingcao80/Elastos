@@ -75,7 +75,8 @@ CAR_INTERFACE_IMPL_2(CApplicationThread, Object, IApplicationThread, IBinder)
 CAR_OBJECT_IMPL(CApplicationThread)
 
 CApplicationThread::CApplicationThread()
-    : mLastProcessState(-1)
+    : mBBinder(NULL)
+    , mLastProcessState(-1)
 {
 }
 

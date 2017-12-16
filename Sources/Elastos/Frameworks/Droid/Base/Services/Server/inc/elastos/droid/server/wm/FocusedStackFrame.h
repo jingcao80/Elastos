@@ -63,7 +63,7 @@ private:
     static const String TAG;
 
     static const Int32 THICKNESS = 10;
-    static const Float ALPHA = 0.3f;
+    static constexpr Float ALPHA = 0.3f;
 
     AutoPtr<ISurfaceControl> mSurfaceControl;
     AutoPtr<ISurface> mSurface;

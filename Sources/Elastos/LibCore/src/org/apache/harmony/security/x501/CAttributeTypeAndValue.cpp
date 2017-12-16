@@ -690,6 +690,9 @@ ECode CAttributeTypeAndValue::AddOID(
     return NOERROR;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 Int32 CAttributeTypeAndValue::HashIntArray(
     /* [in] */ ArrayOf<Int32>* oid)
 {

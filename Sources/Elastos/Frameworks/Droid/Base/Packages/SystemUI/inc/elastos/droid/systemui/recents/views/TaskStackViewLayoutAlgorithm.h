@@ -116,7 +116,7 @@ public:
 
 public:
     // These are all going to change
-    static const Float StackPeekMinScale = 0.8f; // The min scale of the last card in the peek area
+    static constexpr Float StackPeekMinScale = 0.8f; // The min scale of the last card in the peek area
 
     AutoPtr<RecentsConfiguration> mConfig;
 
@@ -135,8 +135,8 @@ public:
     HashMap<AutoPtr<ITaskKey>, Float> mTaskProgressMap;
 
     // Log function
-    static const Float XScale = 1.75f;  // The large the XScale, the longer the flat area of the curve
-    static const Float LogBase = 3000;
+    static constexpr Float XScale = 1.75f;  // The large the XScale, the longer the flat area of the curve
+    static constexpr Float LogBase = 3000;
     static const Int32 PrecisionSteps = 250;
     static AutoPtr<ArrayOf<Float> > sXp;
     static AutoPtr<ArrayOf<Float> > sPx;

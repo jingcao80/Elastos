@@ -126,4 +126,7 @@ SOURCES += CBatteryManager.cpp
 SOURCES += CBatteryProperties.cpp
 SOURCES += CBatteryProperty.cpp
 
+SOURCES += AndroidParcelUtils.cpp
+SOURCES += IPowerManager.cpp
+
 ELASTOS_LIBS += storage/storage.lib

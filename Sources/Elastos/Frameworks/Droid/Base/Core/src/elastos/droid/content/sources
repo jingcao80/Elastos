@@ -94,5 +94,8 @@ SOURCES += CUriMatcher.cpp
 SOURCES += CUriPermission.cpp
 SOURCES += CParcelFileDescriptorInner.cpp
 
+SOURCES += IContentProvider.cpp
+SOURCES += IContentService.cpp
+
 ELASTOS_LIBS += pm/pm.lib
 ELASTOS_LIBS += res/res.lib

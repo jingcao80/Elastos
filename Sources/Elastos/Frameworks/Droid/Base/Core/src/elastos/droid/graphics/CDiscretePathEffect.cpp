@@ -39,7 +39,7 @@ Int64 CDiscretePathEffect::NativeCreate(
     /* [in] */ Float length,
     /* [in] */ Float deviation)
 {
-    SkPathEffect* effect = SkDiscretePathEffect::Create(length, deviation);
+    SkPathEffect* effect = SkDiscretePathEffect::Make(length, deviation).release();
     return reinterpret_cast<Int64>(effect);
 }
 

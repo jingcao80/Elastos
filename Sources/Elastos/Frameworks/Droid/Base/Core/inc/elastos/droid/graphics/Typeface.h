@@ -168,6 +168,8 @@ public:
      */
     static CARAPI CreateFromFamiliesWithDefault(
         /* [in]*/ ArrayOf<IFontFamily*>* families,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 italic,
         /* [out]*/ ITypeface** typeface);
 
     /**
@@ -201,13 +203,16 @@ private:
         /* [in] */ Int64 native_instance);
 
     static CARAPI_(Int64) NativeCreateFromArray(
-        /* [in] */ ArrayOf<Int64>* familyArray);
+        /* [in] */ ArrayOf<Int64>* familyArray,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 italic);
 
     static CARAPI_(void) NativeSetDefault(
         /* [in] */ Int64 native_instance);
 
     static CARAPI_(AutoPtr<IFontFamily>) MakeFamilyFromParsed(
-        /* [in] */ FontListParser::Family* family);
+        /* [in] */ FontListParser::Family* family,
+        /* [in] */ IMap* bufferForPath);
 
     /**
      * Adds the family from src with the name familyName as a fallback font in dst
@@ -290,6 +295,10 @@ public:
 
 private:
     Int32 mStyle;
+
+    // Style value for building typeface.
+    static const Int32 STYLE_NORMAL = 0;
+    static const Int32 STYLE_ITALIC = 1;
 
     // Typefaces that we can garbage collect when changing fonts, and so we don't break public APIs
     static AutoPtr<ITypeface> DEFAULT_INTERNAL;

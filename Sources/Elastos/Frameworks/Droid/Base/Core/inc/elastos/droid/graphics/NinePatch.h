@@ -275,24 +275,18 @@ public:
 
     static CARAPI_(void) NativeDraw(
         /* [in] */ Int64 canvas_instance,
-        /* [in] */ IRectF* loc,
         /* [in] */ Int64 bitmap_instance,
         /* [in] */ Int64 c,
-        /* [in] */ Int64 paint_instance_or_null,
-        /* [in] */ Int32 destDensity,
-        /* [in] */ Int32 srcDensity);
-
-    static CARAPI_(void) NativeDraw(
-        /* [in] */ Int64 canvas_instance,
-        /* [in] */ IRect* loc,
-        /* [in] */ Int64 bitmap_instance,
-        /* [in] */ Int64 c,
+        /* [in] */ Float left,
+        /* [in] */ Float top,
+        /* [in] */ Float right,
+        /* [in] */ Float bottom,
         /* [in] */ Int64 paint_instance_or_null,
         /* [in] */ Int32 destDensity,
         /* [in] */ Int32 srcDensity);
 
     static CARAPI_(Int64) NativeGetTransparentRegion(
-        /* [in] */ Int64 bitmap,
+        /* [in] */ IBitmap* bitmap,
         /* [in] */ Int64 chunk,
         /* [in] */ IRect* location);
 

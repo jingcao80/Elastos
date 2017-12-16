@@ -25,7 +25,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Runnable.h>
 #include <elastos/core/Object.h>
-#include <camera/ICameraService.h>
+#include <android/hardware/ICameraService.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Core::Runnable;
@@ -87,7 +87,7 @@ private:
         ~CameraServiceWrapper();
 
         CARAPI Init(
-            /* [in] */ android::sp<android::ICameraService>& service,
+            /* [in] */ android::sp<android::hardware::ICameraService>& service,
             /* [in] */ CameraManager* host);
 
         /**
@@ -177,7 +177,7 @@ private:
 
     private:
         CameraManager* mHost;
-        android::sp<android::ICameraService> mCameraService;
+        android::sp<android::hardware::ICameraService> mCameraService;
         android::sp<android::IBinder::DeathRecipient> mDeathRecipient;
     };
 

@@ -35,7 +35,7 @@ ECode CCornerPathEffect::constructor(
 Int64 CCornerPathEffect::NativeCreate(
     /* [in] */ Float radius)
 {
-    SkPathEffect* effect = SkCornerPathEffect::Create(radius);
+    SkPathEffect* effect = SkCornerPathEffect::Make(radius).release();
     return reinterpret_cast<Int64>(effect);
 }
 

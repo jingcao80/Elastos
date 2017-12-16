@@ -43,6 +43,16 @@ using Org::Xmlpull::V1::IXmlSerializer;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace Content {
 
 class ECO_PUBLIC Intent
@@ -771,6 +781,8 @@ private:
 
 private:
     ECO_LOCAL static const String TAG;
+
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
 
     String mAction;
     AutoPtr<IUri> mData;

@@ -233,6 +233,9 @@ Int32 Memory::PeekInt32(
     }
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 Int64 Memory::PeekInt64(
     /* [in] */ ArrayOf<Byte>* src,
     /* [in] */ Int32 offset,

@@ -83,7 +83,7 @@ private:
 
 private:
     // These two constants will help add more padding for the text inside the card.
-    static const Double TEXT_LEFT_PADDING_TO_CARD_PADDING_RATIO = 1.1;
+    static constexpr Double TEXT_LEFT_PADDING_TO_CARD_PADDING_RATIO = 1.1;
 
     friend class ApplyCardPaddingToViewRunnable;
 };

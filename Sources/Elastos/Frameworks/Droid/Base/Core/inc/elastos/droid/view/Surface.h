@@ -33,6 +33,16 @@ using Elastos::Core::ICloseGuard;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 
 class Surface
@@ -237,6 +247,8 @@ private:
         /* [out] */ Int64* result);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     static const char* TAG;
 
     AutoPtr<ICloseGuard> mCloseGuard;

@@ -30,19 +30,23 @@
 #include "elastos/droid/graphics/Rasterizer.h"
 #include "elastos/droid/graphics/TemporaryBuffer.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
-#include "elastos/droid/graphics/MinikinSkia.h"
-#include "elastos/droid/graphics/MinikinUtils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/Character.h>
 #include <elastos/utility/logging/Logger.h>
+#include <hwui/Paint.h>
+#include <hwui/Typeface.h>
+#include <hwui/hwui/MinikinUtils.h>
 #include <hwui/utils/Blur.h>
 #include <minikin/FontFamily.h>
 #include <minikin/Layout.h>
 #include <minikin/GraphemeBreak.h>
+#include <skia/core/SkColorFilter.h>
+#include <skia/core/SkMaskFilter.h>
 #include <skia/core/SkPaint.h>
-#include <skia/core/SkRasterizer.h>
+#include <skia/core/SkPath.h>
+#include <skia/core/SkPathEffect.h>
 #include <skia/effects/SkBlurDrawLooper.h>
 #include <unicode/uloc.h>
 
@@ -56,8 +60,8 @@ using Elastos::Core::IString;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
-using android::Layout;
-using android::GraphemeBreak;
+using minikin::Layout;
+using minikin::GraphemeBreak;
 
 namespace Elastos {
 namespace Droid {
@@ -66,11 +70,11 @@ namespace Graphics {
 class GetTextFunctor {
 public:
     GetTextFunctor(
-        /* [in] */ const Layout& layout,
+        /* [in] */ const minikin::Layout& layout,
         /* [in] */ SkPath* path,
         /* [in] */ Float x,
         /* [in] */ Float y,
-        /* [in] */ NativePaint* paint,
+        /* [in] */ android::Paint* paint,
         /* [in] */ uint16_t* glyphs,
         /* [in] */ SkPoint* pos)
         : layout(layout), path(path), x(x), y(y), paint(paint), glyphs(glyphs), pos(pos)
@@ -91,11 +95,11 @@ public:
         }
     }
 private:
-    const Layout& layout;
+    const minikin::Layout& layout;
     SkPath* path;
     Float x;
     Float y;
-    NativePaint* paint;
+    android::Paint* paint;
     uint16_t* glyphs;
     SkPoint* pos;
     SkPath tmpPath;
@@ -103,10 +107,10 @@ private:
 
 static const String TAG("Paint");
 
-static void DefaultSettingsForElastos(SkPaint* paint)
+static void DefaultSettingsForElastos(android::Paint* paint)
 {
     // GlyphID encoding is required because we are using Harfbuzz shaping
-    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    paint->setTextEncoding(android::Paint::kGlyphID_TextEncoding);
 }
 
 const PaintStyle Paint::sStyleArray[] = {
@@ -194,7 +198,6 @@ ECode Paint::Reset()
     mColorFilter = NULL;
     mMaskFilter = NULL;
     mPathEffect = NULL;
-    mRasterizer = NULL;
     mShader = NULL;
     mTypeface = NULL;
     mXfermode = NULL;
@@ -232,7 +235,6 @@ void Paint::SetClassVariablesFrom(
     mColorFilter = paint->mColorFilter;
     mMaskFilter = paint->mMaskFilter;
     mPathEffect = paint->mPathEffect;
-    mRasterizer = paint->mRasterizer;
 
     mShader = NULL;
     if (paint->mShader != NULL) {
@@ -288,19 +290,36 @@ ECode Paint::SetBidiFlags(
     return NOERROR;
 }
 
+// Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
+static const uint32_t sFilterBitmapFlag = 0x02;
+
 ECode Paint::GetFlags(
     /* [out] */ Int32* flags)
 {
     VALIDATE_NOT_NULL(flags)
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
-    *flags = paint->getFlags();
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    uint32_t result = paint->getFlags();
+    result &= ~sFilterBitmapFlag; // Filtering no longer stored in this bit. Mask away.
+    if (paint->getFilterQuality() != kNone_SkFilterQuality) {
+        result |= sFilterBitmapFlag;
+    }
+    *flags = result;
     return NOERROR;
 }
 
 ECode Paint::SetFlags(
     /* [in] */ Int32 flags)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    // Instead of modifying 0x02, change the filter level.
+    paint->setFilterQuality(flags & sFilterBitmapFlag
+            ? kLow_SkFilterQuality
+            : kNone_SkFilterQuality);
+    // Don't pass through filter flag, which is no longer stored in paint's flags.
+    flags &= ~sFilterBitmapFlag;
+    // Use the existing value for 0x02.
+    const uint32_t existing0x02Flag = paint->getFlags() & sFilterBitmapFlag;
+    flags |= existing0x02Flag;
     paint->setFlags(flags);
     return NOERROR;
 }
@@ -309,7 +328,7 @@ ECode Paint::GetHinting(
     /* [out] */ Int32* mode)
 {
     VALIDATE_NOT_NULL(mode)
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *mode = paint->getHinting() == SkPaint::kNo_Hinting ? 0 : 1;
     return NOERROR;
 }
@@ -317,7 +336,7 @@ ECode Paint::GetHinting(
 ECode Paint::SetHinting(
     /* [in] */ Int32 mode)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setFlags(mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kSlight_Hinting);
     return NOERROR;
 }
@@ -335,7 +354,7 @@ ECode Paint::IsAntiAlias(
 ECode Paint::SetAntiAlias(
     /* [in] */ Boolean aa)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setAntiAlias(aa);
     return NOERROR;
 }
@@ -353,7 +372,7 @@ ECode Paint::IsDither(
 ECode Paint::SetDither(
     /* [in] */ Boolean dither)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setDither(dither);
     return NOERROR;
 }
@@ -371,7 +390,7 @@ ECode Paint::IsLinearText(
 ECode Paint::SetLinearText(
     /* [in] */ Boolean linearText)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setLinearText(linearText);
     return NOERROR;
 }
@@ -389,7 +408,7 @@ ECode Paint::IsSubpixelText(
 ECode Paint::SetSubpixelText(
     /* [in] */ Boolean subpixelText)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setSubpixelText(subpixelText);
     return NOERROR;
 }
@@ -407,8 +426,14 @@ ECode Paint::IsUnderlineText(
 ECode Paint::SetUnderlineText(
     /* [in] */ Boolean underlineText)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
-    paint->setUnderlineText(underlineText);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    uint32_t flags = paint->getFlags();
+    if (underlineText) {
+        flags |= android::Paint::kUnderlineText_ReserveFlag;
+    } else {
+        flags &= ~android::Paint::kUnderlineText_ReserveFlag;
+    }
+    paint->setFlags(flags);
     return NOERROR;
 }
 
@@ -425,8 +450,14 @@ ECode Paint::IsStrikeThruText(
 ECode Paint::SetStrikeThruText(
     /* [in] */ Boolean strikeThruText)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
-    paint->setStrikeThruText(strikeThruText);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    uint32_t flags = paint->getFlags();
+    if (strikeThruText) {
+        flags |= android::Paint::kStrikeThruText_ReserveFlag;
+    } else {
+        flags &= ~android::Paint::kStrikeThruText_ReserveFlag;
+    }
+    paint->setFlags(flags);
     return NOERROR;
 }
 
@@ -443,7 +474,7 @@ ECode Paint::IsFakeBoldText(
 ECode Paint::SetFakeBoldText(
     /* [in] */ Boolean fakeBoldText)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setFakeBoldText(fakeBoldText);
     return NOERROR;
 }
@@ -461,8 +492,9 @@ ECode Paint::IsFilterBitmap(
 ECode Paint::SetFilterBitmap(
     /* [in] */ Boolean filterBitmap)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
-    paint->setFilterBitmap(filterBitmap);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setFilterQuality(
+            filterBitmap ? kLow_SkFilterQuality : kNone_SkFilterQuality);
     return NOERROR;
 }
 
@@ -485,7 +517,7 @@ ECode Paint::GetColor(
     /* [out] */ Int32* color)
 {
     VALIDATE_NOT_NULL(color)
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *color = paint->getColor();
     return NOERROR;
 }
@@ -493,7 +525,7 @@ ECode Paint::GetColor(
 ECode Paint::SetColor(
     /* [in] */ Int32 color)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setColor(color);
     return NOERROR;
 }
@@ -502,7 +534,7 @@ ECode Paint::GetAlpha(
     /* [out] */ Int32* alpha)
 {
     VALIDATE_NOT_NULL(alpha)
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *alpha = paint->getAlpha();
     return NOERROR;
 }
@@ -510,7 +542,7 @@ ECode Paint::GetAlpha(
 ECode Paint::SetAlpha(
     /* [in] */ Int32 a)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     paint->setAlpha(a);
     return NOERROR;
 }
@@ -528,7 +560,7 @@ ECode Paint::GetStrokeWidth(
     /* [out] */ Float* width)
 {
     VALIDATE_NOT_NULL(width);
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *width = SkScalarToFloat(paint->getStrokeWidth());
     return NOERROR;
 }
@@ -536,14 +568,15 @@ ECode Paint::GetStrokeWidth(
 ECode Paint::SetStrokeWidth(
     /* [in] */ Float width)
 {
-    GraphicsNative::GetNativePaint(this)->setStrokeWidth(width);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setStrokeWidth(width);
     return NOERROR;
 }
 
 ECode Paint::GetStrokeMiter(
     /* [out] */ Float* miter)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *miter = SkScalarToFloat(paint->getStrokeMiter());
     return NOERROR;
 }
@@ -551,7 +584,8 @@ ECode Paint::GetStrokeMiter(
 ECode Paint::SetStrokeMiter(
     /* [in] */ Float miter)
 {
-    GraphicsNative::GetNativePaint(this)->setStrokeMiter(miter);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setStrokeMiter(miter);
     return NOERROR;
 }
 
@@ -657,7 +691,7 @@ ECode Paint::SetXfermode(
     if (xfermode != NULL) {
         Xfermode* x = (Xfermode*)xfermode;
         assert(x != NULL);
-        xfermodeNative = x->mNativeInstance;
+        xfermodeNative = x->mPorterDuffMode;
     }
     NativeSetXfermode(mNativePaint, xfermodeNative);
     mXfermode = xfermode;
@@ -740,7 +774,7 @@ ECode Paint::GetRasterizer(
     /* [out] */ IRasterizer** rasterizer)
 {
     VALIDATE_NOT_NULL(rasterizer)
-    *rasterizer = mRasterizer;
+    *rasterizer = NULL;
     REFCOUNT_ADD(*rasterizer);
     return NOERROR;
 }
@@ -748,14 +782,6 @@ ECode Paint::GetRasterizer(
 ECode Paint::SetRasterizer(
     /* [in] */ IRasterizer* rasterizer)
 {
-    Int64 rasterizerNative = 0;
-    if (rasterizer != NULL) {
-        Rasterizer* r = (Rasterizer*)rasterizer;
-        assert(r != NULL);
-        rasterizerNative = r->mNativeInstance;
-    }
-    NativeSetRasterizer(mNativePaint, rasterizerNative);
-    mRasterizer = rasterizer;
     return NOERROR;
 }
 
@@ -816,9 +842,7 @@ ECode Paint::SetTextLocale(
     Boolean isEqual;
     if (locale->Equals(mLocale, &isEqual), isEqual) return NOERROR;
     mLocale = locale;
-    String str;
-    locale->ToString(&str);
-    NativeSetTextLocale(mNativePaint, str);
+    NativeSetTextLocale(mNativePaint, locale);
     return NOERROR;
 }
 
@@ -826,14 +850,16 @@ ECode Paint::IsElegantTextHeight(
     /* [out] */ Boolean* isElegantTextHeight)
 {
     VALIDATE_NOT_NULL(isElegantTextHeight);
-    *isElegantTextHeight = GraphicsNative::GetNativePaint(this)->getFontVariant() == android::VARIANT_ELEGANT;
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    *isElegantTextHeight = paint->getFontVariant() == minikin::VARIANT_ELEGANT;
     return NOERROR;
 }
 
 ECode Paint::SetElegantTextHeight(
     /* [in] */ Boolean elegant)
 {
-    GraphicsNative::GetNativePaint(this)->setFontVariant(elegant ? android::VARIANT_ELEGANT : android::VARIANT_DEFAULT);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setFontVariant(elegant ? minikin::VARIANT_ELEGANT : minikin::VARIANT_DEFAULT);
     return NOERROR;
 }
 
@@ -841,7 +867,7 @@ ECode Paint::GetTextSize(
     /* [out] */ Float* size)
 {
     VALIDATE_NOT_NULL(size);
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *size = SkScalarToFloat(paint->getTextSize());
     return NOERROR;
 }
@@ -849,7 +875,8 @@ ECode Paint::GetTextSize(
 ECode Paint::SetTextSize(
     /* [in] */ Float textSize)
 {
-    GraphicsNative::GetNativePaint(this)->setTextSize(textSize);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setTextSize(textSize);
     return NOERROR;
 }
 
@@ -857,7 +884,7 @@ ECode Paint::GetTextScaleX(
     /* [out] */ Float* scaleX)
 {
     VALIDATE_NOT_NULL(scaleX);
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *scaleX = SkScalarToFloat(paint->getTextScaleX());
     return NOERROR;
 }
@@ -865,7 +892,8 @@ ECode Paint::GetTextScaleX(
 ECode Paint::SetTextScaleX(
     /* [in] */ Float scaleX)
 {
-    GraphicsNative::GetNativePaint(this)->setTextScaleX(scaleX);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setTextScaleX(scaleX);
     return NOERROR;
 }
 
@@ -873,7 +901,7 @@ ECode Paint::GetTextSkewX(
     /* [out] */ Float* skewX)
 {
     VALIDATE_NOT_NULL(skewX)
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     *skewX = SkScalarToFloat(paint->getTextSkewX());
     return NOERROR;
 }
@@ -881,7 +909,8 @@ ECode Paint::GetTextSkewX(
 ECode Paint::SetTextSkewX(
     /* [in] */ Float skewX)
 {
-    GraphicsNative::GetNativePaint(this)->setTextSkewX(skewX);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
+    paint->setTextSkewX(skewX);
     return NOERROR;
 }
 
@@ -924,51 +953,29 @@ ECode Paint::SetFontFeatureSettings(
     return NOERROR;
 }
 
-ECode Paint::Ascent(
-    /* [out] */ Float* distance)
-{
-    VALIDATE_NOT_NULL(distance)
-    SkPaint::FontMetrics metrics;
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
-    paint->getFontMetrics(&metrics);
-    *distance = SkScalarToFloat(metrics.fAscent);
-    return NOERROR;
-}
-
-ECode Paint::Descent(
-    /* [out] */ Float* distance)
-{
-    VALIDATE_NOT_NULL(distance)
-    SkPaint::FontMetrics metrics;
-    NativePaint* paint = reinterpret_cast<NativePaint*>(mNativePaint);
-    paint->getFontMetrics(&metrics);
-    *distance = SkScalarToFloat(metrics.fDescent);
-    return NOERROR;
-}
-
 static SkScalar getMetricsInternal(
     /* [in] */ Paint* epaint,
-    /* [in] */ NativePaint::FontMetrics *metrics)
+    /* [in] */ android::Paint::FontMetrics* metrics)
 {
     const int kElegantTop = 2500;
     const int kElegantBottom = -1000;
     const int kElegantAscent = 1900;
     const int kElegantDescent = -500;
     const int kElegantLeading = 0;
-    NativePaint* paint = reinterpret_cast<NativePaint*>(epaint->mNativePaint);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(epaint->GetNativeTypeface());
-    typeface = TypefaceImpl_resolveDefault(typeface);
-    android::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(epaint->mNativePaint);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(epaint->GetNativeTypeface());
+    typeface = android::Typeface::resolveDefault(typeface);
+    minikin::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
     float saveSkewX = paint->getTextSkewX();
     bool savefakeBold = paint->isFakeBoldText();
-    MinikinFontSkia::populateSkPaint(paint, baseFont.font, baseFont.fakery);
+    android::MinikinFontSkia::populateSkPaint(paint, baseFont.font, baseFont.fakery);
     SkScalar spacing = paint->getFontMetrics(metrics);
     // The populateSkPaint call may have changed fake bold / text skew
     // because we want to measure with those effects applied, so now
     // restore the original settings.
     paint->setTextSkewX(saveSkewX);
     paint->setFakeBoldText(savefakeBold);
-    if (paint->getFontVariant() == android::VARIANT_ELEGANT) {
+    if (paint->getFontVariant() == minikin::VARIANT_ELEGANT) {
         SkScalar size = paint->getTextSize();
         metrics->fTop = -size * kElegantTop / 2048;
         metrics->fBottom = -size * kElegantBottom / 2048;
@@ -980,12 +987,32 @@ static SkScalar getMetricsInternal(
     return spacing;
 }
 
+ECode Paint::Ascent(
+    /* [out] */ Float* distance)
+{
+    VALIDATE_NOT_NULL(distance)
+    android::Paint::FontMetrics metrics;
+    getMetricsInternal(this, &metrics);
+    *distance = SkScalarToFloat(metrics.fAscent);
+    return NOERROR;
+}
+
+ECode Paint::Descent(
+    /* [out] */ Float* distance)
+{
+    VALIDATE_NOT_NULL(distance)
+    android::Paint::FontMetrics metrics;
+    getMetricsInternal(this, &metrics);
+    *distance = SkScalarToFloat(metrics.fDescent);
+    return NOERROR;
+}
+
 ECode Paint::GetFontMetrics(
     /* [in] */ IPaintFontMetrics* metrics,
     /* [out] */ Float* spacing)
 {
     VALIDATE_NOT_NULL(spacing)
-    SkPaint::FontMetrics metrics_;
+    android::Paint::FontMetrics metrics_;
     SkScalar spacing_ = getMetricsInternal(this, &metrics_);
 
     if (metrics) {
@@ -1013,8 +1040,7 @@ ECode Paint::GetFontMetricsInt(
 {
     VALIDATE_NOT_NULL(spacing);
     // NPE_CHECK_RETURN_ZERO(env, paint);
-    NativePaint::FontMetrics metrics;
-
+    android::Paint::FontMetrics metrics;
     getMetricsInternal(this, &metrics);
     int ascent = SkScalarRoundToInt(metrics.fAscent);
     int descent = SkScalarRoundToInt(metrics.fDescent);
@@ -1595,7 +1621,7 @@ ECode Paint::GetTextRunCursor(
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    *position = NativeGetTextRunCursor(mNativePaint, text,
+    *position = NativeGetTextRunCursor(mNativePaint, GetNativeTypeface(), text,
         contextStart, contextLength, dir, offset, cursorOpt);
     return NOERROR;
 }
@@ -1648,7 +1674,7 @@ ECode Paint::GetTextRunCursor(
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    *position = NativeGetTextRunCursor(mNativePaint, text,
+    *position = NativeGetTextRunCursor(mNativePaint, GetNativeTypeface(), text,
             contextStart, contextEnd, dir, offset, cursorOpt);
     return NOERROR;
 }
@@ -1719,7 +1745,7 @@ ECode Paint::GetTextBounds(
 
 Int64 Paint::NativeInit()
 {
-    NativePaint* obj = new NativePaint();
+    android::Paint* obj = new android::Paint();
     DefaultSettingsForElastos(obj);
     return reinterpret_cast<Int64>(obj);
 }
@@ -1727,15 +1753,15 @@ Int64 Paint::NativeInit()
 Int64 Paint::NativeInitWithPaint(
     /* [in] */ Int64 paintHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    NativePaint* obj = new NativePaint(*paint);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Paint* obj = new android::Paint(*paint);
     return reinterpret_cast<Int64>(obj);
 }
 
 void Paint::NativeReset(
     /* [in] */ Int64 nObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
     paint->reset();
     DefaultSettingsForElastos(paint);
 }
@@ -1750,7 +1776,7 @@ void Paint::NativeSet(
 Int32 Paint::NativeGetStyle(
     /* [in] */ Int64 nObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
     return paint->getStyle();
 }
 
@@ -1758,14 +1784,14 @@ void Paint::NativeSetStyle(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintStyle style)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    paint->setStyle((SkPaint::Style)style);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    paint->setStyle((android::Paint::Style)style);
 }
 
 Int32 Paint::NativeGetStrokeCap(
     /* [in] */ Int64 nObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
     return paint->getStrokeCap();
 }
 
@@ -1773,14 +1799,14 @@ void Paint::NativeSetStrokeCap(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintCap cap)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    paint->setStrokeCap((SkPaint::Cap)cap);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    paint->setStrokeCap((android::Paint::Cap)cap);
 }
 
 Int32 Paint::NativeGetStrokeJoin(
     /* [in] */ Int64 nObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
     return paint->getStrokeJoin();
 }
 
@@ -1788,8 +1814,8 @@ void Paint::NativeSetStrokeJoin(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintJoin join)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    paint->setStrokeJoin((SkPaint::Join)join);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    paint->setStrokeJoin((android::Paint::Join)join);
 }
 
 Boolean Paint::NativeGetFillPath(
@@ -1797,7 +1823,7 @@ Boolean Paint::NativeGetFillPath(
     /* [in] */ Int64 src,
     /* [in] */ Int64 dst)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
     return paint->getFillPath(*(SkPath*)src, (SkPath*)dst);
 }
 
@@ -1805,45 +1831,50 @@ Int64 Paint::NativeSetShader(
     /* [in] */ Int64 nObj,
     /* [in] */ Int64 shaderObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    SkShader* shader = reinterpret_cast<SkShader *>(shaderObj);
-    return reinterpret_cast<Int64>(paint->setShader(shader));
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    SkShader* shader = reinterpret_cast<SkShader*>(shaderObj);
+    paint->setShader(sk_ref_sp(shader));
+    return reinterpret_cast<Int64>(paint->getShader());
 }
 
 Int64 Paint::NativeSetColorFilter(
     /* [in] */ Int64 nObj,
     /* [in] */ Int64 filterObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    SkColorFilter* filter = reinterpret_cast<SkColorFilter *>(filterObj);
-    return reinterpret_cast<Int64>(paint->setColorFilter(filter));
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    SkColorFilter* filter = reinterpret_cast<SkColorFilter*>(filterObj);
+    paint->setColorFilter(sk_ref_sp(filter));
+    return reinterpret_cast<Int64>(paint->getColorFilter());
 }
 
 Int64 Paint::NativeSetXfermode(
     /* [in] */ Int64 nObj,
     /* [in] */ Int64 xfermodeObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    SkXfermode* xfermode = reinterpret_cast<SkXfermode *>(xfermodeObj);
-    return reinterpret_cast<Int64>(paint->setXfermode(xfermode));
+    SkBlendMode mode = static_cast<SkBlendMode>((Int32)xfermodeObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    paint->setBlendMode(mode);
+    return 0;
 }
 
 Int64 Paint::NativeSetPathEffect(
     /* [in] */ Int64 nObj,
     /* [in] */ Int64 effectObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    SkPathEffect* effect = reinterpret_cast<SkPathEffect *>(effectObj);
-    return reinterpret_cast<Int64>(paint->setPathEffect(effect));
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    SkPathEffect* effect = reinterpret_cast<SkPathEffect*>(effectObj);
+    paint->setPathEffect(sk_ref_sp(effect));
+    return reinterpret_cast<Int64>(paint->getPathEffect());
 }
 
 Int64 Paint::NativeSetMaskFilter(
     /* [in] */ Int64 nObj,
     /* [in] */ Int64 maskfilterObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    SkMaskFilter* maskfilter = reinterpret_cast<SkMaskFilter *>(maskfilterObj);
-    return reinterpret_cast<Int64>(paint->setMaskFilter(maskfilter));
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    SkMaskFilter* maskfilter = reinterpret_cast<SkMaskFilter*>(maskfilterObj);
+    paint->setMaskFilter(sk_ref_sp(maskfilter));
+    return reinterpret_cast<Int64>(paint->getMaskFilter());
 }
 
 Int64 Paint::NativeSetTypeface(
@@ -1854,19 +1885,10 @@ Int64 Paint::NativeSetTypeface(
     return 0;
 }
 
-Int64 Paint::NativeSetRasterizer(
-    /* [in] */ Int64 objHandle,
-    /* [in] */ Int64 rasterizerHandle)
-{
-    NativePaint* obj = reinterpret_cast<NativePaint*>(objHandle);
-    SkAutoTUnref<SkRasterizer> rasterizer(GraphicsNative::RefNativeRasterizer(rasterizerHandle));
-    return reinterpret_cast<Int64>(obj->setRasterizer(rasterizer));
-}
-
 Int32 Paint::NativeGetTextAlign(
     /* [in] */ Int64 nObj)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
     return paint->getTextAlign();
 }
 
@@ -1874,66 +1896,19 @@ void Paint::NativeSetTextAlign(
     /* [in] */ Int64 nObj,
     /* [in] */ PaintAlign align)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(nObj);
-    paint->setTextAlign((SkPaint::Align)align);
-}
-
-// generate bcp47 identifier for the supplied locale
-static void ToLanguageTag(
-    /* [in] */ char* output,
-    /* [in] */ size_t outSize,
-    /* [in] */ const char* locale)
-{
-    if (output == NULL || outSize <= 0) {
-        return;
-    }
-    if (locale == NULL) {
-        output[0] = '\0';
-        return;
-    }
-    char canonicalChars[ULOC_FULLNAME_CAPACITY];
-    UErrorCode uErr = U_ZERO_ERROR;
-    uloc_canonicalize(locale, canonicalChars, ULOC_FULLNAME_CAPACITY,
-            &uErr);
-    if (U_SUCCESS(uErr)) {
-        char likelyChars[ULOC_FULLNAME_CAPACITY];
-        uErr = U_ZERO_ERROR;
-        uloc_addLikelySubtags(canonicalChars, likelyChars,
-                ULOC_FULLNAME_CAPACITY, &uErr);
-        if (U_SUCCESS(uErr)) {
-            uErr = U_ZERO_ERROR;
-            uloc_toLanguageTag(likelyChars, output, outSize, FALSE, &uErr);
-            if (U_SUCCESS(uErr)) {
-                return;
-            }
-            else {
-                // ALOGD("uloc_toLanguageTag(\"%s\") failed: %s", likelyChars,
-                //         u_errorName(uErr));
-            }
-        }
-        else {
-            // ALOGD("uloc_addLikelySubtags(\"%s\") failed: %s",
-            //         canonicalChars, u_errorName(uErr));
-        }
-    }
-    else {
-        // ALOGD("uloc_canonicalize(\"%s\") failed: %s", locale,
-        //         u_errorName(uErr));
-    }
-    // unable to build a proper language identifier
-    output[0] = '\0';
+    android::Paint* paint = reinterpret_cast<android::Paint*>(nObj);
+    paint->setTextAlign((android::Paint::Align)align);
 }
 
 void Paint::NativeSetTextLocale(
     /* [in] */ Int64 objHandle,
-    /* [in] */ const String& locale)
+    /* [in] */ ILocale* locale)
 {
-    NativePaint* obj = reinterpret_cast<NativePaint*>(objHandle);
-    // ScopedUtfChars localeChars(env, locale);
-    char langTag[ULOC_FULLNAME_CAPACITY];
-    ToLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locale.string());
-
-    obj->setTextLocale(String(langTag));
+    android::Paint* obj = reinterpret_cast<android::Paint*>(objHandle);
+    String langTag;
+    locale->ToLanguageTag(&langTag);
+    Int32 minikinLangListId = minikin::FontStyle::registerLanguageList(langTag.string());
+    obj->setMinikinLangListId(minikinLangListId);
 }
 
 Float Paint::NativeMeasureText(
@@ -1942,7 +1917,6 @@ Float Paint::NativeMeasureText(
     /* [in] */ Int32 count,
     /* [in] */ Int32 bidiFlags)
 {
-    // NPE_CHECK_RETURN_ZERO(env, text);
     if (text == NULL) {
         return 0;
     }
@@ -1950,22 +1924,20 @@ Float Paint::NativeMeasureText(
     size_t textLength = text->GetLength();
     if ((index | count) < 0 || (size_t)(index + count) > textLength) {
         // doThrowAIOOBE(env);
-        assert(0);
         return 0;
     }
     if (count == 0) {
         return 0;
     }
 
-    NativePaint* paint = GraphicsNative::GetNativePaint(this);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     Float result = 0;
 
     AutoPtr< ArrayOf<Char16> > textArray = ArrayUtils::ToChar16Array(text);
 
-    Layout layout;
-    TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray->GetPayload(),
-        index, count, textLength);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(GetNativeTypeface());
+    minikin::Layout layout = android::MinikinUtils::doLayout(paint, bidiFlags, typeface, textArray->GetPayload(),
+            index, count, textLength);
     result = layout.getAdvance();
     return result;
 }
@@ -1980,21 +1952,19 @@ Float Paint::NativeMeasureText(
     int count = end - start;
     if ((start | count) < 0 || (size_t)end > textLength) {
         // doThrowAIOOBE(env);
-        assert(0);
         return 0;
     }
     if (count == 0) {
         return 0;
     }
 
-    NativePaint* paint = GraphicsNative::GetNativePaint(this);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     Float width = 0;
     AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
 
-    Layout layout;
-    TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray->GetPayload(),
-        start, count, textLength);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(GetNativeTypeface());
+    minikin::Layout layout = android::MinikinUtils::doLayout(paint, bidiFlags, typeface, textArray->GetPayload(),
+            start, count, textLength);
     width = layout.getAdvance();
     return width;
 }
@@ -2008,36 +1978,33 @@ Float Paint::NativeMeasureText(
         return 0;
     }
 
-    NativePaint* paint = GraphicsNative::GetNativePaint(this);
-    Float width = 0;
+    android::Paint* paint = reinterpret_cast<android::Paint*>(mNativePaint);
     AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
 
-    Layout layout;
-    TypefaceImpl* typeface = GraphicsNative::GetNativeTypeface(this);
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray->GetPayload(),
-        0, textLength, textLength);
-    width = layout.getAdvance();
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(GetNativeTypeface());
+    minikin::Layout layout = android::MinikinUtils::doLayout(paint, bidiFlags, typeface,
+            textArray->GetPayload(), 0, textLength, textLength);
+    Float width = layout.getAdvance();
     return width;
 }
 
 static int breakText(
-    /* [in] */ const NativePaint& paint,
-    /* [in] */ TypefaceImpl* typeface,
+    /* [in] */ const android::Paint& paint,
+    /* [in] */ android::Typeface* typeface,
     /* [in] */ const Char16* text,
     /* [in] */ int count,
     /* [in] */ float maxWidth,
     /* [in] */ Int32 bidiFlags,
     /* [in] */ ArrayOf<Float>* measuredArray,
-    /* [in] */ NativePaint::TextBufferDirection textBufferDirection)
+    /* [in] */ Boolean forwardScan)
 {
     size_t measuredCount = 0;
     float measured = 0;
 
-    Layout layout;
-    MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, 0, count, count);
+    minikin::Layout layout = android::MinikinUtils::doLayout(&paint, bidiFlags, typeface,
+            text, 0, count, count);
     float* advances = new float[count];
     layout.getAdvances(advances);
-    const bool forwardScan = (textBufferDirection == NativePaint::kForward_TextBufferDirection);
     for (int i = 0; i < count; i++) {
         // traverse in the given direction
         int index = forwardScan ? i : (count - i - 1);
@@ -2071,28 +2038,27 @@ Int32 Paint::NativeBreakText(
     /* [in] */ Int32 bidiFlags,
     /* [in] */ ArrayOf<Float>* measuredWidth)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
-    NativePaint::TextBufferDirection tbd;
+    Boolean forwardTextDirection;
     if (count < 0) {
-        tbd = NativePaint::kBackward_TextBufferDirection;
+        forwardTextDirection = FALSE;
         count = -count;
     }
     else {
-        tbd = NativePaint::kForward_TextBufferDirection;
+        forwardTextDirection = TRUE;
     }
 
     if ((index < 0) || (index + count > text->GetLength())) {
         // doThrowAIOOBE(env);
-        assert(0);
         return 0;
     }
 
     AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text, index, count);
 
     count = breakText(*paint, typeface, char16Array->GetPayload(),
-        count, maxWidth, bidiFlags, measuredWidth, tbd);
+            count, maxWidth, bidiFlags, measuredWidth, forwardTextDirection);
     return count;
 }
 
@@ -2105,24 +2071,19 @@ Int32 Paint::NativeBreakText(
     /* [in] */ Int32 bidiFlags,
     /* [in] */ ArrayOf<Float>* measuredWidth)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
-
-    NativePaint::TextBufferDirection tbd = forwards ?
-                                    NativePaint::kForward_TextBufferDirection :
-                                    NativePaint::kBackward_TextBufferDirection;
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
     int count = text.GetLength();
     AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
     count = breakText(*paint, typeface, char16Array->GetPayload(),
-        count, maxWidth, bidiFlags, measuredWidth, tbd);
-    // env->ReleaseStringChars(jtext, text);
+        count, maxWidth, bidiFlags, measuredWidth, forwards);
     return count;
 }
 
 static int dotextwidths(
-    /* [in] */ NativePaint* paint,
-    /* [in] */ TypefaceImpl* typeface,
+    /* [in] */ android::Paint* paint,
+    /* [in] */ android::Typeface* typeface,
     /* [in] */ const Char16* text,
     /* [in] */ Int32 count,
     /* [in] */ ArrayOf<Float>* widths,
@@ -2136,7 +2097,6 @@ static int dotextwidths(
 
     if (count < 0 || !widths) {
         // doThrowAIOOBE(env);
-        assert(0);
         return 0;
     }
     if (count == 0) {
@@ -2145,15 +2105,14 @@ static int dotextwidths(
     size_t widthsLength = widths->GetLength();
     if ((size_t)count > widthsLength) {
         // doThrowAIOOBE(env);
-        assert(0);
         return 0;
     }
 
     AutoFloatArray autoWidths(widths, count);
     Float* widthsArray = autoWidths.ptr();
 
-    Layout layout;
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
+    minikin::Layout layout = android::MinikinUtils::doLayout(paint, bidiFlags, typeface,
+            text, 0, count, count);
     layout.getAdvances(widthsArray);
 
     return count;
@@ -2168,8 +2127,8 @@ Int32 Paint::NativeGetTextWidths(
     /* [in] */ Int32 bidiFlags,
     /* [out] */ ArrayOf<Float>* widths)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr<ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
     return dotextwidths(paint, typeface, char16Array->GetPayload() + index, count, widths, bidiFlags);
 }
@@ -2183,8 +2142,8 @@ Int32 Paint::NativeGetTextWidths(
     /* [in] */ Int32 bidiFlags,
     /* [out] */ ArrayOf<Float>* widths)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr<ArrayOf<Char16> > textArray = text.GetChar16s();
     return dotextwidths(paint, typeface,
         textArray->GetPayload() + start, end - start, widths, bidiFlags);
@@ -2205,8 +2164,8 @@ Int32 Paint::NativeGetTextGlyphs(
 }
 
 static Float doTextRunAdvances(
-    /* [in] */ NativePaint *paint,
-    /* [in] */ TypefaceImpl* typeface,
+    /* [in] */ android::Paint *paint,
+    /* [in] */ android::Typeface* typeface,
     /* [in] */ const Char16 *text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 count,
@@ -2240,10 +2199,9 @@ static Float doTextRunAdvances(
     AutoPtr<ArrayOf<Float> > advancesArray = ArrayOf<Float>::Alloc(count);
     Float totalAdvance = 0;
 
-    int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
 
-    Layout layout;
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, start, count, contextCount);
+    Layout layout = android::MinikinUtils::doLayout(paint, bidiFlags, typeface, text, start, count, contextCount);
     layout.getAdvances(advancesArray->GetPayload());
     totalAdvance = layout.getAdvance();
 
@@ -2265,8 +2223,8 @@ Float Paint::NativeGetTextRunAdvances(
     /* [in] */ ArrayOf<Float>* advances,
     /* [in] */ Int32 advancesIndex)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
     Float result = doTextRunAdvances(paint, typeface, char16Array->GetPayload() + contextIndex,
         index - contextIndex, count, contextCount, isRtl, advances, advancesIndex);
@@ -2285,8 +2243,8 @@ Float Paint::NativeGetTextRunAdvances(
     /* [in] */ ArrayOf<Float>* advances,
     /* [in] */ Int32 advancesIndex)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
 
     AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
     Float result = doTextRunAdvances(paint, typeface, char16Array->GetPayload() + contextStart,
@@ -2300,21 +2258,28 @@ enum MoveOpt {
 };
 
 static Int32 doTextRunCursor(
-    /* [in] */ NativePaint* paint,
+    /* [in] */ android::Paint* paint,
+    /* [in] */ android::Typeface* typeface,
     /* [in] */ const Char16 *text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 count,
-    /* [in] */ Int32 flags,
+    /* [in] */ Int32 dir,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 opt)
 {
-    GraphemeBreak::MoveOpt moveOpt = GraphemeBreak::MoveOpt(opt);
-    size_t result = GraphemeBreak::getTextRunCursor(text, start, count, offset, moveOpt);
+    minikin::GraphemeBreak::MoveOpt moveOpt = minikin::GraphemeBreak::MoveOpt(opt);
+    int bidiFlags = dir == 1 ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+    std::unique_ptr<float[]> advancesArray(new float[count]);
+    android::MinikinUtils::measureText(paint, bidiFlags, typeface, text, start, count, start + count,
+            advancesArray.get());
+    size_t result = minikin::GraphemeBreak::getTextRunCursor(advancesArray.get(), text,
+            start, count, offset, moveOpt);
     return static_cast<Int32>(result);
 }
 
 Int32 Paint::NativeGetTextRunCursor(
     /* [in] */ Int64 paintHandle,
+    /* [in] */ Int64 typefaceHandle,
     /* [in] */ ArrayOf<Char32>* text,
     /* [in] */ Int32 contextStart,
     /* [in] */ Int32 contextCount,
@@ -2322,15 +2287,17 @@ Int32 Paint::NativeGetTextRunCursor(
     /* [in] */ Int32 offset,
     /* [in] */ Int32 cursorOpt)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
-    Int32 result = doTextRunCursor(paint, char16Array->GetPayload(),
+    Int32 result = doTextRunCursor(paint, typeface, char16Array->GetPayload(),
         contextStart, contextCount, dir, offset, cursorOpt);
     return result;
 }
 
 Int32 Paint::NativeGetTextRunCursor(
     /* [in] */ Int64 paintHandle,
+    /* [in] */ Int64 typefaceHandle,
     /* [in] */ const String& text,
     /* [in] */ Int32 contextStart,
     /* [in] */ Int32 contextEnd,
@@ -2338,16 +2305,17 @@ Int32 Paint::NativeGetTextRunCursor(
     /* [in] */ Int32 offset,
     /* [in] */ Int32 cursorOpt)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
-    Int32 result = doTextRunCursor(paint, char16Array->GetPayload(), contextStart,
+    Int32 result = doTextRunCursor(paint, typeface, char16Array->GetPayload(), contextStart,
             contextEnd - contextStart, dir, offset, cursorOpt);
     return result;
 }
 
 static void getTextPath(
-    /* [in] */ NativePaint* paint,
-    /* [in] */ TypefaceImpl* typeface,
+    /* [in] */ android::Paint* paint,
+    /* [in] */ android::Typeface* typeface,
     /* [in] */ const Char16* text,
     /* [in] */ Int32 count,
     /* [in] */ Int32 bidiFlags,
@@ -2355,18 +2323,18 @@ static void getTextPath(
     /* [in] */ Float y,
     /* [in] */ SkPath* path)
 {
-    Layout layout;
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, text, 0, count, count);
+    minikin::Layout layout = android::MinikinUtils::doLayout(paint, bidiFlags, typeface,
+            text, 0, count, count);
     size_t nGlyphs = layout.nGlyphs();
     uint16_t* glyphs = new uint16_t[nGlyphs];
     SkPoint* pos = new SkPoint[nGlyphs];
 
-    x += MinikinUtils::xOffsetForTextAlign(paint, layout);
-    NativePaint::Align align = paint->getTextAlign();
-    paint->setTextAlign(NativePaint::kLeft_Align);
-    paint->setTextEncoding(NativePaint::kGlyphID_TextEncoding);
+    x += android::MinikinUtils::xOffsetForTextAlign(paint, layout);
+    android::Paint::Align align = paint->getTextAlign();
+    paint->setTextAlign(android::Paint::kLeft_Align);
+    paint->setTextEncoding(android::Paint::kGlyphID_TextEncoding);
     GetTextFunctor f(layout, path, x, y, paint, glyphs, pos);
-    MinikinUtils::forFontRun(layout, paint, f);
+    android::MinikinUtils::forFontRun(layout, paint, f);
     paint->setTextAlign(align);
     delete[] glyphs;
     delete[] pos;
@@ -2383,8 +2351,8 @@ void Paint::NativeGetTextPath(
     /* [in] */ Float y,
     /* [in] */ Int64 pathHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text);
     getTextPath(paint, typeface, char16Array->GetPayload() + index, count, bidiFlags, x, y, path);
@@ -2401,8 +2369,8 @@ void Paint::NativeGetTextPath(
     /* [in] */ Float y,
     /* [in] */ Int64 pathHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s();
     getTextPath(paint, typeface, char16Array->GetPayload() + start, end - start, bidiFlags, x, y, path);
@@ -2412,17 +2380,17 @@ static void doTextBounds(
     /* [in] */ ArrayOf<Char16>* text,
     /* [in] */ Int32 count,
     /* [in] */ IRect* bounds,
-    /* [in] */ NativePaint* paint,
-    /* [in] */ TypefaceImpl* typeface,
+    /* [in] */ android::Paint* paint,
+    /* [in] */ android::Typeface* typeface,
     /* [in] */ Int32 bidiFlags)
 {
     SkRect  r;
     SkIRect ir;
 
-    Layout layout;
-    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface,
+    minikin::Layout layout = android::MinikinUtils::doLayout(
+        paint, bidiFlags, typeface,
         text->GetPayload(), 0, count, count);
-    MinikinRect rect;
+    minikin::MinikinRect rect;
     layout.getBounds(&rect);
     r.fLeft = rect.mLeft;
     r.fTop = rect.mTop;
@@ -2441,8 +2409,8 @@ void Paint::NativeGetStringBounds(
     /* [in] */ Int32 bidiFlags,
     /* [in] */ IRect* bounds)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = text.GetChar16s(start, end);
     doTextBounds(char16Array, char16Array->GetLength(), bounds, paint, typeface, bidiFlags);
 }
@@ -2456,8 +2424,8 @@ void Paint::NativeGetCharArrayBounds(
     /* [in] */ Int32 bidiFlags,
     /* [in] */ IRect* bounds)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+    android::Typeface* typeface = reinterpret_cast<android::Typeface*>(typefaceHandle);
     AutoPtr< ArrayOf<Char16> > char16Array = ArrayUtils::ToChar16Array(text, index, count);
     doTextBounds(char16Array, char16Array->GetLength(), bounds, paint, typeface, bidiFlags);
 }
@@ -2465,8 +2433,8 @@ void Paint::NativeGetCharArrayBounds(
 void Paint::NativeFinalizer(
     /* [in] */ Int64 objHandle)
 {
-    NativePaint* obj = reinterpret_cast<NativePaint*>(objHandle);
-    delete obj;
+    android::Paint* paint = reinterpret_cast<android::Paint*>(objHandle);
+    delete paint;
 }
 
 void Paint::NativeSetShadowLayer(
@@ -2476,27 +2444,27 @@ void Paint::NativeSetShadowLayer(
     /* [in] */ Float dy,
     /* [in] */ Int32 color)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     if (radius <= 0) {
         paint->setLooper(NULL);
     }
     else {
         SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-        paint->setLooper(SkBlurDrawLooper::Create((SkColor)color, sigma, dx, dy))->unref();
+        paint->setLooper(SkBlurDrawLooper::Make((SkColor)color, sigma, dx, dy));
     }
 }
 
 Boolean Paint::NativeHasShadowLayer(
     /* [in] */ Int64 paintHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     return paint->getLooper() && paint->getLooper()->asABlurShadow(NULL);
 }
 
 Float Paint::NativeGetLetterSpacing(
     /* [in] */ Int64 paintHandle)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     return paint->getLetterSpacing();
 }
 
@@ -2504,7 +2472,7 @@ void Paint::NativeSetLetterSpacing(
     /* [in] */ Int64 paintHandle,
     /* [in] */ Float letterSpacing)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     paint->setLetterSpacing(letterSpacing);
 }
 
@@ -2512,13 +2480,12 @@ void Paint::NativeSetFontFeatureSettings(
     /* [in] */ Int64 paintHandle,
     /* [in] */ const String& settings)
 {
-    NativePaint* paint = reinterpret_cast<NativePaint*>(paintHandle);
+    android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     if (settings.IsNull()) {
-        paint->setFontFeatureSettings(String(NULL));
+        paint->setFontFeatureSettings(std::string());
     }
     else {
-        // ScopedUtfChars settingsChars(env, settings);
-        paint->setFontFeatureSettings(settings);
+        paint->setFontFeatureSettings(std::string(settings.string()));
     }
 }
 

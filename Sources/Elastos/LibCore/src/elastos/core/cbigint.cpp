@@ -125,6 +125,9 @@
 #define FLOAT_NORMAL_MASK   (0x00800000)
 #define FLOAT_E_OFFSET (150)
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 int32_t
 simpleAddHighPrecision (uint64_t * arg1, int32_t length, uint64_t arg2)
 {
@@ -142,6 +145,9 @@ simpleAddHighPrecision (uint64_t * arg1, int32_t length, uint64_t arg2)
   return index == length;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 int32_t
 addHighPrecision (uint64_t * arg1, int32_t length1, uint64_t * arg2, int32_t length2)
 {

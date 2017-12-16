@@ -34,6 +34,16 @@ using Elastos::Utility::ISet;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace Net {
 
 /**
@@ -1003,6 +1013,7 @@ class HierarchicalUri
 {
     friend class UriBuilder;
     friend class Uri;
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
 
 public:
     HierarchicalUri();

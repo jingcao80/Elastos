@@ -19,6 +19,7 @@
 
 #include "_Elastos_Droid_View_Accessibility_CAccessibilityManagerClient.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::IBinder;
 
@@ -49,6 +50,9 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     CAccessibilityManager* mHost;

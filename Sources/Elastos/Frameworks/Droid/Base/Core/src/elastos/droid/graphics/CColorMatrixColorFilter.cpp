@@ -106,7 +106,7 @@ Int64 CColorMatrixColorFilter::NativeColorMatrixFilter(
     const Float* src = array->GetPayload();
 
 #ifdef SK_SCALAR_IS_FLOAT
-    return reinterpret_cast<Int64>(SkColorMatrixFilter::Create(src));
+    return reinterpret_cast<Int64>(SkColorFilter::MakeMatrixFilterRowMajor255(src).release());
 #else
     SkASSERT(false);
 #endif

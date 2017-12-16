@@ -14,43 +14,43 @@
 // limitations under the License.
 //=========================================================================
 
-#ifndef __ELASTOS_DROID_GRAPHICS_AUTODECODERCANCEL_H__
-#define __ELASTOS_DROID_GRAPHICS_AUTODECODERCANCEL_H__
+#ifndef __ELASTOS_DROID_VIEW_IWINDOWSESSIONCALLBACK_H__
+#define __ELASTOS_DROID_VIEW_IWINDOWSESSIONCALLBACK_H__
 
-#include "Elastos.Droid.Graphics.h"
-#include <skia/core/SkImageDecoder.h>
+#include "Elastos.Droid.View.h"
+#include <binder/Binder.h>
+#include <binder/Parcel.h>
 
 namespace Elastos {
 namespace Droid {
-namespace Graphics {
+namespace View {
 
-class AutoDecoderCancel
+class IWindowSessionCallbackStub
+    : public android::BBinder
 {
 public:
-    AutoDecoderCancel(
-        /* [in] */ IBitmapFactoryOptions* options,
-        /* [in] */ SkImageDecoder* decoder);
-
-    ~AutoDecoderCancel();
-
-    static CARAPI_(Boolean) RequestCancel(
-        /* [in] */ IBitmapFactoryOptions* options);
+    IWindowSessionCallbackStub(
+        /* [in] */ IIWindowSessionCallback* cb);
 
 private:
-    AutoDecoderCancel* mNext;
-    AutoDecoderCancel* mPrev;
-    AutoPtr<IBitmapFactoryOptions> mOptions;
-    SkImageDecoder* mDecoder;
+    void onLastStrongRef(
+        /* [in] */ const void* id);
 
-#ifdef SK_DEBUG
-    static void Validate();
-#else
-    static void Validate() {}
-#endif
+    android::status_t onTransact(
+        /* [in] */ uint32_t code,
+        /* [in] */ const android::Parcel& data,
+        /* [out] */ android::Parcel* reply,
+        /* [in] */ uint32_t flags = 0);
+
+private:
+    static const Boolean DEBUG;
+    static const String TAG;
+
+    AutoPtr<IIWindowSessionCallback> mCb;
 };
 
-} // namespace Graphics
-} // namepsace Droid
+} // namespace View
+} // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_GRAPHICS_AUTODECODERCANCEL_H__
+#endif // __ELASTOS_DROID_VIEW_IWINDOWSESSIONCALLBACK_H__

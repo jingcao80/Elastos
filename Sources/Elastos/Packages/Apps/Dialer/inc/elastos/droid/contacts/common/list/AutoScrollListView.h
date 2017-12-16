@@ -81,7 +81,7 @@ private:
     /**
      * Position the element at about 1/3 of the list height
      */
-    static const Float PREFERRED_SELECTION_OFFSET_FROM_TOP = 0.33f;
+    static constexpr Float PREFERRED_SELECTION_OFFSET_FROM_TOP = 0.33f;
 
     Int32 mRequestedScrollPosition;
     Boolean mSmoothScrollRequested;

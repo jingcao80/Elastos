@@ -23,7 +23,7 @@
 #include <binder/Parcel.h>
 #include <media/IDrm.h>
 #include <media/IDrmClient.h>
-#include <media/IMediaPlayerService.h>
+#include <media/IMediaDrmService.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
@@ -186,8 +186,8 @@ sp<android::IDrm> JDrm::MakeDrm()
     sp<android::IBinder> binder =
         sm->getService(android::String16("media.player"));
 
-    sp<android::IMediaPlayerService> service =
-        android::interface_cast<android::IMediaPlayerService>(binder);
+    sp<android::IMediaDrmService> service =
+        android::interface_cast<android::IMediaDrmService>(binder);
 
     if (service == NULL) {
         return NULL;
@@ -213,7 +213,7 @@ sp<android::IDrm> JDrm::MakeDrm(const uint8_t uuid[16])
         return NULL;
     }
 
-    status_t err = drm->createPlugin(uuid);
+    status_t err = drm->createPlugin(uuid, android::String8(""));
 
     if (err != android::OK) {
         return NULL;
@@ -760,9 +760,10 @@ ECode CMediaDrm::GetKeyRequest(
 
     Vector<uint8_t> request;
     String8 defaultUrl;
+    android::DrmPlugin::KeyRequestType keyRequestType;
 
     status_t err = drm->getKeyRequest(sessionId, initData, mimeType,
-                                          keyType, optParams, request, defaultUrl);
+            keyType, optParams, request, defaultUrl, &keyRequestType);
 
     // if (throwExceptionAsNecessary(env, err, "Failed to get key request")) {
     if (err != android::OK) {
@@ -916,20 +917,6 @@ ECode CMediaDrm::ProvideProvisionResponse(
 
 ECode CMediaDrm::UnprovisionDevice()
 {
-    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
-
-    if (drm == NULL) {
-        // jniThrowException(env, "java/lang/IllegalStateException",
-        //                   "MediaDrm obj is null");
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
-
-    status_t err = drm->unprovisionDevice();
-
-    // throwExceptionAsNecessary(env, err, "Failed to handle provision response");
-    if (err != android::OK) {
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
     return NOERROR;
 }
 

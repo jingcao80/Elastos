@@ -21,28 +21,38 @@ namespace Droid {
 namespace View {
 
 
-static Pools::SynchronizedPool<GLES20RecordingCanvas>* InitPoll()
-{
-    Pools::SynchronizedPool<GLES20RecordingCanvas>* pool;
-    pool = new Pools::SynchronizedPool<GLES20RecordingCanvas>(GLES20RecordingCanvas::POOL_LIMIT);
-    return pool;
-}
-
-Pools::SynchronizedPool<GLES20RecordingCanvas>* GLES20RecordingCanvas::sPool = InitPoll();
+Pools::SynchronizedPool<GLES20RecordingCanvas>* GLES20RecordingCanvas::sPool =
+        new Pools::SynchronizedPool<GLES20RecordingCanvas>(GLES20RecordingCanvas::POOL_LIMIT);
 
 CAR_INTERFACE_IMPL(GLES20RecordingCanvas, GLES20Canvas, IGLES20RecordingCanvas)
 
 AutoPtr<IHardwareCanvas> GLES20RecordingCanvas::Obtain(
-    /* [in] */ IRenderNode* node)
+    /* [in] */ IRenderNode* node,
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height)
 {
     assert(node != NULL);
     AutoPtr<GLES20RecordingCanvas> canvas = sPool->AcquireItem();
     if (canvas == NULL) {
         canvas = new GLES20RecordingCanvas();
-        canvas->constructor();
+        canvas->constructor(node, width, height);
+    }
+    else {
+        canvas->ResetDisplayListRenderer(node, width, height);
     }
     canvas->mNode = node;
+    canvas->SetViewport(width, height);
     return canvas.Get();
+}
+
+ECode GLES20RecordingCanvas::constructor(
+        /* [in] */ IRenderNode* node,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height)
+{
+    FAIL_RETURN(GLES20Canvas::constructor(node, width, height));
+    mDensity = 0;
+    return NOERROR;
 }
 
 ECode GLES20RecordingCanvas::Recycle()
@@ -69,7 +79,6 @@ ECode GLES20RecordingCanvas::IsRecordingFor(
 
 GLES20RecordingCanvas::GLES20RecordingCanvas()
 {}
-
 
 } // namespace View
 } // namespace Droid

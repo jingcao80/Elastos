@@ -61,8 +61,8 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <android/hardware/ICameraService.h>
 #include <binder/IServiceManager.h>
-#include <camera/ICameraService.h>
 #include <camera/VendorTagDescriptor.h>
 #include <sys/types.h> // for socketpair
 #include <sys/socket.h> // for socketpair
@@ -975,7 +975,7 @@ ECode CameraMetadataNative::NativeSetupGlobalVendorTagDescriptor(
     VALIDATE_NOT_NULL(descriptor);
 
     const android::String16 NAME("media.camera");
-    android::sp<android::ICameraService> cameraService;
+    android::sp<android::hardware::ICameraService> cameraService;
     android::status_t err = getService(NAME, /*out*/&cameraService);
 
     if (err != android::OK) {
@@ -985,26 +985,48 @@ ECode CameraMetadataNative::NativeSetupGlobalVendorTagDescriptor(
         return NOERROR;
     }
 
-    android::sp<android::VendorTagDescriptor> desc;
-    err = cameraService->getCameraVendorTagDescriptor(/*out*/desc);
+    android::sp<android::VendorTagDescriptor> desc = new android::VendorTagDescriptor();
+    android::binder::Status res = cameraService->getCameraVendorTagDescriptor(/*out*/desc.get());
 
-    if (err == -EOPNOTSUPP) {
-        Logger::W(TAG, "%s: Camera HAL too old; does not support vendor tags", __FUNCTION__);
+    if (res.serviceSpecificErrorCode() == android::hardware::ICameraService::ERROR_DISCONNECTED) {
+        // No camera module available, not an error on devices with no cameras
         android::VendorTagDescriptor::clearGlobalVendorTagDescriptor();
-
         *descriptor = android::OK;
         return NOERROR;
+    } else if (!res.isOk()) {
+        android::VendorTagDescriptor::clearGlobalVendorTagDescriptor();
+        Logger::E(TAG, "%s: Failed to setup vendor tag descriptors: %s",
+                __FUNCTION__, res.toString8().string());
+        *descriptor = res.serviceSpecificErrorCode();
+        return NOERROR;
     }
-    else if (err != android::OK) {
-        Logger::E(TAG, "%s: Failed to setup vendor tag descriptors, received error %s (%d)",
-                __FUNCTION__, strerror(-err), err);
-        *descriptor = err;
+    if (0 < desc->getTagCount()) {
+        err = android::VendorTagDescriptor::setAsGlobalVendorTagDescriptor(desc);
+    } else {
+        android::sp<android::VendorTagDescriptorCache> cache = new android::VendorTagDescriptorCache();
+        android::binder::Status res = cameraService->getCameraVendorTagCache(/*out*/cache.get());
+        if (res.serviceSpecificErrorCode() == android::hardware::ICameraService::ERROR_DISCONNECTED) {
+            // No camera module available, not an error on devices with no cameras
+            android::VendorTagDescriptorCache::clearGlobalVendorTagCache();
+            *descriptor = android::OK;
+            return NOERROR;
+        } else if (!res.isOk()) {
+            android::VendorTagDescriptorCache::clearGlobalVendorTagCache();
+            Logger::E(TAG, "%s: Failed to setup vendor tag cache: %s",
+                    __FUNCTION__, res.toString8().string());
+            *descriptor = res.serviceSpecificErrorCode();
+            return NOERROR;
+        }
+
+        err = android::VendorTagDescriptorCache::setAsGlobalVendorTagCache(cache);
+    }
+
+    if (err != android::OK) {
+        *descriptor = android::hardware::ICameraService::ERROR_INVALID_OPERATION;
         return NOERROR;
     }
 
-    err = android::VendorTagDescriptor::setAsGlobalVendorTagDescriptor(desc);
-
-    *descriptor = err;
+    *descriptor = android::OK;
     return NOERROR;
 }
 
@@ -2587,12 +2609,12 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
 
     android::sp<android::VendorTagDescriptor> vTags = android::VendorTagDescriptor::getGlobalVendorTagDescriptor();
 
-    android::SortedVector<android::String8> vendorSections;
+    const android::SortedVector<android::String8>* vendorSections;
     size_t vendorSectionCount = 0;
 
     if (vTags != NULL) {
         vendorSections = vTags->getAllSectionNames();
-        vendorSectionCount = vendorSections.size();
+        vendorSectionCount = vendorSections->size();
     }
 
     // First, find the section by the longest string match
@@ -2602,7 +2624,7 @@ ECode CameraMetadataNative::NativeGetTagFromKey(
     size_t totalSectionCount = ANDROID_SECTION_COUNT + vendorSectionCount;
     for (size_t i = 0; i < totalSectionCount; ++i) {
         const char *str = (i < ANDROID_SECTION_COUNT) ? camera_metadata_section_names[i] :
-                vendorSections[i - ANDROID_SECTION_COUNT].string();
+                (*vendorSections)[i - ANDROID_SECTION_COUNT].string();
         // Logger::V(TAG, "%s: Trying to match against section %s '%s'",
         //     __FUNCTION__, (i < ANDROID_SECTION_COUNT ? "built-in tags" : "vendor tags"), str);
         if (strstr(key, str) == key) { // key begins with the section name

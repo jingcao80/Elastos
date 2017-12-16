@@ -670,14 +670,10 @@ public:
     static CARAPI_(void) FreeTextLayoutCaches();
 
     /** @hide */
-    CARAPI_(Int64) GetNativeCanvasWrapper();
-
-    /** @hide */
     CARAPI_(Boolean) IsRecordingFor(
         /* [in] */ IInterface* o);
 
 protected:
-
     virtual CARAPI_(AutoPtr<IGL>) GetGL();
 
     static CARAPI CheckRange(
@@ -690,11 +686,11 @@ protected:
 
 private:
     CARAPI_(Int64) InitRaster(
-        /* [in] */ Int64 bitmap);
+        /* [in] */ IBitmap* bitmap);
 
     static CARAPI_(void) NativeSetBitmap(
         /* [in] */ Int64 nativeCanvas,
-        /* [in] */ Int64 nativeBitmap,
+        /* [in] */ IBitmap* bitmap,
         /* [in] */ Boolean copyState);
 
     static CARAPI_(Boolean) NativeIsOpaque(
@@ -776,11 +772,6 @@ private:
     static CARAPI_(Boolean) NativeClipPath(
         /* [in] */ Int64 nativeCanvas,
         /* [in] */ Int64 nativePath,
-        /* [in] */ RegionOp op);
-
-    static CARAPI_(Boolean) NativeClipRegion(
-        /* [in] */ Int64 nativeCanvas,
-        /* [in] */ Int64 nativeRegion,
         /* [in] */ RegionOp op);
 
     static CARAPI_(void) NativeSetDrawFilter(

@@ -37,22 +37,23 @@ ECode CPaintFlagsDrawFilter::constructor(
 }
 
 // Custom version of SkPaintFlagsDrawFilter that also calls setFilterLevel.
-class CompatFlagsDrawFilter : public SkPaintFlagsDrawFilter {
+class CompatFlagsDrawFilter : public SkPaintFlagsDrawFilter
+{
 public:
     CompatFlagsDrawFilter(uint32_t clearFlags, uint32_t setFlags,
-            SkPaint::FilterLevel desiredLevel)
+            SkFilterQuality desiredQuality)
     : SkPaintFlagsDrawFilter(clearFlags, setFlags)
-    , fDesiredLevel(desiredLevel) {
+    , fDesiredQuality(desiredQuality) {
     }
 
     virtual bool filter(SkPaint* paint, Type type) {
         SkPaintFlagsDrawFilter::filter(paint, type);
-        paint->setFilterLevel(fDesiredLevel);
+        paint->setFilterQuality(fDesiredQuality);
         return true;
     }
 
 private:
-    const SkPaint::FilterLevel fDesiredLevel;
+    const SkFilterQuality fDesiredQuality;
 };
 
 // Returns whether flags contains FILTER_BITMAP_FLAG. If flags does, remove it.
@@ -81,10 +82,10 @@ Int64 CPaintFlagsDrawFilter::NativeConstructor(
         if (turnFilteringOn) {
             // Turning filtering on overrides turning it off.
             filter = new CompatFlagsDrawFilter(clearFlags, setFlags,
-                    SkPaint::kLow_FilterLevel);
+                    kLow_SkFilterQuality);
         } else if (turnFilteringOff) {
             filter = new CompatFlagsDrawFilter(clearFlags, setFlags,
-                    SkPaint::kNone_FilterLevel);
+                    kNone_SkFilterQuality);
         } else {
             filter = new SkPaintFlagsDrawFilter(clearFlags, setFlags);
         }

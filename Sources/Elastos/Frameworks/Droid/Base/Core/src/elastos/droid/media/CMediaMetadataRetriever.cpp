@@ -15,6 +15,7 @@
 //=========================================================================
 
 #include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/graphics/GraphicsNative.h"
 #include "elastos/droid/media/CMediaHTTPService.h"
 #include "elastos/droid/media/CMediaMetadataRetriever.h"
 #include "elastos/droid/media/Media_Utils.h"
@@ -31,14 +32,14 @@
 #include <utils/String8.h>
 #include <utils/threads.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Graphics::BitmapConfig;
 using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::GraphicsNative;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::IBinderForDroidObject;
+using Elastos::Core::AutoLock;
 using Elastos::IO::ICloseable;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFileInputStream;
@@ -466,7 +467,7 @@ ECode CMediaMetadataRetriever::NativeGetFrameAtTime(
             videoFrame->mDisplayHeight,
             videoFrame->mSize);
 
-    BitmapConfig config = CBitmap::NativeToConfig(SkBitmap::kRGB_565_Config);
+    BitmapConfig config = GraphicsNative::ColorTypeToLegacyBitmapConfig(kRGB_565_SkColorType);
 
     size_t width, height;
     Boolean swapWidthAndHeight = FALSE;

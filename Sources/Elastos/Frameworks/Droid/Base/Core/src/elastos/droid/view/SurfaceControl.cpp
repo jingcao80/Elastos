@@ -47,13 +47,14 @@
 #include <utils/Vector.h>
 #include <utils/String8.h>
 
-#include "SkBitmap.h"
-#include "SkTemplates.h"
+#include <skia/core/SkBitmap.h>
+#include <skia/core/SkRegion.h>
 
 using android::sp;
 using android::String8;
 using Elastos::Droid::Os::DroidObjectForIBinder;
 using Elastos::Droid::Os::IBinderForDroidObject;
+using Elastos::Droid::Graphics::BitmapWrapper;
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CRegion;
@@ -71,36 +72,33 @@ namespace View {
 Object SurfaceControl::sLock;
 const String SurfaceControl::TAG("SurfaceControl");
 
-static void assert_premultiplied(const SkBitmap& bitmap, bool isPremultiplied) {
+static void assert_premultiplied(const SkImageInfo& info, bool isPremultiplied) {
     // kOpaque_SkAlphaType and kIgnore_SkAlphaType mean that isPremultiplied is
     // irrelevant. This just tests to ensure that the SkAlphaType is not
     // opposite of isPremultiplied.
     if (isPremultiplied) {
-        SkASSERT(bitmap.alphaType() != kUnpremul_SkAlphaType);
+        SkASSERT(info.alphaType() != kUnpremul_SkAlphaType);
     } else {
-        SkASSERT(bitmap.alphaType() != kPremul_SkAlphaType);
+        SkASSERT(info.alphaType() != kPremul_SkAlphaType);
     }
 }
 
 static AutoPtr<IBitmap> CreateBitmap(
-    /* [in] */ SkBitmap* bitmap,
-    /* [in] */ ArrayOf<Byte>* buffer,
+    /* [in] */ android::Bitmap* bitmap,
     /* [in] */ Int32 bitmapCreateFlags,
     /* [in] */ ArrayOf<Byte>* ninePatchChunk,
     /* [in] */ INinePatchInsetStruct* ninePatchInsets,
     /* [in] */ Int32 density)
 {
-    SkASSERT(bitmap);
-    SkASSERT(bitmap->pixelRef());
     Boolean isMutable = bitmapCreateFlags & GraphicsNative::kBitmapCreateFlag_Mutable;
     Boolean isPremultiplied = bitmapCreateFlags & GraphicsNative::kBitmapCreateFlag_Premultiplied;
 
     // The caller needs to have already set the alpha type properly, so the
     // native SkBitmap stays in sync with the Java Bitmap.
-    assert_premultiplied(*bitmap, isPremultiplied);
-
+    assert_premultiplied(bitmap->info(), isPremultiplied);
+    BitmapWrapper* bitmapWrapper = new BitmapWrapper(bitmap);
     AutoPtr<IBitmap> result;
-    CBitmap::New(reinterpret_cast<Int64>(bitmap), buffer,
+    CBitmap::New(reinterpret_cast<Int64>(bitmapWrapper), NULL,
             bitmap->width(), bitmap->height(), density, isMutable, isPremultiplied,
             ninePatchChunk, ninePatchInsets, (IBitmap**)&result);
 
@@ -836,11 +834,11 @@ AutoPtr<IBitmap> SurfaceControl::NativeScreenshot(
 
     android::Rect sourceCrop(left, top, right, bottom);
 
-    SkAutoTDelete<android::ScreenshotClient> screenshot(new android::ScreenshotClient());
+    std::unique_ptr<android::ScreenshotClient> screenshot(new android::ScreenshotClient());
     android::status_t res;
     if (allLayers) {
-        minLayer = 0;
-        maxLayer = -1UL;
+        minLayer = INT32_MIN;
+        maxLayer = INT32_MAX;
     }
 
     res = screenshot->update(displayToken, sourceCrop, width, height,
@@ -849,48 +847,53 @@ AutoPtr<IBitmap> SurfaceControl::NativeScreenshot(
         return NULL;
     }
 
-    SkImageInfo screenshotInfo;
-    screenshotInfo.fWidth = screenshot->getWidth();
-    screenshotInfo.fHeight = screenshot->getHeight();
-
+    SkColorType colorType;
+    SkAlphaType alphaType;
     switch (screenshot->getFormat()) {
         case android::PIXEL_FORMAT_RGBX_8888: {
-            screenshotInfo.fColorType = kRGBA_8888_SkColorType;
-            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            colorType = kRGBA_8888_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
             break;
         }
         case android::PIXEL_FORMAT_RGBA_8888: {
-            screenshotInfo.fColorType = kRGBA_8888_SkColorType;
-            screenshotInfo.fAlphaType = kPremul_SkAlphaType;
+            colorType = kRGBA_8888_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
+        }
+        case android::PIXEL_FORMAT_RGBA_FP16: {
+            colorType = kRGBA_F16_SkColorType;
+            alphaType = kPremul_SkAlphaType;
             break;
         }
         case android::PIXEL_FORMAT_RGB_565: {
-            screenshotInfo.fColorType = kRGB_565_SkColorType;
-            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            colorType = kRGB_565_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
             break;
         }
         default: {
             return NULL;
         }
     }
+    SkImageInfo screenshotInfo = SkImageInfo::Make(screenshot->getWidth(),
+                                                   screenshot->getHeight(),
+                                                   colorType,
+                                                   alphaType,
+                                                   GraphicsNative::DefaultColorSpace());
 
     const ssize_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
 
-    SkBitmap* bitmap = new SkBitmap();
-    bitmap->setInfo(screenshotInfo, (size_t)rowBytes);
-    if (screenshotInfo.fWidth > 0 && screenshotInfo.fHeight > 0) {
-        // takes ownership of ScreenshotClient
-        SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
-                (size_t) rowBytes, NULL, (void*) screenshot->getPixels(), &DeleteScreenshot,
-                (void*) (screenshot.get()));
-        screenshot.detach();
-        pixels->setImmutable();
-        bitmap->setPixelRef(pixels)->unref();
-        bitmap->lockPixels();
+    if (!screenshotInfo.width() || !screenshotInfo.height()) {
+        return NULL;
     }
 
-    return CreateBitmap(bitmap, NULL,
+    auto bitmap = new android::Bitmap(
+            (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
+            screenshotInfo, rowBytes, nullptr);
+    screenshot.release();
+    bitmap->setImmutable();
+
+    return CreateBitmap(bitmap,
             GraphicsNative::kBitmapCreateFlag_Premultiplied, NULL, NULL, -1);
 }
 
@@ -1084,11 +1087,6 @@ ECode SurfaceControl::NativeSetBlur(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Float blur)
 {
-    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
-    android::status_t err = ctrl->setBlur(blur);
-    if (err < 0 && err != android::NO_INIT) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
     return NOERROR;
 }
 
@@ -1096,12 +1094,6 @@ ECode SurfaceControl::NativeSetBlurMaskSurface(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Int64 maskLayerNativeObject)
 {
-    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
-    android::SurfaceControl* const maskLayer = reinterpret_cast<android::SurfaceControl *>(maskLayerNativeObject);
-    android::status_t err = ctrl->setBlurMaskSurface(maskLayer);
-    if (err < 0 && err != android::NO_INIT) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
     return NOERROR;
 }
 
@@ -1109,11 +1101,6 @@ ECode SurfaceControl::NativeSetBlurMaskSampling(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Int32 blurMaskSampling)
 {
-    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
-    android::status_t err = ctrl->setBlurMaskSampling(blurMaskSampling);
-    if (err < 0 && err != android::NO_INIT) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
     return NOERROR;
 }
 
@@ -1121,11 +1108,6 @@ ECode SurfaceControl::NativeSetBlurMaskAlphaThreshold(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Float alpha)
 {
-    android::SurfaceControl* const ctrl = reinterpret_cast<android::SurfaceControl *>(nativeObject);
-    android::status_t err = ctrl->setBlurMaskAlphaThreshold(alpha);
-    if (err < 0 && err != android::NO_INIT) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
     return NOERROR;
 }
 

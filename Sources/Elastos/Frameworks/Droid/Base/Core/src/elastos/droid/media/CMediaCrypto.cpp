@@ -17,6 +17,7 @@
 #include "elastos/droid/media/CMediaCrypto.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <media/IMediaDrmService.h>
 #include <media/stagefright/MediaCodecList.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -68,8 +69,8 @@ android::sp<android::ICrypto> JCrypto::MakeCrypto()
     android::sp<android::IBinder> binder =
         sm->getService(android::String16("media.player"));
 
-    android::sp<android::IMediaPlayerService> service =
-        android::interface_cast<android::IMediaPlayerService>(binder);
+    android::sp<android::IMediaDrmService> service =
+        android::interface_cast<android::IMediaDrmService>(binder);
 
     if (service == NULL) {
         return NULL;

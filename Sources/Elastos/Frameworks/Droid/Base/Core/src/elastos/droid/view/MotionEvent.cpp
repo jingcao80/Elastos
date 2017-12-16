@@ -2471,7 +2471,7 @@ ECode MotionEvent::NativeInitialize(
         PointerCoordsToNative(pointerCoordsObj, xOffset, yOffset, &rawPointerCoords[i]);
     }
 
-    event->initialize(deviceId, source, action, flags, edgeFlags, metaState, buttonState,
+    event->initialize(deviceId, source, action, 0, flags, edgeFlags, metaState, buttonState,
             xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 

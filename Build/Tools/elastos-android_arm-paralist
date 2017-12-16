@@ -181,6 +181,7 @@
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/graphics/drawable/shapes
   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/graphics/drawable
   Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/graphics/pdf
+  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/graphics/fonts
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/graphics
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/text/format
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/text/method
@@ -208,6 +209,7 @@
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/policy
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/preference
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/statusbar
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/textservice
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/cdma/sms
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/cat
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/internal/telephony/sip

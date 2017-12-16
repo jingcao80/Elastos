@@ -65,26 +65,30 @@ static const String TAG("TextureView");
 
 // FIXME: consider exporting this to share (e.g. android_view_Surface.cpp)
 static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer) {
-    SkImageInfo info;
-    info.fWidth = buffer.width;
-    info.fHeight = buffer.height;
+    SkColorType colorType = kUnknown_SkColorType;
+    SkAlphaType alphaType = kOpaque_SkAlphaType;
     switch (buffer.format) {
         case WINDOW_FORMAT_RGBA_8888:
-            info.fColorType = kN32_SkColorType;
-            info.fAlphaType = kPremul_SkAlphaType;
+            colorType = kN32_SkColorType;
+            alphaType = kPremul_SkAlphaType;
             break;
         case WINDOW_FORMAT_RGBX_8888:
-            info.fColorType = kN32_SkColorType;
-            info.fAlphaType = kOpaque_SkAlphaType;
+            colorType = kN32_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
+            break;
+        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+            colorType = kRGBA_F16_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
         case WINDOW_FORMAT_RGB_565:
-            info.fColorType = kRGB_565_SkColorType;
-            info.fAlphaType = kOpaque_SkAlphaType;
+            colorType = kRGB_565_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
+            break;
         default:
-            info.fColorType = kUnknown_SkColorType;
-            info.fAlphaType = kIgnore_SkAlphaType;
             break;
     }
-    return info;
+    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType,
+            GraphicsNative::DefaultColorSpace());
 }
 
 /**
@@ -515,7 +519,7 @@ ECode TextureView::GetBitmap(
     VALIDATE_NOT_NULL(result)
 
     Boolean bIsAvail = FALSE;
-    if (width > 0 && height > 0 & (IsAvailable(&bIsAvail), bIsAvail)) {
+    if (width > 0 && height > 0 && (IsAvailable(&bIsAvail), bIsAvail)) {
         AutoPtr<IResources> res;
         GetResources((IResources**)&res);
         AutoPtr<IDisplayMetrics> dm;
@@ -674,7 +678,7 @@ void TextureView::NativeCreateNativeWindow(
     sp<IGraphicBufferProducer> producer((IGraphicBufferProducer*)surfaceImpl->mProducer);;
     sp<ANativeWindow> window = new android::Surface(producer, true);
 
-    window->incStrong((void*)&TextureView::NativeCreateNativeWindow);
+    window->incStrong(NULL);
     mNativeWindow = (Int64)(window.get());
 }
 
@@ -684,7 +688,7 @@ void TextureView::NativeDestroyNativeWindow()
 
     if (nativeWindow) {
         sp<ANativeWindow> window(nativeWindow);
-            window->decStrong((void*)&TextureView::NativeCreateNativeWindow);
+        window->decStrong(NULL);
         mNativeWindow = 0;
     }
 }
@@ -700,7 +704,7 @@ Boolean TextureView::NativeLockCanvas(
 
     ANativeWindow_Buffer buffer;
 
-    Rect rect;
+    Rect rect(Rect::EMPTY_RECT);
     if (dirtyRect) {
         Int32 l, t, r, b;
         dirtyRect->GetLeft(&l);
@@ -719,7 +723,7 @@ Boolean TextureView::NativeLockCanvas(
     int32_t status = native_window_lock(window.get(), &buffer, &rect);
     if (status) return FALSE;
 
-    ssize_t bytesCount = buffer.stride * bytesPerPixel(buffer.format);
+    ssize_t bytesCount = buffer.stride * android::bytesPerPixel(buffer.format);
 
     SkBitmap bitmap;
     bitmap.setInfo(convertPixelFormat(buffer), bytesCount);
@@ -730,13 +734,10 @@ Boolean TextureView::NativeLockCanvas(
         bitmap.setPixels(NULL);
     }
 
-    canvas->SetSurfaceFormat(buffer.format);
-    canvas->SetNativeBitmap(reinterpret_cast<Int64>(&bitmap));
-
-    SkRect clipRect;
-    clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
-    SkCanvas* nativeCanvas = GraphicsNative::GetNativeCanvas(canvas);
-    nativeCanvas->clipRect(clipRect);
+    android::Canvas* nativeCanvas = GraphicsNative::GetNativeCanvas(canvas);
+    nativeCanvas->setBitmap(bitmap);
+    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom,
+            SkClipOp::kIntersect);
 
     if (dirtyRect) {
         dirtyRect->Set(int(rect.left), int(rect.top), int(rect.right), int(rect.bottom));

@@ -51,7 +51,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "android"
 ELASTOS_LIBS += ../../marshal/marshalcomm.lib
 ELASTOS_LIBS += ../../marshal/android_linux/marshal.lib
 ELASTOS_LIBS += ../../marshal/linux_rpc/marshal_rpc.lib
-LIBRARIES += -lm -ldl -llog -lz -lcutils -lutils -lbinder
+LIBRARIES += -lm -ldl -llog -lz -lutils -lbinder
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 else
 ifeq "$(XDK_TARGET_PLATFORM)" "linux"

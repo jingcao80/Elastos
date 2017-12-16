@@ -104,6 +104,9 @@ ECode CString::Equals(
     return NOERROR;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode CString::GetHashCode(
     /* [out] */ Int32* hashCode)
 {

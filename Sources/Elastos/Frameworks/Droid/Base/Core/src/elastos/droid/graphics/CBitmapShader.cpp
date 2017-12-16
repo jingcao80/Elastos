@@ -19,8 +19,11 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/CBitmapShader.h"
 #include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/graphics/GraphicsNative.h"
+#include "elastos/droid/graphics/Matrix.h"
 #include <skia/core/SkShader.h>
 #include <skia/core/SkBitmap.h>
+#include <skia/core/SkImagePriv.h>
 
 namespace Elastos {
 namespace Droid {
@@ -44,8 +47,7 @@ ECode CBitmapShader::constructor(
     mBitmap = bitmap;
     mTileX = tileX;
     mTileY = tileY;
-    Int64 nativeBitmatp = ((CBitmap*)bitmap)->mNativeBitmap;
-    Init(NativeCreate(nativeBitmatp, tileX, tileY));
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
@@ -61,16 +63,42 @@ ECode CBitmapShader::Copy(
     return NOERROR;
 }
 
+Int64 CBitmapShader::CreateNativeInstance(
+    /* [in] */ IMatrix* matrix)
+{
+    Int64 nativeMatrix = matrix == NULL ? 0 :
+            ((Matrix*)matrix)->mNativeMatrix;
+    Int64 nativeBitmatp = ((CBitmap*)mBitmap.Get())->mNativeBitmap;
+    return NativeCreate(nativeMatrix, nativeBitmatp, mTileX, mTileY);
+}
+
 Int64 CBitmapShader::NativeCreate(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Int64 bitmapHandle,
     /* [in] */ ShaderTileMode tileModeX,
     /* [in] */ ShaderTileMode tileModeY)
 {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkShader* s = SkShader::CreateBitmapShader(*bitmap,
-            (SkShader::TileMode)tileModeX,
-            (SkShader::TileMode)tileModeY);
-    return reinterpret_cast<Int64>(s);
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
+    SkBitmap bitmap;
+    if (bitmapHandle) {
+        // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
+        // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
+        reinterpret_cast<BitmapWrapper*>(bitmapHandle)->bitmap().getSkBitmapForShaders(&bitmap);
+    }
+
+    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkShader> baseShader = image->makeShader(
+            (SkShader::TileMode)tileModeX, (SkShader::TileMode)tileModeY);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    }
+    else {
+        shader = baseShader.release();
+    }
+
+    return reinterpret_cast<Int64>(shader);
 }
 
 } // namespace Graphics

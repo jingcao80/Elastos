@@ -18,7 +18,6 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/pdf/CPdfDocument.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CreateOutputStreamAdaptor.h"
 #include <skia/core/SkDocument.h>
@@ -26,6 +25,7 @@
 #include <skia/core/SkPictureRecorder.h>
 #include <skia/core/SkStream.h>
 #include <skia/core/SkRect.h>
+#include <hwui/Canvas.h>
 #include <vector>
 
 using Elastos::Core::ICloseGuardHelper;
@@ -252,11 +252,6 @@ public:
         SkCanvas* canvas = page->mPictureRecorder->beginRecording(
                 contentRect.width(), contentRect.height(), NULL, 0);
 
-        // We pass this canvas to Java where it is used to construct
-        // a Java Canvas object which dereferences the pointer when it
-        // is destroyed, so we have to bump up the reference count.
-        canvas->ref();
-
         return canvas;
     }
 
@@ -264,14 +259,14 @@ public:
         assert(mCurrentPage != NULL);
         assert(mCurrentPage->mPictureRecorder != NULL);
         assert(mCurrentPage->mPicture == NULL);
-        mCurrentPage->mPicture = mCurrentPage->mPictureRecorder->endRecording();
+        mCurrentPage->mPicture = mCurrentPage->mPictureRecorder->finishRecordingAsPicture().release();
         delete mCurrentPage->mPictureRecorder;
         mCurrentPage->mPictureRecorder = NULL;
         mCurrentPage = NULL;
     }
 
     void write(SkWStream* stream) {
-        SkDocument* document = SkDocument::CreatePDF(stream);
+        sk_sp<SkDocument> document = SkDocument::MakePDF(stream);
         for (unsigned i = 0; i < mPages.size(); i++) {
             PageRecord* page =  mPages[i];
 
@@ -478,7 +473,7 @@ Int64 CPdfDocument::NativeStartPage(
     PdfDocument* document = reinterpret_cast<PdfDocument*>(documentPtr);
     SkCanvas* canvas = document->startPage(pageWidth, pageHeight,
             contentLeft, contentTop, contentRight, contentBottom);
-    return reinterpret_cast<Int64>(NativeCanvas::create_canvas(canvas));
+    return reinterpret_cast<Int64>(android::Canvas::create_canvas(canvas, android::Canvas::XformToSRGB::kDefer));
 }
 
 } // namespace Pdf

@@ -20,6 +20,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_View_CViewRootImplW.h"
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::IBundle;
@@ -106,12 +107,14 @@ public:
     CARAPI ToString(
         /* [out] */ String* description);
 
-
 private:
     static CARAPI_(Int32) CheckCallingPermission(
         /* [in] */ const String& permission);
 
     CARAPI_(AutoPtr<IViewRootImpl>) GetViewRootImpl();
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     AutoPtr<IWeakReference> mViewAncestor;

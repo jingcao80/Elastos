@@ -25,7 +25,7 @@
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/CSurfaceTexture.h"
 #include "elastos/droid/graphics/CRegion.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
+#include "elastos/droid/graphics/GraphicsNative.h"
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/NativeBinder.h"
 #include <elastos/core/AutoLock.h>
@@ -40,7 +40,6 @@
 #include <skia/core/SkRegion.h>
 #include <utils/String8.h>
 #include <skia/core/SkPixelRef.h>
-//#include <ScopedUtfChars.h>
 #include <ui/DisplayInfo.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
@@ -49,13 +48,14 @@
 #include <binder/Parcel.h>
 #include <android/native_window.h>
 #include <gui/Surface.h>
+#include <gui/view/Surface.h>
 
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::DroidObjectForIBinder;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Graphics::CMatrix;
-using Elastos::Droid::Graphics::NativeCanvas;
+using Elastos::Droid::Graphics::GraphicsNative;
 using Elastos::Core::AutoLock;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
@@ -91,6 +91,7 @@ static inline SkColorType convertPixelFormat(android::PixelFormat format) {
     switch (format) {
     case android::PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
     case android::PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
+    case android::PIXEL_FORMAT_RGBA_FP16:    return kRGBA_F16_SkColorType;
     case android::PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
     default:                        return kUnknown_SkColorType;
     }
@@ -191,7 +192,7 @@ ECode Surface::NativeLockCanvas(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    android::Rect dirtyRect;
+    android::Rect dirtyRect(android::Rect::EMPTY_RECT);
     android::Rect* dirtyRectPtr = NULL;
 
     if (dirty) {
@@ -216,17 +217,11 @@ ECode Surface::NativeLockCanvas(
         }
     }
 
-    // Associate a SkCanvas object to this surface
-    Canvas* canvasImp = (Canvas*)canvas;
-
-    canvasImp->SetSurfaceFormat(outBuffer.format);
-
     SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
                                          convertPixelFormat(outBuffer.format),
-                                         kPremul_SkAlphaType);
-    if (outBuffer.format == android::PIXEL_FORMAT_RGBX_8888) {
-        info.fAlphaType = kOpaque_SkAlphaType;
-    }
+                                         outBuffer.format == android::PIXEL_FORMAT_RGBX_8888
+                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType,
+                                         GraphicsNative::DefaultColorSpace());
 
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * android::bytesPerPixel(outBuffer.format);
@@ -238,12 +233,12 @@ ECode Surface::NativeLockCanvas(
         bitmap.setPixels(NULL);
     }
 
-    canvasImp->SetNativeBitmap(reinterpret_cast<Int64>(&bitmap));
+    android::Canvas* nativeCanvas = reinterpret_cast<android::Canvas*>(((Canvas*)canvas)->mNativeCanvas);
+    nativeCanvas->setBitmap(bitmap);
 
     if (dirtyRectPtr) {
-        SkCanvas* nativeCanvas = reinterpret_cast<NativeCanvas*>(canvasImp->mNativeCanvas)->getSkCanvas();
-        assert(nativeCanvas != NULL);
-        nativeCanvas->clipRect(SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)));
+        nativeCanvas->clipRect(dirtyRect.left, dirtyRect.top,
+                dirtyRect.right, dirtyRect.bottom, SkClipOp::kIntersect);
     }
 
     if (dirty) {
@@ -318,30 +313,38 @@ ECode Surface::NativeReadFromParcel(
     if (source == NULL) {
         *result = 0;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-
     }
+
     android::Parcel* parcel;
     source->GetDataPayload((Handle32*)&parcel);
     if (parcel == NULL) {
+        *result = 0;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+
+
+    android::view::Surface surfaceShim;
+
+    // Calling code in Surface.java has already read the name of the Surface
+    // from the Parcel
+    surfaceShim.readFromParcel(parcel, /*nameAlreadyRead*/true);
+
     sp<android::Surface> self(reinterpret_cast<android::Surface *>(mNativeObject));
-    sp<android::IBinder> binder(parcel->readStrongBinder());
 
     // update the Surface only if the underlying IGraphicBufferProducer
     // has changed.
-    if (self != NULL
-            && (self->getIGraphicBufferProducer()->asBinder() == binder)) {
+    if (self != nullptr
+            && (android::IInterface::asBinder(self->getIGraphicBufferProducer()) ==
+                    android::IInterface::asBinder(surfaceShim.graphicBufferProducer))) {
         // same IGraphicBufferProducer, return ourselves
         *result = reinterpret_cast<Int64>(self.get());
         return NOERROR;
     }
 
     sp<android::Surface> sur;
-    sp<android::IGraphicBufferProducer> gbp(android::interface_cast<android::IGraphicBufferProducer>(binder));
-    if (gbp != NULL) {
+    if (surfaceShim.graphicBufferProducer != nullptr) {
         // we have a new IGraphicBufferProducer, create a new Surface for it
-        sur = new android::Surface(gbp, true);
+        sur = new android::Surface(surfaceShim.graphicBufferProducer, true);
         // and keep a reference before passing to java
         sur->incStrong(&sRefBaseOwner);
     }
@@ -368,7 +371,11 @@ ECode Surface::NativeWriteToParcel(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     sp<android::Surface> self(reinterpret_cast<android::Surface *>(mNativeObject));
-    parcel->writeStrongBinder(self != 0 ? self->getIGraphicBufferProducer()->asBinder() : NULL);
+    android::view::Surface surfaceShim;
+    if (self != nullptr) {
+        surfaceShim.graphicBufferProducer = self->getIGraphicBufferProducer();
+    }
+    surfaceShim.writeToParcel(parcel, /*nameAlreadyWritten*/true);
     return NOERROR;
 }
 
@@ -385,24 +392,6 @@ void Surface::NativeAllocateBuffers()
 ECode Surface::NativeSetDirtyRect(
     /* [in] */ IRect* dirty)
 {
-#ifdef QCOM_BSP
-    sp<android::Surface> surface(reinterpret_cast<android::Surface *>(mNativeObject));
-
-    if (!isSurfaceValid(surface)) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-
-    Int32 l, t, r, b;
-    dirty->Get(&l, &t, &r, &b);
-
-    android::Rect rect;
-    rect.left = l;
-    rect.top = t;
-    rect.right = r;
-    rect.bottom = b;
-
-    surface->setDirtyRect(&rect);
-#endif
     return NOERROR;
 }
 

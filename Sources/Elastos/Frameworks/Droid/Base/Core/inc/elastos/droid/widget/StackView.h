@@ -374,11 +374,11 @@ private:
     static const Int32 FRAME_PADDING = 4;
     static const Int32 MIN_TIME_BETWEEN_INTERACTION_AND_AUTOADVANCE = 5000;
 
-    static const Float PERSPECTIVE_SHIFT_FACTOR_Y = 0.1f;
-    static const Float PERSPECTIVE_SHIFT_FACTOR_X = 0.1f;
-    static const Float PERSPECTIVE_SCALE_FACTOR = 0.0f;
-    static const Float SWIPE_THRESHOLD_RATIO = 0.2f;
-    static const Float SLIDE_UP_RATIO = 0.7f;
+    static constexpr Float PERSPECTIVE_SHIFT_FACTOR_Y = 0.1f;
+    static constexpr Float PERSPECTIVE_SHIFT_FACTOR_X = 0.1f;
+    static constexpr Float PERSPECTIVE_SCALE_FACTOR = 0.0f;
+    static constexpr Float SWIPE_THRESHOLD_RATIO = 0.2f;
+    static constexpr Float SLIDE_UP_RATIO = 0.7f;
 
     static const Int64 MIN_TIME_BETWEEN_SCROLLS = 100;
 

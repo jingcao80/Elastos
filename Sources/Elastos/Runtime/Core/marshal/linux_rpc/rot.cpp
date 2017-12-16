@@ -29,6 +29,9 @@ pthread_mutex_t g_marshalLock;
 static ImportObject s_hashImportObjects[ROT_HASHTABLE_SIZE];
 static ExportObject s_hashExportObjects[ROT_HASHTABLE_SIZE];
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 static UInt32 Hash(const String& key)
 {
     assert(!key.IsNull());

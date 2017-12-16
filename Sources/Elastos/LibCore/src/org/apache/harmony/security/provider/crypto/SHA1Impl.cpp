@@ -23,6 +23,9 @@ namespace Security {
 namespace Provider {
 namespace Crypto {
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 void SHA1Impl::ComputeHash(
     /* [in] */ ArrayOf<Int32>* arrW)
 {

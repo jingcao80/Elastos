@@ -560,7 +560,7 @@ private:
 
     static const Int32 DEFAULT_CAPACITY = 11;
 
-    static const Double DEFAULT_INIT_CAPACITY_RATIO = 1.1;
+    static constexpr Double DEFAULT_INIT_CAPACITY_RATIO = 1.1;
 
     static const Int32 DEFAULT_CAPACITY_RATIO = 2;
 

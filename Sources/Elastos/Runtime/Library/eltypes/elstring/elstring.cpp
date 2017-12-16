@@ -173,6 +173,9 @@ String::~String()
     }
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 Int32 String::GetHashCode() const
 {
     // BKDR Hash Function

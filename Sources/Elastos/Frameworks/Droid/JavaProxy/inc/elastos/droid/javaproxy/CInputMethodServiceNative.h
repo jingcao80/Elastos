@@ -25,6 +25,8 @@ using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::View::IIInputMethod;
 using Elastos::Droid::Internal::View::IIInputMethodSession;
 using Elastos::Droid::Internal::View::IIInputSessionCallback;
+using Elastos::Droid::Internal::View::IInputBindResult;
+using Elastos::Droid::Internal::View::IInputMethodClient;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::View::IInputChannel;
@@ -86,6 +88,17 @@ public:
     CARAPI HideSoftInput(
         /* [in] */ Int32 flags,
         /* [in] */ IResultReceiver* resultReceiver);
+
+    CARAPI StartInputOrWindowGainedFocus(
+        /* [in] */ Int32 startInputReason,
+        /* [in] */ IInputMethodClient* client,
+        /* [in] */ IBinder* windowToken,
+        /* [in] */ Int32 controlFlags,
+        /* [in] */ Int32 softInputMode,
+        /* [in] */ Int32 windowFlags,
+        /* [in] */ IEditorInfo* attribute,
+        /* [in] */ IIInputContext* inputContext,
+        /* [out] */ IInputBindResult** result);
 
     CARAPI ChangeInputMethodSubtype(
         /* [in] */ IInputMethodSubtype* subtype);

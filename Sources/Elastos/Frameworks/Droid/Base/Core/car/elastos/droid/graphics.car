@@ -110,6 +110,7 @@ module
     merge("graphics/drawable/shapes/ArcShape.car");
     merge("graphics/drawable/shapes/OvalShape.car");
     merge("graphics/drawable/shapes/PathShape.car");
+    merge("graphics/fonts/FontVariationAxis.car");
     merge("graphics/pdf/PdfDocument.car");
     merge("graphics/pdf/PdfEditor.car");
     merge("graphics/pdf/PdfRenderer.car");

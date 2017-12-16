@@ -34,6 +34,7 @@ CAR_INTERFACE_IMPL_3(CContentObserverTransport, Object, IContentObserverTranspor
 CAR_OBJECT_IMPL(CContentObserverTransport)
 
 CContentObserverTransport::CContentObserverTransport()
+    : mBBinder(NULL)
 {
 }
 

@@ -17,3 +17,4 @@
 DIRS += drawable/shapes
 DIRS += drawable
 DIRS += pdf
+DIRS += fonts

@@ -107,13 +107,6 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Org.Conscrypt.eco
 LIBRARIES += $(XDK_USER_LIB)/Elastos.DroidRuntime.lib
-LIBRARIES += $(PREBUILD_LIB)/libm.a
-LIBRARIES += $(PREBUILD_LIB)/libxml2.a
-LIBRARIES += $(PREBUILD_LIB)/libstdc++.a
-#LIBRARIES += $(PREBUILD_LIB)/cxx-stl/gnu-libstdc++/armeabi/libstdc++.a
-#LIBRARIES += $(PREBUILD_LIB)/libc++.a
-LIBRARIES += $(PREBUILD_LIB)/libstagefright_amrnbenc.a
+LIBRARIES += $(PREBUILD_LIB)/libgif.a
 
-LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lui -linput -landroidfw -lselinux -lz -lusbhost -lnativebridge -lprocessgroup -lmtp -lexif -ljhead -lmedia -lcamera_client -lminikin -lhwui -lgui -lsoundtrigger -lhardware_legacy -lelwebviewchromium -lhardware -lpdfium -ljpeg -lstlport -ldl -lcamera_metadata -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -lnetd_client  -lnetutils -limg_utils -lstagefright -lstagefright_foundation -lstagefright_amrnb_common -lmemtrack -lkeystore_binder
-
-#LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lgui -lui -lhwui -landroidfw -lharfbuzz -ljpeg -lz -lmedia -lhardware_legacy -lstagefright -lstagefright_foundation -lstagefright_amrnb_common -lsqlite -lcamera_client -lusbhost -lselinux -lgpioservice -lelwebcore -lelchromium_net -lcrypto -lstlport -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -ldrm1 -lmtp -lexif -lminikin -lc++ -lharfbuzz_ng
+LIBRARIES += -lm -licuuc -lbinder -lutils -lcutils -lsqlite -lskia -lui -linput -landroidfw -lselinux -lz -lusbhost -lnativebridge -lprocessgroup -lmtp -lexif -lmedia -lcamera_client -lminikin -lhwui -lgui -lhardware_legacy -lhardware -lpdfium -ljpeg -ldl -lcamera_metadata -lEGL -lGLESv1_CM -lGLESv2 -lnetd_client -lnetutils -limg_utils -lstagefright -lstagefright_foundation -lmemtrack -lkeystore_binder -laudioclient -lsoundpool -lmediadrm -lsensor -llog -ldebuggerd_client

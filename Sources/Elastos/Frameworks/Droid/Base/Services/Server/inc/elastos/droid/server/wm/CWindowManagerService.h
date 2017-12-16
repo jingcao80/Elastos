@@ -2095,10 +2095,10 @@ public:
     static const String BOOT_ANIMATION_SERVICE;
 
     /** Minimum value for attachStack and resizeStack weight value */
-    static const Float STACK_WEIGHT_MIN = 0.2f;
+    static constexpr Float STACK_WEIGHT_MIN = 0.2f;
 
     /** Maximum value for attachStack and resizeStack weight value */
-    static const Float STACK_WEIGHT_MAX = 0.8f;
+    static constexpr Float STACK_WEIGHT_MAX = 0.8f;
 
     static const Int32 UPDATE_FOCUS_NORMAL = 0;
     static const Int32 UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;

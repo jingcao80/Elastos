@@ -24,6 +24,7 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/internal/view/CInputBindResult.h"
+#include "elastos/droid/internal/view/IInputMethodManager.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/utility/CSparseArray.h"
@@ -41,6 +42,7 @@
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Internal::View::CInputBindResult;
+using Elastos::Droid::Internal::View::IInputMethodManagerProxy;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::ServiceManager;
@@ -87,6 +89,17 @@ const Int32 CInputMethodManager::MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBE
 const Int32 CInputMethodManager::REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE = 0x0;
 
 const Int32 CInputMethodManager::NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER = -1;
+
+const Int32 CInputMethodManager::START_INPUT_REASON_UNSPECIFIED = 0;
+const Int32 CInputMethodManager::START_INPUT_REASON_WINDOW_FOCUS_GAIN = 1;
+const Int32 CInputMethodManager::START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY = 2;
+const Int32 CInputMethodManager::START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API = 3;
+const Int32 CInputMethodManager::START_INPUT_REASON_CHECK_FOCUS = 4;
+const Int32 CInputMethodManager::START_INPUT_REASON_BOUND_TO_IMMS = 5;
+const Int32 CInputMethodManager::START_INPUT_REASON_UNBOUND_FROM_IMMS = 6;
+const Int32 CInputMethodManager::START_INPUT_REASON_ACTIVATED_BY_IMMS = 7;
+const Int32 CInputMethodManager::START_INPUT_REASON_DEACTIVATED_BY_IMMS = 8;
+const Int32 CInputMethodManager::START_INPUT_REASON_SESSION_CREATED_BY_IME = 9;
 
 //========================================================================================
 //              CInputMethodManager::MyHandler::
@@ -156,7 +169,7 @@ ECode CInputMethodManager::MyHandler::HandleMessage(
 //========================================================================================
 ECode CInputMethodManager::StartInputRunnable::Run()
 {
-    mHost->StartInputInner(NULL, 0, 0, 0);
+    mHost->StartInputInner(mStartInputReason, NULL, 0, 0, 0);
     return NOERROR;
 }
 
@@ -268,8 +281,8 @@ AutoPtr<IInputMethodManager> CInputMethodManager::GetInstance()
     AutoLock lock(sLock);
 
     if (sInstance == NULL) {
-        AutoPtr<IIInputMethodManager> service =
-            IIInputMethodManager::Probe(ServiceManager::GetService(IContext::INPUT_METHOD_SERVICE));
+        android::sp<android::IBinder> im = ServiceManager::GetAndroidService(IContext::INPUT_METHOD_SERVICE);
+        AutoPtr<IIInputMethodManager> service = new IInputMethodManagerProxy(im);
         ASSERT_SUCCEEDED(CInputMethodManager::New(service, Looper::GetMainLooper(), (IInputMethodManager**)&sInstance));
     }
     return sInstance;
@@ -711,11 +724,12 @@ ECode CInputMethodManager::RestartInput(
         mServedConnecting = TRUE;
     }
 
-    StartInputInner(NULL, 0, 0, 0);
+    StartInputInner(START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API, NULL, 0, 0, 0);
     return NOERROR;
 }
 
 Boolean CInputMethodManager::StartInputInner(
+    /* [in] */ Int32 startInputReason,
     /* [in] */ IBinder* windowGainingFocus,
     /* [in] */ Int32 controlFlags,
     /* [in] */ Int32 softInputMode,
@@ -757,7 +771,7 @@ Boolean CInputMethodManager::StartInputInner(
         // The view is running on a different thread than our own, so
         // we need to reschedule our work for over there.
         if (DEBUG) Logger::V(TAG, "Starting input: reschedule to view thread");
-        AutoPtr<IRunnable> runnable = new StartInputRunnable(this);
+        AutoPtr<IRunnable> runnable = new StartInputRunnable(this, startInputReason);
         Boolean result;
         vh->Post(runnable, &result);
         return FALSE;
@@ -835,15 +849,9 @@ Boolean CInputMethodManager::StartInputInner(
                 view.Get(), ic.Get(), tba.Get(), controlFlags);
         }
         AutoPtr<IInputBindResult> res;
-        if (windowGainingFocus != NULL) {
-            mService->WindowGainedFocus(mClient, windowGainingFocus,
-                controlFlags, softInputMode, windowFlags,
+        mService->StartInputOrWindowGainedFocus(startInputReason, mClient,
+                windowGainingFocus, controlFlags, softInputMode, windowFlags,
                 tba, servedContext, (IInputBindResult**)&res);
-        }
-        else {
-            mService->StartInput(mClient,
-                servedContext, tba, controlFlags, (IInputBindResult**)&res);
-        }
         if (DEBUG) Logger::V(TAG, "Starting input: Bind result=%p", res.Get());
         if (res != NULL) {
             String id;
@@ -869,6 +877,28 @@ Boolean CInputMethodManager::StartInputInner(
                     // This means there is no input method available.
                     if (DEBUG) Logger::V(TAG, "ABORT input: no input method!");
                     return TRUE;
+                }
+            }
+        }
+        else {
+            if (startInputReason == START_INPUT_REASON_WINDOW_FOCUS_GAIN) {
+                // We are here probably because of an obsolete window-focus-in message sent
+                // to windowGainingFocus.  Since IMMS determines whether a Window can have
+                // IME focus or not by using the latest window focus state maintained in the
+                // WMS, this kind of race condition cannot be avoided.  One obvious example
+                // would be that we have already received a window-focus-out message but the
+                // UI thread is still handling previous window-focus-in message here.
+                // TODO: InputBindResult should have the error code.
+                if (DEBUG) Logger::W(TAG, "startInputOrWindowGainedFocus failed. "
+                        "Window focus may have already been lost. "
+                        "win=%s view=%s", TO_CSTR(windowGainingFocus), TO_CSTR(view));
+                if (!mActive) {
+                    // mHasBeenInactive is a latch switch to forcefully refresh IME focus
+                    // state when an inactive (mActive == false) client is gaining window
+                    // focus. In case we have unnecessary disable the latch due to this
+                    // spurious wakeup, we re-enable the latch here.
+                    // TODO: Come up with more robust solution.
+                    mHasBeenInactive = TRUE;
                 }
             }
         }
@@ -970,7 +1000,7 @@ void CInputMethodManager::ScheduleCheckFocusLocked(
 ECode CInputMethodManager::CheckFocus()
 {
     if (CheckFocusNoStartInput(FALSE, TRUE)) {
-        StartInputInner(NULL, 0, 0, 0);
+        StartInputInner(START_INPUT_REASON_CHECK_FOCUS, NULL, 0, 0, 0);
     }
     return NOERROR;
 }
@@ -1078,7 +1108,7 @@ ECode CInputMethodManager::OnWindowFocus(
         // should be done in conjunction with telling the system service
         // about the window gaining focus, to help make the transition
         // smooth.
-        if (StartInputInner(binder, controlFlags, softInputMode, windowFlags)) {
+        if (StartInputInner(START_INPUT_REASON_WINDOW_FOCUS_GAIN, binder, controlFlags, softInputMode, windowFlags)) {
             return NOERROR;
         }
     }
@@ -1091,8 +1121,8 @@ ECode CInputMethodManager::OnWindowFocus(
         // try {
         if (DEBUG) Logger::V(TAG, "Reporting focus gain, without startInput");
         AutoPtr<IInputBindResult> result;
-        mService->WindowGainedFocus(mClient, binder,
-                controlFlags, softInputMode, windowFlags, NULL, NULL, (IInputBindResult**)&result);
+        // mService->WindowGainedFocus(mClient, binder,
+        //         controlFlags, softInputMode, windowFlags, NULL, NULL, (IInputBindResult**)&result);
         // } catch (RemoteException e) {
         // }
     }
@@ -1812,7 +1842,7 @@ void CInputMethodManager::HandleBind(
         mCurId = res->mId;
         mBindSequence = res->mSequence;
     }
-    StartInputInner(NULL, 0, 0, 0);
+    StartInputInner(START_INPUT_REASON_BOUND_TO_IMMS, NULL, 0, 0, 0);
 }
 
 void CInputMethodManager::HandleUnBind(
@@ -1849,7 +1879,7 @@ void CInputMethodManager::HandleUnBind(
             }
         }
         if (startInput) {
-            StartInputInner(NULL, 0, 0, 0);
+            StartInputInner(START_INPUT_REASON_UNBOUND_FROM_IMMS, NULL, 0, 0, 0);
         }
     }
 }
@@ -1888,7 +1918,10 @@ void CInputMethodManager::HandleSetActive(
                 // In that case, we really should not call
                 // mServedInputConnection.finishComposingText.
                 if (CheckFocusNoStartInput(mHasBeenInactive, FALSE)) {
-                    StartInputInner(NULL, 0, 0, 0);
+                    Int32 reason = active ?
+                            START_INPUT_REASON_ACTIVATED_BY_IMMS :
+                            START_INPUT_REASON_DEACTIVATED_BY_IMMS;
+                    StartInputInner(reason, NULL, 0, 0, 0);
                 }
             }
         }

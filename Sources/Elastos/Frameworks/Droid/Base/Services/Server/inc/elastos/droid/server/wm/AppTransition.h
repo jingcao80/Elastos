@@ -336,9 +336,9 @@ private:
     static const Boolean DEBUG_ANIM;
 
     /** Fraction of animation at which the recents thumbnail stays completely transparent */
-    static const Float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.7f;
+    static constexpr Float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.7f;
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
-    static const Float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.3f;
+    static constexpr Float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.3f;
 
     static const Int32 DEFAULT_APP_TRANSITION_DURATION = 250;
     static const Int32 THUMBNAIL_APP_TRANSITION_DURATION = 300;

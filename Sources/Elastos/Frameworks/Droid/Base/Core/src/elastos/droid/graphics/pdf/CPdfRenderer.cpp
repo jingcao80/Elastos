@@ -29,7 +29,6 @@
 #include <skia/core/SkBitmap.h>
 #include <skia/core/SkMatrix.h>
 #include <fpdfview.h>
-#include <fsdk_rendercontext.h>
 #include <utils/Log.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -338,7 +337,7 @@ static void InitializeLibraryIfNeeded()
 {
     Mutex::AutoLock _l(sLock);
     if (sUnmatchedInitRequestCount == 0) {
-        FPDF_InitLibrary(NULL);
+        FPDF_InitLibrary();
     }
     sUnmatchedInitRequestCount++;
 }
@@ -417,98 +416,8 @@ Boolean CPdfRenderer::NativeScaleForPrinting(
     return FPDF_VIEWERREF_GetPrintScaling(document);
 }
 
-static void DropContext(
-    /* [in] */ void* data)
-{
-    delete (CRenderContext*) data;
-}
-
-static void renderPageBitmap(
-    /* [in] */ FPDF_BITMAP bitmap,
-    /* [in] */ FPDF_PAGE page,
-    /* [in] */ int destLeft,
-    /* [in] */ int destTop,
-    /* [in] */ int destRight,
-    /* [in] */ int destBottom,
-    /* [in] */ SkMatrix* transform,
-    /* [in] */ int flags)
-{
-    // Note: this code ignores the currently unused RENDER_NO_NATIVETEXT,
-    // FPDF_RENDER_LIMITEDIMAGECACHE, FPDF_RENDER_FORCEHALFTONE, FPDF_GRAYSCALE,
-    // and FPDF_ANNOT flags. To add support for that refer to FPDF_RenderPage_Retail
-    // in fpdfview.cpp
-
-    CRenderContext* pContext = FX_NEW CRenderContext;
-
-    CPDF_Page* pPage = (CPDF_Page*) page;
-    pPage->SetPrivateData((void*) 1, pContext, DropContext);
-
-    CFX_FxgeDevice* fxgeDevice = FX_NEW CFX_FxgeDevice;
-    pContext->m_pDevice = fxgeDevice;
-
-    // Reverse the bytes (last argument TRUE) since the Android
-    // format is ARGB while the renderer uses BGRA internally.
-    fxgeDevice->Attach((CFX_DIBitmap*) bitmap, 0, TRUE);
-
-    CPDF_RenderOptions* renderOptions = pContext->m_pOptions;
-
-    if (!renderOptions) {
-        renderOptions = FX_NEW CPDF_RenderOptions;
-        pContext->m_pOptions = renderOptions;
-    }
-
-    if (flags & FPDF_LCD_TEXT) {
-        renderOptions->m_Flags |= RENDER_CLEARTYPE;
-    } else {
-        renderOptions->m_Flags &= ~RENDER_CLEARTYPE;
-    }
-
-    const CPDF_OCContext::UsageType usage = (flags & FPDF_PRINTING)
-            ? CPDF_OCContext::Print : CPDF_OCContext::View;
-
-    renderOptions->m_AddFlags = flags >> 8;
-    renderOptions->m_pOCContext = new CPDF_OCContext(pPage->m_pDocument, usage);
-
-    fxgeDevice->SaveState();
-
-    FX_RECT clip;
-    clip.left = destLeft;
-    clip.right = destRight;
-    clip.top = destTop;
-    clip.bottom = destBottom;
-    fxgeDevice->SetClip_Rect(&clip);
-
-    CPDF_RenderContext* pageContext = FX_NEW CPDF_RenderContext;
-    pContext->m_pContext = pageContext;
-    pageContext->Create(pPage);
-
-    CFX_AffineMatrix matrix;
-    if (!transform) {
-        pPage->GetDisplayMatrix(matrix, destLeft, destTop, destRight - destLeft,
-                destBottom - destTop, 0);
-    } else {
-        // PDF's coordinate system origin is left-bottom while
-        // in graphics it is the top-left, so remap the origin.
-        matrix.Set(1, 0, 0, -1, 0, pPage->GetPageHeight());
-
-        SkScalar transformValues[6];
-        transform->asAffine(transformValues);
-
-        matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
-                transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
-                transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
-    }
-    pageContext->AppendObjectList(pPage, &matrix);
-
-    pContext->m_pRenderer = FX_NEW CPDF_ProgressiveRenderer;
-    pContext->m_pRenderer->Start(pageContext, fxgeDevice, renderOptions, NULL);
-
-    fxgeDevice->RestoreState();
-
-    pPage->RemovePrivateData((void*) 1);
-
-    delete pContext;
-}
+static const int RENDER_MODE_FOR_DISPLAY = 1;
+static const int RENDER_MODE_FOR_PRINT = 2;
 
 void CPdfRenderer::NativeRenderPage(
     /* [in] */ Int64 documentPtr,
@@ -522,34 +431,58 @@ void CPdfRenderer::NativeRenderPage(
     /* [in] */ Int32 renderMode)
 {
     FPDF_DOCUMENT UNUSED(document) = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
-    SkBitmap* skBitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
-    SkMatrix* skMatrix = reinterpret_cast<SkMatrix*>(matrixPtr);
 
-    skBitmap->lockPixels();
+    FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+
+    SkBitmap* skBitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+
+    SkAutoLockPixels alp(*skBitmap);
 
     const int stride = skBitmap->width() * 4;
 
     FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap->width(), skBitmap->height(),
             FPDFBitmap_BGRA, skBitmap->getPixels(), stride);
-
     if (!bitmap) {
-        Logger::E(String("CPdfRenderer"), String("Erorr creating bitmap"));
+        Logger::E("CPdfRenderer", "Erorr creating bitmap");
         return;
     }
 
-    int renderFlags = 0;
-    if (renderMode == Page::RENDER_MODE_FOR_DISPLAY) {
+    int renderFlags = FPDF_REVERSE_BYTE_ORDER;
+    if (renderMode == RENDER_MODE_FOR_DISPLAY) {
         renderFlags |= FPDF_LCD_TEXT;
-    } else if (renderMode == Page::RENDER_MODE_FOR_PRINT) {
+    } else if (renderMode == RENDER_MODE_FOR_PRINT) {
         renderFlags |= FPDF_PRINTING;
     }
 
-    renderPageBitmap(bitmap, page, destLeft, destTop, destRight,
-            destBottom, skMatrix, renderFlags);
+    // PDF's coordinate system origin is left-bottom while in graphics it
+    // is the top-left. So, translate the PDF coordinates to ours.
+    SkMatrix reflectOnX = SkMatrix::MakeScale(1, -1);
+    SkMatrix moveUp = SkMatrix::MakeTrans(0, FPDF_GetPageHeight(page));
+    SkMatrix coordinateChange = SkMatrix::Concat(moveUp, reflectOnX);
+
+    // Apply the transformation
+    SkMatrix matrix;
+    if (matrixPtr == 0) {
+        matrix = coordinateChange;
+    } else {
+        matrix = SkMatrix::Concat(*reinterpret_cast<SkMatrix*>(matrixPtr), coordinateChange);
+    }
+
+    SkScalar transformValues[6];
+    if (!matrix.asAffine(transformValues)) {
+        Logger::E("CPdfRenderer", "transform matrix has perspective. Only affine matrices are allowed.");
+    }
+
+    FS_MATRIX transform = {transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
+                           transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
+                           transformValues[SkMatrix::kATransX],
+                           transformValues[SkMatrix::kATransY]};
+
+    FS_RECTF clip = {(float) destLeft, (float) destTop, (float) destRight, (float) destBottom};
+
+    FPDF_RenderPageBitmapWithMatrix(bitmap, page, &transform, &clip, renderFlags);
 
     skBitmap->notifyPixelsChanged();
-    skBitmap->unlockPixels();
 }
 
 ECode CPdfRenderer::NativeOpenPageAndGetSize(

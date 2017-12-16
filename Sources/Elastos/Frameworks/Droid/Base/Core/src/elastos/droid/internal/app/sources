@@ -51,3 +51,5 @@ SOURCES += RestrictionsPinActivity.cpp
 SOURCES += ToolbarActionBar.cpp
 SOURCES += WindowDecorActionBar.cpp
 SOURCES += App.cpp
+
+SOURCES += IVoiceInteractor.cpp

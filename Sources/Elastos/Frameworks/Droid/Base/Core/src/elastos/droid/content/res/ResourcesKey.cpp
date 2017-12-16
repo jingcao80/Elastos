@@ -29,6 +29,9 @@ namespace Res {
 
 CAR_INTERFACE_IMPL(ResourcesKey, Object, IResourcesKey)
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ResourcesKey::ResourcesKey(
     /* [in] */ const String& resDir,
     /* [in] */ Int32 displayId,

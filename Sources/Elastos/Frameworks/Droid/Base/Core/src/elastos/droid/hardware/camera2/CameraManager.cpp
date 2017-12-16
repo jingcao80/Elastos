@@ -123,12 +123,12 @@ CameraManager::CameraServiceWrapper::~CameraServiceWrapper()
 }
 
 ECode CameraManager::CameraServiceWrapper::Init(
-    /* [in] */ android::sp<android::ICameraService>& service,
+    /* [in] */ android::sp<android::hardware::ICameraService>& service,
     /* [in] */ CameraManager* host)
 {
     mDeathRecipient = new CameraServiceDeathRecipient(host);
     mCameraService = service;
-    mCameraService->asBinder()->linkToDeath(mDeathRecipient, NULL, 0);
+    android::IInterface::asBinder(mCameraService)->linkToDeath(mDeathRecipient, NULL, 0);
     return NOERROR;
 }
 
@@ -139,7 +139,10 @@ ECode CameraManager::CameraServiceWrapper::GetNumberOfCameras(
     *num = 0;
 
     if (mCameraService.get() != NULL) {
-        *num = mCameraService->getNumberOfCameras();
+        int32_t count;
+        mCameraService->getNumberOfCameras(android::hardware::ICameraService::CAMERA_TYPE_ALL,
+                &count);
+        *num = count;
         return NOERROR;
     }
 
@@ -155,13 +158,14 @@ ECode CameraManager::CameraServiceWrapper::GetCameraInfo(
     *result = android::BAD_VALUE;
 
     if (mCameraService.get() != NULL) {
-        android::CameraInfo cameraInfo;
-        *result = mCameraService->getCameraInfo(cameraId, &cameraInfo);
-        if (*result == android::OK) {
+        android::hardware::CameraInfo cameraInfo;
+        android::binder::Status status = mCameraService->getCameraInfo(cameraId, &cameraInfo);
+        if (status.isOk()) {
             AutoPtr<IHardwareCameraInfo> hci = new HardwareCamera::CameraInfo();
             hci->SetFacing(cameraInfo.facing);
             hci->SetOrientation(cameraInfo.orientation);
             info->SetInfo(hci);
+            *result = android::OK;
             return NOERROR;
         }
     }
@@ -235,9 +239,11 @@ ECode CameraManager::CameraServiceWrapper::GetCameraCharacteristics(
 
     if (mCameraService.get() != NULL) {
         CameraMetadataNative* wrapper = (CameraMetadataNative*)info;
+        android::String16 cameraIdStr = android::String16(android::String8::format("%d", cameraId));
         android::CameraMetadata* data = wrapper->GetNative();
-        *result = mCameraService->getCameraCharacteristics(cameraId, data);
-        if (*result == android::OK) {
+        android::binder::Status status = mCameraService->getCameraCharacteristics(cameraIdStr, data);
+        if (status.isOk()) {
+            *result = android::OK;
             return NOERROR;
         }
     }
@@ -267,8 +273,8 @@ ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
 
     if (mCameraService.get() != NULL) {
         android::String16 str16;
-        *result = mCameraService->getLegacyParameters(cameraId, &str16);
-        if (*result == android::OK) {
+        android::binder::Status status = mCameraService->getLegacyParameters(cameraId, &str16);
+        if (status.isOk()) {
             android::String8 str8(str16);
             String str(str8.string());
             AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
@@ -276,6 +282,7 @@ ECode CameraManager::CameraServiceWrapper::GetLegacyParameters(
             *parameters = array;
             REFCOUNT_ADD(*parameters)
             // Logger::I(TAG, " >> GetLegacyParameters for Camera %d: \n%s", cameraId, str.string());
+            *result = android::OK;
             return NOERROR;
         }
     }
@@ -294,7 +301,10 @@ ECode CameraManager::CameraServiceWrapper::SupportsCameraApi(
     *result = android::BAD_VALUE;
 
     if (mCameraService.get() != NULL) {
-        *result = mCameraService->supportsCameraApi(cameraId, apiVersion);
+        android::String16 cameraIdStr = android::String16(android::String8::format("%d", cameraId));
+        bool isSupported = false;
+        mCameraService->supportsCameraApi(cameraIdStr, apiVersion, &isSupported);
+        *result = isSupported ? android::OK : android::BAD_VALUE;
         // Logger::I(TAG, " >> camera %d SupportsCameraApi %d, result: %d", cameraId, apiVersion, *result);
         return NOERROR;
     }
@@ -1022,7 +1032,7 @@ ECode CameraManager::ConnectCameraServiceLocked()
         return NOERROR;
     }
 
-    android::sp<android::ICameraService> service = android::ICameraService::asInterface(binder);
+    android::sp<android::hardware::ICameraService> service = android::hardware::ICameraService::asInterface(binder);
     if (service == NULL) {
         Logger::E(TAG, "Failed to get Camera service interface.");
         return E_CAMERA_RUNTIME_EXCEPTION;

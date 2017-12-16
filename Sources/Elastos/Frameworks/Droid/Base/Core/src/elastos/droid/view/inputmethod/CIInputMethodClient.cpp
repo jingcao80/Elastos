@@ -39,6 +39,7 @@ CAR_OBJECT_IMPL(CIInputMethodClient)
 ECode CIInputMethodClient::constructor(
     /* [in] */ IInputMethodManager* host)
 {
+    mBBinder = NULL;
     mHost = (CInputMethodManager*)host;
     return NOERROR;
 }

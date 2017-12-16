@@ -85,7 +85,7 @@ public:
     static const AutoPtr<ArrayOf<Double> > FACT;
 
 private:
-    static const Double LOG2E  = 1.4426950408889634074;
+    static constexpr Double LOG2E  = 1.4426950408889634074;
 };
 
 } // namespace Arity

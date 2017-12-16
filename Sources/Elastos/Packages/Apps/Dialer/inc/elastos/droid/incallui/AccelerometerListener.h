@@ -123,7 +123,7 @@ private:
 
     static const Int32 VERTICAL_DEBOUNCE = 100;
     static const Int32 HORIZONTAL_DEBOUNCE = 500;
-    static const Double VERTICAL_ANGLE = 50.0;
+    static constexpr Double VERTICAL_ANGLE = 50.0;
 
     AutoPtr<ISensorManager> mSensorManager;
     AutoPtr<ISensor> mSensor;

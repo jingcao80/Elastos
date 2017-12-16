@@ -221,7 +221,7 @@ public:
 
     static Float ALPHA_FADE_START; // fraction of thumbnail width
                                                  // where fade starts
-    static const Float ALPHA_FADE_END = 0.65f; // fraction of thumbnail width
+    static constexpr Float ALPHA_FADE_END = 0.65f; // fraction of thumbnail width
                                               // beyond which alpha->0
     AutoPtr<ISwipeHelperCallback> mCallback;
 

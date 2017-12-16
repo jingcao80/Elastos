@@ -31,6 +31,16 @@ using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 namespace Accessibility {
 
@@ -314,6 +324,8 @@ private:
         /* [in] */ IParcel* parcel);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     static const String TAG;
     static const Boolean DEBUG;
     static const Int32 MAX_POOL_SIZE;

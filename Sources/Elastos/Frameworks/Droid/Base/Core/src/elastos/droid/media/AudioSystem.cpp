@@ -621,7 +621,7 @@ ECode AudioSystem::NewAudioSessionId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = android::AudioSystem::newAudioUniqueId();
+    *result = android::AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_SESSION);
     return NOERROR;
 }
 
@@ -775,11 +775,12 @@ ECode AudioSystem::SetDeviceConnectionState(
     /* [in] */ const String& device_address)
 {
     const char *c_address = device_address.string();
+    const char *c_name = "";
     ECode ec = CheckAudioSystemCommand(
         android::AudioSystem::setDeviceConnectionState(
             static_cast<audio_devices_t>(device),
             static_cast<audio_policy_dev_state_t>(state),
-            c_address));
+            c_address, c_name));
     if (FAILED(ec)) {
         Logger::E("AudioSystem", "Failed to setDeviceConnectionState:%d, state:%d, address:%s",
             device, state, c_address);

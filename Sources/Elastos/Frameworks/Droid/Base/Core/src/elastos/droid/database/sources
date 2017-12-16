@@ -51,4 +51,6 @@ SOURCES += CBulkCursorDescriptor.cpp
 SOURCES += BulkCursorNative.cpp
 SOURCES += database.cpp
 
+SOURCES += IContentObserver.cpp
+
 ELASTOS_LIBS = sqlite/sqlite.lib

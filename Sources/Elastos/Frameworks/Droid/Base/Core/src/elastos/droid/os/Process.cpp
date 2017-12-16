@@ -37,7 +37,6 @@
 #include <elastos/utility/etl/Algorithm.h>
 
 #include <binder/ProcessState.h>
-#include <cutils/process_name.h>
 #include <cutils/sched_policy.h>
 #include <processgroup/processgroup.h>
 
@@ -997,7 +996,13 @@ ECode Process::SetArgV0(
     }
 
     if (!procName.IsEmpty()) {
-        set_process_name(procName);
+        int len = strlen(procName);
+        if (len < 15) {
+            pthread_setname_np(pthread_self(), procName);
+        }
+        else {
+            pthread_setname_np(pthread_self(), procName + len - 15);
+        }
         DroidRuntime::GetRuntime()->SetArgv0(procName);
     }
     return NOERROR;

@@ -22,6 +22,7 @@
 #include "elastos/droid/graphics/CreateOutputStreamAdaptor.h"
 #include "elastos/droid/graphics/Utils.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
+#include "elastos/droid/graphics/NativeMovie.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include <skia/utils/SkFrontBufferedStream.h>
 
@@ -35,6 +36,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_INTERFACE_IMPL(Movie, Object, IMovie);
+
 Movie::Movie(
     /* [in] */ Int64 nativeMovie)
 {
@@ -56,7 +58,7 @@ ECode Movie::GetWidth(
 {
     VALIDATE_NOT_NULL(width);
 
-    *width = ((SkMovie*)mNativeMovie)->width();
+    *width = reinterpret_cast<NativeMovie*>(mNativeMovie)->width();
     return NOERROR;
 }
 
@@ -65,7 +67,7 @@ ECode Movie::GetHeight(
 {
     VALIDATE_NOT_NULL(height);
 
-    *height = ((SkMovie*)mNativeMovie)->height();
+    *height = reinterpret_cast<NativeMovie*>(mNativeMovie)->height();
     return NOERROR;
 }
 
@@ -74,19 +76,18 @@ ECode Movie::IsOpaque(
 {
     VALIDATE_NOT_NULL(isOpaque);
 
-    *isOpaque = ((SkMovie*)mNativeMovie)->isOpaque();
+    *isOpaque = reinterpret_cast<NativeMovie*>(mNativeMovie)->isOpaque();
     return NOERROR;
 }
 
 ECode Movie::GetDuration(
-    /* [out] */ Int32* height)
+    /* [out] */ Int32* duration)
 {
-    VALIDATE_NOT_NULL(height);
+    VALIDATE_NOT_NULL(duration);
 
-    *height = ((SkMovie*)mNativeMovie)->duration();
+    *duration = reinterpret_cast<NativeMovie*>(mNativeMovie)->duration();
     return NOERROR;
 }
-
 
 ECode Movie::SetTime(
     /* [in] */ Int32 relativeMilliseconds,
@@ -94,7 +95,7 @@ ECode Movie::SetTime(
 {
     VALIDATE_NOT_NULL(isSet);
 
-    *isSet = ((SkMovie*)mNativeMovie)->setTime(relativeMilliseconds);
+    *isSet = reinterpret_cast<NativeMovie*>(mNativeMovie)->setTime(relativeMilliseconds);
     return NOERROR;
 }
 
@@ -111,12 +112,12 @@ ECode Movie::Draw(
     // NPE_CHECK_RETURN_VOID(env, canvas);
     // // its OK for paint to be null
 
-    SkMovie* m = ((SkMovie*)mNativeMovie);
-    SkCanvas* c = GraphicsNative::GetNativeCanvas(canvas);
+    NativeMovie* m = reinterpret_cast<NativeMovie*>(mNativeMovie);
+    android::Canvas* c = GraphicsNative::GetNativeCanvas(canvas);
+    android::Paint* p = paint ? GraphicsNative::GetNativePaint(paint) : NULL;
     const SkBitmap& b = m->bitmap();
-    const SkPaint* p = paint ? GraphicsNative::GetNativePaint(paint) : NULL;
-
-    c->drawBitmap(b, x, y, p);
+    sk_sp<android::Bitmap> wrapper = android::Bitmap::createFrom(b.info(), *b.pixelRef());
+    c->drawBitmap(*wrapper, x, y, p);
     return NOERROR;
 }
 
@@ -129,7 +130,7 @@ ECode Movie::Draw(
 }
 
 static ECode CreateMovie(
-    /* [in] */ SkMovie* moov,
+    /* [in] */ NativeMovie* moov,
     /* [out] */ IMovie** movie)
 {
     if (NULL == moov) {
@@ -137,7 +138,7 @@ static ECode CreateMovie(
         return NOERROR;
     }
 
-    *movie = new Movie(static_cast<Int64>(reinterpret_cast<uintptr_t>(moov)));
+    *movie = new Movie(reinterpret_cast<Int64>(moov));
     REFCOUNT_ADD(*movie);
     return NOERROR;
 }
@@ -177,7 +178,7 @@ ECode Movie::DecodeByteArray(
         return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
-    SkMovie* moov = SkMovie::DecodeMemory(data->GetPayload() + offset, length);
+    NativeMovie* moov = NativeMovie::DecodeMemory(data->GetPayload() + offset, length);
     return CreateMovie(moov, movie);
 }
 
@@ -217,7 +218,7 @@ ECode Movie::DecodeTempStream(
 void Movie::NativeDestructor(
     /* [in] */ Int64 nativeMovie)
 {
-    SkMovie* movie = (SkMovie*) nativeMovie;
+    NativeMovie* movie = (NativeMovie*) nativeMovie;
     delete movie;
 }
 
@@ -231,10 +232,9 @@ ECode Movie::NativeDecodeAsset(
         *movie = NULL;
         return NOERROR;
     }
-    SkAutoTUnref<SkStreamRewindable> stream (new AssetStreamAdaptor(asset,
-            AssetStreamAdaptor::kNo_OwnAsset,
-            AssetStreamAdaptor::kNo_HasMemoryBase));
-    SkMovie* moov = SkMovie::DecodeStream(stream.get());
+    AssetStreamAdaptor stream(asset,
+            AssetStreamAdaptor::kNo_OwnAsset, AssetStreamAdaptor::kNo_HasMemoryBase);
+    NativeMovie* moov = NativeMovie::DecodeStream(&stream);
 
     return CreateMovie(moov, movie);
 }
@@ -251,7 +251,6 @@ ECode Movie::NativeDecodeStream(
     }
 
     AutoPtr<ArrayOf<Byte> > byteArray = ArrayOf<Byte>::Alloc(16*1024);
-    // ScopedLocalRef<jbyteArray> scoper(env, byteArray);
     SkStream* strm = CreateInputStreamAdaptor(istream, byteArray);
     if (NULL == strm) {
         *movie = NULL;
@@ -262,11 +261,10 @@ ECode Movie::NativeDecodeStream(
     // trying to determine the stream's format. The only decoder for movies is GIF, which
     // will only read 6.
     // FIXME: Get this number from SkImageDecoder
-    SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
+    std::unique_ptr<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
     SkASSERT(bufferedStream.get() != NULL);
 
-    SkMovie* moov = SkMovie::DecodeStream(bufferedStream);
-    strm->unref();
+    NativeMovie* moov = NativeMovie::DecodeStream(bufferedStream.get());
     return CreateMovie(moov, movie);
 }
 

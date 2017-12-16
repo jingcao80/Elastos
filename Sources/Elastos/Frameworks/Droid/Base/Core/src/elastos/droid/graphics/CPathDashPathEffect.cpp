@@ -49,8 +49,8 @@ Int64 CPathDashPathEffect::NativeCreate(
 {
     const SkPath* shape = reinterpret_cast<SkPath*>(nativePath);
     SkASSERT(shape != NULL);
-    SkPathEffect* effect = SkPath1DPathEffect::Create(*shape, advance, phase,
-            (SkPath1DPathEffect::Style)nativeStyle);
+    SkPathEffect* effect = SkPath1DPathEffect::Make(*shape, advance, phase,
+                (SkPath1DPathEffect::Style)nativeStyle).release();
     return reinterpret_cast<Int64>(effect);
 }
 

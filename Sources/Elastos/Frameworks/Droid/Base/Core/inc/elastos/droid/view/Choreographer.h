@@ -19,6 +19,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/DisplayEventReceiver.h"
+#include "elastos/droid/view/FrameInfo.h"
 #include "elastos/droid/os/Handler.h"
 #include <pthread.h>
 
@@ -445,6 +446,8 @@ public:
     static const Int32 MSG_DO_SCHEDULE_VSYNC = 1;
     static const Int32 MSG_DO_SCHEDULE_CALLBACK = 2;
 
+    AutoPtr<FrameInfo> mFrameInfo;
+
 private:
     static const char* TAG;
     static const Boolean DEBUG;
@@ -500,7 +503,6 @@ private:
     Boolean mCallbacksRunning;
     Int64 mLastFrameTimeNanos;
     Int64 mFrameIntervalNanos;
-
 };
 
 } // namespace View

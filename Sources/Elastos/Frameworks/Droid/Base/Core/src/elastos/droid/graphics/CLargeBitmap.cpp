@@ -21,10 +21,9 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CBitmapFactoryOptions.h"
 #include "elastos/droid/graphics/CBitmapFactory.h"
-#include "elastos/droid/graphics/AutoDecoderCancel.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
 #include "elastos/droid/graphics/NBitmapFactory.h"
-#include <skia/core/SkTemplates.h>
+#include <skia/private/SkTemplates.h>
 #include <skia/core/SkPixelRef.h>
 
 namespace Elastos {

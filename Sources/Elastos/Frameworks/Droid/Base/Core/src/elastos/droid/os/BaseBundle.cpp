@@ -1768,18 +1768,28 @@ ECode BaseBundle::ReadArrayMapInternal(
     /* [in] */ Int32 size,
     /* [in] */ IClassLoader* classLoader)
 {
-    String key;
-    AutoPtr<ICharSequence> keyObj;
-    AutoPtr<IInterface> valueObj;
-    //Logger::E(TAG, "line:%d, func:%s, size:%d\n", __LINE__, __func__, size);
-    while (size > 0) {
-        source->ReadString(&key);
-        //Logger::E(TAG, "line:%d, func:%s, key:%s\n", __LINE__, __func__, key.string());
-        keyObj = CoreUtils::Convert(key);
-        valueObj = ReadValue(source, key);
+    if (IAndroidParcelWrapper::Probe(source) ==  NULL) {
+        while (size > 0) {
+            String key;
+            source->ReadString(&key);
+            AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
+            AutoPtr<IInterface> valueObj = ReadValue(source, key);
 
-        arrayMap->Put(keyObj.Get(), valueObj.Get());
-        size--;
+            arrayMap->Put(keyObj.Get(), valueObj.Get());
+            size--;
+        }
+    }
+    else { // for running Elastos App on Android OS.
+        while (size > 0) {
+            String key;
+            source->ReadString(&key);
+            AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
+            AutoPtr<IInterface> valueObj;
+            source->ReadValue((IInterface**)&valueObj);
+
+            arrayMap->Put(keyObj.Get(), valueObj.Get());
+            size--;
+        }
     }
     return NOERROR;
 }

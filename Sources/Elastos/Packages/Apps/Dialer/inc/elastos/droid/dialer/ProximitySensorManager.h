@@ -92,7 +92,7 @@ private:
         CARAPI_(void) UnregisterWithoutNotification();
 
     private:
-        static const Float FAR_THRESHOLD = 5.0f;
+        static constexpr Float FAR_THRESHOLD = 5.0f;
 
         AutoPtr<ISensorManager> mSensorManager;
         AutoPtr<ISensor> mProximitySensor;

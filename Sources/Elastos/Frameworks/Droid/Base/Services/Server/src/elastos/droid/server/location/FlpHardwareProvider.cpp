@@ -842,7 +842,9 @@ FlpCallbacks sFlpCallbacks = {
   LocationCallback,
   AcquireWakelock,
   ReleaseWakelock,
-  SetThreadEvent
+  SetThreadEvent,
+  NULL,
+  NULL
 };
 
 static void ReportData(
@@ -952,7 +954,8 @@ FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
   GeofenceRemoveCallback,
   GeofencePauseCallback,
   GeofenceResumeCallback,
-  SetThreadEvent
+  SetThreadEvent,
+  NULL
 };
 
 void FlpHardwareProvider::NativeInit()

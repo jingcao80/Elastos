@@ -760,8 +760,8 @@ static install_status_t copyFileIfChanged(void* arg, ZipFileRO* zipFile, ZipEntr
     String nativeLibPath((char*) arg);
 
     size_t uncompLen;
-    long when;
-    long crc;
+    uint32_t when;
+    uint32_t crc;
     time_t modTime;
 
     if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, &when, &crc)) {

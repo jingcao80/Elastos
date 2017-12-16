@@ -2616,6 +2616,9 @@ Boolean ApplicationPackageManager::ResourceName::Equals(
 
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode ApplicationPackageManager::ResourceName::GetHashCode(
     /* [out] */ Int32* hash)
 {

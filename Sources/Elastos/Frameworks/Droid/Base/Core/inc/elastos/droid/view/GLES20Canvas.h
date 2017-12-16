@@ -79,7 +79,10 @@ public:
 
     TO_STRING_IMPL("GLES20Canvas")
 
-    CARAPI constructor();
+    CARAPI constructor(
+        /* [in] */ IRenderNode* node,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
 
     virtual ~GLES20Canvas();
 
@@ -219,7 +222,6 @@ public:
     CARAPI Skew(
         /* [in] */ Float sx,
         /* [in] */ Float sy);
-
 
     CARAPI Rotate(
         /* [in] */ Float degrees);
@@ -589,6 +591,11 @@ protected:
         /* [in] */ Int64 renderer,
         /* [out] */ Int64* res);
 
+    CARAPI ResetDisplayListRenderer(
+        /* [in] */ IRenderNode* node,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
+
 private:
     CARAPI_(AutoPtr<IRect>) GetInternalClipBounds();
 
@@ -600,28 +607,22 @@ private:
 
     CARAPI_(AutoPtr<ArrayOf<Float> >) GetLineStorage();
 
-    static CARAPI_(void) nSetProperty(
-        /* [in] */ const String& name,
-        /* [in] */ const String& value);
-
     static CARAPI_(Boolean) IsAvailable();
 
-    static CARAPI_(Int64) nCreateDisplayListRenderer();
+    static CARAPI_(Int64) nCreateDisplayListRenderer(
+        /* [in] */ Int64 nativeNode,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
 
     static CARAPI_(void) nResetDisplayListRenderer(
-        /* [in] */ Int64 renderer);
-
-    static CARAPI_(void) nDestroyRenderer(
-        /* [in] */ Int64 renderer);
+        /* [in] */ Int64 renderer,
+        /* [in] */ Int64 nativeNode,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
 
     static CARAPI_(Int32) nGetMaximumTextureWidth();
 
     static CARAPI_(Int32) nGetMaximumTextureHeight();
-
-    static CARAPI_(void) nSetViewport(
-        /* [in] */ Int64 renderer,
-        /* [in] */ Int32 width,
-        /* [in] */ Int32 height);
 
     static CARAPI_(void) nSetHighContrastText(
         /* [in] */ Int64 renderer,
@@ -630,21 +631,6 @@ private:
     static CARAPI_(void) nInsertReorderBarrier(
         /* [in] */ Int64 renderer,
         /* [in] */ Boolean enableReorder);
-
-    static CARAPI_(Int32) nPrepare(
-        /* [in] */ Int64 renderer,
-        /* [in] */ Boolean opaque);
-
-    static CARAPI_(Int32) nPrepareDirty(
-        /* [in] */ Int64 renderer,
-        /* [in] */ Int32 left,
-        /* [in] */ Int32 top,
-        /* [in] */ Int32 right,
-        /* [in] */ Int32 bottom,
-        /* [in] */ Boolean opaque);
-
-    static CARAPI_(void) nFinish(
-        /* [in] */ Int64 renderer);
 
     static CARAPI_(Int32) nCallDrawGLFunction(
         /* [in] */ Int64 renderer,
@@ -681,11 +667,6 @@ private:
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom,
-        /* [in] */ Int32 op);
-
-    static CARAPI_(Boolean) nClipRegion(
-        /* [in] */ Int64 renderer,
-        /* [in] */ Int64 region,
         /* [in] */ Int32 op);
 
     static CARAPI_(Boolean) nGetClipBounds(
@@ -736,11 +717,6 @@ private:
 
     static CARAPI_(Int32) nSaveLayer(
         /* [in] */ Int64 renderer,
-        /* [in] */ Int64 paint,
-        /* [in] */ Int32 saveFlags);
-
-    static CARAPI_(Int32) nSaveLayer(
-        /* [in] */ Int64 renderer,
         /* [in] */ Float left,
         /* [in] */ Float top,
         /* [in] */ Float right,
@@ -772,8 +748,9 @@ private:
     static CARAPI_(Int32) nGetSaveCount(
         /* [in] */ Int64 renderer);
 
-    static CARAPI_(void) nResetPaintFilter(
-        /* [in] */ Int64 renderer);
+    static CARAPI_(void) nSetDrawFilter(
+        /* [in] */ Int64 renderer,
+        /* [in] */ Int64 filter);
 
     static CARAPI_(void) nSetupPaintFilter(
         /* [in] */ Int64 renderer,
@@ -794,33 +771,34 @@ private:
     static CARAPI_(void) nDrawPatch(
         /* [in] */ Int64 renderer,
         /* [in] */ Int64 bitmap,
-        /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Int64 chunk,
         /* [in] */ Float left,
         /* [in] */ Float top,
         /* [in] */ Float right,
         /* [in] */ Float bottom,
-        /* [in] */ Int64 paint);
+        /* [in] */ Int64 paint,
+        /* [in] */ Int32 screenDensity,
+        /* [in] */ Int32 bitmapDensity);
 
     static CARAPI_(void) nDrawBitmap(
         /* [in] */ Int64 renderer,
         /* [in] */ Int64 bitmap,
-        /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Float left,
         /* [in] */ Float top,
-        /* [in] */ Int64 paint);
+        /* [in] */ Int64 paint,
+        /* [in] */ Int32 canvasDensity,
+        /* [in] */ Int32 screenDensity,
+        /* [in] */ Int32 bitmapDensity);
 
     static CARAPI_(void) nDrawBitmap(
         /* [in] */ Int64 renderer,
         /* [in] */ Int64 bitmap,
-        /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Int64 matrix,
         /* [in] */ Int64 paint);
 
     static CARAPI_(void) nDrawBitmap(
         /* [in] */ Int64 renderer,
         /* [in] */ Int64 bitmap,
-        /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Float srcLeft,
         /* [in] */ Float srcTop,
         /* [in] */ Float srcRight,
@@ -829,8 +807,9 @@ private:
         /* [in] */ Float top,
         /* [in] */ Float right,
         /* [in] */ Float bottom,
-        /* [in] */ Int64 paint);
-
+        /* [in] */ Int64 paint,
+        /* [in] */ Int32 screenDensity,
+        /* [in] */ Int32 bitmapDensity);
 
     static CARAPI_(void) nDrawBitmap(
         /* [in] */ Int64 renderer,
@@ -847,7 +826,6 @@ private:
     static CARAPI_(void) nDrawBitmapMesh(
         /* [in] */ Int64 renderer,
         /* [in] */ Int64 bitmap,
-        /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Int32 meshWidth,
         /* [in] */ Int32 meshHeight,
         /* [in] */ ArrayOf<Float>* verts,
@@ -972,8 +950,6 @@ private:
     static CARAPI_(void) nDrawTextOnPath(
         /* [in] */ Int64 renderer,
         /* [in] */ const String& text,
-        /* [in] */ Int32 start,
-        /* [in] */ Int32 end,
         /* [in] */ Int64 path,
         /* [in] */ Float hOffset,
         /* [in] */ Float vOffset,

@@ -405,6 +405,21 @@ ECode CInputMethodServiceNative::HideSoftInput(
     return NOERROR;
 }
 
+ECode CInputMethodServiceNative::StartInputOrWindowGainedFocus(
+    /* [in] */ Int32 startInputReason,
+    /* [in] */ IInputMethodClient* client,
+    /* [in] */ IBinder* windowToken,
+    /* [in] */ Int32 controlFlags,
+    /* [in] */ Int32 softInputMode,
+    /* [in] */ Int32 windowFlags,
+    /* [in] */ IEditorInfo* attribute,
+    /* [in] */ IIInputContext* inputContext,
+    /* [out] */ IInputBindResult** result)
+{
+    assert(0);
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode CInputMethodServiceNative::RevokeSession(
     /* [in] */ IIInputMethodSession* session)
 {

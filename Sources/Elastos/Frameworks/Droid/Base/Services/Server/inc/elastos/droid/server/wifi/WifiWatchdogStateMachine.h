@@ -684,12 +684,12 @@ private:
      * We want the historic loss to base on more data points to be statistically reliable.
      * We want the current instant loss to base on less data points to be responsive.
      */
-    static const Double EXP_COEFFICIENT_RECORD = 0.1;
+    static constexpr Double EXP_COEFFICIENT_RECORD = 0.1;
 
     /**
      * See {@link #EXP_COEFFICIENT_RECORD}.
      */
-    static const Double EXP_COEFFICIENT_MONITOR = 0.5;
+    static constexpr Double EXP_COEFFICIENT_MONITOR = 0.5;
 
     /**
      * Thresholds for sending good/poor link notifications, in packet loss %.
@@ -701,12 +701,12 @@ private:
      * 50% loss threshold is a good balance between accuracy and reponsiveness.
      * <=10% good threshold is a safe value to avoid jumping back to WiFi too easily.
      */
-    static const Double POOR_LINK_LOSS_THRESHOLD = 0.5;
+    static constexpr Double POOR_LINK_LOSS_THRESHOLD = 0.5;
 
     /**
      * See {@link #POOR_LINK_LOSS_THRESHOLD}.
      */
-    static const Double GOOD_LINK_LOSS_THRESHOLD = 0.1;
+    static constexpr Double GOOD_LINK_LOSS_THRESHOLD = 0.1;
 
     /**
      * Number of samples to confirm before sending a poor link notification.
@@ -723,7 +723,7 @@ private:
      * <p>
      * According to experiments, 1pkt/sec is too sensitive but 3pkt/sec is slightly unresponsive.
      */
-    static const Double POOR_LINK_MIN_VOLUME = 2.0 * LINK_SAMPLING_INTERVAL_MS / 1000.0;
+    static constexpr Double POOR_LINK_MIN_VOLUME = 2.0 * LINK_SAMPLING_INTERVAL_MS / 1000.0;
 
     /**
      * When a poor link is detected, we scan over this range (based on current

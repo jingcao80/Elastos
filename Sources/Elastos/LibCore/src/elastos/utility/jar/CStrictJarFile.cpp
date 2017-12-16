@@ -437,10 +437,11 @@ ECode CStrictJarFile::NativeStartIteration(
     int32_t error = 0;
     if (prefix.GetLength() == 0) {
         error = StartIteration(reinterpret_cast<ZipArchiveHandle>(nativeHandle),
-                    handle->CookieAddress(), NULL);
+                    handle->CookieAddress(), NULL, NULL);
     } else {
+        ZipString zipPrefix(handle->Prefix());
         error = StartIteration(reinterpret_cast<ZipArchiveHandle>(nativeHandle),
-                    handle->CookieAddress(), handle->Prefix());
+                    handle->CookieAddress(), &zipPrefix, NULL);
     }
 
     if (error) {
@@ -492,7 +493,7 @@ ECode CStrictJarFile::NativeNextEntry(
     *ze = NULL;
 
     ZipEntry data;
-    ZipEntryName entryName;
+    ZipString entryName;
 
     IterationHandle* handle = reinterpret_cast<IterationHandle*>(iterationHandle);
     const int32_t error = Next(*handle->CookieAddress(), &data, &entryName);
@@ -511,20 +512,21 @@ ECode CStrictJarFile::NativeNextEntry(
 
 ECode CStrictJarFile::NativeFindEntry(
     /* [in] */ Int64 nativeHandle,
-    /* [in] */ const String& entryName,
+    /* [in] */ const String& _entryName,
     /* [out] */ IZipEntry** ze)
 {
     VALIDATE_NOT_NULL(ze)
     *ze = NULL;
 
+    ZipString entryName(_entryName.string());
     ZipEntry data;
     const int32_t error = ::FindEntry(reinterpret_cast<ZipArchiveHandle>(nativeHandle),
-                            entryName.string(), &data);
+                            entryName, &data);
     if (error) {
         return NOERROR;
     }
 
-    return NewZipEntry(data, entryName, entryName.GetLength(), ze);
+    return NewZipEntry(data, _entryName, _entryName.GetLength(), ze);
 }
 
 ECode CStrictJarFile::NativeClose(

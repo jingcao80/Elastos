@@ -1,19 +1,19 @@
-I/DEBUG   (  278):     #00 pc 0196d578  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  278):     #01 pc 018a6080  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  278):     #02 pc 018a97e4  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  278):     #03 pc 018a95e8  /system/lib/Elastos.Droid.Core.eco
-I/DEBUG   (  278):     #04 pc 017ce110  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Content::AsyncQueryHandler::WorkerHandler::HandleMessage(Elastos::Droid::Os::IMessage*)+828)
-I/DEBUG   (  278):     #05 pc 026ccbbc  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Handler::DispatchMessage(Elastos::Droid::Os::IMessage*)+604)
-I/DEBUG   (  278):     #06 pc 026cf158  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::Looper::Loop()+572)
-I/DEBUG   (  278):     #07 pc 026ce1c0  /system/lib/Elastos.Droid.Core.eco (Elastos::Droid::Os::HandlerThread::Run()+212)
-I/DEBUG   (  278):     #08 pc 004d6908  /system/lib/Elastos.CoreLibrary.eco
-
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/database/BulkCursorToCursorAdaptor.cpp:45
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core//src/elastos/droid/content/ContentProviderNative.cpp:59 (discriminator 3)
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/ContentResolver.cpp:398
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/ContentResolver.cpp:358
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/content/AsyncQueryHandler.cpp:82
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:695
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Looper.cpp:140
-/home/luozhaohui/Elastos5/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/HandlerThread.cpp:65
-/home/luozhaohui/Elastos5/Sources/Elastos/LibCore/src/elastos/core/NativeThread.cpp:988
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #03 pc 0001a749  /system/lib/libc.so (__assert2+16)
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #04 pc 02cb3f3c  /system/lib/Elastos.Droid.Core.eco
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #05 pc 01b6facc  /system/lib/Elastos.Droid.Core.eco
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #06 pc 01b6fbec  /system/lib/Elastos.Droid.Core.eco
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #07 pc 01a147b4  /system/lib/Elastos.Droid.Core.eco
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #08 pc 02d69ae8  /system/lib/Elastos.Droid.Core.eco (_ZN7Elastos5Droid2Os7Handler15DispatchMessageEPNS1_8IMessageE+120)
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #09 pc 02d6d800  /system/lib/Elastos.Droid.Core.eco (_ZN7Elastos5Droid2Os6Looper4LoopEv+556)
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #10 pc 01a36834  /system/lib/Elastos.Droid.Core.eco
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #11 pc 01a5984c  /system/lib/Elastos.Droid.Core.eco
+12-08 08:03:03.138  7387  7387 F DEBUG   :     #12 pc 0005dcb0  /system/lib/Elastos.Runtime.eco
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/AndroidParcelUtils.cpp:2538
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/IActivityManager.cpp:372
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/IActivityManager.cpp:360
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThread.cpp:646 (discriminator 2)
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Handler.cpp:691 (discriminator 1)
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/os/Looper.cpp:155 (discriminator 2)
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThread.cpp:6343
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/CActivityThreadHelper.cpp:94
+/home/jingcao/Workspace/Elastos5_on_A8/Sources/Elastos/Runtime/Core/reflection/invoke_gnuc.S:50

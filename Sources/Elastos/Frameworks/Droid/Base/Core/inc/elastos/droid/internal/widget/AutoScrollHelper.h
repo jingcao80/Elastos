@@ -551,8 +551,8 @@ private:
     static const Int32 DEFAULT_MINIMUM_VELOCITY_DIPS = 315;
     static const Int32 DEFAULT_MAXIMUM_VELOCITY_DIPS = 1575;
     static const Float DEFAULT_MAXIMUM_EDGE;
-    static const Float DEFAULT_RELATIVE_EDGE = 0.2f;
-    static const Float DEFAULT_RELATIVE_VELOCITY = 1.0f;
+    static constexpr Float DEFAULT_RELATIVE_EDGE = 0.2f;
+    static constexpr Float DEFAULT_RELATIVE_VELOCITY = 1.0f;
     static const Int32 DEFAULT_ACTIVATION_DELAY; //= ViewConfiguration.getTapTimeout();
     static const Int32 DEFAULT_RAMP_UP_DURATION = 500;
     static const Int32 DEFAULT_RAMP_DOWN_DURATION = 500;

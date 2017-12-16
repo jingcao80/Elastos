@@ -30,6 +30,7 @@ CAR_INTERFACE_IMPL_2(CWindowManagerGlobalSessionCallback, Object, IIWindowSessio
 CAR_OBJECT_IMPL(CWindowManagerGlobalSessionCallback)
 
 CWindowManagerGlobalSessionCallback::CWindowManagerGlobalSessionCallback()
+    : mBBinder(NULL)
 {}
 
 ECode CWindowManagerGlobalSessionCallback::constructor()

@@ -20,7 +20,6 @@
 #include "Elastos.Droid.Graphics.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/Object.h>
-#include <skia/images/SkMovie.h>
 
 using Elastos::IO::IInputStream;
 
@@ -50,7 +49,7 @@ public:
         /* [out] */ Boolean* isOpaque);
 
     CARAPI GetDuration(
-        /* [out] */ Int32* height);
+        /* [out] */ Int32* duration);
 
     CARAPI SetTime(
         /* [in] */ Int32 relativeMilliseconds,

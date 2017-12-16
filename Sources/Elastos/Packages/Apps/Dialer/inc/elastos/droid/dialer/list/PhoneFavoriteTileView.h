@@ -126,8 +126,8 @@ private:
     // These parameters instruct the photo manager to display the default image/letter at 70% of
     // its normal size, and vertically offset upwards 12% towards the top of the letter tile, to
     // make room for the contact name and number label at the bottom of the image.
-    static const Float DEFAULT_IMAGE_LETTER_OFFSET = -0.12f;
-    static const Float DEFAULT_IMAGE_LETTER_SCALE = 0.70f;
+    static constexpr Float DEFAULT_IMAGE_LETTER_OFFSET = -0.12f;
+    static constexpr Float DEFAULT_IMAGE_LETTER_SCALE = 0.70f;
 
     /** View that contains the transparent shadow that is overlaid on top of the contact image. */
     AutoPtr<IView> mShadowOverlay;

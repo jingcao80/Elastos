@@ -197,13 +197,13 @@ private:
     static const Int64 SCROLL_HANDLER_DELAY_MILLIS = 5;
     static const Int32 DRAG_SCROLL_PX_UNIT = 25;
 
-    static const Float DRAG_SHADOW_ALPHA = 0.7f;
+    static constexpr Float DRAG_SHADOW_ALPHA = 0.7f;
 
     /**
      * {@link #mTopScrollBound} and {@link mBottomScrollBound} will be
      * offseted to the top / bottom by {@link #getHeight} * {@link #BOUND_GAP_RATIO} pixels.
      */
-    static const Float BOUND_GAP_RATIO = 0.2f;
+    static constexpr Float BOUND_GAP_RATIO = 0.2f;
 
     Float mTouchSlop;
 

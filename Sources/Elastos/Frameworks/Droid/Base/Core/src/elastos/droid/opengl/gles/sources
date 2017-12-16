@@ -26,9 +26,10 @@ INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 INCLUDES += $(PREBUILD_INC)/GLES
 INCLUDES += $(PREBUILD_INC)/utils
-INCLUDES += $(PREBUILD_INC)/skia
+INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/config
 INCLUDES += $(PREBUILD_INC)/ETC1
-INCLUDES += $(PREBUILD_INC)/bionic
+INCLUDES += $(PREBUILD_INC)/bionic/private
 
 SOURCES = CEGLConfigImpl.cpp
 SOURCES += CEGLContextImpl.cpp

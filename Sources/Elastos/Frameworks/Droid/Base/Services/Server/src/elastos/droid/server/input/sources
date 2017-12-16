@@ -23,6 +23,7 @@ INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
 
 #PREBUILD_INC = ./Build/Prebuilt/Linux/usr/include
 INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/config
 
 C_DEFINES += -DDROID_SERVER
 include $(MAKEDIR)/../../../../../../../../sources.inc

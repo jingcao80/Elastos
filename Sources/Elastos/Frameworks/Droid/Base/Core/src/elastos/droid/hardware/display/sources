@@ -35,3 +35,6 @@ SOURCES += DisplayViewport.cpp
 SOURCES += WifiDisplaySessionInfo.cpp
 
 SOURCES += display.cpp
+
+SOURCES += IDisplayManager.cpp
+SOURCES += IDisplayManagerCallback.cpp

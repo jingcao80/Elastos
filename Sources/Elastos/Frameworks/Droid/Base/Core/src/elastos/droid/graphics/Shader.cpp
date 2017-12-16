@@ -34,6 +34,7 @@ Shader::Shader()
 Shader::~Shader()
 {
     NativeDestructor(mNativeInstance);
+    mNativeInstance = 0;
 }
 
 ECode Shader::GetLocalMatrix(
@@ -55,10 +56,34 @@ ECode Shader::GetLocalMatrix(
 ECode Shader::SetLocalMatrix(
     /* [in] */ IMatrix* localM)
 {
-    mLocalMatrix = localM;
-    NativeSetLocalMatrix(mNativeInstance,
-        localM == NULL ? 0 : ((Matrix*)localM)->mNativeMatrix);
+    Boolean result;
+    if (localM == NULL || (localM->IsIdentity(&result), result)) {
+        if (mLocalMatrix != NULL) {
+            mLocalMatrix = NULL;
+            NativeDestructor(mNativeInstance);
+            mNativeInstance = CreateNativeInstance(NULL);
+        }
+    }
+    else {
+        if (mLocalMatrix == NULL) {
+            CMatrix::New(localM, (IMatrix**)&mLocalMatrix);
+            NativeDestructor(mNativeInstance);
+            mNativeInstance = CreateNativeInstance(mLocalMatrix);
+        }
+        else if (Object::Equals(mLocalMatrix, localM)) {
+            mLocalMatrix->Set(localM);
+            NativeDestructor(mNativeInstance);
+            mNativeInstance = CreateNativeInstance(mLocalMatrix);
+        }
+    }
+
     return NOERROR;
+}
+
+Int64 Shader::CreateNativeInstance(
+    /* [in] */ IMatrix* matrix)
+{
+    return 0;
 }
 
 void Shader::Init(
@@ -101,23 +126,9 @@ Int64 Shader::GetNativeInstance()
 void Shader::NativeDestructor(
     /* [in] */ Int64 shaderHandle)
 {
-    SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
-    SkSafeUnref(shader);
-}
-
-void Shader::NativeSetLocalMatrix(
-    /* [in] */ Int64 shaderHandle,
-    /* [in] */ Int64 matrixHandle)
-{
-    SkShader* shader       = reinterpret_cast<SkShader*>(shaderHandle);
-    if (shader) {
-        SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
-        if (matrix) {
-            shader->setLocalMatrix(*matrix);
-        } else {
-            shader->resetLocalMatrix();
-        }
-        shader->setGenerationID(shader->getGenerationID() + 1);
+    if (shaderHandle != 0) {
+        SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
+        SkSafeUnref(shader);
     }
 }
 

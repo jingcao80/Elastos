@@ -1135,7 +1135,7 @@ static android::status_t produceFrame(
     err = native_window_dequeue_buffer_and_wait(anw.get(), &anb);
     if (err != android::NO_ERROR) return err;
 
-    android::sp<android::GraphicBuffer> buf(new android::GraphicBuffer(anb, /*keepOwnership*/false));
+    android::sp<android::GraphicBuffer> buf(android::GraphicBuffer::from(anb));
     uint32_t grallocBufWidth = buf->getWidth();
     uint32_t grallocBufHeight = buf->getHeight();
     uint32_t grallocBufStride = buf->getStride();
@@ -1267,8 +1267,8 @@ static android::status_t produceFrame(
         case HAL_PIXEL_FORMAT_BLOB: {
             int8_t* img = NULL;
             struct camera3_jpeg_blob footer = {
-                jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
-                jpeg_size: (uint32_t)bufferLength
+                .jpeg_blob_id = CAMERA3_JPEG_BLOB_ID,
+                .jpeg_size = (uint32_t)bufferLength
             };
 
             size_t totalJpegSize = bufferLength + sizeof(footer);
@@ -1455,7 +1455,7 @@ Int64 LegacyCameraDevice::NativeGetSurfaceId(
                 "from surface.", __FUNCTION__);
         return 0;
     }
-    android::sp<android::IBinder> b = gbp->asBinder();
+    android::sp<android::IBinder> b = android::IInterface::asBinder(gbp);
     if (b == NULL) {
         Logger::E("LegacyCameraDevice", "%s: Could not retrieve IBinder from "
                 "surface.", __FUNCTION__);

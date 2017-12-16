@@ -29,14 +29,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-class CanvasPropertyPrimitive : public VirtualLightRefBase {
-    PREVENT_COPY_AND_ASSIGN(CanvasPropertyPrimitive);
-public:
-    CanvasPropertyPrimitive(Float initialValue) : value(initialValue) {}
-
-    Float value;
-};
-
 /**
  * TODO: Make public?
  * @hide

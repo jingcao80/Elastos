@@ -919,10 +919,11 @@ Int32 CAudioRecord::NativeSetup(
         return IAudioSystem::ERROR;
     }
 
-    Int32 sessionId = (*session)[0];
+    audio_session_t sessionId = (audio_session_t)(*session)[0];
 
     // create an uninitialized AudioRecord object
-    android::sp<android::AudioRecord> lpRecorder = new android::AudioRecord();
+    android::sp<android::AudioRecord> lpRecorder = new android::AudioRecord(
+            android::String16(""));
 
     AutoPtr<CAudioAttributes> attr = (CAudioAttributes*)attributes;
     audio_attributes_t *paa = NULL;
@@ -1047,7 +1048,7 @@ ECode CAudioRecord::NativeStart(
     }
 
     *result = NativeToElastosStatus(
-            lpRecorder->start((android::AudioSystem::sync_event_t)syncEvent, sessionId));
+            lpRecorder->start((android::AudioSystem::sync_event_t)syncEvent, (audio_session_t)sessionId));
     return NOERROR;
 }
 

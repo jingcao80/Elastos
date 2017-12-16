@@ -120,26 +120,14 @@ void NativeBN::PutULongInt(
     if (!OneValidHandle(a0)) return;
 
     uint64_t dw = java_dw;
-
-    // cf. litEndInts2bn:
     BIGNUM* a = ToBigNum(a0);
-    bn_check_top(a);
-    if (bn_wexpand(a, 8/BN_BYTES) != NULL) {
-#ifdef __LP64__
-        a->d[0] = dw;
-#else
-        unsigned int hi = dw >> 32; // This shifts without sign extension.
-        int lo = (int)dw; // This truncates implicitly.
-        a->d[0] = lo;
-        a->d[1] = hi;
-#endif
-        a->top = 8 / BN_BYTES;
-        a->neg = neg;
-        bn_correct_top(a);
+
+    if (!BN_set_u64(a, dw)) {
+        // throwException(env);
+        return;
     }
-    else {
-        //throwExceptionIfNecessary(env);
-    }
+
+    ::BN_set_negative(a, neg);
 }
 
 void NativeBN::PutLongInt(
@@ -207,7 +195,6 @@ void NativeBN::LitEndInts2bn(
 {
     if (!OneValidHandle(ret0)) return;
     BIGNUM* ret = ToBigNum(ret0);
-    bn_check_top(ret);
     if (len > 0) {
         if (arr.GetLength() == 0) return;
     #ifdef __LP64__
@@ -245,74 +232,6 @@ void NativeBN::LitEndInts2bn(
     }
 }
 
-#ifdef __LP64__
-#define BYTES2ULONG(bytes, k) \
-    ((bytes[k + 7] & 0xffULL)       | (bytes[k + 6] & 0xffULL) <<  8 | (bytes[k + 5] & 0xffULL) << 16 | (bytes[k + 4] & 0xffULL) << 24 | \
-     (bytes[k + 3] & 0xffULL) << 32 | (bytes[k + 2] & 0xffULL) << 40 | (bytes[k + 1] & 0xffULL) << 48 | (bytes[k + 0] & 0xffULL) << 56)
-#else
-#define BYTES2ULONG(bytes, k) \
-    ((bytes[k + 3] & 0xff) | (bytes[k + 2] & 0xff) << 8 | (bytes[k + 1] & 0xff) << 16 | (bytes[k + 0] & 0xff) << 24)
-#endif
-
-void NativeBN::NegBigEndianBytes2bn(
-    /* [in] */ const unsigned char* bytes,
-    /* [in] */ Int32 bytesLen,
-    /* [in] */ Int64 ret0)
-{
-    BIGNUM* ret = ToBigNum(ret0);
-
-    bn_check_top(ret);
-    // FIXME: assert bytesLen > 0
-    int wLen = (bytesLen + BN_BYTES - 1) / BN_BYTES;
-    int firstNonzeroDigit = -2;
-    if (bn_wexpand(ret, wLen) != NULL) {
-        BN_ULONG* d = ret->d;
-        BN_ULONG di;
-        ret->top = wLen;
-        int highBytes = bytesLen % BN_BYTES;
-        int k = bytesLen;
-        // Put bytes to the int array starting from the end of the byte array
-        int i = 0;
-        while (k > highBytes) {
-            k -= BN_BYTES;
-            di = BYTES2ULONG(bytes, k);
-            if (di != 0) {
-                d[i] = -di;
-                firstNonzeroDigit = i;
-                i++;
-                while (k > highBytes) {
-                    k -= BN_BYTES;
-                    d[i] = ~BYTES2ULONG(bytes, k);
-                    i++;
-                }
-                break;
-            }
-            else {
-                d[i] = 0;
-                i++;
-            }
-        }
-        if (highBytes != 0) {
-            di = -1;
-            // Put the first bytes in the highest element of the int array
-            if (firstNonzeroDigit != -2) {
-                for (k = 0; k < highBytes; k++) {
-                    di = (di << 8) | (bytes[k] & 0xFF);
-                }
-                d[i] = ~di;
-            }
-            else {
-                for (k = 0; k < highBytes; k++) {
-                    di = (di << 8) | (bytes[k] & 0xFF);
-                }
-                d[i] = -di;
-            }
-        }
-        // The top may have superfluous zeros, so fix it.
-        bn_correct_top(ret);
-    }
-}
-
 void NativeBN::TwosComp2bn(
     /* [in] */ const ArrayOf<Byte>& arr,
     /* [in] */ Int32 bytesLen,
@@ -324,21 +243,27 @@ void NativeBN::TwosComp2bn(
     if (bytesLen == 0) return;
 
     const unsigned char* s = reinterpret_cast<const unsigned char*>(arr.GetPayload());
-    if ((arr[0] & 0X80) == 0) { // Positive value!
-        //
-        // We can use the existing BN implementation for unsigned big endian bytes:
-        //
-        ::BN_bin2bn(s, bytesLen, ret);
-        ::BN_set_negative(ret, FALSE);
+
+    if (!::BN_bin2bn(s, bytesLen, ret)) {
+        // throwException(env);
+        return;
     }
-    else { // Negative value!
-        //
-        // We need to apply two's complement:
-        //
-        NegBigEndianBytes2bn(s, bytesLen, ret0);
-        ::BN_set_negative(ret, TRUE);
+
+    // Use the high bit to determine the sign in twos-complement.
+    ::BN_set_negative(ret, (arr[0] & 0x80) != 0);
+
+    if (BN_is_negative(ret)) {
+        // For negative values, BN_bin2bn doesn't interpret the twos-complement
+        // representation, so ret is now (- value - 2^N). We can use nnmod_pow2 to set
+        // ret to (-value).
+        if (!BN_nnmod_pow2(ret, ret, bytesLen * 8)) {
+            // throwException(env);
+            return;
+        }
+
+        // And now we correct the sign.
+        ::BN_set_negative(ret, 1);
     }
-    //throwExceptionIfNecessary(env);
 }
 
 Int64 NativeBN::LongInt(
@@ -347,7 +272,6 @@ Int64 NativeBN::LongInt(
     if (!OneValidHandle(a0)) return -1;
 
     BIGNUM* a = ToBigNum(a0);
-    bn_check_top(a);
     int wLen = a->top;
     if (wLen == 0) {
         return 0;
@@ -435,24 +359,25 @@ AutoPtr<ArrayOf<Int32> > NativeBN::Bn2litEndInts(
 {
   if (!OneValidHandle(a0)) return NULL;
   BIGNUM* a = ToBigNum(a0);
-  bn_check_top(a);
-  int wLen = a->top;
-  if (wLen == 0) {
-    return NULL;
-  }
-  AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(wLen * BN_BYTES/sizeof(unsigned int));
+
+  // The number of integers we need is BN_num_bytes(a) / sizeof(int), rounded up
+  int intLen = (BN_num_bytes(a) + sizeof(int) - 1) / sizeof(int);
+
+  AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(intLen);
   if (result == NULL) {
     return NULL;
   }
+
   unsigned int* uints = reinterpret_cast<unsigned int*>(result->GetPayload());
   if (uints == NULL) {
     return NULL;
   }
-#ifdef __LP64__
-  int i = wLen; do { i--; uints[i*2+1] = a->d[i] >> 32; uints[i*2] = a->d[i]; } while (i > 0);
-#else
-  int i = wLen; do { i--; uints[i] = a->d[i]; } while (i > 0);
-#endif
+
+  // We can simply interpret a little-endian byte stream as a little-endian integer stream.
+  if (!BN_bn2le_padded(reinterpret_cast<uint8_t*>(uints), intLen * sizeof(int), a)) {
+    // throwException(env);
+    return NULL;
+  }
   return result;
 }
 
@@ -482,20 +407,28 @@ Int32 NativeBN::BitLength(
 {
   if (!OneValidHandle(a0)) return 0; //FALSE;
   BIGNUM* a = ToBigNum(a0);
-  bn_check_top(a);
-  int wLen = a->top;
-  if (wLen == 0) return 0;
-  BN_ULONG* d = a->d;
-  int i = wLen - 1;
-  BN_ULONG msd = d[i]; // most significant digit
-  if (a->neg) {
-    // Handle negative values correctly:
-    // i.e. decrement the msd if all other digits are 0:
-    // while ((i > 0) && (d[i] != 0)) { i--; }
-    do { i--; } while (!((i < 0) || (d[i] != 0)));
-    if (i < 0) msd--; // Only if all lower significant digits are 0 we decrement the most significant one.
+
+  // If a is not negative, we can use BN_num_bits directly.
+  if (!BN_is_negative(a)) {
+    return BN_num_bits(a);
   }
-  return (wLen - 1) * BN_BYTES * 8 + ::BN_num_bits_word(msd);
+
+  // In the negative case, the number of bits in a is the same as the number of bits in |a|,
+  // except one less when |a| is a power of two.
+  BIGNUM positiveA;
+  BN_init(&positiveA);
+
+  if (!::BN_copy(&positiveA, a)) {
+    ::BN_free(&positiveA);
+    // throwException(env);
+    return -1;
+  }
+
+  ::BN_set_negative(&positiveA, false);
+  int numBits = BN_is_pow2(&positiveA) ? BN_num_bits(&positiveA) - 1 : BN_num_bits(&positiveA);
+
+  ::BN_free(&positiveA);
+  return numBits;
 }
 
 Boolean NativeBN::BN_is_bit_set(

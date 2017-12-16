@@ -72,27 +72,18 @@ protected:
     CARAPI Copy(
         /* [out] */ IShader** shader);
 
+    // @Override
+    CARAPI_(Int64) CreateNativeInstance(
+        /* [in] */ IMatrix* matrix);
+
 private:
-    static CARAPI_(Int64) NativeCreate1(
+    static CARAPI_(Int64) NativeCreate(
+        /* [in] */ Int64 nativeMatrix,
         /* [in] */ Int64 nativeShaderA,
         /* [in] */ Int64 nativeShaderB,
         /* [in] */ Int64 nativeMode);
 
-    static CARAPI_(Int64) NativeCreate2(
-        /* [in] */ Int64 nativeShaderA,
-        /* [in] */ Int64 nativeShaderB,
-        /* [in] */ Int32 porterDuffMode);
-
 private:
-    static const Int32 TYPE_XFERMODE;
-    static const Int32 TYPE_PORTERDUFFMODE;
-
-    /**
-     * Type of the ComposeShader: can be either TYPE_XFERMODE or TYPE_PORTERDUFFMODE
-     */
-    Int32 mType;
-
-    AutoPtr<IXfermode> mXferMode;
     PorterDuffMode mPorterDuffMode;
 
     /**

@@ -24,12 +24,14 @@
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CRegion.h"
 #include "elastos/droid/graphics/GraphicsNative.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
-#include "elastos/droid/graphics/NativePaint.h"
 #include <elastos/utility/logging/Logger.h>
 #include <androidfw/ResourceTypes.h>
 #include <skia/core/SkCanvas.h>
-#include <Caches.h>
+#include <skia/core/SkLatticeIter.h>
+#include <skia/core/SkRegion.h>
+#include <hwui/Canvas.h>
+#include <hwui/NinePatchUtils.h>
+#include <hwui/ResourceCache.h>
 
 using Elastos::Utility::Logging::Logger;
 
@@ -48,12 +50,6 @@ namespace Graphics {
 
 #define TO_PAINT(obj) \
     ((Paint*)obj)
-
-extern ECode NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
-        const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
-        const SkPaint* paint, SkRegion** outRegion);
-
-// static const char* TAG = "NinePatch";
 
 CAR_INTERFACE_IMPL(NinePatch::InsetStruct, Object, INinePatchInsetStruct);
 NinePatch::InsetStruct::InsetStruct(
@@ -216,7 +212,9 @@ void NinePatch::DrawSoftware(
     /* [in] */ IRectF* location,
     /* [in] */ IPaint* paint)
 {
-    NativeDraw(TO_CANVAS(canvas)->GetNativeCanvasWrapper(), location, TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk,
+    Float left, top, right, bottom;
+    location->Get(&left, &top, &right, &bottom);
+    NativeDraw(TO_CANVAS(canvas)->mNativeCanvas, TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk, left, top, right, bottom,
             paint != NULL ? TO_PAINT(paint)->mNativePaint : 0, TO_CANVAS(canvas)->mDensity, TO_CBITMAP(mBitmap)->mDensity);
 }
 
@@ -225,7 +223,9 @@ void NinePatch::DrawSoftware(
     /* [in] */ IRect* location,
     /* [in] */ IPaint* paint)
 {
-    NativeDraw(TO_CANVAS(canvas)->GetNativeCanvasWrapper(), location, TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk,
+    Int32 left, top, right, bottom;
+    location->Get(&left, &top, &right, &bottom);
+    NativeDraw(TO_CANVAS(canvas)->mNativeCanvas, TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk, left, top, right, bottom,
             paint != NULL ? TO_PAINT(paint)->mNativePaint  : 0, TO_CANVAS(canvas)->mDensity, TO_CBITMAP(mBitmap)->mDensity);
 }
 
@@ -262,7 +262,7 @@ ECode NinePatch::GetTransparentRegion(
     /* [out] */ IRegion** region)
 {
     VALIDATE_NOT_NULL(region);
-    Int64 r = NativeGetTransparentRegion(TO_CBITMAP(mBitmap)->mNativeBitmap, mNativeChunk, bounds);
+    Int64 r = NativeGetTransparentRegion(mBitmap, mNativeChunk, bounds);
     if (r != 0) {
         return CRegion::New(r, region);
     }
@@ -320,118 +320,92 @@ void NinePatch::NativeFinalize(
     /* [in] */ Int64 patchHandle)
 {
     int8_t* patch = reinterpret_cast<int8_t*>(patchHandle);
-#ifdef USE_OPENGL_RENDERER
-    if (android::uirenderer::Caches::hasInstance()) {
+    if (android::uirenderer::ResourceCache::hasInstance()) {
         android::Res_png_9patch* p = (android::Res_png_9patch*) patch;
-        android::uirenderer::Caches::getInstance().resourceCache.destructor(p);
-        return;
+        android::uirenderer::ResourceCache::getInstance().destructor(p);
     }
-#endif // USE_OPENGL_RENDERER
-    delete[] patch;
+    else {
+        delete[] patch;
+    }
 }
 
-static void draw(
-    /* [in] */ SkCanvas* canvas,
-    /* [in] */ SkRect& bounds,
-    /* [in] */ const SkBitmap* bitmap,
-    /* [in] */ android::Res_png_9patch* chunk,
-    /* [in] */ const SkPaint* paint,
+void NinePatch::NativeDraw(
+    /* [in] */ Int64 canvasHandle,
+    /* [in] */ Int64 bitmapHandle,
+    /* [in] */ Int64 chunkHandle,
+    /* [in] */ Float left,
+    /* [in] */ Float top,
+    /* [in] */ Float right,
+    /* [in] */ Float bottom,
+    /* [in] */ Int64 paintHandle,
     /* [in] */ Int32 destDensity,
     /* [in] */ Int32 srcDensity)
 {
-    if (destDensity == srcDensity || destDensity == 0 || srcDensity == 0) {
-        // Logger::V(TAG, "Drawing unscaled 9-patch: (%g,%g)-(%g,%g)",
-        //         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-        //         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom));
-        NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
-    }
-    else {
-        canvas->save();
+    android::Canvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle);
+    android::Bitmap& bitmap = reinterpret_cast<BitmapWrapper*>(bitmapHandle)->bitmap();
+    const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
+    const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
+
+    if (CC_LIKELY(destDensity == srcDensity || destDensity == 0 || srcDensity == 0)) {
+        canvas->drawNinePatch(bitmap, *chunk, left, top, right, bottom, paint);
+    } else {
+        canvas->save(android::SaveFlags::MatrixClip);
 
         SkScalar scale = destDensity / (float)srcDensity;
-        canvas->translate(bounds.fLeft, bounds.fTop);
+        canvas->translate(left, top);
         canvas->scale(scale, scale);
 
-        bounds.fRight = SkScalarDiv(bounds.fRight-bounds.fLeft, scale);
-        bounds.fBottom = SkScalarDiv(bounds.fBottom-bounds.fTop, scale);
-        bounds.fLeft = bounds.fTop = 0;
+        android::Paint filteredPaint;
+        if (paint) {
+            filteredPaint = *paint;
+        }
+        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
 
-        // Logger::V(TAG, String("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d"),
-        //         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-        //         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom),
-        //         srcDensity, destDensity);
-
-        NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
+        canvas->drawNinePatch(bitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
+                &filteredPaint);
 
         canvas->restore();
     }
 }
 
-void NinePatch::NativeDraw(
-    /* [in] */ Int64 canvasHandle,
-    /* [in] */ IRectF* boundsRectF,
-    /* [in] */ Int64 bitmapHandle,
-    /* [in] */ Int64 chunkHandle,
-    /* [in] */ Int64 paintHandle,
-    /* [in] */ Int32 destDensity,
-    /* [in] */ Int32 srcDensity)
-{
-    SkCanvas* canvas       = reinterpret_cast<NativeCanvas*>(canvasHandle)->getSkCanvas();
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    android::Res_png_9patch* chunk  = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
-    const NativePaint* paint     = reinterpret_cast<NativePaint*>(paintHandle);
-    SkASSERT(canvas);
-    SkASSERT(boundsRectF);
-    SkASSERT(bitmap);
-    SkASSERT(chunk);
-    // paint is optional
-
-    SkRect bounds;
-    GraphicsNative::IRectF2SkRect(boundsRectF, &bounds);
-
-    draw(canvas, bounds, bitmap, chunk, paint, destDensity, srcDensity);
-}
-
-void NinePatch::NativeDraw(
-    /* [in] */ Int64 canvasHandle,
-    /* [in] */ IRect* boundsRect,
-    /* [in] */ Int64 bitmapHandle,
-    /* [in] */ Int64 chunkHandle,
-    /* [in] */ Int64 paintHandle,
-    /* [in] */ Int32 destDensity,
-    /* [in] */ Int32 srcDensity)
-{
-    SkCanvas* canvas       = reinterpret_cast<NativeCanvas*>(canvasHandle)->getSkCanvas();
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    android::Res_png_9patch* chunk  = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
-    const NativePaint* paint     = reinterpret_cast<NativePaint*>(paintHandle);
-    SkASSERT(canvas);
-    SkASSERT(boundsRect);
-    SkASSERT(bitmap);
-    SkASSERT(chunk);
-    // paint is optional
-
-    SkRect bounds;
-    GraphicsNative::IRect2SkRect(boundsRect, &bounds);
-    draw(canvas, bounds, bitmap, chunk, paint, destDensity, srcDensity);
-}
-
 Int64 NinePatch::NativeGetTransparentRegion(
-    /* [in] */ Int64 bitmapHandle,
+    /* [in] */ IBitmap* bitmapObj,
     /* [in] */ Int64 chunkHandle,
     /* [in] */ IRect* boundsRect)
 {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
-    SkASSERT(bitmap);
     SkASSERT(chunk);
     SkASSERT(boundsRect);
 
+    SkBitmap bitmap;
+    GraphicsNative::GetNativeBitmap(bitmapObj, &bitmap);
     SkRect bounds;
     GraphicsNative::IRect2SkRect(boundsRect, &bounds);
 
-    SkRegion* region = NULL;
-    NinePatch_Draw(NULL, bounds, *bitmap, *chunk, NULL, &region);
+    SkCanvas::Lattice lattice;
+    SkIRect src = SkIRect::MakeWH(bitmap.width(), bitmap.height());
+    lattice.fBounds = &src;
+    android::NinePatchUtils::SetLatticeDivs(&lattice, *chunk, bitmap.width(), bitmap.height());
+    lattice.fFlags = nullptr;
+
+    SkRegion* region = nullptr;
+    if (SkLatticeIter::Valid(bitmap.width(), bitmap.height(), lattice)) {
+        SkLatticeIter iter(lattice, bounds);
+        if (iter.numRectsToDraw() == chunk->numColors) {
+            SkRect dummy;
+            SkRect iterDst;
+            int index = 0;
+            while (iter.next(&dummy, &iterDst)) {
+                if (0 == chunk->getColors()[index++] && !iterDst.isEmpty()) {
+                    if (!region) {
+                        region = new SkRegion();
+                    }
+
+                    region->op(iterDst.round(), SkRegion::kUnion_Op);
+                }
+            }
+        }
+    }
 
     return reinterpret_cast<Int64>(region);
 }

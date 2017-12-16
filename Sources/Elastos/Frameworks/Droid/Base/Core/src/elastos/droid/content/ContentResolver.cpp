@@ -26,6 +26,7 @@
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CSyncRequestBuilder.h"
 #include "elastos/droid/content/CParcelFileDescriptorInner.h"
+#include "elastos/droid/content/IContentService.h"
 #include "elastos/droid/content/res/CAssetFileDescriptor.h"
 //#include "elastos/droid/accounts/CAccount.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
@@ -2158,8 +2159,8 @@ ECode ContentResolver::GetContentService(
     VALIDATE_NOT_NULL(contentService)
 
     if (NULL == sContentService) {
-        AutoPtr<IInterface> service = ServiceManager::GetService(IContentResolver::CONTENT_SERVICE_NAME);
-        sContentService = IIContentService::Probe(service);
+        android::sp<android::IBinder> cs = ServiceManager::GetAndroidService(IContentResolver::CONTENT_SERVICE_NAME);
+        sContentService = new IContentServiceProxy(cs);
     }
 
     // if (false) Log.v("ContentService", "default service binder = " + b);

@@ -28,6 +28,7 @@
 #include <gui/BufferQueue.h>
 #include <utils/misc.h>
 #include <utils/Errors.h>
+#include <cutils/atomic.h>
 
 using Elastos::Droid::Os::Looper;
 using android::GLConsumer;
@@ -268,7 +269,7 @@ public:
     DroidSurfaceTextureContext(
         /* [in] */ IWeakReference* weakThiz);
     virtual ~DroidSurfaceTextureContext();
-    virtual void onFrameAvailable();
+    virtual void onFrameAvailable(const android::BufferItem& item);
 
 private:
     AutoPtr<IWeakReference> mWeakThiz;
@@ -284,11 +285,35 @@ DroidSurfaceTextureContext::~DroidSurfaceTextureContext()
     mWeakThiz = NULL;
 }
 
-void DroidSurfaceTextureContext::onFrameAvailable()
+void DroidSurfaceTextureContext::onFrameAvailable(const android::BufferItem& /* item */)
 {
     CSurfaceTexture::PostEventFromNative(mWeakThiz);
 }
+
 // ----------------------------------------------------------------------------
+
+#define EGL_PROTECTED_CONTENT_EXT 0x32C0
+
+// Get an ID that's unique within this process.
+static int32_t createProcessUniqueId() {
+    static volatile int32_t globalCounter = 0;
+    return android_atomic_inc(&globalCounter);
+}
+
+// Check whether the current EGL context is protected.
+static bool isProtectedContext() {
+    EGLDisplay dpy = eglGetCurrentDisplay();
+    EGLContext ctx = eglGetCurrentContext();
+
+    if (dpy == EGL_NO_DISPLAY || ctx == EGL_NO_CONTEXT) {
+        return false;
+    }
+
+    EGLint isProtected = EGL_FALSE;
+    eglQueryContext(dpy, ctx, EGL_PROTECTED_CONTENT_EXT, &isProtected);
+
+    return isProtected;
+}
 
 ECode CSurfaceTexture::NativeInit(
     /* [in] */ Boolean isDetached,
@@ -301,17 +326,16 @@ ECode CSurfaceTexture::NativeInit(
     BufferQueue::createBufferQueue(&producer, &consumer);
 
     if (singleBufferMode) {
-        consumer->disableAsyncBuffer();
-        consumer->setDefaultMaxBufferCount(1);
+        consumer->setMaxBufferCount(1);
     }
 
     android::sp<GLConsumer> surfaceTexture;
     if (isDetached) {
         surfaceTexture = new GLConsumer(consumer, GL_TEXTURE_EXTERNAL_OES,
-                true, true);
+                true, !singleBufferMode);
     } else {
         surfaceTexture = new GLConsumer(consumer, texName,
-                GL_TEXTURE_EXTERNAL_OES, true, true);
+                GL_TEXTURE_EXTERNAL_OES, true, !singleBufferMode);
     }
 
     if (surfaceTexture == 0) {
@@ -319,15 +343,16 @@ ECode CSurfaceTexture::NativeInit(
         //         "Unable to create native SurfaceTexture");
         return E_OUT_OF_RESOURCES_EXCEPTION;
     }
+    surfaceTexture->setName(android::String8::format("SurfaceTexture-%d-%d-%d",
+            (isDetached ? 0 : texName),
+            getpid(),
+            createProcessUniqueId()));
+
+    // If the current context is protected, inform the producer.
+    consumer->setConsumerIsProtected(isProtectedContext());
+
     SurfaceTexture_setSurfaceTexture(this, surfaceTexture);
     SurfaceTexture_setProducer(this, producer);
-
-    // jclass clazz = env->GetObjectClass(thiz);
-    // if (clazz == NULL) {
-    //     // jniThrowRuntimeException(env,
-    //     //         "Can't find android/graphics/SurfaceTexture");
-    //     return E_RUNTIME_EXCEPTION;
-    // }
 
     android::sp<DroidSurfaceTextureContext> ctx(new DroidSurfaceTextureContext(weakSelf));
     surfaceTexture->setFrameAvailableListener(ctx);

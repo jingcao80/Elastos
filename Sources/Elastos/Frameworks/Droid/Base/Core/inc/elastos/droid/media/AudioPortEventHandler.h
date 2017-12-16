@@ -97,6 +97,8 @@ private:
     AutoPtr<IHandler> mHandler;
     AutoPtr<IArrayList> mListeners;
     IAudioManager* mAudioManager; // AudioManager holder this
+
+    Int64 mNativeCallback;
 };
 
 } // namespace Media

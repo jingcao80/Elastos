@@ -20,14 +20,24 @@
 #include "elastos/droid/graphics/Typeface.h"
 #include "elastos/droid/graphics/CTypeface.h"
 #include "elastos/droid/graphics/FontFamily.h"
-#include "elastos/droid/graphics/TypefaceImpl.h"
+#include "elastos/droid/graphics/FontUtils.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <skia/core/SkStream.h>
 #include <skia/core/SkTypeface.h>
 #include <androidfw/AssetManager.h>
+#include <hwui/Typeface.h>
 
+using Elastos::Core::CoreUtils;
+using Elastos::IO::IByteBuffer;
 using Elastos::IO::CFile;
 using Elastos::IO::IInputStream;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::IMappedByteBuffer;
+using Elastos::IO::Channels::IFileChannel;
+using Elastos::IO::Channels::FileChannelMapMode_READ_ONLY;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
 extern void skia_set_text_gamma(float, float);
@@ -91,6 +101,8 @@ AutoPtr<ITypeface> Typeface::DEFAULT_BOLD_INTERNAL;
 AutoPtr<ITypeface> Typeface::SANS_SERIF_INTERNAL;
 AutoPtr<ITypeface> Typeface::SERIF_INTERNAL;
 AutoPtr<ITypeface> Typeface::MONOSPACE_INTERNAL;
+const Int32 Typeface::STYLE_NORMAL;
+const Int32 Typeface::STYLE_ITALIC;
 const Typeface::StaticInitializer Typeface::sInitializer;
 
 CAR_INTERFACE_IMPL(Typeface, Object, ITypeface);
@@ -262,10 +274,13 @@ ECode Typeface::CreateFromAsset(
     if (sFallbackFonts != NULL) {
         AutoPtr<IFontFamily> fontFamily = new FontFamily();
         Boolean result = FALSE;
-        if (fontFamily->AddFontFromAsset(mgr, path, &result), result) {
+        if (fontFamily->AddFontFromAsset(mgr, path, 0, TRUE, 0,
+            android::RESOLVE_BY_FONT_TABLE, android::RESOLVE_BY_FONT_TABLE, NULL, &result), result) {
+            fontFamily->Freeze(&result);
             AutoPtr<ArrayOf<IFontFamily*> > families = ArrayOf<IFontFamily*>::Alloc(1);
-            families->Set(0, fontFamily);
-            return CreateFromFamiliesWithDefault(families, typeface);
+            families->Set(0, fontFamily.Get());
+            return CreateFromFamiliesWithDefault(families, android::RESOLVE_BY_FONT_TABLE,
+                    android::RESOLVE_BY_FONT_TABLE, typeface);
         }
     }
     *typeface = NULL;
@@ -290,10 +305,16 @@ ECode Typeface::CreateFromFile(
     if (sFallbackFonts != NULL) {
         AutoPtr<IFontFamily> fontFamily = new FontFamily();
         Boolean result = FALSE;
-        if (fontFamily->AddFont(path, &result), result) {
+        if (fontFamily->AddFont(path, 0, NULL,
+                android::RESOLVE_BY_FONT_TABLE, android::RESOLVE_BY_FONT_TABLE, &result), result) {
+            fontFamily->Freeze(&result);
             AutoPtr<ArrayOf<IFontFamily*> > families = ArrayOf<IFontFamily*>::Alloc(1);
             families->Set(0, fontFamily);
-            return CreateFromFamiliesWithDefault(families, typeface);
+            return CreateFromFamiliesWithDefault(families, android::RESOLVE_BY_FONT_TABLE,
+                    android::RESOLVE_BY_FONT_TABLE, typeface);
+        }
+        else {
+            fontFamily->AbortCreation();
         }
     }
     *typeface = NULL;
@@ -309,11 +330,14 @@ ECode Typeface::CreateFromFamilies(
     for (Int32 i = 0; i < families->GetLength(); i++) {
         (*ptrArray)[i] = ((FontFamily*)(*families)[i])->mNativePtr;
     }
-    return CTypeface::New(NativeCreateFromArray(ptrArray), typeface);
+    return CTypeface::New(NativeCreateFromArray(
+            ptrArray, android::RESOLVE_BY_FONT_TABLE, android::RESOLVE_BY_FONT_TABLE), typeface);
 }
 
 ECode Typeface::CreateFromFamiliesWithDefault(
     /* [in]*/ ArrayOf<IFontFamily*>* families,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 italic,
     /* [out]*/ ITypeface** typeface)
 {
     Int32 len = families->GetLength();
@@ -324,7 +348,7 @@ ECode Typeface::CreateFromFamiliesWithDefault(
     for (Int32 i = 0; i < sFallbackFonts->GetLength(); i++) {
         (*ptrArray)[i + len] = ((FontFamily*)(*sFallbackFonts)[i])->mNativePtr;
     }
-    return CTypeface::New(NativeCreateFromArray(ptrArray), typeface);
+    return CTypeface::New(NativeCreateFromArray(ptrArray, weight, italic), typeface);
 }
 
 ECode Typeface::constructor(
@@ -350,15 +374,15 @@ Int64 Typeface::NativeCreateFromTypeface(
     /* [in] */ Int64 familyHandle,
     /* [in] */ Int32 style)
 {
-    TypefaceImpl* family = reinterpret_cast<TypefaceImpl*>(familyHandle);
-    TypefaceImpl* face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)style);
+    android::Typeface* family = reinterpret_cast<android::Typeface*>(familyHandle);
+    android::Typeface* face = android::Typeface::createRelative(family, (SkTypeface::Style)style);
     // TODO: the following logic shouldn't be necessary, the above should always succeed.
     // Try to find the closest matching font, using the standard heuristic
     if (NULL == face) {
-        face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
+        face = android::Typeface::createRelative(family, (SkTypeface::Style)(style ^ SkTypeface::kItalic));
     }
     for (int i = 0; NULL == face && i < 4; i++) {
-        face = TypefaceImpl_createFromTypeface(family, (SkTypeface::Style)i);
+        face = android::Typeface::createRelative(family, (SkTypeface::Style)i);
     }
     return reinterpret_cast<Int64>(face);
 }
@@ -367,8 +391,8 @@ Int64 Typeface::NativeCreateWeightAlias(
     /* [in] */ Int64 familyHandle,
     /* [in] */ Int32 weight)
 {
-    TypefaceImpl* family = reinterpret_cast<TypefaceImpl*>(familyHandle);
-    TypefaceImpl* face = TypefaceImpl_createWeightAlias(family, weight);
+    android::Typeface* family = reinterpret_cast<android::Typeface*>(familyHandle);
+    android::Typeface* face = android::Typeface::createWithDifferentBaseWeight(family, weight);
     return reinterpret_cast<Int64>(face);
 }
 
@@ -376,29 +400,38 @@ void Typeface::NativeUnref(
     /* [in] */ Int64 faceHandle)
 {
     if (faceHandle) {
-        TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-        TypefaceImpl_unref(face);
+        android::Typeface* face = reinterpret_cast<android::Typeface*>(faceHandle);
+        delete face;
     }
 }
 
 Int32 Typeface::NativeGetStyle(
     /* [in] */ Int64 faceHandle)
 {
-    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-    return TypefaceImpl_getStyle(face);
+    android::Typeface* face = reinterpret_cast<android::Typeface*>(faceHandle);
+    return face->fSkiaStyle;
 }
 
 Int64 Typeface::NativeCreateFromArray(
-    /* [in] */ ArrayOf<Int64>* familyArray)
+    /* [in] */ ArrayOf<Int64>* familyArray,
+    /* [in] */ Int32 weight,
+    /* [in] */ Int32 italic)
 {
-    return reinterpret_cast<Int64>(TypefaceImpl_createFromFamilies(familyArray->GetPayload(), familyArray->GetLength()));
+    std::vector<std::shared_ptr<minikin::FontFamily>>familyVec;
+    familyVec.reserve(familyArray->GetLength());
+    for (Int32 i = 0; i < familyArray->GetLength(); i++) {
+        FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>((*familyArray)[i]);
+        familyVec.emplace_back(family->family);
+    }
+    return reinterpret_cast<Int64>(
+            android::Typeface::createFromFamilies(std::move(familyVec), weight, italic));
 }
 
 void Typeface::NativeSetDefault(
     /* [in] */ Int64 faceHandle)
 {
-    TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
-    return TypefaceImpl_setDefault(face);
+    android::Typeface* face = reinterpret_cast<android::Typeface*>(faceHandle);
+    android::Typeface::setDefault(face);
 }
 
 class AssetStream : public SkStream
@@ -462,17 +495,43 @@ private:
 };
 
 AutoPtr<IFontFamily> Typeface::MakeFamilyFromParsed(
-    /* [in] */ FontListParser::Family* family)
+    /* [in] */ FontListParser::Family* family,
+    /* [in] */ IMap* bufferForPath)
 {
     AutoPtr<FontFamily> fontFamily = new FontFamily(family->mLang, family->mVariant);
+    Boolean result;
     Int32 N;
     family->mFonts->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         family->mFonts->Get(i, (IInterface**)&obj);
         FontListParser::Font* font = (FontListParser::Font*)IObject::Probe(obj);
-        Boolean result = FALSE;
-        fontFamily->AddFontWeightStyle(font->mFontName, font->mWeight, font->mIsItalic, &result);
+        String fullPathName = String("/system/fonts/") + font->mFontName;
+        AutoPtr<IInterface> value;
+        bufferForPath->Get(CoreUtils::Convert(fullPathName), (IInterface**)&value);
+        AutoPtr<IByteBuffer> fontBuffer = IByteBuffer::Probe(value);
+        if (fontBuffer == NULL) {
+            AutoPtr<IFileInputStream> file;
+            CFileInputStream::New(fullPathName, (IFileInputStream**)&file);
+            AutoPtr<IFileChannel> fileChannel;
+            file->GetChannel((IFileChannel**)&fileChannel);
+            Int64 fontSize;
+            fileChannel->GetSize(&fontSize);
+            AutoPtr<IMappedByteBuffer> mbb;
+            fileChannel->Map(FileChannelMapMode_READ_ONLY, 0, fontSize, (IMappedByteBuffer**)&mbb);
+            fontBuffer = IByteBuffer::Probe(mbb);
+            bufferForPath->Put(CoreUtils::Convert(fullPathName), fontBuffer);
+        }
+        if (fontFamily->AddFontFromBuffer(fontBuffer, font->mTtcIndex, font->mAxes,
+                font->mWeight, font->mIsItalic ? STYLE_ITALIC : STYLE_NORMAL, &result), !result) {
+            Logger::E(TAG, "Error creating font %s#%d", fullPathName.string(), font->mTtcIndex);
+        }
+    }
+    if (fontFamily->Freeze(&result), !result) {
+        // Treat as system error since reaching here means that a system pre-installed font
+        // can't be used by our font stack.
+        Logger::E(TAG, "Unable to load Family: %s:%s", family->mName.string(), family->mLang.string());
+        return NULL;
     }
     return fontFamily;
 }
@@ -584,6 +643,7 @@ void Typeface::Init()
     ECode ec = NOERROR;
     Int32 N = 0, i = 0;
     AutoPtr<IList> familyList;
+    AutoPtr<IMap> bufferForPath;
     AutoPtr<ITypeface> tmp;
     AutoPtr<FontListParser::Config> fontConfig;
     AutoPtr<FontListParser::Config> systemFontConfig;
@@ -601,6 +661,8 @@ void Typeface::Init()
         AddFallbackFontsForFamilyName(systemFontConfig, fontConfig, SANS_SERIF_FAMILY_NAME);
     }
 
+    CHashMap::New((IMap**)&bufferForPath);
+
     CArrayList::New((IList**)&familyList);
 
     // Note that the default typeface is always present in the fallback list;
@@ -611,10 +673,12 @@ void Typeface::Init()
         fontConfig->mFamilies->Get(i, (IInterface**)&obj);
         FontListParser::Family* f = (FontListParser::Family*)IObject::Probe(obj);
         if (i == 0 || f->mName.IsNull()) {
-            familyList->Add(MakeFamilyFromParsed(f));
+            AutoPtr<IFontFamily> family = MakeFamilyFromParsed(f, bufferForPath);
+            if (family != NULL) {
+                familyList->Add(family);
+            }
         }
     }
-
     familyList->GetSize(&N);
     sFallbackFonts = ArrayOf<IFontFamily*>::Alloc(N);
     for (i = 0; i < N; i++) {
@@ -640,10 +704,14 @@ void Typeface::Init()
                 typeface = sDefaultTypeface;
             }
             else {
-                AutoPtr<IFontFamily> fontFamily = MakeFamilyFromParsed(f);
+                AutoPtr<IFontFamily> fontFamily = MakeFamilyFromParsed(f, bufferForPath);
+                if (fontFamily == NULL) {
+                    continue;
+                }
                 AutoPtr<ArrayOf<IFontFamily*> > families = ArrayOf<IFontFamily*>::Alloc(1);
                 families->Set(0, fontFamily);
-                Typeface::CreateFromFamiliesWithDefault(families, (ITypeface**)&typeface);
+                Typeface::CreateFromFamiliesWithDefault(families,
+                        android::RESOLVE_BY_FONT_TABLE, android::RESOLVE_BY_FONT_TABLE, (ITypeface**)&typeface);
             }
             sSystemFontMap[f->mName] = typeface;
         }

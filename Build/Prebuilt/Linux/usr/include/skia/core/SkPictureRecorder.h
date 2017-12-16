@@ -13,11 +13,13 @@
 #include "SkPicture.h"
 #include "SkRefCnt.h"
 
-#ifdef SK_BUILD_FOR_ANDROID_FRAMEWORK
-namespace android {
-    class Picture;
+namespace Elastos {
+namespace Droid {
+namespace Graphics {
+    class NativePicture;
+}
+}
 };
-#endif
 
 class GrContext;
 class SkCanvas;
@@ -105,9 +107,7 @@ private:
     /** Replay the current (partially recorded) operation stream into
         canvas. This call doesn't close the current recording.
     */
-#ifdef SK_BUILD_FOR_ANDROID_FRAMEWORK
-    friend class android::Picture;
-#endif
+    friend class Elastos::Droid::Graphics::NativePicture;
     friend class SkPictureRecorderReplayTester; // for unit testing
     void partialReplay(SkCanvas* canvas) const;
 

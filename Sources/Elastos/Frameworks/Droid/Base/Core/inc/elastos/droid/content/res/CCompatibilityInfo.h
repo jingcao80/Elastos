@@ -31,6 +31,14 @@ using Elastos::Droid::View::IWindowManagerLayoutParams;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+class AndroidParcelUtils;
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace Content {
 namespace Res {
 
@@ -248,6 +256,7 @@ public:
     Boolean mIsThemeable;
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
 
     /**
      *  A compatibility flags

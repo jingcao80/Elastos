@@ -24,12 +24,21 @@
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace App {
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Content::IIContentProvider;
 using Elastos::Droid::Content::Pm::IProviderInfo;
-
 
 CarClass(CContentProviderHolder)
     , public Object
@@ -79,6 +88,8 @@ public:
         /* [in] */ Boolean noReleaseNeeded);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     AutoPtr<IProviderInfo> mInfo;
     AutoPtr<IIContentProvider> mProvider;
     AutoPtr<IBinder> mConnection;

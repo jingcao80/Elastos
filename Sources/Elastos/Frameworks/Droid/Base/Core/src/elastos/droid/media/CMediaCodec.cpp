@@ -29,6 +29,7 @@
 
 #include <gui/Surface.h>
 #include <media/ICrypto.h>
+#include <media/MediaCodecBuffer.h>
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -38,12 +39,11 @@
 #include <media/stagefright/MediaErrors.h>
 #include <system/window.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::View::CSurface;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::IO::ByteOrder;
@@ -123,6 +123,7 @@ struct JMediaCodec : public android::AHandler {
             const uint8_t key[16],
             const uint8_t iv[16],
             android::CryptoPlugin::Mode mode,
+            const android::CryptoPlugin::Pattern &pattern,
             int64_t presentationTimeUs,
             uint32_t flags,
             AString *errorDetailMsg);
@@ -179,8 +180,9 @@ private:
 
     status_t mInitStatus;
 
+    template <typename T>
     status_t createByteBufferFromABuffer(
-            bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+            bool readOnly, bool clearBuffer, const sp<T> &buffer,
             IByteBuffer **buf) const;
 
     DISALLOW_EVIL_CONSTRUCTORS(JMediaCodec);
@@ -250,7 +252,7 @@ JMediaCodec::~JMediaCodec() {
 status_t JMediaCodec::setCallback(IMediaCodecCallback* cb) {
     if (cb != NULL) {
         if (mCallbackNotification == NULL) {
-            mCallbackNotification = new AMessage(kWhatCallbackNotify, id());
+            mCallbackNotification = new AMessage(kWhatCallbackNotify, this);
         }
     }
     else {
@@ -321,12 +323,13 @@ status_t JMediaCodec::queueSecureInputBuffer(
     const uint8_t key[16],
     const uint8_t iv[16],
     android::CryptoPlugin::Mode mode,
+    const android::CryptoPlugin::Pattern &pattern,
     int64_t presentationTimeUs,
     uint32_t flags,
     AString *errorDetailMsg)
 {
     return mCodec->queueSecureInputBuffer(
-            index, offset, subSamples, numSubSamples, key, iv, mode,
+            index, offset, subSamples, numSubSamples, key, iv, mode, pattern,
             presentationTimeUs, flags, errorDetailMsg);
 }
 
@@ -404,7 +407,7 @@ status_t JMediaCodec::getBuffers(
     VALIDATE_NOT_NULL(bufArray)
     *bufArray = NULL;
 
-    android::Vector<sp<ABuffer> > buffers;
+    android::Vector<sp<android::MediaCodecBuffer> > buffers;
 
     status_t err =
         input
@@ -421,7 +424,7 @@ status_t JMediaCodec::getBuffers(
     }
 
     for (size_t i = 0; i < buffers.size(); ++i) {
-        const sp<ABuffer> &buffer = buffers.itemAt(i);
+        const sp<android::MediaCodecBuffer> &buffer = buffers.itemAt(i);
 
         AutoPtr<IByteBuffer> byteBuffer;
         err = createByteBufferFromABuffer(
@@ -440,8 +443,9 @@ status_t JMediaCodec::getBuffers(
 }
 
 // static
+template <typename T>
 status_t JMediaCodec::createByteBufferFromABuffer(
-    bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+    bool readOnly, bool clearBuffer, const sp<T> &buffer,
     IByteBuffer **buf) const
 {
     VALIDATE_NOT_NULL(buf)
@@ -484,7 +488,7 @@ status_t JMediaCodec::getBuffer(
     VALIDATE_NOT_NULL(buf)
     *buf = NULL;
 
-    sp<ABuffer> buffer;
+    sp<android::MediaCodecBuffer> buffer;
 
     status_t err =
         input
@@ -505,7 +509,7 @@ status_t JMediaCodec::getImage(
     VALIDATE_NOT_NULL(buf)
     *buf = NULL;
 
-    sp<ABuffer> buffer;
+    sp<android::MediaCodecBuffer> buffer;
 
     status_t err =
         input
@@ -1665,6 +1669,10 @@ void CMediaCodec::NativeQueueSecureInputBuffer(
     Int32 mode;
     cryptoInfoObj->GetMode(&mode);
 
+    android::CryptoPlugin::Pattern pattern;
+    pattern.mEncryptBlocks = 0;
+    pattern.mSkipBlocks = 0;
+
     android::status_t err = android::OK;
 
     android::CryptoPlugin::SubSample *subSamples = NULL;
@@ -1740,6 +1748,7 @@ void CMediaCodec::NativeQueueSecureInputBuffer(
                 subSamples, numSubSamples,
                 (const uint8_t *)key, (const uint8_t *)iv,
                 (android::CryptoPlugin::Mode)mode,
+                pattern,
                 timestampUs,
                 flags,
                 &errorDetailMsg);

@@ -17,8 +17,9 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/CLinearGradient.h"
+#include "elastos/droid/graphics/Matrix.h"
 #include <skia/effects/SkGradientShader.h>
-#include <skia/core/SkTemplates.h>
+#include <skia/private/SkTemplates.h>
 
 namespace Elastos {
 namespace Droid {
@@ -67,7 +68,7 @@ ECode CLinearGradient::constructor(
     mColors = colors;
     mPositions = positions;
     mTileMode = tile;
-    Init(NativeCreate1(x0, y0, x1, y1, colors, positions, tile));
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
@@ -88,11 +89,20 @@ ECode CLinearGradient::constructor(
     mColor0 = color0;
     mColor1 = color1;
     mTileMode = tile;
-    Init(NativeCreate2(x0, y0, x1, y1, color0, color1, tile));
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
+/**
+ * By default Skia gradients will interpolate their colors in unpremul space
+ * and then premultiply each of the results. We must set this flag to preserve
+ * backwards compatiblity by premultiplying the colors of the gradient first,
+ * and then interpolating between them.
+ */
+static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColorsInPremul_Flag;
+
 Int64 CLinearGradient::NativeCreate1(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Float x0,
     /* [in] */ Float y0,
     /* [in] */ Float x1,
@@ -101,6 +111,7 @@ Int64 CLinearGradient::NativeCreate1(
     /* [in] */ ArrayOf<Float>* positions,
     /* [in] */ ShaderTileMode tileMode)
 {
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
     SkPoint pts[2];
     pts[0].set(x0, y0);
     pts[1].set(x1, y1);
@@ -113,17 +124,23 @@ Int64 CLinearGradient::NativeCreate1(
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::CreateLinear(pts,
+    sk_sp<SkShader> baseShader(SkGradientShader::MakeLinear(pts,
             reinterpret_cast<const SkColor*>(colors->GetPayload()), pos, count,
-            static_cast<SkShader::TileMode>(tileMode));
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, NULL));
 
-    // env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
-    // ThrowIAE_IfNull(env, shader);
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+
     assert(shader != NULL);
     return reinterpret_cast<Int64>(shader);
 }
 
 Int64 CLinearGradient::NativeCreate2(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Float x0,
     /* [in] */ Float y0,
     /* [in] */ Float x1,
@@ -132,6 +149,7 @@ Int64 CLinearGradient::NativeCreate2(
     /* [in] */ Int32 color1,
     /* [in] */ ShaderTileMode tileMode)
 {
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
     SkPoint pts[2];
     pts[0].set(x0, y0);
     pts[1].set(x1, y1);
@@ -140,9 +158,16 @@ Int64 CLinearGradient::NativeCreate2(
     colors[0] = color0;
     colors[1] = color1;
 
-    SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2, (SkShader::TileMode)tileMode);
+    sk_sp<SkShader> baseShader(SkGradientShader::MakeLinear(pts, colors, NULL, 2,
+            static_cast<SkShader::TileMode>(tileMode), sGradientShaderFlags, NULL));
 
-    // ThrowIAE_IfNull(env, s);
+    SkShader* s;
+    if (matrix) {
+        s = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        s = baseShader.release();
+    }
+
     assert(s != NULL);
     return reinterpret_cast<Int64>(s);
 }
@@ -169,6 +194,21 @@ ECode CLinearGradient::Copy(
     *shader = copy;
     REFCOUNT_ADD(*shader);
     return NOERROR;
+}
+
+Int64 CLinearGradient::CreateNativeInstance(
+    /* [in] */ IMatrix* matrix)
+{
+    Int64 nativeMatrix = matrix == NULL ? 0 :
+            ((Matrix*)matrix)->mNativeMatrix;
+    if (mType == TYPE_COLORS_AND_POSITIONS) {
+        return NativeCreate1(nativeMatrix, mX0, mY0, mX1, mY1,
+                mColors, mPositions, mTileMode);
+    }
+    else { // TYPE_COLOR_START_AND_COLOR_END
+        return NativeCreate2(nativeMatrix, mX0, mY0, mX1, mY1,
+                mColor0, mColor1, mTileMode);
+    }
 }
 
 } // namespace Graphics

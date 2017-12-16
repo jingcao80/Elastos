@@ -24,6 +24,14 @@ using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+class AndroidParcelUtils;
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace Text {
 namespace Style {
 
@@ -175,6 +183,7 @@ private:
      * An IME needs to set the span by specifying the target IME and Subtype of SuggestionSpan.
      * And the current IME might want to specify any IME as the target IME including other IMEs.
      */
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
 
     Int32 mFlags;
     AutoPtr< ArrayOf<String> > mSuggestions;

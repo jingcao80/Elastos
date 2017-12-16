@@ -17,8 +17,8 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/CSweepGradient.h"
+#include "elastos/droid/graphics/Matrix.h"
 #include <skia/effects/SkGradientShader.h>
-#include <skia/core/SkTemplates.h>
 
 namespace Elastos {
 namespace Droid {
@@ -58,7 +58,7 @@ ECode CSweepGradient::constructor(
     mCy = cy;
     mColors = colors;
     mPositions = positions;
-    Init(NativeCreate1(cx, cy, colors, positions));
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
@@ -73,7 +73,7 @@ ECode CSweepGradient::constructor(
     mCy = cy;
     mColor0 = color0;
     mColor1 = color1;
-    Init(NativeCreate2(cx, cy, color0, color1));
+    Init(CreateNativeInstance(mLocalMatrix));
     return NOERROR;
 }
 
@@ -107,12 +107,28 @@ ECode CSweepGradient::Copy(
     return NOERROR;
 }
 
+Int64 CSweepGradient::CreateNativeInstance(
+    /* [in] */ IMatrix* matrix)
+{
+    Int64 nativeMatrix = matrix == NULL ? 0 :
+            ((Matrix*)matrix)->mNativeMatrix;
+    if (mType == TYPE_COLORS_AND_POSITIONS) {
+        return NativeCreate1(nativeMatrix, mCx, mCy, mColors, mPositions);
+    } else { // TYPE_COLOR_START_AND_COLOR_END
+        return NativeCreate2(nativeMatrix, mCx, mCy, mColor0, mColor1);
+    }
+}
+
+static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColorsInPremul_Flag;
+
 Int64 CSweepGradient::NativeCreate1(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ ArrayOf<Int32>* colors,
     /* [in] */ ArrayOf<Float>* positions)
 {
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
     size_t count = (size_t)colors->GetLength();
     const Int32* colValues = colors->GetPayload();
 
@@ -122,27 +138,42 @@ Int64 CSweepGradient::NativeCreate1(
     #error Need to convert float array to SkScalar array before calling the following function.
 #endif
 
-    SkShader* shader = SkGradientShader::CreateSweep(x, y,
-            reinterpret_cast<const SkColor*>(colValues), pos, count);
-    // env->ReleaseIntArrayElements(jcolors, const_cast<Int32*>(colValues),
-    //                              JNI_ABORT);
-    // ThrowIAE_IfNull(env, shader);
-    assert(shader != NULL);
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeSweep(x, y,
+            reinterpret_cast<const SkColor*>(colors), pos, count,
+            sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+
     return reinterpret_cast<Int64>(shader);
 }
 
 Int64 CSweepGradient::NativeCreate2(
+    /* [in] */ Int64 matrixHandle,
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Int32 color0,
     /* [in] */ Int32 color1)
 {
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixHandle);
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
-    SkShader* s = SkGradientShader::CreateSweep(x, y, colors, NULL, 2);
-    assert(s != NULL);
-    return reinterpret_cast<Int64>(s);
+
+    sk_sp<SkShader> baseShader = SkGradientShader::MakeSweep(x, y, colors,
+            NULL, 2, sGradientShaderFlags, NULL);
+
+    SkShader* shader;
+    if (matrix) {
+        shader = baseShader->makeWithLocalMatrix(*matrix).release();
+    } else {
+        shader = baseShader.release();
+    }
+    return reinterpret_cast<Int64>(shader);
 }
 
 } // namespace Graphics

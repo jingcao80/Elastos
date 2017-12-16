@@ -20,20 +20,20 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Widget.h"
+#include "elastos/droid/internal/textservice/ITextServicesManager.h"
 #include "elastos/droid/view/textservice/CTextServicesManager.h"
 #include "elastos/droid/view/textservice/CSpellCheckerSession.h"
 #include "elastos/droid/view/textservice/CSpellCheckerSubtype.h"
-#include "elastos/droid/os/CServiceManager.h"
+#include "elastos/droid/os/ServiceManager.h"
 
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::IServiceManager;
-using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Internal::TextService::IITextServicesSessionListener;
 using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Internal::TextService::ITextServicesManagerProxy;
 
 using Elastos::Utility::Logging::Logger;
 
@@ -60,12 +60,8 @@ CAR_OBJECT_IMPL(CTextServicesManager)
 ECode CTextServicesManager::constructor()
 {
     if (sService == NULL) {
-        AutoPtr<IServiceManager> sm;
-        CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-        AutoPtr<IInterface> s;
-        sm->GetService(IContext::TEXT_SERVICES_MANAGER_SERVICE, (IInterface**)&s);
-        AutoPtr<IBinder> b = IBinder::Probe(s);
-        sService = IITextServicesManager::Probe(b);
+        android::sp<android::IBinder> tsm = ServiceManager::GetAndroidService(IContext::TEXT_SERVICES_MANAGER_SERVICE);
+        sService = new ITextServicesManagerProxy(tsm);
     }
     return NOERROR;
 }

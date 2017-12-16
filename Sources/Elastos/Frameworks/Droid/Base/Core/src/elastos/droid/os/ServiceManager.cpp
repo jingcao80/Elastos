@@ -18,6 +18,7 @@
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
+#include <binder/IServiceManager.h>
 
 using Elastos::Utility::Logging::Logger;
 
@@ -49,6 +50,18 @@ AutoPtr<IInterface> ServiceManager::GetService(
 //    } catch (RemoteException e) {
 //        Log.e(TAG, "error in getService", e);
 //    }
+}
+
+android::sp<android::IBinder> ServiceManager::GetAndroidService(
+    /* [in] */ const String& name)
+{
+    android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+    if (sm == NULL) {
+        Logger::E(TAG, "Failed to get android service_manager.");
+        return NULL;
+    }
+    android::sp<android::IBinder> service = sm->getService(android::String16(name.string()));
+    return service;
 }
 
 ECode ServiceManager::AddService(

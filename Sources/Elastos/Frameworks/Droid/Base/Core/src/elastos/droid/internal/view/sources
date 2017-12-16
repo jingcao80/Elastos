@@ -43,4 +43,7 @@ VPATH += $(MAKEDIR)/animation
 SOURCES += NativeInterpolatorFactoryHelper.cpp
 SOURCES += FallbackLUTInterpolator.cpp
 
+SOURCES += IInputMethodManager.cpp
+SOURCES += IInputMethodSession.cpp
+
 ELASTOS_LIBS += menu/menu.lib

@@ -237,67 +237,20 @@ bail:
 
 AutoPtr< ArrayOf<String> > SELinux::GetBooleanNames()
 {
-#ifdef HAVE_SELINUX
-    if (sIsSELinuxDisabled) return NULL;
-
-    char **list;
-    int i, len;
-    AutoPtr< ArrayOf<String> > stringArray;
-
-    if (security_get_boolean_names(&list, &len) == -1) return NULL;
-
-    stringArray = ArrayOf<String>::Alloc(len);
-    for (i = 0; i < len; i++) {
-        (*stringArray)[i] = list[i];
-        free(list[i]);
-    }
-    free(list);
-
-    return stringArray;
-#else
     return NULL;
-#endif
 }
 
 Boolean SELinux::GetBooleanValue(
     /* [in] */ const String& name)
 {
-#ifdef HAVE_SELINUX
-    if (sIsSELinuxDisabled) return FALSE;
-
-    const char *boolean_name;
-    int ret;
-
-    if (name.IsNull()) return FALSE;
-    boolean_name = name.string();
-    ret = security_get_boolean_active(boolean_name);
-    return (ret == 1) ? TRUE : FALSE;
-#else
     return FALSE;
-#endif
 }
 
 Boolean SELinux::SetBooleanValue(
     /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
-#ifdef HAVE_SELINUX
-    if (sIsSELinuxDisabled) return FALSE;
-
-    const char *boolean_name = NULL;
-    int ret;
-
-    if (name.IsNull()) return FALSE;
-    boolean_name = name.string();
-    ret = security_set_boolean(boolean_name, (value) ? 1 : 0);
-    if (ret) return FALSE;
-
-    if (security_commit_booleans() == -1) return FALSE;
-
-    return TRUE;
-#else
     return FALSE;
-#endif
 }
 
 Boolean SELinux::CheckSELinuxAccess(

@@ -18,18 +18,21 @@
 #define __ELASTOS_DROID_GRAPHICS_GRAPHICSNATIVE_H__
 
 #include "elastos/droid/graphics/CBitmap.h"
-#include "elastos/droid/graphics/NativePaint.h"
-#include "elastos/droid/graphics/TypefaceImpl.h"
+#include <skia/android/SkBRDAllocator.h>
 #include <skia/core/SkBitmap.h>
 #include <skia/core/SkRect.h>
 #include <skia/core/SkMallocPixelRef.h>
-#include <skia/core/SkCanvas.h>
+#include <skia/core/SkClipOp.h>
+#include <hwui/Canvas.h>
+#include <hwui/Typeface.h>
+#include <hwui/hwui/Bitmap.h>
+#include <hwui/hwui/Paint.h>
+
+class SkBitmapRegionDecoder;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
-
-class SkBitmapRegionDecoder;
 
 enum JNIAccess {
     kRO_JNIAccess,
@@ -239,11 +242,9 @@ public:
         /* [in] */ const SkIPoint& point,
         /* [in] */ IPoint* obj);
 
-    static CARAPI_(SkBitmap*) GetNativeBitmap(
-        /* [in] */ IBitmap* bitmap);
-
-    static CARAPI_(SkBitmap::Config) GetNativeBitmapConfig(
-        /* [in] */ BitmapConfig config);
+    static CARAPI_(void) GetNativeBitmap(
+        /* [in] */ IBitmap* bitmap,
+        /* [out] */ SkBitmap* outBitmap);
 
     /*
      *  LegacyBitmapConfig is the old enum in Skia that matched the enum int values
@@ -260,15 +261,14 @@ public:
         /* [in] */ BitmapConfig config);
 
     static CARAPI_(AutoPtr<IBitmap>) CreateBitmap(
-        /* [in] */ SkBitmap* bitmap,
-        /* [in] */ ArrayOf<Byte>* buffer,
+        /* [in] */ android::Bitmap* bitmap,
         /* [in] */ Int32 bitmapCreateFlags,
-        /* [in] */ ArrayOf<Byte>* ninePatchChunk,
-        /* [in] */ INinePatchInsetStruct* ninePatchInsets,
-        /* [in] */ Int32 density);
+        /* [in] */ ArrayOf<Byte>* ninePatchChunk = NULL,
+        /* [in] */ INinePatchInsetStruct* ninePatchInsets = NULL,
+        /* [in] */ Int32 density = -1);
 
     static CARAPI_(AutoPtr<IBitmap>) CreateBitmap(
-        /* [in] */ SkBitmap* bitmap,
+        /* [in] */ android::Bitmap* bitmap,
         /* [in] */ Int32 bitmapCreateFlags,
         /* [in] */ ArrayOf<Byte>* ninePatchChunk,
         /* [in] */ Int32 density = -1);
@@ -297,25 +297,172 @@ public:
     */
     static CARAPI_(void) ReinitBitmap(
         /* [in] */ IBitmap* bitmapObj,
-        /* [in] */ SkBitmap* bitmap,
+        /* [in] */ const SkImageInfo& info,
         /* [in] */ Boolean isPremultiplied);
 
     static CARAPI_(Int32) GetBitmapAllocationByteCount(
         /* [in] */ IBitmap* bitmapObj);
 
-    static CARAPI_(SkCanvas*) GetNativeCanvas(
+    static CARAPI_(android::Canvas*) GetNativeCanvas(
         /* [in] */ ICanvas* canvas);
 
-    static CARAPI_(NativePaint*) GetNativePaint(
+    static CARAPI_(android::Paint*) GetNativePaint(
         /* [in] */ IPaint* paint);
 
-    static CARAPI_(TypefaceImpl*) GetNativeTypeface(
+    static CARAPI_(android::Typeface*) GetNativeTypeface(
         /* [in] */ IPaint* paint);
 
     // Given the 'native' long held by the Rasterizer.java object, return a
     // ref to its SkRasterizer* (or NULL).
     static CARAPI_(SkRasterizer*) RefNativeRasterizer(
         /* [in] */ Int64 rasterizerHandle);
+
+    static CARAPI_(android::Bitmap*) MapAshmemBitmap(
+        /* [in] */ SkBitmap* bitmap,
+        /* [in] */ SkColorTable* ctable,
+        /* [in] */ int fd,
+        /* [in] */ void* addr,
+        /* [in] */ size_t size,
+        /* [in] */ bool readOnly);
+
+    static sk_sp<SkColorSpace> DefaultColorSpace();
+
+    static sk_sp<SkColorSpace> LinearColorSpace();
+
+    static sk_sp<SkColorSpace> ColorSpaceForType(
+        /* [in] */ SkColorType type);
+
+    static CARAPI_(Boolean) IsColorSpaceSRGB(
+        /* [in] */ SkColorSpace* colorSpace);
+
+    static CARAPI_(SkClipOp) OpHandleToClipOp(
+        /* [in] */ Int32 opHandle);
+};
+
+class HeapAllocator : public SkBRDAllocator
+{
+public:
+   HeapAllocator() { };
+    ~HeapAllocator() { };
+
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
+
+    /**
+     * Fetches the backing allocation object. Must be called!
+     */
+    android::Bitmap* getStorageObjAndReset() {
+        return mStorage.release();
+    };
+
+    SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kYes_ZeroInitialized; }
+
+private:
+    sk_sp<android::Bitmap> mStorage;
+};
+
+/**
+ *  Allocator to handle reusing bitmaps for BitmapRegionDecoder.
+ *
+ *  The BitmapRegionDecoder documentation states that, if it is
+ *  provided, the recycled bitmap will always be reused, clipping
+ *  the decoded output to fit in the recycled bitmap if necessary.
+ *  This allocator implements that behavior.
+ *
+ *  Skia's SkBitmapRegionDecoder expects the memory that
+ *  is allocated to be large enough to decode the entire region
+ *  that is requested.  It will decode directly into the memory
+ *  that is provided.
+ *
+ *  FIXME: BUG:25465958
+ *  If the recycled bitmap is not large enough for the decode
+ *  requested, meaning that a clip is required, we will allocate
+ *  enough memory for Skia to perform the decode, and then copy
+ *  from the decoded output into the recycled bitmap.
+ *
+ *  If the recycled bitmap is large enough for the decode requested,
+ *  we will provide that memory for Skia to decode directly into.
+ *
+ *  This allocator should only be used for a single allocation.
+ *  After we reuse the recycledBitmap once, it is dangerous to
+ *  reuse it again, given that it still may be in use from our
+ *  first allocation.
+ */
+class RecyclingClippingPixelAllocator : public SkBRDAllocator
+{
+public:
+
+    RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
+            size_t recycledBytes);
+
+    ~RecyclingClippingPixelAllocator();
+
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
+
+    /**
+     *  Must be called!
+     *
+     *  In the event that the recycled bitmap is not large enough for
+     *  the allocation requested, we will allocate memory on the heap
+     *  instead.  As a final step, once we are done using this memory,
+     *  we will copy the contents of the heap memory into the recycled
+     *  bitmap's memory, clipping as necessary.
+     */
+    void copyIfNecessary();
+
+    /**
+     *  Indicates that this allocator does not allocate zero initialized
+     *  memory.
+     */
+    SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kNo_ZeroInitialized; }
+
+private:
+    android::Bitmap* mRecycledBitmap;
+    const size_t     mRecycledBytes;
+    SkBitmap*        mSkiaBitmap;
+    bool             mNeedsCopy;
+};
+
+class BitmapWrapper
+{
+public:
+    BitmapWrapper(android::Bitmap* bitmap);
+
+    void freePixels();
+
+    bool valid();
+
+    android::Bitmap& bitmap();
+
+    void assertValid();
+
+    void getSkBitmap(SkBitmap* outBitmap);
+
+    bool hasHardwareMipMap();
+
+    void setHasHardwareMipMap(bool hasMipMap);
+
+    void setAlphaType(SkAlphaType alphaType);
+
+    const SkImageInfo& info();
+
+    size_t getAllocationByteCount() const;
+
+    size_t rowBytes() const;
+
+    uint32_t getGenerationID() const;
+
+    bool isHardware();
+
+    ~BitmapWrapper();
+
+private:
+    sk_sp<android::Bitmap> mBitmap;
+    SkImageInfo mInfo;
+    bool mHasHardwareMipMap;
+    size_t mAllocationSize;
+    size_t mRowBytes;
+    uint32_t mGenerationId;
+    bool mIsHardware;
 };
 
 } // namespace Graphics

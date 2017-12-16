@@ -201,6 +201,11 @@ SOURCES += Profile.cpp
 SOURCES += CProfileHelper.cpp
 SOURCES += CProfileTriggerHelper.cpp
 
+SOURCES += IActivityManager.cpp
+SOURCES += IApplicationThread.cpp
+SOURCES += IInstrumentationWatcher.cpp
+SOURCES += IIUiAutomationConnection.cpp
+
 ELASTOS_LIBS += admin/admin.lib
 #ELASTOS_LIBS += backup/backup.lib
 ELASTOS_LIBS += job/job.lib

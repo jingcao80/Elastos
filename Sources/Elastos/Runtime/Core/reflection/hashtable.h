@@ -434,6 +434,9 @@ void HashTable<T, type>::Clear()
 }
 
 template <class T, CARDataType type>
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 UInt32 HashTable<T, type>::Hash(
     /* [in] */ PVoid key)
 {

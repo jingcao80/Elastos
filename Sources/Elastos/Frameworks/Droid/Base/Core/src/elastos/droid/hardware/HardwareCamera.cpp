@@ -589,6 +589,38 @@ void HardwareCamera::JNICameraContext::postDataTimestamp(
     postData(msgType, dataPtr, NULL);
 }
 
+void HardwareCamera::JNICameraContext::postRecordingFrameHandleTimestamp(
+    /* [in] */ nsecs_t timestamp,
+    /* [in] */ native_handle_t* handle)
+{
+    // Video buffers are not needed at app layer so just return the video buffers here.
+    // This may be called when stagefright just releases camera but there are still outstanding
+    // video buffers.
+    if (mCamera != nullptr) {
+        mCamera->releaseRecordingFrameHandle(handle);
+    } else {
+        native_handle_close(handle);
+        native_handle_delete(handle);
+    }
+}
+
+void HardwareCamera::JNICameraContext::postRecordingFrameHandleTimestampBatch(
+    /* [in] */ const std::vector<nsecs_t>& timestamps,
+    /* [in] */ const std::vector<native_handle_t*>& handles)
+{
+    // Video buffers are not needed at app layer so just return the video buffers here.
+    // This may be called when stagefright just releases camera but there are still outstanding
+    // video buffers.
+    if (mCamera != nullptr) {
+        mCamera->releaseRecordingFrameHandleBatch(handles);
+    } else {
+        for (auto& handle : handles) {
+            native_handle_close(handle);
+            native_handle_delete(handle);
+        }
+    }
+}
+
 void HardwareCamera::JNICameraContext::postMetadata(
     /* [in] */ int32_t msgType,
     /* [in] */ camera_frame_metadata_t *metadata)
@@ -3197,7 +3229,7 @@ ECode HardwareCamera::native_setup(
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
         // Default path: hal version is don't care, do normal camera connect.
         camera = android::Camera::connect(cameraId, clientName,
-                android::Camera::USE_CALLING_UID);
+                android::Camera::USE_CALLING_UID, android::Camera::USE_CALLING_PID);
     } else {
         int status = android::Camera::connectLegacy(cameraId, halVersion, clientName,
                 android::Camera::USE_CALLING_UID, camera);

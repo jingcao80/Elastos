@@ -509,6 +509,9 @@ struct ForwardIteratorConcept
     T mI;
 };
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsequenced"
+
 template <typename T>
 struct MutableForwardIteratorConcept
 {
@@ -519,6 +522,8 @@ struct MutableForwardIteratorConcept
 
     T mI;
 };
+
+#pragma clang diagnostic pop
 
 template <typename T>
 struct BidirectionalIteratorConcept
@@ -535,6 +540,9 @@ struct BidirectionalIteratorConcept
     T mI;
 };
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsequenced"
+
 template <typename T>
 struct MutableBidirectionalIteratorConcept
 {
@@ -546,6 +554,8 @@ struct MutableBidirectionalIteratorConcept
 
     T mI;
 };
+
+#pragma clang diagnostic pop
 
 template <typename T>
 struct RandomAccessIteratorConcept

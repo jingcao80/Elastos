@@ -21,9 +21,8 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/GraphicBuffer.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
-#include "elastos/droid/graphics/Canvas.h"
 #include "elastos/droid/graphics/CCanvas.h"
+#include "elastos/droid/graphics/GraphicsNative.h"
 #include "elastos/droid/view/CGraphicBuffer.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
@@ -33,11 +32,8 @@
 
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
+#include <hwui/Canvas.h>
 
-#include <gui/IGraphicBufferAlloc.h>
-#include <gui/ISurfaceComposer.h>
-
-#include <SkCanvas.h>
 #include <SkBitmap.h>
 
 #include <fcntl.h>
@@ -46,18 +42,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/mman.h>
-#include <private/gui/ComposerService.h>
 
 #define LOCK_CANVAS_USAGE GraphicBuffer::USAGE_SW_READ_OFTEN | GraphicBuffer::USAGE_SW_WRITE_OFTEN
 #define NativeGraphicBuffer android::GraphicBuffer
-#define sp android::sp
-#define ISurfaceComposer android::ISurfaceComposer
-#define ComposerService android::ComposerService
-#define IGraphicBufferAlloc android::IGraphicBufferAlloc
 
-using Elastos::Droid::Graphics::Canvas;
 using Elastos::Droid::Graphics::CCanvas;
-using Elastos::Droid::Graphics::NativeCanvas;
+using Elastos::Droid::Graphics::GraphicsNative;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
@@ -81,10 +71,10 @@ namespace View {
 
 class GraphicBufferWrapper {
 public:
-    GraphicBufferWrapper(const sp<NativeGraphicBuffer>& buffer): buffer(buffer) {
+    GraphicBufferWrapper(const android::sp<NativeGraphicBuffer>& buffer): buffer(buffer) {
     }
 
-    sp<NativeGraphicBuffer> buffer;
+    android::sp<NativeGraphicBuffer> buffer;
 };
 
 CAR_INTERFACE_IMPL_2(GraphicBuffer, Object, IGraphicBuffer, IParcelable)
@@ -419,16 +409,13 @@ Int64 GraphicBuffer::nCreateGraphicBuffer(
     /* [in] */ Int32 format,
     /* [in] */ Int32 usage)
 {
-    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
-    sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
-    if (alloc == NULL) {
-        Slogger::E("GraphicBuffer", "createGraphicBufferAlloc() failed in GraphicBuffer.create()");
-        return 0;
-    }
+    android::sp<android::GraphicBuffer> buffer = new android::GraphicBuffer(
+            uint32_t(width), uint32_t(height), android::PixelFormat(format), uint32_t(usage),
+            std::string("GraphicBuffer::nCreateGraphicBuffer pid [") +
+                    std::to_string(getpid()) +"]");
 
-    android::status_t error;
-    sp<NativeGraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, format, usage, &error));
-    if (buffer == NULL) {
+    android::status_t error = buffer->initCheck();
+    if (error < 0) {
         Slogger::E("GraphicBuffer", "createGraphicBuffer() failed in GraphicBuffer.create()");
         return 0;
     }
@@ -475,7 +462,7 @@ ECode GraphicBuffer::nReadGraphicBufferFromParcel(
     source->GetDataPayload((Handle32*)&parcel);
 
     if (parcel) {
-        sp<android::GraphicBuffer> buffer = new android::GraphicBuffer();
+        android::sp<android::GraphicBuffer> buffer = new android::GraphicBuffer();
         parcel->read(*buffer);
         *nativeObject = reinterpret_cast<Int64>(new GraphicBufferWrapper(buffer));
     }
@@ -493,7 +480,7 @@ Boolean GraphicBuffer::nLockCanvas(
         return FALSE;
     }
 
-    sp<NativeGraphicBuffer> buffer(wrapper->buffer);
+    android::sp<NativeGraphicBuffer> buffer(wrapper->buffer);
 
     android::Rect rect;
     if (dirtyRect) {
@@ -519,7 +506,8 @@ Boolean GraphicBuffer::nLockCanvas(
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(buffer->getWidth(), buffer->getHeight(),
                                      convertPixelFormat(buffer->getPixelFormat()),
-                                     kPremul_SkAlphaType), bytesCount);
+                                     kPremul_SkAlphaType,
+                                     GraphicsNative::DefaultColorSpace()), bytesCount);
 
     if (buffer->getWidth() > 0 && buffer->getHeight() > 0) {
         bitmap.setPixels(bits);
@@ -527,20 +515,16 @@ Boolean GraphicBuffer::nLockCanvas(
         bitmap.setPixels(NULL);
     }
 
-    Canvas* impl = (Canvas*)canvas;
-    canvas->SetSurfaceFormat(buffer->getPixelFormat());
-    impl->SetNativeBitmap(reinterpret_cast<Int64>(&bitmap));
-
-    SkRect clipRect;
-    clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
-    SkCanvas* nativeCanvas = reinterpret_cast<NativeCanvas*>(impl->mNativeCanvas)->getSkCanvas();
-    nativeCanvas->clipRect(clipRect);
+    android::Canvas* nativeCanvas = GraphicsNative::GetNativeCanvas(canvas);
+    nativeCanvas->setBitmap(bitmap);
+    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom,
+            SkClipOp::kIntersect);
 
     if (dirtyRect) {
         dirtyRect->Set(rect.left, rect.top, rect.right, rect.bottom);
     }
 
-    return FALSE;
+    return TRUE;
 }
 
 Boolean GraphicBuffer::nUnlockCanvasAndPost(
@@ -548,8 +532,8 @@ Boolean GraphicBuffer::nUnlockCanvasAndPost(
     /* [in] */ ICanvas* canvas)
 {
     GraphicBufferWrapper* wrapper = reinterpret_cast<GraphicBufferWrapper*>(nativeObject);
-    Canvas* impl = (Canvas*)canvas;
-    impl->SetNativeBitmap((Int64)0);
+    android::Canvas* nativeCanvas = GraphicsNative::GetNativeCanvas(canvas);
+    nativeCanvas->setBitmap(SkBitmap());
 
     if (wrapper) {
         android::status_t status = wrapper->buffer->unlock();

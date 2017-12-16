@@ -65,6 +65,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::IString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
+using Elastos::Core::UniquePtr;
 using Elastos::Utility::Collections;
 using Elastos::Utility::ISet;
 using Elastos::Utility::CHashMap;

@@ -31,6 +31,7 @@ CAR_OBJECT_IMPL(CDisplayManagerCallback)
 ECode CDisplayManagerCallback::constructor(
     /* [in] */ Handle32 owner)
 {
+    mBBinder = NULL;
     mOwner = (DisplayManagerGlobal*)owner;
     return NOERROR;
 }

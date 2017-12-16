@@ -129,7 +129,9 @@ public:
         /* [out]*/ ITypeface** typeface);
 
     CARAPI CreateFromFamiliesWithDefault(
-        /* [in]*/ ArrayOf<IFontFamily*>* families,
+        /* [in] */ ArrayOf<IFontFamily*>* families,
+        /* [in] */ Int32 weight,
+        /* [in] */ Int32 italic,
         /* [out]*/ ITypeface** typeface);
 };
 

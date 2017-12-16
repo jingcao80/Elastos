@@ -18,15 +18,20 @@
 #define __ELASTOS_DROID_GRAPHICS_FONTLISTPARSER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Net.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Graphics::Fonts::IFontVariationAxis;
+using Elastos::Droid::Net::IUri;
 using Elastos::Core::Object;
 using Elastos::IO::IFile;
 using Elastos::IO::IInputStream;
 using Elastos::Utility::IList;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::Regex::IPattern;
 using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
@@ -64,17 +69,24 @@ public:
     public:
         Font(
             /* [in] */ const String& fontName,
+            /* [in] */ Int32 ttcIndex,
+            /* [in] */ ArrayOf<IFontVariationAxis*>* axes,
             /* [in] */ Int32 weight,
             /* [in] */ Boolean isItalic)
             : mFontName(fontName)
+            , mTtcIndex(ttcIndex)
+            , mAxes(axes)
             , mWeight(weight)
             , mIsItalic(isItalic)
         {}
 
     public:
         String mFontName;
+        Int32 mTtcIndex;
+        AutoPtr< ArrayOf<IFontVariationAxis*> > mAxes;
         Int32 mWeight;
         Boolean mIsItalic;
+        AutoPtr<IUri> mUri;
     };
 
     class Alias
@@ -146,12 +158,25 @@ private:
         /* [in] */ const String& dirPath,
         /* [out] */ Family** result);
 
+    static CARAPI ReadFont(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ Font** result);
+
+    static CARAPI ReadAxis(
+        /* [in] */ IXmlPullParser* parser,
+        /* [out] */ IFontVariationAxis** result);
+
     static CARAPI ReadAlias(
         /* [in] */ IXmlPullParser* parser,
         /* [out] */ Alias** result);
 
     static CARAPI Skip(
         /* [in] */ IXmlPullParser* parser);
+
+    static CARAPI_(AutoPtr<IPattern>) Init_FILENAME_WHITESPACE_PATTERN();
+
+private:
+    static AutoPtr<IPattern> FILENAME_WHITESPACE_PATTERN;
 };
 
 } // namespace Graphics

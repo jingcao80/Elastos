@@ -19,6 +19,7 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/os/Handler.h"
+#include <binder/Binder.h>
 
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBinder;
@@ -229,6 +230,9 @@ private:
         /* [in] */ IInterface* arg2);
 
     CARAPI_(Boolean) IsActive();
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     static String TAG;

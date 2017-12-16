@@ -31,7 +31,7 @@ SkStream* CreateInputStreamAdaptor(
     /* [in] */ IInputStream* stream,
     /* [in] */ ArrayOf<Byte>* storage);
 
-SkStreamRewindable* CopyJavaInputStream(
+SkStreamRewindable* CopyElastosInputStream(
     /* [in] */ IInputStream* stream,
     /* [in] */ ArrayOf<Byte>* storage);
 

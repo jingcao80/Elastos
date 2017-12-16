@@ -1198,12 +1198,10 @@ void CPath::NativeFinalizer(
     /* [in] */ Int64 objHandle)
 {
     SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-#ifdef USE_OPENGL_RENDERER
-    if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().resourceCache.destructor(obj);
-        return;
+    // Purge entries from the HWUI path cache if this path's data is unique
+    if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
     }
-#endif
     delete obj;
 }
 

@@ -20,11 +20,11 @@
 #include "elastos/droid/mtp/CMtpStorageInfo.h"
 #include "elastos/droid/mtp/CMtpObjectInfo.h"
 
-#include "MediaMtp/MtpTypes.h"
-#include "MediaMtp/MtpDevice.h"
-#include "MediaMtp/MtpDeviceInfo.h"
-#include "MediaMtp/MtpStorageInfo.h"
-#include "MediaMtp/MtpObjectInfo.h"
+#include "media/mtp/MtpTypes.h"
+#include "media/mtp/MtpDevice.h"
+#include "media/mtp/MtpDeviceInfo.h"
+#include "media/mtp/MtpStorageInfo.h"
+#include "media/mtp/MtpObjectInfo.h"
 
 using namespace android;
 using Elastos::Droid::Mtp::CMtpDeviceInfo;
@@ -550,7 +550,7 @@ struct get_object_callback_data {
     AutoPtr<ArrayOf<Byte> > array;
 };
 
-static bool get_object_callback(void* data, int offset, int length, void* clientData)
+static bool get_object_callback(void* data, unsigned int offset, unsigned int length, void* clientData)
 {
     get_object_callback_data* cbData = (get_object_callback_data *)clientData;
     //// cbData->env->SetByteArrayRegion(cbData->array, offset, length, (jbyte *)data);

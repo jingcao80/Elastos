@@ -16,7 +16,9 @@
 
 module
 {
+    using interface Elastos.IO.IByteBuffer;
     interface Elastos.Droid.Content.Res.IAssetManager;
+    interface Elastos.Droid.Graphics.Fonts.IFontVariationAxis;
 
     namespace Elastos {
     namespace Droid {
@@ -27,23 +29,39 @@ module
      *
      * @hide
      */
+    [deprecated]
     interface IFontFamily {
-
         AddFont(
           [in] String path,
+          [in] Int32 ttcIndex,
+          [in] ArrayOf<IFontVariationAxis*>* axes,
+          [in] Int32 weight,
+          [in] Int32 italic,
           [out] Boolean* rst);
 
-        AddFontWeightStyle(
-          [in] String path,
+        AddFontFromBuffer(
+          [in] IByteBuffer* font,
+          [in] Int32 ttcIndex,
+          [in] ArrayOf<IFontVariationAxis*>* axes,
           [in] Int32 weight,
-          [in] Boolean style,
-          [out] Boolean* rst);
+          [in] Int32 italic,
+          [out] Boolean* result);
 
         AddFontFromAsset(
           [in] IAssetManager* mgr,
           [in] String path,
+          [in] Int32 cookie,
+          [in] Boolean isAsset,
+          [in] Int32 ttcIndex,
+          [in] Int32 weight,
+          [in] Int32 isItalic,
+          [in] ArrayOf<IFontVariationAxis*>* axes,
           [out] Boolean* rst);
 
+        Freeze(
+          [out] Boolean* result);
+
+        AbortCreation();
     }
 
     } // namespace Graphics

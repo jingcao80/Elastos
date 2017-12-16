@@ -19,7 +19,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/CPicture.h"
 #include "elastos/droid/graphics/NativePicture.h"
-#include "elastos/droid/graphics/NativeCanvas.h"
 #include "elastos/droid/graphics/SkiaIOStreamAdaptor.h"
 #include "elastos/droid/graphics/CreateOutputStreamAdaptor.h"
 #include <skia/core/SkPicture.h>
@@ -69,6 +68,7 @@ CPicture::CPicture()
 CPicture::~CPicture()
 {
     NativeDestructor(mNativePicture);
+    mNativePicture = 0;
 }
 
 ECode CPicture::constructor()
@@ -189,12 +189,8 @@ ECode CPicture::GetNativePicture(
 Int64 CPicture::NativeConstructor(
     /* [in] */ Int64 nativeSrcOr0)
 {
-    if (nativeSrcOr0) {
-        return (Int64)new SkPicture(*(SkPicture*)nativeSrcOr0);
-    }
-    else {
-        return (Int64)new SkPicture;
-    }
+    const NativePicture* src = reinterpret_cast<NativePicture*>(nativeSrcOr0);
+    return reinterpret_cast<Int64>(new NativePicture(src));
 }
 
 Int64 CPicture::NativeCreateFromStream(
@@ -230,7 +226,7 @@ Int64 CPicture::NativeBeginRecording(
     /* [in] */ Int32 h)
 {
     NativePicture* pict = reinterpret_cast<NativePicture*>(pictHandle);
-    NativeCanvas* canvas = pict->BeginRecording(w, h);
+    android::Canvas* canvas = pict->BeginRecording(w, h);
     return reinterpret_cast<Int64>(canvas);
 }
 
@@ -245,7 +241,7 @@ void CPicture::NativeDraw(
     /* [in] */ Int64 canvasHandle,
     /* [in] */ Int64 pictureHandle)
 {
-    NativeCanvas* canvas = reinterpret_cast<NativeCanvas*>(canvasHandle);
+    android::Canvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle);
     NativePicture* picture = reinterpret_cast<NativePicture*>(pictureHandle);
     SkASSERT(canvas);
     SkASSERT(picture);

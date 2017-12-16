@@ -80,3 +80,5 @@ SOURCES += CVerifierInfo.cpp
 SOURCES += BaseThemeInfo.cpp
 SOURCES += CThemeInfo.cpp
 SOURCES += ThemeUtils.cpp
+
+SOURCES += IPackageManager.cpp

@@ -18,7 +18,6 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/CBitmapFactoryOptions.h"
-#include "elastos/droid/graphics/AutoDecoderCancel.h"
 
 namespace Elastos {
 namespace Droid {
@@ -46,15 +45,9 @@ CBitmapFactoryOptions::CBitmapFactoryOptions()
     , mCancel(FALSE)
 {}
 
-void CBitmapFactoryOptions::RequestCancel()
-{
-    AutoDecoderCancel::RequestCancel(this);
-}
-
 ECode CBitmapFactoryOptions::RequestCancelDecode()
 {
     mCancel = TRUE;
-    RequestCancel();
     return NOERROR;
 }
 

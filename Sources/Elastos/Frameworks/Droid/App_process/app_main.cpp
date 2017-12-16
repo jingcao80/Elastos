@@ -20,7 +20,6 @@
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
 #include <cutils/memory.h>
-#include <cutils/process_name.h>
 #include <cutils/properties.h>
 #include <cutils/trace.h>
 #include <elastos/droid/DroidRuntime.h>
@@ -155,45 +154,6 @@ static size_t computeArgBlockSize(int argc, char* const argv[])
     return (end - start);
 }
 
-static void maybeCreateDalvikCache()
-{
-#if defined(__aarch64__)
-    static const char kInstructionSet[] = "arm64";
-#elif defined(__x86_64__)
-    static const char kInstructionSet[] = "x86_64";
-#elif defined(__arm__)
-    static const char kInstructionSet[] = "arm";
-#elif defined(__i386__)
-    static const char kInstructionSet[] = "x86";
-#elif defined (__mips__)
-    static const char kInstructionSet[] = "mips";
-#else
-#error "Unknown instruction set"
-#endif
-    const char* androidRoot = getenv("ANDROID_DATA");
-    LOG_ALWAYS_FATAL_IF(androidRoot == NULL, "ANDROID_DATA environment variable unset");
-
-    char dalvikCacheDir[PATH_MAX];
-    const int numChars = snprintf(dalvikCacheDir, PATH_MAX,
-            "%s/dalvik-cache/%s", androidRoot, kInstructionSet);
-    LOG_ALWAYS_FATAL_IF((numChars >= PATH_MAX || numChars < 0),
-            "Error constructing dalvik cache : %s", strerror(errno));
-
-    int result = mkdir(dalvikCacheDir, 0711);
-    LOG_ALWAYS_FATAL_IF((result < 0 && errno != EEXIST),
-            "Error creating cache dir %s : %s", dalvikCacheDir, strerror(errno));
-
-    // We always perform these steps because the directory might
-    // already exist, with wider permissions and a different owner
-    // than we'd like.
-    result = chown(dalvikCacheDir, AID_ROOT, AID_ROOT);
-    LOG_ALWAYS_FATAL_IF((result < 0), "Error changing dalvik-cache ownership : %s", strerror(errno));
-
-    result = chmod(dalvikCacheDir, 0711);
-    LOG_ALWAYS_FATAL_IF((result < 0),
-            "Error changing dalvik-cache permissions : %s", strerror(errno));
-}
-
 #if defined(__LP64__)
 static const char ABI_LIST_PROPERTY[] = "ro.product.cpu.abilist64";
 static const char ZYGOTE_NICE_NAME[] = "elzygote64";
@@ -304,7 +264,6 @@ int main(int argc, char* argv[])
     }
     else {
         // We're in zygote mode.
-        maybeCreateDalvikCache();
 
         if (startSystemServer) {
             args.add(String("start-system-server"));
@@ -330,7 +289,13 @@ int main(int argc, char* argv[])
 
     if (niceName) {
         runtime.SetArgv0(String(niceName));
-        set_process_name(niceName);
+        int len = strlen(niceName);
+        if (len < 15) {
+            pthread_setname_np(pthread_self(), niceName);
+        }
+        else {
+            pthread_setname_np(pthread_self(), niceName + len - 15);
+        }
     }
 
     const size_t numArgs = args.size();

@@ -902,7 +902,7 @@ void CMessageQueue::NativeWake()
 Boolean CMessageQueue::NativeIsIdling()
 {
     NativeMessageQueue* nativeMessageQueue = (NativeMessageQueue*)mPtr;
-    return (Boolean)nativeMessageQueue->GetLooper()->isIdling();
+    return (Boolean)nativeMessageQueue->GetLooper()->isPolling();
 }
 
 } // namespace Os

@@ -21,14 +21,15 @@
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/internal/utility/CFastPrintWriter.h"
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/view/CWindowManagerGlobalSessionCallback.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
 #include "elastos/droid/view/HardwareRenderer.h"
-#include "elastos/droid/view/inputmethod/CInputMethodManager.h"
+#include "elastos/droid/view/IWindowManager.h"
 #include "elastos/droid/view/ViewRootImpl.h"
+#include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -44,10 +45,10 @@ using Elastos::Droid::Internal::Utility::IFastPrintWriter;
 using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::View::IInputMethodClient;
 using Elastos::Droid::Os::Build;
-using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::View::EIID_IIWindowSessionCallback;
 using Elastos::Droid::View::CWindowManagerGlobalSessionCallback;
 using Elastos::Droid::View::HardwareRenderer;
@@ -138,11 +139,8 @@ AutoPtr<IIWindowManager> CWindowManagerGlobal::GetWindowManagerService()
 {
     AutoLock lock(sDefaultWindowManagerLock);
     if (sWindowManagerService == NULL) {
-        AutoPtr<IServiceManager> sm;
-        CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-        AutoPtr<IInterface> obj;
-        sm->GetService(String("window"), (IInterface**)&obj);
-        sWindowManagerService = IIWindowManager::Probe(obj);
+        android::sp<android::IBinder> wm = ServiceManager::GetAndroidService(String("window"));
+        sWindowManagerService = new IWindowManagerProxy(wm);
     }
     return sWindowManagerService;
 }

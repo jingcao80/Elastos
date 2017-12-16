@@ -165,7 +165,8 @@ android::status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const an
     for (size_t i = 0; i <= event->getHistorySize(); i++) {
         publishedSeq = mNextPublishedSeq++;
         android::status_t status = mInputPublisher.publishMotionEvent(publishedSeq,
-                event->getDeviceId(), event->getSource(), event->getAction(), event->getFlags(),
+                event->getDeviceId(), event->getSource(),
+                event->getAction(), event->getActionButton(), event->getFlags(),
                 event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
                 event->getXOffset(), event->getYOffset(),
                 event->getXPrecision(), event->getYPrecision(),

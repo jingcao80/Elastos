@@ -21,19 +21,30 @@
 #include "elastos/droid/graphics/FontListConverter.h"
 #include "elastos/droid/graphics/FontListParser.h"
 #include "elastos/droid/graphics/LegacyFontListParser.h"
+#include "elastos/droid/graphics/fonts/FontVariationAxis.h"
 #include "elastos/droid/utility/Xml.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Graphics::Fonts::FontVariationAxis;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFileHelper;
 using Elastos::IO::CFileHelper;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Regex::IPatternHelper;
+using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::Regex::IMatcher;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
+
+AutoPtr<IPattern> FontListParser::FILENAME_WHITESPACE_PATTERN = Init_FILENAME_WHITESPACE_PATTERN();
 
 ECode FontListParser::Parse(
     /* [in] */ IFile* configFilename,
@@ -72,7 +83,8 @@ ECode FontListParser::IsLegacyFormat(
     Int32 tag;
     ECode ec = parser->NextTag(&tag);
     FAIL_GOTO(ec, EXIT);
-    parser->Require(IXmlPullParser::START_TAG, String(NULL), String("familyset"));
+    ec = parser->Require(IXmlPullParser::START_TAG, String(NULL), String("familyset"));
+    FAIL_GOTO(ec, EXIT);
     ec = parser->GetAttributeValue(String(NULL), String("version"), &version);
     FAIL_GOTO(ec, EXIT);
     isLegacy = version.IsNull();
@@ -196,17 +208,8 @@ ECode FontListParser::ReadFamily(
         String tag;
         FAIL_RETURN(parser->GetName(&tag));
         if (tag.Equals(String("font"))) {
-            String weightStr;
-            FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("weight"), &weightStr));
-            Int32 weight = weightStr == NULL ? 400 : StringUtils::ParseInt32(weightStr);
-
-            String value;
-            FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("style"), &value));
-            Boolean isItalic = value.Equals("italic");
-            String filename;
-            FAIL_RETURN(parser->NextText(&filename));
-            String fullFilename = prefix + filename;
-            AutoPtr<Font> font = new Font(fullFilename, weight, isItalic);
+            AutoPtr<Font> font;
+            FAIL_RETURN(ReadFont(parser, (Font**)&font));
             fonts->Add((IObject*)font);
         }
         else {
@@ -214,6 +217,73 @@ ECode FontListParser::ReadFamily(
         }
     }
     *result = new Family(name, fonts, lang, variant);
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode FontListParser::ReadFont(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ Font** result)
+{
+    String indexStr;
+    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("index"), &indexStr));
+    Int32 index = indexStr.IsNull() ? 0 : StringUtils::ParseInt32(indexStr);
+
+    AutoPtr<IList> axes;
+    CArrayList::New((IList**)&axes);
+
+    String weightStr;
+    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("weight"), &weightStr));
+    Int32 weight = weightStr.IsNull() ? 400 : StringUtils::ParseInt32(weightStr);
+
+    String value;
+    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("style"), &value));
+    Boolean isItalic = value.Equals("italic");
+    StringBuilder sb;
+    Int32 next;
+    while (parser->Next(&next), next != IXmlPullParser::END_TAG) {
+        Int32 type = 0;
+        if (parser->GetEventType(&type), type == IXmlPullParser::TEXT) {
+            String text;
+            parser->GetText(&text);
+            sb += text;
+        }
+        if (parser->GetEventType(&type), type != IXmlPullParser::START_TAG) continue;
+        String tag;
+        parser->GetName(&tag);
+        if (tag.Equals("axis")) {
+            AutoPtr<IFontVariationAxis> axis;
+            FAIL_RETURN(ReadAxis(parser, (IFontVariationAxis**)&axis));
+            axes->Add(axis);
+        }
+        else {
+            Skip(parser);
+        }
+    }
+    AutoPtr<IMatcher> matcher;
+    FILENAME_WHITESPACE_PATTERN->Matcher(sb.ToString(), (IMatcher**)&matcher);
+    String sanitizedName;
+    matcher->ReplaceAll(String(""), &sanitizedName);
+    AutoPtr< ArrayOf<IFontVariationAxis*> > axesArray;
+    axes->ToArray((ArrayOf<IInterface*>**)&axesArray);
+    AutoPtr<Font> font = new Font(sanitizedName, index, axesArray, weight, isItalic);
+    *result = font;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode FontListParser::ReadAxis(
+    /* [in] */ IXmlPullParser* parser,
+    /* [out] */ IFontVariationAxis** result)
+{
+    String tagStr;
+    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("tag"), &tagStr));
+    String styleValueStr;
+    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("stylevalue"), &styleValueStr));
+    Skip(parser); // axis tag is empty, ignore any contents and consume end tag
+    AutoPtr<FontVariationAxis> axis = new FontVariationAxis();
+    FAIL_RETURN(axis->constructor(tagStr, StringUtils::ParseFloat(styleValueStr)));
+    *result = axis;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -256,6 +326,15 @@ ECode FontListParser::Skip(
         }
     }
     return NOERROR;
+}
+
+AutoPtr<IPattern> FontListParser::Init_FILENAME_WHITESPACE_PATTERN()
+{
+    AutoPtr<IPatternHelper> helper;
+    CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
+    AutoPtr<IPattern> pattern;
+    helper->Compile(String("^[ \\n\\r\\t]+|[ \\n\\r\\t]+$"), (IPattern**)&pattern);
+    return pattern;
 }
 
 } // namespace Graphics

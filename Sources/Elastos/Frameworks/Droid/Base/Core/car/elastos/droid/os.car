@@ -16,6 +16,7 @@
 
 module
 {
+    merge("os/AndroidParcelWrapper.car");
     merge("os/AsyncResult.car");
     merge("os/BaseBundle.car");
     merge("os/BatteryProperty.car");

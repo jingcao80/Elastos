@@ -51,7 +51,7 @@ public:
 private:
     AutoPtr<IFunction> mF;
     AutoPtr<IComplex> mC;
-    static const Double H = 1e-12;
+    static constexpr Double H = 1e-12;
     static const Double INVH;
 };
 

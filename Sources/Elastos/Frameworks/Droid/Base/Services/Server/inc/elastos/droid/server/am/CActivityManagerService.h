@@ -1446,6 +1446,9 @@ public:
     CARAPI ActivityDestroyed(
         /* [in] */ IBinder* token);
 
+    CARAPI ActivityRelaunched(
+        /* [in] */ IBinder* token);
+
     CARAPI BackgroundResourcesReleased(
         /* [in] */ IBinder* token);
 
@@ -2266,6 +2269,9 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
+    CARAPI SetRenderThread(
+        /* [in] */ Int32 tid);
 
 public:
     CARAPI_(AutoPtr<BroadcastQueue>) BroadcastQueueForIntent(

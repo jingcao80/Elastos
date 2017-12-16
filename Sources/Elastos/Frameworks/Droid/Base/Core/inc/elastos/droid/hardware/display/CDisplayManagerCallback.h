@@ -20,7 +20,7 @@
 #include "_Elastos_Droid_Hardware_Display_CDisplayManagerCallback.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include <elastos/core/Object.h>
-
+#include <binder/Binder.h>
 
 namespace Elastos {
 namespace Droid {
@@ -46,6 +46,9 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     DisplayManagerGlobal* mOwner;

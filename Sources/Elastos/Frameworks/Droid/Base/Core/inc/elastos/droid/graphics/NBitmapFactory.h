@@ -18,7 +18,7 @@
 #define __ELASTOS_DROID_GRAPHICS_NBITMAPFACTORY_H__
 
 #include <elastos.h>
-#include <skia/core/SkImageDecoder.h>
+#include <skia/core/SkEncodedImageFormat.h>
 
 namespace Elastos {
 namespace Droid {
@@ -27,8 +27,8 @@ namespace Graphics {
 class NBitmapFactory
 {
 public:
-    static CARAPI_(String) GetMimeTypeString(
-        /* [in] */ SkImageDecoder::Format format);
+    static CARAPI_(String) EncodedFormatToString(
+        /* [in] */ SkEncodedImageFormat format);
 };
 
 } // namespace Graphics

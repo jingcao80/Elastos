@@ -21,6 +21,7 @@
 #include "elastos/droid/hardware/display/CVirtualDisplay.h"
 #include "elastos/droid/hardware/display/WifiDisplayStatus.h"
 #include "elastos/droid/hardware/display/CDisplayManagerCallback.h"
+#include "elastos/droid/hardware/display/IDisplayManager.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -189,9 +190,9 @@ AutoPtr<IDisplayManagerGlobal> DisplayManagerGlobal::GetInstance()
 {
     {    AutoLock syncLock(sInstanceLock);
         if (sInstance == NULL) {
-            AutoPtr<IInterface> service = ServiceManager::GetService(IContext::DISPLAY_SERVICE);
-            if (service != NULL) {
-                AutoPtr<IIDisplayManager> idm = IIDisplayManager::Probe(service);
+            android::sp<android::IBinder> dm = ServiceManager::GetAndroidService(IContext::DISPLAY_SERVICE);
+            if (dm != NULL) {
+                AutoPtr<IIDisplayManager> idm = new IDisplayManagerProxy(dm);
                 sInstance = new DisplayManagerGlobal(idm);
             }
             else {

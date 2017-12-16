@@ -109,6 +109,7 @@ ECode IInputConnectionWrapper::MyHandler::HandleMessage(
 CAR_INTERFACE_IMPL_2(IInputConnectionWrapper, Object, IIInputContext, IBinder)
 
 IInputConnectionWrapper::IInputConnectionWrapper()
+    : mBBinder(NULL)
 {
 }
 

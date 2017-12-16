@@ -17,7 +17,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/graphics/YuvToJpegEncoder.h"
-#include <skia/images/SkJpegUtility.h>
+#include <skia/images/SkJPEGWriteUtility.h>
 #include <hardware/hardware.h>
 
 namespace Elastos {
@@ -61,7 +61,7 @@ Boolean YuvToJpegEncoder::Encode(
     cinfo.err = jpeg_std_error(&sk_err);
     sk_err.error_exit = skjpeg_error_exit;
     if (setjmp(sk_err.fJmpBuf)) {
-        return false;
+        return FALSE;
     }
     jpeg_create_compress(&cinfo);
 

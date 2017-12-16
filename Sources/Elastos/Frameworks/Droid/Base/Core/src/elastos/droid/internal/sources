@@ -40,3 +40,5 @@ ELASTOS_LIBS += transition/transition.lib
 ELASTOS_LIBS += utility/utility.lib
 ELASTOS_LIBS += view/view.lib
 ELASTOS_LIBS += widget/widget.lib
+
+ELASTOS_LIBS += textservice/textservice.lib

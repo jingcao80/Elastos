@@ -16,7 +16,6 @@
 
 #include "FutureTask.h"
 #include <cutils/atomic.h>
-#include <cutils/atomic-inline.h>
 #include "LockSupport.h"
 #include "Executors.h"
 #include "CInteger32.h"

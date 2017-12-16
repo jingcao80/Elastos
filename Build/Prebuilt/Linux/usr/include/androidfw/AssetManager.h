@@ -95,7 +95,7 @@ public:
      * Convenience for adding the standard system assets.  Uses the
      * ANDROID_ROOT environment variable to find them.
      */
-    bool addDefaultAssets();
+    bool addDefaultAssets(const String8& systemAssets);
 
     /*
      * Iterate over the asset paths in this manager.  (Previously

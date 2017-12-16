@@ -23,8 +23,8 @@
 #include <elastos/core/Mutex.h>
 #include <elastos/utility/logging/Logger.h>
 #include <fpdfview.h>
-#include <fpdfedit.h>
-#include <fpdfsave.h>
+#include <fpdf_edit.h>
+#include <fpdf_save.h>
 #include <utils/Log.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -178,7 +178,7 @@ static void InitializeLibraryIfNeeded()
 {
     Mutex::AutoLock _l(sLock);
     if (sUnmatchedInitRequestCount == 0) {
-        FPDF_InitLibrary(NULL);
+        FPDF_InitLibrary();
     }
     sUnmatchedInitRequestCount++;
 }
@@ -293,7 +293,7 @@ static int writeBlock(
 {
     const PdfToFdWriter* writer = reinterpret_cast<PdfToFdWriter*>(owner);
     const bool success = writeAllBytes(writer->dstFd, buffer, size);
-    if (success < 0) {
+    if (!success) {
         Logger::E(String("PdfEditor"), String("Cannot write to file descriptor. Error:%d"), errno);
         return 0;
     }

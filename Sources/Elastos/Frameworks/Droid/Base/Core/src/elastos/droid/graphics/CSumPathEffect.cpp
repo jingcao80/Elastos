@@ -41,7 +41,8 @@ Int64 CSumPathEffect::NativeCreate(
 {
     SkPathEffect* first = reinterpret_cast<SkPathEffect*>(firstHandle);
     SkPathEffect* second = reinterpret_cast<SkPathEffect*>(secondHandle);
-    SkPathEffect* effect = SkSumPathEffect::Create(first, second);
+    SkPathEffect* effect = SkPathEffect::MakeSum(sk_ref_sp(first),
+                sk_ref_sp(second)).release();
     return reinterpret_cast<Int64>(effect);
 }
 

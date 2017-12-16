@@ -36,10 +36,10 @@
 #include <skia/core/SkPaint.h>
 #include <minikin/MinikinFont.h>
 
-using android::MinikinPaint;
-using android::MinikinFont;
-using android::MinikinRect;
-using android::FontFakery;
+using minikin::MinikinPaint;
+using minikin::MinikinFont;
+using minikin::MinikinRect;
+using minikin::FontFakery;
 
 namespace Elastos {
 namespace Droid {
@@ -49,9 +49,7 @@ class MinikinFontSkia : public MinikinFont
 {
 public:
     // Note: this takes ownership of the reference (will unref on dtor)
-    explicit MinikinFontSkia(SkTypeface *typeface);
-
-    ~MinikinFontSkia();
+    explicit MinikinFontSkia(sk_sp<SkTypeface> typeface);
 
     bool GetGlyph(uint32_t codepoint, uint32_t *glyph) const;
 
@@ -67,6 +65,9 @@ public:
     int32_t GetUniqueId() const;
 
     SkTypeface* GetSkTypeface() const;
+    sk_sp<SkTypeface> RefSkTypeface() const;
+
+    const std::vector<minikin::FontVariation>& GetAxes() const;
 
     static uint32_t packPaintFlags(const SkPaint* paint);
     static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
@@ -75,7 +76,9 @@ public:
     static void populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery);
 
 private:
-    SkTypeface *mTypeface;
+    sk_sp<SkTypeface> mTypeface;
+
+    std::vector<minikin::FontVariation> mAxes;
 };
 
 } // namespace Graphics

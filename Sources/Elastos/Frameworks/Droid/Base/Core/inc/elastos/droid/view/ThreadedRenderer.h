@@ -19,6 +19,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/HardwareRenderer.h"
+#include <binder/Binder.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
@@ -26,6 +27,16 @@ using Elastos::Droid::Graphics::IBitmap;
 
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IFileDescriptor;
+
+namespace Elastos {
+namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
 
 namespace Elastos {
 namespace Droid {
@@ -53,27 +64,68 @@ namespace View {
 class ThreadedRenderer
     : public HardwareRenderer
 {
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
 private:
-    class AtlasInitializer
+    class ProcessInitializer
         : public Object
     {
+        friend class Elastos::Droid::Os::AndroidParcelUtils;
+
+    private:
+        class IGraphicsStatsCallbackStub
+            : public Object
+            , public IIGraphicsStatsCallback
+            , public android::BBinder
+        {
+        public:
+            IGraphicsStatsCallbackStub(
+                /* [in] */ ProcessInitializer* host);
+
+            CAR_INTERFACE_DECL();
+
+            CARAPI OnRotateGraphicsStatsBuffer();
+
+        private:
+            void onLastStrongRef(
+                /* [in] */ const void* id);
+
+            android::status_t onTransact(
+                /* [in] */ uint32_t code,
+                /* [in] */ const android::Parcel& data,
+                /* [out] */ android::Parcel* reply,
+                /* [in] */ uint32_t flags = 0);
+
+        private:
+            ProcessInitializer* mHost;
+        };
+
     public:
         CARAPI_(void) Init(
             /* [in] */ IContext* context,
             /* [in] */ Int64 renderProxy);
 
     private:
-        AtlasInitializer();
+        ProcessInitializer();
 
-        static CARAPI_(void) ValidateMap(
+        CARAPI_(void) InitSched(
             /* [in] */ IContext* context,
-            /* [in] */ ArrayOf<Int64>* map);
+            /* [in] */ Int64 renderProxy);
+
+        CARAPI_(void) InitGraphicsStats();
+
+        CARAPI_(void) RotateBuffer();
+
+        CARAPI_(void) RequestBuffer();
 
     public:
-        static AutoPtr<AtlasInitializer> sInstance;
+        static AutoPtr<ProcessInitializer> sInstance;
 
     private:
         Boolean mInitialized;
+        AutoPtr<IContext> mAppContext;
+        AutoPtr<IIGraphicsStats> mGraphicsStatsService;
+        AutoPtr<IIGraphicsStatsCallback> mGraphicsStatsCallback;
     };
 
 public:
@@ -195,11 +247,6 @@ private:
         /* [in] */ IView* view,
         /* [in] */ IHardwareDrawCallbacks* callbacks);
 
-    static CARAPI_(void) NativeSetAtlas(
-        /* [in] */ Int64 nativeProxy,
-        /* [in] */ IGraphicBuffer* buffer,
-        /* [in] */ ArrayOf<Int64>* map);
-
     static CARAPI_(Int64) NativeCreateRootRenderNode();
 
     static CARAPI_(Int64) NativeCreateProxy(
@@ -208,10 +255,6 @@ private:
 
     static CARAPI_(void) NativeDeleteProxy(
         /* [in] */ Int64 nativeProxy);
-
-    static CARAPI_(void) NativeSetFrameInterval(
-        /* [in] */ Int64 nativeProxy,
-        /* [in] */ Int64 frameIntervalNanos);
 
     static CARAPI_(Boolean) NativeLoadSystemProperties(
         /* [in] */ Int64 nativeProxy);
@@ -245,9 +288,8 @@ private:
 
     static CARAPI_(Int32) NativeSyncAndDrawFrame(
         /* [in] */ Int64 nativeProxy,
-        /* [in] */ Int64 frameTimeNanos,
-        /* [in] */ Int64 recordDuration,
-        /* [in] */ Float density);
+        /* [in] */ ArrayOf<Int64>* frameInfo,
+        /* [in] */ Int32 size);
 
     static CARAPI_(void) NativeDestroy(
         /* [in] */ Int64 nativeProxy);
@@ -303,6 +345,14 @@ private:
         /* [in] */ Int64 nativeProxy,
         /* [in] */ IFileDescriptor* fd);
 
+    static CARAPI_(void) NativeRotateProcessStatsBuffer();
+
+    static CARAPI_(void) NativeSetProcessStatsBuffer(
+        /* [in] */ Int32 fd);
+
+    static CARAPI_(Int32) NativeGetRenderThreadTid(
+        /* [in] */ Int64 nativeProxy);
+
 private:
     static const String LOGTAG;
 
@@ -311,6 +361,8 @@ private:
     static const Int32 SYNC_OK;
     // Needs a ViewRoot invalidate
     static const Int32 SYNC_INVALIDATE_REQUIRED;
+    // Spoiler: the reward is GPU-accelerated drawing, better find that Surface!
+    static const Int32 SYNC_LOST_SURFACE_REWARD_IF_FOUND;
 
     static const AutoPtr<ArrayOf<String> > VISUALIZERS;
 

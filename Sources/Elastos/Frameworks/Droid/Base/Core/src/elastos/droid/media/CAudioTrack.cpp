@@ -1412,7 +1412,7 @@ Int32 CAudioTrack::NativeSetup(
         return IAudioSystem::ERROR;
     }
 
-    Int32 sessionId = jSession[0];
+    audio_session_t sessionId = (audio_session_t) jSession[0];
 
     // create the native AudioTrack object
     android::sp<android::AudioTrack> lpTrack = new android::AudioTrack();

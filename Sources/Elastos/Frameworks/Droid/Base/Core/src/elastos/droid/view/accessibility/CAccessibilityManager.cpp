@@ -24,6 +24,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManagerClient.h"
+#include "elastos/droid/view/accessibility/IAccessibilityManager.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Binder.h"
@@ -32,8 +33,6 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::AccessibilityService::IAccessibilityServiceInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
@@ -44,6 +43,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IProcess;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::ICollection;
@@ -137,7 +137,8 @@ ECode CAccessibilityManager::constructor(
     mHandler->constructor();
     mService = service;
     mUserId = userId;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         TryConnectToServiceLocked();
     }
     return NOERROR;
@@ -167,8 +168,8 @@ ECode CAccessibilityManager::GetInstance(
             else {
                 userId = UserHandle::GetMyUserId();
             }
-            AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE);
-            AutoPtr<IIAccessibilityManager> service = IIAccessibilityManager::Probe(obj);
+            android::sp<android::IBinder> am = ServiceManager::GetAndroidService(IContext::ACCESSIBILITY_SERVICE);
+            AutoPtr<IIAccessibilityManager> service = new IAccessibilityManagerProxy(am);
             CAccessibilityManager::New(context, service, userId, (IAccessibilityManager**)&sInstance);
         }
     }
@@ -578,11 +579,11 @@ AutoPtr<IIAccessibilityManager> CAccessibilityManager::GetServiceLocked()
 
 void CAccessibilityManager::TryConnectToServiceLocked()
 {
-    AutoPtr<IInterface> iBinder = ServiceManager::GetService(IContext::ACCESSIBILITY_SERVICE);
-    if (iBinder == NULL) {
+    android::sp<android::IBinder> am = ServiceManager::GetAndroidService(IContext::ACCESSIBILITY_SERVICE);
+    if (am == NULL) {
         return;
     }
-    AutoPtr<IIAccessibilityManager> service =IIAccessibilityManager::Probe(iBinder);
+    AutoPtr<IIAccessibilityManager> service = new IAccessibilityManagerProxy(am);
 
     // try {
     Int32 stateFlags;

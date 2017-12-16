@@ -224,7 +224,7 @@ public:
 
     private:
         static const String TAG;
-        static const Float sMaxCountSlackPercent = 0.75f;
+        static constexpr Float sMaxCountSlackPercent = 0.75f;
         static const Int32 sMaxMemoryLimitInBytes = 2 * 1024 * 1024;
         AutoPtr<RemoteViewsMetaData> mMetaData;
         AutoPtr<RemoteViewsMetaData> mTemporaryMetaData;

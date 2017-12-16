@@ -2943,6 +2943,20 @@ ECode CInputMethodManagerService::HideSoftInput(
     return NOERROR;
 }
 
+ECode CInputMethodManagerService::StartInputOrWindowGainedFocus(
+    /* [in] */ Int32 startInputReason,
+    /* [in] */ IInputMethodClient* client,
+    /* [in] */ IBinder* windowToken,
+    /* [in] */ Int32 controlFlags,
+    /* [in] */ Int32 softInputMode,
+    /* [in] */ Int32 windowFlags,
+    /* [in] */ IEditorInfo* attribute,
+    /* [in] */ IIInputContext* inputContext,
+    /* [out] */ IInputBindResult** result)
+{
+    return E_NOT_SUPPORTED;
+}
+
 Boolean CInputMethodManagerService::HideCurrentInputLocked(
     /* [in] */ Int32 flags,
     /* [in] */ IResultReceiver* resultReceiver)

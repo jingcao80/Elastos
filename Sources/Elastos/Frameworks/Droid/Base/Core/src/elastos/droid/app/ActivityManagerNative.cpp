@@ -17,6 +17,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/app/IActivityManager.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -34,12 +35,15 @@ Boolean ActivityManagerNative::sSystemReady = FALSE;
 
 AutoPtr<IIActivityManager> ActivityManagerNative::GetDefault()
 {
-    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::ACTIVITY_SERVICE);
-    AutoPtr<IIActivityManager> service = IIActivityManager::Probe(obj);
-    if (service == NULL) {
+    static AutoPtr<IIActivityManager> sAm;
+    if (sAm != NULL) return sAm;
+
+    android::sp<android::IBinder> am = ServiceManager::GetAndroidService(IContext::ACTIVITY_SERVICE);
+    if (am == NULL) {
         Logger::W("ActivityManagerNative", "GetDefault(): %s service not ready yet.", IContext::ACTIVITY_SERVICE.string());
     }
-    return service;
+    sAm = new IActivityManagerProxy(am);
+    return sAm;
 }
 
 Boolean ActivityManagerNative::IsSystemReady()

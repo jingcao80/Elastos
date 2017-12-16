@@ -960,8 +960,14 @@ Int32 AudioEffect::NativeSetup(
         goto setup_failure;
     }
 
-    lpAudioEffect = new android::AudioEffect(typeStr, uuidStr, priority,
-        effectCallback, &lpJniStorage->mCallbackData, sessionId, 0);
+    lpAudioEffect = new android::AudioEffect(typeStr,
+                                    android::String16(""),
+                                    uuidStr,
+                                    priority,
+                                    effectCallback,
+                                    &lpJniStorage->mCallbackData,
+                                    (audio_session_t) sessionId,
+                                    AUDIO_IO_HANDLE_NONE);
 
     if (lpAudioEffect == NULL) {
         goto setup_failure;
@@ -1347,17 +1353,8 @@ AutoPtr<ArrayOf<IAudioEffectDescriptor* > > AudioEffect::NativeQueryPreProcessin
     effect_descriptor_t *descriptors = new effect_descriptor_t[android::AudioEffect::kMaxPreProcessing];
     uint32_t numEffects = android::AudioEffect::kMaxPreProcessing;
 
-    android::status_t status = android::AudioEffect::queryDefaultPreProcessing(audioSession,descriptors,&numEffects);
-
-    // if ((status != android::NO_ERROR && status != android::NO_MEMORY) || numEffects == 0) {
-    //     delete[] descriptors;
-    //     return NULL;
-    // }
-    // if (status == android::NO_MEMORY) {
-    //     delete [] descriptors;
-    //     descriptors = new effect_descriptor_t[numEffects];
-    //     status = android::AudioEffect::queryDefaultPreProcessing(audioSession,descriptors,&numEffects);
-    // }
+    android::status_t status = android::AudioEffect::queryDefaultPreProcessing(
+            (audio_session_t)audioSession, descriptors, &numEffects);
     if (status != android::NO_ERROR || numEffects == 0) {
         delete[] descriptors;
         return NULL;

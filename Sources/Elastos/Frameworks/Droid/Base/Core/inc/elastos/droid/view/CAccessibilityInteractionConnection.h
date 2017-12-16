@@ -22,8 +22,8 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
-
 #include <elastos/core/Object.h>
+#include <binder/Binder.h>
 
 using Elastos::Core::Object;
 using Elastos::Droid::Os::IBundle;
@@ -125,6 +125,9 @@ public:
         /* [in] */ Int32 interrogatingPid,
         /* [in] */ Int64 interrogatingTid,
         /* [in] */ IMagnificationSpec* spec);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     AutoPtr<IWeakReference> mViewRootImpl;

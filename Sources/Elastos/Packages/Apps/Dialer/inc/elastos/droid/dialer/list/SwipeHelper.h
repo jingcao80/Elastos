@@ -227,7 +227,7 @@ public:
     static const Int32 X = 0;
     static const Int32 Y = 1;
 
-    static const Float ALPHA_FADE_START = 0.0f; // fraction of thumbnail width
+    static constexpr Float ALPHA_FADE_START = 0.0f; // fraction of thumbnail width
                                                // where fade starts
 
 private:
@@ -251,10 +251,10 @@ private:
     static Float MIN_VERT;
     static Float MIN_LOCK;
 
-    static const Float ALPHA_FADE_END = 0.7f; // fraction of thumbnail width
+    static constexpr Float ALPHA_FADE_END = 0.7f; // fraction of thumbnail width
                                               // beyond which alpha->0
 
-    static const Float FACTOR = 1.2f;
+    static constexpr Float FACTOR = 1.2f;
 
     static const Int32 PROTECTION_PADDING = 50;
 
