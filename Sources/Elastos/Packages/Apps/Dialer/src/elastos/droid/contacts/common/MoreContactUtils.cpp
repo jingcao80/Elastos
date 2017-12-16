@@ -245,6 +245,7 @@ AutoPtr<IIntent> MoreContactUtils::GetInvitableIntent(
     /* [in] */ IUri* lookupUri)
 {
     assert(0);
+    return NULL;
     // String syncAdapterPackageName = ((AccountType*)accountType)->mSyncAdapterPackageName;
     // String className;
     // accountType->GetInviteContactActivityClassName(&className);

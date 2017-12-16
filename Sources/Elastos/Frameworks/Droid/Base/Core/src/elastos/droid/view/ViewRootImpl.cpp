@@ -130,14 +130,14 @@ using Elastos::Droid::View::Accessibility::EIID_IAccessibilityManagerHighTextCon
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::ViewTreeObserver;
 using Elastos::Droid::Widget::CScroller;
-using Elastos::Utility::CArrayList;
-using Elastos::Utility::CHashSet;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Core::CString;
 using Elastos::Core::Thread;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 #ifndef TRACE_IN_TERMINAL
 #define TRACE_IN_TERMINAL          0
@@ -2954,7 +2954,7 @@ void ViewRootImpl::PerformTraversals()
                 mAttachInfo->mHardwareRenderer->Destroy();
             }
         }
-        else if (surfaceGenerationId != (mSurface->GetGenerationId(&gId), gId)
+        else if ((mSurface->GetGenerationId(&gId), surfaceGenerationId != gId)
             && mSurfaceHolder == NULL && mAttachInfo->mHardwareRenderer != NULL) {
             mFullRedrawNeeded = TRUE;
             ECode ec = mAttachInfo->mHardwareRenderer->UpdateSurface(mSurface);

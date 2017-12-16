@@ -227,6 +227,7 @@ Int32 IccUtils::HexCharToInt32(
 
     assert(0 && "invalid hex Char32");
     // throw new RuntimeException ("invalid hex Char32 '" + c + "'");
+    return -1;
 }
 
 AutoPtr<ArrayOf<Byte> > IccUtils::HexStringToBytes(

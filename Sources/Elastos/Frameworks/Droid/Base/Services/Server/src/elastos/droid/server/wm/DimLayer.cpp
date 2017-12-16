@@ -55,7 +55,7 @@ DimLayer::DimLayer(
     CRect::New((IRect**)&mLastBounds);
 
     Int32 displayId = mDisplayContent->GetDisplayId();
-    if (DEBUG) Slogger::V(TAG, "Ctor: displayId=" + displayId);
+    if (DEBUG) Slogger::V(TAG, "Ctor: displayId=%d", displayId);
     AutoPtr<ISurfaceControlHelper> helper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
     helper->OpenTransaction();

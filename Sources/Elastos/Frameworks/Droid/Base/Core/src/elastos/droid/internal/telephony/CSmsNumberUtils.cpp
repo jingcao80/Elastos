@@ -115,6 +115,7 @@ String CSmsNumberUtils::FormatNumber(
     /* [in] */ Int32 networkType)
 {
     assert(0 && "TODO");
+    return String(NULL);
 //    if (number == NULL ) {
 //        throw new IllegalArgumentException("number is NULL");
 //    }
@@ -227,6 +228,7 @@ AutoPtr<IArrayList> CSmsNumberUtils::GetAllIDDs(
     /* [in] */ const String& mcc)
 {
     assert(0 && "TODO");
+    return NULL;
 //    ArrayList<String> allIDDs = IDDS_MAPS->Get(mcc);
 //    if (allIDDs != NULL) {
 //        return allIDDs;
@@ -276,6 +278,7 @@ Int32 CSmsNumberUtils::CheckNANP(
     /* [in] */ IArrayList* allIDDs)
 {
     assert(0 && "TODO");
+    return 0;
 //    Boolean isNANP = FALSE;
 //    String number = numberEntry.number;
 //
@@ -364,6 +367,7 @@ Int32 CSmsNumberUtils::CheckInternationalNumberPlan(
     /* [in] */ const String& homeIDD)
 {
     assert(0 && "TODO");
+    return 0;
 //    String number = numberEntry.number;
 //    Int32 countryCode = -1;
 //
@@ -414,6 +418,7 @@ Int32 CSmsNumberUtils::GetCountryCode(
     /* [in] */ const String& number)
 {
     assert(0 && "TODO");
+    return 0;
 //    Int32 countryCode = -1;
 //    if (number->Length() >= MIN_COUNTRY_AREA_LOCAL_LENGTH) {
 //        // Check Country code
@@ -484,6 +489,7 @@ Boolean CSmsNumberUtils::InExceptionListForNpCcAreaLocal(
     /* [in] */ NumberEntry* numberEntry)
 {
     assert(0 && "TODO");
+    return FALSE;
 //    Int32 countryCode = numberEntry.countryCode;
 //    Boolean result = (numberEntry.number->Length() == 12
 //                      && (countryCode == 7 || countryCode == 20
@@ -566,6 +572,7 @@ Int32 CSmsNumberUtils::GetNetworkType(
     /* [in] */ IPhoneBase* phoneBase)
 {
     assert(0 && "TODO");
+    return 0;
 //    Int32 networkType = -1;
 //    Int32 phoneType = TelephonyManager->GetDefault()->GetPhoneType();
 //
@@ -588,6 +595,7 @@ Boolean CSmsNumberUtils::IsInternationalRoaming(
     /* [in] */ IPhoneBase* phoneBase)
 {
     assert(0 && "TODO");
+    return FALSE;
 //    String operatorIsoCountry = phoneBase->GetSystemProperty(
 //            TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
 //    String simIsoCountry = phoneBase->GetSystemProperty(
@@ -609,6 +617,7 @@ Boolean CSmsNumberUtils::NeedToConvert(
     /* [in] */ IPhoneBase* phoneBase)
 {
     assert(0 && "TODO");
+    return FALSE;
 //    Boolean bNeedToConvert  = FALSE;
 //    String[] listArray = phoneBase->GetContext()->GetResources()
 //            .GetStringArray(R.array
@@ -638,6 +647,7 @@ Boolean CSmsNumberUtils::CompareGid1(
     /* [in] */ const String& serviceGid1)
 {
     assert(0 && "TODO");
+    return FALSE;
 //    String gid1 = phoneBase->GetGroupIdLevel1();
 //    Boolean ret = TRUE;
 //

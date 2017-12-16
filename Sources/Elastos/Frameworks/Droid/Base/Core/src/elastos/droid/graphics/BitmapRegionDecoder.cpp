@@ -496,7 +496,7 @@ ECode BitmapRegionDecoder::NativeNewInstance(
     /* [out] */ IBitmapRegionDecoder** decoder)
 {
     // for now we don't allow shareable with java inputstreams
-    SkStreamRewindable* stream = CopyJavaInputStream(is, storage);
+    SkStreamRewindable* stream = CopyElastosInputStream(is, storage);
 
     ECode ec = NOERROR;
     *decoder = NULL;

@@ -488,7 +488,7 @@ ECode CMmsSmsProvider::Query(
         case URI_SEARCH_SUGGEST: {
             String v;
             uri->GetQueryParameter(String("pattern"), &v);
-            (*SEARCH_STRING)[0] = v + '*' ;
+            (*SEARCH_STRING)[0] = v + "*" ;
 
             // find the words which match the pattern using the snippet function.  The
             // snippet function parameters mainly describe how to format the result.

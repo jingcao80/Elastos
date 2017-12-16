@@ -143,17 +143,17 @@ protected:
     CARAPI_(void) Finalize();
 
 private:
-    CARAPI_(Handle32) NativeListen(
+    CARAPI_(Int64) NativeListen(
         /* [in] */ const String& iface);
 
     CARAPI_(void) NativeDispose(
-        /* [in] */ Handle32 ptr);
+        /* [in] */ Int64 ptr);
 
     CARAPI_(void) NativePause(
-        /* [in] */ Handle32 ptr);
+        /* [in] */ Int64 ptr);
 
     CARAPI_(void) NativeResume(
-        /* [in] */ Handle32 ptr);
+        /* [in] */ Int64 ptr);
 
     CARAPI_(void) Dispose(
         /* [in] */ Boolean finalized);
@@ -168,7 +168,7 @@ private:
 
     AutoPtr<IHandler> mHandler;
 
-    Handle32 mPtr;
+    Int64 mPtr;
 };
 
 } // namespace Media

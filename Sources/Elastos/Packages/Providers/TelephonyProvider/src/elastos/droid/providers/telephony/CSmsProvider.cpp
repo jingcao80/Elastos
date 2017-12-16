@@ -344,7 +344,7 @@ ECode CSmsProvider::Query(
             l->Get(1, (IInterface**)&obj);
             threadID = StringUtils::ParseInt32(TO_STR(obj));
             if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
-                Logger::D(TAG, "query conversations: threadID=" + threadID);
+                Logger::D(TAG, "query conversations: threadID=%d", threadID);
             }
             // }
             // catch (Exception ex) {
@@ -362,8 +362,8 @@ ECode CSmsProvider::Query(
         }
 
         case SMS_CONVERSATIONS: {
-            qb->SetTables(String("sms, (SELECT thread_id AS group_thread_id, MAX(date)AS group_date,")
-                   + "COUNT(*) AS msg_count FROM sms GROUP BY thread_id) AS groups");
+            qb->SetTables(String("sms, (SELECT thread_id AS group_thread_id, MAX(date)AS group_date,"
+                   "COUNT(*) AS msg_count FROM sms GROUP BY thread_id) AS groups"));
 
             AutoPtr<ICharSequence> cs;
             CString::New(String("sms.thread_id = groups.group_thread_id AND sms.date =groups.group_date")

@@ -50,7 +50,7 @@ public:
         /* [out] */ Boolean* isOpaque);
 
     CARAPI GetDuration(
-        /* [out] */ Int32* height);
+        /* [out] */ Int32* duration);
 
     CARAPI SetTime(
         /* [in] */ Int32 relativeMilliseconds,

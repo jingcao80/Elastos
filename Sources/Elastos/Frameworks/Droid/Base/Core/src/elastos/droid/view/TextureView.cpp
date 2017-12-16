@@ -515,7 +515,7 @@ ECode TextureView::GetBitmap(
     VALIDATE_NOT_NULL(result)
 
     Boolean bIsAvail = FALSE;
-    if (width > 0 && height > 0 & (IsAvailable(&bIsAvail), bIsAvail)) {
+    if (width > 0 && height > 0 && (IsAvailable(&bIsAvail), bIsAvail)) {
         AutoPtr<IResources> res;
         GetResources((IResources**)&res);
         AutoPtr<IDisplayMetrics> dm;

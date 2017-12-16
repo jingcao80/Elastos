@@ -796,7 +796,7 @@ protected:
     /* transient */ AutoPtr<HashMapEntry> mEntryForNullKey;
 
 private:
-    ECO_LOCAL static const Int64 sSerialVersionUID = 362498820763181265L;
+    ECO_LOCAL static const Int64 sSerialVersionUID = 362498820763181265ll;
 
     ECO_LOCAL static AutoPtr< ArrayOf<IObjectStreamField*> > sSerialPersistentFields;
 

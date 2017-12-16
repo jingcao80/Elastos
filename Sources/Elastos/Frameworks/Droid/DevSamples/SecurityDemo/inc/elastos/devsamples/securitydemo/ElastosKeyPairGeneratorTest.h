@@ -83,7 +83,7 @@ private:
         /* [in] */ IInterface* expected,
         /* [in] */ IInterface* actual);
 
-    static AssertDateEquals(
+    static CARAPI AssertDateEquals(
         /* [in] */ IDate* date1,
         /* [in] */ IDate* date2);
 

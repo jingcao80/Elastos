@@ -35,6 +35,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_INTERFACE_IMPL(Movie, Object, IMovie);
+
 Movie::Movie(
     /* [in] */ Int64 nativeMovie)
 {
@@ -79,14 +80,13 @@ ECode Movie::IsOpaque(
 }
 
 ECode Movie::GetDuration(
-    /* [out] */ Int32* height)
+    /* [out] */ Int32* duration)
 {
-    VALIDATE_NOT_NULL(height);
+    VALIDATE_NOT_NULL(duration);
 
-    *height = ((SkMovie*)mNativeMovie)->duration();
+    *duration = ((SkMovie*)mNativeMovie)->duration();
     return NOERROR;
 }
-
 
 ECode Movie::SetTime(
     /* [in] */ Int32 relativeMilliseconds,

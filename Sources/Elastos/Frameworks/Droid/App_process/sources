@@ -31,3 +31,5 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_USER_LIB)/Elastos.DroidRuntime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += -lm -lcutils -lbinder -lutils -licuuc -licui18n -lskia -landroidfw
+
+#LIBRARIES += -lcutils -lbinder -lutils -lskia -llog

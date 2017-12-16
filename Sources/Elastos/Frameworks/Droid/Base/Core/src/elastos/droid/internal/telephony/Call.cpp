@@ -52,6 +52,7 @@ ICallState Call::StateFromDCState(
         default: {
             assert(0 && "illegal call state");
             // throw new RuntimeException ("illegal call state:" + dcState);
+            return -1;
         }
     }
 }

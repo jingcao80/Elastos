@@ -172,7 +172,7 @@ static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
     return streamMem;
 }
 
-SkStreamRewindable* CopyJavaInputStream(
+SkStreamRewindable* CopyElastosInputStream(
     /* [in] */ IInputStream* stream,
     /* [in] */ ArrayOf<Byte>* storage)
 {

@@ -128,4 +128,3 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(PREBUILD_LIB)/libm.a
 LIBRARIES += -lbinder -linput -llog -lutils
-#LIBRARIES += -lcutils -licuuc -landroidfw

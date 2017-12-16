@@ -268,7 +268,7 @@ private:
     android::sp<NativeRemoteDisplayClient> mClient;
 };
 
-Handle32 CRemoteDisplay::NativeListen(
+Int64 CRemoteDisplay::NativeListen(
     /* [in] */ const String& iface)
 {
     android::sp<android::IServiceManager> sm = android::defaultServiceManager();
@@ -287,25 +287,25 @@ Handle32 CRemoteDisplay::NativeListen(
     }
 
     AutoPtr<NativeRemoteDisplay> wrapper = new NativeRemoteDisplay(display.get(), client);
-    return (Handle32)wrapper.Get();
+    return (Int64)wrapper.Get();
 }
 
 void CRemoteDisplay::NativeDispose(
-    /* [in] */ Handle32 ptr)
+    /* [in] */ Int64 ptr)
 {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     delete wrapper;
 }
 
 void CRemoteDisplay::NativePause(
-    /* [in] */ Handle32 ptr)
+    /* [in] */ Int64 ptr)
 {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     wrapper->pause();
 }
 
 void CRemoteDisplay::NativeResume(
-    /* [in] */ Handle32 ptr)
+    /* [in] */ Int64 ptr)
 {
     NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
     wrapper->pause();
