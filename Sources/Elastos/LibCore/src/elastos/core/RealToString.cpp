@@ -277,7 +277,7 @@ void RealToString::LongDigitGenerator(Int64 f, Int32 e,
 {
     Int64 R, S, M;
     if (e >= 0) {
-        M = ((Int64)1l) << e;
+        M = 1ll << e;
         if (!mantissaIsZero) {
             R = f << (e + 1);
             S = 2;
