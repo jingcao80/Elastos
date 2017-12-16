@@ -604,7 +604,7 @@ String WifiNative::SetBatchedScanSettings(
     Int32 maxApForDistance;
     settings->GetMaxApForDistance(&maxApForDistance);
     if (maxApForDistance != IBatchedScanSettings::UNSPECIFIED) {
-        cmd += " RTT=" + maxApForDistance;
+        cmd += String(" RTT=") + StringUtils::ToString(maxApForDistance);
     }
     return DoStringCommand(cmd);
 }

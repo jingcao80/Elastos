@@ -188,6 +188,7 @@ ECode SmsUsageMonitor::SettingsObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     assert(0 && "TODO");
+    return NOERROR;
 //    mEnabled->Set(Settings::Global::>GetInt(mContext->GetContentResolver(),
 //            Settings::Global::SMS_SHORT_CODE_CONFIRMATION, 1) != 0);
 }
@@ -228,6 +229,7 @@ ECode SmsUsageMonitor::SmsLimitObserver::OnChange(
     /* [in] */ IUri* uri)
 {
     assert(0 && "TODO");
+    return NOERROR;
 //    ContentResolver resolver = mContext->GetContentResolver();
 //    mMaxAllowed = Settings.Secure->GetInt(resolver,
 //            Settings::Global::SMS_OUTGOING_CHECK_MAX_COUNT,
@@ -329,6 +331,7 @@ AutoPtr<SmsUsageMonitor::ShortCodePatternMatcher> SmsUsageMonitor::GetPatternMat
     /* [in] */ const String& country)
 {
     assert(0 && "TODO");
+    return NULL;
 //    Int32 id = R.xml.sms_short_codes;
 //    XmlResourceParser parser = NULL;
 //    try {
@@ -630,6 +633,7 @@ ECode SmsUsageMonitor::SetPremiumSmsPermission(
     /* [in] */ Int32 permission)
 {
     assert(0 && "TODO");
+    return NOERROR;
 //    CheckCallerIsSystemOrPhoneApp();
 //    if (permission < PREMIUM_SMS_PERMISSION_ASK_USER
 //            || permission > PREMIUM_SMS_PERMISSION_ALWAYS_ALLOW) {
@@ -704,6 +708,7 @@ Boolean SmsUsageMonitor::IsUnderLimit(
     /* [in] */ Int32 smsWaiting)
 {
     assert(0 && "TODO");
+    return FALSE;
 //    Long ct = System->CurrentTimeMillis();
 //    Int64 beginCheckPeriod = ct - mCheckPeriod;
 //

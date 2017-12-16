@@ -86,16 +86,19 @@ String RealToString::Convert(Double inputNumber)
     String quickResult;
     if (e == 2047) {
         if (mantissaIsZero) {
-            quickResult = String(positive ? "Infinity" : "-Infinity");
-        } else {
-            quickResult = String("NaN");
+            quickResult = positive ? "Infinity" : "-Infinity";
         }
-    } else if (e == 0) {
+        else {
+            quickResult = "NaN";
+        }
+    }
+    else if (e == 0) {
         if (mantissaIsZero) {
-            quickResult = String(positive ? "0.0" : "-0.0");
-        } else if (f == 1) {
+            quickResult = positive ? "0.0" : "-0.0";
+        }
+        else if (f == 1) {
             // special case to increase precision even though 2 * Math::DOUBLE_MIN_VALUE is 1.0e-323
-            quickResult = String(positive ? "4.9E-324" : "-4.9E-324");
+            quickResult = positive ? "4.9E-324" : "-4.9E-324";
         }
     }
 
@@ -109,14 +112,15 @@ String RealToString::Convert(Double inputNumber)
     if (e == 0) {
         pow = 1 - p; // a denormalized number
         Int64 ff = f;
-        while ((ff & 0x0010000000000000L) == 0) {
+        while ((ff & 0x0010000000000000ll) == 0) {
             ff = ff << 1;
             numBits--;
         }
-    } else {
+    }
+    else {
         // 0 < e < 2047
         // a "normalized" number
-        f = f | 0x0010000000000000L;
+        f = f | 0x0010000000000000ll;
         pow = e - p;
     }
 
@@ -125,7 +129,8 @@ String RealToString::Convert(Double inputNumber)
     mFirstK = mDigitCount = 0;
     if (((-59 < pow) && (pow < 6)) || ((pow == -59) && (!mantissaIsZero))) {
         LongDigitGenerator(f, pow, e == 0, mantissaIsZero, numBits);
-    } else {
+    }
+    else {
         BigIntDigitGenerator(f, pow, e == 0, numBits);
     }
 
@@ -133,7 +138,8 @@ String RealToString::Convert(Double inputNumber)
     if ((inputNumber >= 1e7l) || (inputNumber <= -1e7l)
             || ((inputNumber > -1e-3l) && (inputNumber < 1e-3l))) {
         FreeFormatExponential(dst, positive);
-    } else {
+    }
+    else {
         FreeFormat(dst, positive);
     }
 
@@ -156,12 +162,14 @@ String RealToString::Convert(Float inputNumber)
     String quickResult;
     if (e == 255) {
         if (mantissaIsZero) {
-            quickResult = String(positive ? "Infinity" : "-Infinity");
-        } else {
-            quickResult = String("NaN");
+            quickResult = positive ? "Infinity" : "-Infinity";
         }
-    } else if (e == 0 && mantissaIsZero) {
-        quickResult = String(positive ? "0.0" : "-0.0");
+        else {
+            quickResult = "NaN";
+        }
+    }
+    else if (e == 0 && mantissaIsZero) {
+        quickResult = positive ? "0.0" : "-0.0";
     }
 
     if (!quickResult.IsNull()) {
@@ -182,7 +190,8 @@ String RealToString::Convert(Float inputNumber)
             ff = ff << 1;
             numBits--;
         }
-    } else {
+    }
+    else {
         // 0 < e < 255
         // a "normalized" number
         f = f | 0x00800000;
@@ -192,14 +201,16 @@ String RealToString::Convert(Float inputNumber)
     mFirstK = mDigitCount = 0;
     if ((-59 < pow && pow < 35) || ((pow == -59) && (!mantissaIsZero))) {
         LongDigitGenerator(f, pow, e == 0, mantissaIsZero, numBits);
-    } else {
+    }
+    else {
         BigIntDigitGenerator(f, pow, e == 0, numBits);
     }
     StringBuilder dst(26);
     if ((inputNumber >= 1e7f) || (inputNumber <= -1e7f)
             || ((inputNumber > -1e-3f) && (inputNumber < 1e-3f))) {
         FreeFormatExponential(dst, positive);
-    } else {
+    }
+    else {
         FreeFormat(dst, positive);
     }
     return dst.ToString();
@@ -249,7 +260,8 @@ void RealToString::FreeFormat(StringBuilder& sb, Boolean positive)
     do {
         if (U != -1) {
             sb.AppendChar('0' + U);
-        } else if (k >= -1) {
+        }
+        else if (k >= -1) {
             sb.AppendChar('0');
         }
         if (k == 0) {
@@ -269,31 +281,36 @@ void RealToString::LongDigitGenerator(Int64 f, Int32 e,
         if (!mantissaIsZero) {
             R = f << (e + 1);
             S = 2;
-        } else {
+        }
+        else {
             R = f << (e + 2);
             S = 4;
         }
-    } else {
+    }
+    else {
         M = 1;
         if (isDenormalized || !mantissaIsZero) {
             R = f << 1;
-            S = ((Int64)1l) << (1 - e);
-        } else {
+            S = 1ll << (1 - e);
+        }
+        else {
             R = f << 2;
-            S = ((Int64)1l) << (2 - e);
+            S = 1ll << (2 - e);
         }
     }
     Int32 k = (Int32) Math::Ceil((e + p - 1) * INV_LOG_OF_TEN_BASE_2 - 1e-10);
     if (k > 0) {
         S = S * (*Math::LONG_POWERS_OF_TEN)[k];
-    } else if (k < 0) {
+    }
+    else if (k < 0) {
         Int64 scale = (*Math::LONG_POWERS_OF_TEN)[-k];
         R = R * scale;
         M = M == 1 ? scale : M * scale;
     }
     if (R + M > S) { // was M_plus
         mFirstK = k;
-    } else {
+    }
+    else {
         mFirstK = k - 1;
         R = R * 10;
         M = M * 10;
@@ -321,11 +338,14 @@ void RealToString::LongDigitGenerator(Int64 f, Int32 e,
     }
     if (low && !high) {
         mDigits[mDigitCount++] = U;
-    } else if (high && !low) {
+    }
+    else if (high && !low) {
         mDigits[mDigitCount++] = U + 1;
-    } else if ((R << 1) < S) {
+    }
+    else if ((R << 1) < S) {
         mDigits[mDigitCount++] = U;
-    } else {
+    }
+    else {
         mDigits[mDigitCount++] = U + 1;
     }
 }
@@ -393,18 +413,21 @@ void RealToString::BigIntDigitGenerator(Int64 f, Int32 e,
              *      4710000000000000 = 2.076918743413931E34
              */
             simpleShiftLeftHighPrecision(mplus, RM_SIZE, e);
-        } else {
+        }
+        else {
             simpleShiftLeftHighPrecision(R, RM_SIZE, e + 2);
             *S = 4;
             simpleShiftLeftHighPrecision(mplus, RM_SIZE, e + 1);
         }
-    } else {
+    }
+    else {
         if (isDenormalized || (f != (2 << (p - 1)))) {
             *R = f << 1;
             *S = 1;
             simpleShiftLeftHighPrecision(S, STemp_SIZE, 1 - e);
             *mplus = *mminus = 1;
-        } else {
+        }
+        else {
             *R = f << 2;
             *S = 1;
             simpleShiftLeftHighPrecision(S, STemp_SIZE, 2 - e);
@@ -417,7 +440,8 @@ void RealToString::BigIntDigitGenerator(Int64 f, Int32 e,
 
     if (k > 0) {
         timesTenToTheEHighPrecision(S, STemp_SIZE, k);
-    } else {
+    }
+    else {
         timesTenToTheEHighPrecision(R     , RM_SIZE, -k);
         timesTenToTheEHighPrecision(mplus , RM_SIZE, -k);
         timesTenToTheEHighPrecision(mminus, RM_SIZE, -k);
@@ -429,30 +453,38 @@ void RealToString::BigIntDigitGenerator(Int64 f, Int32 e,
     memset(Temp + RM_SIZE, 0, (STemp_SIZE - RM_SIZE) * sizeof(UInt64));
     memcpy(Temp, R, RM_SIZE * sizeof (UInt64));
 
-    while (RLength > 1 && R[RLength - 1] == 0)
+    while (RLength > 1 && R[RLength - 1] == 0) {
         --RLength;
-    while (mplus_Length > 1 && mplus[mplus_Length - 1] == 0)
+    }
+    while (mplus_Length > 1 && mplus[mplus_Length - 1] == 0) {
         --mplus_Length;
-    while (mminus_Length > 1 && mminus[mminus_Length - 1] == 0)
+    }
+    while (mminus_Length > 1 && mminus[mminus_Length - 1] == 0) {
         --mminus_Length;
-    while (SLength > 1 && S[SLength - 1] == 0)
+    }
+    while (SLength > 1 && S[SLength - 1] == 0) {
       --SLength;
+    }
     TempLength = (RLength > mplus_Length ? RLength : mplus_Length) + 1;
     addHighPrecision(Temp, TempLength, mplus, mplus_Length);
 
     if (compareHighPrecision(Temp, TempLength, S, SLength) >= 0) {
         firstK = k;
-    } else {
+    }
+    else {
         firstK = k - 1;
         simpleAppendDecimalDigitHighPrecision(R     , ++RLength      , 0);
         simpleAppendDecimalDigitHighPrecision(mplus , ++mplus_Length , 0);
         simpleAppendDecimalDigitHighPrecision(mminus, ++mminus_Length, 0);
-        while (RLength > 1 && R[RLength - 1] == 0)
+        while (RLength > 1 && R[RLength - 1] == 0) {
             --RLength;
-        while (mplus_Length > 1 && mplus[mplus_Length - 1] == 0)
+        }
+        while (mplus_Length > 1 && mplus[mplus_Length - 1] == 0) {
             --mplus_Length;
-        while (mminus_Length > 1 && mminus[mminus_Length - 1] == 0)
+        }
+        while (mminus_Length > 1 && mminus[mminus_Length - 1] == 0) {
             --mminus_Length;
+        }
     }
 
     Int32 digitCount = 0;
@@ -464,7 +496,7 @@ void RealToString::BigIntDigitGenerator(Int64 f, Int32 e,
             memcpy (Temp, S, SLength * sizeof(UInt64));
             simpleShiftLeftHighPrecision(Temp, TempLength, i);
             if (compareHighPrecision(R, RLength, Temp, TempLength) >= 0) {
-                subtractHighPrecision (R, RLength, Temp, TempLength);
+                subtractHighPrecision(R, RLength, Temp, TempLength);
                 U += 1 << i;
             }
         }
@@ -474,38 +506,45 @@ void RealToString::BigIntDigitGenerator(Int64 f, Int32 e,
         memset(Temp + RLength, 0, (STemp_SIZE - RLength) * sizeof (UInt64));
         memcpy(Temp, R, RLength * sizeof (UInt64));
         TempLength = (RLength > mplus_Length ? RLength : mplus_Length) + 1;
-        addHighPrecision (Temp, TempLength, mplus, mplus_Length);
+        addHighPrecision(Temp, TempLength, mplus, mplus_Length);
 
         high = compareHighPrecision(Temp, TempLength, S, SLength) >= 0;
 
-        if (low || high)
+        if (low || high) {
             break;
+        }
 
         simpleAppendDecimalDigitHighPrecision(R     , ++RLength      , 0);
         simpleAppendDecimalDigitHighPrecision(mplus , ++mplus_Length , 0);
         simpleAppendDecimalDigitHighPrecision(mminus, ++mminus_Length, 0);
-        while (RLength > 1 && R[RLength - 1] == 0)
+        while (RLength > 1 && R[RLength - 1] == 0) {
             --RLength;
-        while (mplus_Length > 1 && mplus[mplus_Length - 1] == 0)
+        }
+        while (mplus_Length > 1 && mplus[mplus_Length - 1] == 0) {
             --mplus_Length;
-        while (mminus_Length > 1 && mminus[mminus_Length - 1] == 0)
+        }
+        while (mminus_Length > 1 && mminus[mminus_Length - 1] == 0) {
             --mminus_Length;
+        }
         mDigits[digitCount++] = U;
     } while (1);
 
     simpleShiftLeftHighPrecision(R, ++RLength, 1);
-    if (low && !high)
+    if (low && !high) {
         mDigits[digitCount++] = U;
-    else if (high && !low)
+    }
+    else if (high && !low) {
         mDigits[digitCount++] = U + 1;
-    else if (compareHighPrecision(R, RLength, S, SLength) < 0)
+    }
+    else if (compareHighPrecision(R, RLength, S, SLength) < 0) {
         mDigits[digitCount++] = U;
-    else
+    }
+    else {
         mDigits[digitCount++] = U + 1;
+    }
 
     mDigitCount = digitCount;
     mFirstK = firstK;
-
 }
 
 } // namespace Core

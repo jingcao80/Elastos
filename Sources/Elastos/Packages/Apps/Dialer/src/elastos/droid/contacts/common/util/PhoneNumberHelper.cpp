@@ -90,6 +90,7 @@ String PhoneNumberHelper::FormatNumber(
     }
 
     assert(0 && "TODO");
+    return String(NULL);
     // AutoPtr<IPhoneNumberUtil> util = PhoneNumberUtil::GetInstance();
     // String result;
     // // try {

@@ -2786,7 +2786,7 @@ GpsCallbacks sGpsCallbacks = {
     acquire_wakelock_callback,
     release_wakelock_callback,
     create_thread_callback,
-    request_utc_time_callback,
+    request_utc_time_callback
 };
 
 static void xtra_download_request_callback()
@@ -3666,7 +3666,7 @@ static void measurement_callback(GpsData* data)
 
 GpsMeasurementCallbacks sGpsMeasurementCallbacks = {
     sizeof(GpsMeasurementCallbacks),
-    measurement_callback,
+    measurement_callback
 };
 
 Boolean GpsLocationProvider::Native_is_measurement_supported()
@@ -3748,7 +3748,7 @@ static void navigation_message_callback(GpsNavigationMessage* message)
 
 GpsNavigationMessageCallbacks sGpsNavigationMessageCallbacks = {
     sizeof(GpsNavigationMessageCallbacks),
-    navigation_message_callback,
+    navigation_message_callback
 };
 
 Boolean GpsLocationProvider::Native_is_navigation_message_supported()

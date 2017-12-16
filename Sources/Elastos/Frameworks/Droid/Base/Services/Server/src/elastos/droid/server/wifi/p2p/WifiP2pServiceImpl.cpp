@@ -520,6 +520,7 @@ ECode WifiP2pServiceImpl::P2pStateMachine::Dump(
     //pw.println("mSavedPeerConfig " + mSavedPeerConfig);
     //pw.println("mSavedP2pGroup " + mSavedP2pGroup);
     //pw.println();
+    return NOERROR;
 }
 
 ECode WifiP2pServiceImpl::P2pStateMachine::SendP2pStateChangedBroadcast(
