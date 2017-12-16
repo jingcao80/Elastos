@@ -272,6 +272,9 @@ void RealToString::FreeFormat(StringBuilder& sb, Boolean positive)
     } while (U != -1 || k >= -1);
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 void RealToString::LongDigitGenerator(Int64 f, Int32 e,
         Boolean isDenormalized, Boolean mantissaIsZero, Int32 p)
 {
@@ -383,6 +386,9 @@ void RealToString::LongDigitGenerator(Int64 f, Int32 e,
  *           1.2341234124312331E107
  *
  */
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 void RealToString::BigIntDigitGenerator(Int64 f, Int32 e,
         Boolean isDenormalized, Int32 p)
 {

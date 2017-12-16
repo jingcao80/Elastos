@@ -2770,6 +2770,8 @@ void ViewRootImpl::PerformTraversals()
             // happens in WindowManager service, we need to be defensive here
             // and stop using the surface in case it gets destroyed.
             mAttachInfo->mHardwareRenderer->PauseSurface(mSurface);
+
+            ((Choreographer*)mChoreographer.Get())->mFrameInfo->AddFlags(FrameInfo::FLAG_WINDOW_LAYOUT_CHANGED);
         }
 
         Int32 surfaceGenerationId;
@@ -5652,6 +5654,19 @@ ECode ViewRootImpl::DoProcessInputEvents()
         mPendingInputEventCount -= 1;
         /*Trace::TraceCounter(Trace::TRACE_TAG_INPUT, mPendingInputEventQueueLengthCounterName,
                 mPendingInputEventCount);*/
+
+        Int64 eventTime;
+        q->mEvent->GetEventTimeNano(&eventTime);
+        Int64 oldestEventTime = eventTime;
+        if (IMotionEvent::Probe(q->mEvent) != NULL) {
+            IMotionEvent* me = IMotionEvent::Probe(q->mEvent);
+            Int32 size;
+            if (me->GetHistorySize(&size), size > 0) {
+                me->GetHistoricalEventTimeNano(0, &oldestEventTime);
+            }
+        }
+        ((Choreographer*)mChoreographer.Get())->mFrameInfo->UpdateInputEventTime(eventTime, oldestEventTime);
+
         DeliverInputEvent(q);
     }
 

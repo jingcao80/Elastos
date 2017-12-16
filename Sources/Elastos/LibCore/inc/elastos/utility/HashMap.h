@@ -775,7 +775,7 @@ public:
      * .75 is hardwired into the program, which uses cheap shifts in place of
      * expensive division.
      */
-    static const Float DEFAULT_LOAD_FACTOR = 0.75F;
+    static constexpr Float DEFAULT_LOAD_FACTOR = 0.75F;
 
     /**
      * The hash table. If this hash map contains a mapping for null, it is
