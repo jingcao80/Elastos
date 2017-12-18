@@ -5288,8 +5288,9 @@ CAR_INTERFACE_IMPL(Editor::SpanController, Object, ISpanWatcher)
 
 Editor::SpanController::SpanController(
     /* [in] */ Editor* host)
-    : mHost(host)
-{}
+{
+    host->GetWeakReference((IWeakReference**)&mHost);
+}
 
 ECode Editor::SpanController::OnSpanAdded(
     /* [in] */ ISpannable* text,
@@ -5297,12 +5298,19 @@ ECode Editor::SpanController::OnSpanAdded(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
+    AutoPtr<IEditor> host;
+    mHost->Resolve(EIID_IEditor, (IInterface**)&host);
+    if (host == NULL) {
+        return NOERROR;
+    }
+
+    Editor* hostObj = (Editor*)host.Get();
     if (IsNonIntermediateSelectionSpan(text, span)) {
-        mHost->SendUpdateSelection();
+        hostObj->SendUpdateSelection();
     }
     else if (IEasyEditSpan::Probe(span)) {
         if (mPopupWindow == NULL) {
-            mPopupWindow = new EasyEditPopupWindow(mHost);
+            mPopupWindow = new EasyEditPopupWindow(hostObj);
             mPopupWindow->constructor();
             mHidePopup = new SpanControllerRunnable(this);
         }
@@ -5317,20 +5325,20 @@ ECode Editor::SpanController::OnSpanAdded(
         mPopupWindow->SetOnDeleteListener(listener);
 
         Int32 visible;
-        mHost->mTextView->GetWindowVisibility(&visible);
+        hostObj->mTextView->GetWindowVisibility(&visible);
         if (visible != IView::VISIBLE) {
             // The window is not visible yet, ignore the text change.
             return NOERROR;
         }
 
         AutoPtr<ILayout> layout;
-        mHost->mTextView->GetLayout((ILayout**)&layout);
+        hostObj->mTextView->GetLayout((ILayout**)&layout);
         if (layout == NULL) {
             // The view has not been laid out yet, ignore the text change
             return NOERROR;
         }
 
-        if (mHost->ExtractedTextModeWillBeStarted()) {
+        if (hostObj->ExtractedTextModeWillBeStarted()) {
             // The input is in extract mode. Do not handle the easy edit in
             // the original TextView, as the ExtractEditText will do
             return NOERROR;
@@ -5338,8 +5346,8 @@ ECode Editor::SpanController::OnSpanAdded(
 
         mPopupWindow->Show();
         Boolean res;
-        mHost->mTextView->RemoveCallbacks(mHidePopup, &res);
-        mHost->mTextView->PostDelayed(mHidePopup, DISPLAY_TIMEOUT_MS, &res);
+        hostObj->mTextView->RemoveCallbacks(mHidePopup, &res);
+        hostObj->mTextView->PostDelayed(mHidePopup, DISPLAY_TIMEOUT_MS, &res);
     }
 
     return NOERROR;
@@ -5351,8 +5359,15 @@ ECode Editor::SpanController::OnSpanRemoved(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
+    AutoPtr<IEditor> host;
+    mHost->Resolve(EIID_IEditor, (IInterface**)&host);
+    if (host == NULL) {
+        return NOERROR;
+    }
+
+    Editor* hostObj = (Editor*)host.Get();
     if (IsNonIntermediateSelectionSpan(text, span)) {
-        mHost->SendUpdateSelection();
+        hostObj->SendUpdateSelection();
     }
     else if (mPopupWindow != NULL && span == IInterface::Probe(mPopupWindow->mEasyEditSpan)) {
         Hide();
@@ -5368,8 +5383,15 @@ ECode Editor::SpanController::OnSpanChanged(
     /* [in] */ Int32 newStart,
     /* [in] */ Int32 newEnd)
 {
+    AutoPtr<IEditor> host;
+    mHost->Resolve(EIID_IEditor, (IInterface**)&host);
+    if (host == NULL) {
+        return NOERROR;
+    }
+
+    Editor* hostObj = (Editor*)host.Get();
     if (IsNonIntermediateSelectionSpan(text, span)) {
-        mHost->SendUpdateSelection();
+        hostObj->SendUpdateSelection();
     }
     else if (mPopupWindow != NULL && IEasyEditSpan::Probe(span)) {
         AutoPtr<IEasyEditSpan> easyEditSpan = IEasyEditSpan::Probe(span);
@@ -5381,10 +5403,17 @@ ECode Editor::SpanController::OnSpanChanged(
 
 ECode Editor::SpanController::Hide()
 {
+    AutoPtr<IEditor> host;
+    mHost->Resolve(EIID_IEditor, (IInterface**)&host);
+    if (host == NULL) {
+        return NOERROR;
+    }
+
+    Editor* hostObj = (Editor*)host.Get();
     if (mPopupWindow != NULL) {
         mPopupWindow->Hide();
         Boolean res;
-        mHost->mTextView->RemoveCallbacks(mHidePopup, &res);
+        hostObj->mTextView->RemoveCallbacks(mHidePopup, &res);
     }
     return NOERROR;
 }
@@ -5404,6 +5433,13 @@ void Editor::SpanController::SendEasySpanNotification(
     /* [in] */ Int32 textChangedType,
     /* [in] */ IEasyEditSpan* span)
 {
+    AutoPtr<IEditor> host;
+    mHost->Resolve(EIID_IEditor, (IInterface**)&host);
+    if (host == NULL) {
+        return;
+    }
+
+    Editor* hostObj = (Editor*)host.Get();
     //try {
     AutoPtr<IPendingIntent> pendingIntent;
     span->GetPendingIntent((IPendingIntent**)&pendingIntent);
@@ -5412,7 +5448,7 @@ void Editor::SpanController::SendEasySpanNotification(
         CIntent::New((IIntent**)&intent);
         intent->PutExtra(IEasyEditSpan::EXTRA_TEXT_CHANGED_TYPE, textChangedType);
         AutoPtr<IContext> ctx;
-        mHost->mTextView->GetContext((IContext**)&ctx);
+        hostObj->mTextView->GetContext((IContext**)&ctx);
         pendingIntent->Send(ctx, 0, intent);
     }
     //} catch (CanceledException e) {
@@ -5645,8 +5681,16 @@ Editor::SpanController::SpanControllerListener::SpanControllerListener(
 ECode Editor::SpanController::SpanControllerListener::OnDeleteClick(
     /* [in] */ IEasyEditSpan* span)
 {
+    AutoPtr<IEditor> host;
+    mHost->mHost->Resolve(EIID_IEditor, (IInterface**)&host);
+    if (host == NULL) {
+        return NOERROR;
+    }
+
+    Editor* hostObj = (Editor*)host.Get();
+
     AutoPtr<ICharSequence> text;
-    mHost->mHost->mTextView->GetText((ICharSequence**)&text);
+    hostObj->mTextView->GetText((ICharSequence**)&text);
     AutoPtr<IEditable> editable = IEditable::Probe(text);
     Int32 start, end;
     ISpanned* spEditable = ISpanned::Probe(editable);
@@ -5654,7 +5698,7 @@ ECode Editor::SpanController::SpanControllerListener::OnDeleteClick(
     spEditable->GetSpanEnd(span, &end);
     if (start >= 0 && end >= 0) {
         mHost->SendEasySpanNotification(IEasyEditSpan::TEXT_DELETED, span);
-        mHost->mHost->mTextView->DeleteText_internal(start, end);
+        hostObj->mTextView->DeleteText_internal(start, end);
     }
     ISpannable::Probe(editable)->RemoveSpan(span);
     return NOERROR;
