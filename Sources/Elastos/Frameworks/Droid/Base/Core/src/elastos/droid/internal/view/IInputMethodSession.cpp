@@ -11,6 +11,8 @@ namespace View {
 
 const String IInputMethodSessionProxy::DESCRIPTOR("com.android.internal.view.IInputMethodSession");
 const Int32 IInputMethodSessionProxy::TRANSACTION_updateSelection = android::IBinder::FIRST_CALL_TRANSACTION + 2;
+const Int32 IInputMethodSessionProxy::TRANSACTION_viewClicked = android::IBinder::FIRST_CALL_TRANSACTION + 3;
+const Int32 IInputMethodSessionProxy::TRANSACTION_updateCursorAnchorInfo = android::IBinder::FIRST_CALL_TRANSACTION + 9;
 
 CAR_INTERFACE_IMPL(IInputMethodSessionProxy, Object, IIInputMethodSession);
 
@@ -57,8 +59,12 @@ ECode IInputMethodSessionProxy::UpdateSelection(
 ECode IInputMethodSessionProxy::ViewClicked(
     /* [in] */ Boolean focusChanged)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    android::Parcel data;
+
+    data.writeInterfaceToken(android::String16(DESCRIPTOR.string()));
+    AndroidParcelUtils::WriteInt32(data, focusChanged ? 1: 0);
+    mRemote->transact(TRANSACTION_viewClicked, data, NULL, android::IBinder::FLAG_ONEWAY);
+    return NOERROR;
 }
 
 ECode IInputMethodSessionProxy::UpdateCursor(
@@ -100,8 +106,18 @@ ECode IInputMethodSessionProxy::FinishSession()
 ECode IInputMethodSessionProxy::UpdateCursorAnchorInfo(
     /* [in] */ ICursorAnchorInfo* cursorAnchorInfo)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    android::Parcel data;
+
+    data.writeInterfaceToken(android::String16(DESCRIPTOR.string()));
+    if (cursorAnchorInfo != NULL) {
+        AndroidParcelUtils::WriteInt32(data, 1);
+        AndroidParcelUtils::WriteCursorAnchorInfo(data, cursorAnchorInfo);
+    }
+    else {
+        AndroidParcelUtils::WriteInt32(data, 0);
+    }
+    mRemote->transact(TRANSACTION_updateCursorAnchorInfo, data, NULL, android::IBinder::FLAG_ONEWAY);
+    return NOERROR;
 }
 
 } // namespace View

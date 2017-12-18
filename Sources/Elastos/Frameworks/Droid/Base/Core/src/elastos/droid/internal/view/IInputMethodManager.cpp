@@ -12,7 +12,10 @@ namespace View {
 
 const String IInputMethodManagerProxy::DESCRIPTOR("com.android.internal.view.IInputMethodManager");
 const Int32 IInputMethodManagerProxy::TRANSACTION_finishInput = android::IBinder::FIRST_CALL_TRANSACTION + 7;
+const Int32 IInputMethodManagerProxy::TRANSACTION_showSoftInput = android::IBinder::FIRST_CALL_TRANSACTION + 8;
 const Int32 IInputMethodManagerProxy::TRANSACTION_startInputOrWindowGainedFocus = android::IBinder::FIRST_CALL_TRANSACTION + 10;
+const Int32 IInputMethodManagerProxy::TRANSACTION_registerSuggestionSpansForNotification = android::IBinder::FIRST_CALL_TRANSACTION + 19;
+const Int32 IInputMethodManagerProxy::TRANSACTION_notifyUserAction = android::IBinder::FIRST_CALL_TRANSACTION + 32;
 
 CAR_INTERFACE_IMPL(IInputMethodManagerProxy, Object, IIInputMethodManager);
 
@@ -92,8 +95,24 @@ ECode IInputMethodManagerProxy::ShowSoftInput(
     /* [in] */ IResultReceiver* resultReceiver,
     /* [out] */ Boolean* res)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(res);
+
+    android::Parcel data, reply;
+
+    data.writeInterfaceToken(android::String16(DESCRIPTOR));
+    AndroidParcelUtils::WriteIInputMethodClient(data, client);
+    AndroidParcelUtils::WriteInt32(data, flags);
+    if (resultReceiver != NULL) {
+        AndroidParcelUtils::WriteInt32(data, 1);
+        AndroidParcelUtils::WriteResultReceiver(data, resultReceiver);
+    }
+    else {
+        AndroidParcelUtils::WriteInt32(data, 0);
+    }
+    mRemote->transact(TRANSACTION_showSoftInput, data, &reply, 0);
+    ECode ec = reply.readExceptionCode() == 0 ? NOERROR : E_REMOTE_EXCEPTION;
+    *res = AndroidParcelUtils::ReadInt32(reply) != 0;
+    return ec;
 }
 
 ECode IInputMethodManagerProxy::HideSoftInput(
@@ -222,8 +241,12 @@ ECode IInputMethodManagerProxy::SetImeWindowStatus(
 ECode IInputMethodManagerProxy::RegisterSuggestionSpansForNotification(
     /* [in] */ ArrayOf<ISuggestionSpan*>* spans)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    android::Parcel data, reply;
+
+    data.writeInterfaceToken(android::String16(DESCRIPTOR));
+    AndroidParcelUtils::WriteSuggestionSpanArray(data, spans);
+    mRemote->transact(TRANSACTION_registerSuggestionSpansForNotification, data, &reply, 0);
+    return reply.readExceptionCode() == 0 ? NOERROR : E_REMOTE_EXCEPTION;
 }
 
 ECode IInputMethodManagerProxy::NotifySuggestionPicked(
@@ -303,8 +326,12 @@ ECode IInputMethodManagerProxy::GetInputMethodWindowVisibleHeight(
 ECode IInputMethodManagerProxy::NotifyUserAction(
     /* [in] */ Int32 sequenceNumber)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    android::Parcel data;
+
+    data.writeInterfaceToken(android::String16(DESCRIPTOR));
+    AndroidParcelUtils::WriteInt32(data, sequenceNumber);
+    mRemote->transact(TRANSACTION_notifyUserAction, data, NULL, android::IBinder::FLAG_ONEWAY);
+    return NOERROR;
 }
 
 } // namespace View

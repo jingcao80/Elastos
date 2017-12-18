@@ -91,6 +91,7 @@ ECode SuggestionSpan::constructor(
     mFlags = flags;
     if (locale != NULL) {
         locale->ToString(&mLocaleString);
+        locale->ToLanguageTag(&mLanguageTag);
     }
     else if (context != NULL) {
         AutoPtr<IResources> rs;
@@ -100,10 +101,12 @@ ECode SuggestionSpan::constructor(
         AutoPtr<ILocale> localeCfg;
         cfg->GetLocale((ILocale**)&localeCfg);
         localeCfg->ToString(&mLocaleString);
+        localeCfg->ToLanguageTag(&mLanguageTag);
     }
     else {
         Logger::E(String("SuggestionSpan"), String("No locale or context specified in SuggestionSpan constructor\n") );
         mLocaleString = "";
+        mLanguageTag = "";
     }
 
     if (context != NULL) {
@@ -204,6 +207,7 @@ ECode SuggestionSpan::ReadFromParcel(
     FAIL_RETURN(source->ReadArrayOfString((ArrayOf<String>**)&mSuggestions));
     FAIL_RETURN(source->ReadInt32(&mFlags));
     FAIL_RETURN(source->ReadString(&mLocaleString));
+    FAIL_RETURN(source->ReadString(&mLanguageTag));
     FAIL_RETURN(source->ReadString(&mNotificationTargetClassName));
     FAIL_RETURN(source->ReadString(&mNotificationTargetPackageName));
     FAIL_RETURN(source->ReadInt32(&mHashCode));
@@ -222,6 +226,7 @@ ECode SuggestionSpan::WriteToParcel(
     FAIL_RETURN(dest->WriteArrayOfString(mSuggestions));
     FAIL_RETURN(dest->WriteInt32(mFlags));
     FAIL_RETURN(dest->WriteString(mLocaleString));
+    FAIL_RETURN(dest->WriteString(mLanguageTag));
     FAIL_RETURN(dest->WriteString(mNotificationTargetClassName));
     FAIL_RETURN(dest->WriteString(mNotificationTargetPackageName));
     FAIL_RETURN(dest->WriteInt32(mHashCode));

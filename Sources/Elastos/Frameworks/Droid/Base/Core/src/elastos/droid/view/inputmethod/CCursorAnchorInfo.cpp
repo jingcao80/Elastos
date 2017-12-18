@@ -228,6 +228,9 @@ ECode CCursorAnchorInfo::WriteToParcel(
     return NOERROR;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode CCursorAnchorInfo::GetHashCode(
     /* [out] */ Int32* hc)
 {

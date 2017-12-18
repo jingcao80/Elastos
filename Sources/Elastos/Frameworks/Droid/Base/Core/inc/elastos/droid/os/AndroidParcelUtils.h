@@ -69,30 +69,40 @@ using Elastos::Droid::Database::IIContentObserver;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Hardware::Display::IIDisplayManagerCallback;
+using Elastos::Droid::Hardware::Input::IInputDevicesChangedListener;
 using Elastos::Droid::Internal::App::IIVoiceInteractor;
 using Elastos::Droid::Internal::View::IIInputContext;
+using Elastos::Droid::Internal::View::IIInputContextCallback;
 using Elastos::Droid::Internal::View::IInputBindResult;
 using Elastos::Droid::Internal::View::IInputMethodClient;
 using Elastos::Droid::Net::AbstractPart;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::View::IDisplayInfo;
 using Elastos::Droid::View::IIGraphicsStatsCallback;
 using Elastos::Droid::View::IInputChannel;
+using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::IIWindow;
 using Elastos::Droid::View::IIWindowSessionCallback;
+using Elastos::Droid::View::IKeyCharacterMap;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::IWindowSession;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IIAccessibilityInteractionConnection;
 using Elastos::Droid::View::Accessibility::IIAccessibilityManagerClient;
+using Elastos::Droid::View::InputMethod::ICursorAnchorInfo;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
+using Elastos::Droid::View::InputMethod::IExtractedText;
+using Elastos::Droid::View::InputMethod::IExtractedTextRequest;
+using Elastos::Droid::View::InputMethod::ISparseRectFArray;
 using Elastos::Droid::View::TextService::ISpellCheckerInfo;
 using Elastos::Droid::View::TextService::ISpellCheckerSubtype;
 using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::ISpanned;
 using Elastos::Droid::Text::LayoutAlignment;
+using Elastos::Droid::Text::Style::ISuggestionSpan;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Core::ICharSequence;
@@ -275,6 +285,9 @@ public:
     static CARAPI_(AutoPtr<IInputBindResult>) ReadInputBindResult(
         /* [in] */ const android::Parcel& source);
 
+    static CARAPI_(AutoPtr<IIInputContextCallback>) ReadIInputContextCallback(
+        /* [in] */ const android::Parcel& source);
+
     static CARAPI_(AutoPtr<IUri>) ReadUri(
         /* [in] */ const android::Parcel& source);
 
@@ -305,10 +318,19 @@ public:
     static CARAPI_(AutoPtr<IInputChannel>) ReadInputChannel(
         /* [in] */ const android::Parcel& source);
 
+    static CARAPI_(AutoPtr<IInputDevice>) ReadInputDevice(
+        /* [in] */ const android::Parcel& source);
+
+    static CARAPI_(AutoPtr<IKeyCharacterMap>) ReadKeyCharacterMap(
+        /* [in] */ const android::Parcel& source);
+
     static CARAPI_(AutoPtr<ISurface>) ReadSurface(
         /* [in] */ const android::Parcel& source);
 
     static CARAPI_(AutoPtr<IWindowSession>) ReadWindowSession(
+        /* [in] */ const android::Parcel& source);
+
+    static CARAPI_(AutoPtr<IExtractedTextRequest>) ReadExtractedTextRequest(
         /* [in] */ const android::Parcel& source);
 
     static CARAPI_(AutoPtr<ISpellCheckerInfo>) ReadSpellCheckerInfo(
@@ -326,6 +348,10 @@ public:
         /* [in] */ android::Parcel& data,
         /* [in] */ Int32 value);
 
+    static CARAPI_(void) WriteInt32Array(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ ArrayOf<Int32>* value);
+
     static CARAPI_(void) WriteInt64(
         /* [in] */ android::Parcel& data,
         /* [in] */ Int64 value);
@@ -334,9 +360,17 @@ public:
         /* [in] */ android::Parcel& data,
         /* [in] */ Float value);
 
+    static CARAPI_(void) WriteFloatArray(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ ArrayOf<Float>* value);
+
     static CARAPI_(void) WriteString(
         /* [in] */ android::Parcel& data,
         /* [in] */ const String& value);
+
+    static CARAPI_(void) WriteStringArray(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ ArrayOf<String>* value);
 
     static CARAPI_(void) WriteValue(
         /* [in] */ android::Parcel& data,
@@ -382,6 +416,18 @@ public:
         /* [in] */ android::Parcel& data,
         /* [in] */ IIDisplayManagerCallback* cb);
 
+    static CARAPI_(void) WriteIInputDevicesChangedListener(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ IInputDevicesChangedListener* listener);
+
+    static CARAPI_(void) WriteIIInputContext(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ IIInputContext* inputContext);
+
+    static CARAPI_(void) WriteIInputMethodClient(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ IInputMethodClient* client);
+
     static CARAPI_(void) WriteUri(
         /* [in] */ android::Parcel& data,
         /* [in] */ IUri* value);
@@ -397,6 +443,10 @@ public:
     static CARAPI_(void) WritePersistableBundle(
         /* [in] */ android::Parcel& data,
         /* [in] */ IPersistableBundle* value);
+
+    static CARAPI_(void) WriteResultReceiver(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ IResultReceiver* value);
 
     static CARAPI_(void) WriteSparseArray(
         /* [in] */ android::Parcel& data,
@@ -430,17 +480,25 @@ public:
         /* [in] */ android::Parcel& data,
         /* [in] */ IIAccessibilityManagerClient* client);
 
+    static CARAPI_(void) WriteCursorAnchorInfo(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ ICursorAnchorInfo* info);
+
     static CARAPI_(void) WriteEditorInfo(
         /* [in] */ android::Parcel& data,
         /* [in] */ IEditorInfo* value);
 
-    static CARAPI_(void) WriteIIInputContext(
+    static CARAPI_(void) WriteExtractedText(
         /* [in] */ android::Parcel& data,
-        /* [in] */ IIInputContext* inputContext);
+        /* [in] */ IExtractedText* value);
 
-    static CARAPI_(void) WriteIInputMethodClient(
+    static CARAPI_(void) WriteSparseRectFArray(
         /* [in] */ android::Parcel& data,
-        /* [in] */ IInputMethodClient* client);
+        /* [in] */ ISparseRectFArray* value);
+
+    static CARAPI_(void) WriteSuggestionSpanArray(
+        /* [in] */ android::Parcel& data,
+        /* [in] */ ArrayOf<ISuggestionSpan*>* value);
 
 private:
     static CARAPI_(void) ReadMapInternal(

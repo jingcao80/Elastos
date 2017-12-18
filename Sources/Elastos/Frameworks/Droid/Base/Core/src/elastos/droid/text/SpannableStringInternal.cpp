@@ -587,6 +587,9 @@ ECode SpannableStringInternal::Equals(
 }
 
 // Same as SpannableStringBuilder
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode SpannableStringInternal::GetHashCode(
     /* [out] */ Int32* result)
 {

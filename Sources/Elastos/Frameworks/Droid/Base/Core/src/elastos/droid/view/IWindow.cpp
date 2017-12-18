@@ -15,6 +15,7 @@ const Boolean IWindowStub::DEBUG = FALSE;
 const String IWindowStub::TAG("IWindowStub");
 const String IWindowStub::DESCRIPTOR("android.view.IWindow");
 const Int32 IWindowStub::TRANSACTION_resized = android::IBinder::FIRST_CALL_TRANSACTION + 1;
+const Int32 IWindowStub::TRANSACTION_moved = android::IBinder::FIRST_CALL_TRANSACTION + 2;
 const Int32 IWindowStub::TRANSACTION_dispatchAppVisibility = android::IBinder::FIRST_CALL_TRANSACTION + 3;
 const Int32 IWindowStub::TRANSACTION_windowFocusChanged = android::IBinder::FIRST_CALL_TRANSACTION + 5;
 const Int32 IWindowStub::TRANSACTION_closeSystemDialogs = android::IBinder::FIRST_CALL_TRANSACTION + 6;
@@ -85,6 +86,14 @@ android::status_t IWindowStub::onTransact(
             Int32 displayId = AndroidParcelUtils::ReadInt32(data);
             mWindow->Resized(frame, overscanInsets, contentInsets,
                     visibleInsets, stableInsets, reportDraw, newConfig);
+            return android::NO_ERROR;
+        }
+
+        case TRANSACTION_moved: {
+            data.enforceInterface(android::String16(DESCRIPTOR.string()));
+            Int32 newX = AndroidParcelUtils::ReadInt32(data);
+            Int32 newY = AndroidParcelUtils::ReadInt32(data);
+            mWindow->Moved(newX, newY);
             return android::NO_ERROR;
         }
 

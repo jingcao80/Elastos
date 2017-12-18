@@ -181,7 +181,10 @@ public:
 private:
     static const String DESCRIPTOR;
     static const Int32 TRANSACTION_finishInput;
+    static const Int32 TRANSACTION_showSoftInput;
     static const Int32 TRANSACTION_startInputOrWindowGainedFocus;
+    static const Int32 TRANSACTION_registerSuggestionSpansForNotification;
+    static const Int32 TRANSACTION_notifyUserAction;
 
     android::sp<android::IBinder> mRemote;
 };

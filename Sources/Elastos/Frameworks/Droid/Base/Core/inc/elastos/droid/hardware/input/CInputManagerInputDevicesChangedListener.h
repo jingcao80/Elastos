@@ -19,7 +19,7 @@
 
 #include "_Elastos_Droid_Hardware_Input_CInputManagerInputDevicesChangedListener.h"
 #include <elastos/core/Object.h>
-
+#include <binder/Binder.h>
 
 namespace Elastos {
 namespace Droid {
@@ -42,6 +42,9 @@ public:
 
     CARAPI OnInputDevicesChanged(
         /* [in] */ ArrayOf<Int32>* deviceIdAndGeneration);
+
+public:
+    android::IBinder* mBBinder;
 
 private:
     CInputManager* mOwner;

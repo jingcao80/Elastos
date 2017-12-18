@@ -32,6 +32,16 @@ using Elastos::Droid::Hardware::Input::IInputDeviceIdentifier;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 
 class InputDevice
@@ -481,6 +491,8 @@ private:
         /* [in] */ const String& sourceName);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     Int32 mId;
     Int32 mGeneration;
     Int32 mControllerNumber;

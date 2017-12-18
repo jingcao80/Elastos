@@ -14,26 +14,23 @@
 // limitations under the License.
 //=========================================================================
 
-#ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_IINPUTCONTEXT_H__
-#define __ELASTOS_DROID_VIEW_INPUTMETHOD_IINPUTCONTEXT_H__
+#ifndef __ELASTOS_DROID_HARDWARE_INPUT_IINPUTDEVICESCHANGEDLISTENER_H__
+#define __ELASTOS_DROID_HARDWARE_INPUT_IINPUTDEVICESCHANGEDLISTENER_H__
 
-#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Hardware.h"
 #include <binder/Binder.h>
-#include <binder/Parcel.h>
-
-using Elastos::Droid::Internal::View::IIInputContext;
 
 namespace Elastos {
 namespace Droid {
-namespace View {
-namespace InputMethod {
+namespace Hardware {
+namespace Input {
 
-class IInputContextStub
+class IInputDevicesChangedListenerStub
     : public android::BBinder
 {
 public:
-    IInputContextStub(
-        /* [in] */ IIInputContext* context);
+    IInputDevicesChangedListenerStub(
+        /* [in] */ IInputDevicesChangedListener* listener);
 
 private:
     void onLastStrongRef(
@@ -50,24 +47,14 @@ private:
     static const String TAG;
 
     static const String DESCRIPTOR;
-    static const Int32 TRANSACTION_getTextBeforeCursor;
-    static const Int32 TRANSACTION_getTextAfterCursor;
-    static const Int32 TRANSACTION_getExtractedText;
-    static const Int32 TRANSACTION_setComposingText;
-    static const Int32 TRANSACTION_finishComposingText;
-    static const Int32 TRANSACTION_commitText;
-    static const Int32 TRANSACTION_beginBatchEdit;
-    static const Int32 TRANSACTION_endBatchEdit;
-    static const Int32 TRANSACTION_setComposingRegion;
-    static const Int32 TRANSACTION_getSelectedText;
-    static const Int32 TRANSACTION_requestUpdateCursorAnchorInfo;
+    static const Int32 TRANSACTION_onInputDevicesChanged;
 
-    AutoPtr<IIInputContext> mContext;
+    AutoPtr<IInputDevicesChangedListener> mListener;
 };
 
-} // namespace InputMethod
-} // namespace View
-} // namespace Droid
+} // namespace Input
+} // namespace Hardware
+} // namepsace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_VIEW_INPUTMETHOD_IINPUTCONTEXT_H__
+#endif // __ELASTOS_DROID_HARDWARE_INPUT_IINPUTDEVICESCHANGEDLISTENER_H__

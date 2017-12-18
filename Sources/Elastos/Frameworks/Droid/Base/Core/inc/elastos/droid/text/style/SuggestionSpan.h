@@ -188,6 +188,7 @@ private:
     Int32 mFlags;
     AutoPtr< ArrayOf<String> > mSuggestions;
     String mLocaleString;
+    String mLanguageTag;
     String mNotificationTargetClassName;
     String mNotificationTargetPackageName;
     Int32 mHashCode;

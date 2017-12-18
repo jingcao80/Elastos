@@ -450,6 +450,9 @@ Int32 FrameLayout::GetPaddingBottomWithForeground()
         mPaddingBottom + mForegroundPaddingBottom;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 ECode FrameLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)

@@ -18,11 +18,11 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/hardware/input/CInputManager.h"
-#include "elastos/droid/hardware/input/TouchCalibration.h"
 #include "elastos/droid/hardware/input/CInputManagerInputDevicesChangedListener.h"
+#include "elastos/droid/hardware/input/IInputManager.h"
+#include "elastos/droid/hardware/input/TouchCalibration.h"
 #include "elastos/droid/os/CBinder.h"
 #include "elastos/droid/os/Looper.h"
-#include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/provider/Settings.h"
@@ -37,7 +37,6 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::EIID_IVibrator;
 using Elastos::Droid::Os::ServiceManager;
-using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IIPowerManager;
 using Elastos::Droid::Provider::Settings;
@@ -161,11 +160,8 @@ CInputManager::~CInputManager()
 
 ECode CInputManager::constructor()
 {
-    AutoPtr<IServiceManager> sm;
-    ASSERT_SUCCEEDED(CServiceManager::AcquireSingleton((IServiceManager**)&sm));
-    AutoPtr<IInterface> service;
-    ASSERT_SUCCEEDED(sm->GetService(IContext::INPUT_SERVICE, (IInterface**)&service));
-    mIm = IIInputManager::Probe(service);
+    android::sp<android::IBinder> service = ServiceManager::GetAndroidService(IContext::INPUT_SERVICE);
+    mIm = new IInputManagerProxy(service);
     return NOERROR;
 }
 

@@ -28,6 +28,16 @@ using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 namespace InputMethod {
 
@@ -296,6 +306,8 @@ private:
         /* [in] */ Float b);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     static const String TAG;
     /**
      * The index of the first character of the selected text (inclusive). {@code -1} when there is

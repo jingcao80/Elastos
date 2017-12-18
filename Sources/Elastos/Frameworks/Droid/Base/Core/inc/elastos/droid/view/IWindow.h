@@ -47,6 +47,7 @@ private:
 
     static const String DESCRIPTOR;
     static const Int32 TRANSACTION_resized;
+    static const Int32 TRANSACTION_moved;
     static const Int32 TRANSACTION_dispatchAppVisibility;
     static const Int32 TRANSACTION_windowFocusChanged;
     static const Int32 TRANSACTION_closeSystemDialogs;

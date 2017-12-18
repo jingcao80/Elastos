@@ -24,8 +24,12 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/hardware/display/IDisplayManagerCallback.h"
 #include "elastos/droid/hardware/display/CDisplayManagerCallback.h"
+#include "elastos/droid/hardware/input/CInputDeviceIdentifier.h"
+#include "elastos/droid/hardware/input/CInputManagerInputDevicesChangedListener.h"
+#include "elastos/droid/hardware/input/IInputDevicesChangedListener.h"
 #include "elastos/droid/internal/app/IVoiceInteractor.h"
 #include "elastos/droid/internal/view/CInputBindResult.h"
+#include "elastos/droid/internal/view/IInputContextCallback.h"
 #include "elastos/droid/internal/view/IInputConnectionWrapper.h"
 #include "elastos/droid/internal/view/IInputMethodSession.h"
 #include "elastos/droid/os/CBundle.h"
@@ -61,6 +65,8 @@
 #include "elastos/droid/view/CAccessibilityInteractionConnection.h"
 #include "elastos/droid/view/CDisplayInfo.h"
 #include "elastos/droid/view/CInputChannel.h"
+#include "elastos/droid/view/CInputDevice.h"
+#include "elastos/droid/view/CKeyCharacterMap.h"
 #include "elastos/droid/view/CSurface.h"
 #include "elastos/droid/view/CViewRootImplW.h"
 #include "elastos/droid/view/CWindowManagerGlobalSessionCallback.h"
@@ -72,7 +78,10 @@
 #include "elastos/droid/view/accessibility/CAccessibilityManagerClient.h"
 #include "elastos/droid/view/accessibility/IAccessibilityInteractionConnection.h"
 #include "elastos/droid/view/accessibility/IAccessibilityManagerClient.h"
+#include "elastos/droid/view/inputmethod/CCursorAnchorInfo.h"
+#include "elastos/droid/view/inputmethod/CExtractedTextRequest.h"
 #include "elastos/droid/view/inputmethod/CIInputMethodClient.h"
+#include "elastos/droid/view/inputmethod/CSparseRectFArray.h"
 #include "elastos/droid/view/inputmethod/IInputContext.h"
 #include "elastos/droid/view/inputmethod/IInputMethodClient.h"
 #include "elastos/droid/view/textservice/CSpellCheckerInfo.h"
@@ -105,8 +114,12 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Hardware::Display::CDisplayManagerCallback;
 using Elastos::Droid::Hardware::Display::IDisplayManagerCallbackStub;
+using Elastos::Droid::Hardware::Input::CInputDeviceIdentifier;
+using Elastos::Droid::Hardware::Input::CInputManagerInputDevicesChangedListener;
+using Elastos::Droid::Hardware::Input::IInputDevicesChangedListenerStub;
 using Elastos::Droid::Internal::App::IVoiceInteractorProxy;
 using Elastos::Droid::Internal::View::CInputBindResult;
+using Elastos::Droid::Internal::View::IInputContextCallbackProxy;
 using Elastos::Droid::Internal::View::IInputConnectionWrapper;
 using Elastos::Droid::Internal::View::IInputMethodSessionProxy;
 using Elastos::Droid::Net::HierarchicalUri;
@@ -178,6 +191,8 @@ using Elastos::Droid::View::CAbsSavedStateHelper;
 using Elastos::Droid::View::CAccessibilityInteractionConnection;
 using Elastos::Droid::View::CDisplayInfo;
 using Elastos::Droid::View::CInputChannel;
+using Elastos::Droid::View::CInputDevice;
+using Elastos::Droid::View::CKeyCharacterMap;
 using Elastos::Droid::View::CSurface;
 using Elastos::Droid::View::CViewRootImplW;
 using Elastos::Droid::View::CWindowManagerGlobalSessionCallback;
@@ -192,7 +207,10 @@ using Elastos::Droid::View::Accessibility::CAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::CAccessibilityManagerClient;
 using Elastos::Droid::View::Accessibility::IAccessibilityInteractionConnectionStub;
 using Elastos::Droid::View::Accessibility::IAccessibilityManagerClientStub;
+using Elastos::Droid::View::InputMethod::CCursorAnchorInfo;
+using Elastos::Droid::View::InputMethod::CExtractedTextRequest;
 using Elastos::Droid::View::InputMethod::CIInputMethodClient;
+using Elastos::Droid::View::InputMethod::CSparseRectFArray;
 using Elastos::Droid::View::InputMethod::IInputContextStub;
 using Elastos::Droid::View::InputMethod::IInputMethodClientStub;
 using Elastos::Droid::View::TextService::CSpellCheckerInfo;
@@ -333,8 +351,8 @@ public:
     CARAPI WriteInt32(
         /* [in] */ Int32 value)
     {
-        assert(0);
-        return E_NOT_IMPLEMENTED;
+        AndroidParcelUtils::WriteInt32(*mData, value);
+        return NOERROR;
     }
 
     CARAPI ReadInt64(
@@ -361,8 +379,8 @@ public:
     CARAPI WriteFloat(
         /* [in] */ Float value)
     {
-        assert(0);
-        return E_NOT_IMPLEMENTED;
+        AndroidParcelUtils::WriteFloat(*mData, value);
+        return NOERROR;
     }
 
     CARAPI ReadDouble(
@@ -390,8 +408,8 @@ public:
     CARAPI WriteString(
         /* [in] */ const String& str)
     {
-        assert(0);
-        return E_NOT_IMPLEMENTED;
+        AndroidParcelUtils::WriteString(*mData, str);
+        return NOERROR;
     }
 
     CARAPI ReadStruct(
@@ -461,8 +479,8 @@ public:
     CARAPI WriteArrayOfString(
         /* [in] */ ArrayOf<String>* array)
     {
-        assert(0);
-        return E_NOT_IMPLEMENTED;
+        AndroidParcelUtils::WriteStringArray(*mData, array);
+        return NOERROR;
     }
 
     CARAPI ReadInterfacePtr(
@@ -851,12 +869,26 @@ AutoPtr<IParcelable> AndroidParcelUtils::ReadParcelable(
         helper->GetEMPTY_STATE((IAbsSavedState**)&state);
         return IParcelable::Probe(state);
     }
+    else if (creator.Equals("android.widget.TextView$SavedState")) {
+        Logger::D(TAG, "Read Elastos.Droid.Widget.CTextViewSavedState not implemented");
+        return NULL;
+    }
+    else if (creator.Equals("android.widget.CompoundButton$SavedState")) {
+        Logger::D(TAG, "Read Elastos.Droid.Widget.CCompoundButtonSavedState not implemented");
+        return NULL;
+    }
+    else if (creator.Equals("andriod.widget.AbsListView$SavedState")) {
+        Logger::D(TAG, "Read Elastos.Droid.Widget.CAbsListViewSavedState not implemented");
+        return NULL;
+    }
     else if (creator.Equals("android.support.v4.view.ViewPager$SavedState")) {
         Logger::D(TAG, "Read Elastos.Droid.Support.V4.View.CViewPagerSavedState not implemented");
         return NULL;
     }
-    assert(0);
-    return NULL;
+    else {
+        Logger::D(TAG, "[ReadParcelable] Read %s not implemented", creator.string());
+        return NULL;
+    }
 
 }
 
@@ -1134,7 +1166,7 @@ AutoPtr<ICharSequence> AndroidParcelUtils::Read_CHAR_SEQUENCE(
         }
     }
 
-    return NULL;
+    return ICharSequence::Probe(sp);
 }
 
 AutoPtr<IFileDescriptor> AndroidParcelUtils::ReadFileDescriptor(
@@ -1966,6 +1998,14 @@ AutoPtr<IInputBindResult> AndroidParcelUtils::ReadInputBindResult(
     return result.Get();
 }
 
+AutoPtr<IIInputContextCallback> AndroidParcelUtils::ReadIInputContextCallback(
+    /* [in] */ const android::Parcel& source)
+{
+    AutoPtr<IIInputContextCallback> cb =
+            new IInputContextCallbackProxy(source.readStrongBinder());
+    return cb;
+}
+
 AutoPtr<IUri> AndroidParcelUtils::ReadUri(
     /* [in] */ const android::Parcel& source)
 {
@@ -2168,6 +2208,57 @@ AutoPtr<IInputChannel> AndroidParcelUtils::ReadInputChannel(
     return channel;
 }
 
+AutoPtr<IInputDevice> AndroidParcelUtils::ReadInputDevice(
+    /* [in] */ const android::Parcel& source)
+{
+    AutoPtr<CInputDevice> device;
+    CInputDevice::NewByFriend((CInputDevice**)&device);
+
+    device->mId = ReadInt32(source);
+    device->mGeneration = ReadInt32(source);
+    device->mControllerNumber = ReadInt32(source);
+    device->mName = ReadString(source);
+    device->mVendorId = ReadInt32(source);
+    device->mProductId = ReadInt32(source);
+    device->mDescriptor = ReadString(source);
+    device->mIsExternal = ReadInt32(source) != 0;
+    device->mSources = ReadInt32(source);
+    device->mKeyboardType = ReadInt32(source);
+    device->mKeyCharacterMap = ReadKeyCharacterMap(source);
+    device->mHasVibrator = ReadInt32(source) != 0;
+    // don't have mHasMicrophone member
+    Boolean hasMicrophone = ReadInt32(source) != 0;
+    device->mHasButtonUnderPad = ReadInt32(source) != 0;
+    AutoPtr<IInputDeviceIdentifier> identifier;
+    CInputDeviceIdentifier::New(device->mDescriptor, device->mVendorId, device->mProductId,
+            (IInputDeviceIdentifier**)&identifier);
+    device->mIdentifier = identifier;
+
+    const Int32 MAX_RANGES = 1000;
+    Int32 numRanges = ReadInt32(source);
+    if (numRanges > MAX_RANGES) {
+        numRanges = MAX_RANGES;
+    }
+
+    for (Int32 i = 0; i < numRanges; i++) {
+        device->AddMotionRange(ReadInt32(source), ReadInt32(source),
+                ReadFloat(source), ReadFloat(source), ReadFloat(source),
+                ReadFloat(source), ReadFloat(source));
+    }
+
+    return device.Get();
+}
+
+AutoPtr<IKeyCharacterMap> AndroidParcelUtils::ReadKeyCharacterMap(
+    /* [in] */ const android::Parcel& source)
+{
+    AutoPtr<IParcel> wrapper = new AndroidParcelWrapper(const_cast<android::Parcel*>(&source), FALSE);
+    AutoPtr<IKeyCharacterMap> map;
+    CKeyCharacterMap::New((IKeyCharacterMap**)&map);
+    IParcelable::Probe(map)->ReadFromParcel(wrapper);
+    return map;
+}
+
 AutoPtr<ISurface> AndroidParcelUtils::ReadSurface(
     /* [in] */ const android::Parcel& source)
 {
@@ -2193,6 +2284,18 @@ AutoPtr<IWindowSession> AndroidParcelUtils::ReadWindowSession(
 {
     AutoPtr<IWindowSession> session = new IWindowSessionProxy(source.readStrongBinder());
     return session;
+}
+
+AutoPtr<IExtractedTextRequest> AndroidParcelUtils::ReadExtractedTextRequest(
+    /* [in] */ const android::Parcel& source)
+{
+    AutoPtr<IExtractedTextRequest> request;
+    CExtractedTextRequest::New((IExtractedTextRequest**)&request);
+    request->SetToken(ReadInt32(source));
+    request->SetFlags(ReadInt32(source));
+    request->SetHintMaxLines(ReadInt32(source));
+    request->SetHintMaxChars(ReadInt32(source));
+    return request;
 }
 
 AutoPtr<ISpellCheckerInfo> AndroidParcelUtils::ReadSpellCheckerInfo(
@@ -2265,6 +2368,22 @@ void AndroidParcelUtils::WriteInt32(
     data.writeInt32(value);
 }
 
+void AndroidParcelUtils::WriteInt32Array(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ ArrayOf<Int32>* value)
+{
+    if (value != NULL) {
+        Int32 N = value->GetLength();
+        WriteInt32(data, N);
+        for (Int32 i=0; i<N; i++) {
+            WriteInt32(data, (*value)[i]);
+        }
+    }
+    else {
+        WriteInt32(data, -1);
+    }
+}
+
 void AndroidParcelUtils::WriteInt64(
     /* [in] */ android::Parcel& data,
     /* [in] */ Int64 value)
@@ -2279,6 +2398,22 @@ void AndroidParcelUtils::WriteFloat(
     data.writeFloat(value);
 }
 
+void AndroidParcelUtils::WriteFloatArray(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ ArrayOf<Float>* value)
+{
+    if (value != NULL) {
+        Int32 N = value->GetLength();
+        WriteInt32(data, N);
+        for (Int32 i=0; i<N; i++) {
+            WriteFloat(data, (*value)[i]);
+        }
+    }
+    else {
+        WriteInt32(data, -1);
+    }
+}
+
 void AndroidParcelUtils::WriteString(
     /* [in] */ android::Parcel& data,
     /* [in] */ const String& value)
@@ -2289,6 +2424,22 @@ void AndroidParcelUtils::WriteString(
     }
     else {
         data.writeString16(NULL, 0);
+    }
+}
+
+void AndroidParcelUtils::WriteStringArray(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ ArrayOf<String>* value)
+{
+    if (value != NULL) {
+        Int32 N = value->GetLength();
+        WriteInt32(data, N);
+        for (Int32 i=0; i<N; i++) {
+            WriteString(data, (*value)[i]);
+        }
+    }
+    else {
+        WriteInt32(data, -1);
     }
 }
 
@@ -2349,13 +2500,35 @@ void AndroidParcelUtils::WriteParcelable(
         WriteParcelable(data, state);
         return;
     }
+    else if (name.Equals("Elastos.Droid.Widget.CTextViewSavedState")) {
+        WriteString(data, String("android.widget.TextView$SavedState"));
+        Logger::D(TAG, "Write Elastos.Droid.Widget.CTextViewSavedState not implemented");
+        return;
+    }
+    else if (name.Equals("Elastos.Droid.Widget.CCompoundButtonSavedState")) {
+        WriteString(data, String("android.widget.CompoundButton$SavedState"));
+        Logger::D(TAG, "Write Elastos.Droid.Widget.CCompoundButtonSavedState not implemented");
+        return;
+    }
+    else if (name.Equals("Elastos.Droid.Widget.CAbsListViewSavedState")) {
+        WriteString(data, String("android.widget.AbsListView$SavedState"));
+        Logger::D(TAG, "Write Elastos.Droid.Widget.CAbsListViewSavedState not implemented");
+        return;
+    }
+    else if (name.Equals("Elastos.Droid.View.InputMethod.CSparseRectFArray")) {
+        WriteString(data, String("android.view.inputmethod.SparseRectFArray"));
+        WriteSparseRectFArray(data, ISparseRectFArray::Probe(value));
+        return;
+    }
     else if (name.Equals("Elastos.Droid.Support.V4.View.CViewPagerSavedState")) {
         WriteString(data, String("android.support.v4.view.ViewPager$SavedState"));
         Logger::D(TAG, "Write Elastos.Droid.Support.V4.View.CViewPagerSavedState not implemented");
         return;
     }
-
-    assert(0);
+    else {
+        WriteString(data, name);
+        Logger::D(TAG, "[WriteParcelable] Write %s not implemented", name.string());
+    }
 }
 
 void AndroidParcelUtils::Write_CHAR_SEQUENCE(
@@ -2399,7 +2572,10 @@ void AndroidParcelUtils::Write_CHAR_SEQUENCE(
                             Object::GetClassName(ps).string());
                 }
                 else {
-                    assert(0);
+                    if (spanTypeId != ITextUtils::UNDERLINE_SPAN &&
+                        spanTypeId != ITextUtils::SUGGESTION_SPAN) {
+                        assert(0);
+                    }
                     WriteInt32(data, spanTypeId);
                     AutoPtr<IParcel> wrapper = new AndroidParcelWrapper(&data, FALSE);
                     IParcelable::Probe(ps)->WriteToParcel(wrapper);
@@ -2590,6 +2766,51 @@ void AndroidParcelUtils::WriteIIDisplayManagerCallback(
     data.writeStrongBinder(cbBinder);
 }
 
+void AndroidParcelUtils::WriteIInputDevicesChangedListener(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ IInputDevicesChangedListener* listener)
+{
+    android::sp<android::IBinder> listenerBinder;
+    if (listener != NULL) {
+        listenerBinder = ((CInputManagerInputDevicesChangedListener*)listener)->mBBinder;
+        if (listenerBinder == NULL) {
+            listenerBinder = new IInputDevicesChangedListenerStub(listener);
+            ((CInputManagerInputDevicesChangedListener*)listener)->mBBinder = listenerBinder.get();
+        }
+    }
+    data.writeStrongBinder(listenerBinder);
+}
+
+void AndroidParcelUtils::WriteIIInputContext(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ IIInputContext* inputContext)
+{
+    android::sp<android::IBinder> ctxBinder;
+    if (inputContext != NULL) {
+        ctxBinder = ((IInputConnectionWrapper*)inputContext)->mBBinder;
+        if (ctxBinder == NULL) {
+            ctxBinder = new IInputContextStub(inputContext);
+            ((IInputConnectionWrapper*)inputContext)->mBBinder = ctxBinder.get();
+        }
+    }
+    data.writeStrongBinder(ctxBinder);
+}
+
+void AndroidParcelUtils::WriteIInputMethodClient(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ IInputMethodClient* client)
+{
+    android::sp<android::IBinder> clientBinder;
+    if (client != NULL) {
+        clientBinder = ((CIInputMethodClient*)client)->mBBinder;
+        if (clientBinder == NULL) {
+            clientBinder = new IInputMethodClientStub(client);
+            ((CIInputMethodClient*)client)->mBBinder = clientBinder.get();
+        }
+    }
+    data.writeStrongBinder(clientBinder);
+}
+
 void AndroidParcelUtils::WriteUri(
     /* [in] */ android::Parcel& data,
     /* [in] */ IUri* value)
@@ -2670,6 +2891,13 @@ void AndroidParcelUtils::WriteBundle(
 void AndroidParcelUtils::WritePersistableBundle(
     /* [in] */ android::Parcel& data,
     /* [in] */ IPersistableBundle* value)
+{
+    assert(0);
+}
+
+void AndroidParcelUtils::WriteResultReceiver(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ IResultReceiver* value)
 {
     assert(0);
 }
@@ -2782,7 +3010,12 @@ void AndroidParcelUtils::WriteWindowManagerLayoutParams(
     WriteInt32(data, i32Val);
     AutoPtr<IBinder> token;
     params->GetToken((IBinder**)&token);
-    WriteStrongBinder(data, token);
+    if (IIWindow::Probe(token) != NULL) {
+        WriteIIWindow(data, IIWindow::Probe(token));
+    }
+    else {
+        WriteStrongBinder(data, token);
+    }
     String packageName;
     params->GetPackageName(&packageName);
     WriteString(data, packageName);
@@ -2911,6 +3144,29 @@ void AndroidParcelUtils::WriteIIAccessibilityManagerClient(
     data.writeStrongBinder(clientBinder);
 }
 
+void AndroidParcelUtils::WriteCursorAnchorInfo(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ ICursorAnchorInfo* info)
+{
+    CCursorAnchorInfo* infoObj = (CCursorAnchorInfo*)info;
+    Int32 hashCode;
+    infoObj->GetHashCode(&hashCode);
+    WriteInt32(data, hashCode);
+    WriteInt32(data, infoObj->mSelectionStart);
+    WriteInt32(data, infoObj->mSelectionEnd);
+    WriteInt32(data, infoObj->mComposingTextStart);
+    Write_CHAR_SEQUENCE(data, infoObj->mComposingText);
+    WriteInt32(data, infoObj->mInsertionMarkerFlags);
+    WriteFloat(data, infoObj->mInsertionMarkerHorizontal);
+    WriteFloat(data, infoObj->mInsertionMarkerTop);
+    WriteFloat(data, infoObj->mInsertionMarkerBaseline);
+    WriteFloat(data, infoObj->mInsertionMarkerBottom);
+    WriteParcelable(data, IParcelable::Probe(infoObj->mCharacterBoundsArray));
+    AutoPtr<ArrayOf<Float> > matrixArray = ArrayOf<Float>::Alloc(9);
+    infoObj->mMatrix->GetValues(matrixArray);
+    WriteFloatArray(data, matrixArray);
+}
+
 void AndroidParcelUtils::WriteEditorInfo(
     /* [in] */ android::Parcel& data,
     /* [in] */ IEditorInfo* value)
@@ -2955,34 +3211,60 @@ void AndroidParcelUtils::WriteEditorInfo(
     WriteInt32(data, -1);
 }
 
-void AndroidParcelUtils::WriteIIInputContext(
+void AndroidParcelUtils::WriteExtractedText(
     /* [in] */ android::Parcel& data,
-    /* [in] */ IIInputContext* inputContext)
+    /* [in] */ IExtractedText* value)
 {
-    android::sp<android::IBinder> ctxBinder;
-    if (inputContext != NULL) {
-        ctxBinder = ((IInputConnectionWrapper*)inputContext)->mBBinder;
-        if (ctxBinder == NULL) {
-            ctxBinder = new IInputContextStub(inputContext);
-            ((IInputConnectionWrapper*)inputContext)->mBBinder = ctxBinder.get();
-        }
-    }
-    data.writeStrongBinder(ctxBinder);
+    AutoPtr<ICharSequence> text;
+    value->GetText((ICharSequence**)&text);
+    Write_CHAR_SEQUENCE(data, text);
+    Int32 i32Val;
+    value->GetStartOffset(&i32Val);
+    WriteInt32(data, i32Val);
+    value->GetPartialStartOffset(&i32Val);
+    WriteInt32(data, i32Val);
+    value->GetPartialEndOffset(&i32Val);
+    WriteInt32(data, i32Val);
+    value->GetSelectionStart(&i32Val);
+    WriteInt32(data, i32Val);
+    value->GetSelectionEnd(&i32Val);
+    WriteInt32(data, i32Val);
+    value->GetFlags(&i32Val);
+    WriteInt32(data, i32Val);
 }
 
-void AndroidParcelUtils::WriteIInputMethodClient(
+void AndroidParcelUtils::WriteSparseRectFArray(
     /* [in] */ android::Parcel& data,
-    /* [in] */ IInputMethodClient* client)
+    /* [in] */ ISparseRectFArray* value)
 {
-    android::sp<android::IBinder> clientBinder;
-    if (client != NULL) {
-        clientBinder = ((CIInputMethodClient*)client)->mBBinder;
-        if (clientBinder == NULL) {
-            clientBinder = new IInputMethodClientStub(client);
-            ((CIInputMethodClient*)client)->mBBinder = clientBinder.get();
+    CSparseRectFArray* array = (CSparseRectFArray*)value;
+    WriteInt32Array(data, array->mKeys);
+    WriteFloatArray(data, array->mCoordinates);
+    WriteInt32Array(data, array->mFlagsArray);
+}
+
+void AndroidParcelUtils::WriteSuggestionSpanArray(
+    /* [in] */ android::Parcel& data,
+    /* [in] */ ArrayOf<ISuggestionSpan*>* value)
+{
+    if (value != NULL) {
+        Int32 N = value->GetLength();
+        WriteInt32(data, N);
+        for (Int32 i = 0; i < N; i++) {
+            ISuggestionSpan* span = (*value)[i];
+            if (span != NULL) {
+                WriteInt32(data, 1);
+                AutoPtr<IParcel> wrapper = new AndroidParcelWrapper(&data, FALSE);
+                IParcelable::Probe(span)->WriteToParcel(wrapper);
+            }
+            else {
+                WriteInt32(data, 0);
+            }
         }
     }
-    data.writeStrongBinder(clientBinder);
+    else {
+        WriteInt32(data, -1);
+    }
 }
 
 void AndroidParcelUtils::ReadMapInternal(

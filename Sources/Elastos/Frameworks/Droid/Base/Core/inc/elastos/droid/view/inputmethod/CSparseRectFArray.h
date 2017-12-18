@@ -26,6 +26,16 @@ using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
+namespace Os {
+
+class AndroidParcelUtils;
+
+}
+}
+}
+
+namespace Elastos {
+namespace Droid {
 namespace View {
 namespace InputMethod {
 
@@ -152,6 +162,8 @@ public:
         /* [out] */ Int32* result);
 
 private:
+    friend class Elastos::Droid::Os::AndroidParcelUtils;
+
     /**
      * The keys, in ascending order, of those {@link RectF} that are not null. For example,
      * {@code [null, null, null, Rect1, null, Rect2]} would be represented by {@code [3,5]}.

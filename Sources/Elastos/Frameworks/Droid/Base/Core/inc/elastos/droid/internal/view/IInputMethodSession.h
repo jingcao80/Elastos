@@ -85,6 +85,8 @@ public:
 private:
     static const String DESCRIPTOR;
     static const Int32 TRANSACTION_updateSelection;
+    static const Int32 TRANSACTION_viewClicked;
+    static const Int32 TRANSACTION_updateCursorAnchorInfo;
 
     android::sp<android::IBinder> mRemote;
 };

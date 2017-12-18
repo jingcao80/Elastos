@@ -30,6 +30,7 @@ ECode CInputManagerInputDevicesChangedListener::constructor(
     /* [in] */ Handle32 owner)
 {
     mOwner = (CInputManager*)owner;
+    mBBinder = NULL;
     return NOERROR;
 }
 
