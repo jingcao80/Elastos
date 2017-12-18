@@ -243,8 +243,7 @@ ECode CCursorAnchorInfo::GetHashCode(
     hash *= 31;
     hash += Objects::GetHashCode(mComposingText);
     hash *= 31;
-    assert(0 && "TODO");
-//    hash += Objects::GetHashCode(mCharacterBoundsArray);
+    hash += Objects::GetHashCode(mCharacterBoundsArray);
     hash *= 31;
     hash += Objects::GetHashCode(mMatrix);
     *hc = hash;
@@ -305,11 +304,10 @@ ECode CCursorAnchorInfo::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    assert(0 && "TODO");
-    // if (!Objects::Equals(mCharacterBoundsArray, cThat->mCharacterBoundsArray)) {
-    //     *result = FALSE;
-    //     return NOERROR;
-    // }
+    if (!Objects::Equals(mCharacterBoundsArray, cThat->mCharacterBoundsArray)) {
+        *result = FALSE;
+        return NOERROR;
+    }
     if (!Objects::Equals(mMatrix, cThat->mMatrix)) {
         *result = FALSE;
         return NOERROR;

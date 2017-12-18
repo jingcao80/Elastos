@@ -58,6 +58,7 @@ using Elastos::Droid::View::Animation::LayoutAnimationController;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
+using Elastos::Core::EIID_IComparable;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
@@ -128,13 +129,15 @@ AutoPtr<ViewGroup::HoverTarget> ViewGroup::HoverTarget::sRecycleBin;
 Int32 ViewGroup::HoverTarget::sRecycledCount = 0;
 
 const Int32 ViewGroup::ChildListForAccessibility::MAX_POOL_SIZE = 32;
-AutoPtr<Pools::SynchronizedPool<ViewGroup::ChildListForAccessibility> > ViewGroup::ChildListForAccessibility::sPool;
+AutoPtr<Pools::SynchronizedPool<ViewGroup::ChildListForAccessibility> > ViewGroup::ChildListForAccessibility::sPool =
+        new Pools::SynchronizedPool<ViewGroup::ChildListForAccessibility>(ViewGroup::ChildListForAccessibility::MAX_POOL_SIZE);
 
 const Int32 ViewGroup::ViewLocationHolder::COMPARISON_STRATEGY_STRIPE;
 const Int32 ViewGroup::ViewLocationHolder::COMPARISON_STRATEGY_LOCATION;
 Int32 ViewGroup::ViewLocationHolder::sComparisonStrategy = COMPARISON_STRATEGY_STRIPE;
 const Int32 ViewGroup::ViewLocationHolder::MAX_POOL_SIZE = 32;
-AutoPtr<Pools::SynchronizedPool<ViewGroup::ViewLocationHolder> > ViewGroup::ViewLocationHolder::sPool;
+AutoPtr<Pools::SynchronizedPool<ViewGroup::ViewLocationHolder> > ViewGroup::ViewLocationHolder::sPool =
+        new Pools::SynchronizedPool<ViewGroup::ViewLocationHolder>(ViewGroup::ViewLocationHolder::MAX_POOL_SIZE);;
 
 Boolean ViewGroup::DEBUG_DRAW = FALSE;
 
@@ -900,6 +903,8 @@ void ViewGroup::HoverTarget::Recycle()
 
 ViewGroup::ChildListForAccessibility::ChildListForAccessibility()
 {
+    CArrayList::New((IList**)&mChildren);
+    CArrayList::New((IList**)&mHolders);
 }
 
 AutoPtr<ViewGroup::ChildListForAccessibility> ViewGroup::ChildListForAccessibility::Obtain(
@@ -907,7 +912,7 @@ AutoPtr<ViewGroup::ChildListForAccessibility> ViewGroup::ChildListForAccessibili
     /* [in] */ Boolean sort)
 {
     AutoPtr<ChildListForAccessibility> list = sPool->AcquireItem();
-    if (sPool == NULL) {
+    if (list == NULL) {
         list = new ChildListForAccessibility();
     }
 
@@ -1007,6 +1012,9 @@ void ViewGroup::ChildListForAccessibility::Clear()
     mChildren->Clear();
 }
 
+
+CAR_INTERFACE_IMPL(ViewGroup::ViewLocationHolder, Object, IComparable);
+
 ViewGroup::ViewLocationHolder::ViewLocationHolder()
     : mLayoutDirection(0)
 {
@@ -1018,7 +1026,7 @@ AutoPtr<ViewGroup::ViewLocationHolder> ViewGroup::ViewLocationHolder::Obtain(
     /* [in] */ IView* view)
 {
     AutoPtr<ViewLocationHolder> holder = sPool->AcquireItem();
-    if (sPool == NULL) {
+    if (holder == NULL) {
         holder = new ViewLocationHolder();
     }
     holder->Init(root, view);
@@ -1037,12 +1045,16 @@ void ViewGroup::ViewLocationHolder::Recycle()
     sPool->ReleaseItem(this);
 }
 
-Int32 ViewGroup::ViewLocationHolder::CompareTo(
-    /* [in] */ ViewLocationHolder* another)
+ECode ViewGroup::ViewLocationHolder::CompareTo(
+    /* [in] */ IInterface* o,
+    /* [out] */ Int32* result)
 {
+    ViewLocationHolder* another = (ViewLocationHolder*)IComparable::Probe(o);
+
     // This instance is greater than an invalid argument.
     if (another == NULL) {
-        return 1;
+        *result = 1;
+        return NOERROR;
     }
 
     CRect* rect = (CRect*)mLocation.Get();
@@ -1051,11 +1063,13 @@ Int32 ViewGroup::ViewLocationHolder::CompareTo(
     if (sComparisonStrategy == COMPARISON_STRATEGY_STRIPE) {
         // First is above second.
         if (rect->mBottom - rectAnother->mTop <= 0) {
-            return -1;
+            *result = -1;
+            return NOERROR;
         }
         // First is below second.
         if (rect->mTop - rectAnother->mBottom >= 0) {
-            return 1;
+            *result = 1;
+            return NOERROR;
         }
     }
 
@@ -1064,20 +1078,23 @@ Int32 ViewGroup::ViewLocationHolder::CompareTo(
         Int32 leftDifference = rect->mLeft - rectAnother->mLeft;
         // First more to the left than second.
         if (leftDifference != 0) {
-            return leftDifference;
+            *result = leftDifference;
+            return NOERROR;
         }
     }
     else { // RTL
         Int32 rightDifference = rect->mRight - rectAnother->mRight;
         // First more to the right than second.
         if (rightDifference != 0) {
-            return -rightDifference;
+            *result = -rightDifference;
+            return NOERROR;
         }
     }
     // Break tie by top.
     Int32 topDiference = rect->mTop - rectAnother->mTop;
     if (topDiference != 0) {
-        return topDiference;
+        *result = topDiference;
+        return NOERROR;
     }
     // Break tie by height.
     Int32 h1, h2;
@@ -1085,7 +1102,8 @@ Int32 ViewGroup::ViewLocationHolder::CompareTo(
     another->mLocation->GetHeight(&h2);
     Int32 heightDiference = h1 - h2;
     if (heightDiference != 0) {
-        return -heightDiference;
+        *result = -heightDiference;
+        return NOERROR;
     }
     // Break tie by width.
     Int32 w1, w2;
@@ -1093,7 +1111,8 @@ Int32 ViewGroup::ViewLocationHolder::CompareTo(
     another->mLocation->GetHeight(&w2);
     Int32 widthDiference = w1 - w2;
     if (widthDiference != 0) {
-        return -widthDiference;
+        *result = -widthDiference;
+        return NOERROR;
     }
 
     // Just break the tie somehow. The accessibility ids are unique
@@ -1101,7 +1120,8 @@ Int32 ViewGroup::ViewLocationHolder::CompareTo(
     Int32 id, anotherId;
     mView->GetAccessibilityViewId(&id);
     another->mView->GetAccessibilityViewId(&anotherId);
-    return id - anotherId;
+    *result = id - anotherId;
+    return NOERROR;
 }
 
 void ViewGroup::ViewLocationHolder::Init(
@@ -1112,7 +1132,7 @@ void ViewGroup::ViewLocationHolder::Init(
     root->OffsetDescendantRectToMyCoords(view, mLocation);
     assert(view != NULL);
     mView = VIEW_PROBE(view);
-    (IView::Probe(root))->GetLayoutDirection(&mLayoutDirection);
+    IView::Probe(root)->GetLayoutDirection(&mLayoutDirection);
 }
 
 void ViewGroup::ViewLocationHolder::Clear()

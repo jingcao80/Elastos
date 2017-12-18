@@ -1408,7 +1408,7 @@ private:
             /* [in] */ IEasyEditSpan* span);
 
     private:
-        Editor* mHost;
+        AutoPtr<IWeakReference> mHost;
 
         static const Int32 DISPLAY_TIMEOUT_MS;
 

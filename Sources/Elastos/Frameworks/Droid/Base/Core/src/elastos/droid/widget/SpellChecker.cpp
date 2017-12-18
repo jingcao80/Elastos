@@ -825,10 +825,9 @@ Boolean SpellChecker::HaveWordBoundariesChanged(
         }
     }
     else if (spanEnd == start && start < (ICharSequence::Probe(editable)->GetLength(&length), length)) {
-        Int32 codePoint;
-        assert(0 && "TODO");
-        // codePoint = Character::CodePointAt(editable, start);
-        haveWordBoundariesChanged = Character::IsLetterOrDigit((Char32)codePoint);
+        Char32 codePoint;
+        ICharSequence::Probe(editable)->GetCharAt(start, &codePoint);
+        haveWordBoundariesChanged = Character::IsLetterOrDigit(codePoint);
         if (DBG) {
             StringBuilder builder;
             builder += "(2) Characters have been appended to the spanned text. ";
@@ -846,10 +845,9 @@ Boolean SpellChecker::HaveWordBoundariesChanged(
         }
     }
     else if (spanStart == end && end > 0) {
-        Int32 codePoint;
-        assert(0 && "TODO");
-        // codePoint = Character::CodePointBefore(editable, end);
-        haveWordBoundariesChanged = Character::IsLetterOrDigit((Char32)codePoint);
+        Char32 codePoint;
+        ICharSequence::Probe(editable)->GetCharAt(end, &codePoint);
+        haveWordBoundariesChanged = Character::IsLetterOrDigit(codePoint);
         if (DBG) {
             StringBuilder builder;
             builder += "(3) Characters have been prepended to the spanned text. ";

@@ -544,8 +544,11 @@ private:
      */
     class ViewLocationHolder
         : public Object
+        , public IComparable
     {
     public:
+        CAR_INTERFACE_DECL();
+
         static CARAPI_(AutoPtr<ViewLocationHolder>) Obtain(
             /* [in] */ IViewGroup* root,
             /* [in] */ IView* view);
@@ -555,8 +558,9 @@ private:
 
         CARAPI_(void) Recycle();
 
-        CARAPI_(Int32) CompareTo(
-            /* [in] */ ViewLocationHolder* _another);
+        CARAPI CompareTo(
+            /* [in] */ IInterface* _another,
+            /* [out] */ Int32* result);
 
     private:
         CARAPI_(void) Init(

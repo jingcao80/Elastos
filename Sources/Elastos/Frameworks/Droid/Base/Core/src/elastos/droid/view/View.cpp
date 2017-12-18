@@ -12505,8 +12505,8 @@ Boolean View::DrawAnimation(
     a->IsInitialized(&initialized);
     if (!initialized) {
         Int32 w, h;
-        IView::Probe(parent)->GetWidth(&w);
-        IView::Probe(parent)->GetHeight(&h);
+        parent->GetWidth(&w);
+        parent->GetHeight(&h);
         a->Initialize(mRight - mLeft, mBottom - mTop, w, h);
         a->InitializeInvalidateRegion(0, 0, mRight - mLeft, mBottom - mTop);
         if (mAttachInfo != NULL) a->SetListenerHandler(mAttachInfo->mHandler);
