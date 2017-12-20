@@ -418,6 +418,9 @@ ECode ThreadedRenderer::Draw(
 
     Choreographer* choreographer = (Choreographer*)((ViewRootImpl*)attachInfo->mViewRootImpl)->mChoreographer.Get();
     choreographer->mFrameInfo->MarkDrawStart();
+    Int64 frameTimeNanos = 0;
+    choreographer->GetFrameTimeNanos(&frameTimeNanos);
+    attachInfo->mDrawingTime = frameTimeNanos / TimeUtils::NANOS_PER_MS;
 
     Int64 recordDuration = 0;
 
