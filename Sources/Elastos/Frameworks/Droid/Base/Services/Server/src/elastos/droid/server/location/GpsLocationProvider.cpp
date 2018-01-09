@@ -1779,35 +1779,36 @@ Boolean GpsLocationProvider::DeleteAidingData(
     else {
         flags = 0;
         Boolean v;
-        if (extras->GetBoolean(String("ephemeris"), &v),v) flags |= GPS_DELETE_EPHEMERIS;
-        if (extras->GetBoolean(String("almanac"), &v),v) flags |= GPS_DELETE_ALMANAC;
-        if (extras->GetBoolean(String("position"), &v),v) flags |= GPS_DELETE_POSITION;
-        if (extras->GetBoolean(String("time"), &v),v) flags |= GPS_DELETE_TIME;
-        if (extras->GetBoolean(String("iono"), &v),v) flags |= GPS_DELETE_IONO;
-        if (extras->GetBoolean(String("utc"), &v),v) flags |= GPS_DELETE_UTC;
-        if (extras->GetBoolean(String("health"), &v),v) flags |= GPS_DELETE_HEALTH;
-        if (extras->GetBoolean(String("svdir"), &v),v) flags |= GPS_DELETE_SVDIR;
-        if (extras->GetBoolean(String("svsteer"), &v),v) flags |= GPS_DELETE_SVSTEER;
-        if (extras->GetBoolean(String("sadata"), &v),v) flags |= GPS_DELETE_SADATA;
-        if (extras->GetBoolean(String("rti"), &v),v) flags |= GPS_DELETE_RTI;
-        if (extras->GetBoolean(String("celldb-info"), &v),v) flags |= GPS_DELETE_CELLDB_INFO;
-        if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
-        if (extras->GetBoolean(String("almanac-corr"), &v),v) flags |= GPS_DELETE_ALMANAC_CORR;
-        if (extras->GetBoolean(String("freq-bias-est"), &v),v) flags |= GPS_DELETE_FREQ_BIAS_EST;
-        if (extras->GetBoolean(String("ephemeris-GLO"), &v),v) flags |= GLO_DELETE_EPHEMERIS;
-        if (extras->GetBoolean(String("almanac-GLO"), &v),v) flags |= GLO_DELETE_ALMANAC;
-        if (extras->GetBoolean(String("svdir-GLO"), &v),v) flags |= GLO_DELETE_SVDIR;
-        if (extras->GetBoolean(String("svsteer-GLO"), &v),v) flags |= GLO_DELETE_SVSTEER;
-        if (extras->GetBoolean(String("almanac-corr-GLO"), &v),v) flags |= GLO_DELETE_ALMANAC_CORR;
-        if (extras->GetBoolean(String("time-gps"), &v),v) flags |= GPS_DELETE_TIME_GPS;
-        if (extras->GetBoolean(String("time-GLO"), &v),v) flags |= GLO_DELETE_TIME;
-        if (extras->GetBoolean(String("ephemeris-BDS"), &v),v) flags |= BDS_DELETE_EPHEMERIS;
-        if (extras->GetBoolean(String("almanac-BDS"), &v),v) flags |= BDS_DELETE_ALMANAC;
-        if (extras->GetBoolean(String("svdir-BDS"), &v),v) flags |= BDS_DELETE_SVDIR;
-        if (extras->GetBoolean(String("svsteer-BDS"), &v),v) flags |= BDS_DELETE_SVSTEER;
-        if (extras->GetBoolean(String("almanac-corr-BDS"), &v),v) flags |= BDS_DELETE_ALMANAC_CORR;
-        if (extras->GetBoolean(String("time-BDS"), &v),v) flags |= BDS_DELETE_TIME;
-        if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
+        assert(0);
+        // if (extras->GetBoolean(String("ephemeris"), &v),v) flags |= GPS_DELETE_EPHEMERIS;
+        // if (extras->GetBoolean(String("almanac"), &v),v) flags |= GPS_DELETE_ALMANAC;
+        // if (extras->GetBoolean(String("position"), &v),v) flags |= GPS_DELETE_POSITION;
+        // if (extras->GetBoolean(String("time"), &v),v) flags |= GPS_DELETE_TIME;
+        // if (extras->GetBoolean(String("iono"), &v),v) flags |= GPS_DELETE_IONO;
+        // if (extras->GetBoolean(String("utc"), &v),v) flags |= GPS_DELETE_UTC;
+        // if (extras->GetBoolean(String("health"), &v),v) flags |= GPS_DELETE_HEALTH;
+        // if (extras->GetBoolean(String("svdir"), &v),v) flags |= GPS_DELETE_SVDIR;
+        // if (extras->GetBoolean(String("svsteer"), &v),v) flags |= GPS_DELETE_SVSTEER;
+        // if (extras->GetBoolean(String("sadata"), &v),v) flags |= GPS_DELETE_SADATA;
+        // if (extras->GetBoolean(String("rti"), &v),v) flags |= GPS_DELETE_RTI;
+        // if (extras->GetBoolean(String("celldb-info"), &v),v) flags |= GPS_DELETE_CELLDB_INFO;
+        // if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
+        // if (extras->GetBoolean(String("almanac-corr"), &v),v) flags |= GPS_DELETE_ALMANAC_CORR;
+        // if (extras->GetBoolean(String("freq-bias-est"), &v),v) flags |= GPS_DELETE_FREQ_BIAS_EST;
+        // if (extras->GetBoolean(String("ephemeris-GLO"), &v),v) flags |= GLO_DELETE_EPHEMERIS;
+        // if (extras->GetBoolean(String("almanac-GLO"), &v),v) flags |= GLO_DELETE_ALMANAC;
+        // if (extras->GetBoolean(String("svdir-GLO"), &v),v) flags |= GLO_DELETE_SVDIR;
+        // if (extras->GetBoolean(String("svsteer-GLO"), &v),v) flags |= GLO_DELETE_SVSTEER;
+        // if (extras->GetBoolean(String("almanac-corr-GLO"), &v),v) flags |= GLO_DELETE_ALMANAC_CORR;
+        // if (extras->GetBoolean(String("time-gps"), &v),v) flags |= GPS_DELETE_TIME_GPS;
+        // if (extras->GetBoolean(String("time-GLO"), &v),v) flags |= GLO_DELETE_TIME;
+        // if (extras->GetBoolean(String("ephemeris-BDS"), &v),v) flags |= BDS_DELETE_EPHEMERIS;
+        // if (extras->GetBoolean(String("almanac-BDS"), &v),v) flags |= BDS_DELETE_ALMANAC;
+        // if (extras->GetBoolean(String("svdir-BDS"), &v),v) flags |= BDS_DELETE_SVDIR;
+        // if (extras->GetBoolean(String("svsteer-BDS"), &v),v) flags |= BDS_DELETE_SVSTEER;
+        // if (extras->GetBoolean(String("almanac-corr-BDS"), &v),v) flags |= BDS_DELETE_ALMANAC_CORR;
+        // if (extras->GetBoolean(String("time-BDS"), &v),v) flags |= BDS_DELETE_TIME;
+        // if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
     }
 
     if (flags != 0) {
@@ -2786,7 +2787,8 @@ GpsCallbacks sGpsCallbacks = {
     acquire_wakelock_callback,
     release_wakelock_callback,
     create_thread_callback,
-    request_utc_time_callback
+    request_utc_time_callback,
+    NULL
 };
 
 static void xtra_download_request_callback()
@@ -2831,85 +2833,86 @@ static AutoPtr<ArrayOf<Byte> > convert_to_ipv4(uint32_t ip, bool net_order)
 
 static void agps_status_callback(AGpsStatus* agps_status)
 {
-    AutoPtr<ArrayOf<Byte> > byteArray;
-    bool isSupported = false;
+    assert(0);
+    // AutoPtr<ArrayOf<Byte> > byteArray;
+    // bool isSupported = false;
 
-    size_t status_size = agps_status->size;
-    if (status_size == sizeof(AGpsStatus_v3)) {
-      ALOGV("AGpsStatus is V3: %d", status_size);
-      switch (agps_status->addr.ss_family)
-      {
-      case AF_INET:
-          {
-            struct sockaddr_in *in = (struct sockaddr_in*)&(agps_status->addr);
-            uint32_t *pAddr = (uint32_t*)&(in->sin_addr);
-            byteArray = convert_to_ipv4(*pAddr, true /* net_order */);
-            if (byteArray != NULL) {
-                isSupported = true;
-            }
-            IF_ALOGD() {
-                // log the IP for reference in case there is a bogus value pushed by HAL
-                char str[INET_ADDRSTRLEN];
-                inet_ntop(AF_INET, &(in->sin_addr), str, INET_ADDRSTRLEN);
-                ALOGD("AGPS IP is v4: %s", str);
-            }
-          }
-          break;
-      case AF_INET6:
-          {
-            struct sockaddr_in6 *in6 = (struct sockaddr_in6*)&(agps_status->addr);
-            byteArray = ArrayOf<Byte>::Alloc(16);
-            if (byteArray != NULL) {
-                byteArray->Copy((const Byte*)&(in6->sin6_addr), 16);
-                isSupported = true;
-            }
-            else {
-                ALOGE("Unable to allocate byte array for IPv6 address.");
-            }
-            IF_ALOGD() {
-                // log the IP for reference in case there is a bogus value pushed by HAL
-                char str[INET6_ADDRSTRLEN];
-                inet_ntop(AF_INET6, &(in6->sin6_addr), str, INET6_ADDRSTRLEN);
-                ALOGD("AGPS IP is v6: %s", str);
-            }
-          }
-          break;
-      default:
-          ALOGE("Invalid ss_family found: %d", agps_status->addr.ss_family);
-          break;
-      }
-    }
-    else if (status_size >= sizeof(AGpsStatus_v2)) {
-      ALOGV("AGpsStatus is V2+: %d", status_size);
-      // for back-compatibility reasons we check in v2 that the data structure size is greater or
-      // equal to the declared size in gps.h
-      uint32_t ipaddr = agps_status->ipaddr;
-      ALOGV("AGPS IP is v4: %x", ipaddr);
-      byteArray = convert_to_ipv4(ipaddr, false /* net_order */);
-      if (ipaddr == INADDR_NONE || byteArray != NULL) {
-          isSupported = true;
-      }
-    }
-    else if (status_size >= sizeof(AGpsStatus_v1)) {
-        ALOGV("AGpsStatus is V1+: %d", status_size);
-        // because we have to check for >= with regards to v2, we also need to relax the check here
-        // and only make sure that the size is at least what we expect
-        isSupported = true;
-    }
-    else {
-        ALOGE("Invalid size of AGpsStatus found: %d.", status_size);
-    }
+    // size_t status_size = agps_status->size;
+    // if (status_size == sizeof(AGpsStatus_v3)) {
+    //   ALOGV("AGpsStatus is V3: %d", status_size);
+    //   switch (agps_status->addr.ss_family)
+    //   {
+    //   case AF_INET:
+    //       {
+    //         struct sockaddr_in *in = (struct sockaddr_in*)&(agps_status->addr);
+    //         uint32_t *pAddr = (uint32_t*)&(in->sin_addr);
+    //         byteArray = convert_to_ipv4(*pAddr, true /* net_order */);
+    //         if (byteArray != NULL) {
+    //             isSupported = true;
+    //         }
+    //         IF_ALOGD() {
+    //             // log the IP for reference in case there is a bogus value pushed by HAL
+    //             char str[INET_ADDRSTRLEN];
+    //             inet_ntop(AF_INET, &(in->sin_addr), str, INET_ADDRSTRLEN);
+    //             ALOGD("AGPS IP is v4: %s", str);
+    //         }
+    //       }
+    //       break;
+    //   case AF_INET6:
+    //       {
+    //         struct sockaddr_in6 *in6 = (struct sockaddr_in6*)&(agps_status->addr);
+    //         byteArray = ArrayOf<Byte>::Alloc(16);
+    //         if (byteArray != NULL) {
+    //             byteArray->Copy((const Byte*)&(in6->sin6_addr), 16);
+    //             isSupported = true;
+    //         }
+    //         else {
+    //             ALOGE("Unable to allocate byte array for IPv6 address.");
+    //         }
+    //         IF_ALOGD() {
+    //             // log the IP for reference in case there is a bogus value pushed by HAL
+    //             char str[INET6_ADDRSTRLEN];
+    //             inet_ntop(AF_INET6, &(in6->sin6_addr), str, INET6_ADDRSTRLEN);
+    //             ALOGD("AGPS IP is v6: %s", str);
+    //         }
+    //       }
+    //       break;
+    //   default:
+    //       ALOGE("Invalid ss_family found: %d", agps_status->addr.ss_family);
+    //       break;
+    //   }
+    // }
+    // else if (status_size >= sizeof(AGpsStatus_v2)) {
+    //   ALOGV("AGpsStatus is V2+: %d", status_size);
+    //   // for back-compatibility reasons we check in v2 that the data structure size is greater or
+    //   // equal to the declared size in gps.h
+    //   uint32_t ipaddr = agps_status->ipaddr;
+    //   ALOGV("AGPS IP is v4: %x", ipaddr);
+    //   byteArray = convert_to_ipv4(ipaddr, false /* net_order */);
+    //   if (ipaddr == INADDR_NONE || byteArray != NULL) {
+    //       isSupported = true;
+    //   }
+    // }
+    // else if (status_size >= sizeof(AGpsStatus_v1)) {
+    //     ALOGV("AGpsStatus is V1+: %d", status_size);
+    //     // because we have to check for >= with regards to v2, we also need to relax the check here
+    //     // and only make sure that the size is at least what we expect
+    //     isSupported = true;
+    // }
+    // else {
+    //     ALOGE("Invalid size of AGpsStatus found: %d.", status_size);
+    // }
 
-    if (isSupported) {
-        Int32 byteArrayLength = byteArray != NULL ? byteArray->GetLength() : 0;
-        ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
-        mCallbacksObj->ReportAGpsStatus(agps_status->type,
-                            agps_status->status, byteArray);
+    // if (isSupported) {
+    //     Int32 byteArrayLength = byteArray != NULL ? byteArray->GetLength() : 0;
+    //     ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
+    //     mCallbacksObj->ReportAGpsStatus(agps_status->type,
+    //                         agps_status->status, byteArray);
 
-    }
-    else {
-        ALOGD("Skipping calling method_reportAGpsStatus.");
-    }
+    // }
+    // else {
+    //     ALOGD("Skipping calling method_reportAGpsStatus.");
+    // }
 }
 
 AGpsCallbacks sAGpsCallbacks = {
@@ -3313,28 +3316,29 @@ void GpsLocationProvider::Native_agps_data_conn_open(
     /* [in] */ const String& apn,
     /* [in] */ Int32 apnIpType)
 {
-    if (!sAGpsInterface) {
-        ALOGE("no AGPS interface in agps_data_conn_open");
-        return;
-    }
-    if (apn == NULL) {
-        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        ALOGE("Native_agps_data_conn_open apn is NULL!");
-        return;
-    }
+    assert(0);
+    // if (!sAGpsInterface) {
+    //     ALOGE("no AGPS interface in agps_data_conn_open");
+    //     return;
+    // }
+    // if (apn == NULL) {
+    //     // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+    //     ALOGE("Native_agps_data_conn_open apn is NULL!");
+    //     return;
+    // }
 
-    const char *apnStr = apn.string();
+    // const char *apnStr = apn.string();
 
-    size_t interface_size = sAGpsInterface->size;
-    if (interface_size == sizeof(AGpsInterface_v2)) {
-        sAGpsInterface->data_conn_open_with_apn_ip_type(apnStr, apnIpType);
-    }
-    else if (interface_size == sizeof(AGpsInterface_v1)) {
-        sAGpsInterface->data_conn_open(apnStr);
-    }
-    else {
-        ALOGE("Invalid size of AGpsInterface found: %d.", interface_size);
-    }
+    // size_t interface_size = sAGpsInterface->size;
+    // if (interface_size == sizeof(AGpsInterface_v2)) {
+    //     sAGpsInterface->data_conn_open_with_apn_ip_type(apnStr, apnIpType);
+    // }
+    // else if (interface_size == sizeof(AGpsInterface_v1)) {
+    //     sAGpsInterface->data_conn_open(apnStr);
+    // }
+    // else {
+    //     ALOGE("Invalid size of AGpsInterface found: %d.", interface_size);
+    // }
 }
 
 void GpsLocationProvider::Native_agps_data_conn_closed()
@@ -3666,7 +3670,8 @@ static void measurement_callback(GpsData* data)
 
 GpsMeasurementCallbacks sGpsMeasurementCallbacks = {
     sizeof(GpsMeasurementCallbacks),
-    measurement_callback
+    measurement_callback,
+    NULL,
 };
 
 Boolean GpsLocationProvider::Native_is_measurement_supported()
@@ -3748,7 +3753,8 @@ static void navigation_message_callback(GpsNavigationMessage* message)
 
 GpsNavigationMessageCallbacks sGpsNavigationMessageCallbacks = {
     sizeof(GpsNavigationMessageCallbacks),
-    navigation_message_callback
+    navigation_message_callback,
+    NULL
 };
 
 Boolean GpsLocationProvider::Native_is_navigation_message_supported()

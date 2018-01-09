@@ -81,7 +81,7 @@ AutoPtr<ZipEntry> ZipArchive::Find(
 
     // Resist the urge to delete the space. <: is a bigraph sequence.
     ::ZipEntry* zip_entry = new ::ZipEntry;
-    const int32_t error = FindEntry(mHandle, name, zip_entry);
+    const int32_t error = FindEntry(mHandle, ZipString(name), zip_entry);
     if (error) {
         *error_msg = ErrorCodeString(error);
         delete zip_entry;

@@ -306,6 +306,10 @@ public:
         /* [in] */ Boolean enabled,
         /* [out] */ Boolean* result);
 
+    // @ServiceThreadOnly
+    CARAPI EnableAudioReturnChannel(
+        /* [in] */ Boolean enabled);
+
     /**
      * Returns whether ARC is enabled or not.
      */

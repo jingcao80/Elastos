@@ -28,6 +28,7 @@ using Elastos::Droid::Media::Tv::ITvStreamConfig;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IMessageQueue;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::ISparseInt32Array;
 using Elastos::Droid::View::ISurface;
@@ -85,7 +86,8 @@ public:
 
 private:
     CARAPI_(Int64) NativeOpen(
-        /* [in] */ TvInputHal* thiz);
+        /* [in] */ TvInputHal* thiz,
+        /* [in] */ IMessageQueue* queue);
 
     static CARAPI_(Int32) NativeAddStream(
         /* [in] */ Int64 ptr,

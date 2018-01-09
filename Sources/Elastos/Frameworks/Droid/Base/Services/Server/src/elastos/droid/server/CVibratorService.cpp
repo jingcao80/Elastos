@@ -37,7 +37,8 @@
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Hardware.h>
 #include <Elastos.Droid.Internal.h>
-#include <hardware_legacy/vibrator.h>
+#include <android/hardware/vibrator/1.0/IVibrator.h>
+#include <inttypes.h>
 
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
@@ -388,6 +389,7 @@ ECode CVibratorService::constructor(
 
     mVibrationRunnable = new VibrationRunnable(this);
 
+    VibratorInit();
     // Reset the hardware to a default state, in case this is a runtime
     // restart instead of a fresh boot.
     VibratorOff();
@@ -418,27 +420,51 @@ ECode CVibratorService::constructor(
     return NOERROR;
 }
 
+static android::sp<android::hardware::vibrator::V1_0::IVibrator> mHal;
+
+void CVibratorService::VibratorInit()
+{
+    if (mHal != nullptr) {
+        return;
+    }
+    mHal = android::hardware::vibrator::V1_0::IVibrator::getService();
+}
+
 Boolean CVibratorService::VibratorExists()
 {
-    return vibrator_exists() > 0 ? TRUE : FALSE;
+    if (mHal != nullptr) {
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
 }
 
 void CVibratorService::VibratorOn(
     /* [in] */ Int64 milliseconds)
 {
-    if (DBG) {
-        Slogger::D(TAG, "Turning vibrator on for %lld ms.", milliseconds);
+    if (mHal != nullptr) {
+        android::hardware::vibrator::V1_0::Status retStatus = mHal->on(milliseconds);
+        if (retStatus != android::hardware::vibrator::V1_0::Status::OK) {
+            Slogger::E(TAG, "vibratorOn command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
+        }
     }
-
-    vibrator_on(milliseconds);
+    else {
+        Slogger::W(TAG, "Tried to vibrate but there is no vibrator device.");
+    }
 }
 
 void CVibratorService::VibratorOff()
 {
-    if (DBG) {
-        Slogger::D(TAG, "Turning vibrator off.");
+    if (mHal != nullptr) {
+        android::hardware::vibrator::V1_0::Status retStatus = mHal->off();
+        if (retStatus != android::hardware::vibrator::V1_0::Status::OK) {
+            Slogger::E(TAG, "vibratorOff command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
+        }
     }
-    vibrator_off();
+    else {
+        Slogger::W(TAG, "Tried to stop vibrating but there is no vibrator device.");
+    }
 }
 
 ECode CVibratorService::SystemReady()

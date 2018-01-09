@@ -231,6 +231,8 @@ public:
 
     static CARAPI_(Boolean) VibratorExists();
 
+    static CARAPI_(void) VibratorInit();
+
     static CARAPI_(void) VibratorOn(
         /* [in] */ Int64 milliseconds);
 

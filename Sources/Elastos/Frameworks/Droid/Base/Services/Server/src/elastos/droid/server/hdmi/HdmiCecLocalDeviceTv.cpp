@@ -1170,12 +1170,26 @@ ECode HdmiCecLocalDeviceTv::SetArcStatus(
     HdmiLogger::Debug("Set Arc Status[old:%s new:%s]", mArcEstablished ? "true" : "false", enabled ? "true" : "false");
     Boolean oldStatus = mArcEstablished;
     // 1. Enable/disable ARC circuit.
-    ((HdmiControlService*)mService.Get())->SetAudioReturnChannel(enabled);
+    EnableAudioReturnChannel(enabled);
     // 2. Notify arc status to audio service.
     NotifyArcStatusToAudioService(enabled);
     // 3. Update arc status;
     mArcEstablished = enabled;
     *result = oldStatus;
+    return NOERROR;
+}
+
+ECode HdmiCecLocalDeviceTv::EnableAudioReturnChannel(
+    /* [in] */ Boolean enabled)
+{
+    AssertRunOnServiceThread();
+    AutoPtr<IHdmiDeviceInfo> avr;
+    GetAvrDeviceInfo((IHdmiDeviceInfo**)&avr);
+    if (avr != NULL) {
+        Int32 portId;
+        avr->GetPortId(&portId);
+        ((HdmiControlService*)mService.Get())->EnableAudioReturnChannel(portId, enabled);
+    }
     return NOERROR;
 }
 

@@ -2009,10 +2009,11 @@ ECode HdmiControlService::HandleCecCommand(
     return DispatchMessageToLocalDevice(message, result);
 }
 
-ECode HdmiControlService::SetAudioReturnChannel(
+ECode HdmiControlService::EnableAudioReturnChannel(
+    /* [in] */ Int32 portId,
     /* [in] */ Boolean enabled)
 {
-    return mCecController->SetAudioReturnChannel(enabled);
+    return mCecController->EnableAudioReturnChannel(portId, enabled);
 }
 
 ECode HdmiControlService::DispatchMessageToLocalDevice(

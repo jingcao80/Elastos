@@ -349,7 +349,8 @@ public:
      * @param enabled whether to enable/disable ARC
      */
     // @ServiceThreadOnly
-    CARAPI SetAudioReturnChannel(
+    CARAPI EnableAudioReturnChannel(
+        /* [in] */ Int32 portId,
         /* [in] */ Boolean enabled);
 
     /**
@@ -527,8 +528,9 @@ private:
         /* [in] */ Int32 flag,
         /* [in] */ Int32 value);
 
-    static CARAPI NativeSetAudioReturnChannel(
+    static CARAPI NativeEnableAudioReturnChannel(
         /* [in] */ Int64 controllerPtr,
+        /* [in] */ Int32 portId,
         /* [in] */ Boolean flag);
 
     static CARAPI NativeIsConnected(

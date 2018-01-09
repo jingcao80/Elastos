@@ -84,16 +84,21 @@ public:
     void setShowTouches(
         /* [in] */ bool enabled);
 
-    void setStylusIconEnabled(
-        /* [in] */ bool enabled);
-
-    void setVolumeKeysRotation(
-        /* [in] */ int32_t mode);
-
     void setInteractive(
         /* [in] */ bool interactive);
 
     void reloadCalibration();
+
+    void setPointerIconType(
+        /* [in] */ int32_t iconId);
+
+    void reloadPointerIcons();
+
+    void setCustomPointerIcon(
+        /* [in] */ const android::SpriteIcon& icon);
+
+    void setPointerCapture(
+        /* [in] */ bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
     virtual void getReaderConfiguration(
@@ -177,8 +182,19 @@ public:
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
+    virtual void loadPointerIcon(
+        /* [in] */ android::SpriteIcon* icon);
+
     virtual void loadPointerResources(
         /* [in] */ android::PointerResources* outResources);
+
+    virtual void loadAdditionalMouseResources(
+        /* [in] */ std::map<int32_t, android::SpriteIcon>* outResources,
+        /* [in] */ std::map<int32_t, android::PointerAnimation>* outAnimationResources);
+
+    virtual int32_t getDefaultPointerIconId();
+
+    virtual int32_t getCustomPointerIconId();
 
 private:
     void updateInactivityTimeoutLocked(
@@ -203,6 +219,7 @@ private:
         // Display size information.
         android::DisplayViewport mInternalViewport;
         android::DisplayViewport mExternalViewport;
+        android::Vector<android::DisplayViewport> mVirtualViewports;
 
         // System UI visibility.
         int32_t mSystemUiVisibility;
@@ -216,11 +233,8 @@ private:
         // Show touches feature enable/disable.
         bool mShowTouches;
 
-        // Show icon when stylus is used
-        bool mStylusIconEnabled;
-
-        // Volume keys rotation mode (0 - off, 1 - phone, 2 - tablet)
-        int32_t mVolumeKeysRotationMode;
+        // Pointer capture feature enable/disable.
+        bool mPointerCapture;
 
         // Sprite controller singleton, created on first use.
         android::sp<android::SpriteController> mSpriteController;
@@ -229,7 +243,7 @@ private:
         android::wp<android::PointerController> mPointerController;
     } mLocked;
 
-    volatile bool mInteractive;
+    std::atomic<bool> mInteractive;
 };
 
 } // namespace Input

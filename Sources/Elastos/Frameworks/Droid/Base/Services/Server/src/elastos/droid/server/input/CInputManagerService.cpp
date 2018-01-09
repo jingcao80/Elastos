@@ -486,7 +486,6 @@ ECode CInputManagerService::BroadcastReceiverInStart::OnReceive(
 {
     mOwner->UpdatePointerSpeedFromSettings();
     mOwner->UpdateShowTouchesFromSettings();
-    mOwner->UpdateVolumeKeysRotationFromSettings();
     return NOERROR;
 }
 
@@ -673,42 +672,6 @@ ECode CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver:
     return NOERROR;
 }
 
-
-//------------------------------------------------------------------------------
-//  CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver
-//------------------------------------------------------------------------------
-ECode CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::constructor(
-    /* [in] */ CInputManagerService* owner,
-    /* [in] */ IHandler* handler)
-{
-    mOwner = owner;
-    return ContentObserver::constructor(handler);
-}
-
-ECode CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver::OnChange(
-    /* [in] */ Boolean selfChange)
-{
-    mOwner->UpdateStylusIconEnabledFromSettings();
-    return NOERROR;
-}
-
-//------------------------------------------------------------------------------
-//  CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver
-//------------------------------------------------------------------------------
-ECode CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::constructor(
-    /* [in] */ CInputManagerService* owner,
-    /* [in] */ IHandler* handler)
-{
-    mOwner = owner;
-    return ContentObserver::constructor(handler);
-}
-
-ECode CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver::OnChange(
-    /* [in] */ Boolean selfChange)
-{
-    mOwner->UpdateVolumeKeysRotationFromSettings();
-    return NOERROR;
-}
 
 //==============================================================================
 //  CInputManagerService
@@ -1093,18 +1056,6 @@ void CInputManagerService::NativeSetShowTouches(
     mPtr->setShowTouches(enabled);
 }
 
-void CInputManagerService::NativeSetStylusIconEnabled(
-    /* [in] */ Boolean enabled)
-{
-    mPtr->setStylusIconEnabled(enabled);
-}
-
-void CInputManagerService::NativeSetVolumeKeysRotation(
-    /* [in] */ Int32 mode)
-{
-    mPtr->setVolumeKeysRotation(mode);
-}
-
 void CInputManagerService::NativeSetInteractive(
     /* [in] */ Boolean interactive)
 {
@@ -1195,8 +1146,6 @@ ECode CInputManagerService::Start()
 
     RegisterPointerSpeedSettingObserver();
     RegisterShowTouchesSettingObserver();
-    RegisterStylusIconEnabledSettingObserver();
-    RegisterVolumeKeysRotationSettingObserver();
 
     AutoPtr<IIntentFilter> intentFilter;
     CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&intentFilter);
@@ -1208,8 +1157,6 @@ ECode CInputManagerService::Start()
 
     UpdatePointerSpeedFromSettings();
     UpdateShowTouchesFromSettings();
-    UpdateStylusIconEnabledFromSettings();
-    UpdateVolumeKeysRotationFromSettings();
 
     return NOERROR;
 }
@@ -2544,71 +2491,6 @@ ECode CInputManagerService::TryPointerSpeed(
 
     SetPointerSpeedUnchecked(speed);
     return NOERROR;
-}
-
-void CInputManagerService::UpdateStylusIconEnabledFromSettings()
-{
-    Int32 enabled = GetStylusIconEnabled(0);
-    NativeSetStylusIconEnabled(enabled != 0);
-}
-
-void CInputManagerService::RegisterStylusIconEnabledSettingObserver()
-{
-    AutoPtr<ContentObserverInRegisterStylusIconEnabledSettingObserver> observer =
-            new ContentObserverInRegisterStylusIconEnabledSettingObserver();
-    observer->constructor(this, mHandler);
-    AutoPtr<IUri> uri;
-    Settings::System::GetUriFor(ISettingsSystem::STYLUS_ICON_ENABLED, (IUri**)&uri);
-    AutoPtr<IContentResolver> resolver;
-    mContext->GetContentResolver((IContentResolver**)&resolver);
-    resolver->RegisterContentObserver(uri, FALSE, observer);
-}
-
-Int32 CInputManagerService::GetStylusIconEnabled(
-    /* [in] */ Int32 defaultValue)
-{
-    Int32 result = defaultValue;
-    // try {
-    AutoPtr<IContentResolver> resolver;
-    mContext->GetContentResolver((IContentResolver**)&resolver);
-    Settings::System::GetInt32(resolver, ISettingsSystem::STYLUS_ICON_ENABLED, &result);
-    // } catch (SettingNotFoundException snfe) {
-    // }
-    return result;
-}
-
-void CInputManagerService::UpdateVolumeKeysRotationFromSettings()
-{
-    Int32 mode = GetVolumeKeysRotationSetting(0);
-    NativeSetVolumeKeysRotation(mode);
-}
-
-void CInputManagerService::RegisterVolumeKeysRotationSettingObserver()
-{
-    AutoPtr<ContentObserverInRegisterVolumeKeysRotationSettingObserver> observer =
-            new ContentObserverInRegisterVolumeKeysRotationSettingObserver();
-    observer->constructor(this, mHandler);
-    AutoPtr<IUri> uri;
-    Settings::System::GetUriFor(
-            ISettingsSystem::SWAP_VOLUME_KEYS_ON_ROTATION, (IUri**)&uri);
-    AutoPtr<IContentResolver> resolver;
-    mContext->GetContentResolver((IContentResolver**)&resolver);
-    resolver->RegisterContentObserver(uri, FALSE, observer);
-}
-
-Int32 CInputManagerService::GetVolumeKeysRotationSetting(
-    /* [in] */ Int32 defaultValue)
-{
-    Int32 result = defaultValue;
-    // try {
-    AutoPtr<IContentResolver> resolver;
-    mContext->GetContentResolver((IContentResolver**)&resolver);
-    Settings::System::GetInt32ForUser(resolver,
-            ISettingsSystem::SWAP_VOLUME_KEYS_ON_ROTATION,
-            IUserHandle::USER_CURRENT, &result);
-    // } catch (SettingNotFoundException snfe) {
-    // }
-    return result;
 }
 
 void CInputManagerService::UpdatePointerSpeedFromSettings()

@@ -29,10 +29,12 @@ INCLUDES += $(MAKEDIR)/../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../Core/inc/
 INCLUDES += $(PREBUILD_INC)/skia/utils
 INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/config
 INCLUDES += $(PREBUILD_INC)/gui
 INCLUDES += $(PREBUILD_INC)/ui
 INCLUDES += $(PREBUILD_INC)/hardware
 INCLUDES += $(PREBUILD_INC)/surfaceFlinger
+INCLUDES += $(PREBUILD_INC)/sensorservice
 
 SOURCES = Elastos.Droid.Server.car
 SOURCES += Elastos.Droid.Core.cpp
@@ -165,11 +167,9 @@ LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
-LIBRARIES += $(XDK_USER_LIB)/crt0.lib
-LIBRARIES += $(PREBUILD_LIB)/libm.a
-LIBRARIES += $(PREBUILD_LIB)/libinputservice.so
-LIBRARIES += $(PREBUILD_LIB)/libbatteryservice.a
-LIBRARIES += $(PREBUILD_LIB)/libwifi-service.so
-LIBRARIES += -licuuc -llog -lbinder -lutils -lcutils -lselinux -lsurfaceflinger -lsensorservice -lgui -lskia -landroidfw -linput -lhardware -lusbhost -lsuspend -lpower -lhardware_legacy -ldl -lnetutils -lmedia -linputflinger -lui -lEGL -lGLESv1_CM -lGLESv2 -lz
 
-#ELASTOS_LIBS += server/server.lib
+LIBRARIES += -llog -lbinder -lutils -lcutils -lsensorservice -lskia -linput -lhardware -lusbhost -lsuspend -lpower -lnetutils -linputflinger -lui -lEGL -lGLESv2 -linputservice -lm -lhidlbase -lbatteryservice
+
+LIBRARIES += $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib/android.hardware.vibrator@1.0.so
+LIBRARIES += $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib/android.hardware.tv.cec@1.0.so
+LIBRARIES += $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib/android.hardware.tv.input@1.0.so

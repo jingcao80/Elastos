@@ -21,6 +21,7 @@ include $(MAKEDIR)/../../../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
 
 C_DEFINES += -DDROID_SERVER
 

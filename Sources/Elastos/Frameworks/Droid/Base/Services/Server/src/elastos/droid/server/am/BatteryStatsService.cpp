@@ -93,7 +93,7 @@ namespace Am {
 static Boolean wakeup_init = FALSE;
 static sem_t wakeup_sem;
 
-static void wakeup_callback(void)
+static void wakeup_callback(bool success)
 {
     //ALOGV("In wakeup_callback");
     Int32 ret = sem_post(&wakeup_sem);

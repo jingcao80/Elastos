@@ -492,40 +492,6 @@ private:
         CInputManagerService* mOwner;
     };
 
-    class ContentObserverInRegisterStylusIconEnabledSettingObserver
-        : public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterStylusIconEnabledSettingObserver")
-
-        CARAPI constructor(
-            /* [in] */ CInputManagerService* owner,
-            /* [in] */ IHandler* handler);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        CInputManagerService* mOwner;
-    };
-
-    class ContentObserverInRegisterVolumeKeysRotationSettingObserver
-        : public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CInputManagerService::ContentObserverInRegisterVolumeKeysRotationSettingObserver")
-
-        CARAPI constructor(
-            /* [in] */ CInputManagerService* owner,
-            /* [in] */ IHandler* handler);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
-
-    private:
-        CInputManagerService* mOwner;
-    };
-
 public:
     CAR_INTERFACE_DECL()
 
@@ -791,14 +757,6 @@ public:
     CARAPI_(void) UpdatePointerSpeedFromSettings();
 
     CARAPI_(void) UpdateShowTouchesFromSettings();
-
-    CARAPI_(void) UpdateStylusIconEnabledFromSettings();
-
-    CARAPI_(void) RegisterStylusIconEnabledSettingObserver();
-
-    CARAPI_(void) UpdateVolumeKeysRotationFromSettings();
-
-    CARAPI_(void) RegisterVolumeKeysRotationSettingObserver();
 
     // Binder call
     // @Override
@@ -1095,12 +1053,6 @@ private:
     CARAPI_(void) NativeSetShowTouches(
         /* [in] */ Boolean enabled);
 
-    CARAPI_(void) NativeSetStylusIconEnabled(
-        /* [in] */ Boolean enabled);
-
-    CARAPI_(void) NativeSetVolumeKeysRotation(
-        /* [in] */ Int32 mode);
-
     CARAPI_(void) NativeSetInteractive(
         /* [in] */ Boolean interactive);
 
@@ -1126,12 +1078,6 @@ private:
 
     CARAPI_(Int32) FindInputFilterIndexLocked(
         /* [in] */ IIInputFilter* filter);
-
-    CARAPI_(Int32) GetStylusIconEnabled(
-        /* [in] */ Int32 defaultValue);
-
-    CARAPI_(Int32) GetVolumeKeysRotationSetting(
-        /* [in] */ Int32 defaultValue);
 
 public:
     const static String TAG;

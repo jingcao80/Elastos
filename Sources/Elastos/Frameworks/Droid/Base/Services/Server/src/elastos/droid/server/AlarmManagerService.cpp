@@ -46,6 +46,7 @@
 #include <utils/Log.h>
 #include <utils/misc.h>
 
+#include <dirent.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -59,8 +60,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include <linux/ioctl.h>
-#include <linux/android_alarm.h>
 #include <linux/rtc.h>
+
+#include <array>
 
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
@@ -131,6 +133,21 @@ using Elastos::Utility::Logging::Slogger;
 
 namespace android {
 
+static constexpr int ANDROID_ALARM_TIME_CHANGE_MASK = 1 << 16;
+
+/**
+ * The AlarmManager alarm constants:
+ *
+ *   RTC_WAKEUP
+ *   RTC
+ *   REALTIME_WAKEUP
+ *   REALTIME
+ *   SYSTEMTIME (only defined in old alarm driver header, possibly unused?)
+ *
+ * We also need an extra CLOCK_REALTIME fd which exists specifically to be
+ * canceled on RTC changes.
+ */
+static const size_t ANDROID_ALARM_TYPE_COUNT = 5;
 static const size_t N_ANDROID_TIMERFDS = ANDROID_ALARM_TYPE_COUNT + 1;
 static const clockid_t android_alarm_to_clockid[N_ANDROID_TIMERFDS] = {
     CLOCK_REALTIME_ALARM,
@@ -140,103 +157,39 @@ static const clockid_t android_alarm_to_clockid[N_ANDROID_TIMERFDS] = {
     CLOCK_MONOTONIC,
     CLOCK_REALTIME,
 };
-/* to match the legacy alarm driver implementation, we need an extra
-   CLOCK_REALTIME fd which exists specifically to be canceled on RTC changes */
+
+typedef std::array<int, N_ANDROID_TIMERFDS> TimerFds;
 
 class AlarmImpl
 {
 public:
-    AlarmImpl(int *fds, size_t n_fds);
-    virtual ~AlarmImpl();
+    AlarmImpl(const TimerFds &fds, int epollfd, int rtc_id) :
+        fds{fds}, epollfd{epollfd}, rtc_id{rtc_id} { }
+    ~AlarmImpl();
 
-    virtual int set(int type, struct timespec *ts) = 0;
-    virtual int setTime(struct timeval *tv) = 0;
-    virtual int waitForAlarm() = 0;
+    int set(int type, struct timespec *ts);
+    int setTime(struct timeval *tv);
+    int waitForAlarm();
 
 protected:
-    int *fds;
-    size_t n_fds;
+    const TimerFds fds;
+    const int epollfd;
+    const int rtc_id;
 };
-
-class AlarmImplAlarmDriver : public AlarmImpl
-{
-public:
-    AlarmImplAlarmDriver(int fd) : AlarmImpl(&fd, 1) { }
-
-    int set(int type, struct timespec *ts);
-    int clear(int type, struct timespec *ts);
-    int setTime(struct timeval *tv);
-    int waitForAlarm();
-};
-
-class AlarmImplTimerFd : public AlarmImpl
-{
-public:
-    AlarmImplTimerFd(int fds[N_ANDROID_TIMERFDS], int epollfd) :
-        AlarmImpl(fds, N_ANDROID_TIMERFDS), epollfd(epollfd) { }
-    ~AlarmImplTimerFd();
-
-    int set(int type, struct timespec *ts);
-    int setTime(struct timeval *tv);
-    int waitForAlarm();
-
-private:
-    int epollfd;
-};
-
-AlarmImpl::AlarmImpl(int *fds_, size_t n_fds) : fds(new int[n_fds]),
-        n_fds(n_fds)
-{
-    memcpy(fds, fds_, n_fds * sizeof(fds[0]));
-}
 
 AlarmImpl::~AlarmImpl()
 {
-    for (size_t i = 0; i < n_fds; i++) {
-        close(fds[i]);
+    for (auto fd : fds) {
+        epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, nullptr);
+        close(fd);
     }
-    delete [] fds;
-}
 
-int AlarmImplAlarmDriver::set(int type, struct timespec *ts)
-{
-    return ioctl(fds[0], ANDROID_ALARM_SET(type), ts);
-}
-
-int AlarmImplAlarmDriver::clear(int type, struct timespec *ts)
-{
-    return ioctl(fds[0], ANDROID_ALARM_CLEAR(type), ts);
-}
-
-int AlarmImplAlarmDriver::setTime(struct timeval *tv)
-{
-    struct timespec ts;
-    int res;
-
-    ts.tv_sec = tv->tv_sec;
-    ts.tv_nsec = tv->tv_usec * 1000;
-    res = ioctl(fds[0], ANDROID_ALARM_SET_RTC, &ts);
-    if (res < 0)
-        ALOGV("ANDROID_ALARM_SET_RTC ioctl failed: %s\n", strerror(errno));
-    return res;
-}
-
-int AlarmImplAlarmDriver::waitForAlarm()
-{
-    return ioctl(fds[0], ANDROID_ALARM_WAIT);
-}
-
-AlarmImplTimerFd::~AlarmImplTimerFd()
-{
-    for (size_t i = 0; i < N_ANDROID_TIMERFDS; i++) {
-        epoll_ctl(epollfd, EPOLL_CTL_DEL, fds[i], NULL);
-    }
     close(epollfd);
 }
 
-int AlarmImplTimerFd::set(int type, struct timespec *ts)
+int AlarmImpl::set(int type, struct timespec *ts)
 {
-    if (type > ANDROID_ALARM_TYPE_COUNT) {
+    if (static_cast<size_t>(type) > ANDROID_ALARM_TYPE_COUNT) {
         errno = EINVAL;
         return -1;
     }
@@ -254,7 +207,7 @@ int AlarmImplTimerFd::set(int type, struct timespec *ts)
     return timerfd_settime(fds[type], TFD_TIMER_ABSTIME, &spec, NULL);
 }
 
-int AlarmImplTimerFd::setTime(struct timeval *tv)
+int AlarmImpl::setTime(struct timeval *tv)
 {
     struct rtc_time rtc;
     struct tm tm, *gmtime_res;
@@ -267,9 +220,16 @@ int AlarmImplTimerFd::setTime(struct timeval *tv)
         return -1;
     }
 
-    fd = open("/dev/rtc0", O_RDWR);
+    if (rtc_id < 0) {
+        ALOGV("Not setting RTC because wall clock RTC was not found");
+        errno = ENODEV;
+        return -1;
+    }
+
+    android::String8 rtc_dev = String8::format("/dev/rtc%d", rtc_id);
+    fd = open(rtc_dev.string(), O_RDWR);
     if (fd < 0) {
-        ALOGV("Unable to open RTC driver: %s\n", strerror(errno));
+        ALOGV("Unable to open %s: %s\n", rtc_dev.string(), strerror(errno));
         return res;
     }
 
@@ -298,7 +258,7 @@ done:
     return res;
 }
 
-int AlarmImplTimerFd::waitForAlarm()
+int AlarmImpl::waitForAlarm()
 {
     epoll_event events[N_ANDROID_TIMERFDS];
 
@@ -3399,31 +3359,78 @@ ECode AlarmManagerService::ToString(
 // native codes
 //====================================================================================
 
-static Int64 init_alarm_driver()
+static const char rtc_sysfs[] = "/sys/class/rtc";
+
+static bool rtc_is_hctosys(unsigned int rtc_id)
 {
-    int fd = open("/dev/alarm", O_RDWR);
-    if (fd < 0) {
-        ALOGV("opening alarm driver failed: %s", strerror(errno));
-        return 0;
+    android::String8 hctosys_path = android::String8::format("%s/rtc%u/hctosys",
+            rtc_sysfs, rtc_id);
+    FILE *file = fopen(hctosys_path.string(), "re");
+    if (!file) {
+        ALOGE("failed to open %s: %s", hctosys_path.string(), strerror(errno));
+        return false;
     }
 
-    android::AlarmImpl *ret = new android::AlarmImplAlarmDriver(fd);
-    return reinterpret_cast<Int64>(ret);
+    unsigned int hctosys;
+    bool ret = false;
+    int err = fscanf(file, "%u", &hctosys);
+    if (err == EOF)
+        ALOGE("failed to read from %s: %s", hctosys_path.string(),
+                strerror(errno));
+    else if (err == 0)
+        ALOGE("%s did not have expected contents", hctosys_path.string());
+    else
+        ret = hctosys;
+
+    fclose(file);
+    return ret;
+}
+
+static int wall_clock_rtc()
+{
+    std::unique_ptr<DIR, int(*)(DIR*)> dir(opendir(rtc_sysfs), closedir);
+    if (!dir.get()) {
+        ALOGE("failed to open %s: %s", rtc_sysfs, strerror(errno));
+        return -1;
+    }
+
+    struct dirent *dirent;
+    while (errno = 0, dirent = readdir(dir.get())) {
+        unsigned int rtc_id;
+        int matched = sscanf(dirent->d_name, "rtc%u", &rtc_id);
+
+        if (matched < 0)
+            break;
+        else if (matched != 1)
+            continue;
+
+        if (rtc_is_hctosys(rtc_id)) {
+            ALOGV("found wall clock RTC %u", rtc_id);
+            return rtc_id;
+        }
+    }
+
+    if (errno == 0)
+        ALOGW("no wall clock RTC found");
+    else
+        ALOGE("failed to enumerate RTCs: %s", strerror(errno));
+
+    return -1;
 }
 
 static Int64 init_timerfd()
 {
     int epollfd;
-    int fds[android::N_ANDROID_TIMERFDS];
+    android::TimerFds fds;
 
-    epollfd = epoll_create(android::N_ANDROID_TIMERFDS);
+    epollfd = epoll_create(fds.size());
     if (epollfd < 0) {
-        ALOGV("epoll_create(%u) failed: %s", android::N_ANDROID_TIMERFDS,
+        ALOGV("epoll_create(%u) failed: %s", fds.size(),
                 strerror(errno));
         return 0;
     }
 
-    for (size_t i = 0; i < android::N_ANDROID_TIMERFDS; i++) {
+    for (size_t i = 0; i < fds.size(); i++) {
         fds[i] = timerfd_create(android::android_alarm_to_clockid[i], 0);
         if (fds[i] < 0) {
             ALOGV("timerfd_create(%u) failed: %s",  android::android_alarm_to_clockid[i],
@@ -3436,9 +3443,9 @@ static Int64 init_timerfd()
         }
     }
 
-    android::AlarmImpl *ret = new android::AlarmImplTimerFd(fds, epollfd);
+    android::AlarmImpl *ret = new android::AlarmImpl(fds, epollfd, wall_clock_rtc());
 
-    for (size_t i = 0; i < android::N_ANDROID_TIMERFDS; i++) {
+    for (size_t i = 0; i < fds.size(); i++) {
         epoll_event event;
         event.events = EPOLLIN | EPOLLWAKEUP;
         event.data.u32 = i;
@@ -3456,7 +3463,7 @@ static Int64 init_timerfd()
     /* 0 = disarmed; the timerfd doesn't need to be armed to get
        RTC change notifications, just set up as cancelable */
 
-    int err = timerfd_settime(fds[ANDROID_ALARM_TYPE_COUNT],
+    int err = timerfd_settime(fds[android::ANDROID_ALARM_TYPE_COUNT],
             TFD_TIMER_ABSTIME | TFD_TIMER_CANCEL_ON_SET, &spec, NULL);
     if (err < 0) {
         ALOGV("timerfd_settime() failed: %s", strerror(errno));
@@ -3471,11 +3478,6 @@ static Int64 init_timerfd()
 
 Int64 AlarmManagerService::Native_Init()
 {
-    Int64 ret = init_alarm_driver();
-    if (ret) {
-        return ret;
-    }
-
     return init_timerfd();
 }
 
@@ -3511,17 +3513,7 @@ void AlarmManagerService::Native_Clear(
     /* [in] */ Int64 seconds,
     /* [in] */ Int64 nanoseconds)
 {
-    android::AlarmImplAlarmDriver *impl = reinterpret_cast<android::AlarmImplAlarmDriver *>(nativeData);
-    struct timespec ts;
-    ts.tv_sec = seconds;
-    ts.tv_nsec = nanoseconds;
-
-    int result = impl->clear(type, &ts);
-    if (result < 0)
-    {
-        ALOGE("Unable to clear alarm  %lld.%09lld: %s\n",
-                seconds, nanoseconds, strerror(errno));
-    }
+    assert(0);
 }
 
 Int32 AlarmManagerService::Native_WaitForAlarm(

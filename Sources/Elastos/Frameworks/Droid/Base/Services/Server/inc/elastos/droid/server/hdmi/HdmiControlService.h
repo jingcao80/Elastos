@@ -1028,7 +1028,8 @@ public:
         /* [in] */ IHdmiCecMessage* message,
         /* [out] */ Boolean* result);
 
-    CARAPI SetAudioReturnChannel(
+    CARAPI EnableAudioReturnChannel(
+        /* [in] */ Int32 portId,
         /* [in] */ Boolean enabled);
 
     /**

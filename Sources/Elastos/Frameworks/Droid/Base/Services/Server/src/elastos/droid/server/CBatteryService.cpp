@@ -36,8 +36,6 @@
 #include <binder/IServiceManager.h>
 #include <batteryservice/IBatteryPropertiesRegistrar.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::App::ActivityManagerNative;
@@ -71,6 +69,7 @@ using Elastos::Droid::Server::Am::CBatteryStatsService;
 using Elastos::Droid::Server::Lights::LightsManager;
 using Elastos::Droid::Server::Lights::EIID_ILightsManager;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::EIID_IRunnable;
@@ -668,14 +667,14 @@ public:
         void registerListener(const android::sp<android::IBatteryPropertiesListener>& listener) {
             android::Parcel data;
             data.writeInterfaceToken(IBatteryPropertiesRegistrar::getInterfaceDescriptor());
-            data.writeStrongBinder(listener->asBinder());
+            data.writeStrongBinder(android::IInterface::asBinder(listener));
             remote()->transact(android::REGISTER_LISTENER, data, NULL);
         }
 
         void unregisterListener(const android::sp<android::IBatteryPropertiesListener>& listener) {
             android::Parcel data;
             data.writeInterfaceToken(IBatteryPropertiesRegistrar::getInterfaceDescriptor());
-            data.writeStrongBinder(listener->asBinder());
+            data.writeStrongBinder(android::IInterface::asBinder(listener));
             remote()->transact(android::UNREGISTER_LISTENER, data, NULL);
         }
 
@@ -693,6 +692,12 @@ public:
             if (parcelpresent)
                 val->readFromParcel(&reply);
             return ret;
+        }
+
+        void scheduleUpdate() {
+            android::Parcel data;
+            data.writeInterfaceToken(IBatteryPropertiesRegistrar::getInterfaceDescriptor());
+            remote()->transact(android::SCHEDULE_UPDATE, data, NULL);
         }
 };
 

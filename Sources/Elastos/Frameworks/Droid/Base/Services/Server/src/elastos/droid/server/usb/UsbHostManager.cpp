@@ -497,6 +497,8 @@ ECode UsbHostManager::OpenDevice(
     return NOERROR;
 }
 
+static const int USB_CONTROL_TRANSFER_TIMEOUT_MS = 200;
+
 Int32 UsbHostManager::usb_device_added(const char* devname, void* client_data)
 {
     struct usb_descriptor_header* desc;
@@ -511,9 +513,12 @@ Int32 UsbHostManager::usb_device_added(const char* devname, void* client_data)
     UsbHostManager* thiz = (UsbHostManager*)client_data;
     const usb_device_descriptor* deviceDesc = usb_device_get_device_descriptor(device);
 
-    char *manufacturer = usb_device_get_manufacturer_name(device);
-    char *product = usb_device_get_product_name(device);
-    char *serial = usb_device_get_serial(device);
+    char *manufacturer = usb_device_get_manufacturer_name(device,
+            USB_CONTROL_TRANSFER_TIMEOUT_MS);
+    char *product = usb_device_get_product_name(device,
+            USB_CONTROL_TRANSFER_TIMEOUT_MS);
+    char *serial = usb_device_get_serial(device,
+            USB_CONTROL_TRANSFER_TIMEOUT_MS);
 
     Boolean result = thiz->BeginUsbDeviceAdded(
             String(devname), usb_device_get_vendor_id(device), usb_device_get_product_id(device),
@@ -531,7 +536,8 @@ Int32 UsbHostManager::usb_device_added(const char* devname, void* client_data)
     while ((desc = usb_descriptor_iter_next(&iter)) != NULL) {
         if (desc->bDescriptorType == USB_DT_CONFIG) {
             struct usb_config_descriptor *config = (struct usb_config_descriptor *)desc;
-            char *name = usb_device_get_string(device, config->iConfiguration);
+            char *name = usb_device_get_string(device, config->iConfiguration,
+                    USB_CONTROL_TRANSFER_TIMEOUT_MS);
             thiz->AddUsbConfiguration(
                 config->bConfigurationValue, String(name), config->bmAttributes,
                 config->bMaxPower);
@@ -539,7 +545,8 @@ Int32 UsbHostManager::usb_device_added(const char* devname, void* client_data)
         }
         else if (desc->bDescriptorType == USB_DT_INTERFACE) {
             struct usb_interface_descriptor *ifc = (struct usb_interface_descriptor *)desc;
-            char *name = usb_device_get_string(device, ifc->iInterface);
+            char *name = usb_device_get_string(device, ifc->iInterface,
+                    USB_CONTROL_TRANSFER_TIMEOUT_MS);
             thiz->AddUsbInterface(
                 ifc->bInterfaceNumber, String(name), ifc->bAlternateSetting,
                 ifc->bInterfaceClass, ifc->bInterfaceSubClass,

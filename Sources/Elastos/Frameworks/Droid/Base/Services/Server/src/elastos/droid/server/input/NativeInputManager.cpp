@@ -167,8 +167,7 @@ NativeInputManager::NativeInputManager(
         mLocked.mPointerSpeed = 0;
         mLocked.mPointerGesturesEnabled = true;
         mLocked.mShowTouches = false;
-        mLocked.mStylusIconEnabled = false;
-        mLocked.mVolumeKeysRotationMode = 0;
+        mLocked.mPointerCapture = false;
     }
 
     android::sp<android::EventHub> eventHub = new android::EventHub();
@@ -276,11 +275,14 @@ void NativeInputManager::getReaderConfiguration(
         outConfig->pointerGesturesEnabled = mLocked.mPointerGesturesEnabled;
 
         outConfig->showTouches = mLocked.mShowTouches;
-        outConfig->stylusIconEnabled = mLocked.mStylusIconEnabled;
-        outConfig->volumeKeysRotationMode = mLocked.mVolumeKeysRotationMode;
 
-        outConfig->setDisplayInfo(false /*external*/, mLocked.mInternalViewport);
-        outConfig->setDisplayInfo(true /*external*/, mLocked.mExternalViewport);
+        outConfig->pointerCapture = mLocked.mPointerCapture;
+
+        outConfig->setPhysicalDisplayViewport(android::ViewportType::VIEWPORT_INTERNAL,
+                mLocked.mInternalViewport);
+        outConfig->setPhysicalDisplayViewport(android::ViewportType::VIEWPORT_EXTERNAL,
+                mLocked.mExternalViewport);
+        outConfig->setVirtualDisplayViewports(mLocked.mVirtualViewports);
     } // release lock
 }
 
@@ -291,6 +293,27 @@ enum {
     POINTER_ICON_STYLE_CUSTOM = -1,
     POINTER_ICON_STYLE_NULL = 0,
     POINTER_ICON_STYLE_ARROW = 1000,
+    POINTER_ICON_STYLE_CONTEXT_MENU = 1001,
+    POINTER_ICON_STYLE_HAND = 1002,
+    POINTER_ICON_STYLE_HELP = 1003,
+    POINTER_ICON_STYLE_WAIT = 1004,
+    POINTER_ICON_STYLE_CELL = 1006,
+    POINTER_ICON_STYLE_CROSSHAIR = 1007,
+    POINTER_ICON_STYLE_TEXT = 1008,
+    POINTER_ICON_STYLE_VERTICAL_TEXT = 1009,
+    POINTER_ICON_STYLE_ALIAS = 1010,
+    POINTER_ICON_STYLE_COPY = 1011,
+    POINTER_ICON_STYLE_NO_DROP = 1012,
+    POINTER_ICON_STYLE_ALL_SCROLL = 1013,
+    POINTER_ICON_STYLE_HORIZONTAL_DOUBLE_ARROW = 1014,
+    POINTER_ICON_STYLE_VERTICAL_DOUBLE_ARROW = 1015,
+    POINTER_ICON_STYLE_TOP_RIGHT_DOUBLE_ARROW = 1016,
+    POINTER_ICON_STYLE_TOP_LEFT_DOUBLE_ARROW = 1017,
+    POINTER_ICON_STYLE_ZOOM_IN = 1018,
+    POINTER_ICON_STYLE_ZOOM_OUT = 1019,
+    POINTER_ICON_STYLE_GRAB = 1020,
+    POINTER_ICON_STYLE_GRABBING = 1021,
+
     POINTER_ICON_STYLE_SPOT_HOVER = 2000,
     POINTER_ICON_STYLE_SPOT_TOUCH = 2001,
     POINTER_ICON_STYLE_SPOT_ANCHOR = 2002,
@@ -299,8 +322,7 @@ enum {
 /*
  * Describes a pointer icon.
  */
-struct PointerIcon
-{
+struct PointerIcon {
     inline PointerIcon() {
         reset();
     }
@@ -309,6 +331,8 @@ struct PointerIcon
     SkBitmap bitmap;
     float hotSpotX;
     float hotSpotY;
+    std::vector<SkBitmap> bitmapFrames;
+    int32_t durationPerFrame;
 
     inline bool isNullIcon() {
         return style == POINTER_ICON_STYLE_NULL;
@@ -319,6 +343,8 @@ struct PointerIcon
         bitmap.reset();
         hotSpotX = 0;
         hotSpotY = 0;
+        bitmapFrames.clear();
+        durationPerFrame = 0;
     }
 };
 
@@ -375,18 +401,6 @@ android::sp<android::PointerControllerInterface> NativeInputManager::obtainPoint
                 v.logicalRight - v.logicalLeft,
                 v.logicalBottom - v.logicalTop,
                 v.orientation);
-
-        AutoPtr<IPointerIcon> elPointerIcon = mService->GetPointerIcon();
-        if (elPointerIcon != NULL) {
-            PointerIcon pointerIcon;
-            android::status_t status = PointerIcon_load(elPointerIcon, mContext, &pointerIcon);
-            if (!status && !pointerIcon.isNullIcon()) {
-                controller->setPointerIcon(android::SpriteIcon(pointerIcon.bitmap,
-                        pointerIcon.hotSpotX, pointerIcon.hotSpotY));
-            } else {
-                controller->setPointerIcon(android::SpriteIcon());
-            }
-        }
 
         updateInactivityTimeoutLocked(controller);
     }
@@ -727,42 +741,6 @@ void NativeInputManager::setShowTouches(
             android::InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
 }
 
-void NativeInputManager::setStylusIconEnabled(
-    /* [in] */ bool enabled)
-{
-    { // acquire lock
-        android::AutoMutex _l(mLock);
-
-        if (mLocked.mStylusIconEnabled == enabled) {
-            return;
-        }
-
-        ALOGI("Setting stylus icon enabled to %s.", enabled ? "enabled" : "disabled");
-        mLocked.mStylusIconEnabled = enabled;
-    } // release lock
-
-    mInputManager->getReader()->requestRefreshConfiguration(
-            android::InputReaderConfiguration::CHANGE_STYLUS_ICON_ENABLED);
-}
-
-void NativeInputManager::setVolumeKeysRotation(
-    /* [in] */ int32_t mode)
-{
-    { // acquire lock
-        android::AutoMutex _l(mLock);
-
-        if (mLocked.mVolumeKeysRotationMode == mode) {
-            return;
-        }
-
-        ALOGI("Volume keys: rotation mode set to %d.", mode);
-        mLocked.mVolumeKeysRotationMode = mode;
-    } // release lock
-
-    mInputManager->getReader()->requestRefreshConfiguration(
-            android::InputReaderConfiguration::CHANGE_VOLUME_KEYS_ROTATION);
-}
-
 void NativeInputManager::setInteractive(
     /* [in] */ bool interactive)
 {
@@ -772,7 +750,7 @@ void NativeInputManager::setInteractive(
 void NativeInputManager::reloadCalibration()
 {
     mInputManager->getReader()->requestRefreshConfiguration(
-            android::InputReaderConfiguration::TOUCH_AFFINE_TRANSFORMATION);
+            android::InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
 }
 
 android::TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
@@ -1028,6 +1006,21 @@ static android::status_t PointerIcon_loadSystemIcon(
     return status;
 }
 
+static void loadSystemIconAsSpriteWithPointerIcon(
+    /* [in] */ IContext* context,
+    /* [in] */ int32_t style,
+    /* [in] */ PointerIcon* outPointerIcon,
+    /* [in] */ android::SpriteIcon* outSpriteIcon)
+{
+    android::status_t status = PointerIcon_loadSystemIcon(
+            context, style, outPointerIcon);
+    if (!status) {
+        outPointerIcon->bitmap.copyTo(&outSpriteIcon->bitmap, kN32_SkColorType);
+        outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
+        outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
+    }
+}
+
 static void loadSystemIconAsSprite(
    /* [in] */ IContext* context,
    /* [in] */ int32_t style,
@@ -1043,6 +1036,22 @@ static void loadSystemIconAsSprite(
    }
 }
 
+void NativeInputManager::loadPointerIcon(
+    /* [in] */ android::SpriteIcon* icon)
+{
+    AutoPtr<IPointerIcon> pointerIconObj = mService->GetPointerIcon();
+
+    PointerIcon pointerIcon;
+    android::status_t status = PointerIcon_load(pointerIconObj,
+            mContext, &pointerIcon);
+    if (!status && !pointerIcon.isNullIcon()) {
+        *icon = android::SpriteIcon(pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
+    }
+    else {
+        *icon = android::SpriteIcon();
+    }
+}
+
 void NativeInputManager::loadPointerResources(
     /* [in] */ android::PointerResources* outResources)
 {
@@ -1052,6 +1061,41 @@ void NativeInputManager::loadPointerResources(
             &outResources->spotTouch);
     loadSystemIconAsSprite(mContext, POINTER_ICON_STYLE_SPOT_ANCHOR,
             &outResources->spotAnchor);
+}
+
+void NativeInputManager::loadAdditionalMouseResources(
+    /* [in] */ std::map<int32_t, android::SpriteIcon>* outResources,
+    /* [in] */ std::map<int32_t, android::PointerAnimation>* outAnimationResources)
+{
+    for (int iconId = POINTER_ICON_STYLE_CONTEXT_MENU; iconId <= POINTER_ICON_STYLE_GRABBING;
+             ++iconId) {
+        PointerIcon pointerIcon;
+        loadSystemIconAsSpriteWithPointerIcon(
+                mContext, iconId, &pointerIcon, &((*outResources)[iconId]));
+        if (!pointerIcon.bitmapFrames.empty()) {
+            android::PointerAnimation& animationData = (*outAnimationResources)[iconId];
+            size_t numFrames = pointerIcon.bitmapFrames.size() + 1;
+            animationData.durationPerFrame =
+                    milliseconds_to_nanoseconds(pointerIcon.durationPerFrame);
+            animationData.animationFrames.reserve(numFrames);
+            animationData.animationFrames.push_back(android::SpriteIcon(
+                    pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+            for (size_t i = 0; i < numFrames - 1; ++i) {
+              animationData.animationFrames.push_back(android::SpriteIcon(
+                      pointerIcon.bitmapFrames[i], pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+            }
+        }
+    }
+    loadSystemIconAsSprite(mContext, POINTER_ICON_STYLE_NULL,
+            &((*outResources)[POINTER_ICON_STYLE_NULL]));
+}
+
+int32_t NativeInputManager::getDefaultPointerIconId() {
+    return POINTER_ICON_STYLE_ARROW;
+}
+
+int32_t NativeInputManager::getCustomPointerIconId() {
+    return POINTER_ICON_STYLE_CUSTOM;
 }
 
 } // namespace Input
