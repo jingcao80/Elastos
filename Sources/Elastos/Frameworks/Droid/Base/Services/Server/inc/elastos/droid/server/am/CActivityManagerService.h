@@ -2620,7 +2620,8 @@ public:
         /* [in] */ ActivityRecord* activity,
         /* [in] */ ActivityRecord* parent,
         /* [in] */ Boolean aboveSystem,
-        /* [in] */ const String& reason);
+        /* [in] */ const String& reason,
+        /* [out] */ Boolean* timedout);
 
     CARAPI ShowSafeModeOverlay();
 

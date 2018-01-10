@@ -135,8 +135,8 @@ endif
 #
 # EXE_FLAGS and DLL_FLAGS
 #
-EXE_FLAGS := --entry $(EXE_ENTRY) $(EXE_FLAGS)
-ECX_FLAGS := --entry $(ECX_ENTRY) $(ECX_FLAGS)
+EXE_FLAGS := $(PASS2LD)--entry,$(EXE_ENTRY) $(EXE_FLAGS)
+ECX_FLAGS := $(PASS2LD)--entry,$(ECX_ENTRY) $(ECX_FLAGS)
 
 ifneq "$(XDK_TARGET_FORMAT)" "elf"
   ifeq "$(XDK_COMPILER)" "gcc"
@@ -191,14 +191,14 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
     GCC_SYSROOT=$(PREBUILD_PATH)
     GCC_LIB_PATH=$(shell $(CC) -print-file-name=)
 
-    EXE_FLAGS := $(EXE_FLAGS) -lgcc -lc -lstdc++ -nostdlib -Bdynamic -pie -Wl,--no-gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
-    ECX_FLAGS := $(ECX_FLAGS) $(LIBC_FLAGS) -lstdc++ -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
+    EXE_FLAGS := $(EXE_FLAGS) -nostdlib -Bdynamic -pie -Wl,--no-gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
+    ECX_FLAGS := $(ECX_FLAGS) $(LIBC_FLAGS) -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
 
     EXE_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_dynamic.o
     ECX_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_dynamic.o
 
-    EXE_CRT_END=$(PREBUILD_LIB)/crtend_android.o
-    ECX_CRT_END=$(PREBUILD_LIB)/crtend_android.o
+    EXE_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lgcc -lc -lstdc++
+    ECX_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lgcc -lc -lstdc++
 
     DLL_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_so.o $(PREBUILD_LIB)/crtend_so.o
     DLL_CRT_END=$(GCC_LIB_PATH)/libgcc.a

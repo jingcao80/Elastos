@@ -13560,7 +13560,8 @@ ECode CActivityManagerService::InputDispatchingTimedOut(
             }
             *timeout = GetInputDispatchingTimeoutLocked(proc);
         }
-        if (!InputDispatchingTimedOut(proc, NULL, NULL, aboveSystem, reason)) {
+        Boolean timedout;
+        if (InputDispatchingTimedOut(proc, NULL, NULL, aboveSystem, reason, &timedout), !timedout) {
             *timeout =-1;
             return NOERROR;
         }
@@ -13573,12 +13574,16 @@ ECode CActivityManagerService::InputDispatchingTimedOut(
     /* [in] */ ActivityRecord* activity,
     /* [in] */ ActivityRecord* parent,
     /* [in] */ Boolean aboveSystem,
-    /* [in] */ const String& reason)
+    /* [in] */ const String& reason,
+    /* [out] */ Boolean* timedout)
 {
+    VALIDATE_NOT_NULL(timedout);
+
     if (CheckCallingPermission(Manifest::permission::FILTER_EVENTS)
             != IPackageManager::PERMISSION_GRANTED) {
         // throw new SecurityException("Requires permission "
         //         + Manifest::permission::FILTER_EVENTS);
+        *timedout = FALSE;
         return E_SECURITY_EXCEPTION;
     }
 
@@ -13591,15 +13596,18 @@ ECode CActivityManagerService::InputDispatchingTimedOut(
     }
 
     if (proc != NULL) {
-        {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             if (proc->mDebugging) {
-                return FALSE;
+                *timedout = FALSE;
+                return NOERROR;
             }
 
             if (mDidDexOpt) {
                 // Give more time since we were dexopting.
                 mDidDexOpt = FALSE;
-                return FALSE;
+                *timedout = FALSE;
+                return NOERROR;
             }
 
             if (proc->mInstrumentationClass != NULL) {
@@ -13608,7 +13616,8 @@ ECode CActivityManagerService::InputDispatchingTimedOut(
                 info->PutString(String("shortMsg"), String("keyDispatchingTimedOut"));
                 info->PutString(String("longMsg"), annotation);
                 FinishInstrumentationLocked(proc, IActivity::RESULT_CANCELED, info);
-                return TRUE;
+                *timedout = TRUE;
+                return NOERROR;
             }
         }
         AutoPtr<InputDispatchingTimedOutRunnable> runnable = new InputDispatchingTimedOutRunnable(
@@ -13617,7 +13626,8 @@ ECode CActivityManagerService::InputDispatchingTimedOut(
         mHandler->Post(runnable, &res);
     }
 
-    return TRUE;
+    *timedout = TRUE;
+    return NOERROR;
 }
 
 ECode CActivityManagerService::GetAssistContextExtras(
