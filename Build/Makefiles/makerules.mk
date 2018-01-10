@@ -78,11 +78,9 @@ else
 	perl $(XDK_TOOLS)/cls_trans.pl __$*.rc $(dir $<)
 	perl $(XDK_TOOLS)/res_trans.pl __$*.rc "rc" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CC) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
-
-	-mv __section.cpp __section0.cpp;
-	$(CC) $(C_FLAGS) -o $@ __$*.cpp
+	$(CXX) $(C_FLAGS) -o $@ __$*.cpp
 endif
 
 %.exp: $(MAKEDIR)/%.def
@@ -104,15 +102,12 @@ endif
 ifeq "$(TARGET_TYPE)" "eco"
 	perl $(XDK_TOOLS)/res_trans.pl __$*.def "def" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o __section.o __section.cpp; \
-		$(MV) __section.cpp __section0.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 endif
 	if [ -e "__dllmain.cpp" ]; then \
-		$(CC) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
 	fi
-	$(CC) $(C_DEFINES) -c -fno-builtin -o $*.def __$*_exp.c
-	touch $*.exp
 endif
 	touch $(TARGET_NAME).lib
 
@@ -135,13 +130,12 @@ endif
 ifeq "$(TARGET_TYPE)" "eco"
 	perl $(XDK_TOOLS)/res_trans.pl __$*.def "def" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o __section.o __section.cpp; \
-		$(MV) __section.cpp __section0.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 endif
-	$(CC) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp
-	$(CC) $(C_DEFINES) -c -fno-builtin -o $*.def __$*_exp.c
-	touch $*.exp
+	if [ -e "__dllmain.cpp" ]; then \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
+	fi
 endif
 	touch $(TARGET_NAME).lib
 
@@ -169,11 +163,9 @@ ifeq "$(TARGET_TYPE)" "eco"
 	perl $(XDK_TOOLS)/res_trans.pl __$*.rc "rc"
 	if [ -e "__section.cpp" ]; then \
 		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o __section.o __section.cpp; \
-		$(MV) __section.cpp __section0.cpp; \
 	fi
 	if [ -e "__dllmain.cpp" ]; then \
-		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o __dllmain.o __dllmain.cpp; \
-		$(MV) __dllmain.cpp __dllmain0.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
 	fi
 	$(CC) $(C_FLAGS) -o $@ __$*.cpp
 endif
@@ -232,7 +224,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "win32"
 else
 	perl $(XDK_TOOLS)/res_trans.pl $(TARGET_NAME) "ecx" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CC) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 	-mv __section.cpp __section0.cpp;
 	@echo $(LD) $(ECX_CRT_BEGIN) $(ECX_FLAGS) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map \
@@ -272,7 +264,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "win32"
 else
 	perl $(XDK_TOOLS)/res_trans.pl $(TARGET_NAME) "exe" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CC) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 	-mv __section.cpp __section0.cpp;
 	@echo $(LD) $(EXE_CRT_BEGIN) $(EXE_FLAGS) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map \
@@ -338,16 +330,16 @@ ifneq "$(EXPORT_ALL_SYMBOLS)" ""
 else
 	$(LD) $(DLL_FLAGS) $(DLLTOOL_FLAGS) $(DLL_CRT_BEGIN) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map $(SEARCH_LIB) \
 		-o $(TARGET_DBG_INFO_PATH)/$@ \
-		$(PASS2LD)--start-group $(OBJECTS:exp=def) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
+		$(PASS2LD)--start-group $(filter-out %.exp, $(OBJECTS)) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
 		$(RESSECTION) $(DLL_ENTRY_OBJECT_FILE) $(PASS2LD)--end-group $(DLL_CRT_END)
 	$(STRIP) --strip-all -o $(XDK_TARGETS)/$@ $(TARGET_DBG_INFO_PATH)/$@
 endif
 else
 	@echo $(LD) $(DLL_FLAGS) $(DLLTOOL_FLAGS) $(DLL_CRT_BEGIN) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map $(SEARCH_LIB) -o  $(XDK_TARGETS)/$@ \
-		$(PASS2LD)--strip-all $(PASS2LD)--start-group $(OBJECTS:exp=def) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
+		$(PASS2LD)--strip-all $(PASS2LD)--start-group $(filter-out %.exp, $(OBJECTS)) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
 		$(RESSECTION) $(DLL_ENTRY_OBJECT_FILE) $(PASS2LD)--end-group $(DLL_CRT_END) $(BLACKHOLE)
 	$(LD) $(DLL_FLAGS) $(DLLTOOL_FLAGS) $(DLL_CRT_BEGIN) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map $(SEARCH_LIB) -o  $(XDK_TARGETS)/$@ \
-		$(PASS2LD)--strip-all $(PASS2LD)--start-group $(OBJECTS:exp=def) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
+		$(PASS2LD)--strip-all $(PASS2LD)--start-group $(filter-out %.exp, $(OBJECTS)) __dllmain.o $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) \
 		$(RESSECTION) $(DLL_ENTRY_OBJECT_FILE) $(PASS2LD)--end-group $(DLL_CRT_END)
 endif # "$(DEBUG_INFO)" "1"
 

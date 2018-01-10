@@ -323,7 +323,7 @@ CHECKEXIST: foreach my $single(@g_dep) {
 
 #$W_filename="$TARGET_NAME" . "RES.cpp";
 if (-e "__section.cpp") {
-    die "recreate section.cpp\n"
+    unlink("__section.cpp");
 }
 $W_filename="__section.cpp";
 open(W_FILE, ">$W_filename") || die "ERROR:can not open $W_filename\n";
