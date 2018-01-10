@@ -505,6 +505,7 @@ ECode OpenSSLSocketImpl::StartHandshake()
             // }
         }
     // }
+    return NOERROR;
 }
 
 ECode OpenSSLSocketImpl::GetPeerHostName(

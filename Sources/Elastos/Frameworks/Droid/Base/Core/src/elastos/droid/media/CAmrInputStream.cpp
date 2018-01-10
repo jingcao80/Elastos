@@ -16,7 +16,7 @@
 
 #include "elastos/droid/media/CAmrInputStream.h"
 
-#include <media/stagefright/codecs/amrnb/gsmamr_enc.h>
+// #include <media/stagefright/codecs/amrnb/gsmamr_enc.h>
 
 namespace Elastos {
 namespace Droid {
@@ -175,13 +175,14 @@ ECode CAmrInputStream::GsmAmrEncoderNew(
 ECode CAmrInputStream::GsmAmrEncoderInitialize(
     /* [in] */ Int64 gae)
 {
-    GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
-    int32_t nResult = AMREncodeInit(&state->mEncState, &state->mSidState, false);
-    if (nResult != 0) {
-        // throwException(env, "java/lang/IllegalArgumentException",
-        //     "GsmAmrEncoder initialization failed %d", nResult);
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
+    assert(0);
+    // GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
+    // int32_t nResult = AMREncodeInit(&state->mEncState, &state->mSidState, false);
+    // if (nResult != 0) {
+    //     // throwException(env, "java/lang/IllegalArgumentException",
+    //     //     "GsmAmrEncoder initialization failed %d", nResult);
+    //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    // }
     return NOERROR;
 }
 
@@ -193,51 +194,53 @@ ECode CAmrInputStream::GsmAmrEncoderEncode(
     /* [in] */ Int32 amrOffset,
     /* [out] */ Int32* number)
 {
-    VALIDATE_NOT_NULL(number);
-    Byte inBuf[BYTES_PER_FRAME];
-    Byte outBuf[MAX_OUTPUT_BUFFER_SIZE];
+    assert(0);
+    // VALIDATE_NOT_NULL(number);
+    // Byte inBuf[BYTES_PER_FRAME];
+    // Byte outBuf[MAX_OUTPUT_BUFFER_SIZE];
 
-    memcpy(inBuf, pcm->GetPayload() + pcmOffset, sizeof(inBuf));
-    GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
-    int32_t length;
-    length = AMREncode(state->mEncState, state->mSidState,
-                                (Mode)MR122,
-                                (int16_t *)inBuf,
-                                (unsigned char *)outBuf,
-                                (Frame_Type_3GPP*)&state->mLastModeUsed,
-                                AMR_TX_WMF);
-    if (length < 0) {
-        // throwException(env, "java/io/IOException",
-        //         "Failed to encode a frame with error code: %d", length);
-        *number = -1;
-        return E_IO_EXCEPTION;
-    }
+    // memcpy(inBuf, pcm->GetPayload() + pcmOffset, sizeof(inBuf));
+    // GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
+    // int32_t length;
+    // length = AMREncode(state->mEncState, state->mSidState,
+    //                             (Mode)MR122,
+    //                             (int16_t *)inBuf,
+    //                             (unsigned char *)outBuf,
+    //                             (Frame_Type_3GPP*)&state->mLastModeUsed,
+    //                             AMR_TX_WMF);
+    // if (length < 0) {
+    //     // throwException(env, "java/io/IOException",
+    //     //         "Failed to encode a frame with error code: %d", length);
+    //     *number = -1;
+    //     return E_IO_EXCEPTION;
+    // }
 
-    // The 1st byte of PV AMR frames are WMF (Wireless Multimedia Forum)
-    // bitpacked, i.e.;
-    //    [P(4) + FT(4)]. Q=1 for good frame, P=padding bit, 0
-    // Here we are converting the header to be as specified in Section 5.3 of
-    // RFC 3267 (AMR storage format) i.e.
-    //    [P(1) + FT(4) + Q(1) + P(2)].
-    if (length > 0) {
-        outBuf[0] = (outBuf[0] << 3) | 0x4;
-    }
+    // // The 1st byte of PV AMR frames are WMF (Wireless Multimedia Forum)
+    // // bitpacked, i.e.;
+    // //    [P(4) + FT(4)]. Q=1 for good frame, P=padding bit, 0
+    // // Here we are converting the header to be as specified in Section 5.3 of
+    // // RFC 3267 (AMR storage format) i.e.
+    // //    [P(1) + FT(4) + Q(1) + P(2)].
+    // if (length > 0) {
+    //     outBuf[0] = (outBuf[0] << 3) | 0x4;
+    // }
 
-    memcpy(amr + amrOffset, outBuf, length);
+    // memcpy(amr + amrOffset, outBuf, length);
 
-    *number = length;
+    // *number = length;
     return NOERROR;
 }
 
 void CAmrInputStream::GsmAmrEncoderCleanup(
     /* [in] */ Int64 gae)
 {
-    GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
-    if (state) {
-        AMREncodeExit(&state->mEncState, &state->mSidState);
-        state->mEncState = NULL;
-        state->mSidState = NULL;
-    }
+    assert(0);
+    // GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
+    // if (state) {
+    //     AMREncodeExit(&state->mEncState, &state->mSidState);
+    //     state->mEncState = NULL;
+    //     state->mSidState = NULL;
+    // }
 }
 
 void CAmrInputStream::GsmAmrEncoderDelete(

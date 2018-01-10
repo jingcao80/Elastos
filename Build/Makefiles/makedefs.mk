@@ -53,11 +53,19 @@ OBJ_SUFFIX = .o
 #
 # Select C/C++ compiler and assembler
 #
+ifeq "$(XDK_COMPILER)" "clang"
+CC = clang
+CXX = clang++
+ASM = clang
+AR = ar
+endif
 
+ifeq "$(XDK_COMPILER)" "gcc"
 CC = gcc
 CXX = g++
 ASM = gcc
 AR = ar
+endif
 
 DLLTOOL = dlltool
 
@@ -84,7 +92,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "android"
   ifneq "$(DLLTOOL_FLAGS)" ""
     DLLTOOL_FLAGS := -Wl,-soname,$(strip $(DLLTOOL_FLAGS:-D=))
   endif
-  DLLTOOL_FLAGS := -Wl,-soname,$(TARGET_NAME).$(DEPEND_OBJ_TYPE) -lstdc++ $(LIBC_FLAGS) -nostdlib -L$(PREBUILD_LIB) \
+  DLLTOOL_FLAGS := -Wl,-soname,$(TARGET_NAME).$(DEPEND_OBJ_TYPE) -nostdlib -L$(PREBUILD_LIB) \
                    $(DLLTOOL_FLAGS)
 else
   ifneq "$(DLLTOOL_FLAGS)" ""
@@ -105,10 +113,20 @@ endif
 #
 # Linker and its flags
 #
+
+ifeq "$(XDK_COMPILER)" "clang"
+LD = clang
+STRIP = strip
+OBJCOPY = objcopy
+PASS2LD = -Wl,
+endif
+
+ifeq "$(XDK_COMPILER)" "gcc"
 LD = gcc
 STRIP = strip
 OBJCOPY = objcopy
 PASS2LD = -Wl,
+endif
 
 ifeq "$(ECX_ENTRY)" ""
   EXE_ENTRY = _start
@@ -182,7 +200,8 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
     DLL_CRT_END=$(GCC_LIB_PATH)/32/libgcc.a
   endif
   ifeq "$(XDK_TARGET_PLATFORM)" "android"
-    DLL_FLAGS := $(DLL_FLAGS) -nostdlib -shared -fPIC -Wl,--gc-sections -Wl,--no-undefined,--no-undefined-version
+  DLL_FLAGS := $(DLL_FLAGS) -B$(GCC_TOOLCHAIN)/bin -fuse-ld=gold -nostdlib \
+                       -shared -fPIC -Wl,--gc-sections -Wl,--no-undefined,--no-undefined-version
     ifneq "$(EXPORT_ALL_SYMBOLS)" ""
       DLL_DBGINFO_FLAGS := $(DLL_FLAGS)
     endif
@@ -191,17 +210,18 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
     GCC_SYSROOT=$(PREBUILD_PATH)
     GCC_LIB_PATH=$(shell $(CC) -print-file-name=)
 
-    EXE_FLAGS := $(EXE_FLAGS) -nostdlib -Bdynamic -pie -Wl,--no-gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
-    ECX_FLAGS := $(ECX_FLAGS) $(LIBC_FLAGS) -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
+    EXE_FLAGS := $(ECX_FLAGS) -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
+    ECX_FLAGS := $(ECX_FLAGS) -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
 
     EXE_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_dynamic.o
+
     ECX_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_dynamic.o
 
-    EXE_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lgcc -lc -lstdc++
-    ECX_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lgcc -lc -lstdc++
+    EXE_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lc -lc++ -lcompiler_rt
+    ECX_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lc -lc++ -lcompiler_rt
 
-    DLL_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_so.o $(PREBUILD_LIB)/crtend_so.o
-    DLL_CRT_END=$(GCC_LIB_PATH)/libgcc.a
+    DLL_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_so.o
+    DLL_CRT_END=$(PREBUILD_LIB)/crtend_so.o $(PREBUILD_LIB)/libgcc.a -lc -lc++ -lcompiler_rt
   endif
 endif # elf
 
@@ -245,15 +265,28 @@ ifeq "$(XDK_VERSION)" "dbg"
     C_FLAGS := -ggdb $(C_FLAGS)
   endif
   ifeq "$(XDK_TARGET_CPU)" "arm"
-    C_FLAGS := -mapcs-frame -fno-omit-frame-pointer $(C_FLAGS)
+    C_FLAGS := -fno-omit-frame-pointer $(C_FLAGS)
   endif
   C_DEFINES:= -D_DEBUG $(C_DEFINES)
 endif
 
 ifneq "$(NOWARNING)" ""
-  C_FLAGS := -c -fno-builtin -w -falign-functions=4 $(C_FLAGS)
+  ifeq "$(XDK_COMPILER)" "gcc"
+    C_FLAGS := -c -fno-builtin -w -falign-functions=4 $(C_FLAGS)
+  endif
+  ifeq "$(XDK_COMPILER)" "clang"
+    C_FLAGS := -c -fno-builtin -w $(C_FLAGS)
+  endif
 else
-  C_FLAGS := -c -fno-builtin -Wall -falign-functions=4 $(C_FLAGS)
+  ifeq "$(XDK_COMPILER)" "gcc"
+    C_FLAGS := -c -fno-builtin -Wall -falign-functions=4 $(C_FLAGS)
+  endif
+  ifeq "$(XDK_COMPILER)" "clang"
+    C_FLAGS := -c -fno-builtin -Wall -Wextra -Werror=format-security -Werror=implicit-function-declaration -Winit-self \
+               -Werror=return-type -Werror=address -Werror=sequence-point -Werror=date-time \
+               -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-for-loop-analysis -Wno-unused-command-line-argument \
+               -Wno-nullability-completeness -Wno-extern-c-compat -Wno-return-type-c-linkage -fcolor-diagnostics $(C_FLAGS)
+  endif
 endif
 
 ifeq "$(USE_STDINC)" ""
@@ -282,24 +315,32 @@ ifeq "$(XDK_TARGET_CPU)" "x86"
 endif
 
 ifeq "$(XDK_TARGET_CPU)" "arm"
-  C_FLAGS:= -march=armv7-a \
-            -fms-extensions -mstructure-size-boundary=8 \
+  C_FLAGS:= -target armv7a-linux-androideabi -fms-extensions \
             $(C_FLAGS)
   ifeq "$(XDK_TARGET_PLATFORM)" "linux"
     C_FLAGS:= -msoft-float -fPIC -mthumb-interwork -ffunction-sections -fdata-sections -funwind-tables -fstack-protector $(C_FLAGS)
   else
   	ifeq "$(XDK_TARGET_PLATFORM)" "android"
-      C_FLAGS:= -msoft-float -fPIC -mthumb-interwork -ffunction-sections -fdata-sections -funwind-tables -fstack-protector -Wno-unused-local-typedefs $(C_FLAGS)
+      C_FLAGS:= -msoft-float -fPIC -ffunction-sections -fdata-sections -funwind-tables -Wa,--noexecstack -fstack-protector -fno-short-enums \
+                -no-canonical-prefixes -fmessage-length=0 -nostdlibinc $(C_FLAGS)
   	else
   	  ifneq "$(XDK_COMPILER)" "gcc"
-        C_FLAGS:= -mapcs-32 -msoft-float  $(C_FLAGS)
+        C_FLAGS:= -mapcs-32 -msoft-float $(C_FLAGS)
       endif
   	endif
   endif
 endif
 
 # -fno-rtti only valid for C++ but not for C/ObjC since 3.3.3
+ifeq "$(XDK_COMPILER)" "gcc"
 CPP_FLAGS := -fno-rtti -fcheck-new -Wno-psabi $(CPP_FLAGS)
+endif
+ifeq "$(XDK_COMPILER)" "clang"
+CPP_FLAGS := -c -std=gnu++14 -fno-rtti -fvisibility-inlines-hidden $(CPP_FLAGS)
+ifeq "$(XDK_VERSION)" "dbg"
+CPP_FLAGS := $(CPP_FLAGS) -fsanitize=integer -fsanitize-trap=all -ftrap-function=abort
+endif
+endif
 
 ##########################################################################
 #

@@ -78,9 +78,9 @@ else
 	perl $(XDK_TOOLS)/cls_trans.pl __$*.rc $(dir $<)
 	perl $(XDK_TOOLS)/res_trans.pl __$*.rc "rc" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
-	$(CXX) $(C_FLAGS) -o $@ __$*.cpp
+	$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o $@ __$*.cpp
 endif
 
 %.exp: $(MAKEDIR)/%.def
@@ -102,11 +102,11 @@ endif
 ifeq "$(TARGET_TYPE)" "eco"
 	perl $(XDK_TOOLS)/res_trans.pl __$*.def "def" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 endif
 	if [ -e "__dllmain.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
 	fi
 endif
 	touch $(TARGET_NAME).lib
@@ -130,11 +130,11 @@ endif
 ifeq "$(TARGET_TYPE)" "eco"
 	perl $(XDK_TOOLS)/res_trans.pl __$*.def "def" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 endif
 	if [ -e "__dllmain.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
 	fi
 endif
 	touch $(TARGET_NAME).lib
@@ -162,12 +162,12 @@ ifeq "$(TARGET_TYPE)" "eco"
 	perl $(XDK_TOOLS)/cls_trans.pl __$*.rc 'NA'
 	perl $(XDK_TOOLS)/res_trans.pl __$*.rc "rc"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o __section.o __section.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 	if [ -e "__dllmain.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __dllmain.o __dllmain.cpp; \
 	fi
-	$(CC) $(C_FLAGS) -o $@ __$*.cpp
+	$(CXX) $(CPP_FLAGS) $(C_FLAGS) -o $@ __$*.cpp
 endif
 	touch $@
 
@@ -224,7 +224,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "win32"
 else
 	perl $(XDK_TOOLS)/res_trans.pl $(TARGET_NAME) "ecx" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 	-mv __section.cpp __section0.cpp;
 	@echo $(LD) $(ECX_CRT_BEGIN) $(ECX_FLAGS) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map \
@@ -264,7 +264,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "win32"
 else
 	perl $(XDK_TOOLS)/res_trans.pl $(TARGET_NAME) "exe" "$(SOURCES)"
 	if [ -e "__section.cpp" ]; then \
-		$(CXX) $(C_DEFINES) -c -fno-builtin -o __section.o __section.cpp; \
+		$(CXX) $(CPP_FLAGS) $(C_FLAGS) -c -fno-builtin -o __section.o __section.cpp; \
 	fi
 	-mv __section.cpp __section0.cpp;
 	@echo $(LD) $(EXE_CRT_BEGIN) $(EXE_FLAGS) $(LINK_FLAGS) $(PASS2LD)-Map $(PASS2LD)$(TARGET_NAME).map \

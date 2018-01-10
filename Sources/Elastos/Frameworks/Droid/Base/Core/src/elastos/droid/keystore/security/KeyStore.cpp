@@ -54,11 +54,12 @@ ECode KeyStore::KeystoreServiceWrapper::Init()
 ECode KeyStore::KeystoreServiceWrapper::Test(
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->test();
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->test();
+    // }
     return NOERROR;
 }
 
@@ -66,19 +67,20 @@ ECode KeyStore::KeystoreServiceWrapper::Get(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Byte>** bytes)
 {
-    VALIDATE_NOT_NULL(bytes);
-    *bytes = NULL;
-    if (mKeystoreService.get() != NULL) {
-        uint8_t* data = NULL;
-        size_t len = 0;
-        int32_t ret = mKeystoreService->get(android::String16(name), &data, &len);
-        if (ret == 0 && len > 0) {
-            *bytes = ArrayOf<Byte>::Alloc(len);
-            REFCOUNT_ADD(*bytes);
-            (*bytes)->Copy(data, len);
-            free(data);
-        }
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(bytes);
+    // *bytes = NULL;
+    // if (mKeystoreService.get() != NULL) {
+    //     uint8_t* data = NULL;
+    //     size_t len = 0;
+    //     int32_t ret = mKeystoreService->get(android::String16(name), &data, &len);
+    //     if (ret == 0 && len > 0) {
+    //         *bytes = ArrayOf<Byte>::Alloc(len);
+    //         REFCOUNT_ADD(*bytes);
+    //         (*bytes)->Copy(data, len);
+    //         free(data);
+    //     }
+    // }
     return NOERROR;
 }
 
@@ -89,12 +91,13 @@ ECode KeyStore::KeystoreServiceWrapper::Insert(
     /* [in] */ Int32 flags,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->insert(android::String16(name), item->GetPayload(),
-                item->GetLength(), uid, flags);
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->insert(android::String16(name), item->GetPayload(),
+    //             item->GetLength(), uid, flags);
+    // }
     return NOERROR;
 }
 
@@ -129,25 +132,26 @@ ECode KeyStore::KeystoreServiceWrapper::Saw(
     /* [in] */ Int32 uid,
     /* [out, callee] */ ArrayOf<String>** ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = NULL;
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = NULL;
 
-    if (mKeystoreService.get() != NULL) {
-        android::Vector<android::String16> matches;
-        mKeystoreService->saw(android::String16(name), uid, &matches);
-        Int32 size = matches.size();
-        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
+    // if (mKeystoreService.get() != NULL) {
+    //     android::Vector<android::String16> matches;
+    //     mKeystoreService->saw(android::String16(name), uid, &matches);
+    //     Int32 size = matches.size();
+    //     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(size);
 
-        if (size > 0) {
-            android::Vector<android::String16>::const_iterator it = matches.begin();
-            Int32 i = 0;
-            for (; it != matches.end(); ++it) {
-                array->Set(i++, TextUtils::String16ToString(*it));
-            }
-        }
-        *ret = array;
-        REFCOUNT_ADD(*ret);
-    }
+    //     if (size > 0) {
+    //         android::Vector<android::String16>::const_iterator it = matches.begin();
+    //         Int32 i = 0;
+    //         for (; it != matches.end(); ++it) {
+    //             array->Set(i++, TextUtils::String16ToString(*it));
+    //         }
+    //     }
+    //     *ret = array;
+    //     REFCOUNT_ADD(*ret);
+    // }
     return NOERROR;
 }
 
@@ -166,22 +170,24 @@ ECode KeyStore::KeystoreServiceWrapper::Password(
     /* [in] */ const String& password,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->password(android::String16(password));
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->password(android::String16(password));
+    // }
     return NOERROR;
 }
 
 ECode KeyStore::KeystoreServiceWrapper::Lock(
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->lock();
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->lock();
+    // }
     return NOERROR;
 }
 
@@ -189,21 +195,23 @@ ECode KeyStore::KeystoreServiceWrapper::Unlock(
     /* [in] */ const String& password,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->unlock(android::String16(password));
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->unlock(android::String16(password));
+    // }
     return NOERROR;
 }
 
 ECode KeyStore::KeystoreServiceWrapper::Zero(
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->zero();
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->zero();
+    // }
     return NOERROR;
 }
 
@@ -266,12 +274,13 @@ ECode KeyStore::KeystoreServiceWrapper::Import_key(
     /* [in] */ Int32 flags,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->import(android::String16(name), data->GetPayload()
-                , data->GetLength(), uid, flags);
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->import(android::String16(name), data->GetPayload()
+    //             , data->GetLength(), uid, flags);
+    // }
     return NOERROR;
 }
 
@@ -280,20 +289,21 @@ ECode KeyStore::KeystoreServiceWrapper::Sign(
     /* [in] */ ArrayOf<Byte>* data,
     /* [out, callee] */ ArrayOf<Byte>** ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = NULL;
-    if (mKeystoreService.get() != NULL) {
-        void* out = NULL;
-        size_t outSize = 0;
-        mKeystoreService->sign(android::String16(name), data->GetPayload(), data->GetLength()
-                , (uint8_t**) &out, &outSize);
-        if (outSize > 0 && out != NULL) {
-            *ret = ArrayOf<Byte>::Alloc(outSize);
-            memcpy((*ret)->GetPayload(), out, outSize);
-            REFCOUNT_ADD(*ret);
-            free(out);
-        }
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = NULL;
+    // if (mKeystoreService.get() != NULL) {
+    //     void* out = NULL;
+    //     size_t outSize = 0;
+    //     mKeystoreService->sign(android::String16(name), data->GetPayload(), data->GetLength()
+    //             , (uint8_t**) &out, &outSize);
+    //     if (outSize > 0 && out != NULL) {
+    //         *ret = ArrayOf<Byte>::Alloc(outSize);
+    //         memcpy((*ret)->GetPayload(), out, outSize);
+    //         REFCOUNT_ADD(*ret);
+    //         free(out);
+    //     }
+    // }
     return NOERROR;
 }
 
@@ -303,12 +313,13 @@ ECode KeyStore::KeystoreServiceWrapper::Verify(
     /* [in] */ ArrayOf<Byte>* signature,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->verify(android::String16(name), data->GetPayload(), data->GetLength()
-                , signature->GetPayload(), signature->GetLength());
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->verify(android::String16(name), data->GetPayload(), data->GetLength()
+    //             , signature->GetPayload(), signature->GetLength());
+    // }
     return NOERROR;
 }
 
@@ -316,19 +327,20 @@ ECode KeyStore::KeystoreServiceWrapper::Get_pubkey(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Byte>** ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = NULL;
-    if (mKeystoreService.get() != NULL) {
-        void* out = NULL;
-        size_t outSize = 0;
-        mKeystoreService->get_pubkey(android::String16(name), (unsigned char**) &out, &outSize);
-        if (outSize > 0 && out != NULL) {
-            *ret = ArrayOf<Byte>::Alloc(outSize);
-            memcpy((*ret)->GetPayload(), out, outSize);
-            REFCOUNT_ADD(*ret);
-            free(out);
-        }
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = NULL;
+    // if (mKeystoreService.get() != NULL) {
+    //     void* out = NULL;
+    //     size_t outSize = 0;
+    //     mKeystoreService->get_pubkey(android::String16(name), (unsigned char**) &out, &outSize);
+    //     if (outSize > 0 && out != NULL) {
+    //         *ret = ArrayOf<Byte>::Alloc(outSize);
+    //         memcpy((*ret)->GetPayload(), out, outSize);
+    //         REFCOUNT_ADD(*ret);
+    //         free(out);
+    //     }
+    // }
     return NOERROR;
 }
 
@@ -337,11 +349,12 @@ ECode KeyStore::KeystoreServiceWrapper::Del_key(
     /* [in] */ Int32 uid,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->del_key(android::String16(name), uid);
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->del_key(android::String16(name), uid);
+    // }
     return NOERROR;
 }
 
@@ -375,11 +388,12 @@ ECode KeyStore::KeystoreServiceWrapper::Getmtime(
     /* [in] */ const String& name,
     /* [out] */ Int64* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->getmtime(android::String16(name));
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->getmtime(android::String16(name));
+    // }
     return NOERROR;
 }
 
@@ -427,11 +441,12 @@ ECode KeyStore::KeystoreServiceWrapper::Reset_uid(
     /* [in] */ Int32 uid,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->reset_uid(uid);
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->reset_uid(uid);
+    // }
     return NOERROR;
 }
 
@@ -440,11 +455,12 @@ ECode KeyStore::KeystoreServiceWrapper::Sync_uid(
     /* [in] */ Int32 dstUid,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = 0;
-    if (mKeystoreService.get() != NULL) {
-        *result = mKeystoreService->sync_uid(srcUid, dstUid);
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(result);
+    // *result = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *result = mKeystoreService->sync_uid(srcUid, dstUid);
+    // }
     return NOERROR;
 }
 
@@ -453,11 +469,12 @@ ECode KeyStore::KeystoreServiceWrapper::Password_uid(
     /* [in] */ Int32 uid,
     /* [out] */ Int32* ret)
 {
-    VALIDATE_NOT_NULL(ret);
-    *ret = 0;
-    if (mKeystoreService.get() != NULL) {
-        *ret = mKeystoreService->password_uid(android::String16(password), uid);
-    }
+    assert(0);
+    // VALIDATE_NOT_NULL(ret);
+    // *ret = 0;
+    // if (mKeystoreService.get() != NULL) {
+    //     *ret = mKeystoreService->password_uid(android::String16(password), uid);
+    // }
     return NOERROR;
 }
 

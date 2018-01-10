@@ -31,7 +31,7 @@ Boolean OpenSSLEngine::Init()
     return TRUE;
 }
 
-Boolean OpenSSLEngine::sIsInited = OpenSSLEngine::Init();
+Boolean OpenSSLEngine::sIsInited = FALSE; //OpenSSLEngine::Init();
 
 CAR_INTERFACE_IMPL(OpenSSLEngine, Object, IOpenSSLEngine)
 

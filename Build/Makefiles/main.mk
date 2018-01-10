@@ -137,7 +137,10 @@ TARGET_XSL_C_PATH= $(XDK_SOURCE_PATH)/Documents/References/Chinese/xsl/xsl_c
 TARGET_XSL_E_PATH= $(XDK_SOURCE_PATH)/Documents/References/English/xsl/xsl_e
 
 # SYSTEM INCLUDE PATH
-INCLUDES = .; $(XDK_USER_INC); $(PREBUILD_INC); $(MAKEDIR);
+INCLUDES := .; $(XDK_USER_INC); $(PREBUILD_INC); $(MAKEDIR);
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+INCLUDES := $(PREBUILD_INC)/libcxx; $(INCLUDES);
+endif
 SYSTEM_INCLUDES := $(INCLUDES)
 
 #$(warning makefile_rdk)
