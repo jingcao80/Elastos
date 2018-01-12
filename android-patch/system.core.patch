@@ -1,0 +1,126 @@
+diff --git a/adb/commandline.cpp b/adb/commandline.cpp
+index 4979eef5c..a7453b593 100644
+--- a/adb/commandline.cpp
++++ b/adb/commandline.cpp
+@@ -2001,8 +2001,13 @@ static int uninstall_app(TransportType transport, const char* serial, int argc,
+ static int install_app(TransportType transport, const char* serial, int argc, const char** argv) {
+     // The last argument must be the APK file
+     const char* file = argv[argc - 1];
+-    if (!android::base::EndsWithIgnoreCase(file, ".apk")) {
+-        fprintf(stderr, "Filename doesn't end .apk: %s\n", file);
++    bool isApk = false, isEpk = false;
++    isApk = android::base::EndsWithIgnoreCase(file, ".apk");
++    if (!isApk) {
++        isEpk = android::base::EndsWithIgnoreCase(file, ".epk");
++    }
++    if (!isApk && !isEpk) {
++        fprintf(stderr, "Filename doesn't end .apk or .epk: %s\n", file);
+         return EXIT_FAILURE;
+     }
+ 
+@@ -2029,6 +2034,7 @@ static int install_app(TransportType transport, const char* serial, int argc, co
+     // add size parameter [required for streaming installs]
+     // do last to override any user specified value
+     cmd += " " + android::base::StringPrintf("-S %" PRIu64, static_cast<uint64_t>(sb.st_size));
++    cmd += " " + (isApk ? std::string("--apk") : std::string("--epk"));
+ 
+     int remoteFd = adb_connect(cmd, &error);
+     if (remoteFd < 0) {
+diff --git a/init/init.cpp b/init/init.cpp
+index bb6355ae3..2b7f5b849 100644
+--- a/init/init.cpp
++++ b/init/init.cpp
+@@ -856,7 +856,7 @@ static void selinux_initialize(bool in_kernel_domain) {
+         bool kernel_enforcing = (security_getenforce() == 1);
+         bool is_enforcing = selinux_is_enforcing();
+         if (kernel_enforcing != is_enforcing) {
+-            if (security_setenforce(is_enforcing)) {
++            if (security_setenforce(!is_enforcing)) {
+                 PLOG(ERROR) << "security_setenforce(%s) failed" << (is_enforcing ? "true" : "false");
+                 security_failure();
+             }
+diff --git a/init/init_first_stage.cpp b/init/init_first_stage.cpp
+index bcc8d1b1a..c759a75e6 100644
+--- a/init/init_first_stage.cpp
++++ b/init/init_first_stage.cpp
+@@ -224,10 +224,10 @@ void FirstStageMount::InitVerityDevice(const std::string& verity_device) {
+ 
+ bool FirstStageMount::MountPartitions() {
+     for (auto fstab_rec : mount_fstab_recs_) {
+-        if (!SetUpDmVerity(fstab_rec)) {
+-            PLOG(ERROR) << "Failed to setup verity for '" << fstab_rec->mount_point << "'";
+-            return false;
+-        }
++//         if (!SetUpDmVerity(fstab_rec)) {
++//             PLOG(ERROR) << "Failed to setup verity for '" << fstab_rec->mount_point << "'";
++//             return false;
++//         }
+         if (fs_mgr_do_mount_one(fstab_rec)) {
+             PLOG(ERROR) << "Failed to mount '" << fstab_rec->mount_point << "'";
+             return false;
+diff --git a/init/service.cpp b/init/service.cpp
+index 9ba0272a3..9f0f5dd40 100644
+--- a/init/service.cpp
++++ b/init/service.cpp
+@@ -640,7 +640,7 @@ bool Service::Start() {
+         LOG(INFO) << "computing context for service '" << name_ << "'";
+         scon = ComputeContextFromExecutable(name_, args_[0]);
+         if (scon == "") {
+-            return false;
++            // return false;
+         }
+     }
+ 
+diff --git a/rootdir/init.rc b/rootdir/init.rc
+index 3b996a435..ea15d13ea 100644
+--- a/rootdir/init.rc
++++ b/rootdir/init.rc
+@@ -432,6 +432,9 @@ on post-fs-data
+     mkdir /data/property 0700 root root
+     mkdir /data/tombstones 0771 system system
+ 
++    # create /data/elastos, so as to enforce our permissions
++    mkdir /data/elastos 0771 system system
++
+     # create dalvik-cache, so as to enforce our permissions
+     mkdir /data/dalvik-cache 0771 root root
+     # create the A/B OTA directory, so as to enforce our permissions
+@@ -508,6 +511,7 @@ on zygote-start && property:ro.crypto.state=unencrypted
+     start netd
+     start zygote
+     start zygote_secondary
++    start elzygote
+ 
+ on zygote-start && property:ro.crypto.state=unsupported
+     # A/B update verifier that marks a successful boot.
+@@ -515,6 +519,7 @@ on zygote-start && property:ro.crypto.state=unsupported
+     start netd
+     start zygote
+     start zygote_secondary
++    start elzygote
+ 
+ on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type=file
+     # A/B update verifier that marks a successful boot.
+@@ -522,6 +527,7 @@ on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type
+     start netd
+     start zygote
+     start zygote_secondary
++    start elzygote
+ 
+ on boot
+     # basic network init
+diff --git a/rootdir/init.zygote64_32.rc b/rootdir/init.zygote64_32.rc
+index 09db7b03d..b69ac3483 100644
+--- a/rootdir/init.zygote64_32.rc
++++ b/rootdir/init.zygote64_32.rc
+@@ -21,3 +21,10 @@ service zygote_secondary /system/bin/app_process32 -Xzygote /system/bin --zygote
+     socket zygote_secondary stream 660 root system
+     onrestart restart zygote
+     writepid /dev/cpuset/foreground/tasks
++
++service elzygote /system/bin/ElApp_process /system/bin --zygote
++    class main
++    priority -20
++    user root
++    group root readproc
++    socket elzygote stream 660 root system

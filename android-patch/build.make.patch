@@ -1,0 +1,13 @@
+diff --git a/core/main.mk b/core/main.mk
+index f51070b94..76529d7e7 100644
+--- a/core/main.mk
++++ b/core/main.mk
+@@ -374,6 +374,8 @@ ifneq (,$(user_variant))
+ 
+   ifeq ($(user_variant),user)
+     ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=1
++  else
++    ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
+   endif
+ 
+   ifeq ($(user_variant),userdebug)

@@ -1,0 +1,12 @@
+diff --git a/cc/config/arm_device.go b/cc/config/arm_device.go
+index 1b60eae..e8effe4 100644
+--- a/cc/config/arm_device.go
++++ b/cc/config/arm_device.go
+@@ -58,6 +58,7 @@ var (
+ 	}
+ 
+ 	armLdflags = []string{
++		"-v",
+ 		"-Wl,-z,noexecstack",
+ 		"-Wl,-z,relro",
+ 		"-Wl,-z,now",
