@@ -1100,7 +1100,7 @@ ECode CNativeDecimalFormat::FormatInt64(
     /* [in] */ CNativeDecimalFormat::FieldPositionIterator* javaFieldPositionIterator,
     /* [out] */ ArrayOf<Char32>** rev)
 {
-    return format<Int64>(addr, javaFieldPositionIterator, value, rev);
+    return format<int64_t>(addr, javaFieldPositionIterator, value, rev);
 }
 
 ECode CNativeDecimalFormat::FormatDouble(

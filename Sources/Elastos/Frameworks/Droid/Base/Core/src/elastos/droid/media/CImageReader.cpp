@@ -1594,7 +1594,7 @@ ECode CImageReader::NativeImageSetup(
     }
     // Set SurfaceImage instance member variables
     ((SurfaceImage*)image)->mLockedBuffer = reinterpret_cast<Int64>(buffer);
-    ((SurfaceImage*)image)->mTimestamp = reinterpret_cast<Int64>(buffer->timestamp);
+    ((SurfaceImage*)image)->mTimestamp = buffer->timestamp;
     *result = ACQUIRE_SUCCESS;
     return NOERROR;
 }

@@ -679,7 +679,9 @@ static void TranslateFromObject(
     locationObject->GetLatitude(&location.latitude);
     locationObject->GetLatitude(&location.latitude);
     locationObject->GetLongitude(&location.longitude);
-    locationObject->GetTime(&location.timestamp);
+    Int64 time;
+    locationObject->GetTime(&time);
+    location.timestamp = time;
     location.flags |= FLP_LOCATION_HAS_LAT_LONG;
 
     Boolean hasAltitude;
@@ -721,7 +723,9 @@ static void TranslateFromObject(
     /* [in] */ FlpBatchOptions& batchOptions)
 {
     batchOptionsObject->GetMaxPowerAllocationInMW(&batchOptions.max_power_allocation_mW);
-    batchOptionsObject->GetPeriodInNS(&batchOptions.period_ns);
+    Int64 period;
+    batchOptionsObject->GetPeriodInNS(&period);
+    batchOptions.period_ns = period;
     batchOptionsObject->GetSourcesToUse((Int32*)&batchOptions.sources_to_use);
     batchOptionsObject->GetFlags((Int32*)&batchOptions.flags);
 }
