@@ -100,7 +100,7 @@ ssize_t JavaDataSourceBridge::readAt(
 android::status_t JavaDataSourceBridge::getSize(
     off64_t *size)
 {
-    int64_t len;
+    Int64 len;
     mDataSource->GetSize(&len);
     if (len < 0) {
         *size = android::ERROR_UNSUPPORTED;
@@ -654,17 +654,19 @@ ECode CMediaExtractor::GetSampleTime(
 {
     VALIDATE_NOT_NULL(result);
 
-    android::status_t err = mImpl->getSampleTime(result);
+    int64_t time;
+    android::status_t err = mImpl->getSampleTime(&time);
     if (err == android::ERROR_END_OF_STREAM) {
         *result = -1ll;
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     else if (err != android::OK){
         Logger::E(TAG, "CMediaExtractor::GetSampleTime error");
-        *result = FALSE;
+        *result = -1ll;
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
+    *result = time;
     return NOERROR;
 }
 
@@ -797,7 +799,7 @@ ECode CMediaExtractor::GetCachedDuration(
 {
     VALIDATE_NOT_NULL(result);
 
-    Int64 cachedDurationUs;
+    int64_t cachedDurationUs;
     bool eos;
     android::status_t err = mImpl->getCachedDuration(&cachedDurationUs, &eos);
     if (!err){

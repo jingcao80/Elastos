@@ -102,7 +102,7 @@ android::status_t Media_Utils::ConvertMessageToMap(
         AutoPtr<IInterface> valueObj;
         switch (valueType){
             case android::AMessage::kTypeInt32: {
-                Int32 val;
+                int32_t val;
                 msg->findInt32(key, &val);
                 AutoPtr<IInteger32> value;
                 CInteger32::New(val, (IInteger32**)&value);
@@ -110,7 +110,7 @@ android::status_t Media_Utils::ConvertMessageToMap(
                 break;
             }
             case android::AMessage::kTypeInt64: {
-                Int64 val;
+                int64_t val;
                 msg->findInt64(key, &val);
                 AutoPtr<IInteger64> value;
                 CInteger64::New(val, (IInteger64**)&value);

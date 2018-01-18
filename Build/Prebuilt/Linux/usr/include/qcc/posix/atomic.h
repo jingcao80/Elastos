@@ -27,7 +27,7 @@
 #include <qcc/platform.h>
 
 #ifdef QCC_OS_ANDROID
-#include <sys/atomics.h>
+#include <cutils/atomic.h>
 #endif
 
 #if defined(QCC_OS_DARWIN)
@@ -52,7 +52,7 @@ inline int32_t IncrementAndFetch(volatile int32_t* mem)
      * the value after the increment to be returned we add one to the value
      * returned by __atomic_inc.
      */
-    return __atomic_inc(mem) + 1;
+    return android_atomic_inc(mem) + 1;
 }
 
 /**
@@ -69,7 +69,7 @@ inline int32_t DecrementAndFetch(volatile int32_t* mem)
      * the value after the decrement to be returned we subtract one from the
      * value returned by __atomic_dec.
      */
-    return __atomic_dec(mem) - 1;
+    return android_atomic_dec(mem) - 1;
 }
 
 #elif defined(QCC_OS_LINUX)
