@@ -1,0 +1,1973 @@
+
+project build/make/
+diff --git a/core/main.mk b/core/main.mk
+index f51070b94..76529d7e7 100644
+--- a/core/main.mk
++++ b/core/main.mk
+@@ -374,6 +374,8 @@ ifneq (,$(user_variant))
+ 
+   ifeq ($(user_variant),user)
+     ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=1
++  else
++    ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
+   endif
+ 
+   ifeq ($(user_variant),userdebug)
+
+project build/soong/
+diff --git a/cc/config/arm_device.go b/cc/config/arm_device.go
+index 1b60eae..e8effe4 100644
+--- a/cc/config/arm_device.go
++++ b/cc/config/arm_device.go
+@@ -58,6 +58,7 @@ var (
+ 	}
+ 
+ 	armLdflags = []string{
++		"-v",
+ 		"-Wl,-z,noexecstack",
+ 		"-Wl,-z,relro",
+ 		"-Wl,-z,now",
+
+project external/icu/
+diff --git a/icu4c/source/common/Android.bp b/icu4c/source/common/Android.bp
+index 6bacb5003..055be0e03 100644
+--- a/icu4c/source/common/Android.bp
++++ b/icu4c/source/common/Android.bp
+@@ -206,7 +206,14 @@ cc_defaults {
+ 
+     // We deliberately do not set -DICU_DATA_DIR: ICU4C is configured on Android
+     // using udata_setCommonData.
++    //
++    // We make the ICU data directory relative to $ANDROID_ROOT on Android, so both
++    // device and sim builds can use the same codepath, and it's hard to break one
++    // without noticing because the other still works.
+     cflags: [
++        "-DICU_DATA_DIR_PREFIX_ENV_VAR=\"ANDROID_ROOT\"",
++        "-DICU_DATA_DIR=\"/usr/icu\"",
++
+         "-D_REENTRANT",
+         "-DU_COMMON_IMPLEMENTATION",
+ 
+
+project frameworks/base/
+diff --git a/cmds/bootanimation/BootAnimation.cpp b/cmds/bootanimation/BootAnimation.cpp
+index 7394490fc8d..7e74e214045 100644
+--- a/cmds/bootanimation/BootAnimation.cpp
++++ b/cmds/bootanimation/BootAnimation.cpp
+@@ -267,7 +267,7 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
+ }
+ 
+ status_t BootAnimation::readyToRun() {
+-    mAssets.addDefaultAssets();
++    mAssets.addDefaultAssets(String8("framework/framework-res.apk"));
+ 
+     sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
+             ISurfaceComposer::eDisplayIdMain));
+diff --git a/core/java/android/content/pm/PackageInstaller.java b/core/java/android/content/pm/PackageInstaller.java
+index 7f3f35ffd4f..5d7391ecdb7 100644
+--- a/core/java/android/content/pm/PackageInstaller.java
++++ b/core/java/android/content/pm/PackageInstaller.java
+@@ -943,6 +943,12 @@ public class PackageInstaller {
+         /** {@hide} */
+         public static final int UID_UNKNOWN = -1;
+ 
++        /** {@hide} */
++        public static final int TYPE_APK = 1;
++
++        /** {@hide} */
++        public static final int TYPE_EPK = 2;
++
+         /** {@hide} */
+         public int mode = MODE_INVALID;
+         /** {@hide} */
+@@ -973,6 +979,8 @@ public class PackageInstaller {
+         public String volumeUuid;
+         /** {@hide} */
+         public String[] grantedRuntimePermissions;
++        /** {@hide} */
++        public int appPackageType;
+ 
+         /**
+          * Construct parameters for a new package install session.
+@@ -1001,6 +1009,7 @@ public class PackageInstaller {
+             abiOverride = source.readString();
+             volumeUuid = source.readString();
+             grantedRuntimePermissions = source.readStringArray();
++            appPackageType = source.readInt();
+         }
+ 
+         /**
+@@ -1205,6 +1214,7 @@ public class PackageInstaller {
+             dest.writeString(abiOverride);
+             dest.writeString(volumeUuid);
+             dest.writeStringArray(grantedRuntimePermissions);
++            dest.writeInt(appPackageType);
+         }
+ 
+         public static final Parcelable.Creator<SessionParams>
+diff --git a/core/java/android/content/pm/PackageParser.java b/core/java/android/content/pm/PackageParser.java
+index c67376c2588..8b46677f8b1 100644
+--- a/core/java/android/content/pm/PackageParser.java
++++ b/core/java/android/content/pm/PackageParser.java
+@@ -413,6 +413,7 @@ public class PackageParser {
+         public final boolean use32bitAbi;
+         public final boolean extractNativeLibs;
+         public final boolean isolatedSplits;
++        public final boolean isEpk;
+ 
+         public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
+                 boolean[] isFeatureSplits, String[] usesSplitNames, String[] configForSplit,
+@@ -436,6 +437,7 @@ public class PackageParser {
+             this.use32bitAbi = baseApk.use32bitAbi;
+             this.extractNativeLibs = baseApk.extractNativeLibs;
+             this.isolatedSplits = baseApk.isolatedSplits;
++            this.isEpk = baseApk.isEpk;
+         }
+ 
+         public List<String> getAllCodePaths() {
+@@ -470,13 +472,14 @@ public class PackageParser {
+         public final boolean use32bitAbi;
+         public final boolean extractNativeLibs;
+         public final boolean isolatedSplits;
++        public final boolean isEpk;
+ 
+         public ApkLite(String codePath, String packageName, String splitName, boolean isFeatureSplit,
+                 String configForSplit, String usesSplitName, int versionCode, int revisionCode,
+                 int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
+                 Certificate[][] certificates, boolean coreApp, boolean debuggable,
+                 boolean multiArch, boolean use32bitAbi, boolean extractNativeLibs,
+-                boolean isolatedSplits) {
++                boolean isolatedSplits, boolean isEpk) {
+             this.codePath = codePath;
+             this.packageName = packageName;
+             this.splitName = splitName;
+@@ -495,6 +498,7 @@ public class PackageParser {
+             this.use32bitAbi = use32bitAbi;
+             this.extractNativeLibs = extractNativeLibs;
+             this.isolatedSplits = isolatedSplits;
++            this.isEpk = isEpk;
+         }
+     }
+ 
+@@ -590,6 +594,14 @@ public class PackageParser {
+         return path.endsWith(".apk");
+     }
+ 
++    public static final boolean isEpkFile(File file) {
++        return isEpkPath(file.getName());
++    }
++
++    public static boolean isEpkPath(String path) {
++        return path.endsWith(".epk");
++    }
++
+     /**
+      * Generate and return the {@link PackageInfo} for a parsed package.
+      *
+@@ -865,7 +877,7 @@ public class PackageParser {
+         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
+         final ArrayMap<String, ApkLite> apks = new ArrayMap<>();
+         for (File file : files) {
+-            if (isApkFile(file)) {
++            if (isApkFile(file) || isEpkFile(file)) {
+                 final ApkLite lite = parseApkLite(file, flags);
+ 
+                 // Assert that all package names and version codes are
+@@ -1788,6 +1800,7 @@ public class PackageParser {
+         boolean isFeatureSplit = false;
+         String configForSplit = null;
+         String usesSplitName = null;
++        boolean isEpk = false;
+ 
+         for (int i = 0; i < attrs.getAttributeCount(); i++) {
+             final String attr = attrs.getAttributeName(i);
+@@ -1860,10 +1873,12 @@ public class PackageParser {
+             }
+         }
+ 
++        isEpk = codePath.endsWith(".epk");
++
+         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
+                 configForSplit, usesSplitName, versionCode, revisionCode, installLocation,
+                 verifiers, signatures, certificates, coreApp, debuggable, multiArch, use32bitAbi,
+-                extractNativeLibs, isolatedSplits);
++                extractNativeLibs, isolatedSplits, isEpk);
+     }
+ 
+     /**
+@@ -2016,6 +2031,8 @@ public class PackageParser {
+ 
+         pkg.coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
+ 
++        pkg.mIsEpk = apkPath.endsWith(".epk");
++
+         sa.recycle();
+ 
+         return parseBaseApkCommon(pkg, null, res, parser, flags, outError);
+@@ -5831,6 +5848,8 @@ public class PackageParser {
+          */
+         public boolean visibleToInstantApps;
+ 
++        public boolean mIsEpk;
++
+         public Package(String packageName) {
+             this.packageName = packageName;
+             this.manifestPackageName = packageName;
+diff --git a/core/java/android/os/Process.java b/core/java/android/os/Process.java
+index 7a709ed59b1..86df6fcc894 100644
+--- a/core/java/android/os/Process.java
++++ b/core/java/android/os/Process.java
+@@ -39,6 +39,11 @@ public class Process {
+      */
+     public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
+ 
++    /**
++     * @hide for internal use only.
++     */
++    public static final String ELZYGOTE_SOCKET = "elzygote";
++
+     /**
+      * Defines the root UID.
+      * @hide
+@@ -214,7 +219,7 @@ public class Process {
+      * ** Keep in sync with utils/threads.h **
+      * ***************************************
+      */
+-    
++
+     /**
+      * Lowest available thread priority.  Only for those who really, really
+      * don't want to run if anything else is happening.
+@@ -223,7 +228,7 @@ public class Process {
+      * {@link java.lang.Thread} class.
+      */
+     public static final int THREAD_PRIORITY_LOWEST = 19;
+-    
++
+     /**
+      * Standard priority background threads.  This gives your thread a slightly
+      * lower than normal priority, so that it will have less chance of impacting
+@@ -233,7 +238,7 @@ public class Process {
+      * {@link java.lang.Thread} class.
+      */
+     public static final int THREAD_PRIORITY_BACKGROUND = 10;
+-    
++
+     /**
+      * Standard priority of threads that are currently running a user interface
+      * that the user is interacting with.  Applications can not normally
+@@ -244,7 +249,7 @@ public class Process {
+      * {@link java.lang.Thread} class.
+      */
+     public static final int THREAD_PRIORITY_FOREGROUND = -2;
+-    
++
+     /**
+      * Standard priority of system display threads, involved in updating
+      * the user interface.  Applications can not
+@@ -254,7 +259,7 @@ public class Process {
+      * {@link java.lang.Thread} class.
+      */
+     public static final int THREAD_PRIORITY_DISPLAY = -4;
+-    
++
+     /**
+      * Standard priority of the most important display threads, for compositing
+      * the screen and retrieving input events.  Applications can not normally
+@@ -398,23 +403,23 @@ public class Process {
+      * @hide
+      */
+     public static final ZygoteProcess zygoteProcess =
+-            new ZygoteProcess(ZYGOTE_SOCKET, SECONDARY_ZYGOTE_SOCKET);
++            new ZygoteProcess(ZYGOTE_SOCKET, SECONDARY_ZYGOTE_SOCKET, ELZYGOTE_SOCKET);
+ 
+     /**
+      * Start a new process.
+-     * 
++     *
+      * <p>If processes are enabled, a new process is created and the
+      * static main() function of a <var>processClass</var> is executed there.
+      * The process will continue running after this function returns.
+-     * 
++     *
+      * <p>If processes are not enabled, a new thread in the caller's
+      * process is created and main() of <var>processClass</var> called there.
+-     * 
++     *
+      * <p>The niceName parameter, if not an empty string, is a custom name to
+      * give to the process instead of using processClass.  This allows you to
+      * make easily identifyable processes even if you are using the same base
+      * <var>processClass</var> to start them.
+-     * 
++     *
+      * When invokeWith is not null, the process will be started as a fresh app
+      * and not a zygote fork. Note that this is only allowed for uid 0 or when
+      * debugFlags contains DEBUG_ENABLE_DEBUGGER.
+@@ -433,10 +438,10 @@ public class Process {
+      * @param appDataDir null-ok the data directory of the app.
+      * @param invokeWith null-ok the command to invoke with.
+      * @param zygoteArgs Additional arguments to supply to the zygote process.
+-     * 
++     *
+      * @return An object that describes the result of the attempt to start the process.
+      * @throws RuntimeException on fatal start failure
+-     * 
++     *
+      * {@hide}
+      */
+     public static final ProcessStartResult start(final String processClass,
+@@ -579,7 +584,7 @@ public class Process {
+      * directly to a uid.
+      */
+     public static final native int getUidForName(String name);
+-    
++
+     /**
+      * Returns the GID assigned to a particular user name, or -1 if there is
+      * none.  If the given string consists of only numbers, it is converted
+@@ -632,11 +637,11 @@ public class Process {
+ 
+     /**
+      * Set the priority of a thread, based on Linux priorities.
+-     * 
++     *
+      * @param tid The identifier of the thread/process to change.
+      * @param priority A Linux priority level, from -20 for highest scheduling
+      * priority to 19 for lowest scheduling priority.
+-     * 
++     *
+      * @throws IllegalArgumentException Throws IllegalArgumentException if
+      * <var>tid</var> does not exist.
+      * @throws SecurityException Throws SecurityException if your process does
+@@ -695,7 +700,7 @@ public class Process {
+      * @hide
+      * @param pid The identifier of the process to change.
+      * @param group The target group for this process from THREAD_GROUP_*.
+-     * 
++     *
+      * @throws IllegalArgumentException Throws IllegalArgumentException if
+      * <var>tid</var> does not exist.
+      * @throws SecurityException Throws SecurityException if your process does
+@@ -749,36 +754,36 @@ public class Process {
+     /**
+      * Set the priority of the calling thread, based on Linux priorities.  See
+      * {@link #setThreadPriority(int, int)} for more information.
+-     * 
++     *
+      * @param priority A Linux priority level, from -20 for highest scheduling
+      * priority to 19 for lowest scheduling priority.
+-     * 
++     *
+      * @throws IllegalArgumentException Throws IllegalArgumentException if
+      * <var>tid</var> does not exist.
+      * @throws SecurityException Throws SecurityException if your process does
+      * not have permission to modify the given thread, or to use the given
+      * priority.
+-     * 
++     *
+      * @see #setThreadPriority(int, int)
+      */
+     public static final native void setThreadPriority(int priority)
+             throws IllegalArgumentException, SecurityException;
+-    
++
+     /**
+      * Return the current priority of a thread, based on Linux priorities.
+-     * 
++     *
+      * @param tid The identifier of the thread/process to change.
+-     * 
++     *
+      * @return Returns the current priority, as a Linux priority level,
+      * from -20 for highest scheduling priority to 19 for lowest scheduling
+      * priority.
+-     * 
++     *
+      * @throws IllegalArgumentException Throws IllegalArgumentException if
+      * <var>tid</var> does not exist.
+      */
+     public static final native int getThreadPriority(int tid)
+             throws IllegalArgumentException;
+-    
++
+     /**
+      * Return the current scheduling policy of a thread, based on Linux.
+      *
+@@ -792,7 +797,7 @@ public class Process {
+      *
+      * {@hide}
+      */
+-    
++
+     @TestApi
+     public static final native int getThreadScheduler(int tid)
+             throws IllegalArgumentException;
+@@ -818,7 +823,7 @@ public class Process {
+ 
+     /**
+      * Determine whether the current environment supports multiple processes.
+-     * 
++     *
+      * @return Returns true if the system can run in multiple processes, else
+      * false if everything is running in a single process.
+      *
+@@ -845,9 +850,9 @@ public class Process {
+     /**
+      * Change this process's argv[0] parameter.  This can be useful to show
+      * more descriptive information in things like the 'ps' command.
+-     * 
++     *
+      * @param text The new name of this process.
+-     * 
++     *
+      * {@hide}
+      */
+     public static final native void setArgV0(String text);
+@@ -875,12 +880,12 @@ public class Process {
+ 
+     /**
+      * Send a signal to the given process.
+-     * 
++     *
+      * @param pid The pid of the target process.
+      * @param signal The signal to send.
+      */
+     public static final native void sendSignal(int pid, int signal);
+-    
++
+     /**
+      * @hide
+      * Private impl for avoiding a log message...  DO NOT USE without doing
+@@ -898,20 +903,20 @@ public class Process {
+      * beat you up.
+      */
+     public static final native void sendSignalQuiet(int pid, int signal);
+-    
++
+     /** @hide */
+     public static final native long getFreeMemory();
+-    
++
+     /** @hide */
+     public static final native long getTotalMemory();
+-    
++
+     /** @hide */
+     public static final native void readProcLines(String path,
+             String[] reqFields, long[] outSizes);
+-    
++
+     /** @hide */
+     public static final native int[] getPids(String path, int[] lastArray);
+-    
++
+     /** @hide */
+     public static final int PROC_TERM_MASK = 0xff;
+     /** @hide */
+@@ -934,13 +939,13 @@ public class Process {
+     public static final int PROC_OUT_LONG = 0x2000;
+     /** @hide */
+     public static final int PROC_OUT_FLOAT = 0x4000;
+-    
++
+     /** @hide */
+     public static final native boolean readProcFile(String file, int[] format,
+             String[] outStrings, long[] outLongs, float[] outFloats);
+-    
++
+     /** @hide */
+-    public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
++    public static final native boolean parseProcLine(byte[] buffer, int startIndex,
+             int endIndex, int[] format, String[] outStrings, long[] outLongs, float[] outFloats);
+ 
+     /** @hide */
+@@ -948,10 +953,10 @@ public class Process {
+ 
+     /**
+      * Gets the total Pss value for a given process, in bytes.
+-     * 
++     *
+      * @param pid the process to the Pss for
+      * @return the total Pss value for the given process in bytes,
+-     *  or -1 if the value cannot be determined 
++     *  or -1 if the value cannot be determined
+      * @hide
+      */
+     public static final native long getPss(int pid);
+diff --git a/core/java/android/os/ZygoteProcess.java b/core/java/android/os/ZygoteProcess.java
+index 8208438dc62..5e6362fe5b9 100644
+--- a/core/java/android/os/ZygoteProcess.java
++++ b/core/java/android/os/ZygoteProcess.java
+@@ -65,9 +65,19 @@ public class ZygoteProcess {
+      */
+     private final String mSecondarySocket;
+ 
++    /**
++     * The name of the native zygote socket.
++     */
++    private final String mNativeSocket;
++
+     public ZygoteProcess(String primarySocket, String secondarySocket) {
++        this(primarySocket, secondarySocket, null);
++    }
++
++    public ZygoteProcess(String primarySocket, String secondarySocket, String nativeSocket) {
+         mSocket = primarySocket;
+         mSecondarySocket = secondarySocket;
++        mNativeSocket = nativeSocket;
+     }
+ 
+     /**
+@@ -155,6 +165,11 @@ public class ZygoteProcess {
+      */
+     private ZygoteState secondaryZygoteState;
+ 
++    /**
++     * The state of the connection to the primary zygote.
++     */
++    private ZygoteState nativeZygoteState;
++
+     /**
+      * Start a new process.
+      *
+@@ -419,6 +434,12 @@ public class ZygoteProcess {
+             argsForZygote.add(invokeWith);
+         }
+ 
++        boolean startNativeProcess = processClass.startsWith("Elastos.");
++        if (startNativeProcess) {
++            argsForZygote.add("Elastos.Droid.Core.eco");
++            abi = "armeabi-v7a";
++        }
++
+         argsForZygote.add(processClass);
+ 
+         if (extraArgs != null) {
+@@ -428,7 +449,9 @@ public class ZygoteProcess {
+         }
+ 
+         synchronized(mLock) {
+-            return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi), argsForZygote);
++            ZygoteState zygote = startNativeProcess?
++                    openNativeZygoteSocketIfNeeded(abi) : openZygoteSocketIfNeeded(abi);
++            return zygoteSendArgsAndGetResult(zygote, argsForZygote);
+         }
+     }
+ 
+@@ -483,6 +506,25 @@ public class ZygoteProcess {
+         throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
+     }
+ 
++    private ZygoteState openNativeZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
++        Preconditions.checkState(Thread.holdsLock(mLock), "NativeZygoteProcess lock not held");
++
++        if (nativeZygoteState == null || nativeZygoteState.isClosed()) {
++            try {
++                nativeZygoteState = ZygoteState.connect(mNativeSocket);
++            } catch (IOException ioe) {
++                throw new ZygoteStartFailedEx("Error connecting to native zygote", ioe);
++            }
++        }
++
++        if (nativeZygoteState.matches(abi)) {
++            Log.d(LOG_TAG, "====== openNativeZygoteSocketIfNeeded succeeded ======");
++            return nativeZygoteState;
++        }
++
++        throw new ZygoteStartFailedEx("Unsupported native zygote ABI: " + abi);
++    }
++
+     /**
+      * Instructs the zygote to pre-load the classes and native libraries at the given paths
+      * for the specified abi. Not all zygotes support this function.
+diff --git a/core/java/com/android/internal/content/NativeLibraryHelper.java b/core/java/com/android/internal/content/NativeLibraryHelper.java
+index 83b7d2f948f..16cc6d4453a 100644
+--- a/core/java/com/android/internal/content/NativeLibraryHelper.java
++++ b/core/java/com/android/internal/content/NativeLibraryHelper.java
+@@ -448,4 +448,7 @@ public class NativeLibraryHelper {
+         }
+         return false;
+     }
++
++    // for epk
++    public static native int copyEcoLI(String epkPath, String ecoName, String ecoDir);
+ }
+diff --git a/core/jni/android_util_AssetManager.cpp b/core/jni/android_util_AssetManager.cpp
+index 90aee9e22f7..ae79fb58a1a 100644
+--- a/core/jni/android_util_AssetManager.cpp
++++ b/core/jni/android_util_AssetManager.cpp
+@@ -1602,7 +1602,7 @@ static void android_content_AssetManager_init(JNIEnv* env, jobject clazz, jboole
+         return;
+     }
+ 
+-    am->addDefaultAssets();
++    am->addDefaultAssets(String8("framework/framework-res.apk"));
+ 
+     ALOGV("Created AssetManager %p for Java object %p\n", am, clazz);
+     env->SetLongField(clazz, gAssetManagerOffsets.mObject, reinterpret_cast<jlong>(am));
+diff --git a/core/jni/com_android_internal_content_NativeLibraryHelper.cpp b/core/jni/com_android_internal_content_NativeLibraryHelper.cpp
+index f8f9efe2804..1fddaa55cd4 100644
+--- a/core/jni/com_android_internal_content_NativeLibraryHelper.cpp
++++ b/core/jni/com_android_internal_content_NativeLibraryHelper.cpp
+@@ -563,6 +563,32 @@ com_android_internal_content_NativeLibraryHelper_close(JNIEnv *env, jclass, jlon
+     delete reinterpret_cast<ZipFileRO*>(apkHandle);
+ }
+ 
++static jint
++com_android_internal_content_NativeLibraryHelper_nativeCopyEcoLI(JNIEnv *env, jclass, jstring javaEpkPath,
++        jstring javaEcoName, jstring javaEcoDir)
++{
++    ScopedUtfChars filePath(env, javaEpkPath);
++    ZipFileRO* zipFile = ZipFileRO::open(filePath.c_str());
++    if (zipFile == NULL) {
++        return INSTALL_FAILED_INVALID_APK;
++    }
++
++    ScopedUtfChars ecoName(env, javaEcoName);
++    const ZipEntryRO entry = zipFile->findEntryByName(ecoName.c_str());
++    if (entry == NULL) {
++        delete zipFile;
++        return INSTALL_FAILED_INVALID_APK;
++    }
++
++    jboolean extractNativeLibs = JNI_TRUE;
++    jboolean hasNativeBridge = JNI_FALSE;
++    void* args[] = { &javaEcoDir, &extractNativeLibs, &hasNativeBridge };
++    install_status_t ret = copyFileIfChanged(env, args, zipFile, entry, ecoName.c_str());
++
++    delete zipFile;
++    return (jint)ret;
++}
++
+ static const JNINativeMethod gMethods[] = {
+     {"nativeOpenApk",
+             "(Ljava/lang/String;)J",
+@@ -579,8 +605,11 @@ static const JNINativeMethod gMethods[] = {
+     {"nativeFindSupportedAbi",
+             "(J[Ljava/lang/String;Z)I",
+             (void *)com_android_internal_content_NativeLibraryHelper_findSupportedAbi},
+-    {"hasRenderscriptBitcode", "(J)I",
++    {"hasRenderscriptBitcode",
++            "(J)I",
+             (void *)com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode},
++    {"copyEcoLI", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
++            (void *)com_android_internal_content_NativeLibraryHelper_nativeCopyEcoLI},
+ };
+ 
+ 
+diff --git a/libs/androidfw/AssetManager.cpp b/libs/androidfw/AssetManager.cpp
+index 5603508eaf0..e2e97783291 100644
+--- a/libs/androidfw/AssetManager.cpp
++++ b/libs/androidfw/AssetManager.cpp
+@@ -61,7 +61,7 @@ static const bool kIsDebug = false;
+ 
+ static const char* kAssetsRoot = "assets";
+ static const char* kAppZipName = NULL; //"classes.jar";
+-static const char* kSystemAssets = "framework/framework-res.apk";
++// static const char* kSystemAssets = "framework/framework-res.apk";
+ static const char* kResourceCache = "resource-cache";
+ 
+ static const char* kExcludeExtension = ".EXCLUDE";
+@@ -317,13 +317,13 @@ exit:
+     return ret;
+ }
+ 
+-bool AssetManager::addDefaultAssets()
++bool AssetManager::addDefaultAssets(const String8& systemAssets)
+ {
+     const char* root = getenv("ANDROID_ROOT");
+     LOG_ALWAYS_FATAL_IF(root == NULL, "ANDROID_ROOT not set");
+ 
+     String8 path(root);
+-    path.appendPath(kSystemAssets);
++    path.appendPath(systemAssets);
+ 
+     return addAssetPath(path, NULL, false /* appAsLib */, true /* isSystemAsset */);
+ }
+@@ -530,7 +530,7 @@ bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) con
+                         mZipSet.setZipResourceTableAsset(ap.path, ass);
+                 }
+             }
+-            
++
+             if (nextEntryIdx == 0 && ass != NULL) {
+                 // If this is the first resource table in the asset
+                 // manager, then we are going to cache it so that we
+diff --git a/libs/androidfw/ResourceTypes.cpp b/libs/androidfw/ResourceTypes.cpp
+index bab8883ef64..0d3d0e417bb 100644
+--- a/libs/androidfw/ResourceTypes.cpp
++++ b/libs/androidfw/ResourceTypes.cpp
+@@ -2745,7 +2745,7 @@ bool ResTable_config::match(const ResTable_config& settings) const {
+         }
+     }
+     if (version != 0) {
+-        if (sdkVersion != 0 && sdkVersion > settings.sdkVersion) {
++        if (settings.sdkVersion != 0 && sdkVersion != 0 && sdkVersion > settings.sdkVersion) {
+             return false;
+         }
+         if (minorVersion != 0 && minorVersion != settings.minorVersion) {
+diff --git a/libs/androidfw/include/androidfw/AssetManager.h b/libs/androidfw/include/androidfw/AssetManager.h
+index 0441b9d789e..3f1e89ee071 100644
+--- a/libs/androidfw/include/androidfw/AssetManager.h
++++ b/libs/androidfw/include/androidfw/AssetManager.h
+@@ -95,7 +95,7 @@ public:
+      * Convenience for adding the standard system assets.  Uses the
+      * ANDROID_ROOT environment variable to find them.
+      */
+-    bool addDefaultAssets();
++    bool addDefaultAssets(const String8& systemAssets);
+ 
+     /*
+      * Iterate over the asset paths in this manager.  (Previously
+diff --git a/services/core/java/com/android/server/AppOpsService.java b/services/core/java/com/android/server/AppOpsService.java
+index 1a5ec61a151..6b3c644b82e 100644
+--- a/services/core/java/com/android/server/AppOpsService.java
++++ b/services/core/java/com/android/server/AppOpsService.java
+@@ -1312,15 +1312,15 @@ public class AppOpsService extends IAppOpsService.Stub {
+                     } catch (RemoteException e) {
+                         Slog.w(TAG, "Could not contact PackageManager", e);
+                     }
+-                    if (pkgUid != uid) {
+-                        // Oops!  The package name is not valid for the uid they are calling
+-                        // under.  Abort.
+-                        RuntimeException ex = new RuntimeException("here");
+-                        ex.fillInStackTrace();
+-                        Slog.w(TAG, "Bad call: specified package " + packageName
+-                                + " under uid " + uid + " but it is really " + pkgUid, ex);
+-                        return null;
+-                    }
++                    // if (pkgUid != uid) {
++                    //     // Oops!  The package name is not valid for the uid they are calling
++                    //     // under.  Abort.
++                    //     RuntimeException ex = new RuntimeException("here");
++                    //     ex.fillInStackTrace();
++                    //     Slog.w(TAG, "Bad call: specified package " + packageName
++                    //             + " under uid " + uid + " but it is really " + pkgUid, ex);
++                    //     return null;
++                    // }
+                 } finally {
+                     Binder.restoreCallingIdentity(ident);
+                 }
+diff --git a/services/core/java/com/android/server/am/ActivityManagerService.java b/services/core/java/com/android/server/am/ActivityManagerService.java
+index 186d0f40f43..72584c0d4b9 100644
+--- a/services/core/java/com/android/server/am/ActivityManagerService.java
++++ b/services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -3911,7 +3911,10 @@ public class ActivityManagerService extends IActivityManager.Stub
+             // Start the process.  It will either succeed and return a result containing
+             // the PID of the new process, or else throw a RuntimeException.
+             boolean isActivityProcess = (entryPoint == null);
+-            if (entryPoint == null) entryPoint = "android.app.ActivityThread";
++            if (entryPoint == null) {
++                entryPoint = app.info.sourceDir.endsWith(".epk") ?
++                        "Elastos.Droid.App.CActivityThreadHelper" : "android.app.ActivityThread";
++            }
+             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
+                     app.processName);
+             checkTime(startTime, "startProcess: asking zygote to start proc");
+diff --git a/services/core/java/com/android/server/pm/PackageInstallerSession.java b/services/core/java/com/android/server/pm/PackageInstallerSession.java
+index f111db1434c..1a26b909465 100644
+--- a/services/core/java/com/android/server/pm/PackageInstallerSession.java
++++ b/services/core/java/com/android/server/pm/PackageInstallerSession.java
+@@ -750,7 +750,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
+ 
+             // Take this opportunity to enforce uniform naming
+             final String targetName;
+-            if (apk.splitName == null) {
++            if (apk.isEpk) {
++                targetName = "base.epk";
++            }
++            else if (apk.splitName == null) {
+                 targetName = "base.apk";
+             } else {
+                 targetName = "split_" + apk.splitName + ".apk";
+diff --git a/services/core/java/com/android/server/pm/PackageManagerService.java b/services/core/java/com/android/server/pm/PackageManagerService.java
+index f36b762c5e9..175701a81e1 100644
+--- a/services/core/java/com/android/server/pm/PackageManagerService.java
++++ b/services/core/java/com/android/server/pm/PackageManagerService.java
+@@ -10138,6 +10138,26 @@ public class PackageManagerService extends IPackageManager.Stub
+         return false;
+     }
+ 
++    /**
++     * Returns {@code true} if the given file contains code. Otherwise {@code false}.
++     */
++    private static boolean epkHasCode(String fileName, String packageName) {
++        StrictJarFile jarFile = null;
++        try {
++            jarFile = new StrictJarFile(fileName,
++                    false /*verify*/, false /*signatureSchemeRollbackProtectionsEnforced*/);
++            return jarFile.findEntry(packageName + ".eco") != null;
++        } catch (IOException ignore) {
++        } finally {
++            try {
++                if (jarFile != null) {
++                    jarFile.close();
++                }
++            } catch (IOException ignore) {}
++        }
++        return false;
++    }
++
+     /**
+      * Enforces code policy for the package. This ensures that if an APK has
+      * declared hasCode="true" in its manifest that the APK actually contains
+@@ -10149,9 +10169,15 @@ public class PackageManagerService extends IPackageManager.Stub
+             throws PackageManagerException {
+         final boolean shouldHaveCode =
+                 (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+-        if (shouldHaveCode && !apkHasCode(pkg.baseCodePath)) {
+-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+-                    "Package " + pkg.baseCodePath + " code is missing");
++        if (shouldHaveCode) {
++            if (!pkg.mIsEpk && !apkHasCode(pkg.baseCodePath)) {
++                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
++                        "Package " + pkg.baseCodePath + " code is missing");
++            }
++            else if (pkg.mIsEpk && !epkHasCode(pkg.baseCodePath, pkg.packageName)) {
++                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
++                        "Package " + pkg.baseCodePath + " code is missing");
++            }
+         }
+ 
+         if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+@@ -10611,6 +10637,14 @@ public class PackageManagerService extends IPackageManager.Stub
+         }
+         pkgSetting.setTimeStamp(scanFileTime);
+ 
++        // for epk
++        if (pkg.mIsEpk) {
++            if (extractEcoFilesLI(pkg) != PackageManager.INSTALL_SUCCEEDED) {
++                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
++                    "Fail to extract the eco file of package " + pkg.packageName);
++            }
++        }
++
+         if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
+             if (nonMutatedPs != null) {
+                 synchronized (mPackages) {
+@@ -10629,6 +10663,19 @@ public class PackageManagerService extends IPackageManager.Stub
+         return pkg;
+     }
+ 
++    // for epk
++    private int extractEcoFilesLI(PackageParser.Package pkg) {
++        int retCode = NativeLibraryHelper.copyEcoLI(
++                pkg.codePath + "/base.epk", pkg.packageName + ".eco", "/data/elastos");
++        if (retCode != 1) {
++            Slog.e(TAG, "extractEcoFilesLI: eco file doesn't exist, skipping move: " + pkg.codePath);
++            return PackageManager.INSTALL_FAILED_INVALID_APK;
++        }
++        Slog.i(TAG, "extractEcoFilesLI: from " + pkg.codePath + " to /data/elastos/"
++                + pkg.packageName + ".eco");
++        return PackageManager.INSTALL_SUCCEEDED;
++    }
++
+     /**
+      * Applies policy to the parsed package based upon the given policy flags.
+      * Ensures the package is in a good state.
+diff --git a/services/core/java/com/android/server/pm/PackageManagerShellCommand.java b/services/core/java/com/android/server/pm/PackageManagerShellCommand.java
+index 5095e518ed8..846fd298328 100644
+--- a/services/core/java/com/android/server/pm/PackageManagerShellCommand.java
++++ b/services/core/java/com/android/server/pm/PackageManagerShellCommand.java
+@@ -204,7 +204,8 @@ class PackageManagerShellCommand extends ShellCommand {
+                 pw.println("Error: must either specify a package size or an APK file");
+                 return 1;
+             }
+-            if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
++            if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes,
++                    params.sessionParams.appPackageType == SessionParams.TYPE_APK ? "base.apk" : "base.epk",
+                     false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+                 return 1;
+             }
+@@ -1222,6 +1223,12 @@ class PackageManagerShellCommand extends ShellCommand {
+                 case "--force-sdk":
+                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_SDK;
+                     break;
++                case "--apk":
++                    sessionParams.appPackageType = SessionParams.TYPE_APK;
++                    break;
++                case "--epk":
++                    sessionParams.appPackageType = SessionParams.TYPE_EPK;
++                    break;
+                 default:
+                     throw new IllegalArgumentException("Unknown option " + opt);
+             }
+diff --git a/tools/aapt/Bundle.h b/tools/aapt/Bundle.h
+index a93ee2e2b71..e41042a95d6 100644
+--- a/tools/aapt/Bundle.h
++++ b/tools/aapt/Bundle.h
+@@ -57,7 +57,7 @@ public:
+           mAutoAddOverlay(false), mGenDependencies(false), mNoVersionVectors(false),
+           mNoVersionTransitions(false),
+           mCrunchedOutputDir(NULL), mProguardFile(NULL), mMainDexProguardFile(NULL),
+-          mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
++          mAndroidManifestFile(NULL), mPublicOutputFile(NULL), mNameSpaceName(NULL),
+           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
+           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
+           mVersionCode(NULL), mVersionName(NULL), mReplaceVersion(false), mCustomPackage(NULL),
+@@ -121,6 +121,10 @@ public:
+     void setGenDependencies(bool val) { mGenDependencies = val; }
+     bool getErrorOnFailedInsert() { return mErrorOnFailedInsert; }
+     void setErrorOnFailedInsert(bool val) { mErrorOnFailedInsert = val; }
++
++    void setNameSpaceName(const char* name) { mNameSpaceName = name; }
++    const char* getNameSpaceName() { return mNameSpaceName;}
++
+     bool getErrorOnMissingConfigEntry() { return mErrorOnMissingConfigEntry; }
+     void setErrorOnMissingConfigEntry(bool val) { mErrorOnMissingConfigEntry = val; }
+     const android::String8& getPlatformBuildVersionCode() { return mPlatformVersionCode; }
+@@ -308,6 +312,7 @@ private:
+     const char* mMainDexProguardFile;
+     const char* mAndroidManifestFile;
+     const char* mPublicOutputFile;
++    const char* mNameSpaceName;
+     const char* mRClassDir;
+     const char* mResourceIntermediatesDir;
+     android::String8 mConfigurations;
+diff --git a/tools/aapt/Main.cpp b/tools/aapt/Main.cpp
+index 417b7ae087e..80cf3282f6a 100644
+--- a/tools/aapt/Main.cpp
++++ b/tools/aapt/Main.cpp
+@@ -20,6 +20,8 @@ using namespace android;
+ 
+ static const char* gProgName = "aapt";
+ 
++bool cppflag = 0;
++
+ /*
+  * When running under Cygwin on Windows, this will convert slash-based
+  * paths into back-slash-based ones. Otherwise the ApptAssets file comparisons
+@@ -132,6 +134,7 @@ void usage(void)
+         "   -0  specifies an additional extension for which such files will not\n"
+         "       be stored compressed in the .apk.  An empty string means to not\n"
+         "       compress any files at all.\n"
++        "   --cpp  specifices the user application's namespaces.\n"
+         "   --debug-mode\n"
+         "       inserts android:debuggable=\"true\" in to the application node of the\n"
+         "       manifest, making the application debuggable even on production devices.\n"
+@@ -519,7 +522,17 @@ int main(int argc, char* const argv[])
+                 }
+                 break;
+             case '-':
+-                if (strcmp(cp, "-debug-mode") == 0) {
++                if (strcmp(cp, "-cpp") == 0) {
++                argc--;
++                    argv++;
++                    cppflag = true;
++                    if (!argc) {
++                        fprintf(stderr, "ERROR: No argument supplied for '-cpp' option\n");
++            wantUsage = true;
++                        goto bail;
++                    }
++                    bundle.setNameSpaceName(argv[0]);
++                } else if (strcmp(cp, "-debug-mode") == 0) {
+                     bundle.setDebugMode(true);
+                 } else if (strcmp(cp, "-min-sdk-version") == 0) {
+                     argc--;
+diff --git a/tools/aapt/Resource.cpp b/tools/aapt/Resource.cpp
+index bd2b2a36788..0f417d9cd65 100644
+--- a/tools/aapt/Resource.cpp
++++ b/tools/aapt/Resource.cpp
+@@ -32,8 +32,19 @@
+ static const bool kIsDebug = false;
+ 
+ // Number of threads to use for preprocessing images.
++extern bool cppflag;
++
+ static const size_t MAX_THREADS = 4;
+ 
++static char namearray[8][64] = {{0}};
++static char definebuf[256] = {0};
++static char namebuf[256] = {0};
++static char endbuf[256] = {0};
++
++static char classstack[8][64] = {{0}};
++static int nestlevel = 0;
++
++
+ // ==========================================================================
+ // ==========================================================================
+ // ==========================================================================
+@@ -495,7 +506,7 @@ static int validateAttr(const String8& path, const ResTable& table,
+                         value.data);
+                 return ATTR_NOT_FOUND;
+             }
+-            
++
+             pool = table.getTableStringBlock(strIdx);
+             #if 0
+             if (pool != NULL) {
+@@ -735,7 +746,7 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
+         // don't stop the build.
+         return true;
+     }
+-    
++
+     node->addAttribute(ns, attr, String16(value));
+     return true;
+ }
+@@ -886,7 +897,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
+             bundle->setVersionName(strdup(String8(attr->string).string()));
+         }
+     }
+-    
++
+     sp<XMLNode> vers = root->getChildElement(String16(), String16("uses-sdk"));
+     if (bundle->getMinSdkVersion() != NULL
+             || bundle->getTargetSdkVersion() != NULL
+@@ -895,7 +906,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
+             vers = XMLNode::newElement(root->getFilename(), String16(), String16("uses-sdk"));
+             root->insertChildAt(vers, 0);
+         }
+-        
++
+         if (!addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "minSdkVersion",
+                 bundle->getMinSdkVersion(), errorOnFailedInsert)) {
+             return UNKNOWN_ERROR;
+@@ -995,7 +1006,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
+             }
+         }
+     }
+-    
++
+     sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
+     if (application != NULL) {
+         XMLNode::attribute_entry* icon_attr = application->editAttribute(
+@@ -1284,7 +1295,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+     // --------------------------------------------------------------
+ 
+     // resType -> leafName -> group
+-    KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
++    KeyedVector<String8, sp<ResourceTypeSet> > *resources =
+             new KeyedVector<String8, sp<ResourceTypeSet> >;
+     collect_files(assets, resources);
+ 
+@@ -1318,7 +1329,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+     // now go through any resource overlays and collect their files
+     sp<AaptAssets> current = assets->getOverlay();
+     while(current.get()) {
+-        KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
++        KeyedVector<String8, sp<ResourceTypeSet> > *resources =
+                 new KeyedVector<String8, sp<ResourceTypeSet> >;
+         current->setResources(resources);
+         collect_files(current, resources);
+@@ -1429,7 +1440,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+     // compile resources
+     current = assets;
+     while(current.get()) {
+-        KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
++        KeyedVector<String8, sp<ResourceTypeSet> > *resources =
+                 current->getResources();
+ 
+         ssize_t index = resources->indexOfKey(String8("values"));
+@@ -1438,7 +1449,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+             ssize_t res;
+             while ((res=it.next()) == NO_ERROR) {
+                 const sp<AaptFile>& file = it.getFile();
+-                res = compileResourceFile(bundle, assets, file, it.getParams(), 
++                res = compileResourceFile(bundle, assets, file, it.getParams(),
+                                           (current!=assets), &table);
+                 if (res != NO_ERROR) {
+                     hasErrors = true;
+@@ -1698,7 +1709,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+     if (table.validateLocalizations()) {
+         hasErrors = true;
+     }
+-    
++
+     if (hasErrors) {
+         return UNKNOWN_ERROR;
+     }
+@@ -1747,7 +1758,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+ 
+     ResTable finalResTable;
+     sp<AaptFile> resFile;
+-    
++
+     if (table.hasResources()) {
+         sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
+         err = table.addSymbols(symbols, bundle->getSkipSymbolsWithoutDefaultLocalization());
+@@ -1969,7 +1980,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+                 ssize_t index = block.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE, "name");
+                 const char16_t* id = block.getAttributeStringValue(index, &len);
+                 if (id == NULL) {
+-                    fprintf(stderr, "%s:%d: missing name attribute in element <%s>.\n", 
++                    fprintf(stderr, "%s:%d: missing name attribute in element <%s>.\n",
+                             manifestPath.string(), block.getLineNumber(),
+                             String8(block.getElementName(&len)).string());
+                     hasErrors = true;
+@@ -2158,7 +2169,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
+             return err;
+         }
+     }
+-    
++
+     return err;
+ }
+ 
+@@ -2432,7 +2443,7 @@ static status_t writeLayoutClasses(
+         fprintf(fp, "%s */\n", getIndentSpace(indent));
+ 
+         ann.printAnnotations(fp, indentStr);
+-        
++
+         fprintf(fp,
+                 "%spublic static final int[] %s = {\n"
+                 "%s",
+@@ -2794,6 +2805,539 @@ static status_t writeTextSymbolClass(
+     return NO_ERROR;
+ }
+ 
++//----------------------------------gaojianfeng add start-----------------------
++static FILE *fpcpp = NULL;
++static bool isHaveArray = false;
++#define KEY_NUMBER 4
++#define CLASS_NAME_KEY_NUMBER 2
++static const char* cppKeyWord[KEY_NUMBER] = {
++    "bool",
++    "auto",
++    "signed",
++    "delete"
++};
++
++static const char* classNameKeyWord[CLASS_NAME_KEY_NUMBER] = {
++    "R",
++    "Manifest"
++};
++
++bool isCppKeyWord(const char *name)
++{
++    int i;
++    bool isKeyWord = false;
++    for ( i = 0; i < KEY_NUMBER; i++)
++    {
++        if(!strcmp(name, cppKeyWord[i])) {
++            isKeyWord = true;
++            break;
++        }
++    }
++    return isKeyWord;
++}
++
++void addExtraHeaderFile(FILE* fp, const char *name)
++{
++    if(!strcmp(name, "R")) {
++        fprintf(fp, "#include <elatypes.h>\n");
++    }
++    else if(!strcmp(name, "Manifest")) {
++        fprintf(fp, "#include <elastos.h>\n");
++        fprintf(fp, "using namespace Elastos;\n");
++    }
++}
++
++bool isClassNameKeyWord(const char *name)
++{
++    int i;
++    bool isKeyWord = false;
++    for ( i = 0; i < CLASS_NAME_KEY_NUMBER; i++)
++    {
++        if(!strcmp(name, classNameKeyWord[i])) {
++            isKeyWord = true;
++            break;
++        }
++    }
++    return isKeyWord;
++}
++
++int getGlobalNestClass(
++    char* buf)
++{
++    int index = 0;
++    int tmpindex = nestlevel;
++    while(tmpindex > 0) {
++        strcat(buf, classstack[index]);
++        strcat(buf, "::");
++        tmpindex--;
++        index++;
++    }
++    return nestlevel;
++}
++
++static status_t writeLayoutClassesCpp(
++    FILE* fp, const sp<AaptAssets>& assets,
++    const sp<AaptSymbols>& symbols, int indent, bool includePrivate)
++{
++    const char* indentStr = getIndentSpace(indent);
++    if (!includePrivate) {
++        fprintf(fp, "%s/** @doconly */\n", indentStr);
++    }
++    fprintf(fp, "%spublic: class styleable {\n", indentStr);
++    indent++;
++
++    String16 attr16("attr");
++    String16 package16(assets->getPackage());
++
++    indentStr = getIndentSpace(indent);
++    bool hasErrors = false;
++
++    size_t i;
++    size_t N = symbols->getNestedSymbols().size();
++    for (i=0; i<N; i++) {
++        sp<AaptSymbols> nsymbols = symbols->getNestedSymbols().valueAt(i);
++        String8 nclassName8(symbols->getNestedSymbols().keyAt(i));
++        String8 realClassName(nclassName8);
++        // flattenSymbol(nclassName8);
++        // if (flattenSymbol(&nclassName8) != NO_ERROR) {
++        //     hasErrors = true;
++        // }
++        String8 nclassName(flattenSymbol(nclassName8));
++
++        SortedVector<uint32_t> idents;
++        Vector<uint32_t> origOrder;
++        Vector<bool> publicFlags;
++
++        size_t a;
++        size_t NA = nsymbols->getSymbols().size();
++        for (a=0; a<NA; a++) {
++            const AaptSymbolEntry& sym(nsymbols->getSymbols().valueAt(a));
++            int32_t code = sym.typeCode == AaptSymbolEntry::TYPE_INT32
++                    ? sym.int32Val : 0;
++            bool isPublic = true;
++            if (code == 0) {
++                String16 name16(sym.name);
++                uint32_t typeSpecFlags;
++                code = assets->getIncludedResources().identifierForName(
++                    name16.string(), name16.size(),
++                    attr16.string(), attr16.size(),
++                    package16.string(), package16.size(), &typeSpecFlags);
++                if (code == 0) {
++                    fprintf(stderr, "ERROR: In <declare-styleable> %s, unable to find attribute %s\n",
++                            nclassName.string(), sym.name.string());
++                    hasErrors = true;
++                }
++                isPublic = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
++            }
++            idents.add(code);
++            origOrder.add(code);
++            publicFlags.add(isPublic);
++        }
++
++        NA = idents.size();
++
++        bool deprecated = false;
++
++        String16 comment = symbols->getComment(realClassName);
++        fprintf(fp, "%s/** ", indentStr);
++        if (comment.size() > 0) {
++            String8 cmt(comment);
++            fprintf(fp, "%s\n", cmt.string());
++            if (strstr(cmt.string(), "@deprecated") != NULL) {
++                deprecated = true;
++            }
++        } else {
++            fprintf(fp, "Attributes that can be used with a %s.\n", nclassName.string());
++        }
++        bool hasTable = false;
++        for (a=0; a<NA; a++) {
++            ssize_t pos = idents.indexOf(origOrder.itemAt(a));
++            if (pos >= 0) {
++                if (!hasTable) {
++                    hasTable = true;
++                    fprintf(fp,
++                            "%s   <p>Includes the following attributes:</p>\n"
++                            "%s   <table>\n"
++                            "%s   <colgroup align=\"left\" />\n"
++                            "%s   <colgroup align=\"left\" />\n"
++                            "%s   <tr><th>Attribute</th><th>Description</th></tr>\n",
++                            indentStr,
++                            indentStr,
++                            indentStr,
++                            indentStr,
++                            indentStr);
++                }
++                const AaptSymbolEntry& sym = nsymbols->getSymbols().valueAt(a);
++                if (!publicFlags.itemAt(a) && !includePrivate) {
++                    continue;
++                }
++                String8 name8(sym.name);
++                String16 comment(sym.comment);
++                if (comment.size() <= 0) {
++                    comment = getAttributeComment(assets, name8);
++                }
++                if (comment.size() > 0) {
++                    const char16_t* p = comment.string();
++                    while (*p != 0 && *p != '.') {
++                        if (*p == '{') {
++                            while (*p != 0 && *p != '}') {
++                                p++;
++                            }
++                        } else {
++                            p++;
++                        }
++                    }
++                    if (*p == '.') {
++                        p++;
++                    }
++                    comment = String16(comment.string(), p-comment.string());
++                }
++                String8 name(flattenSymbol(name8));
++                // flattenSymbol(name);
++                fprintf(fp, "%s   <tr><td><code>{@link #%s_%s %s:%s}</code></td><td>%s</td></tr>\n",
++                        indentStr, nclassName.string(),
++                        String8(name).string(),
++                        assets->getPackage().string(),
++                        String8(name).string(),
++                        String8(comment).string());
++            }
++        }
++        if (hasTable) {
++            fprintf(fp, "%s   </table>\n", indentStr);
++        }
++        for (a=0; a<NA; a++) {
++            ssize_t pos = idents.indexOf(origOrder.itemAt(a));
++            if (pos >= 0) {
++                const AaptSymbolEntry& sym = nsymbols->getSymbols().valueAt(a);
++                if (!publicFlags.itemAt(a) && !includePrivate) {
++                    continue;
++                }
++                String8 name(flattenSymbol(sym.name));
++                // flattenSymbol(name);
++                fprintf(fp, "%s   @see #%s_%s\n",
++                        indentStr, nclassName.string(),
++                        String8(name).string());
++            }
++        }
++        fprintf(fp, "%s */\n", getIndentSpace(indent));
++
++ //       if (deprecated) {
++ //           fprintf(fp, "%s@Deprecated\n", indentStr);
++ //       }
++        fprintf(fp,"%spublic: static const int %s[%zu];\n",indentStr, nclassName.string(), NA);
++        // gao jian feng take the initial code out of the definition
++        //fprintf(fp,
++        //        "%spublic: static const int %s[] = {\n"
++        //        "%s",
++        //        indentStr, nclassName.string(),
++        //        getIndentSpace(indent+1));
++        fprintf(fpcpp,
++        "const int R::styleable::%s[%zu] = {\n", nclassName.string(), NA);
++        for (a=0; a<NA; a++) {
++            if (a != 0) {
++                if ((a&3) == 0) {
++                    fprintf(fpcpp, ",\n%s", getIndentSpace(indent+1));
++                } else {
++                    fprintf(fpcpp, ", ");
++                }
++            }
++            if (a == 0) {
++               fprintf(fpcpp, "%s", getIndentSpace(indent+1));
++            }
++            fprintf(fpcpp, "0x%08x", idents[a]);
++        }
++
++        isHaveArray = true;
++        fprintf(fpcpp, "\n%s};\n\n", indentStr);
++
++        for (a=0; a<NA; a++) {
++            ssize_t pos = idents.indexOf(origOrder.itemAt(a));
++            if (pos >= 0) {
++                const AaptSymbolEntry& sym = nsymbols->getSymbols().valueAt(a);
++                if (!publicFlags.itemAt(a) && !includePrivate) {
++                    continue;
++                }
++                String8 name8(sym.name);
++                String16 comment(sym.comment);
++                String16 typeComment;
++                if (comment.size() <= 0) {
++                    comment = getAttributeComment(assets, name8, &typeComment);
++                } else {
++                    getAttributeComment(assets, name8, &typeComment);
++                }
++                String8 name(flattenSymbol(name8));
++                // flattenSymbol(name);
++                // if (flattenSymbol(name) != NO_ERROR) {
++                //     hasErrors = true;
++                // }
++
++                uint32_t typeSpecFlags = 0;
++                String16 name16(sym.name);
++                assets->getIncludedResources().identifierForName(
++                    name16.string(), name16.size(),
++                    attr16.string(), attr16.size(),
++                    package16.string(), package16.size(), &typeSpecFlags);
++                //printf("%s:%s/%s: 0x%08x\n", String8(package16).string(),
++                //    String8(attr16).string(), String8(name16).string(), typeSpecFlags);
++                const bool pub = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
++
++                bool deprecated = false;
++
++                fprintf(fp, "%s/**\n", indentStr);
++                if (comment.size() > 0) {
++                    String8 cmt(comment);
++                    fprintf(fp, "%s  <p>\n%s  @attr description\n", indentStr, indentStr);
++                    fprintf(fp, "%s  %s\n", indentStr, cmt.string());
++                    if (strstr(cmt.string(), "@deprecated") != NULL) {
++                        deprecated = true;
++                    }
++                } else {
++                    fprintf(fp,
++                            "%s  <p>This symbol is the offset where the {@link %s.R.attr#%s}\n"
++                            "%s  attribute's value can be found in the {@link #%s} array.\n",
++                            indentStr,
++                            pub ? assets->getPackage().string()
++                                : assets->getSymbolsPrivatePackage().string(),
++                            String8(name).string(),
++                            indentStr, nclassName.string());
++                }
++                if (typeComment.size() > 0) {
++                    String8 cmt(typeComment);
++                    fprintf(fp, "\n\n%s  %s\n", indentStr, cmt.string());
++                    if (strstr(cmt.string(), "@deprecated") != NULL) {
++                        deprecated = true;
++                    }
++                }
++                if (comment.size() > 0) {
++                    if (pub) {
++                        fprintf(fp,
++                                "%s  <p>This corresponds to the global attribute"
++                                "%s  resource symbol {@link %s.R.attr#%s}.\n",
++                                indentStr, indentStr,
++                                assets->getPackage().string(),
++                                String8(name).string());
++                    } else {
++                        fprintf(fp,
++                                "%s  <p>This is a private symbol.\n", indentStr);
++                    }
++                }
++                fprintf(fp, "%s  @attr name %s:%s\n", indentStr,
++                        "android", String8(name).string());
++                fprintf(fp, "%s*/\n", indentStr);
++                //if (deprecated) {
++                //    fprintf(fp, "%s@Deprecated\n", indentStr);
++                //}
++//                fprintf(fp,
++//                        "%spublic: static const int %s_%s = %d;\n",
++//                        indentStr, nclassName.string(),
++//                        String8(name).string(), (int)pos);
++                fprintf(fp,
++                        "%spublic: static const int %s_%s = %d;\n",
++                        indentStr, nclassName.string(),
++                        String8(name).string(), (int)pos);
++                char buf[256] = {0};
++                getGlobalNestClass(buf);
++                fprintf(fpcpp, "const int %sstyleable::%s_%s;\n", buf, nclassName.string(), String8(name).string());
++
++            }
++        }
++    }
++
++    indent--;
++    fprintf(fp, "%s};\n", getIndentSpace(indent));
++    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
++}
++
++
++static status_t writeSymbolClassCpp(
++    FILE* fp, const sp<AaptAssets>& assets, bool includePrivate,
++    const sp<AaptSymbols>& symbols, const String8& className, int indent)
++{
++    String8 tmpClassName(className);
++
++    if(isCppKeyWord(className.string())) {
++         tmpClassName.append("_");
++    }
++    if(isClassNameKeyWord(tmpClassName.string())) {
++        fprintf(fp, "%s%sclass ECO_PUBLIC %s {\n",
++            getIndentSpace(indent),
++            indent != 0 ? "" : "", tmpClassName.string());
++    } else {
++        fprintf(fp, "%spublic: %sclass %s {\n",
++            getIndentSpace(indent),
++            indent != 0 ? "" : "", tmpClassName.string());
++    }
++
++    indent++;
++    size_t i;
++    status_t err = NO_ERROR;
++    nestlevel++;
++//    printf("the class Name is %s\n", tmpClassName.string());
++    strcpy(classstack[nestlevel-1], tmpClassName.string());
++
++    size_t N = symbols->getSymbols().size();
++    for (i=0; i<N; i++) {
++        const AaptSymbolEntry& sym = symbols->getSymbols().valueAt(i);
++        if (sym.typeCode != AaptSymbolEntry::TYPE_INT32) {
++            continue;
++        }
++        // if (!includePrivate && !sym.isPublic) {
++        //     continue;
++        // }
++        if (!assets->isJavaSymbol(sym, includePrivate)) {
++            continue;
++        }
++        String8 name(flattenSymbol(sym.name));
++        String8 realName(name);
++        // flattenSymbol(name);
++        // if (flattenSymbol(&name) != NO_ERROR) {
++        //     return UNKNOWN_ERROR;
++        // }
++        String16 comment(sym.comment);
++        bool haveComment = false;
++        bool deprecated = false;
++        if (comment.size() > 0) {
++            haveComment = true;
++            String8 cmt(comment);
++            fprintf(fp,
++                    "%s/** %s\n",
++                    getIndentSpace(indent), cmt.string());
++            if (strstr(cmt.string(), "@deprecated") != NULL) {
++                deprecated = true;
++            }
++        } else if (sym.isPublic && !includePrivate) {
++            sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
++                assets->getPackage().string(), className.string(),
++                String8(sym.name).string());
++        }
++        String16 typeComment(sym.typeComment);
++        if (typeComment.size() > 0) {
++            String8 cmt(typeComment);
++            if (!haveComment) {
++                haveComment = true;
++                fprintf(fp,
++                        "%s/** %s\n", getIndentSpace(indent), cmt.string());
++            } else {
++                fprintf(fp,
++                        "%s %s\n", getIndentSpace(indent), cmt.string());
++            }
++            if (strstr(cmt.string(), "@deprecated") != NULL) {
++                deprecated = true;
++            }
++        }
++        if (haveComment) {
++            fprintf(fp,"%s */\n", getIndentSpace(indent));
++        }
++        //if (deprecated) {
++        //    fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
++        //}
++        String8 chkstring(name);
++        if(isCppKeyWord(chkstring.string())) {
++            chkstring.append("_");
++        }
++
++        fprintf(fp, "%spublic: static const int %s = 0x%08x;\n",
++                getIndentSpace(indent),
++                chkstring.string(),  (int)sym.int32Val);
++//        dprintf("the name is %S\n", name.string());
++        char buf[256] = {0};
++        getGlobalNestClass(buf);
++        fprintf(fpcpp, "const int %s%s;\n", buf, chkstring.string());
++    }
++
++    for (i=0; i<N; i++) {
++        const AaptSymbolEntry& sym = symbols->getSymbols().valueAt(i);
++        if (sym.typeCode != AaptSymbolEntry::TYPE_STRING) {
++            continue;
++        }
++        if (!includePrivate && !sym.isPublic) {
++            continue;
++        }
++        String8 name(flattenSymbol(sym.name));
++        // flattenSymbol(name);
++        // if (flattenSymbol(&name) != NO_ERROR) {
++        //     return UNKNOWN_ERROR;
++        // }
++        String16 comment(sym.comment);
++        bool deprecated = false;
++        if (comment.size() > 0) {
++            String8 cmt(comment);
++            fprintf(fp,
++                    "%s/** %s\n"
++                     "%s */\n",
++                    getIndentSpace(indent), cmt.string(),
++                    getIndentSpace(indent));
++            if (strstr(cmt.string(), "@deprecated") != NULL) {
++                deprecated = true;
++            }
++        } else if (sym.isPublic && !includePrivate) {
++            sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
++                assets->getPackage().string(), className.string(),
++                String8(sym.name).string());
++        }
++        //if (deprecated) {
++        //    fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
++        //}
++//        fprintf(fp, "%spublic: static const String %s=\"%s\";\n",
++//                getIndentSpace(indent),
++//                String8(name).string(), sym.stringVal.string());
++        fprintf(fp, "%spublic: static const String %s;\n",
++                getIndentSpace(indent), String8(name).string());
++
++                char buf[256] = {0};
++                getGlobalNestClass(buf);
++                fprintf(fpcpp, "const String %s%s = \"%s\";\n", buf, String8(name).string(), sym.stringVal.string());
++    }
++
++    sp<AaptSymbols> styleableSymbols;
++
++    N = symbols->getNestedSymbols().size();
++    for (i=0; i<N; i++) {
++        sp<AaptSymbols> nsymbols = symbols->getNestedSymbols().valueAt(i);
++        String8 nclassName(symbols->getNestedSymbols().keyAt(i));
++        if (nclassName == "styleable") {
++            styleableSymbols = nsymbols;
++        } else {
++//            dprintf("the nest className is %s\n", nclassName.string());
++            err = writeSymbolClassCpp(fp, assets, includePrivate, nsymbols, nclassName, indent);
++        }
++        if (err != NO_ERROR) {
++            return err;
++        }
++    }
++
++    if (styleableSymbols != NULL) {
++        err = writeLayoutClassesCpp(fp, assets, styleableSymbols, indent, includePrivate);
++        if (err != NO_ERROR) {
++            return err;
++        }
++    }
++
++    indent--;
++    fprintf(fp, "%s};\n", getIndentSpace(indent));
++    nestlevel--;
++    return NO_ERROR;
++}
++
++
++int parseNamespace(
++        char *name)
++{
++        int level = 1;
++        char* temp = NULL;
++        char* nametemp = name;
++        while((temp = strstr(nametemp, ".")) != NULL) {
++        strncpy(namearray[level-1], nametemp, temp - nametemp);
++                nametemp = temp + 1;
++                level++;
++        }
++
++        strcpy(namearray[level -1], nametemp);
++//    printf("=========the level is %d\n", level);
++        return level;
++}
++//----------------------------------gaojianfeng add end-----------------------
++
+ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
+     const String8& package, bool includePrivate, bool emitCallback)
+ {
+@@ -2809,6 +3353,8 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
+         sp<AaptSymbols> symbols = assets->getSymbols().valueAt(i);
+         String8 className(assets->getSymbols().keyAt(i));
+         String8 dest(bundle->getRClassDir());
++        String8 desth(bundle->getRClassDir());
++        String8 destcpp(bundle->getRClassDir());
+ 
+         if (bundle->getMakePackageDirs()) {
+             const String8& pkg(package);
+@@ -2819,18 +3365,64 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
+                 if (s > last && (*s == '.' || *s == 0)) {
+                     String8 part(last, s-last);
+                     dest.appendPath(part);
++                    if (cppflag) {
++                        desth.appendPath(part);
++                        destcpp.appendPath(part);
++                    }
+ #ifdef _WIN32
+                     _mkdir(dest.string());
++                    if (cppflag) {
++                        _mkdir(desth.string());
++                        _mkdir(destcpp.string());
++                    }
+ #else
+                     mkdir(dest.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
++                    if (cppflag) {
++                mkdir(desth.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
++                        mkdir(destcpp.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
++                    }
+ #endif
+                     last = s+1;
+                 }
+             } while (*s);
+         }
+         dest.appendPath(className);
++        if (cppflag) {
++            desth.appendPath(className);
++        }
++
+         dest.append(".java");
++        if (cppflag) {
++            desth.append(".h");
++        }
++
++        destcpp.appendPath(className);
++        if (cppflag) {
++            destcpp.append(".cpp");
++        }
++
+         FILE* fp = fopen(dest.string(), "w+");
++        FILE* fph = NULL;
++        if (cppflag) {
++            fph = fopen(desth.string(), "w+");
++            fpcpp = fopen(destcpp.string(), "w+");
++        }
++//        printf("desth is %s, destcpp is%s\n", desth.string(), destcpp.string());
++
++                if (cppflag) {
++                if (fph == NULL) {
++                fprintf(stderr, "ERROR: Unable to open h class file %s: %s\n",
++                    desth.string(), strerror(errno));
++                return UNKNOWN_ERROR;
++                }
++
++                if (fpcpp == NULL) {
++                fprintf(stderr, "ERROR: Unable to open cpp class file %s: %s\n",
++                        destcpp.string(), strerror(errno));
++                return UNKNOWN_ERROR;
++            }
++        }
++
+         if (fp == NULL) {
+             fprintf(stderr, "ERROR: Unable to open class file %s: %s\n",
+                     dest.string(), strerror(errno));
+@@ -2850,6 +3442,78 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
+             "\n"
+             "package %s;\n\n", package.string());
+ 
++                if (cppflag) {
++            fprintf(fph,
++                "/* AUTO-GENERATED FILE.  DO NOT MODIFY.\n"
++                " *\n"
++                " * This class was automatically generated by the\n"
++                " * aapt tool from the resource data it found.  It\n"
++                " * should not be modified by hand.\n"
++                " */\n"
++                "\n");
++
++            if (!bundle->getNameSpaceName()) {
++                fprintf(fph,
++                "#ifndef __ELASTOS_R_H__\n"
++                "#define __ELASTOS_R_H__\n");
++                addExtraHeaderFile(fph, className.string());
++                fprintf(fph, "namespace Elastos {\n");
++            } else {
++                int level = parseNamespace((char*)bundle->getNameSpaceName());
++                int index = 0;
++                   memset(namebuf, 0, 256);
++                   memset(definebuf, 0, 256);
++                memset(endbuf, 0, 256);
++                while(level > 0) {
++                    strcat(definebuf, namearray[index]);
++                      strcat(definebuf, "_");
++
++                      strcat(namebuf, "namespace ");
++                      strcat(namebuf, namearray[index]);
++                      strcat(namebuf, " {\n");
++
++                      strcat(endbuf, "};\n");
++                    level--;
++                    index++;
++                }
++
++                String8 hfName(desth);
++                // : out/target/common/obj/APPS/framework-res_intermediates/src/com/android/internal/Manifest.h
++                index = 0;
++                while ((index = hfName.find("/", 0)) != -1) {
++                    hfName = String8(hfName.string() + index + 1);
++                }
++                index = hfName.find(".", 0);
++                hfName = String8(hfName, index);
++                fprintf(fph,
++                    "#ifndef __%s%s_H__\n"
++                    "#define __%s%s_H__\n",
++                    definebuf, hfName.string(), definebuf, hfName.string());
++                addExtraHeaderFile(fph, className.string());
++                fprintf(fph, "%s", namebuf);
++
++    //            fprintf(fph,
++    //            "#ifndef __%s_R_H \n"
++    //            "#define __%s_R_H_\n"
++    //            "namespace %s { \n",
++    //            bundle->getNameSpaceName(), bundle->getNameSpaceName(),
++    //            bundle->getNameSpaceName());
++            }
++
++            const char* incfile = desth.string();
++            char* tmp = NULL;
++            while((tmp = strstr((char*)incfile, "/")) != NULL) {
++                incfile = tmp + 1;
++            }
++            fprintf(fpcpp,"#include \"%s\"\n", incfile);
++
++            if (!bundle->getNameSpaceName()) {
++                fprintf(fpcpp, "namespace Elastos {\n");
++            } else {
++                fprintf(fpcpp, "%s \n", namebuf);
++            }
++        }
++
+         status_t err = writeSymbolClass(fp, assets, includePrivate, symbols,
+                 className, 0, bundle->getNonConstantId(), emitCallback);
+         fclose(fp);
+@@ -2857,6 +3521,35 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
+             return err;
+         }
+ 
++        if (cppflag) {
++            status_t errcpp = writeSymbolClassCpp(fph, assets, includePrivate, symbols, className, 0);
++            if (errcpp != NO_ERROR) {
++                return errcpp;
++            }
++
++            if (bundle->getNameSpaceName()) {
++                fprintf(fpcpp, "%s\n", endbuf);
++            } else {
++                fprintf(fpcpp, "};\n");
++            }
++            fclose(fpcpp);
++
++            if(bundle->getNameSpaceName()) {
++                fprintf(fph,
++                "%s\n"
++                "#endif // __%sR_H__\n", endbuf, definebuf);
++            } else {
++                fprintf(fph,
++                "};\n"
++                "#endif //__ELASTOS_R__H\n");
++            }
++            fclose(fph);
++        }
++//        if(!isHaveArray) {
++//            unlink(destcpp.string());
++//        }
++        isHaveArray = false;
++
+         if (textSymbolsDest != NULL && R == className) {
+             String8 textDest(textSymbolsDest);
+             textDest.appendPath(className);
+
+project system/core/
+diff --git a/adb/commandline.cpp b/adb/commandline.cpp
+index 4979eef5c..a7453b593 100644
+--- a/adb/commandline.cpp
++++ b/adb/commandline.cpp
+@@ -2001,8 +2001,13 @@ static int uninstall_app(TransportType transport, const char* serial, int argc,
+ static int install_app(TransportType transport, const char* serial, int argc, const char** argv) {
+     // The last argument must be the APK file
+     const char* file = argv[argc - 1];
+-    if (!android::base::EndsWithIgnoreCase(file, ".apk")) {
+-        fprintf(stderr, "Filename doesn't end .apk: %s\n", file);
++    bool isApk = false, isEpk = false;
++    isApk = android::base::EndsWithIgnoreCase(file, ".apk");
++    if (!isApk) {
++        isEpk = android::base::EndsWithIgnoreCase(file, ".epk");
++    }
++    if (!isApk && !isEpk) {
++        fprintf(stderr, "Filename doesn't end .apk or .epk: %s\n", file);
+         return EXIT_FAILURE;
+     }
+ 
+@@ -2029,6 +2034,7 @@ static int install_app(TransportType transport, const char* serial, int argc, co
+     // add size parameter [required for streaming installs]
+     // do last to override any user specified value
+     cmd += " " + android::base::StringPrintf("-S %" PRIu64, static_cast<uint64_t>(sb.st_size));
++    cmd += " " + (isApk ? std::string("--apk") : std::string("--epk"));
+ 
+     int remoteFd = adb_connect(cmd, &error);
+     if (remoteFd < 0) {
+diff --git a/init/init.cpp b/init/init.cpp
+index bb6355ae3..2b7f5b849 100644
+--- a/init/init.cpp
++++ b/init/init.cpp
+@@ -856,7 +856,7 @@ static void selinux_initialize(bool in_kernel_domain) {
+         bool kernel_enforcing = (security_getenforce() == 1);
+         bool is_enforcing = selinux_is_enforcing();
+         if (kernel_enforcing != is_enforcing) {
+-            if (security_setenforce(is_enforcing)) {
++            if (security_setenforce(!is_enforcing)) {
+                 PLOG(ERROR) << "security_setenforce(%s) failed" << (is_enforcing ? "true" : "false");
+                 security_failure();
+             }
+diff --git a/init/init_first_stage.cpp b/init/init_first_stage.cpp
+index bcc8d1b1a..c759a75e6 100644
+--- a/init/init_first_stage.cpp
++++ b/init/init_first_stage.cpp
+@@ -224,10 +224,10 @@ void FirstStageMount::InitVerityDevice(const std::string& verity_device) {
+ 
+ bool FirstStageMount::MountPartitions() {
+     for (auto fstab_rec : mount_fstab_recs_) {
+-        if (!SetUpDmVerity(fstab_rec)) {
+-            PLOG(ERROR) << "Failed to setup verity for '" << fstab_rec->mount_point << "'";
+-            return false;
+-        }
++//         if (!SetUpDmVerity(fstab_rec)) {
++//             PLOG(ERROR) << "Failed to setup verity for '" << fstab_rec->mount_point << "'";
++//             return false;
++//         }
+         if (fs_mgr_do_mount_one(fstab_rec)) {
+             PLOG(ERROR) << "Failed to mount '" << fstab_rec->mount_point << "'";
+             return false;
+diff --git a/init/service.cpp b/init/service.cpp
+index 9ba0272a3..9f0f5dd40 100644
+--- a/init/service.cpp
++++ b/init/service.cpp
+@@ -640,7 +640,7 @@ bool Service::Start() {
+         LOG(INFO) << "computing context for service '" << name_ << "'";
+         scon = ComputeContextFromExecutable(name_, args_[0]);
+         if (scon == "") {
+-            return false;
++            // return false;
+         }
+     }
+ 
+diff --git a/rootdir/init.rc b/rootdir/init.rc
+index 3b996a435..ea15d13ea 100644
+--- a/rootdir/init.rc
++++ b/rootdir/init.rc
+@@ -432,6 +432,9 @@ on post-fs-data
+     mkdir /data/property 0700 root root
+     mkdir /data/tombstones 0771 system system
+ 
++    # create /data/elastos, so as to enforce our permissions
++    mkdir /data/elastos 0771 system system
++
+     # create dalvik-cache, so as to enforce our permissions
+     mkdir /data/dalvik-cache 0771 root root
+     # create the A/B OTA directory, so as to enforce our permissions
+@@ -508,6 +511,7 @@ on zygote-start && property:ro.crypto.state=unencrypted
+     start netd
+     start zygote
+     start zygote_secondary
++    start elzygote
+ 
+ on zygote-start && property:ro.crypto.state=unsupported
+     # A/B update verifier that marks a successful boot.
+@@ -515,6 +519,7 @@ on zygote-start && property:ro.crypto.state=unsupported
+     start netd
+     start zygote
+     start zygote_secondary
++    start elzygote
+ 
+ on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type=file
+     # A/B update verifier that marks a successful boot.
+@@ -522,6 +527,7 @@ on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type
+     start netd
+     start zygote
+     start zygote_secondary
++    start elzygote
+ 
+ on boot
+     # basic network init
+diff --git a/rootdir/init.zygote64_32.rc b/rootdir/init.zygote64_32.rc
+index 09db7b03d..b69ac3483 100644
+--- a/rootdir/init.zygote64_32.rc
++++ b/rootdir/init.zygote64_32.rc
+@@ -21,3 +21,10 @@ service zygote_secondary /system/bin/app_process32 -Xzygote /system/bin --zygote
+     socket zygote_secondary stream 660 root system
+     onrestart restart zygote
+     writepid /dev/cpuset/foreground/tasks
++
++service elzygote /system/bin/ElApp_process /system/bin --zygote
++    class main
++    priority -20
++    user root
++    group root readproc
++    socket elzygote stream 660 root system
