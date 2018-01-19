@@ -39,7 +39,7 @@ INCLUDES += $(PREBUILD_INC)/bionic
 INCLUDES += $(PREBUILD_INC)/stlport
 INCLUDES += $(PREBUILD_INC)/freetype
 INCLUDES += $(PREBUILD_INC)/harfbuzz_ng
-INCLUDES += $(PREBUILD_INC)/machine
+INCLUDES += $(PREBUILD_INC)/arch-arm64
 INCLUDES += $(PREBUILD_INC)/pdfium/fpdfsdk/include
 INCLUDES += $(PREBUILD_INC)/rs
 

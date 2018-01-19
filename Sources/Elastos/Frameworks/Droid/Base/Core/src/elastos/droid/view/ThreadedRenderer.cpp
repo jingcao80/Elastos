@@ -1179,7 +1179,7 @@ Int32 ThreadedRenderer::NativeSyncAndDrawFrame(
     /* [in] */ Int32 size)
 {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
-    Int64* buf = proxy->frameInfo();
+    int64_t* buf = proxy->frameInfo();
     for (Int32 i = 0; i < size; i++) {
         buf[i] = (*frameInfo)[i];
     }

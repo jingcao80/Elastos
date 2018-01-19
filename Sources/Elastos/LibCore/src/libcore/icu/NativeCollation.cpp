@@ -19,7 +19,7 @@
 #include "ElStringByteSink.h"
 #include <unicode/ucol.h>
 #include <unicode/ucoleitr.h>
-#include <utils/UniquePtr.h>
+#include <nativehelper/UniquePtr.h>
 
 namespace Libcore {
 namespace ICU {

@@ -28,6 +28,11 @@ namespace IO {
 #define LONG_ALIGNMENT_MASK 0x3
 #define INT_ALIGNMENT_MASK 0x0
 #define SHORT_ALIGNMENT_MASK 0x0
+#elif defined(__aarch64__)
+// 64-bit ARM has load/store alignment restrictions for longs.
+#define LONG_ALIGNMENT_MASK 0x7
+#define INT_ALIGNMENT_MASK 0x0
+#define SHORT_ALIGNMENT_MASK 0x0
 #elif defined(__mips__)
 // MIPS has load/store alignment restrictions for longs, ints and shorts.
 #define LONG_ALIGNMENT_MASK 0x7
@@ -59,7 +64,7 @@ template <typename T> static inline void put_unaligned(T* address, T v)
     p->v = v;
 }
 
-template <typename T> static T cast(Int32 address)
+template <typename T> static T cast(Int64 address)
 {
     return reinterpret_cast<T>(static_cast<uintptr_t>(address));
 }

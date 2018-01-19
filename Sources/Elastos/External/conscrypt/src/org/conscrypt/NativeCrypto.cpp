@@ -6160,7 +6160,7 @@ static AutoPtr< ArrayOf<Int64> > getCertificateRefs(const STACK_OF(X509)* chain)
         return NULL;
     }
     AutoPtr< ArrayOf<Int64> > refArray = ArrayOf<Int64>::Alloc(count);
-    for (ssize_t i = 0; i < count; i++) {
+    for (Int32 i = 0; i < count; i++) {
         (*refArray)[i] = reinterpret_cast<uintptr_t>(X509_dup_nocopy(sk_X509_value(chain, i)));
     }
     return refArray;

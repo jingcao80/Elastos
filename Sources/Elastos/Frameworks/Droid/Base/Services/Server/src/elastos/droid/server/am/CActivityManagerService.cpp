@@ -16835,7 +16835,7 @@ void CActivityManagerService::DumpProcessesLocked(
             StringBuilder sb6("  mNumNonCachedProcs=");
             sb6 += mNumNonCachedProcs;
             sb6 += " (";
-            sb6 += mLruProcesses.GetSize();
+            sb6 += (Int64)mLruProcesses.GetSize();
             sb6 += " total)";
             sb6 += " mNumCachedHiddenProcs=";
             sb6 += mNumCachedHiddenProcs;

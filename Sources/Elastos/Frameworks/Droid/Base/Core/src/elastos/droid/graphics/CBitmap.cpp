@@ -1676,7 +1676,7 @@ ECode CBitmap::NativeCreate(
 
     sk_sp<android::Bitmap> nativeBitmap = android::Bitmap::allocateHeapBitmap(&bitmap, NULL);
     if (!nativeBitmap) {
-        return NULL;
+        return NOERROR;
     }
 
     if (colors != NULL) {
@@ -2159,7 +2159,7 @@ ECode CBitmap::NativeCreateFromParcel(
     std::unique_ptr<SkBitmap> bitmap(new SkBitmap);
     if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType, colorSpace),
             rowBytes)) {
-        return NULL;
+        return E_RUNTIME_EXCEPTION;
     }
 
     SkColorTable* ctable = NULL;
@@ -2168,13 +2168,13 @@ ECode CBitmap::NativeCreateFromParcel(
         if (count < 0 || count > 256) {
             // The data is corrupt, since SkColorTable enforces a value between 0 and 256,
             // inclusive.
-            return NULL;
+            return E_RUNTIME_EXCEPTION;
         }
         if (count > 0) {
             size_t size = count * sizeof(SkPMColor);
             const SkPMColor* src = (const SkPMColor*)p->readInplace(size);
             if (src == NULL) {
-                return NULL;
+                return E_RUNTIME_EXCEPTION;
             }
             ctable = new SkColorTable(src, count);
         }
@@ -2187,7 +2187,7 @@ ECode CBitmap::NativeCreateFromParcel(
     if (status) {
         SkSafeUnref(ctable);
         Logger::E(TAG, "Could not read bitmap blob.");
-        return NULL;
+        return E_RUNTIME_EXCEPTION;
     }
 
     // Map the bitmap in place from the ashmem region if possible otherwise copy.
@@ -2208,7 +2208,7 @@ ECode CBitmap::NativeCreateFromParcel(
             blob.release();
             SkSafeUnref(ctable);
             Logger::E(TAG, "Could not allocate dup blob fd.");
-            return NULL;
+            return E_RUNTIME_EXCEPTION;
         }
 
         // Map the pixels in place and take ownership of the ashmem region.
@@ -2219,7 +2219,7 @@ ECode CBitmap::NativeCreateFromParcel(
             close(dupFd);
             blob.release();
             Logger::E(TAG, "Could not allocate ashmem pixel ref.");
-            return NULL;
+            return E_RUNTIME_EXCEPTION;
         }
 
         // Clear the blob handle, don't release it.
@@ -2244,7 +2244,7 @@ ECode CBitmap::NativeCreateFromParcel(
         if (!nativeBitmap) {
             blob.release();
             Logger::E(TAG, "Could not allocate java pixel ref.");
-            return NULL;
+            return E_RUNTIME_EXCEPTION;
         }
         bitmap->lockPixels();
         memcpy(bitmap->getPixels(), blob.data(), size);

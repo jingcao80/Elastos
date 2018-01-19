@@ -388,7 +388,7 @@ function pd ()
         "m")
             local PROJECT_DIR=$PWD
             local XDK_EMAKE_DIR=${PWD/$XDK_SOURCE_PATH/}
-            pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/mirror$XDK_EMAKE_DIR 1>/dev/null
+            pushd $XDK_USER_OBJ/mirror$XDK_EMAKE_DIR 1>/dev/null
         ;;
         *)
             pushd $1 1>/dev/null

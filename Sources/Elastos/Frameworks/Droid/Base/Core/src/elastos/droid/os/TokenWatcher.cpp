@@ -155,7 +155,7 @@ AutoPtr< List<String> > TokenWatcher::DumpInternal()
             keys.Insert(iter->mFirst);
         }
         StringBuilder sb("Token count: ");
-        sb += mTokens.GetSize();
+        sb += (Int32)mTokens.GetSize();
         a->PushBack(sb.ToString());
         Int32 i = 0;
         Set<AutoPtr<IBinder> >::Iterator iter2 = keys.Begin();

@@ -21,6 +21,7 @@ include $(MAKEDIR)/../../../../../../../sources.inc
 
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(PREBUILD_INC)/sqlite
 
 C_DEFINES += -DDROID_CORE
 

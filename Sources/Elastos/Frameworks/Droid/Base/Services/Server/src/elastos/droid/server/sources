@@ -170,6 +170,6 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 
 LIBRARIES += -llog -lbinder -lutils -lcutils -lsensorservice -lskia -linput -lhardware -lusbhost -lsuspend -lpower -lnetutils -linputflinger -lui -lEGL -lGLESv2 -linputservice -lm -lhidlbase -lbatteryservice
 
-LIBRARIES += $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib/android.hardware.vibrator@1.0.so
-LIBRARIES += $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib/android.hardware.tv.cec@1.0.so
-LIBRARIES += $(XDK_BUILD_PATH)/Prebuilt/Linux/usr/lib/android.hardware.tv.input@1.0.so
+LIBRARIES += $(XDK_PREBUILD_LIB)/android.hardware.vibrator@1.0.so
+LIBRARIES += $(XDK_PREBUILD_LIB)/android.hardware.tv.cec@1.0.so
+LIBRARIES += $(XDK_PREBUILD_LIB)/android.hardware.tv.input@1.0.so

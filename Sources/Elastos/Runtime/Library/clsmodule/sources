@@ -17,7 +17,7 @@
 TARGET_NAME= clsinfo
 TARGET_TYPE= lib
 
-INCLUDES:= $(MAKEDIR)/../libzip; $(INCLUDES)
+INCLUDES += $(PREBUILD_INC)/zlib
 
 SOURCES = clserr.cpp
 SOURCES += comprcls.cpp

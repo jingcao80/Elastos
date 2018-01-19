@@ -23,6 +23,7 @@ include $(MAKEDIR)/../../../sources.inc
 
 INCLUDES += $(PREBUILD_INC)/sys;
 INCLUDES += $(PREBUILD_INC)/ziparchive;
+INCLUDES += $(PREBUILD_INC)/zlib;
 INCLUDES += ../../../corelibrary
 INCLUDES += $(MAKEDIR)/../../../../inc;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos;

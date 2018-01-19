@@ -74,7 +74,12 @@ endif
 ifeq "$(XDK_TARGET_PLATFORM)" "android"
   PREBUILD_PATH = $(XDK_BUILD_PATH)/Prebuilt/Linux
   PREBUILD_INC = $(PREBUILD_PATH)/usr/include
-  PREBUILD_LIB = $(PREBUILD_PATH)/usr/lib
+  ifeq "$(XDK_TARGET_CPU)" "arm"
+    PREBUILD_LIB = $(PREBUILD_PATH)/usr/lib
+  endif
+  ifeq "$(XDK_TARGET_CPU)" "aarch64"
+    PREBUILD_LIB = $(PREBUILD_PATH)/usr/lib64
+  endif
   XDK_CERTIFICATE_PATH = $(XDK_TOOLS)/security
   XDK_SIGNAPK_JAR = $(XDK_TOOLS)/signapk.jar
 endif
@@ -140,6 +145,12 @@ TARGET_XSL_E_PATH= $(XDK_SOURCE_PATH)/Documents/References/English/xsl/xsl_e
 INCLUDES := .; $(XDK_USER_INC); $(PREBUILD_INC); $(MAKEDIR);
 ifeq "$(XDK_TARGET_PLATFORM)" "android"
 INCLUDES := $(PREBUILD_INC)/libcxx; $(INCLUDES);
+ifeq "$(XDK_TARGET_CPU)" "arm"
+INCLUDES := $(INCLUDES); $(PREBUILD_INC)/asm-arm; $(PREBUILD_INC)/arch-arm;
+endif
+ifeq "$(XDK_TARGET_CPU)" "aarch64"
+INCLUDES := $(INCLUDES); $(PREBUILD_INC)/asm-arm64; $(PREBUILD_INC)/arch-arm64;
+endif
 endif
 SYSTEM_INCLUDES := $(INCLUDES)
 

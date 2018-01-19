@@ -38,7 +38,8 @@ static const char *s_pszLibraryPath = NULL;
 static const char *s_pszPublicPath = NULL;
 
 #ifdef _linux
-extern int LoadResourceFromELF(const char *pszName, CLSModule **ppDest);
+extern int LoadResourceFromELF32(const char *pszName, CLSModule **ppDest);
+extern int LoadResourceFromELF64(const char *pszName, CLSModule **ppDest);
 #endif
 
 
@@ -197,7 +198,11 @@ int LoadCLSFromDll(const char *pszName, CLSModule **ppDest)
 
     if( pszName == NULL ){
 #ifdef _linux
-        return LoadResourceFromELF(pszName, ppDest);
+#ifdef _x86
+        return LoadResourceFromELF32(pszName, ppDest);
+#elif _x64
+        return LoadResourceFromELF64(pszName, ppDest);
+#endif
 #else
         return LoadResourceFromPE(pszName, ppDest);
 #endif
@@ -233,7 +238,11 @@ int LoadCLSFromDll(const char *pszName, CLSModule **ppDest)
         fclose(pFile);
 
 #ifdef _linux
-            return LoadResourceFromELF(szResult, ppDest);
+#ifdef _devtools
+            return LoadResourceFromELF32(szResult, ppDest);
+#elif _devtools64
+            return LoadResourceFromELF64(szResult, ppDest);
+#endif
 #else
             return LoadResourceFromPE(szResult, ppDest);
 #endif

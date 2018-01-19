@@ -20,6 +20,7 @@ TARGET_TYPE= lib
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../../../Core/inc/
+INCLUDES += $(PREBUILD_INC)/zlib
 
 include $(MAKEDIR)/../../../../../../../../../sources.inc
 

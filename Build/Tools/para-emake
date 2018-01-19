@@ -274,7 +274,8 @@ para_emake_destroy() {
 
 load_job_desc_file() {
     local job_desc_path=$build_tools_path/
-    job_desc_path+=${target_desc/_/-}-paralist
+    local job_desc_file_prefix=${target_desc%_*}
+    job_desc_path+=${job_desc_file_prefix/_/-}-paralist
     if [[ ! -f "$job_desc_path" ]]; then
         echo No paralist found: $job_desc_path
         job_desc_path=${target_desc/_/-}-paralist

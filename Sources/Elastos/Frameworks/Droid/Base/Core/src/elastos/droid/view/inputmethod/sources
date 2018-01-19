@@ -22,10 +22,9 @@ include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-ifeq "$(XDK_TARGET_PLATFORM)" "linux"
 INCLUDES += $(PREBUILD_INC)/skia/utils
 INCLUDES += $(PREBUILD_INC)/skia/core
-endif
+INCLUDES += $(PREBUILD_INC)/surfaceflinger
 
 C_DEFINES += -DDROID_CORE
 

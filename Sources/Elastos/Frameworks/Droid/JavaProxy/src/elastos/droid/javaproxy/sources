@@ -24,6 +24,7 @@ LUBE_FLAGS += -n -u
 
 INCLUDES += $(MAKEDIR)/../../../../inc/
 INCLUDES += ../../../../
+INCLUDES += $(PREBUILD_INC)/nativehelper
 
 SOURCES = Elastos.Droid.JavaProxy.car
 SOURCES += Elastos.Droid.Core.cpp

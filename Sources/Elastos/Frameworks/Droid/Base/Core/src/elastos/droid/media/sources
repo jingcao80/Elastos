@@ -22,6 +22,7 @@ include $(MAKEDIR)/../../../../../../sources.inc
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
 INCLUDES += $(PREBUILD_INC)/harfbuzz_ng
+INCLUDES += $(PREBUILD_INC)/hwui
 INCLUDES += $(PREBUILD_INC)/skia/codec
 INCLUDES += $(PREBUILD_INC)/skia/config
 INCLUDES += $(PREBUILD_INC)/skia/core

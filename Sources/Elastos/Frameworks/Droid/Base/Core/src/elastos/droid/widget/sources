@@ -23,7 +23,7 @@ include $(MAKEDIR)/../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
-
+INCLUDES += $(PREBUILD_INC)/surfaceflinger
 
 SOURCES += AbsListView.cpp
 SOURCES += AbsoluteLayout.cpp

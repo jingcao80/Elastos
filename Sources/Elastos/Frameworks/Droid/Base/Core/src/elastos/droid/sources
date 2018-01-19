@@ -31,6 +31,8 @@ include $(MAKEDIR)/../../../../../sources.inc
 
 INCLUDES += $(MAKEDIR)/../../../inc/
 INCLUDES += $(MAKEDIR)/../../../../../../../LibCore/inc/
+INCLUDES += $(PREBUILD_INC)/sqlite
+INCLUDES += $(PREBUILD_INC)/surfaceflinger
 
 SOURCES = Elastos.Droid.Core.car
 SOURCES += R.cpp

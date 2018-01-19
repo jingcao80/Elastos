@@ -23,6 +23,8 @@ include $(MAKEDIR)/../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
+INCLUDES += $(PREBUILD_INC)/nativehelper
+INCLUDES += $(PREBUILD_INC)/surfaceflinger
 
 SOURCES += app.cpp
 

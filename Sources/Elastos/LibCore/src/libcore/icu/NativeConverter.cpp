@@ -25,7 +25,7 @@
 #include <ustrenum.h> // For UStringEnumeration.
 #include "CharsetICU.h"
 #include <elastos/utility/etl/Vector.h>
-#include <utils/UniquePtr.h>
+#include <nativehelper/UniquePtr.h>
 
 
 using Elastos::Utility::Etl::Vector;

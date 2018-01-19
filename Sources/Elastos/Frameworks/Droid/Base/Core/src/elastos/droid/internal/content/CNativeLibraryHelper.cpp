@@ -26,7 +26,7 @@
 
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
-#include <utils/UniquePtr.h>
+#include <nativehelper/UniquePtr.h>
 #include <utils/Log.h>
 #include <zlib.h>
 #include <fcntl.h>
@@ -737,7 +737,7 @@ static bool isFileDifferent(const char* filePath, size_t fileSize, time_t modifi
 static install_status_t sumFiles(void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
 {
     size_t* total = (size_t*) arg;
-    size_t uncompLen;
+    uint32_t uncompLen;
 
     if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, NULL, NULL)) {
         return INSTALL_FAILED_INVALID_APK;
@@ -759,7 +759,7 @@ static install_status_t copyFileIfChanged(void* arg, ZipFileRO* zipFile, ZipEntr
     // ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
     String nativeLibPath((char*) arg);
 
-    size_t uncompLen;
+    uint32_t uncompLen;
     uint32_t when;
     uint32_t crc;
     time_t modTime;

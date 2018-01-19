@@ -11,6 +11,10 @@ ifeq "$(XDK_TARGET_PRODUCT)" "devtools"
   NATIVE_BUILD=1
 endif
 
+ifeq "$(XDK_TARGET_PRODUCT)" "devtools64"
+  NATIVE_BUILD=1
+endif
+
 ifeq "$(XDK_TARGET_PRODUCT)" "elastos"
   NATIVE_BUILD=1
 endif
@@ -94,6 +98,7 @@ ifeq "$(XDK_TARGET_PLATFORM)" "android"
   endif
   DLLTOOL_FLAGS := -Wl,-soname,$(TARGET_NAME).$(DEPEND_OBJ_TYPE) -nostdlib -L$(PREBUILD_LIB) \
                    $(DLLTOOL_FLAGS)
+  DYNAMIC_LINKER := /system/bin/linker
 else
   ifneq "$(DLLTOOL_FLAGS)" ""
     DLLTOOL_FLAGS := -Wl,-soname,/usr/com.elastos.runtime/elastos/$(strip $(DLLTOOL_FLAGS:-D=))
@@ -104,10 +109,37 @@ endif
 
 endif
 else
-  DLLTOOL_FLAGS := -D $(TARGET_NAME).$(DEPEND_OBJ_TYPE)  \
-                   -l $(XDK_USER_LIB)/$(TARGET_NAME).lib \
-                   $(DLLTOOL_FLAGS)
+  ifeq "$(XDK_TARGET_CPU)" "aarch64"
+  ifneq "$(XDK_TARGET_FORMAT)" "elf"
+    DLLTOOL_FLAGS := -C -f -mcpu=arm9 -f -march=armv7-a --no-export-all-symbols \
+                     -D $(TARGET_NAME).$(DEPEND_OBJ_TYPE) \
+                     -l $(XDK_USER_LIB)/$(TARGET_NAME).lib \
+                     $(DLLTOOL_FLAGS)
+  else
+
+  ifeq "$(XDK_TARGET_PLATFORM)" "android"
+    ifneq "$(DLLTOOL_FLAGS)" ""
+      DLLTOOL_FLAGS := -Wl,-soname,$(strip $(DLLTOOL_FLAGS:-D=))
+    endif
+    DLLTOOL_FLAGS := -Wl,-soname,$(TARGET_NAME).$(DEPEND_OBJ_TYPE) -nostdlib -L$(PREBUILD_LIB) \
+                     $(DLLTOOL_FLAGS)
+    DYNAMIC_LINKER := /system/bin/linker64
+  else
+    ifneq "$(DLLTOOL_FLAGS)" ""
+      DLLTOOL_FLAGS := -Wl,-soname,/usr/com.elastos.runtime/elastos/$(strip $(DLLTOOL_FLAGS:-D=))
+    endif
+    DLLTOOL_FLAGS := -Wl,-soname,/usr/com.elastos.runtime/elastos/$(TARGET_NAME).$(DEPEND_OBJ_TYPE) \
+                     $(DLLTOOL_FLAGS)
+  endif
+
+  endif
+  else
+    DLLTOOL_FLAGS := -D $(TARGET_NAME).$(DEPEND_OBJ_TYPE)  \
+                     -l $(XDK_USER_LIB)/$(TARGET_NAME).lib \
+                     $(DLLTOOL_FLAGS)
+  endif
 endif
+
 
 ##########################################################################
 #
@@ -210,17 +242,18 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
     GCC_SYSROOT=$(PREBUILD_PATH)
     GCC_LIB_PATH=$(shell $(CC) -print-file-name=)
 
-    EXE_FLAGS := $(ECX_FLAGS) -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
-    ECX_FLAGS := $(ECX_FLAGS) -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
+    EXE_FLAGS := $(ECX_FLAGS) -fuse-ld=gold -nostdlib -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
+    ECX_FLAGS := $(ECX_FLAGS) -fuse-ld=gold -nostdlib \
+                 -Bdynamic -pie -Wl,--gc-sections -Wl,-z,nocopyreloc -L$(PREBUILD_LIB) -L$(XDK_TARGETS)
 
-    EXE_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_dynamic.o
+    EXE_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,$(DYNAMIC_LINKER) $(PREBUILD_LIB)/crtbegin_dynamic.o
 
-    ECX_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_dynamic.o
+    ECX_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,$(DYNAMIC_LINKER) $(PREBUILD_LIB)/crtbegin_dynamic.o
 
     EXE_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lc -lc++ -lcompiler_rt
     ECX_CRT_END=$(PREBUILD_LIB)/crtend_android.o -lc -lc++ -lcompiler_rt
 
-    DLL_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,/system/bin/linker $(PREBUILD_LIB)/crtbegin_so.o
+    DLL_CRT_BEGIN=--sysroot=$(GCC_SYSROOT) -Wl,-X -Wl,-dynamic-linker,$(DYNAMIC_LINKER) $(PREBUILD_LIB)/crtbegin_so.o
     DLL_CRT_END=$(PREBUILD_LIB)/crtend_so.o $(PREBUILD_LIB)/libgcc.a -lc -lc++ -lcompiler_rt
   endif
 endif # elf
@@ -242,6 +275,9 @@ ifeq "$(XDK_VERSION)" "pre"
   ifeq "$(XDK_TARGET_CPU)" "arm"
     C_FLAGS := -mapcs-frame -fno-omit-frame-pointer $(C_FLAGS)
   endif
+  ifeq "$(XDK_TARGET_CPU)" "aarch64"
+    C_FLAGS := -mapcs-frame -fno-omit-frame-pointer $(C_FLAGS)
+  endif
   C_FLAGS:= -Os $(C_FLAGS)
   ifeq "$(NODBGSYMBOL)" ""
     C_FLAGS := -ggdb $(C_FLAGS)
@@ -251,6 +287,9 @@ ifeq "$(XDK_VERSION)" "pre"
 endif
 ifeq "$(XDK_VERSION)" "opt"
   ifeq "$(XDK_TARGET_CPU)" "arm"
+    C_FLAGS := -mapcs-frame -fno-omit-frame-pointer $(C_FLAGS)
+  endif
+  ifeq "$(XDK_TARGET_CPU)" "aarch64"
     C_FLAGS := -mapcs-frame -fno-omit-frame-pointer $(C_FLAGS)
   endif
   C_FLAGS:= -Os $(C_FLAGS)
@@ -265,6 +304,9 @@ ifeq "$(XDK_VERSION)" "dbg"
     C_FLAGS := -ggdb $(C_FLAGS)
   endif
   ifeq "$(XDK_TARGET_CPU)" "arm"
+    C_FLAGS := -fno-omit-frame-pointer $(C_FLAGS)
+  endif
+  ifeq "$(XDK_TARGET_CPU)" "aarch64"
     C_FLAGS := -fno-omit-frame-pointer $(C_FLAGS)
   endif
   C_DEFINES:= -D_DEBUG $(C_DEFINES)
@@ -315,7 +357,24 @@ ifeq "$(XDK_TARGET_CPU)" "x86"
 endif
 
 ifeq "$(XDK_TARGET_CPU)" "arm"
-  C_FLAGS:= -target armv7a-linux-androideabi -fms-extensions \
+  C_FLAGS:= -target arm-linux-androideabi -march=armv7-a -fms-extensions \
+            $(C_FLAGS)
+  ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+    C_FLAGS:= -msoft-float -fPIC -mthumb-interwork -ffunction-sections -fdata-sections -funwind-tables -fstack-protector $(C_FLAGS)
+  else
+    ifeq "$(XDK_TARGET_PLATFORM)" "android"
+      C_FLAGS:= -msoft-float -fPIC -ffunction-sections -fdata-sections -funwind-tables -Wa,--noexecstack -fstack-protector -fno-short-enums \
+                -no-canonical-prefixes -fmessage-length=0 -nostdlibinc $(C_FLAGS)
+    else
+      ifneq "$(XDK_COMPILER)" "gcc"
+        C_FLAGS:= -mapcs-32 -msoft-float $(C_FLAGS)
+      endif
+    endif
+  endif
+endif
+
+ifeq "$(XDK_TARGET_CPU)" "aarch64"
+  C_FLAGS:= -target aarch64-linux-android -march=armv8-a -fms-extensions \
             $(C_FLAGS)
   ifeq "$(XDK_TARGET_PLATFORM)" "linux"
     C_FLAGS:= -msoft-float -fPIC -mthumb-interwork -ffunction-sections -fdata-sections -funwind-tables -fstack-protector $(C_FLAGS)

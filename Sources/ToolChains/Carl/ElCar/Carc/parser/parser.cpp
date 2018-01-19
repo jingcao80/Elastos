@@ -3828,6 +3828,12 @@ int TypeSignature(TypeDescriptor* pType, StringBuilder& sb)
                 return Ret_AbortOnError;
             }
             break;
+        case Type_EventHandler:
+            sb.Append("LElastos/EventHandler;");
+            break;
+        case Type_PVoid:
+            sb.Append("V");
+            break;
         default:
             assert(0);
             return Ret_AbortOnError;

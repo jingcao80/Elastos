@@ -25,6 +25,7 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
 INCLUDES += $(PREBUILD_INC)/binder
+INCLUDES += $(PREBUILD_INC)/surfaceflinger
 INCLUDES += $(PREBUILD_INC)/utils
 
 SOURCES += os.cpp

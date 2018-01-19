@@ -229,7 +229,7 @@ int LoadLubeFromELF(const char *pszName, PLUBEHEADER *ppLube)
 
     if (pszName == NULL) {
         char path[256];
-        strcpy(path, getenv("XDK_TOOLS"));
+        strcpy(path, getenv("CAR_TOOLS"));
         strcat(path, "/lube");
         pFile = fopen(path, "rb");
     }

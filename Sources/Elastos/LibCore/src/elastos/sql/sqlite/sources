@@ -21,6 +21,7 @@ C_DEFINES += -DELASTOS_CORELIBRARY
 
 include $(MAKEDIR)/../../../sources.inc
 
+INCLUDES += $(PREBUILD_INC)/sqlite;
 INCLUDES += $(PREBUILD_INC)/sys;
 INCLUDES += ../../../corelibrary
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos
