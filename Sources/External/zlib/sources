@@ -1,29 +1,17 @@
 TARGET_NAME=libz
-ifeq "$(XDK_TARGET_PRODUCT)" "devtools"
-ifeq "$(XDK_TARGET_PLATFORM)" "win32"
-TARGET_TYPE=eco
-else
 TARGET_TYPE=so
-endif
-else
-TARGET_TYPE=eco
-endif
 
 ifeq "$(XDK_TARGET_PRODUCT)" "devtools"
   C_DEFINES+=-DNO_VIZ
 endif
 
-ifeq "$(XDK_TARGET_PLATFORM)" "win32"
-  C_DEFINES+=-UWIN32
-  C_DEFINES+=-U_WIN32
+ifeq "$(XDK_TARGET_PRODUCT)" "devtools64"
+  C_DEFINES+=-DNO_VIZ
 endif
 
 EXPORT_HEADERS+=zlib.h
 EXPORT_HEADERS+=zconf.h
 
-ifeq "$(XDK_TARGET_PLATFORM)" "win32"
-SOURCES += zlib.def
-endif
 SOURCES += adler32.c
 SOURCES += compress.c
 SOURCES += crc32.c
@@ -39,16 +27,3 @@ SOURCES += inftrees.c
 SOURCES += trees.c
 SOURCES += uncompr.c
 SOURCES += zutil.c
-
-#ifeq "$(XDK_TARGET_PRODUCT)" "devtools"
-#  EXTERN_LIBS = user32
-#  EXTERN_LIBS += msvcrt
-#  EXTERN_LIBS += kernel32
-#  EXTERN_LIBS += uuid
-#  EXTERN_LIBS += oleaut32
-#else
-#ifeq "$(XDK_TARGET_PLATFORM)" "win32"
-#  LIBRARIES+=$(XDK_USER_LIB)/Elastos.Runtime.lib
-#endif
-#endif
-

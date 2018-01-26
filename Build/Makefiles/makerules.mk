@@ -290,8 +290,14 @@ endif # ifneq "$(USE_STDLIB)" ""
 
 $(TARGET_NAME).so: $(OBJECTS) $(filter-out -l%,$(LIBRARIES)) $(ELASTOS_LIBS) $(MAKEDIR)/sources
 	@echo Linking $@ ...
+ifeq "$(XDK_TARGET_CPU)" "x86"
 	$(LD) $(LINK_FLAGS) -m32 -shared -fpic -o  $(XDK_TARGETS)/$@ \
 		$(PASS2LD)--start-group $(OBJECTS) $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) $(PASS2LD)--end-group
+endif
+ifeq "$(XDK_TARGET_CPU)" "x64"
+	$(LD) $(LINK_FLAGS) -shared -fpic -o  $(XDK_TARGETS)/$@ \
+		$(PASS2LD)--start-group $(OBJECTS) $(PASS2LD)--whole-archive $(ELASTOS_LIBS) $(PASS2LD)--no-whole-archive $(LIBRARIES) $(PASS2LD)--end-group
+endif
 ifeq "$(DEBUG_INFO)" "1"
 	$(CP) $(XDK_TARGETS)/$@ $(TARGET_DBG_INFO_PATH)
 endif

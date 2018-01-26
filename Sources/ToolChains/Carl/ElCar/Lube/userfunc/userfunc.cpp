@@ -2687,7 +2687,8 @@ void OutputInterface(InterfaceDirEntry* pItfDir, CLSModule* pModule)
             pFile = fopen(pPath, "r+t");
         }
         assert(pFile != NULL);
-        fseek(pFile, -1 * (strlen(buffer) +  15), SEEK_END);
+        long int offset = strlen(buffer) +  15;
+        fseek(pFile, -1 * offset, SEEK_END);
     }
 
     //namespace begin

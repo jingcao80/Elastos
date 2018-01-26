@@ -96,7 +96,7 @@ public:
     {
         if (NULL == mValue.mFunc) return NULL;
 #ifndef _GNUC
-        return (void *)((Elastos::UInt32)mValue.mFunc & CallbackPtrMask);
+        return (void *)((uintptr_t)mValue.mFunc & CallbackPtrMask);
 #else
 #if defined(_arm) || defined(_x86)
         // for gnu-arm-pe compiler, it is another story
@@ -115,6 +115,23 @@ public:
                     | ((int)mValue.mFunc & CallbackTypeMask) );
             return (void *)((Elastos::UInt32)mValue.mFunc & CallbackPtrMask);
         }
+#elif defined(_aarch64)
+        // for gnu-arm-pe compiler, it is another story
+        // an virtual function's address &Foo::Bar() is the offset of &vptr[0]
+        //
+        // In gnu-x86 compiler, the value of pointer pointing to virtual function
+        // is index * 4 + 1. The code below calculates the true address of
+        // function according to mThis and mFunc.
+        //
+        if (*(int*)&mValue.mFunc & 0xFFFFFFFFFFFFF000ll) {
+            return (void *)((Elastos::UInt64)mValue.mFunc & CallbackPtrMask);
+        }
+        else {
+            mValue.mFunc = (void*)(
+                    (Elastos::UInt64)(*(*(void***)mValue.mThis + ((Elastos::UInt64)mValue.mFunc >> 2)))
+                    | ((Elastos::UInt64)mValue.mFunc & CallbackTypeMask) );
+            return (void *)((Elastos::UInt64)mValue.mFunc & CallbackPtrMask);
+        }
 #else
         assert(0 && "your compiler is not support yet!\n");
         return NULL;
@@ -124,7 +141,7 @@ public:
 
     CallbackType GetFuncType()
     {
-        return (CallbackType)(CallbackTypeMask & (_ELASTOS Int32)mValue.mFunc);
+        return (CallbackType)(CallbackTypeMask & (uintptr_t)mValue.mFunc);
     }
 
     static EventHandler Make(
@@ -155,7 +172,7 @@ private:
         mValue.mThis = thisPtr;
         mValue.mFunc = funcPtr;
 
-        mValue.mFunc = (_ELASTOS PVoid)((_ELASTOS Int32)mValue.mFunc | (CallbackTypeMask & type));
+        mValue.mFunc = (_ELASTOS PVoid)((uintptr_t)mValue.mFunc | (CallbackTypeMask & type));
         mCarObjClient = object;
     }
 

@@ -442,8 +442,8 @@ UInt32 HashTable<T, type>::Hash(
 {
     UInt32 value = 0;
     char ch = '\0', *str = (char *)key;
-    unsigned long* lvalue = (unsigned long *)key;
-    Int32 len = sizeof(EMuid) / sizeof(unsigned long);
+    unsigned int* lvalue = (unsigned int*)key;
+    Int32 len = sizeof(EMuid) / sizeof(unsigned int);
     Int32 i = 0;
     switch (type) {
         case Type_UInt32:

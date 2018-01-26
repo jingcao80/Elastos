@@ -83,6 +83,9 @@ Char32 ucase_tolower(
     return c;
 }
 
+#ifdef __clang__
+__attribute__((no_sanitize("integer")))
+#endif
 Char32 ucase_toupper(
     /* [in] */ const UCaseProps *csp,
     /* [in] */ Char32 c)

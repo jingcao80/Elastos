@@ -46,7 +46,7 @@ public:
 public:
     CLSModule*      mClsMod;
     Boolean         mAllocedClsMode;
-    Int32           mBase;
+    uintptr_t       mBase;
 
 private:
     TypeAliasDesc*  mTypeAliasList;

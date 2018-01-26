@@ -107,12 +107,14 @@ public:
 
     CARAPI AcquireAnnotationInfos();
 
+public:
+    InterfaceDescriptor*    mDesc;
+
 private:
     AutoPtr<CClsModule>     mClsModule;
     CLSModule*              mClsMod;
     AutoPtr<CEntryList>     mMethodList;
     InterfaceDirEntry*      mInterfaceDirEntry;
-    InterfaceDescriptor*    mDesc;
     IFIndexEntry*           mIFList;
     AutoPtr<IInterface>     mClassLoader;
     AutoPtr< ArrayOf<IAnnotationInfo*> > mAnnotationInfos;

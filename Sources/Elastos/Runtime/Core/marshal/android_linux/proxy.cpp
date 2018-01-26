@@ -49,7 +49,7 @@ void *GetUnalignedPtr(void* ptr);
 
 namespace Elastos {
 namespace IPC {
-Address s_proxyEntryAddress = (Address)NULL;
+uintptr_t s_proxyEntryAddress = NULL;
 }
 }
 #define PROXY_ENTRY_BASE    Elastos::IPC::s_proxyEntryAddress
@@ -76,6 +76,13 @@ inline UInt32 CalcMethodIndex(UInt32 uCallerAddr)
     } while (0)
 
 #elif defined(_arm)
+
+#define SYS_PROXY_EXIT(ec, pret, argc)  \
+    do {                                \
+        return (ec);                    \
+    } while (0)
+
+#elif defined(_aarch64)
 
 #define SYS_PROXY_EXIT(ec, pret, argc)  \
     do {                                \
@@ -124,6 +131,19 @@ EXTERN_C void ProxyEntryFunc(void);
             "push {lr};"                           \
             "mov  r1, #0xff;"                      \
             "ldr  pc, [r0, #4];"                   \
+        )
+        DECL_SYS_PROXY_ENTRY();
+#    elif defined(_aarch64)
+#       define DECL_SYS_PROXY_ENTRY()              \
+            __asm__(                               \
+            ".text;"                               \
+            ".align 8;"                            \
+            ".globl ProxyEntryFunc;"               \
+            "ProxyEntryFunc:"                      \
+            "stp lr, x1, [sp, #-16];"              \
+            "mov w1, #0xff;"                       \
+            "ldr lr, [x0, #4];"                    \
+            "br lr;"                               \
         )
         DECL_SYS_PROXY_ENTRY();
 #    elif defined(_x86)
@@ -190,6 +210,38 @@ DECL_PROXY_ENTRY();
 
 #endif
 
+#ifdef _aarch64
+
+EXTERN_C void __ProxyEntry(void);
+
+EXTERN_C ECode GlobalProxyEntry(UInt32* args)
+{
+    return Elastos::IPC::CInterfaceProxy::ProxyEntry(args);
+}
+
+#ifdef _GNUC
+#define DECL_PROXY_ENTRY()                 \
+    __asm__(                               \
+        ".text;"                           \
+        ".align 8;"                        \
+        ".globl __ProxyEntry;"             \
+        "__ProxyEntry:"                    \
+        "ldr lr, [sp, #-16];"              \
+        "str x0, [sp, #-16];"              \
+        "str lr, [sp, #-24];"              \
+        "str w1, [sp, #-28];"              \
+        "sub x0, sp, #24;"                 \
+        "bl GlobalProxyEntry;"             \
+        "ldr lr, [sp, #-16];"              \
+        "ldr x1, [sp, #-8];"               \
+        "ret;"                             \
+    )
+
+DECL_PROXY_ENTRY();
+#endif
+
+#endif
+
 #ifdef _mips
 
 EXTERN_C ECode GlobalProxyEntry(UInt32* args)
@@ -229,10 +281,10 @@ namespace IPC {
 
 void InitProxyEntry()
 {
-    s_proxyEntryAddress = (Address)mmap((void*)0,
+    s_proxyEntryAddress = reinterpret_cast<uintptr_t>(mmap((void*)0,
             PAGE_ALIGN(PROXY_ENTRY_NUM * PROXY_ENTRY_SIZE),
             PROT_READ | PROT_WRITE | PROT_EXEC,
-            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
     if (s_proxyEntryAddress == 0) {
         ALOGE("out of memory.\n");
         return;
@@ -247,6 +299,13 @@ void InitProxyEntry()
     }
 #elif defined(_arm)
     char* p = (char *)s_proxyEntryAddress;
+    for (Int32 n = 0; n < PROXY_ENTRY_NUM; n++) {
+        memcpy(p, (void *)&ProxyEntryFunc, PROXY_ENTRY_SIZE);
+        p[8] = n;
+        p += PROXY_ENTRY_SIZE;
+    }
+#elif defined(_aarch64)
+    char* p = reinterpret_cast<char *>(s_proxyEntryAddress);
     for (Int32 n = 0; n < PROXY_ENTRY_NUM; n++) {
         memcpy(p, (void *)&ProxyEntryFunc, PROXY_ENTRY_SIZE);
         p[8] = n;
@@ -268,9 +327,9 @@ void InitProxyEntry()
 void UninitProxyEntry()
 {
      if (0 != s_proxyEntryAddress) {
-        munmap((void*)s_proxyEntryAddress,
+        munmap(reinterpret_cast<void*>(s_proxyEntryAddress),
                PAGE_ALIGN(PROXY_ENTRY_NUM * PROXY_ENTRY_SIZE));
-        s_proxyEntryAddress = (Address)NULL;
+        s_proxyEntryAddress = NULL;
     }
 }
 
@@ -550,6 +609,8 @@ ECode CInterfaceProxy::ProxyEntry(
 #ifdef _x86
     methodIndex = CalcMethodIndex(*(UInt32 *)((UInt32)&args - 4));
 #elif defined(_arm)
+    methodIndex = args[-3];
+#elif defined(_aarch64)
     methodIndex = args[-3];
 #elif defined(_mips)
     methodIndex = CalcMethodIndex(*(args - 4) - 4);
@@ -1240,6 +1301,8 @@ ECode CObjectProxy::S_CreateObject(
 #ifdef _x86
         interfaces[n].mProxyEntry = (PVoid)&CInterfaceProxy::ProxyEntry;
 #elif defined(_arm)
+        interfaces[n].mProxyEntry = (PVoid)&__ProxyEntry;
+#elif defined(_aarch64)
         interfaces[n].mProxyEntry = (PVoid)&__ProxyEntry;
 #elif defined(_mips)
         interfaces[n].mProxyEntry = (PVoid)&ProxyContinue;

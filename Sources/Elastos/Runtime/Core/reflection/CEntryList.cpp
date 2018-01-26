@@ -22,6 +22,7 @@
 #include "CParamInfo.h"
 #include "CFieldInfo.h"
 #include "CClassInfo.h"
+#include "CInterfaceInfo.h"
 
 CEntryList::CEntryList(
     /* [in] */ EntryType type,
@@ -52,6 +53,33 @@ CEntryList::~CEntryList()
     if (mObjElement) {
         for (UInt32 i = 0; i < mTotalCount; i++) {
             if (mObjElement[i].mObject) {
+                switch (mType) {
+                    case EntryType_Class:
+                    {
+                        CClassInfo* ci = (CClassInfo*)IClassInfo::Probe(mObjElement[i].mObject);
+                        g_objInfoList.RemoveClassInfo(ci->mClassDirEntry);
+                        break;
+                    }
+
+                    case EntryType_ClassInterface:
+                    case EntryType_Interface:
+                    {
+                        CInterfaceInfo* ii = (CInterfaceInfo*)IInterfaceInfo::Probe(mObjElement[i].mObject);
+                        g_objInfoList.RemoveInterfaceInfo(ii->mDesc->mIID);
+                        break;
+                    }
+
+                    case EntryType_Method:
+                    {
+                        g_objInfoList.RemoveMethodInfo(
+                            (MethodDescriptor *)mObjElement[i].mDesc,
+                            mObjElement[i].mIndex);
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
                 mObjElement[i].mObject->Release();
             }
         }
@@ -419,7 +447,7 @@ ECode CEntryList::GetAllObjInfos(
         return NOERROR;
     }
 
-    Int32 count = capacity < (int)mTotalCount ? capacity : mTotalCount;
+    Int32 count = capacity < (Int32)mTotalCount ? capacity : mTotalCount;
     ECode ec = NOERROR;
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> object;

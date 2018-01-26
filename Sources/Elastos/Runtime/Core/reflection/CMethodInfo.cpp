@@ -22,7 +22,11 @@
 
 #define INVALID_PARAM_COUNT 0xFFFFFFFF
 
+#ifdef _aarch64
+EXTERN_C int invoke2(uintptr_t func, uintptr_t params, int paramCount, struct ParmElement* paramsSize, int totalSize);
+#else
 EXTERN_C int invoke(void* func, int* param, int size);
+#endif
 
 struct VTable
 {
@@ -343,6 +347,11 @@ ECode CMethodInfo::SetParamElem(
         && parmElement->mAttrib != ParamIOAttribute_CallerAllocOut) {
         mParamBufSize = ROUND8(mParamBufSize);
     }
+#elif defined(_aarch64)
+    if (typeDesc->mType == Type_Double || typeDesc->mType == Type_Int64 ||
+        typeDesc->mType == Type_String) {
+        mParamBufSize = ROUND8(mParamBufSize);
+    }
 #endif
 
     parmElement->mPos = mParamBufSize;
@@ -360,7 +369,11 @@ ECode CMethodInfo::InitParmElement()
     }
     memset(mParamElem, 0, sizeof(mParamElem) * count);
 
+#if defined(_arm)
     mParamBufSize = 4; //For this pointer
+#elif defined(_aarch64)
+    mParamBufSize = 8; //For this pointer
+#endif
     ECode ec = NOERROR;
     for (Int32 i = 0; i < count; i++) {
         ec = SetParamElem(
@@ -503,9 +516,15 @@ ECode CMethodInfo::Invoke(
     Int32* paramBuf = NULL;
     if (!argumentList) {
         if (mMethodDescriptor->mParamCount) return E_INVALID_ARGUMENT;
+#if defined(_arm)
         paramBuf = (Int32 *)alloca(4);
         if (!paramBuf) return E_OUT_OF_MEMORY;
         mParamBufSize = 4;
+#elif defined(_aarch64)
+        paramBuf = (Int32 *)alloca(8);
+        if (!paramBuf) return E_OUT_OF_MEMORY;
+        mParamBufSize = 8;
+#endif
     }
     else {
         paramBuf = (Int32 *)((CArgumentList *)argumentList)->mParamBuf;
@@ -523,8 +542,13 @@ ECode CMethodInfo::Invoke(
     *(PInterface *)paramBuf = object;
 
     VObject* vobj = reinterpret_cast<VObject*>(object);
+#ifdef _aarch64
+    uintptr_t methodAddr = (uintptr_t)vobj->mVtab->mMethods[METHOD_INDEX(mIndex)];
+    return (ECode)invoke2(methodAddr, (uintptr_t)paramBuf, mMethodDescriptor->mParamCount + 1, mParamElem, mParamBufSize);
+#else
     void* methodAddr = vobj->mVtab->mMethods[METHOD_INDEX(mIndex)];
     return (ECode)invoke(methodAddr, paramBuf,  mParamBufSize);
+#endif
 }
 
 ECode CMethodInfo::AcquireAnnotationInfos()

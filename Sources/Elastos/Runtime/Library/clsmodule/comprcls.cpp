@@ -29,13 +29,13 @@ int CompressCLS(
     if (!srcModule) _ReturnError(CLSError_OutOfMemory);
 
     memcpy(srcModule, destModule, destModule->mSize);
-    int dataSize = srcModule->mSize - sizeof(CLSModule);
+    uLongf dataSize = srcModule->mSize - sizeof(CLSModule);
 
     if (compress(
         (Bytef *)destModule + sizeof(CLSModule),
         (uLongf *)&dataSize,
         (Bytef *)srcModule + sizeof(CLSModule),
-        (uLongf)dataSize) != Z_OK) {
+        dataSize) != Z_OK) {
         _ReturnError(CLSError_Compress);
     }
 
@@ -48,13 +48,13 @@ int UncompressCLS(
     /* [in] */ CLSModule* destModule)
 {
     CLSModule* srcModule = (CLSModule *)src;
-    int dataSize = srcModule->mSize - sizeof(CLSModule);
+    uLongf dataSize = srcModule->mSize - sizeof(CLSModule);
 
     if (uncompress(
         (Bytef *)destModule + sizeof(CLSModule),
         (uLongf *)&dataSize,
         (Bytef *)srcModule + sizeof(CLSModule),
-        (uLongf)size - sizeof(CLSModule)) != Z_OK) {
+        (uLong)size - sizeof(CLSModule)) != Z_OK) {
         _ReturnError(CLSError_Uncompress);
     }
 

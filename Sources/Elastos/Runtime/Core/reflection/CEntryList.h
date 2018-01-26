@@ -90,7 +90,7 @@ private:
     EntryType           mType;
     CClassInfo*         mClsInfo;
     ObjElement*         mObjElement;
-    Int32               mBase;
+    uintptr_t           mBase;
 
     IFIndexEntry*       mIFList;
     UInt32              mListCount;

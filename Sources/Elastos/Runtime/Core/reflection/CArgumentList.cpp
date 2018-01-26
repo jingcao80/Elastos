@@ -142,15 +142,28 @@ ECode CArgumentList::SetParamValue(
         *(UInt16 *)(mParamBuf + mParamElem[index].mPos) = *(UInt16 *)param;
     }
     else if (mParamElem[index].mSize == 4) {
+#if defined(_arm)
         if (type == CarDataType_String) {
             *(String **)(mParamBuf + mParamElem[index].mPos) = (String *)param;
         }
         else {
             *(UInt32 *)(mParamBuf + mParamElem[index].mPos) = *(UInt32 *)param;
         }
+#elif defined(_aarch64)
+        *(UInt32 *)(mParamBuf + mParamElem[index].mPos) = *(UInt32 *)param;
+#endif
     }
     else if (mParamElem[index].mSize == 8) {
+#if defined(_arm)
         *(UInt64 *)(mParamBuf + mParamElem[index].mPos) = *(UInt64 *)param;
+#elif defined(_aarch64)
+        if (type == CarDataType_String) {
+            *(String **)(mParamBuf + mParamElem[index].mPos) = (String *)param;
+        }
+        else {
+            *(UInt64 *)(mParamBuf + mParamElem[index].mPos) = *(UInt64 *)param;
+        }
+#endif
     }
     else {
         return E_INVALID_OPERATION;

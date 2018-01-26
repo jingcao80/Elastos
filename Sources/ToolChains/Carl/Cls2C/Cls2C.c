@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
 
     fseek(fRfile, 0, SEEK_SET);
 	//len = strtol(argv[1], NULL, 10);
+    fprintf(fWfile, "#include<stdint.h>\n");
+    fprintf(fWfile, "\n");
     fprintf(fWfile, "typedef struct _ResStruct{\n");
     fprintf(fWfile, "    unsigned int    uSize;\n");
     fprintf(fWfile, "    const char      uClsinfo[%d];\n", len +1);
@@ -76,7 +78,7 @@ int main(int argc, char *argv[])
 
 	fprintf(fWfile, "};\n");
 	fprintf(fWfile, "\n");
-	fprintf(fWfile, "int g_pDllResource = (int)&DllResource;\n");
+	fprintf(fWfile, "uintptr_t g_pDllResource = reinterpret_cast<uintptr_t>(&DllResource);\n");
 	fprintf(fWfile, "\n");
 
     fclose(fRfile);

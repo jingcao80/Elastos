@@ -53,12 +53,15 @@ public:
     CARAPI GetCallbackInvocation(
         /* [out] */ ICallbackInvocation** callbackInvocation);
 
-#ifndef _arm
-    CARAPI OnEvent(
-        /* [in] */ PInterface server);
-#else
+#ifdef _arm
     CARAPI OnEvent(
         /* [in] */ PInterface server, ...);
+#elif _aarch64
+    CARAPI OnEvent(
+        /* [in] */ PInterface server, ...);
+#else
+    CARAPI OnEvent(
+        /* [in] */ PInterface server);
 #endif
 
     CARAPI EventHander(

@@ -313,7 +313,7 @@ int LoadResourceFromELF64(const char *pszName, CLSModule **ppDest)
 
     if (pszName == NULL) {
         char path[256];
-        strcpy(path, getenv("XDK_TOOLS"));
+        strcpy(path, getenv("CAR_TOOLS"));
         strcat(path, "/carc");
         pFile = fopen(path, "rb");
     }

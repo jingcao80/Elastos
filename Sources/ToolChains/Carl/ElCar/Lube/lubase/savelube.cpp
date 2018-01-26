@@ -35,21 +35,21 @@ public:
     int Flat(PLUBEHEADER pLube, char *pBuffer);
 
 private:
-    inline int WriteData(const void *pvData, int nSize);
-    inline int WriteString(const char *pString);
+    inline ptrdiff_t WriteData(const void *pvData, int nSize);
+    inline ptrdiff_t WriteString(const char *pString);
 
-    int WriteState(PSTATEDESC pDesc);
-    int WriteTemplate(LubeTemplate *);
+    ptrdiff_t WriteState(PSTATEDESC pDesc);
+    ptrdiff_t WriteTemplate(LubeTemplate *);
 
 private:
     PLUBEHEADER         m_pLube;
     char *              m_pBuffer;
-    int                 m_nOffset;
+    ptrdiff_t           m_nOffset;
 };
 
-int CLubeBuffer::WriteData(const void *pvData, int nSize)
+ptrdiff_t CLubeBuffer::WriteData(const void *pvData, int nSize)
 {
-    int nBegin = m_nOffset;
+    ptrdiff_t nBegin = m_nOffset;
 
     memcpy(m_pBuffer + m_nOffset, pvData, nSize);
     m_nOffset += RoundUp4(nSize);
@@ -57,12 +57,12 @@ int CLubeBuffer::WriteData(const void *pvData, int nSize)
     return nBegin;
 }
 
-int CLubeBuffer::WriteString(const char *pString)
+ptrdiff_t CLubeBuffer::WriteString(const char *pString)
 {
     return WriteData(pString, strlen(pString) + 1);
 }
 
-int CLubeBuffer::WriteState(PSTATEDESC pDesc)
+ptrdiff_t CLubeBuffer::WriteState(PSTATEDESC pDesc)
 {
     StateDesc state;
 
@@ -80,7 +80,7 @@ int CLubeBuffer::WriteState(PSTATEDESC pDesc)
     return WriteData(&state, sizeof(StateDesc));
 }
 
-int CLubeBuffer::WriteTemplate(LubeTemplate *pTemplate)
+ptrdiff_t CLubeBuffer::WriteTemplate(LubeTemplate *pTemplate)
 {
     LubeTemplate tmp;
 
@@ -94,7 +94,8 @@ int CLubeBuffer::WriteTemplate(LubeTemplate *pTemplate)
 
 int CLubeBuffer::Flat(PLUBEHEADER pLube, char *pBuffer)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
 
     m_pLube = pLube;
     m_pBuffer = pBuffer;
@@ -103,13 +104,13 @@ int CLubeBuffer::Flat(PLUBEHEADER pLube, char *pBuffer)
     pLube = (PLUBEHEADER)pBuffer;
     memcpy(pLube, m_pLube, sizeof(LubeHeader));
 
-    p = (int *)_alloca(pLube->cTemplates * sizeof(int));
+    p = (ptrdiff_t *)_alloca(pLube->cTemplates * sizeof(ptrdiff_t));
     for (n = 0; n < pLube->cTemplates; n++) {
         p[n] = WriteTemplate(pLube->ppTemplates[n]);
     }
-    pLube->ppTemplates = (LubeTemplate **)WriteData(p, n * sizeof(int));
+    pLube->ppTemplates = (LubeTemplate **)WriteData(p, n * sizeof(ptrdiff_t));
 
-    return m_nOffset;
+    return (int)m_nOffset;
 }
 
 int CalcStatementsSize(PSTATEDESC pDesc)

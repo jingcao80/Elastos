@@ -28,13 +28,11 @@ INCLUDES = $(MAKEDIR)/../inc;
 INCLUDES += $(INCLUDESTEMP);
 
 ifeq "$(XDK_TARGET_CPU)" "arm"
-ifeq "$(XDK_COMPILER)" "msvc"
-SOURCES = invoke_ievc.asm
-else
 SOURCES = invoke_gnuc.S
 endif
-else
-SOURCES = invoke.cpp
+
+ifeq "$(XDK_TARGET_CPU)" "aarch64"
+SOURCES = invoke_arm64.S
 endif
 
 SOURCES += CClsModule.cpp

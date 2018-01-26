@@ -22,3 +22,5 @@ SOURCES = main.cpp
 ELASTOS_LIBS += ../../Elastos/Runtime/Library/clsmodule/clsinfo.lib
 LIBRARIES += -lz
 LIBRARIES += -lstdc++
+
+LINK_FLAGS += -Wl,-rpath="$(CAR_TOOLS)"

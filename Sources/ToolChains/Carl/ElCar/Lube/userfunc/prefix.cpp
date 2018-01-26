@@ -50,11 +50,11 @@ char* GenerateCamelPrefix(const char* pszType)
         char* pszPrefixCopy = new char[nIndex + 1];
         pszPrefixCopy[nIndex] = '\0';
         memcpy(pszPrefixCopy, pszPrefix, nIndex);
-        delete pszPrefix;
+        delete[] pszPrefix;
         return pszPrefixCopy;
     }
     else {
-        delete pszPrefix;
+        delete[] pszPrefix;
         return NULL;
     }
 }
@@ -88,7 +88,7 @@ char* GeneratePrefixalVarName(const char* pszPrefix, const char* pszVariable)
 /**
  * Return the true type name of given type. Basically this
  * method just remove the "_" tail.
- * User must release the returned string! 
+ * User must release the returned string!
  */
 char* TrimOutTypeNameBar(const char* pszType)
 {
@@ -106,7 +106,7 @@ char* TrimOutTypeNameBar(const char* pszType)
 /**
  * Return the true type name of given type. Basically this
  * method just remove the "_" tail.
- * User must release the returned string! 
+ * User must release the returned string!
  */
 char* GetTypeName(const char* pszType)
 {

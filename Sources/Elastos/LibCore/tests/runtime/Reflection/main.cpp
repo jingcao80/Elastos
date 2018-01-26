@@ -15,7 +15,7 @@
 //=========================================================================
 
 #include <elautoptr.h>
-#include <Reflection.h>
+#include <_Reflection.h>
 
 using namespace Elastos;
 using namespace Reflection;
@@ -52,8 +52,8 @@ ECode testReflection()
     AutoPtr<IMethodInfo> methodInfo;
     AutoPtr<IArgumentList> argumentList;
 
-    const String moduleName("/data/data/com.elastos.runtime/elastos/Reflection.eco");
-    const String klassName("LReflection/CFooBar;");
+    const String moduleName("/system/lib64/Reflection.eco");
+    const String klassName("Reflection.CFooBar");
 
     ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
     if (FAILED(ec)) {
@@ -64,7 +64,7 @@ ECode testReflection()
     PFL_EX(" > moduleInfo: %p", moduleInfo.Get())
     ec = moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        printf("Acquire \"%s\" class info failed!\n", klassName.string());
+        printf("Acquire \"%s\" class info failed!, ec: 0x%08x\n", klassName.string(), ec);
         return ec;
     }
 
@@ -105,7 +105,7 @@ ECode testReflection()
     }
 
     AutoPtr<IInterfaceInfo> itfInfo;
-    ec = classInfo->GetInterfaceInfo(String("LReflection/IFooBar;"), (IInterfaceInfo**)&itfInfo);
+    ec = classInfo->GetInterfaceInfo(String("Reflection.IFooBar"), (IInterfaceInfo**)&itfInfo);
     if (FAILED(ec)) {
         printf("Acquire \"IFooBar\" interface info failed!\n");
         return ec;

@@ -27,3 +27,5 @@ else
 LIBRARIES += $(XDK_USER_LIB)/libz.lib
 endif
 LIBRARIES += -lstdc++
+
+LINK_FLAGS += -Wl,-rpath="$(CAR_TOOLS)"

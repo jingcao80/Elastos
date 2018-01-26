@@ -214,7 +214,7 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
   endif
 
   ifeq "$(XDK_TARGET_PLATFORM)" "linux"
-    DLL_FLAGS := $(32B_FLAG) $(DLL_FLAGS) -shared -Wl,-fPIC,--no-undefined,--no-undefined-version
+    DLL_FLAGS := $(DLL_FLAGS) -shared -Wl,-fPIC,--no-undefined,--no-undefined-version
     ifneq "$(EXPORT_ALL_SYMBOLS)" ""
       DLL_DBGINFO_FLAGS := $(DLL_FLAGS)
     endif
@@ -222,8 +222,14 @@ else # "$(XDK_TARGET_FORMAT)" "elf"
     GCC_SYSROOT=$(XDK_SYSROOT_PATH)
     GCC_LIB_PATH=$(shell $(CC) -print-file-name=)
 
-    EXE_FLAGS := $(EXE_FLAGS) $(32B_FLAG) -Bdynamic -Wl,--no-gc-sections -L$(XDK_TARGETS)
-    ECX_FLAGS := $(ECX_FLAGS) $(32B_FLAG) -Bdynamic -Wl,--no-gc-sections -L$(XDK_TARGETS) -L$(PREBUILD_LIB)
+    EXE_FLAGS := $(EXE_FLAGS) -Bdynamic -Wl,--no-gc-sections -L$(XDK_TARGETS)
+    ECX_FLAGS := $(ECX_FLAGS) -Bdynamic -Wl,--no-gc-sections -L$(XDK_TARGETS) -L$(PREBUILD_LIB)
+
+    ifeq "$(XDK_TARGET_CPU)" "x86"
+      DLL_FLAGS := $(32B_FLAG) $(DLL_FLAGS)
+      EXE_FLAGS := $(32B_FLAG) $(EXE_FLAGS)
+      ECX_FLAGS := $(32B_FLAG) $(ECX_FLAGS)
+    endif
 
     EXE_CRT_BEGIN=-Wl,-X
     ECX_CRT_BEGIN=-Wl,-X
@@ -324,10 +330,15 @@ else
     C_FLAGS := -c -fno-builtin -Wall -falign-functions=4 $(C_FLAGS)
   endif
   ifeq "$(XDK_COMPILER)" "clang"
-    C_FLAGS := -c -fno-builtin -Wall -Wextra -Werror=format-security -Werror=implicit-function-declaration -Winit-self \
+    ifeq "$(XDK_TARGET_PLATFORM)" "android"
+      C_FLAGS := -c -fno-builtin -Wall -Wextra -Werror=format-security -Werror=implicit-function-declaration -Winit-self \
                -Werror=return-type -Werror=address -Werror=sequence-point -Werror=date-time \
                -Wno-unused-parameter -Wno-unused-local-typedefs -Wno-for-loop-analysis -Wno-unused-command-line-argument \
                -Wno-nullability-completeness -Wno-extern-c-compat -Wno-return-type-c-linkage -fcolor-diagnostics $(C_FLAGS)
+    endif
+    ifeq "$(XDK_TARGET_PLATFORM)" "linux"
+      C_FLAGS := -c -fno-builtin -fPIC -Wall $(C_FLAGS)
+    endif
   endif
 endif
 
@@ -344,7 +355,7 @@ endif
 C_DEFINES := -D_GNUC $(C_DEFINES)
 
 ifeq "$(XDK_TARGET_PLATFORM)" "linux"
-  ifneq "$(XDK_TARGET_CPU)" "arm"
+  ifeq "$(XDK_TARGET_CPU)" "x86"
     C_DEFINES := $(C_DEFINES) $(32B_FLAG)
   endif
 endif
@@ -397,7 +408,9 @@ endif
 ifeq "$(XDK_COMPILER)" "clang"
 CPP_FLAGS := -c -std=gnu++14 -fno-rtti -fvisibility-inlines-hidden $(CPP_FLAGS)
 ifeq "$(XDK_VERSION)" "dbg"
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
 CPP_FLAGS := $(CPP_FLAGS) -fsanitize=integer -fsanitize-trap=all -ftrap-function=abort
+endif
 endif
 endif
 

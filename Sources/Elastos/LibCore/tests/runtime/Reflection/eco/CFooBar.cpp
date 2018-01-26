@@ -14,7 +14,7 @@
 // limitations under the License.
 //=========================================================================
 
-#include "CFooBar.h"
+#include "reflection/CFooBar.h"
 
 namespace Reflection {
 
@@ -24,7 +24,7 @@ CAR_OBJECT_IMPL(CFooBar)
 
 CFooBar::CFooBar()
     : mValue0(0)
-    , mString("")
+    , mString("CFooBar")
     , mValue1(1)
 {
     PFL_EX(" >> CFooBar::CFooBar()");

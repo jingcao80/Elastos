@@ -123,7 +123,6 @@ typedef Handle64 *PHandle64;
   */
 //System Type
 typedef Int32 MemorySize;
-typedef UInt32 Address;
 
 /** @} */
 

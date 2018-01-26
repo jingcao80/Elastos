@@ -64,7 +64,7 @@ typedef enum CARDataType
     Type_Int8,           Type_Int16 ,       Type_Int32,       Type_Int64,
     Type_Byte,           Type_UInt16,       Type_UInt32,      Type_UInt64,
     Type_EMuid,          Type_ECode,        Type_EGuid,       Type_EventHandler,
-    Type_Array,          Type_PVoid,         Type_const,
+    Type_Array,          Type_PVoid,        Type_const,
     Type_interface,      Type_struct,       Type_enum,        Type_alias,
 
     Type_String,         Type_ArrayOf

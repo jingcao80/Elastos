@@ -41,19 +41,19 @@ public:
     void GenerateAbridged(void *pvBuffer);
 
 private:
-    inline int AllocData(int nSize);
-    inline void WriteData(int nOffset, void *pvData, int size);
-    inline void WriteParams(int nOffset, AbridgedParamsInfo c);
-    inline void WriteInt(int nOffset, int n);
-    inline int IWriteInfo(AbridgedInterfaceInfo *pEntry);
+    inline ptrdiff_t AllocData(int nSize);
+    inline void WriteData(ptrdiff_t nOffset, void *pvData, int size);
+    inline void WriteParams(ptrdiff_t nOffset, AbridgedParamsInfo c);
+    inline void WriteAddr(ptrdiff_t nOffset, ptrdiff_t n);
+    inline ptrdiff_t IWriteInfo(AbridgedInterfaceInfo *pEntry);
     inline void CWriteInfo(AbridgedClassInfo *pEntry);
 
     AbridgedParamsInfo GetParamAttrib(DWORD attribs);
     AbridgedParamsInfo GetParamType(TypeDescriptor *pType,
                         DWORD attribs, unsigned char *pStackSize);
-    void WriteMethodInfo(int nAddr, MethodDescriptor *pDesc);
-    int WriteMethodInfos(int nAddr, InterfaceDescriptor *pDesc);
-    int WriteClsIntfs(ClassDescriptor *pDesc, int interfaceCount);
+    void WriteMethodInfo(ptrdiff_t nAddr, MethodDescriptor *pDesc);
+    ptrdiff_t WriteMethodInfos(ptrdiff_t nAddr, InterfaceDescriptor *pDesc);
+    ptrdiff_t WriteClsIntfs(ClassDescriptor *pDesc, int interfaceCount);
     void WriteClasses();
     void WriteInterfaces();
 
@@ -69,9 +69,9 @@ private:
     const CLSModule     *m_pModule;
 
     char                *m_pBuffer;
-    int                 m_nClassOffset;
-    int                 m_nInterfaceOffset;
-    int                 m_nDataOffset;
+    ptrdiff_t           m_nClassOffset;
+    ptrdiff_t           m_nInterfaceOffset;
+    ptrdiff_t           m_nDataOffset;
 
     int                 m_cClasses;
     int                 m_interfaceNumbers[MAX_CLASS_NUMBER];
@@ -79,44 +79,42 @@ private:
 
     int                 m_cInterfaces;
     union {
-        int             m_methodNumbers[MAX_INTERFACE_NUMBER];
-        int             m_interfaceAddrs[MAX_INTERFACE_NUMBER];
+        long int        m_methodNumbers[MAX_INTERFACE_NUMBER];
+        ptrdiff_t       m_interfaceAddrs[MAX_INTERFACE_NUMBER];
     } m_mi;
 
 #define m_methodNumbers     m_mi.m_methodNumbers
 #define m_interfaceAddrs    m_mi.m_interfaceAddrs
 };
 
-int CAbridgedBuffer::AllocData(int nSize)
+ptrdiff_t CAbridgedBuffer::AllocData(int nSize)
 {
-    int nOffset = m_nDataOffset;
+    ptrdiff_t nOffset = m_nDataOffset;
 
     m_nDataOffset += RoundUp4(nSize);
     return nOffset;
 }
 
-void CAbridgedBuffer::WriteParams(int nOffset, AbridgedParamsInfo c)
+void CAbridgedBuffer::WriteParams(ptrdiff_t nOffset, AbridgedParamsInfo c)
 {
     *(AbridgedParamsInfo *)(m_pBuffer + nOffset) = c;
 }
 
-void CAbridgedBuffer::WriteInt(int nOffset, int n)
+void CAbridgedBuffer::WriteAddr(ptrdiff_t nOffset, ptrdiff_t n)
 {
-    *(int *)(m_pBuffer + nOffset) = n;
+    *(ptrdiff_t *)(m_pBuffer + nOffset) = n;
 }
 
-void CAbridgedBuffer::WriteData(int nOffset, void *pvData, int nSize)
+void CAbridgedBuffer::WriteData(ptrdiff_t nOffset, void *pvData, int nSize)
 {
     memcpy(m_pBuffer + nOffset, pvData, nSize);
 }
 
-int CAbridgedBuffer::IWriteInfo(AbridgedInterfaceInfo *pInfo)
+ptrdiff_t CAbridgedBuffer::IWriteInfo(AbridgedInterfaceInfo *pInfo)
 {
-    int nOffset = m_nInterfaceOffset;
-
+    ptrdiff_t nOffset = m_nInterfaceOffset;
     memcpy(m_pBuffer + nOffset, pInfo, sizeof(AbridgedInterfaceInfo));
     m_nInterfaceOffset += sizeof(AbridgedInterfaceInfo);
-
     return nOffset;
 }
 
@@ -250,12 +248,12 @@ AbridgedParamsInfo CAbridgedBuffer::GetParamType(
     return Param_Type_none;
 }
 
-void CAbridgedBuffer::WriteMethodInfo(int nAddr, MethodDescriptor *pDesc)
+void CAbridgedBuffer::WriteMethodInfo(ptrdiff_t nAddr, MethodDescriptor *pDesc)
 {
     AbridgedParamsInfo param = 0;
-    int n, nParamAddr;
+    int n;
+    ptrdiff_t nParamAddr;
     AbridgedMethodInfo entry;
-
     nParamAddr = AllocData(pDesc->mParamCount * sizeof(AbridgedParamsInfo));
     entry.mParamCount = (unsigned char)pDesc->mParamCount;
     entry.pParams = (AbridgedParamsInfo *)nParamAddr;
@@ -273,7 +271,7 @@ void CAbridgedBuffer::WriteMethodInfo(int nAddr, MethodDescriptor *pDesc)
     WriteData(nAddr, &entry, sizeof(AbridgedMethodInfo));
 }
 
-int CAbridgedBuffer::WriteMethodInfos(int nAddr, InterfaceDescriptor *pDesc)
+ptrdiff_t CAbridgedBuffer::WriteMethodInfos(ptrdiff_t nAddr, InterfaceDescriptor *pDesc)
 {
     int n;
 
@@ -291,7 +289,9 @@ int CAbridgedBuffer::WriteMethodInfos(int nAddr, InterfaceDescriptor *pDesc)
 
 void CAbridgedBuffer::WriteInterfaces()
 {
-    int n, nAddr;
+    int n;
+    ptrdiff_t nAddr;
+
     InterfaceDescriptor *pDesc;
     AbridgedInterfaceInfo entry;
 
@@ -311,9 +311,10 @@ void CAbridgedBuffer::WriteInterfaces()
     }
 }
 
-int CAbridgedBuffer::WriteClsIntfs(ClassDescriptor *pDesc, int interfaceCount)
+ptrdiff_t CAbridgedBuffer::WriteClsIntfs(ClassDescriptor *pDesc, int interfaceCount)
 {
-    int n, nAddr, cLocal = 0;
+    int n, cLocal = 0;
+    ptrdiff_t nAddr;
 
     nAddr = AllocData(interfaceCount * sizeof(AbridgedInterfaceInfo *));
 
@@ -323,7 +324,7 @@ int CAbridgedBuffer::WriteClsIntfs(ClassDescriptor *pDesc, int interfaceCount)
             ->mDesc->mAttribs & InterfaceAttrib_local)
                 || (m_pModule->mInterfaceDirs[pDesc->mInterfaces[n]->mIndex]
             ->mDesc->mAttribs & InterfaceAttrib_parcelable))) {
-            WriteInt(nAddr + (n - cLocal) * sizeof(int),
+            WriteAddr(nAddr + (n - cLocal) * sizeof(ptrdiff_t),
                     m_interfaceAddrs[pDesc->mInterfaces[n]->mIndex]);
         }
         else {
@@ -336,7 +337,8 @@ int CAbridgedBuffer::WriteClsIntfs(ClassDescriptor *pDesc, int interfaceCount)
 
 void CAbridgedBuffer::WriteClasses()
 {
-    int n, nAddr;
+    int n;
+    ptrdiff_t nAddr;
     AbridgedClassInfo entry;
 
     for (n = 0; n < m_pModule->mClassCount; n++) {
@@ -397,7 +399,7 @@ void CAbridgedBuffer::InitInterfaceIndexTable()
     InterfaceDirEntry *pEntry;
 
     m_cInterfaces = 0;
-    memset(m_methodNumbers, -1, sizeof(int) * m_pModule->mInterfaceCount);
+    memset(m_methodNumbers, -1, sizeof(long int) * m_pModule->mInterfaceCount);
 
     for (n = 0; n < m_pModule->mInterfaceCount; n++) {
         pEntry = m_pModule->mInterfaceDirs[n];

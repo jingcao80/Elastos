@@ -37,7 +37,7 @@ CClsModule::CClsModule(
         mBase = 0;
     }
     else {
-        mBase = Int32(clsMod);
+        mBase = reinterpret_cast<uintptr_t>(clsMod);
     }
 }
 

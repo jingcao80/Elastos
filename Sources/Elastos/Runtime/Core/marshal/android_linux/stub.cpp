@@ -345,6 +345,8 @@ ECode CObjectStub::Invoke(
 #else
 #error Unknown C++ compiler
 #endif // defined(_GNUC)
+#elif defined(_aarch64)
+    UInt32 r0, r1, r2, r3, ip, lr, sp;
 #elif defined(_mips)
     UInt32 uV0, uV1;
     UInt32 uA0, uA1, uA2, uA3;
@@ -510,6 +512,9 @@ ECode CObjectStub::Invoke(
 #error Unknown C++ compiler
 
 #endif // defined(_GNUC)
+
+#elif defined(_aarch64)
+        assert(0);
 
 #elif defined(_mips)
         GET_REG($2, uV0);

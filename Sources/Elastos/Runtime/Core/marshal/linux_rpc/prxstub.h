@@ -108,7 +108,7 @@ public:
 
 public:
     PVoid                   mVTPtr;       // must be first member
-    PVoid                   mProxyEntry; // must be mVTPtr's next member
+    PVoid                   mProxyEntry;  // must be mVTPtr's next member
 
     UInt32                  mIndex;       // interface index in object
     CObjectProxy*           mOwner;

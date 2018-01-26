@@ -32,44 +32,44 @@ public:
     static int CalcBufferSize(const CLSModule *pModule);
 
 public:
-    int Flat(CLSModule *pModule, void *pBuffer);
+    size_t Flat(CLSModule *pModule, void *pBuffer);
 
 private:
 
-    int WriteString(const char *s);
-    int WriteData(void *pData, int nSize);
+    ptrdiff_t WriteString(const char *s);
+    ptrdiff_t WriteData(void *pData, int nSize);
 
-    int WriteFileDirEntry(FileDirEntry *pEntry);
+    ptrdiff_t WriteFileDirEntry(FileDirEntry *pEntry);
 
-    int WriteKeyValuePair(KeyValuePair *pPair);
+    ptrdiff_t WriteKeyValuePair(KeyValuePair *pPair);
 
-    int WriteAnnotationDescriptor(AnnotationDescriptor *pDesc);
+    ptrdiff_t WriteAnnotationDescriptor(AnnotationDescriptor *pDesc);
 
-    int WriteClassDirEntry(ClassDirEntry *pEntry);
-    int WriteClassDescriptor(ClassDescriptor *pDesc);
+    ptrdiff_t WriteClassDirEntry(ClassDirEntry *pEntry);
+    ptrdiff_t WriteClassDescriptor(ClassDescriptor *pDesc);
 
-    int WriteInterfaceDirEntry(InterfaceDirEntry *pEntry);
-    int WriteInterfaceDescriptor(InterfaceDescriptor *pDesc);
-    int WriteInterfaceConstDescriptor(InterfaceConstDescriptor *pDesc);
-    int WriteMethodDescriptor(MethodDescriptor *pDesc);
+    ptrdiff_t WriteInterfaceDirEntry(InterfaceDirEntry *pEntry);
+    ptrdiff_t WriteInterfaceDescriptor(InterfaceDescriptor *pDesc);
+    ptrdiff_t WriteInterfaceConstDescriptor(InterfaceConstDescriptor *pDesc);
+    ptrdiff_t WriteMethodDescriptor(MethodDescriptor *pDesc);
 
-    int WriteArrayDirEntry(ArrayDirEntry *pEntry);
+    ptrdiff_t WriteArrayDirEntry(ArrayDirEntry *pEntry);
 
-    int WriteStructDirEntry(StructDirEntry *pEntry);
-    int WriteStructDescriptor(StructDescriptor *pDesc);
+    ptrdiff_t WriteStructDirEntry(StructDirEntry *pEntry);
+    ptrdiff_t WriteStructDescriptor(StructDescriptor *pDesc);
 
-    int WriteEnumDirEntry(EnumDirEntry *pEntry);
-    int WriteEnumDescriptor(EnumDescriptor *pDesc);
+    ptrdiff_t WriteEnumDirEntry(EnumDirEntry *pEntry);
+    ptrdiff_t WriteEnumDescriptor(EnumDescriptor *pDesc);
 
-    int WriteAliasDirEntry(AliasDirEntry *pEntry);
+    ptrdiff_t WriteAliasDirEntry(AliasDirEntry *pEntry);
 
-    int WriteConstDirEntry(ConstDirEntry *pEntry);
+    ptrdiff_t WriteConstDirEntry(ConstDirEntry *pEntry);
 
 private:
     const CLSModule *m_pModule;
 
     char            *m_pBuffer;
-    int             m_nOffset;
+    ptrdiff_t        m_nOffset;
 
     int             m_cStrings;
 
@@ -77,9 +77,9 @@ private:
     char            *m_ppStrings[MAXNUM];
 };
 
-int CFlatBuffer::WriteData(void *p, int size)
+ptrdiff_t CFlatBuffer::WriteData(void *p, int size)
 {
-    int nBeginAddress = m_nOffset;
+    ptrdiff_t nBeginAddress = m_nOffset;
 
     memcpy(m_pBuffer + m_nOffset, p, size);
     m_nOffset += RoundUp4(size);
@@ -87,13 +87,14 @@ int CFlatBuffer::WriteData(void *p, int size)
     return nBeginAddress;
 }
 
-int CFlatBuffer::WriteString(const char *s)
+ptrdiff_t CFlatBuffer::WriteString(const char *s)
 {
-    int n, nSize, nBeginAddress;
+    int n, nSize;
+    ptrdiff_t nBeginAddress;
 
     for (n = 0; n < m_cStrings; n++) {
         if (!strcmp(s, m_ppStrings[n]))
-            return (int)(m_ppStrings[n]) - (int)(m_pBuffer);
+            return (ptrdiff_t)((m_ppStrings[n]) - (m_pBuffer));
     }
 
     nBeginAddress = m_nOffset;
@@ -107,32 +108,33 @@ int CFlatBuffer::WriteString(const char *s)
     return nBeginAddress;
 }
 
-int CFlatBuffer::WriteClassDescriptor(ClassDescriptor *pDesc)
+ptrdiff_t CFlatBuffer::WriteClassDescriptor(ClassDescriptor *pDesc)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
     ClassDescriptor d;
 
     memcpy(&d, pDesc, sizeof(ClassDescriptor));
 
     if (d.mAnnotationCount > 0) {
-        p = (int *)_alloca(d.mAnnotationCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mAnnotationCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mAnnotationCount; n++) {
             p[n] = WriteAnnotationDescriptor(d.mAnnotations[n]);
         }
 
         d.mAnnotations = (AnnotationDescriptor **) \
-            WriteData(p, d.mAnnotationCount * sizeof(int));
+            WriteData(p, d.mAnnotationCount * sizeof(ptrdiff_t));
     }
 
     if (d.mInterfaceCount > 0) {
-        p = (int *)_alloca(d.mInterfaceCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mInterfaceCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mInterfaceCount; n++)
             p[n] = WriteData(d.mInterfaces[n], sizeof(ClassInterface));
 
         d.mInterfaces = (ClassInterface **) \
-            WriteData(p, d.mInterfaceCount * sizeof(int));
+            WriteData(p, d.mInterfaceCount * sizeof(ptrdiff_t));
     }
 
     if (d.mAggregateCount > 0) {
@@ -151,7 +153,7 @@ int CFlatBuffer::WriteClassDescriptor(ClassDescriptor *pDesc)
     return WriteData(&d, sizeof(ClassDescriptor));
 }
 
-int CFlatBuffer::WriteFileDirEntry(FileDirEntry *pFileDirEntry)
+ptrdiff_t CFlatBuffer::WriteFileDirEntry(FileDirEntry *pFileDirEntry)
 {
     FileDirEntry entry;
 
@@ -164,7 +166,7 @@ int CFlatBuffer::WriteFileDirEntry(FileDirEntry *pFileDirEntry)
     return WriteData(&entry, sizeof(FileDirEntry));
 }
 
-int CFlatBuffer::WriteKeyValuePair(KeyValuePair *pPair)
+ptrdiff_t CFlatBuffer::WriteKeyValuePair(KeyValuePair *pPair)
 {
     KeyValuePair pair;
 
@@ -180,9 +182,10 @@ int CFlatBuffer::WriteKeyValuePair(KeyValuePair *pPair)
     return WriteData(&pair, sizeof(KeyValuePair));
 }
 
-int CFlatBuffer::WriteAnnotationDescriptor(AnnotationDescriptor *pDesc)
+ptrdiff_t CFlatBuffer::WriteAnnotationDescriptor(AnnotationDescriptor *pDesc)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
     AnnotationDescriptor d;
 
     memcpy(&d, pDesc, sizeof(AnnotationDescriptor));
@@ -193,20 +196,20 @@ int CFlatBuffer::WriteAnnotationDescriptor(AnnotationDescriptor *pDesc)
     }
 
     if (d.mKeyValuePairCount > 0) {
-        p = (int *)_alloca(d.mKeyValuePairCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mKeyValuePairCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mKeyValuePairCount; n++) {
             p[n] = WriteKeyValuePair(d.mKeyValuePairs[n]);
         }
 
         d.mKeyValuePairs = (KeyValuePair **) \
-            WriteData(p, d.mKeyValuePairCount * sizeof(int));
+            WriteData(p, d.mKeyValuePairCount * sizeof(ptrdiff_t));
     }
 
     return WriteData(&d, sizeof(AnnotationDescriptor));
 }
 
-int CFlatBuffer::WriteClassDirEntry(ClassDirEntry *pClassDirEntry)
+ptrdiff_t CFlatBuffer::WriteClassDirEntry(ClassDirEntry *pClassDirEntry)
 {
     ClassDirEntry entry;
 
@@ -223,7 +226,7 @@ int CFlatBuffer::WriteClassDirEntry(ClassDirEntry *pClassDirEntry)
     return WriteData(&entry, sizeof(ClassDirEntry));
 }
 
-int CFlatBuffer::WriteInterfaceConstDescriptor(InterfaceConstDescriptor *pDesc)
+ptrdiff_t CFlatBuffer::WriteInterfaceConstDescriptor(InterfaceConstDescriptor *pDesc)
 {
     InterfaceConstDescriptor d;
 
@@ -237,16 +240,17 @@ int CFlatBuffer::WriteInterfaceConstDescriptor(InterfaceConstDescriptor *pDesc)
     return WriteData(&d, sizeof(InterfaceConstDescriptor));
 }
 
-int CFlatBuffer::WriteMethodDescriptor(MethodDescriptor *pDesc)
+ptrdiff_t CFlatBuffer::WriteMethodDescriptor(MethodDescriptor *pDesc)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
     MethodDescriptor d;
     ParamDescriptor param;
 
     memcpy(&d, pDesc, sizeof(MethodDescriptor));
 
     if (d.mParamCount > 0) {
-        p = (int *)_alloca(d.mParamCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mParamCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mParamCount; n++) {
             memcpy(&param, d.mParams[n], sizeof(ParamDescriptor));
@@ -259,70 +263,71 @@ int CFlatBuffer::WriteMethodDescriptor(MethodDescriptor *pDesc)
         }
 
         d.mParams = (ParamDescriptor **) \
-            WriteData(p, d.mParamCount * sizeof(int));
+            WriteData(p, d.mParamCount * sizeof(ptrdiff_t));
     }
     d.mName = (char *)WriteString(d.mName);
     d.mSignature = (char *)WriteString(d.mSignature);
 
     if (d.mAnnotationCount > 0) {
-        p = (int *)_alloca(d.mAnnotationCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mAnnotationCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mAnnotationCount; n++) {
             p[n] = WriteAnnotationDescriptor(d.mAnnotations[n]);
         }
 
         d.mAnnotations = (AnnotationDescriptor **) \
-            WriteData(p, d.mAnnotationCount * sizeof(int));
+            WriteData(p, d.mAnnotationCount * sizeof(ptrdiff_t));
     }
 
     return WriteData(&d, sizeof(MethodDescriptor));
 }
 
-int CFlatBuffer::WriteInterfaceDescriptor(
+ptrdiff_t CFlatBuffer::WriteInterfaceDescriptor(
     InterfaceDescriptor *pDesc)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
     InterfaceDescriptor d;
 
     memcpy(&d, pDesc, sizeof(InterfaceDescriptor));
 
     if (d.mAnnotationCount > 0) {
-        p = (int *)_alloca(d.mAnnotationCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mAnnotationCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mAnnotationCount; n++) {
             p[n] = WriteAnnotationDescriptor(d.mAnnotations[n]);
         }
 
         d.mAnnotations = (AnnotationDescriptor **) \
-            WriteData(p, d.mAnnotationCount * sizeof(int));
+            WriteData(p, d.mAnnotationCount * sizeof(ptrdiff_t));
     }
 
     if (d.mConstCount > 0) {
-        p = (int *)_alloca(d.mConstCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mConstCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mConstCount; n++) {
             p[n] = WriteInterfaceConstDescriptor(d.mConsts[n]);
         }
 
         d.mConsts = (InterfaceConstDescriptor **) \
-            WriteData(p, d.mConstCount * sizeof(int));
+            WriteData(p, d.mConstCount * sizeof(ptrdiff_t));
     }
 
     if (d.mMethodCount > 0) {
-        p = (int *)_alloca(d.mMethodCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mMethodCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mMethodCount; n++) {
             p[n] = WriteMethodDescriptor(d.mMethods[n]);
         }
 
         d.mMethods = (MethodDescriptor **) \
-            WriteData(p, d.mMethodCount * sizeof(int));
+            WriteData(p, d.mMethodCount * sizeof(ptrdiff_t));
     }
 
     return WriteData(&d, sizeof(InterfaceDescriptor));
 }
 
-int CFlatBuffer::WriteInterfaceDirEntry(
+ptrdiff_t CFlatBuffer::WriteInterfaceDirEntry(
     InterfaceDirEntry *pInterfaceDirEntry)
 {
     InterfaceDirEntry entry;
@@ -340,7 +345,7 @@ int CFlatBuffer::WriteInterfaceDirEntry(
     return WriteData(&entry, sizeof(InterfaceDirEntry));
 }
 
-int CFlatBuffer::WriteArrayDirEntry(ArrayDirEntry *pArrayDirEntry)
+ptrdiff_t CFlatBuffer::WriteArrayDirEntry(ArrayDirEntry *pArrayDirEntry)
 {
     ArrayDirEntry entry;
 
@@ -358,16 +363,17 @@ int CFlatBuffer::WriteArrayDirEntry(ArrayDirEntry *pArrayDirEntry)
     return WriteData(&entry, sizeof(ArrayDirEntry));
 }
 
-int CFlatBuffer::WriteStructDescriptor(StructDescriptor *pDesc)
+ptrdiff_t CFlatBuffer::WriteStructDescriptor(StructDescriptor *pDesc)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
     StructDescriptor d;
     StructElement elem;
 
     memcpy(&d, pDesc, sizeof(StructDescriptor));
 
     if (d.mElementCount > 0) {
-        p = (int *)_alloca(d.mElementCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mElementCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mElementCount; n++) {
             memcpy(&elem, d.mElements[n], sizeof(StructElement));
@@ -380,13 +386,13 @@ int CFlatBuffer::WriteStructDescriptor(StructDescriptor *pDesc)
         }
 
         d.mElements = (StructElement **) \
-            WriteData(p, d.mElementCount * sizeof(int));
+            WriteData(p, d.mElementCount * sizeof(ptrdiff_t));
     }
 
     return WriteData(&d, sizeof(StructDescriptor));
 }
 
-int CFlatBuffer::WriteStructDirEntry(StructDirEntry *pStructDirEntry)
+ptrdiff_t CFlatBuffer::WriteStructDirEntry(StructDirEntry *pStructDirEntry)
 {
     StructDirEntry entry;
 
@@ -403,16 +409,17 @@ int CFlatBuffer::WriteStructDirEntry(StructDirEntry *pStructDirEntry)
     return WriteData(&entry, sizeof(StructDirEntry));
 }
 
-int CFlatBuffer::WriteEnumDescriptor(EnumDescriptor *pDesc)
+ptrdiff_t CFlatBuffer::WriteEnumDescriptor(EnumDescriptor *pDesc)
 {
-    int *p, n;
+    int n;
+    ptrdiff_t *p;
     EnumDescriptor d;
     EnumElement elem;
 
     memcpy(&d, pDesc, sizeof(EnumDescriptor));
 
     if (d.mElementCount > 0) {
-        p = (int *)_alloca(d.mElementCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(d.mElementCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < d.mElementCount; n++) {
             memcpy(&elem, d.mElements[n], sizeof(EnumElement));
@@ -421,13 +428,13 @@ int CFlatBuffer::WriteEnumDescriptor(EnumDescriptor *pDesc)
         }
 
         d.mElements = (EnumElement **) \
-            WriteData(p, d.mElementCount * sizeof(int));
+            WriteData(p, d.mElementCount * sizeof(ptrdiff_t));
     }
 
     return WriteData(&d, sizeof(EnumDescriptor));
 }
 
-int CFlatBuffer::WriteEnumDirEntry(EnumDirEntry *pEnumDirEntry)
+ptrdiff_t CFlatBuffer::WriteEnumDirEntry(EnumDirEntry *pEnumDirEntry)
 {
     EnumDirEntry entry;
 
@@ -444,7 +451,7 @@ int CFlatBuffer::WriteEnumDirEntry(EnumDirEntry *pEnumDirEntry)
     return WriteData(&entry, sizeof(EnumDirEntry));
 }
 
-int CFlatBuffer::WriteAliasDirEntry(AliasDirEntry *pAliasDirEntry)
+ptrdiff_t CFlatBuffer::WriteAliasDirEntry(AliasDirEntry *pAliasDirEntry)
 {
     AliasDirEntry entry;
 
@@ -463,7 +470,7 @@ int CFlatBuffer::WriteAliasDirEntry(AliasDirEntry *pAliasDirEntry)
     return WriteData(&entry, sizeof(AliasDirEntry));
 }
 
-int CFlatBuffer::WriteConstDirEntry(ConstDirEntry *pConstDirEntry)
+ptrdiff_t CFlatBuffer::WriteConstDirEntry(ConstDirEntry *pConstDirEntry)
 {
     ConstDirEntry entry;
 
@@ -480,9 +487,10 @@ int CFlatBuffer::WriteConstDirEntry(ConstDirEntry *pConstDirEntry)
     return WriteData(&entry, sizeof(ConstDirEntry));
 }
 
-int CFlatBuffer::Flat(CLSModule *pModule, void *pvDest)
+size_t CFlatBuffer::Flat(CLSModule *pModule, void *pvDest)
 {
-    int n, *p;
+    int n;
+    ptrdiff_t *p;
 
     m_pModule = pModule;
     m_pBuffer = (char *)pvDest;
@@ -493,129 +501,129 @@ int CFlatBuffer::Flat(CLSModule *pModule, void *pvDest)
     memcpy(pModule, m_pModule, sizeof(CLSModule));
 
     if (pModule->mFileCount > 0) {
-        p = (int *)_alloca(pModule->mFileCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mFileCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mFileCount; n++)
             p[n] = WriteFileDirEntry(pModule->mFileDirs[n]);
 
         pModule->mFileDirs = (FileDirEntry **) \
-            WriteData(p, pModule->mFileCount * sizeof(int));
+            WriteData(p, pModule->mFileCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mFileDirs = NULL;
     }
 
     if (pModule->mClassCount > 0) {
-        p = (int *)_alloca(pModule->mClassCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mClassCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mClassCount; n++)
             p[n] = WriteClassDirEntry(pModule->mClassDirs[n]);
 
         pModule->mClassDirs = (ClassDirEntry **) \
-            WriteData(p, pModule->mClassCount * sizeof(int));
+            WriteData(p, pModule->mClassCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mClassDirs = NULL;
     }
 
     if (pModule->mInterfaceCount > 0) {
-        p = (int *)_alloca(pModule->mInterfaceCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mInterfaceCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mInterfaceCount; n++)
             p[n] = WriteInterfaceDirEntry(pModule->mInterfaceDirs[n]);
 
         pModule->mInterfaceDirs = (InterfaceDirEntry **) \
-            WriteData(p, pModule->mInterfaceCount * sizeof(int));
+            WriteData(p, pModule->mInterfaceCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mInterfaceDirs = NULL;
     }
 
     if (pModule->mDefinedInterfaceCount > 0) {
-        p = (int *)_alloca(pModule->mDefinedInterfaceCount * sizeof(int));
+        int *indexes = (int *)_alloca(pModule->mDefinedInterfaceCount * sizeof(int));
 
         for (n = 0; n < pModule->mDefinedInterfaceCount; n++)
-            p[n] = pModule->mDefinedInterfaceIndexes[n];
+            indexes[n] = pModule->mDefinedInterfaceIndexes[n];
 
         pModule->mDefinedInterfaceIndexes = (int *) \
-            WriteData(p, pModule->mDefinedInterfaceCount * sizeof(int));
+            WriteData(indexes, pModule->mDefinedInterfaceCount * sizeof(int));
     }
     else {
         pModule->mDefinedInterfaceIndexes = NULL;
     }
 
     if (pModule->mStructCount > 0) {
-        p = (int *)_alloca(pModule->mStructCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mStructCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mStructCount; n++)
             p[n] = WriteStructDirEntry(pModule->mStructDirs[n]);
 
         pModule->mStructDirs = (StructDirEntry **) \
-            WriteData(p, pModule->mStructCount * sizeof(int));
+            WriteData(p, pModule->mStructCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mStructDirs = NULL;
     }
     if (pModule->mArrayCount > 0) {
-        p = (int *)_alloca(pModule->mArrayCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mArrayCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mArrayCount; n++)
             p[n] = WriteArrayDirEntry(pModule->mArrayDirs[n]);
 
         pModule->mArrayDirs = (ArrayDirEntry **) \
-            WriteData(p, pModule->mArrayCount * sizeof(int));
+            WriteData(p, pModule->mArrayCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mArrayDirs = NULL;
     }
 
     if (pModule->mEnumCount > 0) {
-        p = (int *)_alloca(pModule->mEnumCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mEnumCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mEnumCount; n++)
             p[n] = WriteEnumDirEntry(pModule->mEnumDirs[n]);
 
         pModule->mEnumDirs = (EnumDirEntry **) \
-            WriteData(p, pModule->mEnumCount * sizeof(int));
+            WriteData(p, pModule->mEnumCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mEnumDirs = NULL;
     }
 
     if (pModule->mAliasCount > 0) {
-        p = (int *)_alloca(pModule->mAliasCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mAliasCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mAliasCount; n++)
             p[n] = WriteAliasDirEntry(pModule->mAliasDirs[n]);
 
         pModule->mAliasDirs = (AliasDirEntry **) \
-            WriteData(p, pModule->mAliasCount * sizeof(int));
+            WriteData(p, pModule->mAliasCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mAliasDirs = NULL;
     }
 
     if (pModule->mConstCount > 0) {
-        p = (int *)_alloca(pModule->mConstCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mConstCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mConstCount; n++)
             p[n] = WriteConstDirEntry(pModule->mConstDirs[n]);
 
         pModule->mConstDirs = (ConstDirEntry **) \
-            WriteData(p, pModule->mConstCount * sizeof(int));
+            WriteData(p, pModule->mConstCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mConstDirs = NULL;
     }
 
     if (pModule->mLibraryCount > 0) {
-        p = (int *)_alloca(pModule->mLibraryCount * sizeof(int));
+        p = (ptrdiff_t *)_alloca(pModule->mLibraryCount * sizeof(ptrdiff_t));
 
         for (n = 0; n < pModule->mLibraryCount; n++)
             p[n] = WriteString(pModule->mLibraryNames[n]);
 
         pModule->mLibraryNames = (char **) \
-            WriteData(p, pModule->mLibraryCount * sizeof(int));
+            WriteData(p, pModule->mLibraryCount * sizeof(ptrdiff_t));
     }
     else {
         pModule->mLibraryNames = NULL;
@@ -632,7 +640,7 @@ int CFlatBuffer::Flat(CLSModule *pModule, void *pvDest)
 
     pModule->mSize = m_nOffset;
 
-    return m_nOffset;
+    return (size_t)m_nOffset;
 }
 
 inline int StringAlignSize(const char *s)
@@ -907,7 +915,7 @@ int FlatCLS(const CLSModule *pSrc, void **ppDest)
     pDest = (CLSModule *)new char[nSize];
     if (!pDest) _ReturnError (CLSError_OutOfMemory);
 
-    nSize = buffer.Flat((CLSModule *)pSrc, pDest);
+    nSize = (int)buffer.Flat((CLSModule *)pSrc, pDest);
     pDest->mAttribs |= CARAttrib_inheap;
 
     if (pDest->mAttribs & CARAttrib_compress) {

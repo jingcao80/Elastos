@@ -20,6 +20,8 @@ TARGET_TYPE= eco
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
+INCLUDES += $(MAKEDIR)/inc
+
 SOURCES = Reflection.car
 SOURCES += CFooBar.cpp
 SOURCES += Elastos.CoreLibrary.cpp

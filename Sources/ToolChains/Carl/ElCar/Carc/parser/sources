@@ -18,7 +18,7 @@ TARGET_NAME= carc
 TARGET_TYPE= exe
 
 INCLUDESTEMP := $(INCLUDES);
-INCLUDES += $(MAKEDIR)/../../inc ;
+INCLUDES += $(MAKEDIR)/../../inc;
 INCLUDES += $(INCLUDESTEMP);
 
 SOURCES = carc.cpp
@@ -43,3 +43,5 @@ else
 LIBRARIES += -lz
 LIBRARIES += -lstdc++
 endif
+
+LINK_FLAGS += -Wl,-rpath="$(CAR_TOOLS)"

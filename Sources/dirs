@@ -14,16 +14,27 @@
 # limitations under the License.
 #=========================================================================
 
-ifneq "$(XDK_TARGET_PRODUCT)" "devtools"
+ifeq "$(XDK_TARGET_PRODUCT)" "devtools"
+  DIRS = Elastos/Runtime/Library/inc
+  DIRS += External/zlib
+  DIRS += Elastos/Runtime/Library/clsmodule
+  DIRS += ToolChains
+else
+
+ifeq "$(XDK_TARGET_PRODUCT)" "devtools64"
+  DIRS = Elastos/Runtime/Library/inc
+  DIRS += External/zlib
+  DIRS += Elastos/Runtime/Library/clsmodule
+  DIRS += ToolChains
+else
+
 ifeq "$(XDK_TARGET_PLATFORM)" "android"
   DIRS = Elastos
 endif
 ifeq "$(XDK_TARGET_PLATFORM)" "linux"
   DIRS = Elastos/Runtime
 endif
-else
-  DIRS = Elastos/Runtime/Library/inc
-  DIRS += External/zlib
-  DIRS += Elastos/Runtime/Library/clsmodule
-  DIRS += ToolChains
+
+endif
+
 endif

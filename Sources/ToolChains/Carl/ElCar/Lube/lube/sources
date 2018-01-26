@@ -42,3 +42,4 @@ EXTERN_LIBS += oleaut32
 endif
 LIBRARIES += -lstdc++
 
+LINK_FLAGS += -Wl,-rpath="$(CAR_TOOLS)"

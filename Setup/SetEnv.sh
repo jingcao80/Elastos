@@ -4,9 +4,13 @@ if [ "$1" == '-h' ]; then
     echo "Usage: SetEnv.sh {elastos_android_arm | devtools_linux_x86}"
     echo ""
     echo "  elastos_android_arm"
-    echo "                 setup elastos development environment."
+    echo "                 setup elastos development environment for arm."
+    echo "  elastos_android_arm64"
+    echo "                 setup elastos development environment for arm64."
     echo "  devtools_linux_x86"
-    echo "                 setup elastos devtools development environment."
+    echo "                 setup elastos devtools development environment for building arm devtools."
+    echo "  devtools64_linux_x64"
+    echo "                 setup elastos devtools development environment for building arm64 devtools."
     return
 else
     ################################################################################
@@ -21,6 +25,8 @@ else
         export XDK_BUILD_ENV=target
     elif [ "$TARGET" == "devtools" ]; then
         export XDK_BUILD_ENV=host
+    elif [ "$TARGET" == "devtools64" ]; then
+        export XDK_BUILD_ENV=host
     else
         echo "Unknow build target '$TARGET'."
         return
@@ -31,7 +37,7 @@ else
         return
     fi
 
-    if [ "$HARDWARE" != "arm" ] && [ "$HARDWARE" != "x86" ]; then
+    if [ "$HARDWARE" != "arm" ] && [ "$HARDWARE" != "arm64" ] && [ "$HARDWARE" != "x86" ] && [ "$HARDWARE" != "x64" ]; then
         echo "Unknow build target hardware '$HARDWARE'."
         return
     fi
@@ -59,9 +65,6 @@ else
 
     # Set command and build-tool lookup path
     export XDK_TOOLS=$XDK_BUILD_PATH/Tools
-    #export XDK_COMMANDES=$XDK_ROOT/Commandes
-    export PATH=.:$XDK_TOOLS:$PATH:
-    #export PATH=.:$XDK_TOOLS:$XDK_COMMANDES:
 
     # Set user defined environment variables if the user config file exists
     if [ -f $XDK_SETUP_PATH/UserDefined.sh ]; then
@@ -71,6 +74,28 @@ else
     if [ -f $XDK_SETUP_PATH/Config/$XDK_TARGET_HARDWARE.sh ]; then
         source $XDK_SETUP_PATH/Config/$XDK_TARGET_HARDWARE.sh
     fi
+
+    export XDK_PREBUILD_INC=$XDK_BUILD_PATH/Prebuilt/Linux/usr/include
+
+    if [ "$XDK_TARGET_CPU" == "arm" ]; then
+    export CAR_TOOLS=$XDK_TOOLS/arm
+    export XDK_PREBUILD_LIB=$XDK_BUILD_PATH/Prebuilt/Linux/usr/lib
+    fi
+
+    if [ "$XDK_TARGET_CPU" == "aarch64" ]; then
+    export CAR_TOOLS=$XDK_TOOLS/arm64
+    export XDK_PREBUILD_LIB=$XDK_BUILD_PATH/Prebuilt/Linux/usr/lib64
+    fi
+
+    if [ "$XDK_TARGET_PRODUCT" == "devtools" ]; then
+    export CAR_TOOLS=$XDK_TOOLS/arm
+    fi
+
+    if [ "$XDK_TARGET_PRODUCT" == "devtools64" ]; then
+    export CAR_TOOLS=$XDK_TOOLS/arm64
+    fi
+
+    export PATH=.:$XDK_TOOLS:$CAR_TOOLS:$PATH:
 
     source $XDK_TOOLS/env_tools.sh
 

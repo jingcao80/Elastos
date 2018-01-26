@@ -117,11 +117,14 @@ ECode CDelegateProxy::GetDelegate(
         return E_INVALID_ARGUMENT;
     }
 
-#ifndef _arm
-    ECode (__stdcall CDelegateProxy::*CBFunc)(PInterface) =
+#ifdef _arm
+    ECode (__stdcall CDelegateProxy::*CBFunc)(PInterface, ...) =
+        &CDelegateProxy::OnEvent;
+#elif _aarch64
+    ECode (__stdcall CDelegateProxy::*CBFunc)(PInterface, ...) =
         &CDelegateProxy::OnEvent;
 #else
-    ECode (__stdcall CDelegateProxy::*CBFunc)(PInterface, ...) =
+    ECode (__stdcall CDelegateProxy::*CBFunc)(PInterface) =
         &CDelegateProxy::OnEvent;
 #endif
 
@@ -236,6 +239,11 @@ ECode CDelegateProxy::OnEvent(PInterface server)
     return ec;
 }
 #elif _arm
+ECode CDelegateProxy::OnEvent(PInterface server,...)
+{
+    return EventHander(&server, NULL);
+}
+#elif _aarch64
 ECode CDelegateProxy::OnEvent(PInterface server,...)
 {
     return EventHander(&server, NULL);

@@ -211,7 +211,7 @@ UInt32 GetDataTypeSize(
             size = sizeof(double);
             break;
         case Type_PVoid:
-            size = 4;
+            size = sizeof(PVoid);
             break;
         case Type_ECode:
             size = sizeof(ECode);
