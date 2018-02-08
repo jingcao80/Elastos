@@ -34,6 +34,15 @@ typedef unsigned long long  UINT64;
 
 _ELASTOS_NAMESPACE_USING
 
+inline int RoundUp(int n)
+{
+#if defined(_x86)
+    return RoundUp4(n);
+#elif defined(_x64)
+    return RoundUp8(n);
+#endif
+}
+
 class CAbridgedBuffer
 {
 public:
@@ -91,7 +100,8 @@ ptrdiff_t CAbridgedBuffer::AllocData(int nSize)
 {
     ptrdiff_t nOffset = m_nDataOffset;
 
-    m_nDataOffset += RoundUp4(nSize);
+    m_nDataOffset += RoundUp(nSize);
+
     return nOffset;
 }
 
@@ -507,7 +517,7 @@ int CAbridgedBuffer::TotalParamSize(InterfaceDescriptor *pDesc)
     }
 
     for (n = 0; n < pDesc->mMethodCount; n++) {
-        size += RoundUp4(pDesc->mMethods[n]->mParamCount * sizeof(AbridgedParamsInfo));
+        size += RoundUp(pDesc->mMethods[n]->mParamCount * sizeof(AbridgedParamsInfo));
     }
 
     return size;
@@ -524,23 +534,23 @@ int CAbridgedBuffer::Prepare(const CLSModule *pModule)
 
     size = sizeof(AbridgedModuleInfo);
     if (pModule->mUunm) size += strlen(pModule->mUunm);
-    size = m_nClassOffset = RoundUp4(size);
+    size = m_nClassOffset = RoundUp(size);
 
-    size += RoundUp4(m_cClasses * sizeof(AbridgedClassInfo));
+    size += RoundUp(m_cClasses * sizeof(AbridgedClassInfo));
     m_nInterfaceOffset = size;
 
-    size += RoundUp4(m_cInterfaces * sizeof(AbridgedInterfaceInfo));
+    size += RoundUp(m_cInterfaces * sizeof(AbridgedInterfaceInfo));
     m_nDataOffset = size;
 
     for (n = 0; n < m_pModule->mClassCount; n++) {
         if (m_interfaceNumbers[n] != 0) {
-            size += RoundUp4(
+            size += RoundUp(
                     m_interfaceNumbers[n] * sizeof(AbridgedInterfaceInfo *));
         }
     }
     for (n = 0; n < m_pModule->mInterfaceCount; n++) {
         if (m_methodNumbers[n] != 0) {
-            size += RoundUp4(m_methodNumbers[n] * sizeof(AbridgedMethodInfo));
+            size += RoundUp(m_methodNumbers[n] * sizeof(AbridgedMethodInfo));
             size += TotalParamSize(m_pModule->mInterfaceDirs[n]->mDesc);
         }
     }

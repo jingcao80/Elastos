@@ -48,6 +48,122 @@ module
                 [out] Int32* value0,
                 [out] String* str,
                 [out] Int64* value1);
+
+            SetValue(
+                [in] String str,
+                [in] Int32 value0,
+                [in] Int64 value1);
+
+            GetValue(
+                [out] String* str,
+                [out] Int32* value0,
+                [out] Int64* value1);
+
+            SetValue(
+                [in] Int16 value0,
+                [in] Int32 value1,
+                [in] String str,
+                [in] Boolean value2,
+                [in] Int64 value3,
+                [in] Int64 value4,
+                [in] Int32 value5);
+
+            GetValue(
+                [out] Int16* value0,
+                [out] Int32* value1,
+                [out] String* str,
+                [out] Boolean* value2,
+                [out] Int64* value3,
+                [out] Int64* value4,
+                [out] Int32* value5);
+
+            SetValue(
+                [in] Int16 value0,
+                [in] Int32 value1,
+                [in] String str,
+                [in] Boolean value2,
+                [in] Int64 value3,
+                [in] Int64 value4,
+                [in] Int32 value5,
+                [in] String str2);
+
+            GetValue(
+                [out] Int16* value0,
+                [out] Int32* value1,
+                [out] String* str,
+                [out] Boolean* value2,
+                [out] Int64* value3,
+                [out] Int64* value4,
+                [out] Int32* value5,
+                [out] String* str2);
+
+            SetValue(
+                [in] Int16 value0,
+                [in] Int32 value1,
+                [in] String str,
+                [in] Boolean value2,
+                [in] Int64 value3,
+                [in] Int64 value4,
+                [in] Int32 value5,
+                [in] String str2,
+                [in] Int32 value6);
+
+            GetValue(
+                [out] Int16* value0,
+                [out] Int32* value1,
+                [out] String* str,
+                [out] Boolean* value2,
+                [out] Int64* value3,
+                [out] Int64* value4,
+                [out] Int32* value5,
+                [out] String* str2,
+                [out] Int32* value6);
+
+            SetValue(
+                [in] Int16 value0,
+                [in] Int32 value1,
+                [in] String str,
+                [in] Boolean value2,
+                [in] Int64 value3,
+                [in] Int64 value4,
+                [in] Int32 value5,
+                [in] Int32 value6,
+                [in] String str2);
+
+            GetValue(
+                [out] Int16* value0,
+                [out] Int32* value1,
+                [out] String* str,
+                [out] Boolean* value2,
+                [out] Int64* value3,
+                [out] Int64* value4,
+                [out] Int32* value5,
+                [out] Int32* value6,
+                [out] String* str2);
+
+            SetValue(
+                [in] Int16 value0,
+                [in] Int32 value1,
+                [in] String str,
+                [in] Boolean value2,
+                [in] Int64 value3,
+                [in] Int64 value4,
+                [in] Int32 value5,
+                [in] Int32 value6,
+                [in] String str2,
+                [in] Int64 value7);
+
+            GetValue(
+                [out] Int16* value0,
+                [out] Int32* value1,
+                [out] String* str,
+                [out] Boolean* value2,
+                [out] Int64* value3,
+                [out] Int64* value4,
+                [out] Int32* value5,
+                [out] Int32* value6,
+                [out] String* str2,
+                [out] Int64* value7);
         }
 
         class CFooBar {

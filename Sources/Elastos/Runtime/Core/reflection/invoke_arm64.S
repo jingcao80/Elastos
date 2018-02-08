@@ -15,6 +15,9 @@
 //=========================================================================
 
 # EXTERN_C int invoke2(uintptr_t func, uintptr_t params, int paramCount, struct ParmElement* paramsSize, int totalSize);
+
+#include <asm.h>
+
     .text
     .align 8;
     .global C_SYMBOL(invoke2);
@@ -34,11 +37,11 @@ C_SYMBOL(invoke2):
     b       main
 
 get_next_param:
-    add     x13, x13, #24            ; /* jump to next parameter size */
-    ldr     w15, [x13]
+    add     x13, x13, #20            ; /* jump to next parameter size, sizeof(struct ParmElement) is #20. */
+    ldr     w15, [x13, #4]
     cmp     w15, #8
     beq     need_eight_bytes_alignment
-    br     x9
+    br      x9
 need_eight_bytes_alignment:
     and     x15, x11, #0x7
     cmp     x15, #0
@@ -56,13 +59,14 @@ main:
 set_this:
     ldr     x0, [x11]
     add     x11, x11, #8
+    sub     w12, w12, #1
     cmp     w12, #0
     ble     call_func
 
 set_reg_x1:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w1
+    ble     set_reg_w1
     ldr     x1, [x11]
     add     x11, x11, #8
     b       set_ret_x1_end
@@ -79,7 +83,7 @@ set_ret_x1_end:
 set_reg_x2:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w2
+    ble     set_reg_w2
     ldr     x2, [x11]
     add     x11, x11, #8
     b       set_ret_x2_end
@@ -96,7 +100,7 @@ set_ret_x2_end:
 set_reg_x3:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w3
+    ble     set_reg_w3
     ldr     x3, [x11]
     add     x11, x11, #8
     b       set_ret_x3_end
@@ -113,7 +117,7 @@ set_ret_x3_end:
 set_reg_x4:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w4
+    ble     set_reg_w4
     ldr     x4, [x11]
     add     x11, x11, #8
     b       set_ret_x4_end
@@ -130,7 +134,7 @@ set_ret_x4_end:
 set_reg_x5:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w5
+    ble     set_reg_w5
     ldr     x5, [x11]
     add     x11, x11, #8
     b       set_ret_x5_end
@@ -147,7 +151,7 @@ set_ret_x5_end:
 set_reg_x6:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w6
+    ble     set_reg_w6
     ldr     x6, [x11]
     add     x11, x11, #8
     b       set_ret_x6_end
@@ -164,7 +168,7 @@ set_ret_x6_end:
 set_reg_x7:
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     set_reg_w7
+    ble     set_reg_w7
     ldr     x7, [x11]
     add     x11, x11, #8
     b       set_ret_x7_end
@@ -179,26 +183,37 @@ set_ret_x7_end:
     b       get_next_param
 
 save_param_to_sp:
-    mov     x14, #8
+    mov     x14, #16                  ; /* sp should be 16-byte aligned */
     mul     x14, x12, x14
     sub     sp, sp, x14
+    mov     x8, sp
 save_next_param:
-    cmp     w12, #0
-    beq     call_func
     ldr     w9, [x13, #4]
     cmp     w9, #4
-    beq     size_four
+    ble     size_four
+x8_need_eight_bytes_alignment:
+    and     x15, x8, #0x7
+    cmp     x15, #0
+    beq     do_not_adjust_x8
+    add     x8, x8, #4
+do_not_adjust_x8:
     ldr     x14, [x11]
-    str     x14, [sp]
-    add     sp, sp, #8
+    str     x14, [x8]
+    add     x11, x11, #8
+    add     x8, x8, #8
     sub     w12, w12, #1
+    cmp     w12, #0
+    beq     call_func
     adr     x9, save_next_param
     b       get_next_param
 size_four:
     ldr     w14, [x11]
-    str     w14, [sp]
-    add     sp, sp, #8
+    str     w14, [x8]
+    add     x11, x11, #4
+    add     x8, x8, #4
     sub     w12, w12, #1
+    cmp     w12, #0
+    beq     call_func
     adr     x9, save_next_param
     b       get_next_param
 
@@ -209,4 +224,5 @@ call_func:
 return_from_func:
     mov     sp, fp
     ldp     fp, lr, [sp]
+    add     sp, sp, #16
     ret

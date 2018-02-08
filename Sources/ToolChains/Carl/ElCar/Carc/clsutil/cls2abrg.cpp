@@ -26,10 +26,6 @@ typedef unsigned char  byte;
 #include <clsutil.h>
 #include <abrgcls.h>
 
-#ifdef _linux
-#define _alloca alloca
-#endif
-
 void AbrgUuid(const GUID *puuid, FILE *pFile)
 {
     fprintf(pFile,
@@ -175,7 +171,7 @@ void Abrg2Comment(FILE * pFile,
     int n;
     AbridgedCLS *pAbridged;
 
-    pAbridged = (AbridgedCLS *)_alloca(pAbrg->nTotalSize);
+    pAbridged = (AbridgedCLS *)malloc(pAbrg->nTotalSize);
     if (!pAbridged) return;
     memcpy(pAbridged, pAbrg, pAbrg->nTotalSize);
 
@@ -199,6 +195,8 @@ void Abrg2Comment(FILE * pFile,
     for (n = 0; n < pAbridged->mClassCount; n++) {
         AbrgClass(pFile, pModule, &pAbridged->pClasses[n]);
     }
+
+    free(pAbridged);
 }
 
 #ifdef _linux

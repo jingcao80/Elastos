@@ -33,6 +33,11 @@ inline int RoundUp4(int n)
     return ((n) + 4 - 1) & ~(4 - 1);
 }
 
+inline int RoundUp8(int n)
+{
+    return ((n) + 8 - 1) & ~(8 - 1);
+}
+
 extern int sCLSErrorNumber;
 extern char sCLSErrorName[];
 extern char sCLSErrorMessage[];

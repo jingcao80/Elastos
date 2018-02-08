@@ -26,6 +26,15 @@
 #define _alloca alloca
 #endif
 
+inline int RoundUp(int n)
+{
+#if defined(_x86)
+    return RoundUp4(n);
+#elif defined(_x64)
+    return RoundUp8(n);
+#endif
+}
+
 class CFlatBuffer
 {
 public:
@@ -82,7 +91,7 @@ ptrdiff_t CFlatBuffer::WriteData(void *p, int size)
     ptrdiff_t nBeginAddress = m_nOffset;
 
     memcpy(m_pBuffer + m_nOffset, p, size);
-    m_nOffset += RoundUp4(size);
+    m_nOffset += RoundUp(size);
 
     return nBeginAddress;
 }
@@ -104,7 +113,7 @@ ptrdiff_t CFlatBuffer::WriteString(const char *s)
     assert(m_cStrings < MAXNUM);
     m_ppStrings[m_cStrings++] = m_pBuffer + m_nOffset;
 
-    m_nOffset += RoundUp4(nSize);
+    m_nOffset += RoundUp(nSize);
     return nBeginAddress;
 }
 
@@ -645,7 +654,7 @@ size_t CFlatBuffer::Flat(CLSModule *pModule, void *pvDest)
 
 inline int StringAlignSize(const char *s)
 {
-    return RoundUp4(strlen(s) + 1);
+    return RoundUp(strlen(s) + 1);
 }
 
 int CalcFileSize(FileDirEntry *p)
@@ -699,9 +708,9 @@ int CalcClassSize(ClassDirEntry *p)
     size += p->mDesc->mInterfaceCount * \
         (sizeof(ClassInterface) + sizeof(ClassInterface *));
 
-    size += RoundUp4(p->mDesc->mAggregateCount * sizeof(USHORT));
-    size += RoundUp4(p->mDesc->mAspectCount * sizeof(USHORT));
-    size += RoundUp4(p->mDesc->mClassCount * sizeof(USHORT));
+    size += RoundUp(p->mDesc->mAggregateCount * sizeof(USHORT));
+    size += RoundUp(p->mDesc->mAspectCount * sizeof(USHORT));
+    size += RoundUp(p->mDesc->mClassCount * sizeof(USHORT));
 
     return size;
 }

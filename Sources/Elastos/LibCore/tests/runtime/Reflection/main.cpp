@@ -252,6 +252,455 @@ ECode testReflection()
 
     printf(" >>> GetValue: [%s], value0: %d, value1: %lld\n",
         strResult.string(), value0, value1);
+
+    // SetValue
+    //
+    PFL_EX("SetValue String, Int32, Int64")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("SetValue"), String("(LElastos/String;I32I64)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    strValue = String("-Elastos-(LElastos/String;I32I64)E");
+    argumentList->SetInputArgumentOfString(0, strValue);
+    argumentList->SetInputArgumentOfInt32(1, 33);
+    argumentList->SetInputArgumentOfInt64(2, 0xffffffffffffll);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"SetValue\" method failed!\n");
+        return ec;
+    }
+
+    // GetValue
+    //
+    PFL_EX("GetValue String, Int32, Int64")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("GetValue"), String("(LElastos/String;*I32*I64*)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    argumentList->SetOutputArgumentOfStringPtr(0, &strResult);
+    argumentList->SetOutputArgumentOfInt32Ptr(1, &value0);
+    argumentList->SetOutputArgumentOfInt64Ptr(2, &value1);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"GetValue\" method failed!\n");
+        return ec;
+    }
+
+    printf(" >>> GetValue: [%s], value0: %d, value1: 0x%16llx\n",
+        strResult.string(), value0, value1);
+
+    // SetValue
+    //
+    PFL_EX("SetValue Int16, Int32, String, Boolean, Int64, Int64, Int32")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("SetValue"), String("(I16I32LElastos/String;ZI64I64I32)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    strValue = String("-Elastos-(I16I32LElastos/String;ZI64I64I32)E");
+    argumentList->SetInputArgumentOfInt16(0, 8);
+    argumentList->SetInputArgumentOfInt32(1, 31);
+    argumentList->SetInputArgumentOfString(2, strValue);
+    argumentList->SetInputArgumentOfBoolean(3, FALSE);
+    argumentList->SetInputArgumentOfInt64(4, 0x123456789all);
+    argumentList->SetInputArgumentOfInt64(5, 0xbcdefffffffffll);
+    argumentList->SetInputArgumentOfInt32(6, 63);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"SetValue\" method failed!\n");
+        return ec;
+    }
+
+    // GetValue
+    //
+    PFL_EX("GetValue Int16, Int32, String, Boolean, Int64, Int64, Int32")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("GetValue"), String("(I16*I32*LElastos/String;*Z*I64*I64*I32*)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+
+    Int16 i16;
+    Int32 i32_1, i32_2;
+    Boolean b;
+    Int64 i64_1, i64_2;
+
+    argumentList->SetOutputArgumentOfInt16Ptr(0, &i16);
+    argumentList->SetOutputArgumentOfInt32Ptr(1, &i32_1);
+    argumentList->SetOutputArgumentOfStringPtr(2, &strResult);
+    argumentList->SetOutputArgumentOfBooleanPtr(3, &b);
+    argumentList->SetOutputArgumentOfInt64Ptr(4, &i64_1);
+    argumentList->SetOutputArgumentOfInt64Ptr(5, &i64_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(6, &i32_2);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"GetValue\" method failed!\n");
+        return ec;
+    }
+
+    printf(" >>> GetValue: i16: %d, i32_1: %d, str: %s, b: %d, i64_1: 0x%16llx, i64_2: 0x%16llx, i32_2: %d \n",
+            i16, i32_1, strResult.string(), b, i64_1, i64_2, i32_2);
+
+    // SetValue
+    //
+    PFL_EX("SetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, String")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("SetValue"), String("(I16I32LElastos/String;ZI64I64I32LElastos/String;)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    strValue = String("-Elastos-(I16I32LElastos/String;ZI64I64I32LElastos/String;)E");
+    argumentList->SetInputArgumentOfInt16(0, 8);
+    argumentList->SetInputArgumentOfInt32(1, 31);
+    argumentList->SetInputArgumentOfString(2, strValue);
+    argumentList->SetInputArgumentOfBoolean(3, FALSE);
+    argumentList->SetInputArgumentOfInt64(4, 0x123456789all);
+    argumentList->SetInputArgumentOfInt64(5, 0xbcdefffffffffll);
+    argumentList->SetInputArgumentOfInt32(6, 63);
+    strValue = "-HelloWorld-";
+    argumentList->SetInputArgumentOfString(7, strValue);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"SetValue\" method failed!\n");
+        return ec;
+    }
+
+    // GetValue
+    //
+    PFL_EX("GetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, String")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("GetValue"), String("(I16*I32*LElastos/String;*Z*I64*I64*I32*LElastos/String;*)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+
+    String str2;
+
+    argumentList->SetOutputArgumentOfInt16Ptr(0, &i16);
+    argumentList->SetOutputArgumentOfInt32Ptr(1, &i32_1);
+    argumentList->SetOutputArgumentOfStringPtr(2, &strResult);
+    argumentList->SetOutputArgumentOfBooleanPtr(3, &b);
+    argumentList->SetOutputArgumentOfInt64Ptr(4, &i64_1);
+    argumentList->SetOutputArgumentOfInt64Ptr(5, &i64_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(6, &i32_2);
+    argumentList->SetOutputArgumentOfStringPtr(7, &str2);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"GetValue\" method failed!\n");
+        return ec;
+    }
+
+    printf(" >>> GetValue: i16: %d, i32_1: %d, str: %s, b: %d, i64_1: 0x%16llx, i64_2: 0x%16llx, i32_2: %d, str2: %s \n",
+            i16, i32_1, strResult.string(), b, i64_1, i64_2, i32_2, str2.string());
+
+    // SetValue
+    //
+    PFL_EX("SetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, String, Int32")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("SetValue"), String("(I16I32LElastos/String;ZI64I64I32LElastos/String;I32)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    strValue = String("-Elastos-(I16I32LElastos/String;ZI64I64I32LElastos/String;I32)E");
+    argumentList->SetInputArgumentOfInt16(0, 8);
+    argumentList->SetInputArgumentOfInt32(1, 31);
+    argumentList->SetInputArgumentOfString(2, strValue);
+    argumentList->SetInputArgumentOfBoolean(3, FALSE);
+    argumentList->SetInputArgumentOfInt64(4, 0x123456789all);
+    argumentList->SetInputArgumentOfInt64(5, 0xbcdefffffffffll);
+    argumentList->SetInputArgumentOfInt32(6, 63);
+    strValue = "-HelloWorld-";
+    argumentList->SetInputArgumentOfString(7, strValue);
+    argumentList->SetInputArgumentOfInt32(8, 96);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"SetValue\" method failed!\n");
+        return ec;
+    }
+
+    // GetValue
+    //
+    PFL_EX("GetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, String, Int32")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("GetValue"), String("(I16*I32*LElastos/String;*Z*I64*I64*I32*LElastos/String;*I32*)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+
+    Int32 i32_3;
+
+    argumentList->SetOutputArgumentOfInt16Ptr(0, &i16);
+    argumentList->SetOutputArgumentOfInt32Ptr(1, &i32_1);
+    argumentList->SetOutputArgumentOfStringPtr(2, &strResult);
+    argumentList->SetOutputArgumentOfBooleanPtr(3, &b);
+    argumentList->SetOutputArgumentOfInt64Ptr(4, &i64_1);
+    argumentList->SetOutputArgumentOfInt64Ptr(5, &i64_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(6, &i32_2);
+    argumentList->SetOutputArgumentOfStringPtr(7, &str2);
+    argumentList->SetOutputArgumentOfInt32Ptr(8, &i32_3);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"GetValue\" method failed!\n");
+        return ec;
+    }
+
+    printf(" >>> GetValue: i16: %d, i32_1: %d, str: %s, b: %d, i64_1: 0x%16llx, i64_2: 0x%16llx, i32_2: %d, str2: %s, i32_3: %d \n",
+            i16, i32_1, strResult.string(), b, i64_1, i64_2, i32_2, str2.string(), i32_3);
+
+    // SetValue
+    //
+    PFL_EX("SetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, Int32, String")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("SetValue"), String("(I16I32LElastos/String;ZI64I64I32I32LElastos/String;)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    strValue = String("-Elastos-(I16I32LElastos/String;ZI64I64I32I32LElastos/String;)E");
+    argumentList->SetInputArgumentOfInt16(0, 8);
+    argumentList->SetInputArgumentOfInt32(1, 31);
+    argumentList->SetInputArgumentOfString(2, strValue);
+    argumentList->SetInputArgumentOfBoolean(3, FALSE);
+    argumentList->SetInputArgumentOfInt64(4, 0x123456789all);
+    argumentList->SetInputArgumentOfInt64(5, 0xbcdefffffffffll);
+    argumentList->SetInputArgumentOfInt32(6, 63);
+    argumentList->SetInputArgumentOfInt32(7, 87);
+    strValue = "-HelloWorld-";
+    argumentList->SetInputArgumentOfString(8, strValue);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"SetValue\" method failed!\n");
+        return ec;
+    }
+
+    // GetValue
+    //
+    PFL_EX("GetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, Int32, String")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("GetValue"), String("(I16*I32*LElastos/String;*Z*I64*I64*I32*I32*LElastos/String;*)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+
+    argumentList->SetOutputArgumentOfInt16Ptr(0, &i16);
+    argumentList->SetOutputArgumentOfInt32Ptr(1, &i32_1);
+    argumentList->SetOutputArgumentOfStringPtr(2, &strResult);
+    argumentList->SetOutputArgumentOfBooleanPtr(3, &b);
+    argumentList->SetOutputArgumentOfInt64Ptr(4, &i64_1);
+    argumentList->SetOutputArgumentOfInt64Ptr(5, &i64_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(6, &i32_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(7, &i32_3);
+    argumentList->SetOutputArgumentOfStringPtr(8, &str2);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"GetValue\" method failed!\n");
+        return ec;
+    }
+
+    printf(" >>> GetValue: i16: %d, i32_1: %d, str: %s, b: %d, i64_1: 0x%16llx, i64_2: 0x%16llx, i32_2: %d, i32_3: %d, str2: %s \n",
+            i16, i32_1, strResult.string(), b, i64_1, i64_2, i32_2, i32_3, str2.string());
+
+    // SetValue
+    //
+    PFL_EX("SetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, Int32, String, Int64")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("SetValue"), String("(I16I32LElastos/String;ZI64I64I32I32LElastos/String;I64)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"SetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+    strValue = String("-Elastos-(I16I32LElastos/String;ZI64I64I32I32LElastos/String;I64)E");
+    argumentList->SetInputArgumentOfInt16(0, 8);
+    argumentList->SetInputArgumentOfInt32(1, 31);
+    argumentList->SetInputArgumentOfString(2, strValue);
+    argumentList->SetInputArgumentOfBoolean(3, FALSE);
+    argumentList->SetInputArgumentOfInt64(4, 0x123456789all);
+    argumentList->SetInputArgumentOfInt64(5, 0xbcdefffffffffll);
+    argumentList->SetInputArgumentOfInt32(6, 63);
+    argumentList->SetInputArgumentOfInt32(7, 87);
+    strValue = "-HelloWorld-";
+    argumentList->SetInputArgumentOfString(8, strValue);
+    argumentList->SetInputArgumentOfInt64(9, 0xffff987654321ll);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"SetValue\" method failed!\n");
+        return ec;
+    }
+
+    // GetValue
+    //
+    PFL_EX("GetValue Int16, Int32, String, Boolean, Int64, Int64, Int32, Int32, String, Int64")
+    methodInfo = NULL;
+    ec = classInfo->GetMethodInfo(String("GetValue"), String("(I16*I32*LElastos/String;*Z*I64*I64*I32*I32*LElastos/String;*I64*)E"), (IMethodInfo**)&methodInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(methodInfo != NULL);
+    argumentList = NULL;
+    ec = methodInfo->CreateArgumentList((IArgumentList**)&argumentList);
+    if (FAILED(ec)) {
+        printf("Acquire \"GetValue\" method info failed!\n");
+        return ec;
+    }
+
+    assert(argumentList != NULL);
+
+    Int64 i64_3;
+
+    argumentList->SetOutputArgumentOfInt16Ptr(0, &i16);
+    argumentList->SetOutputArgumentOfInt32Ptr(1, &i32_1);
+    argumentList->SetOutputArgumentOfStringPtr(2, &strResult);
+    argumentList->SetOutputArgumentOfBooleanPtr(3, &b);
+    argumentList->SetOutputArgumentOfInt64Ptr(4, &i64_1);
+    argumentList->SetOutputArgumentOfInt64Ptr(5, &i64_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(6, &i32_2);
+    argumentList->SetOutputArgumentOfInt32Ptr(7, &i32_3);
+    argumentList->SetOutputArgumentOfStringPtr(8, &str2);
+    argumentList->SetOutputArgumentOfInt64Ptr(9, &i64_3);
+
+    ec = methodInfo->Invoke(object, argumentList);
+    if (FAILED(ec)) {
+        printf("Invoke \"GetValue\" method failed!\n");
+        return ec;
+    }
+
+    printf(" >>> GetValue: i16: %d, i32_1: %d, str: %s, b: %d, i64_1: 0x%16llx, i64_2: 0x%16llx, i32_2: %d, i32_3: %d, str2: %s, i64_3: 0x%16llx \n",
+            i16, i32_1, strResult.string(), b, i64_1, i64_2, i32_2, i32_3, str2.string(), i64_3);
+
     return NOERROR;
 }
 

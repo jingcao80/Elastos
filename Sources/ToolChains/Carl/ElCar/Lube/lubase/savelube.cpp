@@ -22,11 +22,13 @@
 #define _alloca alloca
 #endif
 
-#define ALIGN_BOUND 4
-
-inline int RoundUp4(int n)
+inline int RoundUp(int n)
 {
-    return ((n) + ALIGN_BOUND - 1) & ~(ALIGN_BOUND - 1);
+#if defined(_x86)
+    return ((n) + 4 - 1) & ~(4 - 1);
+#elif defined(_x64)
+    return ((n) + 8 - 1) & ~(8 - 1);
+#endif
 }
 
 class CLubeBuffer
@@ -52,7 +54,7 @@ ptrdiff_t CLubeBuffer::WriteData(const void *pvData, int nSize)
     ptrdiff_t nBegin = m_nOffset;
 
     memcpy(m_pBuffer + m_nOffset, pvData, nSize);
-    m_nOffset += RoundUp4(nSize);
+    m_nOffset += RoundUp(nSize);
 
     return nBegin;
 }
@@ -121,7 +123,7 @@ int CalcStatementsSize(PSTATEDESC pDesc)
         if (pDesc->pBlockette) {
             nSize += CalcStatementsSize(pDesc->pBlockette);
         }
-        nSize += sizeof(StateDesc) + RoundUp4(pDesc->uDataSize);
+        nSize += sizeof(StateDesc) + RoundUp(pDesc->uDataSize);
         pDesc = pDesc->pNext;
     }
     return nSize;
@@ -132,7 +134,7 @@ int CalcTemplateSize(LubeTemplate *pTemplate)
     int nSize = sizeof(LubeTemplate);
 
     nSize += CalcStatementsSize(pTemplate->tRoot.pBlockette);
-    nSize += RoundUp4(strlen(pTemplate->mName) + 1);
+    nSize += RoundUp(strlen(pTemplate->mName) + 1);
 
     return nSize;
 }

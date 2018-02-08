@@ -27,8 +27,6 @@
 #include "clsbase.h"
 
 #ifdef _linux
-#define _alloca alloca
-
 #define _MAX_PATH 256
 
 #define _stricmp strcasecmp
@@ -125,7 +123,7 @@ int LoadCLSFromFile(const char *pszName, CLSModule **ppDest)
     fseek(pFile, 0L, SEEK_END);
     nLength = ftell(pFile);
 
-    pSrc = (CLSModule *)_alloca(nLength);
+    pSrc = (CLSModule *)malloc(nLength);
     if (!pSrc) goto ErrorExit;
 
     fseek(pFile, 0L, SEEK_SET);
@@ -135,6 +133,7 @@ int LoadCLSFromFile(const char *pszName, CLSModule **ppDest)
 
     nRet = (r < 0) ? r : RelocFlattedCLS(pSrc, nLength, ppDest);
 
+    free(pSrc);
 ErrorExit:
     fclose(pFile);
     _Return(nRet);
