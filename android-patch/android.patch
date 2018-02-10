@@ -5,13 +5,13 @@ index f51070b94..76529d7e7 100644
 --- a/core/main.mk
 +++ b/core/main.mk
 @@ -374,6 +374,8 @@ ifneq (,$(user_variant))
- 
+
    ifeq ($(user_variant),user)
      ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=1
 +  else
 +    ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
    endif
- 
+
    ifeq ($(user_variant),userdebug)
 
 project build/soong/
@@ -21,7 +21,7 @@ index 1b60eae..e8effe4 100644
 +++ b/cc/config/arm_device.go
 @@ -58,6 +58,7 @@ var (
  	}
- 
+
  	armLdflags = []string{
 +		"-v",
  		"-Wl,-z,noexecstack",
@@ -34,7 +34,7 @@ index 6bacb5003..055be0e03 100644
 --- a/icu4c/source/common/Android.bp
 +++ b/icu4c/source/common/Android.bp
 @@ -206,7 +206,14 @@ cc_defaults {
- 
+
      // We deliberately do not set -DICU_DATA_DIR: ICU4C is configured on Android
      // using udata_setCommonData.
 +    //
@@ -47,7 +47,7 @@ index 6bacb5003..055be0e03 100644
 +
          "-D_REENTRANT",
          "-DU_COMMON_IMPLEMENTATION",
- 
+
 
 project frameworks/base/
 diff --git a/cmds/bootanimation/BootAnimation.cpp b/cmds/bootanimation/BootAnimation.cpp
@@ -56,11 +56,11 @@ index 7394490fc8d..7e74e214045 100644
 +++ b/cmds/bootanimation/BootAnimation.cpp
 @@ -267,7 +267,7 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height)
  }
- 
+
  status_t BootAnimation::readyToRun() {
 -    mAssets.addDefaultAssets();
 +    mAssets.addDefaultAssets(String8("framework/framework-res.apk"));
- 
+
      sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
              ISurfaceComposer::eDisplayIdMain));
 diff --git a/core/java/android/content/pm/PackageInstaller.java b/core/java/android/content/pm/PackageInstaller.java
@@ -70,7 +70,7 @@ index 7f3f35ffd4f..5d7391ecdb7 100644
 @@ -943,6 +943,12 @@ public class PackageInstaller {
          /** {@hide} */
          public static final int UID_UNKNOWN = -1;
- 
+
 +        /** {@hide} */
 +        public static final int TYPE_APK = 1;
 +
@@ -86,7 +86,7 @@ index 7f3f35ffd4f..5d7391ecdb7 100644
          public String[] grantedRuntimePermissions;
 +        /** {@hide} */
 +        public int appPackageType;
- 
+
          /**
           * Construct parameters for a new package install session.
 @@ -1001,6 +1009,7 @@ public class PackageInstaller {
@@ -95,7 +95,7 @@ index 7f3f35ffd4f..5d7391ecdb7 100644
              grantedRuntimePermissions = source.readStringArray();
 +            appPackageType = source.readInt();
          }
- 
+
          /**
 @@ -1205,6 +1214,7 @@ public class PackageInstaller {
              dest.writeString(abiOverride);
@@ -103,7 +103,7 @@ index 7f3f35ffd4f..5d7391ecdb7 100644
              dest.writeStringArray(grantedRuntimePermissions);
 +            dest.writeInt(appPackageType);
          }
- 
+
          public static final Parcelable.Creator<SessionParams>
 diff --git a/core/java/android/content/pm/PackageParser.java b/core/java/android/content/pm/PackageParser.java
 index c67376c2588..8b46677f8b1 100644
@@ -114,7 +114,7 @@ index c67376c2588..8b46677f8b1 100644
          public final boolean extractNativeLibs;
          public final boolean isolatedSplits;
 +        public final boolean isEpk;
- 
+
          public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
                  boolean[] isFeatureSplits, String[] usesSplitNames, String[] configForSplit,
 @@ -436,6 +437,7 @@ public class PackageParser {
@@ -123,14 +123,14 @@ index c67376c2588..8b46677f8b1 100644
              this.isolatedSplits = baseApk.isolatedSplits;
 +            this.isEpk = baseApk.isEpk;
          }
- 
+
          public List<String> getAllCodePaths() {
 @@ -470,13 +472,14 @@ public class PackageParser {
          public final boolean use32bitAbi;
          public final boolean extractNativeLibs;
          public final boolean isolatedSplits;
 +        public final boolean isEpk;
- 
+
          public ApkLite(String codePath, String packageName, String splitName, boolean isFeatureSplit,
                  String configForSplit, String usesSplitName, int versionCode, int revisionCode,
                  int installLocation, List<VerifierInfo> verifiers, Signature[] signatures,
@@ -148,11 +148,11 @@ index c67376c2588..8b46677f8b1 100644
 +            this.isEpk = isEpk;
          }
      }
- 
+
 @@ -590,6 +594,14 @@ public class PackageParser {
          return path.endsWith(".apk");
      }
- 
+
 +    public static final boolean isEpkFile(File file) {
 +        return isEpkPath(file.getName());
 +    }
@@ -171,20 +171,20 @@ index c67376c2588..8b46677f8b1 100644
 -            if (isApkFile(file)) {
 +            if (isApkFile(file) || isEpkFile(file)) {
                  final ApkLite lite = parseApkLite(file, flags);
- 
+
                  // Assert that all package names and version codes are
 @@ -1788,6 +1800,7 @@ public class PackageParser {
          boolean isFeatureSplit = false;
          String configForSplit = null;
          String usesSplitName = null;
 +        boolean isEpk = false;
- 
+
          for (int i = 0; i < attrs.getAttributeCount(); i++) {
              final String attr = attrs.getAttributeName(i);
 @@ -1860,10 +1873,12 @@ public class PackageParser {
              }
          }
- 
+
 +        isEpk = codePath.endsWith(".epk");
 +
          return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
@@ -193,21 +193,21 @@ index c67376c2588..8b46677f8b1 100644
 -                extractNativeLibs, isolatedSplits);
 +                extractNativeLibs, isolatedSplits, isEpk);
      }
- 
+
      /**
 @@ -2016,6 +2031,8 @@ public class PackageParser {
- 
+
          pkg.coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
- 
+
 +        pkg.mIsEpk = apkPath.endsWith(".epk");
 +
          sa.recycle();
- 
+
          return parseBaseApkCommon(pkg, null, res, parser, flags, outError);
 @@ -5831,6 +5848,8 @@ public class PackageParser {
           */
          public boolean visibleToInstantApps;
- 
+
 +        public boolean mIsEpk;
 +
          public Package(String packageName) {
@@ -220,7 +220,7 @@ index 7a709ed59b1..86df6fcc894 100644
 @@ -39,6 +39,11 @@ public class Process {
       */
      public static final String SECONDARY_ZYGOTE_SOCKET = "zygote_secondary";
- 
+
 +    /**
 +     * @hide for internal use only.
 +     */
@@ -233,7 +233,7 @@ index 7a709ed59b1..86df6fcc894 100644
       * ** Keep in sync with utils/threads.h **
       * ***************************************
       */
--    
+-
 +
      /**
       * Lowest available thread priority.  Only for those who really, really
@@ -242,7 +242,7 @@ index 7a709ed59b1..86df6fcc894 100644
       * {@link java.lang.Thread} class.
       */
      public static final int THREAD_PRIORITY_LOWEST = 19;
--    
+-
 +
      /**
       * Standard priority background threads.  This gives your thread a slightly
@@ -251,7 +251,7 @@ index 7a709ed59b1..86df6fcc894 100644
       * {@link java.lang.Thread} class.
       */
      public static final int THREAD_PRIORITY_BACKGROUND = 10;
--    
+-
 +
      /**
       * Standard priority of threads that are currently running a user interface
@@ -260,7 +260,7 @@ index 7a709ed59b1..86df6fcc894 100644
       * {@link java.lang.Thread} class.
       */
      public static final int THREAD_PRIORITY_FOREGROUND = -2;
--    
+-
 +
      /**
       * Standard priority of system display threads, involved in updating
@@ -269,7 +269,7 @@ index 7a709ed59b1..86df6fcc894 100644
       * {@link java.lang.Thread} class.
       */
      public static final int THREAD_PRIORITY_DISPLAY = -4;
--    
+-
 +
      /**
       * Standard priority of the most important display threads, for compositing
@@ -280,25 +280,25 @@ index 7a709ed59b1..86df6fcc894 100644
      public static final ZygoteProcess zygoteProcess =
 -            new ZygoteProcess(ZYGOTE_SOCKET, SECONDARY_ZYGOTE_SOCKET);
 +            new ZygoteProcess(ZYGOTE_SOCKET, SECONDARY_ZYGOTE_SOCKET, ELZYGOTE_SOCKET);
- 
+
      /**
       * Start a new process.
--     * 
+-     *
 +     *
       * <p>If processes are enabled, a new process is created and the
       * static main() function of a <var>processClass</var> is executed there.
       * The process will continue running after this function returns.
--     * 
+-     *
 +     *
       * <p>If processes are not enabled, a new thread in the caller's
       * process is created and main() of <var>processClass</var> called there.
--     * 
+-     *
 +     *
       * <p>The niceName parameter, if not an empty string, is a custom name to
       * give to the process instead of using processClass.  This allows you to
       * make easily identifyable processes even if you are using the same base
       * <var>processClass</var> to start them.
--     * 
+-     *
 +     *
       * When invokeWith is not null, the process will be started as a fresh app
       * and not a zygote fork. Note that this is only allowed for uid 0 or when
@@ -307,11 +307,11 @@ index 7a709ed59b1..86df6fcc894 100644
       * @param appDataDir null-ok the data directory of the app.
       * @param invokeWith null-ok the command to invoke with.
       * @param zygoteArgs Additional arguments to supply to the zygote process.
--     * 
+-     *
 +     *
       * @return An object that describes the result of the attempt to start the process.
       * @throws RuntimeException on fatal start failure
--     * 
+-     *
 +     *
       * {@hide}
       */
@@ -320,21 +320,21 @@ index 7a709ed59b1..86df6fcc894 100644
       * directly to a uid.
       */
      public static final native int getUidForName(String name);
--    
+-
 +
      /**
       * Returns the GID assigned to a particular user name, or -1 if there is
       * none.  If the given string consists of only numbers, it is converted
 @@ -632,11 +637,11 @@ public class Process {
- 
+
      /**
       * Set the priority of a thread, based on Linux priorities.
--     * 
+-     *
 +     *
       * @param tid The identifier of the thread/process to change.
       * @param priority A Linux priority level, from -20 for highest scheduling
       * priority to 19 for lowest scheduling priority.
--     * 
+-     *
 +     *
       * @throws IllegalArgumentException Throws IllegalArgumentException if
       * <var>tid</var> does not exist.
@@ -343,7 +343,7 @@ index 7a709ed59b1..86df6fcc894 100644
       * @hide
       * @param pid The identifier of the process to change.
       * @param group The target group for this process from THREAD_GROUP_*.
--     * 
+-     *
 +     *
       * @throws IllegalArgumentException Throws IllegalArgumentException if
       * <var>tid</var> does not exist.
@@ -352,43 +352,43 @@ index 7a709ed59b1..86df6fcc894 100644
      /**
       * Set the priority of the calling thread, based on Linux priorities.  See
       * {@link #setThreadPriority(int, int)} for more information.
--     * 
+-     *
 +     *
       * @param priority A Linux priority level, from -20 for highest scheduling
       * priority to 19 for lowest scheduling priority.
--     * 
+-     *
 +     *
       * @throws IllegalArgumentException Throws IllegalArgumentException if
       * <var>tid</var> does not exist.
       * @throws SecurityException Throws SecurityException if your process does
       * not have permission to modify the given thread, or to use the given
       * priority.
--     * 
+-     *
 +     *
       * @see #setThreadPriority(int, int)
       */
      public static final native void setThreadPriority(int priority)
              throws IllegalArgumentException, SecurityException;
--    
+-
 +
      /**
       * Return the current priority of a thread, based on Linux priorities.
--     * 
+-     *
 +     *
       * @param tid The identifier of the thread/process to change.
--     * 
+-     *
 +     *
       * @return Returns the current priority, as a Linux priority level,
       * from -20 for highest scheduling priority to 19 for lowest scheduling
       * priority.
--     * 
+-     *
 +     *
       * @throws IllegalArgumentException Throws IllegalArgumentException if
       * <var>tid</var> does not exist.
       */
      public static final native int getThreadPriority(int tid)
              throws IllegalArgumentException;
--    
+-
 +
      /**
       * Return the current scheduling policy of a thread, based on Linux.
@@ -397,16 +397,16 @@ index 7a709ed59b1..86df6fcc894 100644
       *
       * {@hide}
       */
--    
+-
 +
      @TestApi
      public static final native int getThreadScheduler(int tid)
              throws IllegalArgumentException;
 @@ -818,7 +823,7 @@ public class Process {
- 
+
      /**
       * Determine whether the current environment supports multiple processes.
--     * 
+-     *
 +     *
       * @return Returns true if the system can run in multiple processes, else
       * false if everything is running in a single process.
@@ -415,25 +415,25 @@ index 7a709ed59b1..86df6fcc894 100644
      /**
       * Change this process's argv[0] parameter.  This can be useful to show
       * more descriptive information in things like the 'ps' command.
--     * 
+-     *
 +     *
       * @param text The new name of this process.
--     * 
+-     *
 +     *
       * {@hide}
       */
      public static final native void setArgV0(String text);
 @@ -875,12 +880,12 @@ public class Process {
- 
+
      /**
       * Send a signal to the given process.
--     * 
+-     *
 +     *
       * @param pid The pid of the target process.
       * @param signal The signal to send.
       */
      public static final native void sendSignal(int pid, int signal);
--    
+-
 +
      /**
       * @hide
@@ -442,24 +442,24 @@ index 7a709ed59b1..86df6fcc894 100644
       * beat you up.
       */
      public static final native void sendSignalQuiet(int pid, int signal);
--    
+-
 +
      /** @hide */
      public static final native long getFreeMemory();
--    
+-
 +
      /** @hide */
      public static final native long getTotalMemory();
--    
+-
 +
      /** @hide */
      public static final native void readProcLines(String path,
              String[] reqFields, long[] outSizes);
--    
+-
 +
      /** @hide */
      public static final native int[] getPids(String path, int[] lastArray);
--    
+-
 +
      /** @hide */
      public static final int PROC_TERM_MASK = 0xff;
@@ -468,28 +468,28 @@ index 7a709ed59b1..86df6fcc894 100644
      public static final int PROC_OUT_LONG = 0x2000;
      /** @hide */
      public static final int PROC_OUT_FLOAT = 0x4000;
--    
+-
 +
      /** @hide */
      public static final native boolean readProcFile(String file, int[] format,
              String[] outStrings, long[] outLongs, float[] outFloats);
--    
+-
 +
      /** @hide */
--    public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
+-    public static final native boolean parseProcLine(byte[] buffer, int startIndex,
 +    public static final native boolean parseProcLine(byte[] buffer, int startIndex,
              int endIndex, int[] format, String[] outStrings, long[] outLongs, float[] outFloats);
- 
+
      /** @hide */
 @@ -948,10 +953,10 @@ public class Process {
- 
+
      /**
       * Gets the total Pss value for a given process, in bytes.
--     * 
+-     *
 +     *
       * @param pid the process to the Pss for
       * @return the total Pss value for the given process in bytes,
--     *  or -1 if the value cannot be determined 
+-     *  or -1 if the value cannot be determined
 +     *  or -1 if the value cannot be determined
       * @hide
       */
@@ -501,7 +501,7 @@ index 8208438dc62..5e6362fe5b9 100644
 @@ -65,9 +65,19 @@ public class ZygoteProcess {
       */
      private final String mSecondarySocket;
- 
+
 +    /**
 +     * The name of the native zygote socket.
 +     */
@@ -516,12 +516,12 @@ index 8208438dc62..5e6362fe5b9 100644
          mSecondarySocket = secondarySocket;
 +        mNativeSocket = nativeSocket;
      }
- 
+
      /**
 @@ -155,6 +165,11 @@ public class ZygoteProcess {
       */
      private ZygoteState secondaryZygoteState;
- 
+
 +    /**
 +     * The state of the connection to the primary zygote.
 +     */
@@ -533,19 +533,19 @@ index 8208438dc62..5e6362fe5b9 100644
 @@ -419,6 +434,12 @@ public class ZygoteProcess {
              argsForZygote.add(invokeWith);
          }
- 
+
 +        boolean startNativeProcess = processClass.startsWith("Elastos.");
 +        if (startNativeProcess) {
 +            argsForZygote.add("Elastos.Droid.Core.eco");
-+            abi = "armeabi-v7a";
++            abi = "arm64-v8a";
 +        }
 +
          argsForZygote.add(processClass);
- 
+
          if (extraArgs != null) {
 @@ -428,7 +449,9 @@ public class ZygoteProcess {
          }
- 
+
          synchronized(mLock) {
 -            return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi), argsForZygote);
 +            ZygoteState zygote = startNativeProcess?
@@ -553,11 +553,11 @@ index 8208438dc62..5e6362fe5b9 100644
 +            return zygoteSendArgsAndGetResult(zygote, argsForZygote);
          }
      }
- 
+
 @@ -483,6 +506,25 @@ public class ZygoteProcess {
          throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
      }
- 
+
 +    private ZygoteState openNativeZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
 +        Preconditions.checkState(Thread.holdsLock(mLock), "NativeZygoteProcess lock not held");
 +
@@ -599,10 +599,10 @@ index 90aee9e22f7..ae79fb58a1a 100644
 @@ -1602,7 +1602,7 @@ static void android_content_AssetManager_init(JNIEnv* env, jobject clazz, jboole
          return;
      }
- 
+
 -    am->addDefaultAssets();
 +    am->addDefaultAssets(String8("framework/framework-res.apk"));
- 
+
      ALOGV("Created AssetManager %p for Java object %p\n", am, clazz);
      env->SetLongField(clazz, gAssetManagerOffsets.mObject, reinterpret_cast<jlong>(am));
 diff --git a/core/jni/com_android_internal_content_NativeLibraryHelper.cpp b/core/jni/com_android_internal_content_NativeLibraryHelper.cpp
@@ -612,7 +612,7 @@ index f8f9efe2804..1fddaa55cd4 100644
 @@ -563,6 +563,32 @@ com_android_internal_content_NativeLibraryHelper_close(JNIEnv *env, jclass, jlon
      delete reinterpret_cast<ZipFileRO*>(apkHandle);
  }
- 
+
 +static jint
 +com_android_internal_content_NativeLibraryHelper_nativeCopyEcoLI(JNIEnv *env, jclass, jstring javaEpkPath,
 +        jstring javaEcoName, jstring javaEcoDir)
@@ -653,42 +653,42 @@ index f8f9efe2804..1fddaa55cd4 100644
 +    {"copyEcoLI", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
 +            (void *)com_android_internal_content_NativeLibraryHelper_nativeCopyEcoLI},
  };
- 
- 
+
+
 diff --git a/libs/androidfw/AssetManager.cpp b/libs/androidfw/AssetManager.cpp
 index 5603508eaf0..e2e97783291 100644
 --- a/libs/androidfw/AssetManager.cpp
 +++ b/libs/androidfw/AssetManager.cpp
 @@ -61,7 +61,7 @@ static const bool kIsDebug = false;
- 
+
  static const char* kAssetsRoot = "assets";
  static const char* kAppZipName = NULL; //"classes.jar";
 -static const char* kSystemAssets = "framework/framework-res.apk";
 +// static const char* kSystemAssets = "framework/framework-res.apk";
  static const char* kResourceCache = "resource-cache";
- 
+
  static const char* kExcludeExtension = ".EXCLUDE";
 @@ -317,13 +317,13 @@ exit:
      return ret;
  }
- 
+
 -bool AssetManager::addDefaultAssets()
 +bool AssetManager::addDefaultAssets(const String8& systemAssets)
  {
      const char* root = getenv("ANDROID_ROOT");
      LOG_ALWAYS_FATAL_IF(root == NULL, "ANDROID_ROOT not set");
- 
+
      String8 path(root);
 -    path.appendPath(kSystemAssets);
 +    path.appendPath(systemAssets);
- 
+
      return addAssetPath(path, NULL, false /* appAsLib */, true /* isSystemAsset */);
  }
 @@ -530,7 +530,7 @@ bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) con
                          mZipSet.setZipResourceTableAsset(ap.path, ass);
                  }
              }
--            
+-
 +
              if (nextEntryIdx == 0 && ass != NULL) {
                  // If this is the first resource table in the asset
@@ -716,7 +716,7 @@ index 0441b9d789e..3f1e89ee071 100644
       */
 -    bool addDefaultAssets();
 +    bool addDefaultAssets(const String8& systemAssets);
- 
+
      /*
       * Iterate over the asset paths in this manager.  (Previously
 diff --git a/services/core/java/com/android/server/AppOpsService.java b/services/core/java/com/android/server/AppOpsService.java
@@ -769,7 +769,7 @@ index f111db1434c..1a26b909465 100644
 --- a/services/core/java/com/android/server/pm/PackageInstallerSession.java
 +++ b/services/core/java/com/android/server/pm/PackageInstallerSession.java
 @@ -750,7 +750,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
- 
+
              // Take this opportunity to enforce uniform naming
              final String targetName;
 -            if (apk.splitName == null) {
@@ -787,7 +787,7 @@ index f36b762c5e9..175701a81e1 100644
 @@ -10138,6 +10138,26 @@ public class PackageManagerService extends IPackageManager.Stub
          return false;
      }
- 
+
 +    /**
 +     * Returns {@code true} if the given file contains code. Otherwise {@code false}.
 +     */
@@ -828,12 +828,12 @@ index f36b762c5e9..175701a81e1 100644
 +                        "Package " + pkg.baseCodePath + " code is missing");
 +            }
          }
- 
+
          if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
 @@ -10611,6 +10637,14 @@ public class PackageManagerService extends IPackageManager.Stub
          }
          pkgSetting.setTimeStamp(scanFileTime);
- 
+
 +        // for epk
 +        if (pkg.mIsEpk) {
 +            if (extractEcoFilesLI(pkg) != PackageManager.INSTALL_SUCCEEDED) {
@@ -848,7 +848,7 @@ index f36b762c5e9..175701a81e1 100644
 @@ -10629,6 +10663,19 @@ public class PackageManagerService extends IPackageManager.Stub
          return pkg;
      }
- 
+
 +    // for epk
 +    private int extractEcoFilesLI(PackageParser.Package pkg) {
 +        int retCode = NativeLibraryHelper.copyEcoLI(
@@ -929,9 +929,9 @@ index 417b7ae087e..80cf3282f6a 100644
 --- a/tools/aapt/Main.cpp
 +++ b/tools/aapt/Main.cpp
 @@ -20,6 +20,8 @@ using namespace android;
- 
+
  static const char* gProgName = "aapt";
- 
+
 +bool cppflag = 0;
 +
  /*
@@ -970,12 +970,12 @@ index bd2b2a36788..0f417d9cd65 100644
 +++ b/tools/aapt/Resource.cpp
 @@ -32,8 +32,19 @@
  static const bool kIsDebug = false;
- 
+
  // Number of threads to use for preprocessing images.
 +extern bool cppflag;
 +
  static const size_t MAX_THREADS = 4;
- 
+
 +static char namearray[8][64] = {{0}};
 +static char definebuf[256] = {0};
 +static char namebuf[256] = {0};
@@ -992,7 +992,7 @@ index bd2b2a36788..0f417d9cd65 100644
                          value.data);
                  return ATTR_NOT_FOUND;
              }
--            
+-
 +
              pool = table.getTableStringBlock(strIdx);
              #if 0
@@ -1001,7 +1001,7 @@ index bd2b2a36788..0f417d9cd65 100644
          // don't stop the build.
          return true;
      }
--    
+-
 +
      node->addAttribute(ns, attr, String16(value));
      return true;
@@ -1010,7 +1010,7 @@ index bd2b2a36788..0f417d9cd65 100644
              bundle->setVersionName(strdup(String8(attr->string).string()));
          }
      }
--    
+-
 +
      sp<XMLNode> vers = root->getChildElement(String16(), String16("uses-sdk"));
      if (bundle->getMinSdkVersion() != NULL
@@ -1019,7 +1019,7 @@ index bd2b2a36788..0f417d9cd65 100644
              vers = XMLNode::newElement(root->getFilename(), String16(), String16("uses-sdk"));
              root->insertChildAt(vers, 0);
          }
--        
+-
 +
          if (!addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "minSdkVersion",
                  bundle->getMinSdkVersion(), errorOnFailedInsert)) {
@@ -1028,25 +1028,25 @@ index bd2b2a36788..0f417d9cd65 100644
              }
          }
      }
--    
+-
 +
      sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
      if (application != NULL) {
          XMLNode::attribute_entry* icon_attr = application->editAttribute(
 @@ -1284,7 +1295,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
      // --------------------------------------------------------------
- 
+
      // resType -> leafName -> group
--    KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
+-    KeyedVector<String8, sp<ResourceTypeSet> > *resources =
 +    KeyedVector<String8, sp<ResourceTypeSet> > *resources =
              new KeyedVector<String8, sp<ResourceTypeSet> >;
      collect_files(assets, resources);
- 
+
 @@ -1318,7 +1329,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
      // now go through any resource overlays and collect their files
      sp<AaptAssets> current = assets->getOverlay();
      while(current.get()) {
--        KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
+-        KeyedVector<String8, sp<ResourceTypeSet> > *resources =
 +        KeyedVector<String8, sp<ResourceTypeSet> > *resources =
                  new KeyedVector<String8, sp<ResourceTypeSet> >;
          current->setResources(resources);
@@ -1055,16 +1055,16 @@ index bd2b2a36788..0f417d9cd65 100644
      // compile resources
      current = assets;
      while(current.get()) {
--        KeyedVector<String8, sp<ResourceTypeSet> > *resources = 
+-        KeyedVector<String8, sp<ResourceTypeSet> > *resources =
 +        KeyedVector<String8, sp<ResourceTypeSet> > *resources =
                  current->getResources();
- 
+
          ssize_t index = resources->indexOfKey(String8("values"));
 @@ -1438,7 +1449,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
              ssize_t res;
              while ((res=it.next()) == NO_ERROR) {
                  const sp<AaptFile>& file = it.getFile();
--                res = compileResourceFile(bundle, assets, file, it.getParams(), 
+-                res = compileResourceFile(bundle, assets, file, it.getParams(),
 +                res = compileResourceFile(bundle, assets, file, it.getParams(),
                                            (current!=assets), &table);
                  if (res != NO_ERROR) {
@@ -1073,16 +1073,16 @@ index bd2b2a36788..0f417d9cd65 100644
      if (table.validateLocalizations()) {
          hasErrors = true;
      }
--    
+-
 +
      if (hasErrors) {
          return UNKNOWN_ERROR;
      }
 @@ -1747,7 +1758,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
- 
+
      ResTable finalResTable;
      sp<AaptFile> resFile;
--    
+-
 +
      if (table.hasResources()) {
          sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
@@ -1091,7 +1091,7 @@ index bd2b2a36788..0f417d9cd65 100644
                  ssize_t index = block.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE, "name");
                  const char16_t* id = block.getAttributeStringValue(index, &len);
                  if (id == NULL) {
--                    fprintf(stderr, "%s:%d: missing name attribute in element <%s>.\n", 
+-                    fprintf(stderr, "%s:%d: missing name attribute in element <%s>.\n",
 +                    fprintf(stderr, "%s:%d: missing name attribute in element <%s>.\n",
                              manifestPath.string(), block.getLineNumber(),
                              String8(block.getElementName(&len)).string());
@@ -1100,16 +1100,16 @@ index bd2b2a36788..0f417d9cd65 100644
              return err;
          }
      }
--    
+-
 +
      return err;
  }
- 
+
 @@ -2432,7 +2443,7 @@ static status_t writeLayoutClasses(
          fprintf(fp, "%s */\n", getIndentSpace(indent));
- 
+
          ann.printAnnotations(fp, indentStr);
--        
+-
 +
          fprintf(fp,
                  "%spublic static final int[] %s = {\n"
@@ -1117,7 +1117,7 @@ index bd2b2a36788..0f417d9cd65 100644
 @@ -2794,6 +2805,539 @@ static status_t writeTextSymbolClass(
      return NO_ERROR;
  }
- 
+
 +//----------------------------------gaojianfeng add start-----------------------
 +static FILE *fpcpp = NULL;
 +static bool isHaveArray = false;
@@ -1660,7 +1660,7 @@ index bd2b2a36788..0f417d9cd65 100644
          String8 dest(bundle->getRClassDir());
 +        String8 desth(bundle->getRClassDir());
 +        String8 destcpp(bundle->getRClassDir());
- 
+
          if (bundle->getMakePackageDirs()) {
              const String8& pkg(package);
 @@ -2819,18 +3365,64 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
@@ -1731,7 +1731,7 @@ index bd2b2a36788..0f417d9cd65 100644
 @@ -2850,6 +3442,78 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
              "\n"
              "package %s;\n\n", package.string());
- 
+
 +                if (cppflag) {
 +            fprintf(fph,
 +                "/* AUTO-GENERATED FILE.  DO NOT MODIFY.\n"
@@ -1810,7 +1810,7 @@ index bd2b2a36788..0f417d9cd65 100644
 @@ -2857,6 +3521,35 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
              return err;
          }
- 
+
 +        if (cppflag) {
 +            status_t errcpp = writeSymbolClassCpp(fph, assets, includePrivate, symbols, className, 0);
 +            if (errcpp != NO_ERROR) {
@@ -1864,13 +1864,13 @@ index 4979eef5c..a7453b593 100644
 +        fprintf(stderr, "Filename doesn't end .apk or .epk: %s\n", file);
          return EXIT_FAILURE;
      }
- 
+
 @@ -2029,6 +2034,7 @@ static int install_app(TransportType transport, const char* serial, int argc, co
      // add size parameter [required for streaming installs]
      // do last to override any user specified value
      cmd += " " + android::base::StringPrintf("-S %" PRIu64, static_cast<uint64_t>(sb.st_size));
 +    cmd += " " + (isApk ? std::string("--apk") : std::string("--epk"));
- 
+
      int remoteFd = adb_connect(cmd, &error);
      if (remoteFd < 0) {
 diff --git a/init/init.cpp b/init/init.cpp
@@ -1891,7 +1891,7 @@ index bcc8d1b1a..c759a75e6 100644
 --- a/init/init_first_stage.cpp
 +++ b/init/init_first_stage.cpp
 @@ -224,10 +224,10 @@ void FirstStageMount::InitVerityDevice(const std::string& verity_device) {
- 
+
  bool FirstStageMount::MountPartitions() {
      for (auto fstab_rec : mount_fstab_recs_) {
 -        if (!SetUpDmVerity(fstab_rec)) {
@@ -1917,7 +1917,7 @@ index 9ba0272a3..9f0f5dd40 100644
 +            // return false;
          }
      }
- 
+
 diff --git a/rootdir/init.rc b/rootdir/init.rc
 index 3b996a435..ea15d13ea 100644
 --- a/rootdir/init.rc
@@ -1925,7 +1925,7 @@ index 3b996a435..ea15d13ea 100644
 @@ -432,6 +432,9 @@ on post-fs-data
      mkdir /data/property 0700 root root
      mkdir /data/tombstones 0771 system system
- 
+
 +    # create /data/elastos, so as to enforce our permissions
 +    mkdir /data/elastos 0771 system system
 +
@@ -1937,7 +1937,7 @@ index 3b996a435..ea15d13ea 100644
      start zygote
      start zygote_secondary
 +    start elzygote
- 
+
  on zygote-start && property:ro.crypto.state=unsupported
      # A/B update verifier that marks a successful boot.
 @@ -515,6 +519,7 @@ on zygote-start && property:ro.crypto.state=unsupported
@@ -1945,7 +1945,7 @@ index 3b996a435..ea15d13ea 100644
      start zygote
      start zygote_secondary
 +    start elzygote
- 
+
  on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type=file
      # A/B update verifier that marks a successful boot.
 @@ -522,6 +527,7 @@ on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type
@@ -1953,7 +1953,7 @@ index 3b996a435..ea15d13ea 100644
      start zygote
      start zygote_secondary
 +    start elzygote
- 
+
  on boot
      # basic network init
 diff --git a/rootdir/init.zygote64_32.rc b/rootdir/init.zygote64_32.rc
