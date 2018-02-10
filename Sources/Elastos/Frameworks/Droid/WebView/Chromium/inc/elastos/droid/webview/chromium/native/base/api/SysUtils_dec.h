@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_SysUtils_InitCallback(Handle32 cb);
+    extern void Elastos_SysUtils_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -51,7 +51,7 @@ void* SysUtils::ElaSysUtilsCallback_Init()
     sElaSysUtilsCallback.elastos_SysUtils_amountOfPhysicalMemoryKB = &SysUtils::AmountOfPhysicalMemoryKB;
     sElaSysUtilsCallback.elastos_SysUtils_isLowEndDevice = &SysUtils::IsLowEndDevice;
 
-    Elastos_SysUtils_InitCallback((Handle32)&sElaSysUtilsCallback);
+    Elastos_SysUtils_InitCallback((HANDLE)&sElaSysUtilsCallback);
     return &sElaSysUtilsCallback;
 }
 

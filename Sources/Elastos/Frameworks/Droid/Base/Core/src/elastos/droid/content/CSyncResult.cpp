@@ -367,7 +367,7 @@ ECode CSyncResult::ReadFromParcel(
     mMoreRecordsToGet = (source->ReadInt32(&value), value) != 0;
     source->ReadInt64(&mDelayUntil);
     AutoPtr<IInterface> stats;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&stats);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&stats);
     mStats = ISyncStats::Probe(stats);
     return NOERROR;
 }

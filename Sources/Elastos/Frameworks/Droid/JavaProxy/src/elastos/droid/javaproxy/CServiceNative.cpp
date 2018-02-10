@@ -48,8 +48,8 @@ ECode CServiceNative::constructor()
 }
 
 ECode CServiceNative::constructor(
-    /* [in] */ Handle64 jVM,
-    /* [in] */ Handle64 jInstance)
+    /* [in] */ HANDLE jVM,
+    /* [in] */ HANDLE jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;
@@ -90,7 +90,7 @@ ECode CServiceNative::ToString(
 ECode CServiceNative::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    Handle32 parcel;
+    HANDLE parcel;
     source->GetDataPayload(&parcel);
     mibinder = ((android::Parcel*)parcel)->readStrongBinder();
     // LOGGERD(TAG, "CServiceNative::ReadFromParcel(), mibinder = %p", mibinder.get());
@@ -99,7 +99,7 @@ ECode CServiceNative::ReadFromParcel(
 
 ECode CServiceNative::GetRemoteInstance(
     /* [in] */ JNIEnv* env,
-    /* [out] */ Handle64* obj)
+    /* [out] */ HANDLE* obj)
 {
     // LOGGERD(TAG, "+ CServiceNative::GetRemoteInstance()");
 
@@ -117,7 +117,7 @@ ECode CServiceNative::GetRemoteInstance(
     jobject jbinder = env->CallStaticObjectMethod(binderClass, m, (jlong)mibinder.get());
     Util::CheckErrorAndLog(env, TAG, "call Binder::ibinderForJavaObject : %d!\n", __LINE__);
     env->DeleteLocalRef(binderClass);
-    *obj = (Handle64)jbinder;
+    *obj = (HANDLE)jbinder;
 
     // LOGGERD(TAG, "- CServiceNative::GetRemoteInstance()");
     return NOERROR;
@@ -126,7 +126,7 @@ ECode CServiceNative::GetRemoteInstance(
 ECode CServiceNative::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    Handle32 parcel;
+    HANDLE parcel;
     dest->GetDataPayload(&parcel);
 
     if (mJVM == NULL) {

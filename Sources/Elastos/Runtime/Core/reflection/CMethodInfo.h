@@ -116,7 +116,7 @@ private:
     ArrayOf<IParamInfo *>*  mParameterInfos;
     ParmElement*            mParamElem;
     UInt32                  mParamBufSize;
-    Int32                   mBase;
+    uintptr_t               mBase;
 };
 
 #endif // __CMETHODINFO_H__

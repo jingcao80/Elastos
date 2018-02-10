@@ -683,7 +683,7 @@ ECode CWifiEnterpriseConfig::WriteToParcel(
         AutoPtr< ArrayOf<Byte> > userKeyBytes;
         IKey::Probe(mClientPrivateKey)->GetEncoded((ArrayOf<Byte>**)&userKeyBytes);
         dest->WriteInt32(userKeyBytes->GetLength());
-        dest->WriteArrayOf((Handle32)userKeyBytes.Get());
+        dest->WriteArrayOf((HANDLE)userKeyBytes.Get());
         dest->WriteString(algorithm);
     }
     else {
@@ -782,7 +782,7 @@ void CWifiEnterpriseConfig::WriteCertificate(
             AutoPtr< ArrayOf<Byte> > certBytes;
             ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&certBytes);
             dest->WriteInt32(certBytes->GetLength());
-            dest->WriteArrayOf((Handle32)certBytes.Get());
+            dest->WriteArrayOf((HANDLE)certBytes.Get());
         // } catch (CertificateEncodingException e) {
         //     dest.writeInt(0);
         // }
@@ -850,7 +850,7 @@ ECode CWifiEnterpriseConfig::ReadCertificate(
     if (len > 0) {
         //try {
             AutoPtr<ArrayOf<Byte> > bytes;// = ArrayOf<Byte>::Alloc(len);
-            in->ReadArrayOf((Handle32*)&bytes);
+            in->ReadArrayOf((HANDLE*)&bytes);
             AutoPtr<ICertificateFactoryHelper> cfHelper;
             CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&cfHelper);
             AutoPtr<ICertificateFactory> cFactory;
@@ -894,7 +894,7 @@ ECode CWifiEnterpriseConfig::ReadFromParcel(
         //try {
             //byte[] bytes = new byte[len];
         AutoPtr<ArrayOf<Byte> > bytes;
-        source->ReadArrayOf((Handle32*)&bytes);
+        source->ReadArrayOf((HANDLE*)&bytes);
         String algorithm;
         source->ReadString(&algorithm);
 

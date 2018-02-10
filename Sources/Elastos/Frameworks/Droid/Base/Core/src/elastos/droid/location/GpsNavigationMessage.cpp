@@ -195,7 +195,7 @@ ECode GpsNavigationMessage::ReadFromParcel(
     Int32 dataLength;
     parcel->ReadInt32(&dataLength);
     AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(dataLength);
-    parcel->ReadArrayOf((Handle32*)&data);
+    parcel->ReadArrayOf((HANDLE*)&data);
     SetData(data.Get());
     return NOERROR;
 }
@@ -208,7 +208,7 @@ ECode GpsNavigationMessage::WriteToParcel(
     parcel->WriteInt32(mMessageId);
     parcel->WriteInt32(mSubmessageId);
     parcel->WriteInt32(mData->GetLength());
-    parcel->WriteArrayOf((Handle32)(ArrayOf<Byte>*)mData);
+    parcel->WriteArrayOf((HANDLE)(ArrayOf<Byte>*)mData);
     return NOERROR;
 }
 

@@ -24,7 +24,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ByteBuffer_InitCallback(Handle32 cb);
+    extern void Elastos_ByteBuffer_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* AwByteBuffer::ElaByteBufferCallback_Init()
     sElaByteBufferCallback.elastos_ByteBuffer_GetDirectBufferAddress = &AwByteBuffer::GetDirectBufferAddress;
     sElaByteBufferCallback.elastos_ByteBuffer_GetDirectBufferCapacity = &AwByteBuffer::GetDirectBufferCapacity;
 
-    Elastos_ByteBuffer_InitCallback((Handle32)&sElaByteBufferCallback);
+    Elastos_ByteBuffer_InitCallback((HANDLE)&sElaByteBufferCallback);
     return &sElaByteBufferCallback;
 }
 

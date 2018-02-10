@@ -102,7 +102,7 @@ ECode CAudioPolicyConfig::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mMixes = IArrayList::Probe(obj);
     return NOERROR;
 }

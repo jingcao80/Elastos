@@ -465,7 +465,7 @@ ECode CWifiP2pGroup::ReadFromParcel(
     VALIDATE_NOT_NULL(source);
 
     FAIL_RETURN(source->ReadString(&mNetworkName));
-    FAIL_RETURN(source->ReadInterfacePtr((Handle32*)&mOwner));
+    FAIL_RETURN(source->ReadInterfacePtr((HANDLE*)&mOwner));
     Byte b;
     FAIL_RETURN(source->ReadByte(&b));
     mIsGroupOwner = (b == 1);
@@ -474,7 +474,7 @@ ECode CWifiP2pGroup::ReadFromParcel(
     FAIL_RETURN(source->ReadInt32(&size));
     for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IWifiP2pDevice> device;
-        FAIL_RETURN(source->ReadInterfacePtr((Handle32*)&device));
+        FAIL_RETURN(source->ReadInterfacePtr((HANDLE*)&device));
         mClients.PushBack(device);
     }
 

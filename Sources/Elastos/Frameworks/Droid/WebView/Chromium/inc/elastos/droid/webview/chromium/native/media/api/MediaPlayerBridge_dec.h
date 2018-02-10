@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_MediaPlayerBridge_nativeOnDidSetDataUriDataSource(IInterface* caller,Handle64 nativeMediaPlayerBridge,Boolean success);
-    extern void Elastos_MediaPlayerBridge_InitCallback(Handle64 cb);
+    extern void Elastos_MediaPlayerBridge_nativeOnDidSetDataUriDataSource(IInterface* caller,HANDLE nativeMediaPlayerBridge,Boolean success);
+    extern void Elastos_MediaPlayerBridge_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -42,7 +42,7 @@ namespace Media {
 
 struct ElaMediaPlayerBridgeCallback
 {
-    AutoPtr<IInterface> (*elastos_MediaPlayerBridge_create)(Handle64 nativeMediaPlayerBridge);
+    AutoPtr<IInterface> (*elastos_MediaPlayerBridge_create)(HANDLE nativeMediaPlayerBridge);
     void (*elastos_MediaPlayerBridge_destroy)(IInterface* obj);
     void (*elastos_MediaPlayerBridge_setSurface)(IInterface* obj, IInterface* surface);
     Boolean (*elastos_MediaPlayerBridge_prepareAsync)(IInterface* obj);
@@ -91,7 +91,7 @@ void* MediaPlayerBridge::ElaMediaPlayerBridgeCallback_Init()
     sElaMediaPlayerBridgeCallback.elastos_AllowedOperations_canSeekBackward = &MediaPlayerBridge::AllowedOperations::CanSeekBackward;
     sElaMediaPlayerBridgeCallback.elastos_MediaPlayerBridge_getAllowedOperations = &MediaPlayerBridge::GetAllowedOperations;
 
-    Elastos_MediaPlayerBridge_InitCallback((Handle64)&sElaMediaPlayerBridgeCallback);
+    Elastos_MediaPlayerBridge_InitCallback((HANDLE)&sElaMediaPlayerBridgeCallback);
     return &sElaMediaPlayerBridgeCallback;
 }
 

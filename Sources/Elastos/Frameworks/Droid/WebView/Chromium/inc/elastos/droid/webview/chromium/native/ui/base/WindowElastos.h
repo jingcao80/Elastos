@@ -244,7 +244,7 @@ public:
       * the object has not been previously initialized.
       * @return A pointer to the c++ AndroidWindow.
       */
-    virtual CARAPI_(Handle64) GetNativePointer();
+    virtual CARAPI_(HANDLE) GetNativePointer();
 
     static CARAPI_(void*) ElaWindowElastosCallback_Init();
 
@@ -263,15 +263,15 @@ private:
     // @CalledByNative
     CARAPI RequestVSyncUpdate();
 
-    CARAPI_(Handle64) NativeInit(
+    CARAPI_(HANDLE) NativeInit(
         /* [in] */ Int64 vsyncPeriod);
 
     CARAPI NativeOnVSync(
-        /* [in] */ Handle64 nativeWindowElastos,
+        /* [in] */ HANDLE nativeWindowElastos,
         /* [in] */ Int64 vsyncTimeMicros);
 
     CARAPI NativeDestroy(
-        /* [in] */ Handle64 nativeWindowElastos);
+        /* [in] */ HANDLE nativeWindowElastos);
 
 public:
     // A string used as a key to store intent errors in a bundle
@@ -290,7 +290,7 @@ protected:
 private:
     static const String TAG;
     // Native pointer to the c++ WindowElastos object.
-    Handle64 mNativeWindowElastos;
+    HANDLE mNativeWindowElastos;
     AutoPtr<VSyncMonitor> mVSyncMonitor;
     AutoPtr<VSyncMonitor::Listener> mVSyncListener;
 };

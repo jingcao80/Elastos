@@ -286,10 +286,10 @@ ECode CMediaMetadata::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mBundle = IBundle::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mDescription = IMediaDescription::Probe(obj);
     return NOERROR;
 }

@@ -488,10 +488,10 @@ ECode RouteInfo::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mDestination = IIpPrefix::Probe(obj);
     obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mGateway = IInetAddress::Probe(obj);
     parcel->ReadString(&mInterface);
     parcel->ReadInt32(&mType);

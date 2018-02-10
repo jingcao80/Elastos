@@ -106,7 +106,7 @@ ECode NetworkKey::ReadFromParcel(
     AutoPtr<IInterface> obj;
     switch (mType) {
         case TYPE_WIFI:
-            parcel->ReadInterfacePtr((Handle32*)&obj);
+            parcel->ReadInterfacePtr((HANDLE*)&obj);
             mWifiKey = IWifiKey::Probe(obj);
             break;
         default:

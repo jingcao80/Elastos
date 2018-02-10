@@ -63,7 +63,7 @@ DisplayEventReceiver::~DisplayEventReceiver()
 
 void DisplayEventReceiver::NativeInit()
 {
-    Handle64 nativeQueue;
+    HANDLE nativeQueue;
     mMessageQueue->GetNativeMessageQueue(&nativeQueue);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(nativeQueue);
     if (messageQueue == NULL) {

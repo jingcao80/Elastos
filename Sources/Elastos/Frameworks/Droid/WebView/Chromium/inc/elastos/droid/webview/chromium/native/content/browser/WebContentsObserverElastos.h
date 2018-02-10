@@ -293,14 +293,14 @@ private:
     static CARAPI_(void) DetachFromWebContents(
         /* [in] */ IInterface* obj);
 
-    CARAPI_(Handle64) NativeInit(
+    CARAPI_(HANDLE) NativeInit(
         /* [in] */ WebContents* webContents);
 
     CARAPI NativeDestroy(
-        /* [in] */ Handle64 nativeWebContentsObserverElastos);
+        /* [in] */ HANDLE nativeWebContentsObserverElastos);
 
 private:
-    Handle64 mNativeWebContentsObserverElastos;
+    HANDLE mNativeWebContentsObserverElastos;
 };
 
 } // namespace Browser

@@ -79,7 +79,7 @@ ECode CSoundTriggerKeyphrase::FromParcel(
     FAIL_RETURN(source->ReadInt32(&numUsers))
     if (numUsers >= 0) {
         users = ArrayOf<Int32>::Alloc(numUsers);
-        FAIL_RETURN(source->ReadArrayOf((Handle32*)&users))
+        FAIL_RETURN(source->ReadArrayOf((HANDLE*)&users))
     }
 
     AutoPtr<CSoundTriggerKeyphrase> newResult;
@@ -99,7 +99,7 @@ ECode CSoundTriggerKeyphrase::WriteToParcel(
     FAIL_RETURN(dest->WriteString(mText))
     if (mUsers != NULL) {
         FAIL_RETURN(dest->WriteInt32(mUsers->GetLength()))
-        FAIL_RETURN(dest->WriteArrayOf((Handle32)mUsers.Get()))
+        FAIL_RETURN(dest->WriteArrayOf((HANDLE)mUsers.Get()))
     } else {
         FAIL_RETURN(dest->WriteInt32(-1))
     }
@@ -119,7 +119,7 @@ ECode CSoundTriggerKeyphrase::ReadFromParcel(
     FAIL_RETURN(source->ReadInt32(&numUsers))
     if (numUsers >= 0) {
         users = ArrayOf<Int32>::Alloc(numUsers);
-        FAIL_RETURN(source->ReadArrayOf((Handle32*)&users))
+        FAIL_RETURN(source->ReadArrayOf((HANDLE*)&users))
     }
     mUsers = users;
 

@@ -131,7 +131,7 @@ void CActivityOne::SendMessage(
     // CCallbackParcel::New((IParcel**)&params);
     // params->WriteInt32(what);
     // Boolean result;
-    // handler->PostCppCallback((Handle32)handler.Get(), *(Handle32*)&pHandlerFunc,
+    // handler->PostCppCallback((HANDLE)handler.Get(), *(HANDLE*)&pHandlerFunc,
     //       params, what, FALSE, &result);
 }
 

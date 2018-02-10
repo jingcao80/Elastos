@@ -29,7 +29,7 @@ extern "C"
     extern void Elastos_ChildProcessLauncher_nativeOnChildProcessStarted(Int64 clientContext,Int32 pid);
     extern void Elastos_ChildProcessLauncher_nativeEstablishSurfacePeer(Int32 pid,IInterface* surface,Int32 primaryID,Int32 secondaryID);
     extern Boolean Elastos_ChildProcessLauncher_nativeIsSingleProcess();
-    extern void Elastos_ChildProcessLauncher_InitCallback(Handle32 cb);
+    extern void Elastos_ChildProcessLauncher_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -68,7 +68,7 @@ void* ChildProcessLauncher::ElaChildProcessLauncherCallback_Init()
     sElaChildProcessLauncherCallback.elastos_ChildProcessLauncher_start = &ChildProcessLauncher::Start;
     sElaChildProcessLauncherCallback.elastos_ChildProcessLauncher_stop = &ChildProcessLauncher::Stop;
 
-    Elastos_ChildProcessLauncher_InitCallback((Handle32)&sElaChildProcessLauncherCallback);
+    Elastos_ChildProcessLauncher_InitCallback((HANDLE)&sElaChildProcessLauncherCallback);
     return &sElaChildProcessLauncherCallback;
 }
 

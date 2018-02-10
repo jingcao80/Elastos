@@ -182,7 +182,7 @@ ECode UsbInterface::ReadFromParcel(
     FAIL_RETURN(source->ReadInt32(&mClass))
     FAIL_RETURN(source->ReadInt32(&mSubclass))
     FAIL_RETURN(source->ReadInt32(&mProtocol))
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mEndpoints))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mEndpoints))
     return NOERROR;
 }
 
@@ -197,7 +197,7 @@ ECode UsbInterface::WriteToParcel(
     FAIL_RETURN(dest->WriteInt32(mClass))
     FAIL_RETURN(dest->WriteInt32(mSubclass))
     FAIL_RETURN(dest->WriteInt32(mProtocol))
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mEndpoints.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mEndpoints.Get()))
     return NOERROR;
 }
 

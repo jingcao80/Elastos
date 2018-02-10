@@ -66,7 +66,7 @@ public:
      * @param natviePointer The native pointer to which the created factory is associated.
      */
     UsbMidiDeviceFactoryElastos(
-        /* [in] */ Handle64 nativePointer);
+        /* [in] */ HANDLE nativePointer);
 
     /**
      * Constructs a UsbMidiDeviceAndroid.
@@ -74,7 +74,7 @@ public:
      */
     //@CalledByNative return UsbMidiDeviceFactoryElastos
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativePointer);
+        /* [in] */ HANDLE nativePointer);
 
     /**
      * Enumerates USB-MIDI devices.
@@ -107,7 +107,7 @@ private:
         /* [in] */ IIntent* intent);
 
     static CARAPI_(void) NativeOnUsbMidiDeviceRequestDone(
-        /* [in] */ Handle64 nativeUsbMidiDeviceFactoryElastos,
+        /* [in] */ HANDLE nativeUsbMidiDeviceFactoryElastos,
         /* [in] */ ArrayOf<IInterface*>* devices);
 
 //callback function declaration
@@ -147,7 +147,7 @@ private:
     /**
      * The identifier of this factory.
      */
-    Handle64 mNativePointer;
+    HANDLE mNativePointer;
 
     static const String ACTION_USB_PERMISSION;
 };

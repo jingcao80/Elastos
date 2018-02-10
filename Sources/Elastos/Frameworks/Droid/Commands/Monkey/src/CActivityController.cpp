@@ -55,7 +55,7 @@ ECode CActivityController::ActivityStarting(
         // redirected to a file?)  So we allow disk writes
         // around this region for the monkey to minimize
         // harmless dropbox uploads from monkeys.
-        Handle32 sp;
+        HANDLE sp;
         AutoPtr<IStrictMode> sm;
         CStrictMode::AcquireSingleton((IStrictMode**)&sm);
         sm->AllowThreadDiskWrites(&sp);
@@ -93,7 +93,7 @@ ECode CActivityController::ActivityResuming(
 {
     VALIDATE_NOT_NULL(res);
     AutoPtr<IStrictMode> sm;
-    Handle32 sp;
+    HANDLE sp;
     CStrictMode::AcquireSingleton((IStrictMode**)&sm);
     sm->AllowThreadDiskWrites(&sp);
     AutoPtr<IFileOutputStream> fos;
@@ -139,7 +139,7 @@ ECode CActivityController::AppCrashed(
 {
     VALIDATE_NOT_NULL(res)
     AutoPtr<IStrictMode> sm;
-    Handle32 sp;
+    HANDLE sp;
     CStrictMode::AcquireSingleton((IStrictMode**)&sm);
     sm->AllowThreadDiskWrites(&sp);
     AutoPtr<IFileOutputStream> fos;
@@ -215,7 +215,7 @@ ECode CActivityController::AppNotResponding(
 {
     VALIDATE_NOT_NULL(res);
     AutoPtr<IStrictMode> sm;
-    Handle32 sp;
+    HANDLE sp;
     CStrictMode::AcquireSingleton((IStrictMode**)&sm);
     sm->AllowThreadDiskWrites(&sp);
     AutoPtr<IFileOutputStream> fos;
@@ -250,7 +250,7 @@ ECode CActivityController::AppNotResponding(
 }
 
 ECode CActivityController::constructor(
-    /* [in] */ Handle32 monkey)
+    /* [in] */ HANDLE monkey)
 {
     mHost = (Monkey*)monkey;
     return NOERROR;

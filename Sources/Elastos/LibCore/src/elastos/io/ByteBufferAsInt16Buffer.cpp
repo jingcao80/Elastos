@@ -39,7 +39,7 @@ ECode ByteBufferAsInt16Buffer::constructor(
 }
 
 ECode ByteBufferAsInt16Buffer::GetPrimitiveArray(
-    /* [out] */ Handle64* arrayHandle)
+    /* [out] */ HANDLE* arrayHandle)
 {
     AutoPtr<ArrayOf<Int16> > arrayTmp;
     GetArray((ArrayOf<Int16>**)&arrayTmp);
@@ -49,7 +49,7 @@ ECode ByteBufferAsInt16Buffer::GetPrimitiveArray(
         return NOERROR;
     }
     Int16* primitiveArray = arrayTmp->GetPayload();
-    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    *arrayHandle = reinterpret_cast<HANDLE>(primitiveArray);
     return NOERROR;
 }
 

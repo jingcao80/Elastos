@@ -54,7 +54,7 @@ AwQuotaManagerBridge::Origins::Origins(
 AutoPtr<AwQuotaManagerBridge> AwQuotaManagerBridge::sInstance;
 
 AwQuotaManagerBridge::AwQuotaManagerBridge(
-    /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl)
+    /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl)
     : mNativeAwQuotaManagerBridgeImpl(nativeAwQuotaManagerBridgeImpl)
     , mNextId(0)
 {
@@ -65,7 +65,7 @@ AwQuotaManagerBridge::AwQuotaManagerBridge(
 }
 
 // TODO(boliu): This should be obtained from Java AwBrowserContext that owns this.
-Handle64 AwQuotaManagerBridge::NativeGetDefaultNativeAwQuotaManagerBridge()
+HANDLE AwQuotaManagerBridge::NativeGetDefaultNativeAwQuotaManagerBridge()
 {
     return Elastos_AwQuotaManagerBridge_nativeGetDefaultNativeAwQuotaManagerBridge();
 }
@@ -191,33 +191,33 @@ void AwQuotaManagerBridge::OnGetUsageAndQuotaForOriginCallback(
 }
 
 void AwQuotaManagerBridge::NativeInit(
-    /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl)
+    /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl)
 {
     Elastos_AwQuotaManagerBridge_nativeInit(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl);
 }
 
 void AwQuotaManagerBridge::NativeDeleteAllData(
-    /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl)
+    /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl)
 {
     Elastos_AwQuotaManagerBridge_nativeDeleteAllData(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl);
 }
 
 void AwQuotaManagerBridge::NativeDeleteOrigin(
-    /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
+    /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl,
     /* [in] */ const String& origin)
 {
     Elastos_AwQuotaManagerBridge_nativeDeleteOrigin(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl, origin);
 }
 
 void AwQuotaManagerBridge::NativeGetOrigins(
-    /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
+    /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl,
     /* [in] */ Int32 callbackId)
 {
     Elastos_AwQuotaManagerBridge_nativeGetOrigins(TO_IINTERFACE(this), nativeAwQuotaManagerBridgeImpl, callbackId);
 }
 
 void AwQuotaManagerBridge::NativeGetUsageAndQuotaForOrigin(
-    /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
+    /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl,
     /* [in] */ const String& origin,
     /* [in] */ Int32 callbackId,
     /* [in] */ Boolean isQuota)

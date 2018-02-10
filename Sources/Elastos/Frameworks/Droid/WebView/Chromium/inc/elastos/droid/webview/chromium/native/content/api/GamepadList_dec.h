@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_GamepadList_nativeSetGamepadData(IInterface* caller,Int64 webGamepadsPtr,Int32 index,Boolean mapping,Boolean connected,const String& devicename,Int64 timestamp,ArrayOf<Float>* axes,ArrayOf<Float>* buttons);
-    extern void Elastos_GamepadList_InitCallback(Handle32 cb);
+    extern void Elastos_GamepadList_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -55,7 +55,7 @@ void* GamepadList::ElaGamepadListCallback_Init()
     sElaGamepadListCallback.elastos_GamepadList_updateGamepadData = &GamepadList::UpdateGamepadData;
     sElaGamepadListCallback.elastos_GamepadList_notifyForGamepadsAccess = &GamepadList::NotifyForGamepadsAccess;
 
-    Elastos_GamepadList_InitCallback((Handle32)&sElaGamepadListCallback);
+    Elastos_GamepadList_InitCallback((HANDLE)&sElaGamepadListCallback);
     return &sElaGamepadListCallback;
 }
 

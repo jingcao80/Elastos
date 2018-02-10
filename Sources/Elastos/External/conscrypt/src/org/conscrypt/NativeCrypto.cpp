@@ -6169,7 +6169,7 @@ static AutoPtr< ArrayOf<Int64> > getCertificateRefs(const STACK_OF(X509)* chain)
 /**
  * Returns an array containing all the X500 principal's bytes.
  */
-static AutoPtr< ArrayOf<Handle32> > getPrincipalBytes(const STACK_OF(X509_NAME)* names)
+static AutoPtr< ArrayOf<HANDLE> > getPrincipalBytes(const STACK_OF(X509_NAME)* names)
 {
     if (names == NULL) {
         return NULL;
@@ -6180,7 +6180,7 @@ static AutoPtr< ArrayOf<Handle32> > getPrincipalBytes(const STACK_OF(X509_NAME)*
         return NULL;
     }
 
-    AutoPtr< ArrayOf<Handle32> > joa = ArrayOf<Handle32>::Alloc(count);
+    AutoPtr< ArrayOf<HANDLE> > joa = ArrayOf<HANDLE>::Alloc(count);
 
     for (int i = 0; i < count; i++) {
         X509_NAME* principal = sk_X509_NAME_value(names, i);
@@ -6191,7 +6191,7 @@ static AutoPtr< ArrayOf<Handle32> > getPrincipalBytes(const STACK_OF(X509_NAME)*
             return NULL;
         }
         byteArray->AddRef();
-        (*joa)[i] = reinterpret_cast<Handle32>(byteArray.Get());
+        (*joa)[i] = reinterpret_cast<HANDLE>(byteArray.Get());
     }
 
     return joa;
@@ -6755,7 +6755,7 @@ static int cert_cb(SSL* ssl, void* arg)
     // Call Java callback which can reconfigure the client certificate.
     const uint8_t* ctype = nullptr;
     size_t ctype_num = SSL_get0_certificate_types(ssl, &ctype);
-    AutoPtr< ArrayOf<Handle32> > issuers = getPrincipalBytes(SSL_get_client_CA_list(ssl));
+    AutoPtr< ArrayOf<HANDLE> > issuers = getPrincipalBytes(SSL_get_client_CA_list(ssl));
 
 #ifdef WITH_JNI_TRACE
     for (int i = 0; i < ctype_num; i++) {
@@ -7223,7 +7223,7 @@ ECode NativeCrypto::SSL_check_private_key(
 
 ECode NativeCrypto::SSL_set_client_CA_list(
     /* [in] */ Int64 ssl_address,
-    /* [in] */ ArrayOf<Handle32>* principals)
+    /* [in] */ ArrayOf<HANDLE>* principals)
 {
     ECode ec;
     SSL* ssl = to_SSL(ssl_address, TRUE, &ec);

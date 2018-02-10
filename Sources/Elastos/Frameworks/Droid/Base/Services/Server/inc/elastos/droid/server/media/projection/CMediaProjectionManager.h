@@ -41,7 +41,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 host);
+        /* [in] */ HANDLE host);
 
     CARAPI HasProjectionPermission(
         /* [in] */ Int32 uid,

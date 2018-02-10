@@ -982,7 +982,7 @@ public:
 private:
     CARAPI GetDirectBufferPointer(
         /* [in] */ IBuffer* buffer,
-        /* [out] */ Handle64* result);
+        /* [out] */ HANDLE* result);
 
     CARAPI GlPointSizePointerOESBounds(
         /* [in] */ Int32 type,

@@ -210,7 +210,7 @@ ECode Condition::SetFlags(
 ECode Condition::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadInterfacePtr((Handle32*)((IUri**)&mId));
+    source->ReadInterfacePtr((HANDLE*)((IUri**)&mId));
     source->ReadString(&mSummary);
     source->ReadString(&mLine1);
     source->ReadString(&mLine2);

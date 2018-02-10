@@ -100,13 +100,13 @@ ECode CDashboardTile::ReadFromParcel(
     TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(in, (ICharSequence**)&mSummary);
     in->ReadInt32(&mIconRes);
     in->ReadString(&mFragment);
-    in->ReadInterfacePtr((Handle32*)(IBundle**)&mFragmentArguments);
+    in->ReadInterfacePtr((HANDLE*)(IBundle**)&mFragmentArguments);
     Int32 data;
     if ((in->ReadInt32(&data), data) != 0) {
         CIntent::New((IIntent**)&mIntent);
         IParcelable::Probe(mIntent)->ReadFromParcel(in);
     }
-    in->ReadInterfacePtr((Handle32*)(IBundle**)&mExtras);
+    in->ReadInterfacePtr((HANDLE*)(IBundle**)&mExtras);
     return NOERROR;
 }
 

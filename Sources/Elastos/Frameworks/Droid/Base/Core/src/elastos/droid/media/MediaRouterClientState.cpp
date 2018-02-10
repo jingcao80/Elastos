@@ -386,7 +386,7 @@ ECode MediaRouterClientState::ReadFromParcel(
     /* [in] */ IParcel* src)
 {
     // routes = src.createTypedArrayList(RouteInfo.CREATOR);
-    src->ReadInterfacePtr((Handle32*)&mRoutes);
+    src->ReadInterfacePtr((HANDLE*)&mRoutes);
     return src->ReadString(&mGloballySelectedRouteId);
 }
 

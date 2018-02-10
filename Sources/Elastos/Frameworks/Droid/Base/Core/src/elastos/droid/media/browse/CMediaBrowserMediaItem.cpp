@@ -118,7 +118,7 @@ ECode CMediaBrowserMediaItem::ReadFromParcel(
 {
     AutoPtr<IInterface> obj;
     source->ReadInt32(&mFlags);
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mDescription = IMediaDescription::Probe(obj);
     return NOERROR;
 }

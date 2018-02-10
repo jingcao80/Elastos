@@ -40,7 +40,7 @@ extern "C"
     extern Boolean Elastos_AwCookieManager_nativeHasCookies(IInterface* caller);
     extern Boolean Elastos_AwCookieManager_nativeAllowFileSchemeCookies(IInterface* caller);
     extern void Elastos_AwCookieManager_nativeSetAcceptFileSchemeCookies(IInterface* caller,Boolean accept);
-    extern void Elastos_AwCookieManager_InitCallback(Handle32 cb);
+    extern void Elastos_AwCookieManager_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -64,7 +64,7 @@ void* AwCookieManager::ElaAwCookieManagerCallback_Init()
 
     sElaAwCookieManagerCallback.elastos_AwCookieManager_invokeBooleanCookieCallback = &AwCookieManager::InvokeBooleanCookieCallback;
 
-    Elastos_AwCookieManager_InitCallback((Handle32)&sElaAwCookieManagerCallback);
+    Elastos_AwCookieManager_InitCallback((HANDLE)&sElaAwCookieManagerCallback);
     return &sElaAwCookieManagerCallback;
 }
 

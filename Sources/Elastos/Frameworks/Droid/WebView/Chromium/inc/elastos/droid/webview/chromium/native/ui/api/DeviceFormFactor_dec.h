@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_DeviceFormFactor_InitCallback(Handle32 cb);
+    extern void Elastos_DeviceFormFactor_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -50,7 +50,7 @@ void* DeviceFormFactor::ElaDeviceFormFactorCallback_Init()
 
     sElaDeviceFormFactorCallback.elastos_DeviceFormFactor_isTablet = &DeviceFormFactor::IsTablet;
 
-    Elastos_DeviceFormFactor_InitCallback((Handle32)&sElaDeviceFormFactorCallback);
+    Elastos_DeviceFormFactor_InitCallback((HANDLE)&sElaDeviceFormFactorCallback);
     return &sElaDeviceFormFactorCallback;
 }
 

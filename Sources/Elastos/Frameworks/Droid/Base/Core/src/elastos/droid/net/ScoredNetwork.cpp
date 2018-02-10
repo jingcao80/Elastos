@@ -100,10 +100,10 @@ ECode ScoredNetwork::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mNetworkKey = INetworkKey::Probe(obj);
     obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mRssiCurve = IRssiCurve::Probe(obj);
     return NOERROR;
 }

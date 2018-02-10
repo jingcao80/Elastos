@@ -53,8 +53,8 @@ CContentProviderNative::~CContentProviderNative()
 }
 
 ECode CContentProviderNative::constructor(
-    /* [in] */ Handle64 jVM,
-    /* [in] */ Handle64 jInstance)
+    /* [in] */ HANDLE jVM,
+    /* [in] */ HANDLE jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -203,7 +203,7 @@ ECode CContentProviderNative::Query(
         if (jcursor != NULL) {
             jobject jInstance = env->NewGlobalRef(jcursor);
             env->DeleteLocalRef(jcursor);
-            CCursorNative::New((Handle64)mJVM, (Handle64)jInstance, cursor);
+            CCursorNative::New((HANDLE)mJVM, (HANDLE)jInstance, cursor);
         }
     }
 
@@ -922,7 +922,7 @@ ECode CContentProviderNative::CreateCancellationSignal(
         jobject jInstance = env->NewGlobalRef(jcancellationSignal);
         env->DeleteLocalRef(jcancellationSignal);
 
-        if(NOERROR != CICancellationSignalNative::New((Handle64)mJVM, (Handle64)jInstance, cancellationSignal)) {
+        if(NOERROR != CICancellationSignalNative::New((HANDLE)mJVM, (HANDLE)jInstance, cancellationSignal)) {
             LOGGERE(TAG, "CreateCancellationSignal() new CICancellationSignalNative fail!");
         }
     }

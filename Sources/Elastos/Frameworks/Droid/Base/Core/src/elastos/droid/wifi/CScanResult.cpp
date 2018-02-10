@@ -494,7 +494,7 @@ ECode CScanResult::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mWifiSsid = IWifiSsid::Probe(obj);
     if (mWifiSsid != NULL) {
         IObject::Probe(mWifiSsid)->ToString(&mSSID);
@@ -570,7 +570,7 @@ ECode CScanResult::WriteToParcel(
             Int32 len = bytes->GetLength();
             dest->WriteInt32(id);
             dest->WriteInt32(len);
-            dest->WriteArrayOf((Handle32)bytes.Get());
+            dest->WriteArrayOf((HANDLE)bytes.Get());
         }
     }
     else {

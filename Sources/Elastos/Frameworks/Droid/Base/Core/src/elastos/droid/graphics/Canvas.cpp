@@ -1101,7 +1101,7 @@ ECode Canvas::DrawBitmap(
     assert(bitmap != NULL);
 
     FAIL_RETURN(ThrowIfCannotDraw(bitmap));
-    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    HANDLE nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
     Int32 density;
     bitmap->GetDensity(&density);
     Int64 nativePaint = paint ? (TO_PAINT(paint)->mNativePaint) : 0;
@@ -1148,7 +1148,7 @@ ECode Canvas::DrawBitmap(
     CRectF* _dst = (CRectF*)dst;
     Int32 density = 0;
     bitmap->GetDensity(&density);
-    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    HANDLE nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
     NativeDrawBitmap(mNativeCanvas, nativeBitmap, left, top, right, bottom,
           _dst->mLeft, _dst->mTop, _dst->mRight, _dst->mBottom, nativePaint, mScreenDensity,
           density);
@@ -1185,7 +1185,7 @@ ECode Canvas::DrawBitmap(
     CRect* _dst = (CRect*)dst;
     Int32 density = 0;
     bitmap->GetDensity(&density);
-    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    HANDLE nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
     NativeDrawBitmap(mNativeCanvas, nativeBitmap, left, top, right, bottom,
         _dst->mLeft, _dst->mTop, _dst->mRight, _dst->mBottom, nativePaint, mScreenDensity,
         density);
@@ -1258,7 +1258,7 @@ ECode Canvas::DrawBitmap(
     assert(bitmap != NULL);
     assert(matrix != NULL);
 
-    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    HANDLE nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
     Int64 nativeMatrix = ((CMatrix*)matrix)->mNativeMatrix;
     Int64 nativePaint = paint ? (TO_PAINT(paint)->mNativePaint) : 0;
     NativeDrawBitmapMatrix(mNativeCanvas, nativeBitmap, nativeMatrix, nativePaint);
@@ -1303,7 +1303,7 @@ ECode Canvas::DrawBitmapMesh(
         // no mul by 2, since we need only 1 color per vertex
         FAIL_RETURN(CheckRange(colors->GetLength(), colorOffset, count));
     }
-    Handle64 nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
+    HANDLE nativeBitmap = ((CBitmap*)bitmap)->mNativeBitmap;
     Int64 nativePaint = paint ? (TO_PAINT(paint)->mNativePaint) : 0;
     NativeDrawBitmapMesh(mNativeCanvas, nativeBitmap, meshWidth, meshHeight,
             verts, vertOffset, colors, colorOffset, nativePaint);

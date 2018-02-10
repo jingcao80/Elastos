@@ -128,7 +128,7 @@ ECode CActivityManagerStackInfo::WriteToParcel(
     dest->WriteInt32(bounds->mTop);
     dest->WriteInt32(bounds->mRight);
     dest->WriteInt32(bounds->mBottom);
-    dest->WriteArrayOf((Handle32)mTaskIds.Get());
+    dest->WriteArrayOf((HANDLE)mTaskIds.Get());
     dest->WriteArrayOfString(mTaskNames);
     dest->WriteInt32(mDisplayId);
     return NOERROR;
@@ -148,7 +148,7 @@ ECode CActivityManagerStackInfo::ReadFromParcel(
     CRect::New(l, t, r, b, (IRect**)&mBounds);
 
     mTaskIds = NULL;
-    source->ReadArrayOf((Handle32*)(&mTaskIds));
+    source->ReadArrayOf((HANDLE*)(&mTaskIds));
     source->ReadArrayOfString((ArrayOf<String>**)&mTaskNames);
     source->ReadInt32(&mDisplayId);
     return NOERROR;

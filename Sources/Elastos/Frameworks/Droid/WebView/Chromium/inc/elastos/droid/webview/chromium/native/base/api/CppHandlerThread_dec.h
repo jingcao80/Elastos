@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_JavaHandlerThread_nativeInitializeThread(IInterface* caller,Handle64 nativeJavaHandlerThread,Handle64 nativeEvent);
-    extern void Elastos_JavaHandlerThread_InitCallback(Handle64 cb);
+    extern void Elastos_JavaHandlerThread_nativeInitializeThread(IInterface* caller,HANDLE nativeJavaHandlerThread,HANDLE nativeEvent);
+    extern void Elastos_JavaHandlerThread_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -43,7 +43,7 @@ namespace Base {
 struct ElaJavaHandlerThreadCallback
 {
     AutoPtr<IInterface> (*elastos_JavaHandlerThread_create)(const String& name);
-    void (*elastos_JavaHandlerThread_start)(IInterface* obj, Handle64 nativeThread, Handle64 nativeEvent);
+    void (*elastos_JavaHandlerThread_start)(IInterface* obj, HANDLE nativeThread, HANDLE nativeEvent);
 };
 
 void* CppHandlerThread::ElaCppHandlerThreadCallback_Init()
@@ -53,7 +53,7 @@ void* CppHandlerThread::ElaCppHandlerThreadCallback_Init()
     sElaJavaHandlerThreadCallback.elastos_JavaHandlerThread_create = &CppHandlerThread::Create;
     sElaJavaHandlerThreadCallback.elastos_JavaHandlerThread_start = &CppHandlerThread::Start;
 
-    Elastos_JavaHandlerThread_InitCallback((Handle64)&sElaJavaHandlerThreadCallback);
+    Elastos_JavaHandlerThread_InitCallback((HANDLE)&sElaJavaHandlerThreadCallback);
     return &sElaJavaHandlerThreadCallback;
 }
 

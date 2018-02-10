@@ -66,11 +66,16 @@ static Boolean CompareAndSwapInt64(volatile int64_t* address, Int64 expect, Int6
     return (ret == 0);
 }
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, IInterface* expect, IInterface* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -84,7 +89,7 @@ static void PutOrderedInt32(volatile int32_t* address, Int32 newValue)
     *address = newValue;
 }
 
-static void PutOrderedObject(volatile int32_t* address, IInterface* newValue)
+static void PutOrderedObject(volatile uintptr_t* address, IInterface* newValue)
 {
     ANDROID_MEMBAR_STORE();
     IInterface* oldValue = reinterpret_cast<IInterface*>(*address);
@@ -237,9 +242,13 @@ AutoPtr<CConcurrentHashMap::Node> CConcurrentHashMap::TabAt(
     /* [in] */ ArrayOf<Node*>* tab,
     /* [in] */ Int32 i)
 {
-    volatile int32_t* address =
-            (volatile int32_t*)(tab->GetPayload() + i);
-    int32_t value = android_atomic_acquire_load(address);
+    volatile uintptr_t* address =
+            (volatile uintptr_t*)(tab->GetPayload() + i);
+#if defined(_arm)
+    uintptr_t value = android_atomic_acquire_load((int32_t*)address);
+#elif defined(_aarch64)
+    uintptr_t value = __sync_fetch_and_and(address, 0xffffffffffffffffll);
+#endif
     return (Node*)reinterpret_cast<IMapEntry*>(value);
 }
 
@@ -249,7 +258,7 @@ Boolean CConcurrentHashMap::CasTabAt(
     /* [in] */ Node* c,
     /* [in] */ Node* v)
 {
-    return CompareAndSwapObject((volatile int32_t*)(tab->GetPayload() + i),
+    return CompareAndSwapObject((volatile uintptr_t*)(tab->GetPayload() + i),
             (IMapEntry*)c, (IMapEntry*)v);
 }
 
@@ -258,7 +267,7 @@ void CConcurrentHashMap::SetTabAt(
     /* [in] */ Int32 i,
     /* [in] */ Node* v)
 {
-    PutOrderedObject((volatile int32_t*)(tab->GetPayload() + i), (IMapEntry*)v);
+    PutOrderedObject((volatile uintptr_t*)(tab->GetPayload() + i), (IMapEntry*)v);
 }
 
 ECode CConcurrentHashMap::PutVal(

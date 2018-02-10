@@ -96,18 +96,18 @@ ECode CGLES10Ext::GlQueryMatrixxOES(
 {
     VALIDATE_NOT_NULL(matrixx)
 
-    Handle64 _mantissaArray = (Handle64) 0;
+    HANDLE _mantissaArray = (HANDLE) 0;
     Int32 _mantissaBufferOffset = (Int32) 0;
-    Handle64 _exponentArray = (Handle64) 0;
+    HANDLE _exponentArray = (HANDLE) 0;
     Int32 _exponentBufferOffset = (Int32) 0;
     GLbitfield _returnValue = -1;
     *matrixx = -1;
     Int32 _mantissaRemaining;
     GLfixed *mantissa = (GLfixed *) 0;
-    Handle64 mantissaTmp;
+    HANDLE mantissaTmp;
     Int32 _exponentRemaining;
     GLint *exponent = (GLint *) 0;
-    Handle64 exponentTmp;
+    HANDLE exponentTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(mantissa_buf), &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset, &mantissaTmp));
     mantissa = (GLfixed *) mantissaTmp;
@@ -140,10 +140,10 @@ ECode CGLES10Ext::GlQueryMatrixxOES(
 
 ECode CGLES10Ext::GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle64* array,
+    /* [in, out] */ HANDLE* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle64* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -162,7 +162,7 @@ ECode CGLES10Ext::GetPointer(
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle64)pointer;
+        *rst = (HANDLE)pointer;
         return NOERROR;
     }
 

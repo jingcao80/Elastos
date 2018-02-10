@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AudioManagerAndroid_nativeSetMute(IInterface* caller,Handle64 nativeAudioManagerAndroid,Boolean muted);
-    extern void Elastos_AudioManagerAndroid_InitCallback(Handle64 cb);
+    extern void Elastos_AudioManagerAndroid_nativeSetMute(IInterface* caller,HANDLE nativeAudioManagerAndroid,Boolean muted);
+    extern void Elastos_AudioManagerAndroid_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -44,7 +44,7 @@ struct ElaAudioManagerAndroidCallback
 {
     Elastos::String (*elastos_AudioDeviceName_id)(IInterface* obj);
     Elastos::String (*elastos_AudioDeviceName_name)(IInterface* obj);
-    AutoPtr<IInterface> (*elastos_AudioManagerAndroid_createAudioManagerAndroid)(IInterface* context, Handle64 nativeAudioManagerAndroid);
+    AutoPtr<IInterface> (*elastos_AudioManagerAndroid_createAudioManagerAndroid)(IInterface* context, HANDLE nativeAudioManagerAndroid);
     void (*elastos_AudioManagerAndroid_init)(IInterface* obj);
     void (*elastos_AudioManagerAndroid_close)(IInterface* obj);
     void (*elastos_AudioManagerAndroid_setCommunicationAudioModeOn)(IInterface* obj, Boolean on);
@@ -76,7 +76,7 @@ void* AudioManagerElastos::ElaAudioManagerElastosCallback_Init()
     sElaAudioManagerAndroidCallback.elastos_AudioManagerAndroid_getAudioLowLatencyOutputFrameSize = &AudioManagerElastos::GetAudioLowLatencyOutputFrameSize;
     sElaAudioManagerAndroidCallback.elastos_AudioManagerAndroid_shouldUseAcousticEchoCanceler = &AudioManagerElastos::ShouldUseAcousticEchoCanceler;
 
-    Elastos_AudioManagerAndroid_InitCallback((Handle64)&sElaAudioManagerAndroidCallback);
+    Elastos_AudioManagerAndroid_InitCallback((HANDLE)&sElaAudioManagerAndroidCallback);
     return &sElaAudioManagerAndroidCallback;
 }
 

@@ -23,7 +23,7 @@ module
 
     interface IDisplayAdapterListener {
         OnDisplayDeviceEvent(
-            [in] Handle32 device,
+            [in] HANDLE device,
             [in] Int32 event);
 
         OnTraversalRequested();

@@ -720,7 +720,7 @@ ECode CObjectStub::TransactRunnable::Run()
     ECode ec = stubObj->OnTransact(cmd, mData, reply);
     if (SUCCEEDED(ec)) {
         void* payload;
-        reply->GetDataPayload((Handle32*)&payload);
+        reply->GetDataPayload((HANDLE*)&payload);
         Int32 payloadSize;
         reply->GetDataSize(&payloadSize);
         AutoPtr<DataBuffer> dataBuf = new DataBuffer();

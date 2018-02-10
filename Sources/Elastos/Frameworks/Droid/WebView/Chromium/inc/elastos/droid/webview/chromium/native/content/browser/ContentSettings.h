@@ -46,7 +46,7 @@ public:
      */
     ContentSettings(
         /* [in] */ ContentViewCore* contentViewCore,
-        /* [in] */ Handle64 nativeContentView);
+        /* [in] */ HANDLE nativeContentView);
 
     /**
      * Return true if JavaScript is enabled. Must be called on the UI thread.
@@ -60,7 +60,7 @@ public:
 private:
     static CARAPI_(void) OnNativeContentSettingsDestroyed(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativeContentSettings);
+        /* [in] */ HANDLE nativeContentSettings);
 
     /**
      * Notification from the native side that it is being destroyed.
@@ -68,21 +68,21 @@ private:
      */
     //@CalledByNative
     CARAPI_(void) OnNativeContentSettingsDestroyed(
-        /* [in] */ Handle64 nativeContentSettings);
+        /* [in] */ HANDLE nativeContentSettings);
 
     // Initialize the ContentSettings native side.
-    CARAPI_(Handle64) NativeInit(
-        /* [in] */ Handle64 contentViewPtr);
+    CARAPI_(HANDLE) NativeInit(
+        /* [in] */ HANDLE contentViewPtr);
 
     CARAPI_(Boolean) NativeGetJavaScriptEnabled(
-        /* [in] */ Handle64 nativeContentSettings);
+        /* [in] */ HANDLE nativeContentSettings);
 
 private:
     static const String TAG;
 
     // The native side of this object. Ownership is retained native-side by the WebContents
     // instance that backs the associated ContentViewCore.
-    Handle64 mNativeContentSettings;
+    HANDLE mNativeContentSettings;
 
     AutoPtr<ContentViewCore> mContentViewCore;
 };

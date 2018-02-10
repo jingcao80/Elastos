@@ -593,7 +593,7 @@ module
 
 //     class CBackupAgentBackupServiceBinder {
 //         constructor(
-//             [in] Handle32 backupAgent);
+//             [in] HANDLE backupAgent);
 
 //         interface IIBackupAgent;
 //         interface IBinder;

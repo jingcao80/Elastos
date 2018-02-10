@@ -63,7 +63,7 @@ ECode CIParcelableNative::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadString(&mPkgPath);
-    source->ReadArrayOf((Handle32*)&mObject);
+    source->ReadArrayOf((HANDLE*)&mObject);
     return NOERROR;
 }
 
@@ -71,7 +71,7 @@ ECode CIParcelableNative::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteString(mPkgPath);
-    dest->WriteArrayOf((Handle32)mObject.Get());
+    dest->WriteArrayOf((HANDLE)mObject.Get());
     return NOERROR;
 }
 

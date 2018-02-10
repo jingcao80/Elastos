@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_TimeZoneMonitor_nativeTimeZoneChangedFromJava(IInterface* caller,Handle64 nativeTimeZoneMonitorAndroid);
-    extern void Elastos_TimeZoneMonitor_InitCallback(Handle64 cb);
+    extern void Elastos_TimeZoneMonitor_nativeTimeZoneChangedFromJava(IInterface* caller,HANDLE nativeTimeZoneMonitorAndroid);
+    extern void Elastos_TimeZoneMonitor_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -43,7 +43,7 @@ namespace Browser {
 
 struct ElaTimeZoneMonitorCallback
 {
-    AutoPtr<IInterface> (*elastos_TimeZoneMonitor_getInstance)(IInterface* context, Handle64 nativePtr);
+    AutoPtr<IInterface> (*elastos_TimeZoneMonitor_getInstance)(IInterface* context, HANDLE nativePtr);
     void (*elastos_TimeZoneMonitor_stop)(IInterface* obj);
 };
 
@@ -54,7 +54,7 @@ void* TimeZoneMonitor::ElaTimeZoneMonitorCallback_Init()
     sElaTimeZoneMonitorCallback.elastos_TimeZoneMonitor_getInstance = &TimeZoneMonitor::GetInstance;
     sElaTimeZoneMonitorCallback.elastos_TimeZoneMonitor_stop = &TimeZoneMonitor::Stop;
 
-    Elastos_TimeZoneMonitor_InitCallback((Handle64)&sElaTimeZoneMonitorCallback);
+    Elastos_TimeZoneMonitor_InitCallback((HANDLE)&sElaTimeZoneMonitorCallback);
     return &sElaTimeZoneMonitorCallback;
 }
 

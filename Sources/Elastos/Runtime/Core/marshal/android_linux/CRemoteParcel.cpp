@@ -165,7 +165,7 @@ ECode CRemoteParcel::AppendFrom(
     /* [in] */ Int32 length)
 {
     android::Parcel* parcelObj;
-    parcel->GetDataPayload((Handle32*)&parcelObj);
+    parcel->GetDataPayload((HANDLE*)&parcelObj);
     if (parcelObj == NULL) return E_INVALID_ARGUMENT;
     mData->appendFrom(parcelObj, offset, length);
     return NOERROR;
@@ -683,7 +683,7 @@ ECode CRemoteParcel::ReadString(
 }
 
 ECode CRemoteParcel::ReadStruct(
-    /* [out] */ Handle32* addr)
+    /* [out] */ HANDLE* addr)
 {
     return ReadValue((PVoid)addr, Type_Struct);
 }
@@ -701,7 +701,7 @@ ECode CRemoteParcel::ReadEGuid(
 }
 
 ECode CRemoteParcel::ReadInterfacePtr(
-    /* [out] */ Handle32* itfPtr)
+    /* [out] */ HANDLE* itfPtr)
 {
     assert(itfPtr != NULL);
 
@@ -709,7 +709,7 @@ ECode CRemoteParcel::ReadInterfacePtr(
 }
 
 ECode CRemoteParcel::ReadArrayOf(
-    /* [out] */ Handle32* array)
+    /* [out] */ HANDLE* array)
 {
     assert(array != NULL);
 
@@ -805,7 +805,7 @@ ECode CRemoteParcel::WriteInterfacePtr(
 }
 
 ECode CRemoteParcel::WriteStruct(
-    /* [in] */ Handle32 value,
+    /* [in] */ HANDLE value,
     /* [in] */ Int32 size)
 {
     return WriteValue((PVoid)value, Type_Struct, size + sizeof(UInt32));
@@ -825,7 +825,7 @@ ECode CRemoteParcel::WriteEGuid(
 }
 
 ECode CRemoteParcel::WriteArrayOf(
-    /* [in] */ Handle32 array)
+    /* [in] */ HANDLE array)
 {
     Int32 size = array != 0 ? sizeof(UInt32) + sizeof(CarQuintet) + ((CarQuintet*)array)->mSize
         : sizeof(UInt32);
@@ -878,9 +878,9 @@ ECode CRemoteParcel::SetDataPosition(
 }
 
 ECode CRemoteParcel::GetDataPayload(
-    /* [out] */ Handle32* buffer)
+    /* [out] */ HANDLE* buffer)
 {
-    *buffer = (Handle32)mData;
+    *buffer = (HANDLE)mData;
     return NOERROR;
 }
 

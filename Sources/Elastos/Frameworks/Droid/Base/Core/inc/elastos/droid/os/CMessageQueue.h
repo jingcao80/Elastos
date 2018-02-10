@@ -108,7 +108,7 @@ public:
         /* [in] */ IInterface* object);
 
     CARAPI GetNativeMessageQueue(
-        /* [out] */ Handle64* queue);
+        /* [out] */ HANDLE* queue);
 
     CARAPI RemoveSyncBarrier(
         /* [in] */ Int32 token);
@@ -144,7 +144,7 @@ private:
     CARAPI_(Boolean) IsIdlingLocked();
 
 public:
-    Handle64 mPtr;
+    HANDLE mPtr;
 
 private:
     static const String TAG;

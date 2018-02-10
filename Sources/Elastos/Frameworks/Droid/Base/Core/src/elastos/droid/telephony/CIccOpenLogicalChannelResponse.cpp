@@ -57,7 +57,7 @@ ECode CIccOpenLogicalChannelResponse::ReadFromParcel(
 {
     source->ReadInt32(&mChannel);
     source->ReadInt32(&mStatus);
-    source->ReadArrayOf((Handle32*)(&mSelectResponse));
+    source->ReadArrayOf((HANDLE*)(&mSelectResponse));
     return NOERROR;
 }
 
@@ -66,7 +66,7 @@ ECode CIccOpenLogicalChannelResponse::WriteToParcel(
 {
     dest->WriteInt32(mChannel);
     dest->WriteInt32(mStatus);
-    dest->WriteArrayOf((Handle32)mSelectResponse.Get());
+    dest->WriteArrayOf((HANDLE)mSelectResponse.Get());
     return NOERROR;
 }
 

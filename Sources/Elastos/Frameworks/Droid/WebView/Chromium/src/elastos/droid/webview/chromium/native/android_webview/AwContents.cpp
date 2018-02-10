@@ -115,7 +115,7 @@ AutoPtr<AwScrollOffsetManager> AwContents::DependencyFactory::CreateScrollOffset
 CAR_INTERFACE_IMPL(AwContents::DestroyRunnable, Object, IRunnable);
 
 AwContents::DestroyRunnable::DestroyRunnable(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
     : mNativeAwContents(nativeAwContents)
 {
 }
@@ -1251,7 +1251,7 @@ AutoPtr<ContentViewCore> AwContents::CreateAndInitializeContentViewCore(
     /* [in] */ IViewGroup* containerView,
     /* [in] */ IContext* context,
     /* [in] */ AwContents::InternalAccessDelegate* internalDispatcher,
-    /* [in] */ Handle64 nativeWebContents,
+    /* [in] */ HANDLE nativeWebContents,
     /* [in] */ GestureStateListener* gestureStateListener,
     /* [in] */ ContentViewClient* contentViewClient,
     /* [in] */ ContentViewCore::ZoomControlsDelegate* zoomControlsDelegate)
@@ -1416,7 +1416,7 @@ void AwContents::OnContainerViewChanged()
  * ^^^^^^^^^  See the native class declaration for more details on relative object lifetimes.
  */
 void AwContents::SetNewAwContents(
-    /* [in] */ Handle64 newAwContentsPtr)
+    /* [in] */ HANDLE newAwContentsPtr)
 {
     if (mNativeAwContents != 0) {
         Destroy();
@@ -1435,7 +1435,7 @@ void AwContents::SetNewAwContents(
     AutoPtr<IRunnable> runnable = new DestroyRunnable(mNativeAwContents);
     mCleanupReference = new CleanupReference(this, runnable);
 
-    Handle64 nativeWebContents = NativeGetWebContents(mNativeAwContents);
+    HANDLE nativeWebContents = NativeGetWebContents(mNativeAwContents);
     AutoPtr<AwGestureStateListener> listener = new AwGestureStateListener(this);
     mContentViewCore = CreateAndInitializeContentViewCore(
             mContainerView, mContext, mInternalAccessAdapter, nativeWebContents,
@@ -1457,7 +1457,7 @@ void AwContents::SetNewAwContents(
 void AwContents::SupplyContentsForPopup(
     /* [in] */ AwContents* newContents)
 {
-    Handle64 popupNativeAwContents = NativeReleasePopupAwContents(mNativeAwContents);
+    HANDLE popupNativeAwContents = NativeReleasePopupAwContents(mNativeAwContents);
     if (popupNativeAwContents == 0) {
         Logger::W(TAG, "Popup WebView bind failed: no pending content.");
         if (newContents != NULL) newContents->Destroy();
@@ -1474,7 +1474,7 @@ void AwContents::SupplyContentsForPopup(
 // Recap: supplyContentsForPopup() is called on the parent window's content, this method is
 // called on the popup window's content.
 void AwContents::ReceivePopupContents(
-    /* [in] */ Handle64 popupNativeAwContents)
+    /* [in] */ HANDLE popupNativeAwContents)
 {
     mDeferredShouldOverrideUrlLoadingIsPendingForPopup = TRUE;
     // Save existing view state.
@@ -1603,18 +1603,18 @@ AutoPtr<AwPdfExporter> AwContents::GetPdfExporter()
 }
 
 void AwContents::SetAwDrawSWFunctionTable(
-    /* [in] */ Handle64 functionTablePointer)
+    /* [in] */ HANDLE functionTablePointer)
 {
     NativeSetAwDrawSWFunctionTable(functionTablePointer);
 }
 
 void AwContents::SetAwDrawGLFunctionTable(
-    /* [in] */ Handle64 functionTablePointer)
+    /* [in] */ HANDLE functionTablePointer)
 {
     NativeSetAwDrawGLFunctionTable(functionTablePointer);
 }
 
-Handle64 AwContents::GetAwDrawGLFunction()
+HANDLE AwContents::GetAwDrawGLFunction()
 {
     return NativeGetAwDrawGLFunction();
 }
@@ -1645,7 +1645,7 @@ Int32 AwContents::GetNativeInstanceCount()
     return NativeGetNativeInstanceCount();
 }
 
-Handle64 AwContents::GetAwDrawGLViewContext()
+HANDLE AwContents::GetAwDrawGLViewContext()
 {
     // Only called during early construction, so client should not have had a chance to
     // call destroy yet.
@@ -3186,31 +3186,31 @@ Boolean AwContents::UseLegacyGeolocationPermissionAPI()
 //  Native methods
 //--------------------------------------------------------------------------------------------
 
-Handle64 AwContents::NativeInit(
+HANDLE AwContents::NativeInit(
     /* [in] */ AwBrowserContext* browserContext)
 {
     return Elastos_AwContents_nativeInit(TO_IINTERFACE(browserContext));
 }
 
 void AwContents::NativeDestroy(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     Elastos_AwContents_nativeDestroy(nativeAwContents);
 }
 
 void AwContents::NativeSetAwDrawSWFunctionTable(
-    /* [in] */ Handle64 functionTablePointer)
+    /* [in] */ HANDLE functionTablePointer)
 {
     Elastos_AwContents_nativeSetAwDrawSWFunctionTable(functionTablePointer);
 }
 
 void AwContents::NativeSetAwDrawGLFunctionTable(
-    /* [in] */ Handle64 functionTablePointer)
+    /* [in] */ HANDLE functionTablePointer)
 {
     Elastos_AwContents_nativeSetAwDrawGLFunctionTable(functionTablePointer);
 }
 
-Handle64 AwContents::NativeGetAwDrawGLFunction()
+HANDLE AwContents::NativeGetAwDrawGLFunction()
 {
     return Elastos_AwContents_nativeGetAwDrawGLFunction();
 }
@@ -3226,7 +3226,7 @@ void AwContents::NativeSetShouldDownloadFavicons()
 }
 
 void AwContents::NativeSetJavaPeers(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ AwContents* awContents,
     /* [in] */ AwWebContentsDelegate* webViewWebContentsDelegate,
     /* [in] */ AwContentsClientBridge* contentsClientBridge,
@@ -3241,14 +3241,14 @@ void AwContents::NativeSetJavaPeers(
             TO_IINTERFACE(navigationInterceptionDelegate));
 }
 
-Handle64 AwContents::NativeGetWebContents(
-    /* [in] */ Handle64 nativeAwContents)
+HANDLE AwContents::NativeGetWebContents(
+    /* [in] */ HANDLE nativeAwContents)
 {
     return Elastos_AwContents_nativeGetWebContents(TO_IINTERFACE(this), nativeAwContents);
 }
 
 void AwContents::NativeDocumentHasImages(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ IMessage* message)
 {
     Elastos_AwContents_nativeDocumentHasImages(TO_IINTERFACE(this), nativeAwContents,
@@ -3256,7 +3256,7 @@ void AwContents::NativeDocumentHasImages(
 }
 
 void AwContents::NativeGenerateMHTML(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ const String& path,
     /* [in] */ IValueCallback* callback)
 {
@@ -3264,14 +3264,14 @@ void AwContents::NativeGenerateMHTML(
 }
 
 void AwContents::NativeAddVisitedLinks(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ ArrayOf<String>* visitedLinks)
 {
     Elastos_AwContents_nativeAddVisitedLinks(TO_IINTERFACE(this), nativeAwContents, visitedLinks);
 }
 
 Boolean AwContents::NativeOnDraw(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ ICanvas* canvas,
     /* [in] */ Boolean isHardwareAccelerated,
     /* [in] */ Int32 scrollX,
@@ -3286,41 +3286,41 @@ Boolean AwContents::NativeOnDraw(
 }
 
 void AwContents::NativeFindAllAsync(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ const String& searchString)
 {
     Elastos_AwContents_nativeFindAllAsync(TO_IINTERFACE(this), nativeAwContents, searchString);
 }
 
 void AwContents::NativeFindNext(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean forward)
 {
     Elastos_AwContents_nativeFindNext(TO_IINTERFACE(this), nativeAwContents, forward);
 }
 
 void AwContents::NativeClearMatches(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     Elastos_AwContents_nativeClearMatches(TO_IINTERFACE(this), nativeAwContents);
 }
 
 void AwContents::NativeClearCache(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean includeDiskFiles)
 {
     Elastos_AwContents_nativeClearCache(TO_IINTERFACE(this), nativeAwContents, includeDiskFiles);
 }
 
 AutoPtr< ArrayOf<Byte> > AwContents::NativeGetCertificate(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     return Elastos_AwContents_nativeGetCertificate(TO_IINTERFACE(this), nativeAwContents);
 }
 
 // Coordinates in desity independent pixels.
 void AwContents::NativeRequestNewHitTestDataAt(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
@@ -3328,13 +3328,13 @@ void AwContents::NativeRequestNewHitTestDataAt(
 }
 
 void AwContents::NativeUpdateLastHitTestData(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     Elastos_AwContents_nativeUpdateLastHitTestData(TO_IINTERFACE(this), nativeAwContents);
 }
 
 void AwContents::NativeOnSizeChanged(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */  Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
@@ -3344,7 +3344,7 @@ void AwContents::NativeOnSizeChanged(
 }
 
 void AwContents::NativeScrollTo(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Int32 x,
     /* [in] */ Int32 y)
 {
@@ -3352,28 +3352,28 @@ void AwContents::NativeScrollTo(
 }
 
 void AwContents::NativeSetViewVisibility(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean visible)
 {
     Elastos_AwContents_nativeSetViewVisibility(TO_IINTERFACE(this), nativeAwContents, visible);
 }
 
 void AwContents::NativeSetWindowVisibility(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean visible)
 {
     Elastos_AwContents_nativeSetWindowVisibility(TO_IINTERFACE(this), nativeAwContents, visible);
 }
 
 void AwContents::NativeSetIsPaused(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean paused)
 {
     Elastos_AwContents_nativeSetIsPaused(TO_IINTERFACE(this), nativeAwContents, paused);
 }
 
 void AwContents::NativeOnAttachedToWindow(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
 {
@@ -3381,13 +3381,13 @@ void AwContents::NativeOnAttachedToWindow(
 }
 
 void AwContents::NativeOnDetachedFromWindow(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     Elastos_AwContents_nativeOnDetachedFromWindow(nativeAwContents);
 }
 
 void AwContents::NativeSetDipScale(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Float dipScale)
 {
     Elastos_AwContents_nativeSetDipScale(TO_IINTERFACE(this), nativeAwContents, dipScale);
@@ -3395,46 +3395,46 @@ void AwContents::NativeSetDipScale(
 
 // Returns null if save state fails.
 AutoPtr< ArrayOf<Byte> > AwContents::NativeGetOpaqueState(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     return Elastos_AwContents_nativeGetOpaqueState(TO_IINTERFACE(this), nativeAwContents);
 }
 
 // Returns false if restore state fails.
 Boolean AwContents::NativeRestoreFromOpaqueState(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ ArrayOf<Byte>* state)
 {
     return Elastos_AwContents_nativeRestoreFromOpaqueState(TO_IINTERFACE(this), nativeAwContents, state);
 }
 
-Handle64 AwContents::NativeReleasePopupAwContents(
-    /* [in] */ Handle64 nativeAwContents)
+HANDLE AwContents::NativeReleasePopupAwContents(
+    /* [in] */ HANDLE nativeAwContents)
 {
     return Elastos_AwContents_nativeReleasePopupAwContents(TO_IINTERFACE(this), nativeAwContents);
 }
 
 void AwContents::NativeFocusFirstNode(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     Elastos_AwContents_nativeFocusFirstNode(TO_IINTERFACE(this), nativeAwContents);
 }
 
 void AwContents::NativeSetBackgroundColor(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Int32 color)
 {
     Elastos_AwContents_nativeSetBackgroundColor(TO_IINTERFACE(this), nativeAwContents, color);
 }
 
-Handle64 AwContents::NativeGetAwDrawGLViewContext(
-    /* [in] */ Handle64 nativeAwContents)
+HANDLE AwContents::NativeGetAwDrawGLViewContext(
+    /* [in] */ HANDLE nativeAwContents)
 {
     return Elastos_AwContents_nativeGetAwDrawGLViewContext(TO_IINTERFACE(this), nativeAwContents);
 }
 
-Handle64 AwContents::NativeCapturePicture(
-    /* [in] */ Handle64 nativeAwContents,
+HANDLE AwContents::NativeCapturePicture(
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -3442,20 +3442,20 @@ Handle64 AwContents::NativeCapturePicture(
 }
 
 void AwContents::NativeEnableOnNewPicture(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean enabled)
 {
     Elastos_AwContents_nativeEnableOnNewPicture(TO_IINTERFACE(this), nativeAwContents, enabled);
 }
 
 void AwContents::NativeClearView(
-    /* [in] */ Handle64 nativeAwContents)
+    /* [in] */ HANDLE nativeAwContents)
 {
     Elastos_AwContents_nativeClearView(TO_IINTERFACE(this), nativeAwContents);
 }
 
 void AwContents::NativeSetExtraHeadersForUrl(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ const String& url,
     /* [in] */ const String& extraHeaders)
 {
@@ -3463,7 +3463,7 @@ void AwContents::NativeSetExtraHeadersForUrl(
 }
 
 void AwContents::NativeInvokeGeolocationCallback(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean value,
     /* [in] */ const String& requestingFrame)
 {
@@ -3471,14 +3471,14 @@ void AwContents::NativeInvokeGeolocationCallback(
 }
 
 void AwContents::NativeSetJsOnlineProperty(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Boolean networkUp)
 {
     Elastos_AwContents_nativeSetJsOnlineProperty(TO_IINTERFACE(this), nativeAwContents, networkUp);
 }
 
 void AwContents::NativeTrimMemory(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ Int32 level,
     /* [in] */ Boolean visible)
 {
@@ -3486,14 +3486,14 @@ void AwContents::NativeTrimMemory(
 }
 
 void AwContents::NativeCreatePdfExporter(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ AwPdfExporter* awPdfExporter)
 {
     Elastos_AwContents_nativeCreatePdfExporter(TO_IINTERFACE(this), nativeAwContents, TO_IINTERFACE(awPdfExporter));
 }
 
 void AwContents::NativePreauthorizePermission(
-    /* [in] */ Handle64 nativeAwContents,
+    /* [in] */ HANDLE nativeAwContents,
     /* [in] */ const String& origin,
     /* [in] */ Int64 resources)
 {

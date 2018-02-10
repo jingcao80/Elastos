@@ -127,11 +127,16 @@ static Boolean CompareAndSwapInt32(volatile int32_t* address, Int32 expect, Int3
     return (ret == 0);
 }
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, IInterface* expect, IInterface* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -235,7 +240,7 @@ ECode FutureTask::Run()
     if (mState != NEW) return NOERROR;
 
     AutoPtr<IThread> t = Thread::GetCurrentThread();
-    if (!CompareAndSwapObject((volatile int32_t*)&mRunner, NULL, t.Get())) {
+    if (!CompareAndSwapObject((volatile uintptr_t*)&mRunner, NULL, t.Get())) {
         return NOERROR;
     }
     // try {
@@ -279,7 +284,7 @@ Boolean FutureTask::RunAndReset()
     if (mState != NEW) return FALSE;
 
     AutoPtr<IThread> t = Thread::GetCurrentThread();
-    if (!CompareAndSwapObject((volatile int32_t*)&mRunner, NULL, t.Get())) {
+    if (!CompareAndSwapObject((volatile uintptr_t*)&mRunner, NULL, t.Get())) {
         return FALSE;
     }
     Boolean ran = FALSE;
@@ -338,7 +343,7 @@ void FutureTask::FinishCompletion()
 {
     // assert state > COMPLETING;
     for (AutoPtr<IInterface> q; (q = mWaiters) != NULL;) {
-        if (CompareAndSwapObject((volatile int32_t*)&mWaiters, q, NULL)) {
+        if (CompareAndSwapObject((volatile uintptr_t*)&mWaiters, q, NULL)) {
             for (;;) {
                 WaitNode* qNode = (WaitNode*)IObject::Probe(q);
                 AutoPtr<IThread> t = qNode->mThread;
@@ -400,7 +405,7 @@ ECode FutureTask::AwaitDone(
             q = new WaitNode();
         }
         else if (!queued) {
-            queued = CompareAndSwapObject((volatile int32_t*)&mWaiters,
+            queued = CompareAndSwapObject((volatile uintptr_t*)&mWaiters,
                     (q->mNext = mWaiters), q->Probe(EIID_IInterface));
         }
         else if (timed) {
@@ -441,7 +446,7 @@ RETRY:
                     if (predNode->mThread == NULL) // check for race
                         goto RETRY;
                 }
-                else if (!(CompareAndSwapObject((volatile int32_t*)&mWaiters, q, s))) {
+                else if (!(CompareAndSwapObject((volatile uintptr_t*)&mWaiters, q, s))) {
                     goto RETRY;
                 }
             }

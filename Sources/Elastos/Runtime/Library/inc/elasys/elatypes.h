@@ -111,12 +111,9 @@ typedef Boolean *PBoolean;
 /** @addtogroup CARTypesRef
   *   @{
   */
-typedef UInt32 Handle32;
-typedef UInt64 Handle64;
+typedef uintptr_t HANDLE;
+typedef HANDLE *PHANDLE;
 /** @} */
-
-typedef Handle32 *PHandle32;
-typedef Handle64 *PHandle64;
 
 /** @addtogroup CARTypesRef
   *   @{

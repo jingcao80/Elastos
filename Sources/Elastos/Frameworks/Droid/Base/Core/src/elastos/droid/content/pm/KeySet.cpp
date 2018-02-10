@@ -74,7 +74,7 @@ ECode KeySet::GetHashCode(
 ECode KeySet::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    return source->ReadInterfacePtr((Handle32*)&mToken);
+    return source->ReadInterfacePtr((HANDLE*)&mToken);
 }
 
 ECode KeySet::WriteToParcel(

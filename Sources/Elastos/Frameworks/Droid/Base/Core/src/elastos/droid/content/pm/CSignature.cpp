@@ -266,13 +266,13 @@ ECode CSignature::GetHashCode(
 ECode CSignature::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    return source->ReadArrayOf((Handle32*)&mSignature);
+    return source->ReadArrayOf((HANDLE*)&mSignature);
 }
 
 ECode CSignature::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    return dest->WriteArrayOf((Handle32)mSignature.Get());
+    return dest->WriteArrayOf((HANDLE)mSignature.Get());
 }
 
 Boolean CSignature::AreExactMatch(

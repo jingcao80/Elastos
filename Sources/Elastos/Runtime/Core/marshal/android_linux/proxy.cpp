@@ -662,7 +662,7 @@ ECode CInterfaceProxy::ProxyEntry(
         android::Parcel reply;
 
         inParcel->GetDataSize(&size);
-        inParcel->GetDataPayload((Handle32*)&data);
+        inParcel->GetDataPayload((HANDLE*)&data);
         inHeader = inParcel->GetMarshalHeader();
         inHeader->mInSize = size;
         inHeader->mOutSize = outSize;

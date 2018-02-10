@@ -110,7 +110,7 @@ public:
 
     // @CalledByNative
     virtual CARAPI Start(
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
     // @CalledByNative
     virtual CARAPI Stop();
@@ -123,7 +123,7 @@ private:
 
     static CARAPI_(void) Start(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
     static CARAPI_(void) Stop(
         /* [in] */ IInterface* obj);
@@ -144,18 +144,18 @@ private:
       */
     // @NativeClassQualifiedName("ProxyConfigServiceAndroid::JNIDelegate")
     CARAPI NativeProxySettingsChangedTo(
-        /* [in] */ Handle64 nativePtr,
+        /* [in] */ HANDLE nativePtr,
         /* [in] */ const String& host,
         /* [in] */ Int32 port);
 
     // @NativeClassQualifiedName("ProxyConfigServiceAndroid::JNIDelegate")
     CARAPI NativeProxySettingsChanged(
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
 private:
     static const String TAG;
     static Boolean sEnabled;
-    Handle64 mNativePtr;
+    HANDLE mNativePtr;
     AutoPtr<IContext> mContext;
     AutoPtr<ProxyReceiver> mProxyReceiver;
     AutoPtr<Delegate> mDelegate;

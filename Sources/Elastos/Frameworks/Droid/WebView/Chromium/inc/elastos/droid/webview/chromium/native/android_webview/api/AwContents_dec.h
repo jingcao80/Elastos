@@ -26,50 +26,50 @@
 extern "C"
 {
 #endif
-    extern Handle64 Elastos_AwContents_nativeInit(IInterface* browserContext);
-    extern void Elastos_AwContents_nativeSetAwDrawSWFunctionTable(Handle64 functionTablePointer);
-    extern void Elastos_AwContents_nativeSetAwDrawGLFunctionTable(Handle64 functionTablePointer);
-    extern Handle64 Elastos_AwContents_nativeGetAwDrawGLFunction();
+    extern HANDLE Elastos_AwContents_nativeInit(IInterface* browserContext);
+    extern void Elastos_AwContents_nativeSetAwDrawSWFunctionTable(HANDLE functionTablePointer);
+    extern void Elastos_AwContents_nativeSetAwDrawGLFunctionTable(HANDLE functionTablePointer);
+    extern HANDLE Elastos_AwContents_nativeGetAwDrawGLFunction();
     extern Int32 Elastos_AwContents_nativeGetNativeInstanceCount();
     extern void Elastos_AwContents_nativeSetShouldDownloadFavicons();
-    extern void Elastos_AwContents_nativeDestroy(Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeSetJavaPeers(IInterface* caller,Handle64 nativeAwContents,IInterface* awContents,IInterface* webViewWebContentsDelegate,IInterface* contentsClientBridge,IInterface* ioThreadClient,IInterface* navigationInterceptionDelegate);
-    extern Handle64 Elastos_AwContents_nativeGetWebContents(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeDocumentHasImages(IInterface* caller,Handle64 nativeAwContents,IInterface* message);
-    extern void Elastos_AwContents_nativeGenerateMHTML(IInterface* caller,Handle64 nativeAwContents,const String& path,IInterface* callback);
-    extern void Elastos_AwContents_nativeAddVisitedLinks(IInterface* caller,Handle64 nativeAwContents,ArrayOf<String>* visitedLinks);
-    extern Boolean Elastos_AwContents_nativeOnDraw(IInterface* caller,Handle64 nativeAwContents,IInterface* canvas,Boolean isHardwareAccelerated,Int32 scrollX,Int32 scrollY,Int32 visibleLeft,Int32 visibleTop,Int32 visibleRight,Int32 visibleBottom);
-    extern void Elastos_AwContents_nativeFindAllAsync(IInterface* caller,Handle64 nativeAwContents,const String& searchString);
-    extern void Elastos_AwContents_nativeFindNext(IInterface* caller,Handle64 nativeAwContents,Boolean forward);
-    extern void Elastos_AwContents_nativeClearMatches(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeClearCache(IInterface* caller,Handle64 nativeAwContents,Boolean includeDiskFiles);
-    extern AutoPtr<ArrayOf<Byte> > Elastos_AwContents_nativeGetCertificate(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeRequestNewHitTestDataAt(IInterface* caller,Handle64 nativeAwContents,Int32 x,Int32 y);
-    extern void Elastos_AwContents_nativeUpdateLastHitTestData(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeOnSizeChanged(IInterface* caller,Handle64 nativeAwContents,Int32 w,Int32 h,Int32 ow,Int32 oh);
-    extern void Elastos_AwContents_nativeScrollTo(IInterface* caller,Handle64 nativeAwContents,Int32 x,Int32 y);
-    extern void Elastos_AwContents_nativeSetViewVisibility(IInterface* caller,Handle64 nativeAwContents,Boolean visible);
-    extern void Elastos_AwContents_nativeSetWindowVisibility(IInterface* caller,Handle64 nativeAwContents,Boolean visible);
-    extern void Elastos_AwContents_nativeSetIsPaused(IInterface* caller,Handle64 nativeAwContents,Boolean paused);
-    extern void Elastos_AwContents_nativeOnAttachedToWindow(IInterface* caller,Handle64 nativeAwContents,Int32 w,Int32 h);
-    extern void Elastos_AwContents_nativeOnDetachedFromWindow(Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeSetDipScale(IInterface* caller,Handle64 nativeAwContents,Float dipScale);
-    extern AutoPtr<ArrayOf<Byte> > Elastos_AwContents_nativeGetOpaqueState(IInterface* caller,Handle64 nativeAwContents);
-    extern Boolean Elastos_AwContents_nativeRestoreFromOpaqueState(IInterface* caller,Handle64 nativeAwContents,ArrayOf<Byte>* state);
-    extern Handle64 Elastos_AwContents_nativeReleasePopupAwContents(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeFocusFirstNode(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeSetBackgroundColor(IInterface* caller,Handle64 nativeAwContents,Int32 color);
-    extern Handle64 Elastos_AwContents_nativeGetAwDrawGLViewContext(IInterface* caller,Handle64 nativeAwContents);
-    extern Handle64 Elastos_AwContents_nativeCapturePicture(IInterface* caller,Handle64 nativeAwContents,Int32 width,Int32 height);
-    extern void Elastos_AwContents_nativeEnableOnNewPicture(IInterface* caller,Handle64 nativeAwContents,Boolean enabled);
-    extern void Elastos_AwContents_nativeClearView(IInterface* caller,Handle64 nativeAwContents);
-    extern void Elastos_AwContents_nativeSetExtraHeadersForUrl(IInterface* caller,Handle64 nativeAwContents,const String& url,const String& extraHeaders);
-    extern void Elastos_AwContents_nativeInvokeGeolocationCallback(IInterface* caller,Handle64 nativeAwContents,Boolean value,const String& requestingFrame);
-    extern void Elastos_AwContents_nativeSetJsOnlineProperty(IInterface* caller,Handle64 nativeAwContents,Boolean networkUp);
-    extern void Elastos_AwContents_nativeTrimMemory(IInterface* caller,Handle64 nativeAwContents,Int32 level,Boolean visible);
-    extern void Elastos_AwContents_nativeCreatePdfExporter(IInterface* caller,Handle64 nativeAwContents,IInterface* awPdfExporter);
-    extern void Elastos_AwContents_nativePreauthorizePermission(IInterface* caller,Handle64 nativeAwContents,const String& origin,Int64 resources);
-    extern void Elastos_AwContents_InitCallback(Handle64 cb);
+    extern void Elastos_AwContents_nativeDestroy(HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeSetJavaPeers(IInterface* caller,HANDLE nativeAwContents,IInterface* awContents,IInterface* webViewWebContentsDelegate,IInterface* contentsClientBridge,IInterface* ioThreadClient,IInterface* navigationInterceptionDelegate);
+    extern HANDLE Elastos_AwContents_nativeGetWebContents(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeDocumentHasImages(IInterface* caller,HANDLE nativeAwContents,IInterface* message);
+    extern void Elastos_AwContents_nativeGenerateMHTML(IInterface* caller,HANDLE nativeAwContents,const String& path,IInterface* callback);
+    extern void Elastos_AwContents_nativeAddVisitedLinks(IInterface* caller,HANDLE nativeAwContents,ArrayOf<String>* visitedLinks);
+    extern Boolean Elastos_AwContents_nativeOnDraw(IInterface* caller,HANDLE nativeAwContents,IInterface* canvas,Boolean isHardwareAccelerated,Int32 scrollX,Int32 scrollY,Int32 visibleLeft,Int32 visibleTop,Int32 visibleRight,Int32 visibleBottom);
+    extern void Elastos_AwContents_nativeFindAllAsync(IInterface* caller,HANDLE nativeAwContents,const String& searchString);
+    extern void Elastos_AwContents_nativeFindNext(IInterface* caller,HANDLE nativeAwContents,Boolean forward);
+    extern void Elastos_AwContents_nativeClearMatches(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeClearCache(IInterface* caller,HANDLE nativeAwContents,Boolean includeDiskFiles);
+    extern AutoPtr<ArrayOf<Byte> > Elastos_AwContents_nativeGetCertificate(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeRequestNewHitTestDataAt(IInterface* caller,HANDLE nativeAwContents,Int32 x,Int32 y);
+    extern void Elastos_AwContents_nativeUpdateLastHitTestData(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeOnSizeChanged(IInterface* caller,HANDLE nativeAwContents,Int32 w,Int32 h,Int32 ow,Int32 oh);
+    extern void Elastos_AwContents_nativeScrollTo(IInterface* caller,HANDLE nativeAwContents,Int32 x,Int32 y);
+    extern void Elastos_AwContents_nativeSetViewVisibility(IInterface* caller,HANDLE nativeAwContents,Boolean visible);
+    extern void Elastos_AwContents_nativeSetWindowVisibility(IInterface* caller,HANDLE nativeAwContents,Boolean visible);
+    extern void Elastos_AwContents_nativeSetIsPaused(IInterface* caller,HANDLE nativeAwContents,Boolean paused);
+    extern void Elastos_AwContents_nativeOnAttachedToWindow(IInterface* caller,HANDLE nativeAwContents,Int32 w,Int32 h);
+    extern void Elastos_AwContents_nativeOnDetachedFromWindow(HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeSetDipScale(IInterface* caller,HANDLE nativeAwContents,Float dipScale);
+    extern AutoPtr<ArrayOf<Byte> > Elastos_AwContents_nativeGetOpaqueState(IInterface* caller,HANDLE nativeAwContents);
+    extern Boolean Elastos_AwContents_nativeRestoreFromOpaqueState(IInterface* caller,HANDLE nativeAwContents,ArrayOf<Byte>* state);
+    extern HANDLE Elastos_AwContents_nativeReleasePopupAwContents(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeFocusFirstNode(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeSetBackgroundColor(IInterface* caller,HANDLE nativeAwContents,Int32 color);
+    extern HANDLE Elastos_AwContents_nativeGetAwDrawGLViewContext(IInterface* caller,HANDLE nativeAwContents);
+    extern HANDLE Elastos_AwContents_nativeCapturePicture(IInterface* caller,HANDLE nativeAwContents,Int32 width,Int32 height);
+    extern void Elastos_AwContents_nativeEnableOnNewPicture(IInterface* caller,HANDLE nativeAwContents,Boolean enabled);
+    extern void Elastos_AwContents_nativeClearView(IInterface* caller,HANDLE nativeAwContents);
+    extern void Elastos_AwContents_nativeSetExtraHeadersForUrl(IInterface* caller,HANDLE nativeAwContents,const String& url,const String& extraHeaders);
+    extern void Elastos_AwContents_nativeInvokeGeolocationCallback(IInterface* caller,HANDLE nativeAwContents,Boolean value,const String& requestingFrame);
+    extern void Elastos_AwContents_nativeSetJsOnlineProperty(IInterface* caller,HANDLE nativeAwContents,Boolean networkUp);
+    extern void Elastos_AwContents_nativeTrimMemory(IInterface* caller,HANDLE nativeAwContents,Int32 level,Boolean visible);
+    extern void Elastos_AwContents_nativeCreatePdfExporter(IInterface* caller,HANDLE nativeAwContents,IInterface* awPdfExporter);
+    extern void Elastos_AwContents_nativePreauthorizePermission(IInterface* caller,HANDLE nativeAwContents,const String& origin,Int64 resources);
+    extern void Elastos_AwContents_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -139,7 +139,7 @@ void* AwContents::ElaAwContentsCallback_Init()
     sElaAwContentsCallback.elastos_AwContents_didOverscroll = &AwContents::DidOverscroll;
     sElaAwContentsCallback.elastos_AwContents_useLegacyGeolocationPermissionAPI = &AwContents::UseLegacyGeolocationPermissionAPI;
 
-    Elastos_AwContents_InitCallback((Handle64)&sElaAwContentsCallback);
+    Elastos_AwContents_InitCallback((HANDLE)&sElaAwContentsCallback);
     return &sElaAwContentsCallback;
 }
 

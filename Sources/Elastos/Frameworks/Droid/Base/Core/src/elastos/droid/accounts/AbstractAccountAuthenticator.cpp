@@ -61,7 +61,7 @@ ECode AbstractAccountAuthenticator::MyRunnable::Run()
 //===============================================================
 AbstractAccountAuthenticator::AbstractAccountAuthenticator()
 {
-    ASSERT_SUCCEEDED(CAccountAuthenticatorTransport::NewByFriend((Handle32)this,
+    ASSERT_SUCCEEDED(CAccountAuthenticatorTransport::NewByFriend((HANDLE)this,
             (CAccountAuthenticatorTransport**)&mTransport));
 }
 

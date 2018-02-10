@@ -400,7 +400,7 @@ ECode CMemoryFile::native_mmap(
     /* [in] */ IFileDescriptor* fileDescriptor,
     /* [in] */ Int32 length,
     /* [in] */ Int32 prot,
-    /* [out] */ Handle64* addr)
+    /* [out] */ HANDLE* addr)
 {
     Int32 fd;
     fileDescriptor->GetDescriptor(&fd);
@@ -409,12 +409,12 @@ ECode CMemoryFile::native_mmap(
         // jniThrowException(env, "java/io/IOException", "mmap failed");
         return E_IO_EXCEPTION;
     }
-    *addr = reinterpret_cast<Handle64>(result);
+    *addr = reinterpret_cast<HANDLE>(result);
     return NOERROR;
 }
 
 ECode CMemoryFile::native_munmap(
-    /* [in] */ Handle64 addr,
+    /* [in] */ HANDLE addr,
     /* [in] */ Int32 length)
 {
     Int32 result = munmap(reinterpret_cast<void *>(addr), length);
@@ -439,7 +439,7 @@ ECode CMemoryFile::native_close(
 
 ECode CMemoryFile::native_read(
     /* [in] */ IFileDescriptor* fileDescriptor,
-    /* [in] */ Handle64 address,
+    /* [in] */ HANDLE address,
     /* [in] */ ArrayOf<Byte>* buffer,
     /* [in] */ Int32 srcOffset,
     /* [in] */ Int32 destOffset,
@@ -470,7 +470,7 @@ ECode CMemoryFile::native_read(
 
 ECode CMemoryFile::native_write(
     /* [in] */ IFileDescriptor* fileDescriptor,
-    /* [in] */ Handle64 address,
+    /* [in] */ HANDLE address,
     /* [in] */ ArrayOf<Byte>* buffer,
     /* [in] */ Int32 srcOffset,
     /* [in] */ Int32 destOffset,

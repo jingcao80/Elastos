@@ -232,7 +232,7 @@ ECode CWifiP2pConfig::ReadFromParcel(
 
     mWps = NULL;
     FAIL_RETURN(source->ReadString(&mDeviceAddress));
-    FAIL_RETURN(source->ReadInterfacePtr((Handle32*)&mWps));
+    FAIL_RETURN(source->ReadInterfacePtr((HANDLE*)&mWps));
     FAIL_RETURN(source->ReadInt32(&mGroupOwnerIntent));
     FAIL_RETURN(source->ReadInt32(&mNetId));
     return NOERROR;

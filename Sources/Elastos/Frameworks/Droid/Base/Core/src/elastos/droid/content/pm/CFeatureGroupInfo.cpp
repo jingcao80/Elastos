@@ -55,13 +55,13 @@ ECode CFeatureGroupInfo::constructor(
 ECode CFeatureGroupInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    return source->ReadArrayOf((Handle32*)&mFeatures);
+    return source->ReadArrayOf((HANDLE*)&mFeatures);
 }
 
 ECode CFeatureGroupInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    return dest->WriteArrayOf((Handle32)mFeatures.Get());
+    return dest->WriteArrayOf((HANDLE)mFeatures.Get());
 }
 
 ECode CFeatureGroupInfo::SetFeatures(

@@ -375,9 +375,9 @@ ECode CSubject::ToString(
 
 ECode CSubject::constructor()
 {
-    mPrincipals = new SecureSet(_PRINCIPALS, (Handle32)this);
-    mPublicCredentials = new SecureSet(_PUBLIC_CREDENTIALS, (Handle32)this);
-    mPrivateCredentials = new SecureSet(_PRIVATE_CREDENTIALS, (Handle32)this);
+    mPrincipals = new SecureSet(_PRINCIPALS, (HANDLE)this);
+    mPublicCredentials = new SecureSet(_PUBLIC_CREDENTIALS, (HANDLE)this);
+    mPrivateCredentials = new SecureSet(_PRIVATE_CREDENTIALS, (HANDLE)this);
     mReadOnly = FALSE;
     return NOERROR;
 }
@@ -404,9 +404,9 @@ ECode CSubject::constructor(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    mPrincipals = new SecureSet(_PRINCIPALS, (ICollection*) subjPrincipals->Probe(EIID_ICollection), (Handle32)this);
-    mPublicCredentials = new SecureSet(_PUBLIC_CREDENTIALS, (ICollection*) pubCredentials->Probe(EIID_ICollection), (Handle32)this);
-    mPrivateCredentials = new SecureSet(_PRIVATE_CREDENTIALS, (ICollection*) privCredentials->Probe(EIID_ICollection), (Handle32)this);
+    mPrincipals = new SecureSet(_PRINCIPALS, (ICollection*) subjPrincipals->Probe(EIID_ICollection), (HANDLE)this);
+    mPublicCredentials = new SecureSet(_PUBLIC_CREDENTIALS, (ICollection*) pubCredentials->Probe(EIID_ICollection), (HANDLE)this);
+    mPrivateCredentials = new SecureSet(_PRIVATE_CREDENTIALS, (ICollection*) privCredentials->Probe(EIID_ICollection), (HANDLE)this);
     mReadOnly = readOnly;
     return NOERROR;
 }
@@ -583,7 +583,7 @@ ECode CSubject::SecureSet::GetIterator(
     public:
         InnerSub_SecureIterator(
             /* [in] */ IIterator *iterator,
-            /* [in] */ Handle32 host)
+            /* [in] */ HANDLE host)
             : SecureIterator(iterator, host)
         {}
         /*
@@ -622,7 +622,7 @@ ECode CSubject::SecureSet::RetainAll(
 
 CSubject::SecureSet::SecureSet(
     /* [in] */ IPermission *perm,
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
     : mPermission(perm)
     , mHost(host)
 {
@@ -632,7 +632,7 @@ CSubject::SecureSet::SecureSet(
 CSubject::SecureSet::SecureSet(
     /* [in] */ IPermission *perm,
     /* [in] */ ICollection *s,
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
     : mPermission(perm)
     , mHost(host)
 {
@@ -816,7 +816,7 @@ ECode CSubject::SecureSet::SecureIterator::Remove()
 
 CSubject::SecureSet::SecureIterator::SecureIterator(
     /* [in] */ IIterator *iterator,
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
     : mIterator(iterator)
     , mHost(host)
 {}

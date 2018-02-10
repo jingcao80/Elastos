@@ -38,7 +38,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-            /* [in] */ Handle32 owner);
+            /* [in] */ HANDLE owner);
 
     CARAPI OnInputDevicesChanged(
         /* [in] */ ArrayOf<Int32>* deviceIdAndGeneration);

@@ -24,11 +24,16 @@ namespace Utility {
 namespace Concurrent {
 namespace Atomic {
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, IInterface* expect, IInterface* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -36,7 +41,7 @@ static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expec
     return (ret == 0);
 }
 
-const Int64 AtomicReference::mSerialVersionUID = -1848883965231344442L;
+const Int64 AtomicReference::mSerialVersionUID = -1848883965231344442LL;
 
 const Int64 AtomicReference::mValueOffset = 0; //unsafe.objectFieldOffset(AtomicReference.class.getDeclaredField("value"));
 
@@ -85,7 +90,7 @@ ECode AtomicReference::CompareAndSet(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = CompareAndSwapObject((volatile int32_t*)&mValue, expect, update);
+    *value = CompareAndSwapObject((volatile uintptr_t*)&mValue, expect, update);
     return NOERROR;
 }
 
@@ -95,7 +100,7 @@ ECode AtomicReference::WeakCompareAndSet(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = CompareAndSwapObject((volatile int32_t*)&mValue, expect, update);
+    *value = CompareAndSwapObject((volatile uintptr_t*)&mValue, expect, update);
     return NOERROR;
 }
 

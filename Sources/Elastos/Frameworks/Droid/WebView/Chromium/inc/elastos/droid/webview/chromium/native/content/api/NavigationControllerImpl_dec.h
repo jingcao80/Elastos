@@ -26,14 +26,14 @@
 extern "C"
 {
 #endif
-    extern Boolean Elastos_NavigationControllerImpl_nativeCanGoBack(IInterface* caller,Handle64 nativeNavigationControllerAndroid);
-    extern Boolean Elastos_NavigationControllerImpl_nativeCanGoForward(IInterface* caller,Handle64 nativeNavigationControllerAndroid);
-    extern Boolean Elastos_NavigationControllerImpl_nativeCanGoToOffset(IInterface* caller,Handle64 nativeNavigationControllerAndroid,Int32 offset);
-    extern void Elastos_NavigationControllerImpl_nativeGoBack(IInterface* caller,Handle64 nativeNavigationControllerAndroid);
-    extern void Elastos_NavigationControllerImpl_nativeGoForward(IInterface* caller,Handle64 nativeNavigationControllerAndroid);
-    extern void Elastos_NavigationControllerImpl_nativeGoToOffset(IInterface* caller,Handle64 nativeNavigationControllerAndroid,Int32 offset);
-    extern void Elastos_NavigationControllerImpl_nativeGoToNavigationIndex(IInterface* caller,Handle64 nativeNavigationControllerAndroid,Int32 index);
-    extern void Elastos_NavigationControllerImpl_InitCallback(Handle64 cb);
+    extern Boolean Elastos_NavigationControllerImpl_nativeCanGoBack(IInterface* caller,HANDLE nativeNavigationControllerAndroid);
+    extern Boolean Elastos_NavigationControllerImpl_nativeCanGoForward(IInterface* caller,HANDLE nativeNavigationControllerAndroid);
+    extern Boolean Elastos_NavigationControllerImpl_nativeCanGoToOffset(IInterface* caller,HANDLE nativeNavigationControllerAndroid,Int32 offset);
+    extern void Elastos_NavigationControllerImpl_nativeGoBack(IInterface* caller,HANDLE nativeNavigationControllerAndroid);
+    extern void Elastos_NavigationControllerImpl_nativeGoForward(IInterface* caller,HANDLE nativeNavigationControllerAndroid);
+    extern void Elastos_NavigationControllerImpl_nativeGoToOffset(IInterface* caller,HANDLE nativeNavigationControllerAndroid,Int32 offset);
+    extern void Elastos_NavigationControllerImpl_nativeGoToNavigationIndex(IInterface* caller,HANDLE nativeNavigationControllerAndroid,Int32 index);
+    extern void Elastos_NavigationControllerImpl_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -50,7 +50,7 @@ namespace Framehost {
 
 struct ElaNavigationControllerImplCallback
 {
-    AutoPtr<IInterface> (*elastos_NavigationControllerImpl_create)(Handle64 nativeNavigationControllerAndroid);
+    AutoPtr<IInterface> (*elastos_NavigationControllerImpl_create)(HANDLE nativeNavigationControllerAndroid);
     void (*elastos_NavigationControllerImpl_destroy)(IInterface* obj);
 };
 
@@ -61,7 +61,7 @@ void* NavigationControllerImpl::ElaNavigationControllerImplCallback_Init()
     sElaNavigationControllerImplCallback.elastos_NavigationControllerImpl_create = &NavigationControllerImpl::Create;
     sElaNavigationControllerImplCallback.elastos_NavigationControllerImpl_destroy = &NavigationControllerImpl::Destroy;
 
-    Elastos_NavigationControllerImpl_InitCallback((Handle64)&sElaNavigationControllerImplCallback);
+    Elastos_NavigationControllerImpl_InitCallback((HANDLE)&sElaNavigationControllerImplCallback);
     return &sElaNavigationControllerImplCallback;
 }
 

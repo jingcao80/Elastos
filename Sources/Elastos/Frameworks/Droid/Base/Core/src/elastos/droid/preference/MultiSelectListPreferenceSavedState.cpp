@@ -44,7 +44,7 @@ ECode MultiSelectListPreferenceSavedState::ReadFromParcel(
 {
     PreferenceBaseSavedState::ReadFromParcel(source);
     mValues = NULL;
-    source->ReadInterfacePtr((Handle32*)(ISet**)&mValues);
+    source->ReadInterfacePtr((HANDLE*)(ISet**)&mValues);
     return NOERROR;
 }
 

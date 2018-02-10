@@ -257,7 +257,7 @@ Int64 SystemSensorManager::BaseEventQueue::NativeInitBaseEventQueue(
     android::SensorManager* mgr = reinterpret_cast<android::SensorManager*>(sensorManager);
     android::sp<android::SensorEventQueue> queue(mgr->createEventQueue());
 
-    Handle64 handle;
+    HANDLE handle;
     msgQ->GetNativeMessageQueue(&handle);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(handle);
     if (messageQueue == NULL) {

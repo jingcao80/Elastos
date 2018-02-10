@@ -28,7 +28,7 @@ extern "C"
 #endif
     extern Int32 Elastos_LocalizationUtils_nativeGetFirstStrongCharacterDirection(const String& string);
     extern String Elastos_LocalizationUtils_nativeGetDurationString(Int64 timeInMillis);
-    extern void Elastos_LocalizationUtils_InitCallback(Handle32 cb);
+    extern void Elastos_LocalizationUtils_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -59,7 +59,7 @@ void* LocalizationUtils::ElaLocalizationUtilsCallback_Init()
     sElaLocalizationUtilsCallback.elastos_LocalizationUtils_getDisplayNameForLocale = &LocalizationUtils::GetDisplayNameForLocale;
     sElaLocalizationUtilsCallback.elastos_LocalizationUtils_isLayoutRtl = &LocalizationUtils::IsLayoutRtl;
 
-    Elastos_LocalizationUtils_InitCallback((Handle32)&sElaLocalizationUtilsCallback);
+    Elastos_LocalizationUtils_InitCallback((HANDLE)&sElaLocalizationUtilsCallback);
     return &sElaLocalizationUtilsCallback;
 }
 

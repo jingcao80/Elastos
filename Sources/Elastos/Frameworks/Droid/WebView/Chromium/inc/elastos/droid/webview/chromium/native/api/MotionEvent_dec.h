@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_MotionEvent_InitCallback(Handle32 cb);
+    extern void Elastos_MotionEvent_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -217,7 +217,7 @@ void* AwMotionEvent::ElaMotionEventCallback_Init()
     sElaMotionEventCallback.elastos_MotionEvent_axisFromString = &AwMotionEvent::AxisFromString;
     sElaMotionEventCallback.elastos_MotionEvent_writeToParcel = &AwMotionEvent::WriteToParcel;
 
-    Elastos_MotionEvent_InitCallback((Handle32)&sElaMotionEventCallback);
+    Elastos_MotionEvent_InitCallback((HANDLE)&sElaMotionEventCallback);
     return &sElaMotionEventCallback;
 }
 

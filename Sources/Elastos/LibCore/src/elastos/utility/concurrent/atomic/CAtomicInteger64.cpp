@@ -115,6 +115,7 @@ ECode CAtomicInteger64::GetAndSet(
 static int dvmQuasiAtomicCas64(int64_t oldvalue, int64_t newvalue,
     volatile int64_t* addr)
 {
+#if defined(_arm)
     int64_t prev;
     int status;
     do {
@@ -129,6 +130,9 @@ static int dvmQuasiAtomicCas64(int64_t oldvalue, int64_t newvalue,
             : "cc");
     } while (__builtin_expect(status != 0, 0));
     return prev != oldvalue;
+#elif defined(_aarch64)
+    return !__sync_bool_compare_and_swap(addr, oldvalue, newvalue);
+#endif
 }
 
 /**

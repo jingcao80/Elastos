@@ -860,10 +860,10 @@ ECode CWifiConfiguration::ReadFromParcel(
     mAllowedGroupCiphers = ReadBitSet(source);
 
     AutoPtr<IInterface> ecObj;
-    source->ReadInterfacePtr((Handle32*)&ecObj);
+    source->ReadInterfacePtr((HANDLE*)&ecObj);
     mEnterpriseConfig = IWifiEnterpriseConfig::Probe(ecObj);
     AutoPtr<IInterface> icObj;
-    source->ReadInterfacePtr((Handle32*)&icObj);
+    source->ReadInterfacePtr((HANDLE*)&icObj);
     mIpConfiguration = IIpConfiguration::Probe(icObj);
 
     source->ReadString(&mDhcpServer);

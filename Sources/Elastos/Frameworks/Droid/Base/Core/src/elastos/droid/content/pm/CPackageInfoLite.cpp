@@ -76,7 +76,7 @@ ECode CPackageInfoLite::ReadFromParcel(
         mVerifiers = ArrayOf<IVerifierInfo*>::Alloc(0);
     }
     else {
-        source->ReadArrayOf((Handle32*)&mVerifiers);
+        source->ReadArrayOf((HANDLE*)&mVerifiers);
     }
     return NOERROR;
 }
@@ -97,7 +97,7 @@ ECode CPackageInfoLite::WriteToParcel(
     }
     else {
         dest->WriteInt32(1);
-        dest->WriteArrayOf((Handle32)mVerifiers.Get());
+        dest->WriteArrayOf((HANDLE)mVerifiers.Get());
     }
     return NOERROR;
 }

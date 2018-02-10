@@ -40,7 +40,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 host);
+        /* [in] */ HANDLE host);
 
     CARAPI_(void) Dispose();
 

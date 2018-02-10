@@ -189,11 +189,11 @@ ECode CGLES11Ext::GlDrawTexsvOES(
 ECode CGLES11Ext::GlDrawTexsvOES(
     /* [in] */ Elastos::IO::IInt16Buffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLshort *coords = (GLshort *) 0;
-    Handle64 coordsTmp;
+    HANDLE coordsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &coordsTmp));
     coords = (GLshort *) coordsTmp;
@@ -244,11 +244,11 @@ ECode CGLES11Ext::GlDrawTexivOES(
 ECode CGLES11Ext::GlDrawTexivOES(
     /* [in] */ Elastos::IO::IInt32Buffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *coords = (GLint *) 0;
-    Handle64 coordsTmp;
+    HANDLE coordsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &coordsTmp));
     coords = (GLint *) coordsTmp;
@@ -299,11 +299,11 @@ ECode CGLES11Ext::GlDrawTexxvOES(
 ECode CGLES11Ext::GlDrawTexxvOES(
     /* [in] */ Elastos::IO::IInt32Buffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *coords = (GLfixed *) 0;
-    Handle64 coordsTmp;
+    HANDLE coordsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &coordsTmp));
     coords = (GLfixed *) coordsTmp;
@@ -371,11 +371,11 @@ ECode CGLES11Ext::GlDrawTexfvOES(
 ECode CGLES11Ext::GlDrawTexfvOES(
     /* [in] */ Elastos::IO::IFloatBuffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *coords = (GLfloat *) 0;
-    Handle64 coordsTmp;
+    HANDLE coordsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &coordsTmp));
     coords = (GLfloat *) coordsTmp;
@@ -397,11 +397,11 @@ ECode CGLES11Ext::GlEGLImageTargetTexture2DOES(
     /* [in] */ Int32 target,
     /* [in] */ Elastos::IO::IBuffer* image_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLeglImageOES image = (GLeglImageOES) 0;
-    Handle64 imageTmp;
+    HANDLE imageTmp;
 
     FAIL_RETURN(GetPointer(image_buf, &_array, &_remaining, &_bufferOffset, &imageTmp));
     image = (GLeglImageOES) imageTmp;
@@ -420,11 +420,11 @@ ECode CGLES11Ext::GlEGLImageTargetRenderbufferStorageOES(
     /* [in] */ Int32 target,
     /* [in] */ Elastos::IO::IBuffer* image_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLeglImageOES image = (GLeglImageOES) 0;
-    Handle64 imageTmp;
+    HANDLE imageTmp;
 
     FAIL_RETURN(GetPointer(image_buf, &_array, &_remaining, &_bufferOffset, &imageTmp));
     image = (GLeglImageOES) imageTmp;
@@ -504,11 +504,11 @@ ECode CGLES11Ext::GlClipPlanexOES(
     /* [in] */ Int32 plane,
     /* [in] */ Elastos::IO::IInt32Buffer* equation_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *equation = (GLfixed *) 0;
-    Handle64 equationTmp;
+    HANDLE equationTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(equation_buf), &_array, &_remaining, &_bufferOffset, &equationTmp));
     equation = (GLfixed *) equationTmp;
@@ -590,11 +590,11 @@ ECode CGLES11Ext::GlFogxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -664,11 +664,11 @@ ECode CGLES11Ext::GlGetClipPlanexOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* eqn_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *eqn = (GLfixed *) 0;
-    Handle64 eqnTmp;
+    HANDLE eqnTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(eqn_buf), &_array, &_remaining, &_bufferOffset, &eqnTmp));
     eqn = (GLfixed *) eqnTmp;
@@ -717,11 +717,11 @@ ECode CGLES11Ext::GlGetFixedvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -769,11 +769,11 @@ ECode CGLES11Ext::GlGetLightxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -823,11 +823,11 @@ ECode CGLES11Ext::GlGetMaterialxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -876,11 +876,11 @@ ECode CGLES11Ext::GlGetTexEnvxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -929,11 +929,11 @@ ECode CGLES11Ext::GlGetTexParameterxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -990,11 +990,11 @@ ECode CGLES11Ext::GlLightModelxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -1055,11 +1055,11 @@ ECode CGLES11Ext::GlLightxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -1112,11 +1112,11 @@ ECode CGLES11Ext::GlLoadMatrixxOES(
 ECode CGLES11Ext::GlLoadMatrixxOES(
     /* [in] */ Elastos::IO::IInt32Buffer* m_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *m = (GLfixed *) 0;
-    Handle64 mTmp;
+    HANDLE mTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &mTmp));
     m = (GLfixed *) mTmp;
@@ -1176,11 +1176,11 @@ ECode CGLES11Ext::GlMaterialxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -1223,11 +1223,11 @@ ECode CGLES11Ext::GlMultMatrixxOES(
 ECode CGLES11Ext::GlMultMatrixxOES(
     /* [in] */ Elastos::IO::IInt32Buffer* m_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *m = (GLfixed *) 0;
-    Handle64 mTmp;
+    HANDLE mTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &mTmp));
     m = (GLfixed *) mTmp;
@@ -1331,11 +1331,11 @@ ECode CGLES11Ext::GlPointParameterxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -1455,11 +1455,11 @@ ECode CGLES11Ext::GlTexEnvxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -1521,11 +1521,11 @@ ECode CGLES11Ext::GlTexParameterxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -1615,11 +1615,11 @@ ECode CGLES11Ext::GlDeleteRenderbuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ Elastos::IO::IInt32Buffer* renderbuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
-    Handle64 renderbuffersTmp;
+    HANDLE renderbuffersTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &renderbuffersTmp));
     renderbuffers = (GLuint *) renderbuffersTmp;
@@ -1674,11 +1674,11 @@ ECode CGLES11Ext::GlGenRenderbuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ Elastos::IO::IInt32Buffer* renderbuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
-    Handle64 renderbuffersTmp;
+    HANDLE renderbuffersTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &renderbuffersTmp));
     renderbuffers = (GLuint *) renderbuffersTmp;
@@ -1751,11 +1751,11 @@ ECode CGLES11Ext::GlGetRenderbufferParameterivOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLint *) paramsTmp;
@@ -1836,11 +1836,11 @@ ECode CGLES11Ext::GlDeleteFramebuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ Elastos::IO::IInt32Buffer* framebuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
-    Handle64 framebuffersTmp;
+    HANDLE framebuffersTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &framebuffersTmp));
     framebuffers = (GLuint *) framebuffersTmp;
@@ -1896,11 +1896,11 @@ ECode CGLES11Ext::GlGenFramebuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ Elastos::IO::IInt32Buffer* framebuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
-    Handle64 framebuffersTmp;
+    HANDLE framebuffersTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &framebuffersTmp));
     framebuffers = (GLuint *) framebuffersTmp;
@@ -2007,11 +2007,11 @@ ECode CGLES11Ext::GlGetFramebufferAttachmentParameterivOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLint *) paramsTmp;
@@ -2180,11 +2180,11 @@ ECode CGLES11Ext::GlClipPlanefOES(
     /* [in] */ Int32 plane,
     /* [in] */ Elastos::IO::IFloatBuffer* equation_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *equation = (GLfloat *) 0;
-    Handle64 equationTmp;
+    HANDLE equationTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(equation_buf), &_array, &_remaining, &_bufferOffset, &equationTmp));
     equation = (GLfloat *) equationTmp;
@@ -2235,11 +2235,11 @@ ECode CGLES11Ext::GlGetClipPlanefOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IFloatBuffer* eqn_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *eqn = (GLfloat *) 0;
-    Handle64 eqnTmp;
+    HANDLE eqnTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(eqn_buf), &_array, &_remaining, &_bufferOffset, &eqnTmp));
     eqn = (GLfloat *) eqnTmp;
@@ -2313,11 +2313,11 @@ ECode CGLES11Ext::GlTexGenfvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfloat *) paramsTmp;
@@ -2379,11 +2379,11 @@ ECode CGLES11Ext::GlTexGenivOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLint *) paramsTmp;
@@ -2445,11 +2445,11 @@ ECode CGLES11Ext::GlTexGenxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -2499,11 +2499,11 @@ ECode CGLES11Ext::GlGetTexGenfvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfloat *) paramsTmp;
@@ -2552,11 +2552,11 @@ ECode CGLES11Ext::GlGetTexGenivOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLint *) paramsTmp;
@@ -2605,11 +2605,11 @@ ECode CGLES11Ext::GlGetTexGenxvOES(
     /* [in] */ Int32 pname,
     /* [in] */ Elastos::IO::IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
-    Handle64 paramsTmp;
+    HANDLE paramsTmp;
 
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &paramsTmp));
     params = (GLfixed *) paramsTmp;
@@ -2633,7 +2633,7 @@ ECode CGLES11Ext::GlMatrixIndexPointerOESBounds(
     /* [in] */ Int32 remaining)
 {
     GLvoid *pointer = (GLvoid *) 0;
-    Handle64 pointerTmp;
+    HANDLE pointerTmp;
 
     if (pointer_buf) {
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &pointerTmp));
@@ -2660,7 +2660,7 @@ ECode CGLES11Ext::GlWeightPointerOESBounds(
     /* [in] */ Int32 remaining)
 {
     GLvoid *pointer = (GLvoid *) 0;
-    Handle64 pointerTmp;
+    HANDLE pointerTmp;
 
     if (pointer_buf) {
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &pointerTmp));
@@ -2681,10 +2681,10 @@ ECode CGLES11Ext::GlWeightPointerOESBounds(
 
 ECode CGLES11Ext::GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle64* array,
+    /* [in, out] */ HANDLE* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle64* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -2703,7 +2703,7 @@ ECode CGLES11Ext::GetPointer(
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle64)pointer;
+        *rst = (HANDLE)pointer;
         return NOERROR;
     }
 
@@ -2721,11 +2721,11 @@ ECode CGLES11Ext::GetPointer(
 
 ECode CGLES11Ext::GetDirectBufferPointer(
     /* [in] */ IBuffer* buffer,
-    /* [out] */ Handle64* result)
+    /* [out] */ HANDLE* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    Handle64 effectiveDirectAddress;
+    HANDLE effectiveDirectAddress;
     buffer->GetEffectiveDirectAddress(&effectiveDirectAddress);
     if (effectiveDirectAddress != 0) {
         Int32 position, elementSizeShift;

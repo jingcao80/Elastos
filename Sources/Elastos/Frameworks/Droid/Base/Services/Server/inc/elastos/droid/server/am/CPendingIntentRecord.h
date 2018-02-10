@@ -113,7 +113,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IIActivityManager* owner,
-        /* [in] */ Handle32 k,
+        /* [in] */ HANDLE k,
         /* [in] */ Int32 u);
 
     CARAPI Send(

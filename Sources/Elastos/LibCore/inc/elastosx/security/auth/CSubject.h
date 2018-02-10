@@ -331,12 +331,12 @@ private:
         */
         SecureSet(
             /* [in] */ IPermission *perm,
-            /* [in] */ Handle32 host);
+            /* [in] */ HANDLE host);
 
         SecureSet(
             /* [in] */ IPermission *perm,
             /* [in] */ ICollection *s,
-            /* [in] */ Handle32 host);
+            /* [in] */ HANDLE host);
 
         /**
          * return set with elements that are instances or subclasses of the
@@ -373,11 +373,11 @@ private:
 
             SecureIterator(
                 /* [in] */ IIterator *iterator,
-                /* [in] */ Handle32 host);
+                /* [in] */ HANDLE host);
 
         protected:
             AutoPtr<IIterator> mIterator;
-            Handle32 mHost;
+            HANDLE mHost;
         };
 
         // verifies new set element
@@ -427,7 +427,7 @@ private:
         // transient
         AutoPtr<IPermission> mPermission;
 
-        Handle32 mHost;
+        HANDLE mHost;
 
     };
 

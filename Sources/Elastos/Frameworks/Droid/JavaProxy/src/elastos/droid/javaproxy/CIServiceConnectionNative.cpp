@@ -45,8 +45,8 @@ CIServiceConnectionNative::~CIServiceConnectionNative()
 }
 
 ECode CIServiceConnectionNative::constructor(
-    /* [in] */ Handle64 jVM,
-    /* [in] */ Handle64 jInstance)
+    /* [in] */ HANDLE jVM,
+    /* [in] */ HANDLE jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -110,7 +110,7 @@ ECode CIServiceConnectionNative::Connected(
             Util::CheckErrorAndLog(env, TAG, "GetMethodID: connected %d", __LINE__);
 
             CServiceNative* cservice = (CServiceNative*)service;
-            Handle64 hservice;
+            HANDLE hservice;
             cservice->GetRemoteInstance(env, &hservice);
             jservice = (jobject)hservice;
         }

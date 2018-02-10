@@ -133,7 +133,7 @@ ECode RssiCurve::ReadFromParcel(
 {
     parcel->ReadInt32(&mStart);
     parcel->ReadInt32(&mBucketWidth);
-    parcel->ReadArrayOf((Handle32*)&mRssiBuckets);
+    parcel->ReadArrayOf((HANDLE*)&mRssiBuckets);
     return NOERROR;
 }
 
@@ -142,7 +142,7 @@ ECode RssiCurve::WriteToParcel(
 {
     dest->WriteInt32(mStart);
     dest->WriteInt32(mBucketWidth);
-    dest->WriteArrayOf((Handle32)mRssiBuckets.Get());
+    dest->WriteArrayOf((HANDLE)mRssiBuckets.Get());
     return NOERROR;
 }
 

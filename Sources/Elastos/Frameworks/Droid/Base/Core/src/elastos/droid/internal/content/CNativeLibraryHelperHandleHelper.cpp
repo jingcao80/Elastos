@@ -33,7 +33,7 @@ ECode CNativeLibraryHelperHandleHelper::Create(
 }
 
 ECode CNativeLibraryHelperHandleHelper::CreatePackage(
-    /* [in] */ Handle64 pkg,
+    /* [in] */ HANDLE pkg,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
     return CNativeLibraryHelperHandle::CreatePackage(pkg, handle);

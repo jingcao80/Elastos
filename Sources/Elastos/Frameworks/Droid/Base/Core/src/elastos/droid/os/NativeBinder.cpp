@@ -145,7 +145,7 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
     AutoPtr<BinderProxy> proxy = new BinderProxy();
     // LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object.Get());
     // The proxy holds a reference to the native object.
-    proxy->mObject = (Int32)val.get();
+    proxy->mObject = reinterpret_cast<Int64>(val.get());
     val->incStrong(proxy.Get());
 
     // The native object needs to hold a weak reference back to the

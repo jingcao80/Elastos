@@ -83,7 +83,7 @@ AutoPtr<BatteryStatusManager> BatteryStatusManager::GetInstance(
  */
 //@CalledByNative
 Boolean BatteryStatusManager::Start(
-  /* [in] */ Handle64 nativePtr)
+  /* [in] */ HANDLE nativePtr)
 {
     {    AutoLock syncLock(mNativePtrLock);
         AutoPtr<IIntent> stickyIntent;
@@ -186,7 +186,7 @@ void BatteryStatusManager::GotBatteryStatus(
  * see content/browser/battery_status/battery_status_manager.cc
  */
 void BatteryStatusManager::NativeGotBatteryStatus(
-  /* [in] */ Handle64 nativeBatteryStatusManager,
+  /* [in] */ HANDLE nativeBatteryStatusManager,
   /* [in] */ Boolean charging,
   /* [in] */ Double chargingTime,
   /* [in] */ Double dischargingTime,
@@ -205,7 +205,7 @@ AutoPtr<IInterface> BatteryStatusManager::GetInstance(
 
 Boolean BatteryStatusManager::Start(
     /* [in] */ IInterface* obj,
-    /* [in] */ Handle64 nativePtr)
+    /* [in] */ HANDLE nativePtr)
 {
     AutoPtr<BatteryStatusManager> mObj = (BatteryStatusManager*)(IObject::Probe(obj));
     if (NULL == mObj)

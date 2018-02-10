@@ -384,7 +384,7 @@ ECode CWifiP2pGroupList::ReadFromParcel(
     source->ReadInt32(&deviceCount);
     for (Int32 i = 0; i < deviceCount; ++i) {
         AutoPtr<IWifiP2pGroup> group;
-        source->ReadInterfacePtr((Handle32*)&group);
+        source->ReadInterfacePtr((HANDLE*)&group);
         Add(group);
     }
 

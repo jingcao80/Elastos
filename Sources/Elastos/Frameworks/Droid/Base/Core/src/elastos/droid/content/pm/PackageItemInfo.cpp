@@ -278,7 +278,7 @@ ECode PackageItemInfo::ReadFromParcel(
     src->ReadInt32(&mIcon);
     src->ReadInt32(&mLogo);
     AutoPtr<IInterface> obj;
-    src->ReadInterfacePtr((Handle32*)&obj);
+    src->ReadInterfacePtr((HANDLE*)&obj);
     mMetaData = obj != NULL ? IBundle::Probe(obj) : NULL;
     src->ReadInt32(&mBanner);
     src->ReadInt32(&mShowUserIcon);

@@ -1603,7 +1603,7 @@ ECode CAccessibilityNodeInfo::ReadFromParcel(
             Int32 data;
             parcel->ReadInt32(&data);
             AutoPtr<IInterface> obj;
-            parcel->ReadInterfacePtr((Handle32*)&obj);
+            parcel->ReadInterfacePtr((HANDLE*)&obj);
             AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
             AutoPtr<IAccessibilityNodeInfoAccessibilityAction> action;
             CAccessibilityNodeInfoAccessibilityAction::New(data, cs, (IAccessibilityNodeInfoAccessibilityAction**)&action);
@@ -1616,15 +1616,15 @@ ECode CAccessibilityNodeInfo::ReadFromParcel(
     parcel->ReadInt32(&mBooleanProperties);
 
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mPackageName = ICharSequence::Probe(obj);
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mClassName = ICharSequence::Probe(obj);
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mText = ICharSequence::Probe(obj);
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mError = ICharSequence::Probe(obj);
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mContentDescription = ICharSequence::Probe(obj);
     parcel->ReadString(&mViewIdResourceName);
 
@@ -1638,7 +1638,7 @@ ECode CAccessibilityNodeInfo::ReadFromParcel(
     parcel->ReadInt32(&data);
     if (data == 1) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         AutoPtr<IBundle> btmp = IBundle::Probe(obj);
         AutoPtr<IBundle> bundle;
         GetExtras((IBundle**)&bundle);

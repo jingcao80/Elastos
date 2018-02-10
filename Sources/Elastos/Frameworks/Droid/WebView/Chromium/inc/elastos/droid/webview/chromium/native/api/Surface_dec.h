@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_Surface_InitCallback(Handle32 cb);
+    extern void Elastos_Surface_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -69,7 +69,7 @@ void* AwSurface::ElaSurfaceCallback_Init()
     sElaSurfaceCallback.elastos_Surface_toString = &AwSurface::ToString;
     sElaSurfaceCallback.elastos_Surface_Constructor = &AwSurface::Constructor;
 
-    Elastos_Surface_InitCallback((Handle32)&sElaSurfaceCallback);
+    Elastos_Surface_InitCallback((HANDLE)&sElaSurfaceCallback);
     return &sElaSurfaceCallback;
 }
 

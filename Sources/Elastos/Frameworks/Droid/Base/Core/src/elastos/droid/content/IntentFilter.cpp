@@ -1688,7 +1688,7 @@ ECode IntentFilter::ReadFromParcel(
 
         for(Int32 i = 0; i < count; i++){
             AutoPtr<IPatternMatcher> pm;
-            source->ReadInterfacePtr((Handle32*)&pm);
+            source->ReadInterfacePtr((HANDLE*)&pm);
             mDataSchemeSpecificParts->PushBack(pm);
         }
     }
@@ -1701,7 +1701,7 @@ ECode IntentFilter::ReadFromParcel(
 
         for(Int32 i = 0; i < count; i++){
             AutoPtr<IIntentFilterAuthorityEntry> ae;
-            source->ReadInterfacePtr((Handle32*)&ae);
+            source->ReadInterfacePtr((HANDLE*)&ae);
             mDataAuthorities->PushBack(ae);
         }
     }
@@ -1714,7 +1714,7 @@ ECode IntentFilter::ReadFromParcel(
 
         for(Int32 i = 0; i < count; i++){
             AutoPtr<IPatternMatcher> pm;
-            source->ReadInterfacePtr((Handle32*)&pm);
+            source->ReadInterfacePtr((HANDLE*)&pm);
             mDataPaths->PushBack(pm);
         }
     }

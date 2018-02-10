@@ -67,7 +67,7 @@ ECode CMediaProjection::constructor(
     /* [in] */ Int32 type,
     /* [in] */ Int32 uid,
     /* [in] */ const String& packageName,
-    /* [in] */ Handle64 host)
+    /* [in] */ HANDLE host)
 {
     mType = type;
     mUid = uid;

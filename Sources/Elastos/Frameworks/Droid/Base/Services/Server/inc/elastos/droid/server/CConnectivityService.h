@@ -379,7 +379,7 @@ public:
         /* [in] */ IINetworkManagementService* netManager,
         /* [in] */ IINetworkStatsService* statsService,
         /* [in] */ IINetworkPolicyManager* policyManager,
-        /* [in] */ Handle32 netFac);
+        /* [in] */ HANDLE netFac);
 
 
     /**

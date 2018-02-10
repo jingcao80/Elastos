@@ -915,14 +915,14 @@ ECode NetworkStats::ReadFromParcel(
     parcel->ReadInt32(&mSize);
     parcel->ReadInt32(&mCapacity);
     parcel->ReadArrayOfString((ArrayOf<String>**)&mIface);
-    parcel->ReadArrayOf((Handle32*)&mUid );
-    parcel->ReadArrayOf((Handle32*)&mSet);
-    parcel->ReadArrayOf((Handle32*)&mTag);
-    parcel->ReadArrayOf((Handle32*)&mRxBytes);
-    parcel->ReadArrayOf((Handle32*)&mRxPackets);
-    parcel->ReadArrayOf((Handle32*)&mTxBytes);
-    parcel->ReadArrayOf((Handle32*)&mTxPackets);
-    parcel->ReadArrayOf((Handle32*)&mOperations);
+    parcel->ReadArrayOf((HANDLE*)&mUid );
+    parcel->ReadArrayOf((HANDLE*)&mSet);
+    parcel->ReadArrayOf((HANDLE*)&mTag);
+    parcel->ReadArrayOf((HANDLE*)&mRxBytes);
+    parcel->ReadArrayOf((HANDLE*)&mRxPackets);
+    parcel->ReadArrayOf((HANDLE*)&mTxBytes);
+    parcel->ReadArrayOf((HANDLE*)&mTxPackets);
+    parcel->ReadArrayOf((HANDLE*)&mOperations);
     return NOERROR;
 }
 
@@ -933,14 +933,14 @@ ECode NetworkStats::WriteToParcel(
     dest->WriteInt32(mSize);
     dest->WriteInt32(mCapacity);
     dest->WriteArrayOfString(mIface);
-    dest->WriteArrayOf((Handle32)mUid.Get());
-    dest->WriteArrayOf((Handle32)mSet.Get());
-    dest->WriteArrayOf((Handle32)mTag.Get());
-    dest->WriteArrayOf((Handle32)mRxBytes.Get());
-    dest->WriteArrayOf((Handle32)mRxPackets.Get());
-    dest->WriteArrayOf((Handle32)mTxBytes.Get());
-    dest->WriteArrayOf((Handle32)mTxPackets.Get());
-    dest->WriteArrayOf((Handle32)mOperations.Get());
+    dest->WriteArrayOf((HANDLE)mUid.Get());
+    dest->WriteArrayOf((HANDLE)mSet.Get());
+    dest->WriteArrayOf((HANDLE)mTag.Get());
+    dest->WriteArrayOf((HANDLE)mRxBytes.Get());
+    dest->WriteArrayOf((HANDLE)mRxPackets.Get());
+    dest->WriteArrayOf((HANDLE)mTxBytes.Get());
+    dest->WriteArrayOf((HANDLE)mTxPackets.Get());
+    dest->WriteArrayOf((HANDLE)mOperations.Get());
     return NOERROR;
 }
 

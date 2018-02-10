@@ -48,7 +48,7 @@ ECode CChooseResponse::OnError(
 }
 
 ECode CChooseResponse::constructor (
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (CAccountManager::GetAuthTokenByTypeAndFeaturesTask*)host;
     return NOERROR;

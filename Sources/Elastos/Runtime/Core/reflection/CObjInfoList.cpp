@@ -433,7 +433,7 @@ ECode CObjInfoList::AcquireClassInfo(
 
     ClassDirEntry** clsDirEntry = clsEntries->Get((PVoid)&(clsId.mClsid));
     if (!clsDirEntry) {
-        Int32 base = clsModule->mBase;
+        uintptr_t base = clsModule->mBase;
         for (Int32 i = 0; i < clsModule->mClsMod->mClassCount; i++) {
             ClassDirEntry* classDir = getClassDirAddr(base, clsModule->mClsMod->mClassDirs, i);
             ClassDescriptor* clsDesc = adjustClassDescAddr(base, classDir->mDesc);

@@ -328,7 +328,7 @@ static Int64 nativeInit(Elastos::Droid::Server::Hdmi::HdmiCecController* callbac
         return 0;
     }
 
-    Handle64 ptr;
+    HANDLE ptr;
     messageQueueObj->GetNativeMessageQueue(&ptr);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
 

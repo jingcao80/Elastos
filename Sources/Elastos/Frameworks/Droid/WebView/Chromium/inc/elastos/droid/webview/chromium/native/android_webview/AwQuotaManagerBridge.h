@@ -114,10 +114,10 @@ public:
 
 private:
     AwQuotaManagerBridge(
-        /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl);
+        /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl);
 
     // TODO(boliu): This should be obtained from Java AwBrowserContext that owns this.
-    static CARAPI_(Handle64) NativeGetDefaultNativeAwQuotaManagerBridge();
+    static CARAPI_(HANDLE) NativeGetDefaultNativeAwQuotaManagerBridge();
 
     CARAPI_(Int32) GetNextId();
 
@@ -136,21 +136,21 @@ private:
         /* [in] */ Int64 quota);
 
     CARAPI_(void) NativeInit(
-        /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl);
+        /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl);
 
     CARAPI_(void) NativeDeleteAllData(
-        /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl);
+        /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl);
 
     CARAPI_(void) NativeDeleteOrigin(
-        /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
+        /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl,
         /* [in] */ const String& origin);
 
     CARAPI_(void) NativeGetOrigins(
-        /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
+        /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl,
         /* [in] */ Int32 callbackId);
 
     CARAPI_(void) NativeGetUsageAndQuotaForOrigin(
-        /* [in] */ Handle64 nativeAwQuotaManagerBridgeImpl,
+        /* [in] */ HANDLE nativeAwQuotaManagerBridgeImpl,
         /* [in] */ const String& origin,
         /* [in] */ Int32 callbackId,
         /* [in] */ Boolean isQuota);
@@ -179,7 +179,7 @@ private:
     static AutoPtr<AwQuotaManagerBridge> sInstance;
 
     // This is not owning. The native object is owned by the native AwBrowserContext.
-    Handle64 mNativeAwQuotaManagerBridgeImpl;
+    HANDLE mNativeAwQuotaManagerBridgeImpl;
 
     // The Java callbacks are saved here. An incrementing callback id is generated for each saved
     // callback and is passed to the native side to identify callback.

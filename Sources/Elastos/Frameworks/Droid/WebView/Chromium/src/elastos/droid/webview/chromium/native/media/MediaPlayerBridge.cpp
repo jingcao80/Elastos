@@ -252,14 +252,14 @@ MediaPlayerBridge::MediaPlayerBridge()
 }
 
 MediaPlayerBridge::MediaPlayerBridge(
-    /* [in] */ Handle64 nativeMediaPlayerBridge)
+    /* [in] */ HANDLE nativeMediaPlayerBridge)
     : mNativeMediaPlayerBridge(nativeMediaPlayerBridge)
 {
 }
 
 //@CalledByNative return MediaPlayerBridge
 AutoPtr<IInterface> MediaPlayerBridge::Create(
-    /* [in] */ Handle64 nativeMediaPlayerBridge)
+    /* [in] */ HANDLE nativeMediaPlayerBridge)
 {
     AutoPtr<MediaPlayerBridge> mpb = new MediaPlayerBridge(nativeMediaPlayerBridge);
     AutoPtr<IInterface> result = TO_IINTERFACE(mpb);
@@ -617,7 +617,7 @@ AutoPtr<MediaPlayerBridge::AllowedOperations> MediaPlayerBridge::GetAllowedOpera
 }
 
 void MediaPlayerBridge::NativeOnDidSetDataUriDataSource(
-    /* [in] */ Handle64 nativeMediaPlayerBridge,
+    /* [in] */ HANDLE nativeMediaPlayerBridge,
     /* [in] */ Boolean success)
 {
     Elastos_MediaPlayerBridge_nativeOnDidSetDataUriDataSource(TO_IINTERFACE(this), nativeMediaPlayerBridge, success);

@@ -39,7 +39,7 @@ public:
     CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ Handle32 threadState);
+        /* [in] */ HANDLE threadState);
 
     CARAPI Finish();
 

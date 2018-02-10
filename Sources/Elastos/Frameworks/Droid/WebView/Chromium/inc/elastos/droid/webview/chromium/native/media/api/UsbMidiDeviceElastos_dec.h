@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_UsbMidiDeviceAndroid_nativeOnData(Handle64 nativeUsbMidiDeviceAndroid,Int32 endpointNumber,ArrayOf<Byte>* data);
-    extern void Elastos_UsbMidiDeviceAndroid_InitCallback(Handle64 cb);
+    extern void Elastos_UsbMidiDeviceAndroid_nativeOnData(HANDLE nativeUsbMidiDeviceAndroid,Int32 endpointNumber,ArrayOf<Byte>* data);
+    extern void Elastos_UsbMidiDeviceAndroid_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -42,7 +42,7 @@ namespace Media {
 
 struct ElaUsbMidiDeviceAndroidCallback
 {
-    void (*elastos_UsbMidiDeviceAndroid_registerSelf)(IInterface* obj, Handle64 nativePointer);
+    void (*elastos_UsbMidiDeviceAndroid_registerSelf)(IInterface* obj, HANDLE nativePointer);
     void (*elastos_UsbMidiDeviceAndroid_send)(IInterface* obj, Int32 endpointNumber, ArrayOf<Byte>* bs);
     AutoPtr<ArrayOf<Byte> > (*elastos_UsbMidiDeviceAndroid_getDescriptors)(IInterface* obj);
     void (*elastos_UsbMidiDeviceAndroid_close)(IInterface* obj);
@@ -57,7 +57,7 @@ void* UsbMidiDeviceElastos::ElaUsbMidiDeviceElastosCallback_Init()
     sElaUsbMidiDeviceAndroidCallback.elastos_UsbMidiDeviceAndroid_getDescriptors = &UsbMidiDeviceElastos::GetDescriptors;
     sElaUsbMidiDeviceAndroidCallback.elastos_UsbMidiDeviceAndroid_close = &UsbMidiDeviceElastos::Close;
 
-    Elastos_UsbMidiDeviceAndroid_InitCallback((Handle64)&sElaUsbMidiDeviceAndroidCallback);
+    Elastos_UsbMidiDeviceAndroid_InitCallback((HANDLE)&sElaUsbMidiDeviceAndroidCallback);
     return &sElaUsbMidiDeviceAndroidCallback;
 }
 

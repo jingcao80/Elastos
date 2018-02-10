@@ -731,7 +731,7 @@ void CBackupManagerService::PerformBackupTask::BeginBackup()
         AutoPtr<PackageManagerBackupAgent> pmAgent = new PackageManagerBackupAgent(
                 mHost->mPackageManager, mHost->AllAgentPackages());
         AutoPtr<IIBackupAgent> backupAgent;
-        FAIL_GOTO((ec = CBackupAgentBackupServiceBinder::New((Handle32)(BackupAgent*)pmAgent.Get(), (IIBackupAgent**)&backupAgent)), _Exit_)
+        FAIL_GOTO((ec = CBackupAgentBackupServiceBinder::New((HANDLE)(BackupAgent*)pmAgent.Get(), (IIBackupAgent**)&backupAgent)), _Exit_)
         mStatus = InvokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
                 backupAgent, mTransport);
         StringBuilder strbb3("PMBA invoke: ");
@@ -3830,7 +3830,7 @@ void CBackupManagerService::PerformRestoreTask::DownloadRestoreData()
     omPackage->SetPackageName(PACKAGE_MANAGER_SENTINEL);
     mPmAgent = new PackageManagerBackupAgent(mHost->mPackageManager, mAgentPackages);
 
-    FAIL_GOTO((ec = CBackupAgentBackupServiceBinder::New((Handle32)(BackupAgent*)mPmAgent.Get(), (IIBackupAgent**)&backupAgent)), _Exit_);
+    FAIL_GOTO((ec = CBackupAgentBackupServiceBinder::New((HANDLE)(BackupAgent*)mPmAgent.Get(), (IIBackupAgent**)&backupAgent)), _Exit_);
     InitiateOneRestore(omPackage, 0, backupAgent, mNeedFullBackup);
     // The PM agent called operationComplete() already, because our invocation
     // of it is process-local and therefore synchronous.  That means that a
@@ -5774,7 +5774,7 @@ ECode CBackupManagerService::BeginRestoreSession(
         }
 
         mActiveRestoreSession = NULL;
-        CActiveRestoreSession::New(packageName, tmpPort, (Handle32)this, (IIRestoreSession**)&mActiveRestoreSession);
+        CActiveRestoreSession::New(packageName, tmpPort, (HANDLE)this, (IIRestoreSession**)&mActiveRestoreSession);
         Boolean bResult;
         mBackupHandler->SendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT, TIMEOUT_RESTORE_INTERVAL, &bResult);
     }

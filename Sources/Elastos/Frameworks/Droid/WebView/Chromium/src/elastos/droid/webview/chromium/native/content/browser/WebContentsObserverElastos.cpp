@@ -164,14 +164,14 @@ ECode WebContentsObserverElastos::DetachFromWebContents()
     return NOERROR;
 }
 
-Handle64 WebContentsObserverElastos::NativeInit(
+HANDLE WebContentsObserverElastos::NativeInit(
     /* [in] */ WebContents* webContents)
 {
     return Elastos_WebContentsObserverAndroid_nativeInit(TO_IINTERFACE(this), TO_IINTERFACE(webContents));
 }
 
 ECode WebContentsObserverElastos::NativeDestroy(
-    /* [in] */ Handle64 nativeWebContentsObserverElastos)
+    /* [in] */ HANDLE nativeWebContentsObserverElastos)
 {
     Elastos_WebContentsObserverAndroid_nativeDestroy(TO_IINTERFACE(this),
             nativeWebContentsObserverElastos);

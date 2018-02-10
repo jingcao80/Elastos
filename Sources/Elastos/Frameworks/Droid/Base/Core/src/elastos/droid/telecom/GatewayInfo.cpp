@@ -114,7 +114,7 @@ ECode GatewayInfo::ReadFromParcel(
         //    Logger::E("GatewayInfo", "Wrong URI id:%d, only 1, 2, 3 accepted", id);
         //}
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mGatewayAddress = IUri::Probe(obj);
     }
     else {
@@ -142,7 +142,7 @@ ECode GatewayInfo::ReadFromParcel(
         //    Logger::E("GatewayInfo", "Wrong URI id:%d, only 1, 2, 3 accepted", id);
         //}
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mOriginalAddress = IUri::Probe(obj);
     }
     else {

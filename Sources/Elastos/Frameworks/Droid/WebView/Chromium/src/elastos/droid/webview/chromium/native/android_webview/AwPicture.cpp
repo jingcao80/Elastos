@@ -33,7 +33,7 @@ namespace AndroidWebview {
 CAR_INTERFACE_IMPL(AwPicture::DestroyRunnable, Object, IRunnable);
 
 AwPicture::DestroyRunnable::DestroyRunnable(
-    /* [in] */ Handle64 nativeAwPicture)
+    /* [in] */ HANDLE nativeAwPicture)
     : mNativeAwPicture(nativeAwPicture)
 {
 }
@@ -55,7 +55,7 @@ CAR_INTERFACE_IMPL(AwPicture, Object, IPicture);
  *                        taken by this java instance.
  */
 AwPicture::AwPicture(
-    /* [in] */ Handle64 nativeAwPicture)
+    /* [in] */ HANDLE nativeAwPicture)
     : mNativeAwPicture(nativeAwPicture)
 {
     AutoPtr<IRunnable> runnable = new DestroyRunnable(nativeAwPicture);
@@ -110,7 +110,7 @@ ECode AwPicture::Draw(
 }
 
 ECode GetNativePicture(
-    /* [out] */ Handle32/*TODO Handle64*/* handle)
+    /* [out] */ HANDLE/*TODO HANDLE*/* handle)
 {
     return E_NOT_IMPLEMENTED;
 }
@@ -131,25 +131,25 @@ void AwPicture::UnsupportedOperation()
 }
 
 void AwPicture::NativeDestroy(
-    /* [in] */ Handle64 nativeAwPicture)
+    /* [in] */ HANDLE nativeAwPicture)
 {
     Elastos_AwPicture_nativeDestroy(nativeAwPicture);
 }
 
 Int32 AwPicture::NativeGetWidth(
-    /* [in] */ Handle64 nativeAwPicture)
+    /* [in] */ HANDLE nativeAwPicture)
 {
     return Elastos_AwPicture_nativeGetWidth(TO_IINTERFACE(this), nativeAwPicture);
 }
 
 Int32 AwPicture::NativeGetHeight(
-    /* [in] */ Handle64 nativeAwPicture)
+    /* [in] */ HANDLE nativeAwPicture)
 {
     return Elastos_AwPicture_nativeGetHeight(TO_IINTERFACE(this), nativeAwPicture);
 }
 
 void AwPicture::NativeDraw(
-    /* [in] */ Handle64 nativeAwPicture,
+    /* [in] */ HANDLE nativeAwPicture,
     /* [in] */ ICanvas* canvas)
 {
     Elastos_AwPicture_nativeDraw(TO_IINTERFACE(this), nativeAwPicture, TO_IINTERFACE(canvas));

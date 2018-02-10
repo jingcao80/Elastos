@@ -125,7 +125,7 @@ ECode CManifestDigest::constructor(
     /* [in] */ IParcel* source)
 {
     VALIDATE_NOT_NULL(source)
-    source->ReadArrayOf((Handle32*)&mDigest);
+    source->ReadArrayOf((HANDLE*)&mDigest);
     return NOERROR;
 }
 
@@ -179,7 +179,7 @@ ECode CManifestDigest::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest)
-    return dest->WriteArrayOf((Handle32)mDigest.Get());
+    return dest->WriteArrayOf((HANDLE)mDigest.Get());
 }
 
 }

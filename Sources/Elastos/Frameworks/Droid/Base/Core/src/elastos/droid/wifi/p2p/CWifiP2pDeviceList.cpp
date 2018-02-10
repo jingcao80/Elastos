@@ -333,7 +333,7 @@ ECode CWifiP2pDeviceList::ReadFromParcel(
     source->ReadInt32(&size);
     for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IWifiP2pDevice> device;
-        source->ReadInterfacePtr((Handle32*)&device);
+        source->ReadInterfacePtr((HANDLE*)&device);
         Update(device);
     }
     return NOERROR;

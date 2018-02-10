@@ -403,7 +403,7 @@ public:
      */
     CARAPI CreateVector(
         /* [in] */ RenderScript* rs,
-        /* [in] */ Handle64 dt,
+        /* [in] */ HANDLE dt,
         /* [in] */ Int32 size,
         /* [out] */ IElement** e);
 
@@ -421,7 +421,7 @@ public:
      */
     CARAPI CreatePixel(
         /* [in] */ RenderScript* rs,
-        /* [in] */ Handle64 dt,
+        /* [in] */ HANDLE dt,
         /* [in] */ ElementDataKind dk,
         /* [out] */ IElement** e);
 

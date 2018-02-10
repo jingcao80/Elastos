@@ -43,7 +43,7 @@ ECode CStrictModeVmPolicyBuilder::constructor(
 }
 
 ECode CStrictModeVmPolicyBuilder::SetClassInstanceLimit(
-    /* [in] */ Handle32 klass,
+    /* [in] */ HANDLE klass,
     /* [in] */ Int32 instanceLimit)
 {
     if (klass == 0) {
@@ -58,7 +58,7 @@ ECode CStrictModeVmPolicyBuilder::SetClassInstanceLimit(
             return NOERROR;
         }
         mClassInstanceLimitNeedCow = FALSE;
-        //mClassInstanceLimit = (HashMap<Handle32, Int32>) mClassInstanceLimit.clone();
+        //mClassInstanceLimit = (HashMap<HANDLE, Int32>) mClassInstanceLimit.clone();
     }
     // else if (mClassInstanceLimit == null) {
     //     mClassInstanceLimit = new HashMap<Class, Integer>();

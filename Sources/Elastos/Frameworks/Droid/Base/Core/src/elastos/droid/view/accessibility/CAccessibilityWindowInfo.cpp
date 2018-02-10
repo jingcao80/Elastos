@@ -361,7 +361,7 @@ ECode CAccessibilityWindowInfo::ReadFromParcel(
     parcel->ReadInt32(&mParentId);
 
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mBoundsInScreen = IRect::Probe(obj);
 
     Int32 childCount;

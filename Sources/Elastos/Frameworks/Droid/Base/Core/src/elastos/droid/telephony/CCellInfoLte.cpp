@@ -157,8 +157,8 @@ ECode CCellInfoLte::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     CellInfo::ReadFromParcel(source);
-    source->ReadInterfacePtr((Handle32*)&mCellIdentityLte);
-    source->ReadInterfacePtr((Handle32*)&mCellSignalStrengthLte);
+    source->ReadInterfacePtr((HANDLE*)&mCellIdentityLte);
+    source->ReadInterfacePtr((HANDLE*)&mCellSignalStrengthLte);
     return NOERROR;
 }
 

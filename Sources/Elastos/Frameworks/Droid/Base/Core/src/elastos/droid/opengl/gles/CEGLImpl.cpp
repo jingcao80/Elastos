@@ -268,7 +268,7 @@ ECode CEGLImpl::EglCreatePixmapSurface(
     SkBitmap const * nativeBitmap = NULL;
     if (IBitmap::Probe(native_pixmap) != NULL) {
         AutoPtr<IBitmap> bt = IBitmap::Probe(native_pixmap);
-        Handle64 nbt;
+        HANDLE nbt;
         bt->GetNativeBitmap(&nbt);
         nativeBitmap = (SkBitmap const *)nbt;
     }

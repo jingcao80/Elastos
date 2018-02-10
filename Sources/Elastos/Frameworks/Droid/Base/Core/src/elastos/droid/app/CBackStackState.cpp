@@ -219,7 +219,7 @@ ECode CBackStackState::Instantiate(
 ECode CBackStackState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteArrayOf((Handle32)mOps.Get());
+    dest->WriteArrayOf((HANDLE)mOps.Get());
     dest->WriteInt32(mTransition);
     dest->WriteInt32(mTransitionStyle);
     dest->WriteString(mName);
@@ -235,18 +235,18 @@ ECode CBackStackState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     mOps = NULL;
-    source->ReadArrayOf((Handle32*)(&mOps));
+    source->ReadArrayOf((HANDLE*)(&mOps));
     source->ReadInt32(&mTransition);
     source->ReadInt32(&mTransitionStyle);
     source->ReadString(&mName);
     source->ReadInt32(&mIndex);
     source->ReadInt32(&mBreadCrumbTitleRes);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mBreadCrumbTitleText = obj != NULL ? ICharSequence::Probe(obj) : NULL;
     source->ReadInt32(&mBreadCrumbShortTitleRes);
     AutoPtr<IInterface> obj_2;
-    source->ReadInterfacePtr((Handle32*)&obj_2);
+    source->ReadInterfacePtr((HANDLE*)&obj_2);
     mBreadCrumbShortTitleText = obj_2 != NULL ? ICharSequence::Probe(obj_2) : NULL;
     mSharedElementSourceNames = Elastos::Droid::Os::CParcel::CreateStringArrayList(source);
     mSharedElementTargetNames = Elastos::Droid::Os::CParcel::CreateStringArrayList(source);

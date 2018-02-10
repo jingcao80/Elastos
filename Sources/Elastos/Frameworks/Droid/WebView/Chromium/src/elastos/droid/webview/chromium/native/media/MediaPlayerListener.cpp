@@ -47,7 +47,7 @@ CAR_INTERFACE_IMPL_7(MediaPlayerListener, Object, IMediaPlayerOnPreparedListener
         IMediaPlayerOnErrorListener, IAudioManagerOnAudioFocusChangeListener);
 
 MediaPlayerListener::MediaPlayerListener(
-    /* [in] */ Handle64 nativeMediaPlayerListener,
+    /* [in] */ HANDLE nativeMediaPlayerListener,
     /* [in] */ IContext* context)
     : mNativeMediaPlayerListener(nativeMediaPlayerListener)
     , mContext(context)
@@ -171,7 +171,7 @@ void MediaPlayerListener::ReleaseResources()
 
 //@CalledByNative return IMediaPlayerListener
 AutoPtr<IInterface> MediaPlayerListener::Create(
-    /* [in] */ Handle64 nativeMediaPlayerListener,
+    /* [in] */ HANDLE nativeMediaPlayerListener,
     /* [in] */ IContext* context,
     /* [in] */ MediaPlayerBridge* mediaPlayerBridge)
 {
@@ -204,14 +204,14 @@ AutoPtr<IInterface> MediaPlayerListener::Create(
  * See media/base/android/media_player_listener.cc for all the following functions.
  */
 void MediaPlayerListener::NativeOnMediaError(
-    /* [in] */ Handle64 nativeMediaPlayerListener,
+    /* [in] */ HANDLE nativeMediaPlayerListener,
     /* [in] */ Int32 errorType)
 {
     Elastos_MediaPlayerListener_nativeOnMediaError(TO_IINTERFACE(this), nativeMediaPlayerListener, errorType);
 }
 
 void MediaPlayerListener::NativeOnVideoSizeChanged(
-    /* [in] */ Handle64 nativeMediaPlayerListener,
+    /* [in] */ HANDLE nativeMediaPlayerListener,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
@@ -219,32 +219,32 @@ void MediaPlayerListener::NativeOnVideoSizeChanged(
 }
 
 void MediaPlayerListener::NativeOnBufferingUpdate(
-    /* [in] */ Handle64 nativeMediaPlayerListener,
+    /* [in] */ HANDLE nativeMediaPlayerListener,
     /* [in] */ Int32 percent)
 {
     Elastos_MediaPlayerListener_nativeOnBufferingUpdate(TO_IINTERFACE(this), nativeMediaPlayerListener, percent);
 }
 
 void MediaPlayerListener::NativeOnMediaPrepared(
-    /* [in] */ Handle64 nativeMediaPlayerListener)
+    /* [in] */ HANDLE nativeMediaPlayerListener)
 {
     Elastos_MediaPlayerListener_nativeOnMediaPrepared(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 void MediaPlayerListener::NativeOnPlaybackComplete(
-    /* [in] */ Handle64 nativeMediaPlayerListener)
+    /* [in] */ HANDLE nativeMediaPlayerListener)
 {
     Elastos_MediaPlayerListener_nativeOnPlaybackComplete(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 void MediaPlayerListener::NativeOnSeekComplete(
-    /* [in] */ Handle64 nativeMediaPlayerListener)
+    /* [in] */ HANDLE nativeMediaPlayerListener)
 {
     Elastos_MediaPlayerListener_nativeOnSeekComplete(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
 
 void MediaPlayerListener::NativeOnMediaInterrupted(
-    /* [in] */ Handle64 nativeMediaPlayerListener)
+    /* [in] */ HANDLE nativeMediaPlayerListener)
 {
     Elastos_MediaPlayerListener_nativeOnMediaInterrupted(TO_IINTERFACE(this), nativeMediaPlayerListener);
 }
@@ -263,7 +263,7 @@ void MediaPlayerListener::ReleaseResources(
 }
 
 AutoPtr<IInterface> MediaPlayerListener::Create(
-    /* [in] */ Handle64 nativeMediaPlayerListener,
+    /* [in] */ HANDLE nativeMediaPlayerListener,
     /* [in] */ IInterface* context,
     /* [in] */ IInterface* mediaPlayerBridge)
 {

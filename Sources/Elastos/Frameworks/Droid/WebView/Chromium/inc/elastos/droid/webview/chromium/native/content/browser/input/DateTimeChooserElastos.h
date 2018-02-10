@@ -66,7 +66,7 @@ public:
 private:
     static CARAPI_(AutoPtr<IInterface>) CreateDateTimeChooser(
         /* [in] */ IInterface* contentViewCore,
-        /* [in] */ Handle64 nativeDateTimeChooserElastos,
+        /* [in] */ HANDLE nativeDateTimeChooserElastos,
         /* [in] */ Int32 dialogType,
         /* [in] */ Double dialogValue,
         /* [in] */ Double min,
@@ -76,7 +76,7 @@ private:
 
     DateTimeChooserElastos(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeDateTimeChooserElastos);
+        /* [in] */ HANDLE nativeDateTimeChooserElastos);
 
     CARAPI_(void) ShowDialog(
         /* [in] */ Int32 dialogType,
@@ -89,7 +89,7 @@ private:
     //@CalledByNative
     static CARAPI_(AutoPtr<DateTimeChooserElastos>) CreateDateTimeChooser(
         /* [in] */ ContentViewCore* contentViewCore,
-        /* [in] */ Handle64 nativeDateTimeChooserElastos,
+        /* [in] */ HANDLE nativeDateTimeChooserElastos,
         /* [in] */ Int32 dialogType,
         /* [in] */ Double dialogValue,
         /* [in] */ Double min,
@@ -126,14 +126,14 @@ private:
         /* [in] */ Int32 textInputTypeWeek);
 
     CARAPI_(void) NativeReplaceDateTime(
-        /* [in] */ Handle64 nativeDateTimeChooserElastos,
+        /* [in] */ HANDLE nativeDateTimeChooserElastos,
         /* [in] */ Double dialogValue);
 
     CARAPI_(void) NativeCancelDialog(
-        /* [in] */ Handle64 nativeDateTimeChooserElastos);
+        /* [in] */ HANDLE nativeDateTimeChooserElastos);
 
 private:
-    const Handle64 mNativeDateTimeChooserElastos;
+    const HANDLE mNativeDateTimeChooserElastos;
     AutoPtr<InputDialogContainer> mInputDialogContainer;
 };
 

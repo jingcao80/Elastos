@@ -442,13 +442,13 @@ ECode TaskViewHeader::OnTaskViewFocusChanged(
     }
     if (focused) {
         Int32 secondaryColor = GetSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
-        AutoPtr<ArrayOf<Handle32> > states = ArrayOf<Handle32>::Alloc(2);
+        AutoPtr<ArrayOf<HANDLE> > states = ArrayOf<HANDLE>::Alloc(2);
         AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(1);
         (*array)[0] = Elastos::Droid::R::attr::state_enabled;
         AutoPtr<ArrayOf<Int32> > array2 = ArrayOf<Int32>::Alloc(1);
         (*array2)[0] = Elastos::Droid::R::attr::state_pressed;
-        (*states)[0] = (Handle32)array.Get();
-        (*states)[1] = (Handle32)array2.Get();
+        (*states)[0] = (HANDLE)array.Get();
+        (*states)[1] = (HANDLE)array2.Get();
         AutoPtr<ArrayOf<Int32> > newStates = ArrayOf<Int32>::Alloc(1);
         (*newStates)[0] = Elastos::Droid::R::attr::state_enabled;
         (*newStates)[1] = Elastos::Droid::R::attr::state_pressed;

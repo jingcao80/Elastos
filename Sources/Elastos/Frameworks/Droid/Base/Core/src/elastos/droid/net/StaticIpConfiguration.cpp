@@ -204,7 +204,7 @@ ECode StaticIpConfiguration::ReadFromParcel(
         /* [in] */ IParcel* parcel)
 {
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mIpAddress = ILinkAddress::Probe(obj);
     NetworkUtils::UnparcelInetAddress(parcel, (IInetAddress**)&mGateway);
     Int32 size;

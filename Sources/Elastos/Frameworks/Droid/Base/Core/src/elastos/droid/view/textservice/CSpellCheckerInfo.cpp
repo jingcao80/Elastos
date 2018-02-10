@@ -163,7 +163,7 @@ ECode CSpellCheckerInfo::ReadFromParcel(
     parcel->ReadString(&mId);
     parcel->ReadString(&mSettingsActivityName);
     IParcelable::Probe(mService)->ReadFromParcel(parcel);
-    parcel->ReadInterfacePtr((Handle32*)&mSubtypes);
+    parcel->ReadInterfacePtr((HANDLE*)&mSubtypes);
 
     return NOERROR;
 }

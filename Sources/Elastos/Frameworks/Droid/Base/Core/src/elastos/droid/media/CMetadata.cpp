@@ -224,7 +224,7 @@ ECode CMetadata::GetByteArray(
     FAIL_RETURN(CheckType(key, BYTE_ARRAY_VAL));
 
     AutoPtr<ArrayOf<Byte> > array;
-    mParcel->ReadArrayOf((Handle32*)(&array));
+    mParcel->ReadArrayOf((HANDLE*)(&array));
     *result = array;
     REFCOUNT_ADD(*result);
     return NOERROR;

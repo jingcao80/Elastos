@@ -183,7 +183,7 @@ ECode CNotificationGroup::ReadFromParcel(
     source->ReadInt32(&mNameResId);
     source->ReadBoolean(&mDirty);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     IParcelUuid::Probe(obj)->GetUuid((IUUID**)&mUuid);
     AutoPtr< ArrayOf<String> > packages;
     source->ReadArrayOfString((ArrayOf<String>**)&packages);

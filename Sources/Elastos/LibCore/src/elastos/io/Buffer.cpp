@@ -292,10 +292,10 @@ ECode Buffer::GetElementSizeShift(
 }
 
 ECode Buffer::GetEffectiveDirectAddress(
-    /* [out] */ Handle64* effectiveDirectAddress)
+    /* [out] */ HANDLE* effectiveDirectAddress)
 {
     VALIDATE_NOT_NULL(effectiveDirectAddress)
-    *effectiveDirectAddress = mEffectiveDirectAddress;
+    *effectiveDirectAddress = (HANDLE)mEffectiveDirectAddress;
     return NOERROR;
 }
 

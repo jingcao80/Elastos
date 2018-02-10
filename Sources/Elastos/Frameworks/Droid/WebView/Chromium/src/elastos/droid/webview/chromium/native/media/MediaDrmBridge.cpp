@@ -449,7 +449,7 @@ const Int32 MediaDrmBridge::INVALID_SESSION_ID;
 
 MediaDrmBridge::MediaDrmBridge(
     /* [in] */ IUUID* schemeUUID,
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Boolean singleSessionMode)
 {
     mSchemeUUID = schemeUUID;
@@ -665,7 +665,7 @@ Boolean MediaDrmBridge::IsCryptoSchemeSupported(
 //@CalledByNative return MediaDrmBridge
 AutoPtr<IInterface> MediaDrmBridge::Create(
     /* [in] */ ArrayOf<Byte>* schemeUUID,
-    /* [in] */ Handle64 nativeMediaDrmBridge)
+    /* [in] */ HANDLE nativeMediaDrmBridge)
 {
     AutoPtr<IUUID> cryptoScheme = GetUUIDFromBytes(schemeUUID);
     AutoPtr<IMediaDrmHelper> mdHelper;
@@ -1324,13 +1324,13 @@ void MediaDrmBridge::AddKeySystemUuidMapping(
 }
 
 void MediaDrmBridge::NativeOnMediaCryptoReady(
-    /* [in] */ Handle64 nativeMediaDrmBridge)
+    /* [in] */ HANDLE nativeMediaDrmBridge)
 {
     Elastos_MediaDrmBridge_nativeOnMediaCryptoReady(TO_IINTERFACE(this), nativeMediaDrmBridge);
 }
 
 void MediaDrmBridge::NativeOnSessionCreated(
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Int32 sessionId,
     /* [in] */ const String& webSessionId)
 {
@@ -1338,7 +1338,7 @@ void MediaDrmBridge::NativeOnSessionCreated(
 }
 
 void MediaDrmBridge::NativeOnSessionMessage(
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Int32 sessionId,
     /* [in] */ ArrayOf<Byte>* message,
     /* [in] */ const String& destinationUrl)
@@ -1347,28 +1347,28 @@ void MediaDrmBridge::NativeOnSessionMessage(
 }
 
 void MediaDrmBridge::NativeOnSessionReady(
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Int32 sessionId)
 {
     Elastos_MediaDrmBridge_nativeOnSessionReady(TO_IINTERFACE(this), nativeMediaDrmBridge, sessionId);
 }
 
 void MediaDrmBridge::NativeOnSessionClosed(
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Int32 sessionId)
 {
     Elastos_MediaDrmBridge_nativeOnSessionClosed(TO_IINTERFACE(this), nativeMediaDrmBridge, sessionId);
 }
 
 void MediaDrmBridge::NativeOnSessionError(
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Int32 sessionId)
 {
     Elastos_MediaDrmBridge_nativeOnSessionError(TO_IINTERFACE(this), nativeMediaDrmBridge, sessionId);
 }
 
 void MediaDrmBridge::NativeOnResetDeviceCredentialsCompleted(
-    /* [in] */ Handle64 nativeMediaDrmBridge,
+    /* [in] */ HANDLE nativeMediaDrmBridge,
     /* [in] */ Boolean success)
 {
     Elastos_MediaDrmBridge_nativeOnResetDeviceCredentialsCompleted(TO_IINTERFACE(this), nativeMediaDrmBridge, success);

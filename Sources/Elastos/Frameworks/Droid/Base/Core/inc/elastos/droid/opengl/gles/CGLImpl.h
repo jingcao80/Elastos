@@ -1289,14 +1289,14 @@ private:
 
     static CARAPI GetPointer(
         /* [in] */ IBuffer* buffer,
-        /* [in, out] */ Handle64* array,
+        /* [in, out] */ HANDLE* array,
         /* [in, out] */ Int32* remaining,
         /* [in, out] */ Int32* offset,
-        /* [out] */ Handle64* rst);
+        /* [out] */ HANDLE* rst);
 
     static CARAPI GetDirectBufferPointer(
         /* [in] */ IBuffer* buffer,
-        /* [out] */ Handle64* result);
+        /* [out] */ HANDLE* result);
 
     static CARAPI_(Boolean) SupportsExtension(
         /* [in] */ CGLImpl* impl,

@@ -856,6 +856,9 @@ int P_BaseType(CARToken token, TypeDescriptor *pType)
         case Token_K_UInt64:
             pType->mType = Type_UInt64;
             break;
+        case Token_K_HANDLE:
+            pType->mType = Type_HANDLE;
+            break;
         case Token_K_PVoid:
             pType->mType = Type_PVoid;
             break;

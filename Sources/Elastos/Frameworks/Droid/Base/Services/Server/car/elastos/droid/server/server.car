@@ -737,7 +737,7 @@ module
 //         constructor(
 //             [in] String packageName,
 //             [in] String transport,
-//             [in] Handle32 host);
+//             [in] HANDLE host);
 
 //         interface IIRestoreSession;
 //         interface IBinder;
@@ -745,7 +745,7 @@ module
 
 //     class CWMSUserSwitchObserver {
 //         constructor(
-//             [in] Handle32 owner);
+//             [in] HANDLE owner);
 
 //         interface IIUserSwitchObserver;
 //         interface IBinder;
@@ -1116,7 +1116,7 @@ module
 
     class CMediaProjectionManager {
         constructor(
-            [in] Handle64 host);
+            [in] HANDLE host);
         interface IIMediaProjectionManager;
         interface IBinder;
     }
@@ -1126,7 +1126,7 @@ module
             [in] Int32 type,
             [in] Int32 uid,
             [in] String packageName,
-            [in] Handle64 host);
+            [in] HANDLE host);
         interface IIMediaProjection;
         interface IBinder;
     }
@@ -1169,7 +1169,7 @@ module
 
     class CSessionManagerImpl {
         constructor(
-            [in] Handle64 host);
+            [in] HANDLE host);
         interface IISessionManager;
         interface IBinder;
     }
@@ -1177,7 +1177,7 @@ module
     class CKeyEventWakeLockReceiver {
         constructor(
             [in] IHandler* handler,
-            [in] Handle64 host);
+            [in] HANDLE host);
 
         interface IResultReceiver;
         interface IPendingIntentOnFinished;
@@ -1186,7 +1186,7 @@ module
 
     class CProviderCallback {
         constructor(
-            [in] Handle64 connection);
+            [in] HANDLE connection);
 
         interface IIRemoteDisplayCallback;
         interface IBinder;
@@ -1306,7 +1306,7 @@ module
     class CPackageManagerService {
         constructor(
             [in] IContext* ctx,
-            [in] Handle64 installer,
+            [in] HANDLE installer,
             [in] Boolean factoryTest,
             [in] Boolean onlyCore);
 
@@ -1371,7 +1371,7 @@ module
     [local]
     class CPackageInstallerSession {
         constructor(
-            [in] Handle64 cb,
+            [in] HANDLE cb,
             [in] IContext* ctx,
             [in] IIPackageManager* pm,
             [in] ILooper* l,
@@ -1526,7 +1526,7 @@ module
 
         class CVpnObserver {
             constructor(
-                [in] Handle32 owner);
+                [in] HANDLE owner);
 
             interface IINetworkManagementEventObserver;
             interface IBinder;
@@ -1796,8 +1796,8 @@ module
 
     class CContentProviderConnection {
         constructor(
-            [in] Handle32 provider,
-            [in] Handle32 client);
+            [in] HANDLE provider,
+            [in] HANDLE client);
 
         interface IBinder;
     }
@@ -1817,7 +1817,7 @@ module
     class CPendingIntentRecord {
         constructor(
             [in] IIActivityManager* am,
-            [in] Handle32 k,
+            [in] HANDLE k,
             [in] Int32 u);
 
         interface IPendingIntentRecord;
@@ -1956,7 +1956,7 @@ module
 
     class CGeoFenceListener {
         constructor(
-            [in] Handle64 host);
+            [in] HANDLE host);
 
         interface IIGeoFenceListener;
         interface IBinder;

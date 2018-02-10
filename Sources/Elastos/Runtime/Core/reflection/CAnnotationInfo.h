@@ -70,7 +70,7 @@ private:
     AutoPtr< ArrayOf<String> > mKeys;
     AutoPtr< ArrayOf<String> > mValues;
 
-    Int32 mBase;
+    uintptr_t mBase;
 };
 
 #endif // __CANNOTATIONINFO_H__

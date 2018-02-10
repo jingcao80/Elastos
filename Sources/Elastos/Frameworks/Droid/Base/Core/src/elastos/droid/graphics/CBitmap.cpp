@@ -1192,7 +1192,7 @@ ECode CBitmap::SetPixels(
 }
 
 ECode CBitmap::GetNativeBitmap(
-    /* [out] */ Handle64* bitmap)
+    /* [out] */ HANDLE* bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = mNativeBitmap;
@@ -2054,7 +2054,7 @@ void CBitmap::NativeCopyPixelsToBuffer(
     const void* src = bitmap.getPixels();
 
     if (NULL != src) {
-        Handle64 p;
+        HANDLE p;
         dst->GetPrimitiveArray(&p);
         void* bf = (void*)p;
         // the java side has already checked that buffer is large enough
@@ -2072,7 +2072,7 @@ void CBitmap::NativeCopyPixelsFromBuffer(
     void* dst = bitmap.getPixels();
 
     if (NULL != dst) {
-        Handle64 p;
+        HANDLE p;
         src->GetPrimitiveArray(&p);
         void* bf = (void*)p;
         // the java side has already checked that buffer is large enough
@@ -2119,7 +2119,7 @@ ECode CBitmap::NativeCreateFromParcel(
     }
 
     android::Parcel* p;
-    parcel->GetDataPayload((Handle32*)&p);
+    parcel->GetDataPayload((HANDLE*)&p);
 
     const bool        isMutable = p->readInt32() != 0;
     const SkColorType colorType = (SkColorType)p->readInt32();
@@ -2287,7 +2287,7 @@ Boolean CBitmap::NativeWriteToParcel(
     bitmapWrapper->getSkBitmap(&bitmap);
 
     android::Parcel* p;
-    parcel->GetDataPayload((Handle32*)&p);
+    parcel->GetDataPayload((HANDLE*)&p);
 
     p->writeInt32(isMutable);
     p->writeInt32(bitmap.colorType());

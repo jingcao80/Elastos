@@ -739,7 +739,7 @@ ECode CNotification::ReadFromParcel(
     parcel->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         mContentIntent = IPendingIntent::Probe(obj);
     }
 
@@ -747,7 +747,7 @@ ECode CNotification::ReadFromParcel(
     parcel->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         mDeleteIntent = IPendingIntent::Probe(obj);
     }
 
@@ -788,7 +788,7 @@ ECode CNotification::ReadFromParcel(
     parcel->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         mSound = IUri::Probe(obj);
     }
 
@@ -800,7 +800,7 @@ ECode CNotification::ReadFromParcel(
     }
 
     mVibrate = NULL;
-    parcel->ReadArrayOf((Handle32*)(&mVibrate));
+    parcel->ReadArrayOf((HANDLE*)(&mVibrate));
 
     parcel->ReadInt32(&mLedARGB);
     parcel->ReadInt32(&mLedOnMS);
@@ -946,7 +946,7 @@ ECode CNotification::WriteToParcel(
         parcel->WriteInt32(0);
     }
 
-    parcel->WriteArrayOf((Handle32)mVibrate.Get());
+    parcel->WriteArrayOf((HANDLE)mVibrate.Get());
     parcel->WriteInt32(mLedARGB);
     parcel->WriteInt32(mLedOnMS);
     parcel->WriteInt32(mLedOffMS);

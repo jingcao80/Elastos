@@ -95,7 +95,7 @@ CAccountManager::AmsTask::AmsTask(
     //         throw new IllegalStateException("this should never be called");
     //     }
     // });
-    ASSERT_SUCCEEDED(CAccountManagerAmsResponse::New((Handle32)this,
+    ASSERT_SUCCEEDED(CAccountManagerAmsResponse::New((HANDLE)this,
             (IAccountManagerResponse**)&mResponse));
 }
 
@@ -242,7 +242,7 @@ CAccountManager::BaseFutureTask::BaseFutureTask(
     //         throw new IllegalStateException("this should never be called");
     //     }
     // });
-    ASSERT_SUCCEEDED(CAccountManagerFutureResponse::New((Handle32)this,
+    ASSERT_SUCCEEDED(CAccountManagerFutureResponse::New((HANDLE)this,
             (IAccountManagerResponse**)&mResponse));
 }
 
@@ -455,7 +455,7 @@ ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback::R
     else {
         if (mHost->mActivity != NULL) {
             AutoPtr<IAccountManagerResponse> chooseResponse;
-            FAIL_RETURN(CChooseResponse::New((Handle32)this,
+            FAIL_RETURN(CChooseResponse::New((HANDLE)this,
                     (IAccountManagerResponse**)&chooseResponse));
             // have many accounts, launch the chooser
             AutoPtr<IIntent> intent;

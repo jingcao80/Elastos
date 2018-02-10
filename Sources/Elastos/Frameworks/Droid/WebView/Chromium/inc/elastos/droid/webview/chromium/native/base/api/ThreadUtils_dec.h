@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ThreadUtils_InitCallback(Handle32 cb);
+    extern void Elastos_ThreadUtils_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* ThreadUtils::ElaThreadUtilsCallback_Init()
 
     sElaThreadUtilsCallback.elastos_ThreadUtils_setThreadPriorityAudio = &ThreadUtils::SetThreadPriorityAudio;
 
-    Elastos_ThreadUtils_InitCallback((Handle32)&sElaThreadUtilsCallback);
+    Elastos_ThreadUtils_InitCallback((HANDLE)&sElaThreadUtilsCallback);
     return &sElaThreadUtilsCallback;
 }
 

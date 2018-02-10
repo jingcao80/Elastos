@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_DownloadController_nativeInit(IInterface* caller);
-    extern void Elastos_DownloadController_InitCallback(Handle32 cb);
+    extern void Elastos_DownloadController_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -62,7 +62,7 @@ void* DownloadController::ElaDownloadControllerCallback_Init()
     sElaDownloadControllerCallback.elastos_DownloadController_onDownloadUpdated = &DownloadController::OnDownloadUpdated;
     sElaDownloadControllerCallback.elastos_DownloadController_onDangerousDownload = &DownloadController::OnDangerousDownload;
 
-    Elastos_DownloadController_InitCallback((Handle32)&sElaDownloadControllerCallback);
+    Elastos_DownloadController_InitCallback((HANDLE)&sElaDownloadControllerCallback);
     return &sElaDownloadControllerCallback;
 }
 

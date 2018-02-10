@@ -346,7 +346,7 @@ void CAccessibilityEvent::ReadAccessibilityRecordFromParcel(
     parcel->ReadInt32(&count);
     for (Int32 i = 0; i < count; ++i) {
         AutoPtr<ICharSequence> r;
-        parcel->ReadInterfacePtr((Handle32*)(ICharSequence**)&r);
+        parcel->ReadInterfacePtr((HANDLE*)(ICharSequence**)&r);
         cls->mText->Add(r);
     }
     parcel->ReadInt32(&cls->mSourceWindowId);

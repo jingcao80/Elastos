@@ -187,7 +187,7 @@ ECode MediaSessionService::constructor(
 {
     SystemService::constructor(context);
     mHandler = new MessageHandler(this);
-    CSessionManagerImpl::NewByFriend((Handle64)this, (CSessionManagerImpl**)&mSessionManagerImpl);
+    CSessionManagerImpl::NewByFriend((HANDLE)this, (CSessionManagerImpl**)&mSessionManagerImpl);
     mPriorityStack = new MediaSessionStack();
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);

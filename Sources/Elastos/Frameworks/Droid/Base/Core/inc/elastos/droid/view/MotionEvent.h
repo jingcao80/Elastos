@@ -1707,10 +1707,10 @@ public:
         /* [in] */ IParcel *dest);
 
     CARAPI GetNative(
-        /* [out] */ Handle64* native);
+        /* [out] */ HANDLE* native);
 
     CARAPI SetNative(
-        /* [in] */ Handle64 native);
+        /* [in] */ HANDLE native);
 
     CARAPI_(Int64) GetNativePtr();
 

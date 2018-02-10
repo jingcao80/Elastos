@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_NetworkChangeNotifier_nativeNotifyConnectionTypeChanged(IInterface* caller,Handle64 nativePtr,Int32 newConnectionType);
-    extern void Elastos_NetworkChangeNotifier_InitCallback(Handle64 cb);
+    extern void Elastos_NetworkChangeNotifier_nativeNotifyConnectionTypeChanged(IInterface* caller,HANDLE nativePtr,Int32 newConnectionType);
+    extern void Elastos_NetworkChangeNotifier_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -44,8 +44,8 @@ struct ElaNetworkChangeNotifierCallback
 {
     AutoPtr<IInterface> (*elastos_NetworkChangeNotifier_init)(IInterface* context);
     Int32 (*elastos_NetworkChangeNotifier_getCurrentConnectionType)(IInterface* obj);
-    void (*elastos_NetworkChangeNotifier_addNativeObserver)(IInterface* obj, Handle64 nativeChangeNotifier);
-    void (*elastos_NetworkChangeNotifier_removeNativeObserver)(IInterface* obj, Handle64 nativeChangeNotifier);
+    void (*elastos_NetworkChangeNotifier_addNativeObserver)(IInterface* obj, HANDLE nativeChangeNotifier);
+    void (*elastos_NetworkChangeNotifier_removeNativeObserver)(IInterface* obj, HANDLE nativeChangeNotifier);
     void (*elastos_NetworkChangeNotifier_forceConnectivityState)(Boolean networkAvailable);
 };
 
@@ -59,7 +59,7 @@ void* NetworkChangeNotifier::ElaNetworkChangeNotifierCallback_Init()
     sElaNetworkChangeNotifierCallback.elastos_NetworkChangeNotifier_removeNativeObserver = &NetworkChangeNotifier::RemoveNativeObserver;
     sElaNetworkChangeNotifierCallback.elastos_NetworkChangeNotifier_forceConnectivityState = &NetworkChangeNotifier::ForceConnectivityState;
 
-    Elastos_NetworkChangeNotifier_InitCallback((Handle64)&sElaNetworkChangeNotifierCallback);
+    Elastos_NetworkChangeNotifier_InitCallback((HANDLE)&sElaNetworkChangeNotifierCallback);
     return &sElaNetworkChangeNotifierCallback;
 }
 

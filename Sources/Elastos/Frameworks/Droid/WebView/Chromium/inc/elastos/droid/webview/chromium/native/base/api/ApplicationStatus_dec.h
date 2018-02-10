@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_ApplicationStatus_nativeOnApplicationStateChange(Int32 newState);
-    extern void Elastos_ApplicationStatus_InitCallback(Handle32 cb);
+    extern void Elastos_ApplicationStatus_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -51,7 +51,7 @@ void* ApplicationStatus::ElaApplicationStatusCallback_Init()
 
     sElaApplicationStatusCallback.elastos_ApplicationStatus_registerThreadSafeNativeApplicationStateListener = &ApplicationStatus::RegisterThreadSafeNativeApplicationStateListener;
 
-    Elastos_ApplicationStatus_InitCallback((Handle32)&sElaApplicationStatusCallback);
+    Elastos_ApplicationStatus_InitCallback((HANDLE)&sElaApplicationStatusCallback);
     return &sElaApplicationStatusCallback;
 }
 

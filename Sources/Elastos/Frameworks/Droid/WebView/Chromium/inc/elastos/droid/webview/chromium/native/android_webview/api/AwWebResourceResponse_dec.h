@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AwWebResourceResponse_InitCallback(Handle32 cb);
+    extern void Elastos_AwWebResourceResponse_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -61,7 +61,7 @@ void* AwWebResourceResponse::ElaAwWebResourceResponseCallback_Init()
     sElaAwWebResourceResponseCallback.elastos_AwWebResourceResponse_getResponseHeaderNames = &AwWebResourceResponse::GetResponseHeaderNames;
     sElaAwWebResourceResponseCallback.elastos_AwWebResourceResponse_getResponseHeaderValues = &AwWebResourceResponse::GetResponseHeaderValues;
 
-    Elastos_AwWebResourceResponse_InitCallback((Handle32)&sElaAwWebResourceResponseCallback);
+    Elastos_AwWebResourceResponse_InitCallback((HANDLE)&sElaAwWebResourceResponseCallback);
     return &sElaAwWebResourceResponseCallback;
 }
 

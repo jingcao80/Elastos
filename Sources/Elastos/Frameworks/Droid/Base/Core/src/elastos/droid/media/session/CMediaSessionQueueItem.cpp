@@ -61,7 +61,7 @@ ECode CMediaSessionQueueItem::ReadFromParcel(
 {
     source->ReadInt64(&mId);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mDescription = IMediaDescription::Probe(obj);
     return NOERROR;
 }

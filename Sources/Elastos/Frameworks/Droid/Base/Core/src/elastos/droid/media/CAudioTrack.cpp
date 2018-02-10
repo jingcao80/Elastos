@@ -1311,7 +1311,7 @@ public:
             mPtr = mByteArray->GetPayload();
         }
         else {
-            Handle64 addr;
+            HANDLE addr;
             IBuffer::Probe(mObject)->GetEffectiveDirectAddress(&addr);
             mPtr = (Byte*)addr;
         }

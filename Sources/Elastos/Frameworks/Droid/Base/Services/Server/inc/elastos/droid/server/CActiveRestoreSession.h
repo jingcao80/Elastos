@@ -40,7 +40,7 @@ public:
     CARAPI constructor(
         /* [in] */ const String &packageName,
         /* [in] */ const String &transport,
-        /* [in] */ Handle32 host);
+        /* [in] */ HANDLE host);
 
     /**
      * Ask the current transport what the available restore sets are.

@@ -96,7 +96,7 @@ ECode SmsCbMessage::ReadFromParcel(
     source->ReadInt32(&mSerialNumber);
 
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mLocation = ISmsCbLocation::Probe(obj);
 
     source->ReadInt32(&mServiceCategory);
@@ -105,11 +105,11 @@ ECode SmsCbMessage::ReadFromParcel(
     source->ReadInt32(&mPriority);
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mEtwsWarningInfo = ISmsCbEtwsInfo::Probe(obj);
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mCmasWarningInfo = ISmsCbCmasInfo::Probe(obj);
     return NOERROR;
 }

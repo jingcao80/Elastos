@@ -393,20 +393,20 @@ ECode TracingControllerElastos::ShowToast(
     return NOERROR;
 }
 
-Handle64 TracingControllerElastos::NativeInit()
+HANDLE TracingControllerElastos::NativeInit()
 {
     return Elastos_TracingControllerAndroid_nativeInit(TO_IINTERFACE(this));
 }
 
 ECode TracingControllerElastos::NativeDestroy(
-    /* [in] */ Handle64 nativeTracingControllerElastos)
+    /* [in] */ HANDLE nativeTracingControllerElastos)
 {
     Elastos_TracingControllerAndroid_nativeDestroy(TO_IINTERFACE(this), nativeTracingControllerElastos);
     return NOERROR;
 }
 
 Boolean TracingControllerElastos::NativeStartTracing(
-    /* [in] */ Handle64 nativeTracingControllerElastos,
+    /* [in] */ HANDLE nativeTracingControllerElastos,
     /* [in] */ const String& categories,
     /* [in] */ Boolean recordContinuously)
 {
@@ -415,7 +415,7 @@ Boolean TracingControllerElastos::NativeStartTracing(
 }
 
 ECode TracingControllerElastos::NativeStopTracing(
-    /* [in] */ Handle64 nativeTracingControllerElastos,
+    /* [in] */ HANDLE nativeTracingControllerElastos,
     /* [in] */ const String& filename)
 {
     Elastos_TracingControllerAndroid_nativeStopTracing(TO_IINTERFACE(this),
@@ -424,7 +424,7 @@ ECode TracingControllerElastos::NativeStopTracing(
 }
 
 Boolean TracingControllerElastos::NativeGetKnownCategoryGroupsAsync(
-    /* [in] */ Handle64 nativeTracingControllerElastos)
+    /* [in] */ HANDLE nativeTracingControllerElastos)
 {
     return Elastos_TracingControllerAndroid_nativeGetKnownCategoryGroupsAsync(TO_IINTERFACE(this),
             nativeTracingControllerElastos);

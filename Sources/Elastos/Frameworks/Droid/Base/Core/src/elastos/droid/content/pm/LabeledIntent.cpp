@@ -167,7 +167,7 @@ ECode LabeledIntent::ReadFromParcel(
     source->ReadString(&mSourcePackage);
     source->ReadInt32(&mLabelRes);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mNonLocalizedLabel = obj != NULL ? ICharSequence::Probe(obj) : NULL;
     source->ReadInt32(&mIcon);
 

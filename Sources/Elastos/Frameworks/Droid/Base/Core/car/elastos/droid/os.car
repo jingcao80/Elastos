@@ -610,7 +610,7 @@ module
         constructor();
 
         constructor(
-            [in] Handle32 threadState);
+            [in] HANDLE threadState);
 
         interface IStrictModeSpan;
     }

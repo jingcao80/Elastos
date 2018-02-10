@@ -151,8 +151,8 @@ ECode FragmentState::ReadFromParcel(
     mRetainInstance = value != 0;
     FAIL_RETURN(in->ReadInt32(&value))
     mDetached = value != 0;
-    FAIL_RETURN(in->ReadInterfacePtr((Handle32*)(IBundle**)&mArguments));
-    FAIL_RETURN(in->ReadInterfacePtr((Handle32*)(IBundle**)&mSavedFragmentState));
+    FAIL_RETURN(in->ReadInterfacePtr((HANDLE*)(IBundle**)&mArguments));
+    FAIL_RETURN(in->ReadInterfacePtr((HANDLE*)(IBundle**)&mSavedFragmentState));
     return NOERROR;
 }
 

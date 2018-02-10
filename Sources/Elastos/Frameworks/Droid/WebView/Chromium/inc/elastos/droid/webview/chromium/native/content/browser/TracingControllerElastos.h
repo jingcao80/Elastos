@@ -212,22 +212,22 @@ private:
     CARAPI ShowToast(
         /* [in] */ const String& str);
 
-    CARAPI_(Handle64) NativeInit();
+    CARAPI_(HANDLE) NativeInit();
 
     CARAPI NativeDestroy(
-        /* [in] */ Handle64 nativeTracingControllerElastos);
+        /* [in] */ HANDLE nativeTracingControllerElastos);
 
     CARAPI_(Boolean) NativeStartTracing(
-        /* [in] */ Handle64 nativeTracingControllerElastos,
+        /* [in] */ HANDLE nativeTracingControllerElastos,
         /* [in] */ const String& categories,
         /* [in] */ Boolean recordContinuously);
 
     CARAPI NativeStopTracing(
-        /* [in] */ Handle64 nativeTracingControllerElastos,
+        /* [in] */ HANDLE nativeTracingControllerElastos,
         /* [in] */ const String& filename);
 
     CARAPI_(Boolean) NativeGetKnownCategoryGroupsAsync(
-        /* [in] */ Handle64 nativeTracingControllerElastos);
+        /* [in] */ HANDLE nativeTracingControllerElastos);
 
     CARAPI_(String) NativeGetDefaultCategories();
 
@@ -251,7 +251,7 @@ private:
     // showing the toast impacts performance.  This gives us the chance to disable them.
     Boolean mShowToasts;
     String mFilename;
-    Handle64 mNativeTracingControllerElastos;
+    HANDLE mNativeTracingControllerElastos;
 };
 
 } // namespace Browser

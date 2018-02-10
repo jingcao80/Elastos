@@ -26,13 +26,13 @@
 extern "C"
 {
 #endif
-    extern Handle64 Elastos_TracingControllerAndroid_nativeInit(IInterface* caller);
+    extern HANDLE Elastos_TracingControllerAndroid_nativeInit(IInterface* caller);
     extern String Elastos_TracingControllerAndroid_nativeGetDefaultCategories(IInterface* caller);
-    extern void Elastos_TracingControllerAndroid_nativeDestroy(IInterface* caller,Handle64 nativeTracingControllerElastos);
-    extern Boolean Elastos_TracingControllerAndroid_nativeStartTracing(IInterface* caller,Handle64 nativeTracingControllerElastos,const String& categories,Boolean recordContinuously);
-    extern void Elastos_TracingControllerAndroid_nativeStopTracing(IInterface* caller,Handle64 nativeTracingControllerElastos,const String& filename);
-    extern Boolean Elastos_TracingControllerAndroid_nativeGetKnownCategoryGroupsAsync(IInterface* caller,Handle64 nativeTracingControllerElastos);
-    extern void Elastos_TracingControllerAndroid_InitCallback(Handle64 cb);
+    extern void Elastos_TracingControllerAndroid_nativeDestroy(IInterface* caller,HANDLE nativeTracingControllerElastos);
+    extern Boolean Elastos_TracingControllerAndroid_nativeStartTracing(IInterface* caller,HANDLE nativeTracingControllerElastos,const String& categories,Boolean recordContinuously);
+    extern void Elastos_TracingControllerAndroid_nativeStopTracing(IInterface* caller,HANDLE nativeTracingControllerElastos,const String& filename);
+    extern Boolean Elastos_TracingControllerAndroid_nativeGetKnownCategoryGroupsAsync(IInterface* caller,HANDLE nativeTracingControllerElastos);
+    extern void Elastos_TracingControllerAndroid_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -59,7 +59,7 @@ void* TracingControllerElastos::ElaTracingControllerElastosCallback_Init()
     sElaTracingControllerAndroidCallback.elastos_TracingControllerAndroid_generateTracingFilePath = &TracingControllerElastos::GenerateTracingFilePath;
     sElaTracingControllerAndroidCallback.elastos_TracingControllerAndroid_onTracingStopped = &TracingControllerElastos::OnTracingStopped;
 
-    Elastos_TracingControllerAndroid_InitCallback((Handle64)&sElaTracingControllerAndroidCallback);
+    Elastos_TracingControllerAndroid_InitCallback((HANDLE)&sElaTracingControllerAndroidCallback);
     return &sElaTracingControllerAndroidCallback;
 }
 

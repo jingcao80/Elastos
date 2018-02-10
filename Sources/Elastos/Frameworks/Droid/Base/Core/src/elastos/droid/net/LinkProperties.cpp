@@ -1256,7 +1256,7 @@ ECode LinkProperties::ReadFromParcel(
     parcel->ReadInt32(&addressCount);
     for (Int32 i = 0; i < addressCount; ++i) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         Boolean result;
         AddLinkAddress(ILinkAddress::Probe(obj), &result);
     }
@@ -1265,7 +1265,7 @@ ECode LinkProperties::ReadFromParcel(
     parcel->ReadInt32(&dnsCount);
     for (Int32 i = 0; i < dnsCount; ++i) {
         AutoPtr<ArrayOf<Byte> > address;
-        parcel->ReadArrayOf((Handle32*)&address);
+        parcel->ReadArrayOf((HANDLE*)&address);
         AutoPtr<IInetAddressHelper> naHelper;
         CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&naHelper);
         AutoPtr<IInetAddress> netAddress;
@@ -1282,7 +1282,7 @@ ECode LinkProperties::ReadFromParcel(
     parcel->ReadInt32(&routeCount);
     for (Int32 i = 0; i < routeCount; ++i) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         Boolean result;
         AddRoute(IRouteInfo::Probe(obj), &result);
     }
@@ -1290,12 +1290,12 @@ ECode LinkProperties::ReadFromParcel(
     parcel->ReadByte(&hp);
     if (hp == 1) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         SetHttpProxy(IProxyInfo::Probe(obj));
     }
 
     AutoPtr<ArrayOf<IInterface*> > array;
-    parcel->ReadArrayOf((Handle32*)&array);
+    parcel->ReadArrayOf((HANDLE*)&array);
     for (Int32 i = 0; i < array->GetLength(); ++i) {
         AutoPtr<ILinkProperties> lp = ILinkProperties::Probe((*array)[i]);
         Boolean result;
@@ -1326,7 +1326,7 @@ ECode LinkProperties::WriteToParcel(
         IInetAddress* d = IInetAddress::Probe(obj);
         AutoPtr<ArrayOf<Byte> > address;
         d->GetAddress((ArrayOf<Byte>**)&address);
-        dest->WriteArrayOf((Handle32)address.Get());
+        dest->WriteArrayOf((HANDLE)address.Get());
     }
 
     dest->WriteString(mDomains);
@@ -1353,7 +1353,7 @@ ECode LinkProperties::WriteToParcel(
     mStackedLinks->GetValues((ICollection**)&values);
     AutoPtr<ArrayOf<IInterface*> > array;
     values->ToArray((ArrayOf<IInterface*>**)&array);
-    dest->WriteArrayOf((Handle32)array.Get());
+    dest->WriteArrayOf((HANDLE)array.Get());
 
     return NOERROR;
 }

@@ -52,7 +52,7 @@ public:
         /* [in] */ IKeyguardService* host);
 
     CARAPI constructor(
-        /* [in] */ Handle32 host);
+        /* [in] */ HANDLE host);
 
     // @Override
     CARAPI IsShowing(

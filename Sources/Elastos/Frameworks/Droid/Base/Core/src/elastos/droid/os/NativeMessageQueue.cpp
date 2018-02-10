@@ -48,7 +48,7 @@ void NativeMessageQueue::Wake()
 AutoPtr<NativeMessageQueue> Elastos_Os_MessageQueue_GetMessageQueue(
     /* [in] */ IMessageQueue* messageQueueObj)
 {
-    Handle64 ptr = 0;
+    HANDLE ptr = 0;
     messageQueueObj->GetNativeMessageQueue(&ptr);
     return reinterpret_cast<NativeMessageQueue*>(ptr);
 }

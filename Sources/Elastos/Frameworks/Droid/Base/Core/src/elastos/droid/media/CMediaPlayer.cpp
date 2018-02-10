@@ -1279,7 +1279,7 @@ ECode CMediaPlayer::SetVideoSurface(
         }
     }
     // env->SetIntField(thiz, fields.surface_texture, (int)new_st.get());
-    mNativeSurfaceTexture = reinterpret_cast<Handle32>(new_st.get());
+    mNativeSurfaceTexture = reinterpret_cast<HANDLE>(new_st.get());
     // This will fail if the media player has not been initialized yet. This
     // can be the case if setDisplay() on MediaPlayer.java has been called
     // before setDataSource(). The redundant call to setVideoSurfaceTexture()
@@ -2274,7 +2274,7 @@ ECode CMediaPlayer::NativeSetParameter(
     }
 
     android::Parcel *request;
-    value->GetDataPayload((Handle32*)&request);
+    value->GetDataPayload((HANDLE*)&request);
     android::status_t UNUSED(err) = mp->setParameter(key, *request);
     return NOERROR;
 }
@@ -2423,9 +2423,9 @@ ECode CMediaPlayer::NativeInvoke(
     }
 
     android::Parcel* _request;
-    request->GetDataPayload((Handle32*)&_request);
+    request->GetDataPayload((HANDLE*)&_request);
     android::Parcel* _reply;
-    reply->GetDataPayload((Handle32*)&_reply);
+    reply->GetDataPayload((HANDLE*)&_reply);
 
     // Don't use process_media_player_call which use the async loop to
     // report errors, instead returns the status.
@@ -2448,7 +2448,7 @@ ECode CMediaPlayer::NativeGetMetadata(
     }
 
     android::Parcel* metadata;
-    reply->GetDataPayload((Handle32*)&metadata);
+    reply->GetDataPayload((HANDLE*)&metadata);
     if (metadata == NULL ) {
         Logger::E(TAG, "Reply parcel is NULL");
         return E_FAIL;
@@ -2472,7 +2472,7 @@ ECode CMediaPlayer::NativeSetMetadataFilter(
     }
 
     android::Parcel* filter;
-    request->GetDataPayload((Handle32*)&filter);
+    request->GetDataPayload((HANDLE*)&filter);
 
     if (filter == NULL ) {
         Logger::E(TAG, "Filter is NULL.");

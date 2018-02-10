@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ResourceBundle_InitCallback(Handle32 cb);
+    extern void Elastos_ResourceBundle_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -50,7 +50,7 @@ void* ResourceBundle::ElaResourceBundleCallback_Init()
 
     sElaResourceBundleCallback.elastos_ResourceBundle_assetContainedInApk = &ResourceBundle::AssetContainedInApk;
 
-    Elastos_ResourceBundle_InitCallback((Handle32)&sElaResourceBundleCallback);
+    Elastos_ResourceBundle_InitCallback((HANDLE)&sElaResourceBundleCallback);
     return &sElaResourceBundleCallback;
 }
 

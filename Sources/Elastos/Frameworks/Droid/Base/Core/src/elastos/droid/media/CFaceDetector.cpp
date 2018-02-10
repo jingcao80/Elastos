@@ -192,7 +192,7 @@ Int32  CFaceDetector::fft_detect(
     // u32 height = mHeight;
 
     // // get to the native bitmap
-    // Handle64 nativeBitmatp = ((CBitmap*)bitmap)->mNativeBitmap;
+    // HANDLE nativeBitmatp = ((CBitmap*)bitmap)->mNativeBitmap;
     // SkBitmap const * nativeBitmap = (SkBitmap const *)nativeBitmatp;
 
     // // convert the image to B/W

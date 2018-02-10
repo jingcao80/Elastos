@@ -271,7 +271,7 @@ ECode ParcelableConnection::ReadFromParcel(
         //parcel->ReadFromParcel(source);
         //mAddress= address;
         AutoPtr<IInterface> address;
-        source->ReadInterfacePtr((Handle32*)&address);
+        source->ReadInterfacePtr((HANDLE*)&address);
         mAddress = IUri::Probe(address);
     }
     else {
@@ -284,7 +284,7 @@ ECode ParcelableConnection::ReadFromParcel(
 
     if (source->ReadInt32(&value), value != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mVideoProvider = IIVideoProvider::Probe(obj);
     }
     else {
@@ -322,7 +322,7 @@ ECode ParcelableConnection::ReadFromParcel(
     source->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mConferenceableConnectionIds = IList::Probe(obj);//TODO is it right??
     }
     else {

@@ -135,12 +135,12 @@ static AutoPtr<IMotionEvent> CreateMotionEventFromNative(
         return NULL;
     }
 
-    Handle64 native;
+    HANDLE native;
     eventObj->GetNative(&native);
     android::MotionEvent* destEvent = reinterpret_cast<android::MotionEvent*>(native);
     if (!destEvent) {
         destEvent = new android::MotionEvent();
-        eventObj->SetNative(reinterpret_cast<Handle64>(destEvent));
+        eventObj->SetNative(reinterpret_cast<HANDLE>(destEvent));
     }
 
     destEvent->copyFrom(event, true);
@@ -373,7 +373,7 @@ static android::status_t PointerIcon_load(
     AutoPtr<IBitmap> elBitmap;
     loadedPointerIcon->GetBitmap((IBitmap**)&elBitmap);
     if (elBitmap) {
-        Handle64 b = 0;
+        HANDLE b = 0;
         elBitmap->GetNativeBitmap(&b);
         SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(b);
         if (bitmap) {

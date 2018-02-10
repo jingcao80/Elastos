@@ -67,10 +67,10 @@ static void glVertexAttribIPointerBounds(GLuint indx, GLint size, GLenum type,
 
 static ECode GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle64* array,
+    /* [in, out] */ HANDLE* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle64* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -89,7 +89,7 @@ static ECode GetPointer(
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle64)(pointer);
+        *rst = (HANDLE)(pointer);
         return NOERROR;
     }
 
@@ -107,11 +107,11 @@ static ECode GetPointer(
 
 static ECode GetDirectBufferPointer(
     /* [in] */ IBuffer* buffer,
-    /* [out] */ Handle64* result)
+    /* [out] */ HANDLE* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    Handle64 effectiveDirectAddress;
+    HANDLE effectiveDirectAddress;
     buffer->GetEffectiveDirectAddress(&effectiveDirectAddress);
     if (effectiveDirectAddress != 0) {
         Int32 position, elementSizeShift;
@@ -266,10 +266,10 @@ getarray
     Int32 _exception = 0;
     ECode _exceptionType = NOERROR;
     const char * _exceptionMessage;
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining = 0;
-    Handle64 data;
+    HANDLE data;
     CTYPE *params = (CTYPE *) 0;
     Int32 _needed = 0;
 
@@ -489,13 +489,13 @@ ECode GLES20::GlBufferData(
     /* [in] */ IBuffer* data_buf,
     /* [in] */ Int32 usage)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
     if (data_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp));
         data = (GLvoid *) tmp;
         if (_remaining < size) {
@@ -524,12 +524,12 @@ ECode GLES20::GlBufferSubData(
     /* [in] */ Int32 size,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp));
     data = (GLvoid *) tmp;
     if (_remaining < size) {
@@ -656,12 +656,12 @@ ECode GLES20::GlCompressedTexImage2D(
     /* [in] */ Int32 imageSize,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp));
     data = (GLvoid *) tmp;
     if (data == NULL) {
@@ -696,12 +696,12 @@ ECode GLES20::GlCompressedTexSubImage2D(
     /* [in] */ Int32 imageSize,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp));
     data = (GLvoid *) tmp;
     if (data == NULL) {
@@ -854,12 +854,12 @@ ECode GLES20::GlDeleteBuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* buffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *buffers = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(buffers_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     buffers = (GLvoid *) tmp;
     if (_remaining < n) {
@@ -916,12 +916,12 @@ ECode GLES20::GlDeleteFramebuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* framebuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     framebuffers = (GLuint *) tmp;
     if (_remaining < n) {
@@ -989,12 +989,12 @@ ECode GLES20::GlDeleteRenderbuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* renderbuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     renderbuffers = (GLuint *) tmp;
     if (_remaining < n) {
@@ -1063,12 +1063,12 @@ ECode GLES20::GlDeleteTextures(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* textures_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *textures = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(textures_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     textures = (GLuint *)tmp;
     if (_remaining < n) {
@@ -1196,12 +1196,12 @@ ECode GLES20::GlDrawElements(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* indices_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *indices = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(indices_buf, &_array, &_remaining, &_bufferOffset, &tmp));
     indices = (GLvoid *)tmp;
     if (_remaining < count) {
@@ -1347,12 +1347,12 @@ ECode GLES20::GlGenBuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* buffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *buffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(buffers_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     buffers = (GLuint *)tmp;
     if (_remaining < n) {
@@ -1420,12 +1420,12 @@ ECode GLES20::GlGenFramebuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* framebuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < n) {
         SLOGGERD("GLES20", "GlGenFramebuffers: remaining() < n < needed")
@@ -1482,12 +1482,12 @@ ECode GLES20::GlGenRenderbuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* renderbuffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     renderbuffers = (GLuint *)tmp;
     if (_remaining < n) {
@@ -1545,12 +1545,12 @@ ECode GLES20::GlGenTextures(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* textures_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *textures = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(textures_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     textures = (GLuint *)tmp;
     if (_remaining < n) {
@@ -1661,11 +1661,11 @@ ECode GLES20::GlGetActiveAttrib(
     /* [in] */ IInt32Buffer* type_buf,
     /* [in] */ Byte name)
 {
-    Handle64 _lengthArray = (Handle64) 0;
+    HANDLE _lengthArray = (HANDLE) 0;
     Int32 _lengthBufferOffset = (Int32) 0;
-    Handle64 _sizeArray = (Handle64) 0;
+    HANDLE _sizeArray = (HANDLE) 0;
     Int32 _sizeBufferOffset = (Int32) 0;
-    Handle64 _typeArray = (Handle64) 0;
+    HANDLE _typeArray = (HANDLE) 0;
     Int32 _typeBufferOffset = (Int32) 0;
     Int32 _lengthRemaining;
     GLsizei *length = (GLsizei *) 0;
@@ -1674,7 +1674,7 @@ ECode GLES20::GlGetActiveAttrib(
     Int32 _typeRemaining;
     GLenum *type = (GLenum *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(length_buf), &_lengthArray, &_lengthRemaining, &_lengthBufferOffset, &tmp));
     length = (GLsizei *) tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(size_buf), &_sizeArray, &_sizeRemaining, &_sizeBufferOffset, &tmp));
@@ -1792,9 +1792,9 @@ ECode GLES20::GlGetActiveAttrib(
 {
     VALIDATE_NOT_NULL(str)
 
-    Handle64 _sizeArray = (Handle64) 0;
+    HANDLE _sizeArray = (HANDLE) 0;
     Int32 _sizeBufferOffset = (Int32) 0;
-    Handle64 _typeArray = (Handle64) 0;
+    HANDLE _typeArray = (HANDLE) 0;
     Int32 _typeBufferOffset = (Int32) 0;
     Int32 _sizeRemaining;
     GLint *size = (GLint *) 0;
@@ -1817,7 +1817,7 @@ ECode GLES20::GlGetActiveAttrib(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(size_buf), &_sizeArray, &_sizeRemaining, &_sizeBufferOffset, &tmp));
     size = (GLint *)tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(type_buf), &_typeArray, &_typeRemaining, &_typeBufferOffset, &tmp));
@@ -1935,11 +1935,11 @@ ECode GLES20::GlGetActiveUniform(
     /* [in] */ IInt32Buffer* type_buf,
     /* [in] */ Byte name)
 {
-    Handle64 _lengthArray = (Handle64) 0;
+    HANDLE _lengthArray = (HANDLE) 0;
     Int32 _lengthBufferOffset = (Int32) 0;
-    Handle64 _sizeArray = (Handle64) 0;
+    HANDLE _sizeArray = (HANDLE) 0;
     Int32 _sizeBufferOffset = (Int32) 0;
-    Handle64 _typeArray = (Handle64) 0;
+    HANDLE _typeArray = (HANDLE) 0;
     Int32 _typeBufferOffset = (Int32) 0;
     Int32 _lengthRemaining;
     GLsizei *length = (GLsizei *) 0;
@@ -1948,7 +1948,7 @@ ECode GLES20::GlGetActiveUniform(
     Int32 _typeRemaining;
     GLenum *type = (GLenum *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(length_buf), &_lengthArray, &_lengthRemaining, &_lengthBufferOffset, &tmp));
 
     length = (GLsizei *) tmp;
@@ -2066,9 +2066,9 @@ ECode GLES20::GlGetActiveUniform(
 {
     VALIDATE_NOT_NULL(str)
 
-    Handle64 _sizeArray = (Handle64) 0;
+    HANDLE _sizeArray = (HANDLE) 0;
     Int32 _sizeBufferOffset = (Int32) 0;
-    Handle64 _typeArray = (Handle64) 0;
+    HANDLE _typeArray = (HANDLE) 0;
     Int32 _typeBufferOffset = (Int32) 0;
     Int32 _sizeRemaining;
     GLint *size = (GLint *) 0;
@@ -2089,7 +2089,7 @@ ECode GLES20::GlGetActiveUniform(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(size_buf), &_sizeArray, &_sizeRemaining, &_sizeBufferOffset, &tmp));
     size = (GLint *) tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(type_buf), &_typeArray, &_typeRemaining, &_typeBufferOffset, &tmp));
@@ -2181,9 +2181,9 @@ ECode GLES20::GlGetAttachedShaders(
     /* [in] */ IInt32Buffer* count_buf,
     /* [in] */ IInt32Buffer* shaders_buf)
 {
-    Handle64 _countArray = (Handle64) 0;
+    HANDLE _countArray = (HANDLE) 0;
     Int32 _countBufferOffset = (Int32) 0;
-    Handle64 _shadersArray = (Handle64) 0;
+    HANDLE _shadersArray = (HANDLE) 0;
     Int32 _shadersBufferOffset = (Int32) 0;
     Int32 _countRemaining;
     GLsizei *count = (GLsizei *) 0;
@@ -2191,7 +2191,7 @@ ECode GLES20::GlGetAttachedShaders(
     GLuint *shaders = (GLuint *) 0;
 
     if (count_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetPointer(IBuffer::Probe(count_buf), &_countArray, &_countRemaining, &_countBufferOffset, &tmp));
         if (_countRemaining < 1) {
             SLOGGERD("GLES20", "GlGetAttachedShaders: remaining() < 1 < needed")
@@ -2201,7 +2201,7 @@ ECode GLES20::GlGetAttachedShaders(
     }
 
     if (shaders_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetPointer(IBuffer::Probe(shaders_buf), &_shadersArray, &_shadersRemaining, &_shadersBufferOffset, &tmp));
         if (_shadersRemaining < maxcount) {
             SLOGGERD("GLES20", "GlGetAttachedShaders: remaining() < maxcount < needed")
@@ -2318,12 +2318,12 @@ ECode GLES20::GlGetBufferParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     params = (GLint *) tmp;
     if (_remaining < 1) {
@@ -2418,12 +2418,12 @@ ECode GLES20::GlGetFramebufferAttachmentParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     params = (GLint *) tmp;
     if (params == NULL) {
@@ -2503,12 +2503,12 @@ ECode GLES20::GlGetProgramiv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < 1) {
         SLOGGERD("GLES20", "GlGetProgramiv: _remaining < 1 < needed")
@@ -2593,12 +2593,12 @@ ECode GLES20::GlGetRenderbufferParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     if (_remaining < 1) {
         SLOGGERD("GLES20", "GlGetRenderbufferParameteriv: remaining() < 1 < needed")
@@ -2659,12 +2659,12 @@ ECode GLES20::GlGetShaderiv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     if (_remaining < 1) {
         SLOGGERD("GLES20", "GlGetShaderiv: remaining() < 1 < needed")
@@ -2776,16 +2776,16 @@ ECode GLES20::GlGetShaderPrecisionFormat(
     /* [in] */ IInt32Buffer* range_buf,
     /* [in] */ IInt32Buffer* precision_buf)
 {
-    Handle64 _rangeArray = (Handle64) 0;
+    HANDLE _rangeArray = (HANDLE) 0;
     Int32 _rangeBufferOffset = (Int32) 0;
-    Handle64 _precisionArray = (Handle64) 0;
+    HANDLE _precisionArray = (HANDLE) 0;
     Int32 _precisionBufferOffset = (Int32) 0;
     Int32 _rangeRemaining;
     GLint *range = (GLint *) 0;
     Int32 _precisionRemaining;
     GLint *precision = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(range_buf), &_rangeArray, &_rangeRemaining, &_rangeBufferOffset, &tmp))
     if (_rangeRemaining < 1) {
         SLOGGERD("GLES20", "GlGetShaderPrecisionFormat: remaining() < 1 < needed")
@@ -2869,12 +2869,12 @@ ECode GLES20::GlGetShaderSource(
     /* [in] */ IInt32Buffer* length_buf,
     /* [in] */ Byte source)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLsizei *length = (GLsizei *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(length_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     length = (GLsizei *) tmp;
     if (length == NULL) {
@@ -2973,12 +2973,12 @@ ECode GLES20::GlGetTexParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     params = (GLfloat *) tmp;
     if (_remaining < 1) {
@@ -3040,12 +3040,12 @@ ECode GLES20::GlGetTexParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     params = (GLint *) tmp;
     if (_remaining < 1) {
@@ -3107,12 +3107,12 @@ ECode GLES20::GlGetUniformfv(
     /* [in] */ Int32 location,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     if (_remaining < 1) {
         SLOGGERD("GLES20", "GlGetUniformfv: remaining() < 1 < needed")
@@ -3173,12 +3173,12 @@ ECode GLES20::GlGetUniformiv(
     /* [in] */ Int32 location,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < 1) {
         SLOGGERD("GLES20", "GlGetUniformiv: remaining() < 1 < needed")
@@ -3275,12 +3275,12 @@ ECode GLES20::GlGetVertexAttribfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     Int32 _needed;
     switch (pname) {
@@ -3363,12 +3363,12 @@ ECode GLES20::GlGetVertexAttribiv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     Int32 _needed;
     switch (pname) {
@@ -3583,12 +3583,12 @@ ECode GLES20::GlReadPixels(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp));
     pixels = (GLvoid *) tmp;
     if (pixels == NULL) {
@@ -3673,7 +3673,7 @@ ECode GLES20::GlShaderBinary(
     /* [in] */ IBuffer* binary_buf,
     /* [in] */ Int32 length)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     GLuint *shaders_base = (GLuint *) 0;
     GLuint *shaders = (GLuint *) 0;
@@ -3691,7 +3691,7 @@ ECode GLES20::GlShaderBinary(
     shaders_base = (GLuint *) shaders_ref->GetPayload();
     shaders = shaders_base + offset;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(binary_buf, &_array, &_binaryRemaining, &_bufferOffset, &tmp))
     if (_binaryRemaining < length) {
         SLOGGERD("GLES20", "GlShaderBinary: remaining() < length < needed")
@@ -3723,16 +3723,16 @@ ECode GLES20::GlShaderBinary(
     /* [in] */ IBuffer* binary_buf,
     /* [in] */ Int32 length)
 {
-    Handle64 _shadersArray = (Handle64) 0;
+    HANDLE _shadersArray = (HANDLE) 0;
     Int32 _shadersBufferOffset = (Int32) 0;
-    Handle64 _binaryArray = (Handle64) 0;
+    HANDLE _binaryArray = (HANDLE) 0;
     Int32 _binaryBufferOffset = (Int32) 0;
     Int32 _shadersRemaining;
     GLuint *shaders = (GLuint *) 0;
     Int32 _binaryRemaining;
     GLvoid *binary = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(shaders_buf), &_shadersArray, &_shadersRemaining, &_shadersBufferOffset, &tmp));
     FAIL_RETURN(GetPointer(binary_buf, &_binaryArray, &_binaryRemaining, &_binaryBufferOffset, &tmp));
     if (_binaryRemaining < length) {
@@ -3878,13 +3878,13 @@ ECode GLES20::GlTexImage2D(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
     if (pixels_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp));
         pixels = (GLvoid *) tmp;
     }
@@ -3964,12 +3964,12 @@ ECode GLES20::GlTexParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     params = (GLfloat *) tmp;
     if (_remaining < 1) {
@@ -4046,12 +4046,12 @@ ECode GLES20::GlTexParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     params = (GLint *) tmp;
     if (_remaining < 1) {
@@ -4084,13 +4084,13 @@ ECode GLES20::GlTexSubImage2D(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
     if (pixels_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp));
     }
     if (pixels_buf && pixels == NULL) {
@@ -4166,12 +4166,12 @@ ECode GLES20::GlUniform1fv(
     /* [in] */ Int32 count,
     /* [in] */ IFloatBuffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *v = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count) {
         SLOGGERD("GLES20", "GlUniform1fv: remaining() < count < needed")
@@ -4245,12 +4245,12 @@ ECode GLES20::GlUniform1iv(
     /* [in] */ Int32 count,
     /* [in] */ IInt32Buffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *v = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     if (_remaining < count) {
         SLOGGERD("GLES20", "GlUniform1iv: remaining() < count < needed")
@@ -4326,12 +4326,12 @@ ECode GLES20::GlUniform2fv(
     /* [in] */ Int32 count,
     /* [in] */ IFloatBuffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *v = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*2) {
         SLOGGERD("GLES20", "GlUniform2fv: remaining() < count*2 < needed")
@@ -4407,12 +4407,12 @@ ECode GLES20::GlUniform2iv(
     /* [in] */ Int32 count,
     /* [in] */ IInt32Buffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *v = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp));
     if (_remaining < count*2) {
         SLOGGERD("GLES20", "remaining() < count*2 < needed")
@@ -4490,12 +4490,12 @@ ECode GLES20::GlUniform3fv(
     /* [in] */ Int32 count,
     /* [in] */ IFloatBuffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *v = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*3) {
         SLOGGERD("GLES20", "GlUniform3fv: remaining() < count*3 < needed")
@@ -4573,12 +4573,12 @@ ECode GLES20::GlUniform3iv(
     /* [in] */ Int32 count,
     /* [in] */ IInt32Buffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *v = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*3) {
         SLOGGERD("GLES20", "GlUniform3iv: remaining() < count*3 < needed")
@@ -4658,12 +4658,12 @@ ECode GLES20::GlUniform4fv(
     /* [in] */ Int32 count,
     /* [in] */ IFloatBuffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *v = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*4) {
         SLOGGERD("GLES20", "GlUniform4fv: remaining() < count*4 < needed")
@@ -4743,12 +4743,12 @@ ECode GLES20::GlUniform4iv(
     /* [in] */ Int32 count,
     /* [in] */ IInt32Buffer* v_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *v = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(v_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*4) {
         SLOGGERD("GLES20", "GlUniform4iv: remaining() < count*4 < needed")
@@ -4812,12 +4812,12 @@ ECode GLES20::GlUniformMatrix2fv(
     /* [in] */ Boolean transpose,
     /* [in] */ IFloatBuffer* value_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *value = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(value_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*4) {
         SLOGGERD("GLES20", "GlUniformMatrix2fv:: remaining() < count*4 < needed")
@@ -4883,12 +4883,12 @@ ECode GLES20::GlUniformMatrix3fv(
     /* [in] */ Boolean transpose,
     /* [in] */ IFloatBuffer* value_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *value = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(value_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*9) {
         SLOGGERD("GLES20", "GlUniformMatrix3fv: remaining() < count*9 < needed")
@@ -4953,12 +4953,12 @@ ECode GLES20::GlUniformMatrix4fv(
     /* [in] */ Boolean transpose,
     /* [in] */ IFloatBuffer* value_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *value = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(value_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < count*16) {
         SLOGGERD("GLES20", "GlUniformMatrix4fv: remaining() < count*16 < needed")
@@ -5052,12 +5052,12 @@ ECode GLES20::GlVertexAttrib1fv(
     /* [in] */ Int32 indx,
     /* [in] */ IFloatBuffer* values_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *values = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(values_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < 1) {
         SLOGGERD("GLES20", "GlVertexAttrib1fv: remaining() < 1 < needed")
@@ -5129,12 +5129,12 @@ ECode GLES20::GlVertexAttrib2fv(
     /* [in] */ Int32 indx,
     /* [in] */ IFloatBuffer* values_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *values = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(values_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < 2) {
         SLOGGERD("GLES20", "GlVertexAttrib1fv: remaining() < 2 < needed")
@@ -5208,12 +5208,12 @@ ECode GLES20::GlVertexAttrib3fv(
     /* [in] */ Int32 indx,
     /* [in] */ IFloatBuffer* values_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *values = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(values_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < 3) {
         SLOGGERD("GLES20", "GlVertexAttrib3fv: remaining() < 3 < needed")
@@ -5289,12 +5289,12 @@ ECode GLES20::GlVertexAttrib4fv(
     /* [in] */ Int32 indx,
     /* [in] */ IFloatBuffer* values_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *values = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(values_buf), &_array, &_remaining, &_bufferOffset, &tmp))
     if (_remaining < 4) {
         SLOGGERD("GLES20", "GlVertexAttrib4fv: remaining() < 4 < needed")
@@ -5388,7 +5388,7 @@ ECode GLES20::GlVertexAttribPointerBounds(
 {
     GLvoid *ptr = (GLvoid *) 0;
     if (ptr_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetDirectBufferPointer(ptr_buf, &tmp));
         ptr = (GLvoid *) tmp;
         if ( ! ptr ) {

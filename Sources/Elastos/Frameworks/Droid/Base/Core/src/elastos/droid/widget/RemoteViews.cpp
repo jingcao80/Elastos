@@ -493,7 +493,7 @@ ECode RemoteViews::_SetOnClickFillInIntent::ReadFromParcel(
     // need not to read TAG again!
     source->ReadInt32(&mViewId);
     mFillInIntent = NULL;
-    source->ReadInterfacePtr((Handle32*)&mFillInIntent);
+    source->ReadInterfacePtr((HANDLE*)&mFillInIntent);
     return NOERROR;
 }
 
@@ -565,7 +565,7 @@ ECode RemoteViews::_SetPendingIntentTemplate::ReadFromParcel(
     // need not to read TAG again!
     source->ReadInt32(&mViewId);
     mPendingIntentTemplate = NULL;
-    source->ReadInterfacePtr((Handle32*)&mPendingIntentTemplate);
+    source->ReadInterfacePtr((HANDLE*)&mPendingIntentTemplate);
     return NOERROR;
 }
 
@@ -778,7 +778,7 @@ ECode RemoteViews::SetRemoteViewsAdapterIntent::ReadFromParcel(
     // need not to read TAG again!
     source->ReadInt32(&mViewId);
     mIntent = NULL;
-    source->ReadInterfacePtr((Handle32*)&mIntent);
+    source->ReadInterfacePtr((HANDLE*)&mIntent);
     return NOERROR;
 }
 
@@ -864,7 +864,7 @@ ECode RemoteViews::_SetOnClickPendingIntent::ReadFromParcel(
     source->ReadInt32(&temp);
     if (temp == 1) {
         mPendingIntent = NULL;
-        source->ReadInterfacePtr((Handle32*)&mPendingIntent);
+        source->ReadInterfacePtr((HANDLE*)&mPendingIntent);
     }
 
     return NOERROR;
@@ -1640,7 +1640,7 @@ ECode RemoteViews::ReflectionAction::ReadFromParcel(
             source->ReadInt32(&flag);
             if (flag != 0) {
                 AutoPtr<IUri> uri;
-                source->ReadInterfacePtr((Handle32*)&uri);
+                source->ReadInterfacePtr((HANDLE*)&uri);
 
                 if(uri != NULL){
                     mValue = uri;
@@ -2564,7 +2564,7 @@ ECode RemoteViews::constructor(
 
     if (mode == MODE_NORMAL) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         mApplication = IApplicationInfo::Probe(obj);
         parcel->ReadInt32(&mLayoutId);
         parcel->ReadInt32(&ival);

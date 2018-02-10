@@ -63,7 +63,7 @@ public:
         /* [out] */ Int32 * res);
 
     CARAPI constructor(
-        /* [in] */ Handle32 monkey);
+        /* [in] */ HANDLE monkey);
 
 private:
     Monkey* mHost;

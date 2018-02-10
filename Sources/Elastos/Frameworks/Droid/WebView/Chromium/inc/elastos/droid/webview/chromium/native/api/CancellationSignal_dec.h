@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_CancellationSignal_InitCallback(Handle32 cb);
+    extern void Elastos_CancellationSignal_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -58,7 +58,7 @@ void* AwCancellationSignal::ElaCancellationSignalCallback_Init()
     sElaCancellationSignalCallback.elastos_CancellationSignal_setOnCancelListener = &AwCancellationSignal::SetOnCancelListener;
     sElaCancellationSignalCallback.elastos_CancellationSignal_Constructor = &AwCancellationSignal::Constructor;
     //no user for these callbacks in chromium.so
-    //Elastos_CancellationSignal_InitCallback((Handle32)&sElaCancellationSignalCallback);
+    //Elastos_CancellationSignal_InitCallback((HANDLE)&sElaCancellationSignalCallback);
     return &sElaCancellationSignalCallback;
 }
 

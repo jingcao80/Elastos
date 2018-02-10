@@ -81,14 +81,14 @@ ECode CPackageInstallerSessionParams::ReadFromParcel(
     source->ReadInt64(&mSizeBytes);
     source->ReadString(&mAppPackageName);
     AutoPtr<IInterface> appIcon;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&appIcon);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&appIcon);
     mAppIcon = IBitmap::Probe(appIcon);
     source->ReadString(&mAppLabel);
     AutoPtr<IInterface> uri;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&uri);
     mOriginatingUri = IUri::Probe(uri);
     uri = NULL;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&uri);
     mReferrerUri = IUri::Probe(uri);
     source->ReadString(&mAbiOverride);
     return NOERROR;

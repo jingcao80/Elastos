@@ -362,7 +362,7 @@ ECode AppWidgetProviderInfo::GetProviderInfo(
 ECode AppWidgetProviderInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadInterfacePtr((Handle32*)&mProvider);
+    source->ReadInterfacePtr((HANDLE*)&mProvider);
     source->ReadInt32(&mMinWidth);
     source->ReadInt32(&mMinHeight);
     source->ReadInt32(&mMinResizeWidth);
@@ -370,14 +370,14 @@ ECode AppWidgetProviderInfo::ReadFromParcel(
     source->ReadInt32(&mUpdatePeriodMillis);
     source->ReadInt32(&mInitialLayout);
     source->ReadInt32(&mInitialKeyguardLayout);
-    source->ReadInterfacePtr((Handle32*)&mConfigure);
+    source->ReadInterfacePtr((HANDLE*)&mConfigure);
     source->ReadString(&mLabel);
     source->ReadInt32(&mIcon);
     source->ReadInt32(&mPreviewImage);
     source->ReadInt32(&mAutoAdvanceViewId);
     source->ReadInt32(&mResizeMode);
     source->ReadInt32(&mWidgetCategory);
-    source->ReadInterfacePtr((Handle32*)&mProviderInfo);
+    source->ReadInterfacePtr((HANDLE*)&mProviderInfo);
     return NOERROR;
 }
 

@@ -250,7 +250,7 @@ ECode CatCmdMessage::ReadFromParcel(
     mCmdDet = NULL;
     if (flag) {
         AutoPtr<IInterface> obj;
-        in->ReadInterfacePtr((Handle32*)&obj);
+        in->ReadInterfacePtr((HANDLE*)&obj);
         mCmdDet = (CommandDetails*)IParcelable::Probe(obj);
     }
 
@@ -258,7 +258,7 @@ ECode CatCmdMessage::ReadFromParcel(
     mTextMsg = NULL;
     if (flag) {
         AutoPtr<IInterface> obj;
-        in->ReadInterfacePtr((Handle32*)&obj);
+        in->ReadInterfacePtr((HANDLE*)&obj);
         mTextMsg = ITextMessage::Probe(obj);
     }
 
@@ -266,7 +266,7 @@ ECode CatCmdMessage::ReadFromParcel(
     mMenu = NULL;
     if (flag) {
         AutoPtr<IInterface> obj;
-        in->ReadInterfacePtr((Handle32*)&obj);
+        in->ReadInterfacePtr((HANDLE*)&obj);
         mMenu = IMenu::Probe(obj);
     }
 
@@ -274,7 +274,7 @@ ECode CatCmdMessage::ReadFromParcel(
     mInput = NULL;
     if (flag) {
         AutoPtr<IInterface> obj;
-        in->ReadInterfacePtr((Handle32*)&obj);
+        in->ReadInterfacePtr((HANDLE*)&obj);
         mInput = IInput::Probe(obj);
     }
 
@@ -299,7 +299,7 @@ ECode CatCmdMessage::ReadFromParcel(
         mToneSettings = NULL;
         if (flag) {
             AutoPtr<IInterface> obj;
-            in->ReadInterfacePtr((Handle32*)&obj);
+            in->ReadInterfacePtr((HANDLE*)&obj);
             mToneSettings = IToneSettings::Probe(obj);
         }
         break;
@@ -310,7 +310,7 @@ ECode CatCmdMessage::ReadFromParcel(
         AutoPtr<ITextMessage> cfm;
         if (flag) {
             AutoPtr<IInterface> obj;
-            in->ReadInterfacePtr((Handle32*)&obj);
+            in->ReadInterfacePtr((HANDLE*)&obj);
             cfm = ITextMessage::Probe(obj);
         }
         mCallSettings->mConfirmMsg = cfm;
@@ -319,7 +319,7 @@ ECode CatCmdMessage::ReadFromParcel(
         in->ReadBoolean(&flag);
         if (flag) {
             AutoPtr<IInterface> obj;
-            in->ReadInterfacePtr((Handle32*)&obj);
+            in->ReadInterfacePtr((HANDLE*)&obj);
             cm = ITextMessage::Probe(obj);
         }
         mCallSettings->mCallMsg = cm;
@@ -328,7 +328,7 @@ ECode CatCmdMessage::ReadFromParcel(
     case SET_UP_EVENT_LIST: {
         mSetupEventListSettings = new SetupEventListSettings();
         AutoPtr<ArrayOf<Int32> > eventList;
-        in->ReadArrayOf((Handle32*)(&eventList));
+        in->ReadArrayOf((HANDLE*)(&eventList));
         mSetupEventListSettings->mEventList = eventList;
         break;
     }
@@ -419,7 +419,7 @@ ECode CatCmdMessage::WriteToParcel(
     case SET_UP_EVENT_LIST: {
         AutoPtr<ArrayOf<Int32> > eventList;
         mSetupEventListSettings->GetEventList((ArrayOf<Int32>**)&eventList);
-        dest->WriteArrayOf((Handle32)eventList.Get());
+        dest->WriteArrayOf((HANDLE)eventList.Get());
         break;
     }
     default:

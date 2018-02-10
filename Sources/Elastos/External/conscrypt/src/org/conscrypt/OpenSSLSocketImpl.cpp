@@ -537,7 +537,7 @@ ECode OpenSSLSocketImpl::GetPeerPort(
 
 ECode OpenSSLSocketImpl::ClientCertificateRequested(
     /* [in] */ ArrayOf<Byte>* keyTypeBytes,
-    /* [in] */ ArrayOf<Handle32>* asn1DerEncodedPrincipals)
+    /* [in] */ ArrayOf<HANDLE>* asn1DerEncodedPrincipals)
 {
     assert(0 && "TODO");
     // mSslParameters->ChooseClientCertificate(keyTypeBytes, asn1DerEncodedPrincipals,

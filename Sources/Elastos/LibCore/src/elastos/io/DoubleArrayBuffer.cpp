@@ -48,7 +48,7 @@ ECode DoubleArrayBuffer::constructor(
 }
 
 ECode DoubleArrayBuffer::GetPrimitiveArray(
-    /* [out] */ Handle64* arrayHandle)
+    /* [out] */ HANDLE* arrayHandle)
 {
     AutoPtr<ArrayOf<Double> > arrayTmp;
     GetArray((ArrayOf<Double>**)&arrayTmp);
@@ -58,7 +58,7 @@ ECode DoubleArrayBuffer::GetPrimitiveArray(
         return NOERROR;
     }
     Double* primitiveArray = arrayTmp->GetPayload();
-    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    *arrayHandle = reinterpret_cast<HANDLE>(primitiveArray);
     return NOERROR;
 }
 

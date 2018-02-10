@@ -103,13 +103,13 @@ ECode CSoundTriggerKeyphraseRecognitionEvent::FromParcel(
     }
 
     AutoPtr<ArrayOf<Byte> > data;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&data))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&data))
 
     // KeyphraseRecognitionExtra[] keyphraseExtras =
     //         in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
     assert(0 && "TODO: KeyphraseRecognitionExtra.CREATOR");
     AutoPtr<ArrayOf<ISoundTriggerKeyphraseRecognitionExtra*> > keyphraseExtras;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&keyphraseExtras))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&keyphraseExtras))
 
     AutoPtr<CSoundTriggerKeyphraseRecognitionEvent> newResult;
     CSoundTriggerKeyphraseRecognitionEvent::NewByFriend(status, soundModelHandle, captureAvailable,
@@ -144,11 +144,11 @@ ECode CSoundTriggerKeyphraseRecognitionEvent::WriteToParcel(
     } else {
         FAIL_RETURN(dest->WriteByte((Byte)0))
     }
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mData.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mData.Get()))
 
     //dest.writeTypedArray(keyphraseExtras, flags);
     assert(0 && "TODO: writeTypedArray");
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mKeyphraseExtras.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mKeyphraseExtras.Get()))
     return NOERROR;
 }
 
@@ -185,11 +185,11 @@ ECode CSoundTriggerKeyphraseRecognitionEvent::ReadFromParcel(
         mCaptureFormat = NULL;
     }
 
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mData))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mData))
     // KeyphraseRecognitionExtra[] keyphraseExtras =
     //         in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
     assert(0 && "TODO: KeyphraseRecognitionExtra.CREATOR");
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mKeyphraseExtras))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mKeyphraseExtras))
     return NOERROR;
 }
 

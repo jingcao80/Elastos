@@ -50,7 +50,7 @@ ECode CharArrayBuffer::constructor(
 }
 
 ECode CharArrayBuffer::GetPrimitiveArray(
-    /* [out] */ Handle64* arrayHandle)
+    /* [out] */ HANDLE* arrayHandle)
 {
     VALIDATE_NOT_NULL(arrayHandle)
     *arrayHandle = 0;
@@ -63,7 +63,7 @@ ECode CharArrayBuffer::GetPrimitiveArray(
         return NOERROR;
     }
     Char32* primitiveArray = arrayTmp->GetPayload();
-    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    *arrayHandle = reinterpret_cast<HANDLE>(primitiveArray);
     return NOERROR;
 }
 

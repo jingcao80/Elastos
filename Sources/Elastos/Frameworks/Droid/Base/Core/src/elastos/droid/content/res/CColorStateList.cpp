@@ -84,8 +84,8 @@ ECode CColorStateList::ValueOf(
     if (csl == NULL) {
         AutoPtr< ArrayOf<Int32> > colors = ArrayOf<Int32>::Alloc(1);
         (*colors)[0] = color;
-        AutoPtr< ArrayOf<Handle32> > emptyArray = ArrayOf<Handle32>::Alloc(1);
-        emptyArray->Set(0, (Handle32)(*EMPTY)[0].Get());
+        AutoPtr< ArrayOf<HANDLE> > emptyArray = ArrayOf<HANDLE>::Alloc(1);
+        emptyArray->Set(0, (HANDLE)(*EMPTY)[0].Get());
         AutoPtr<CColorStateList> ccsl;
         FAIL_RETURN(CColorStateList::NewByFriend(emptyArray, colors, (CColorStateList**)&ccsl));
         csl = ccsl;
@@ -164,9 +164,9 @@ ECode CColorStateList::WithAlpha(
         (*colors)[i] = ((*mColors)[i] & 0xFFFFFF) | (alpha << 24);
     }
 
-    AutoPtr< ArrayOf<Handle32> > array = ArrayOf<Handle32>::Alloc(mStateSpecs->GetLength());
+    AutoPtr< ArrayOf<HANDLE> > array = ArrayOf<HANDLE>::Alloc(mStateSpecs->GetLength());
     for (Int32 i = 0; i < mStateSpecs->GetLength(); ++i) {
-        array->Set(i, (Handle32)(*mStateSpecs)[i].Get());
+        array->Set(i, (HANDLE)(*mStateSpecs)[i].Get());
     }
     return CColorStateList::New(array, colors, colorState);
 }
@@ -375,9 +375,9 @@ AutoPtr<IColorStateList> CColorStateList::AddFirstIfMissing(
     sa->Set(0, state);
     outputStates->Set(0, sa);
 
-    AutoPtr<ArrayOf<Handle32> > states = ArrayOf<Handle32>::Alloc(outputStates->GetLength());
+    AutoPtr<ArrayOf<HANDLE> > states = ArrayOf<HANDLE>::Alloc(outputStates->GetLength());
     for (Int32 i = 0; i < outputStates->GetLength(); ++i) {
-        states->Set(i, (Handle32)(*outputStates)[i].Get());
+        states->Set(i, (HANDLE)(*outputStates)[i].Get());
     }
 
     AutoPtr<ArrayOf<Int32> > inputColors = csl->GetColors();
@@ -396,9 +396,9 @@ ECode CColorStateList::WriteToParcel(
     Int32 N = mStateSpecs->GetLength();
     dest->WriteInt32(N);
     for (Int32 i = 0; i < N; i++) {
-        dest->WriteArrayOf((Handle32)(*mStateSpecs)[i].Get());
+        dest->WriteArrayOf((HANDLE)(*mStateSpecs)[i].Get());
     }
-    dest->WriteArrayOf((Handle32)mColors.Get());
+    dest->WriteArrayOf((HANDLE)mColors.Get());
     return NOERROR;
 }
 
@@ -409,10 +409,10 @@ ECode CColorStateList::ReadFromParcel(
     source->ReadInt32(&N);
     AutoPtr< ArrayOf<Int32Array > > stateSpec = ArrayOf<Int32Array >::Alloc(N);
     for (Int32 i = 0; i < N; i++) {
-        source->ReadArrayOf((Handle32*)&(*stateSpec)[i]);
+        source->ReadArrayOf((HANDLE*)&(*stateSpec)[i]);
     }
     AutoPtr< ArrayOf<Int32> > colors;
-    source->ReadArrayOf((Handle32*)&colors);
+    source->ReadArrayOf((HANDLE*)&colors);
 
     assert(stateSpec->GetLength() == colors->GetLength());
 
@@ -438,7 +438,7 @@ ECode CColorStateList::constructor()
 }
 
 ECode CColorStateList::constructor(
-    /* [in] */ ArrayOf<Handle32>* states,
+    /* [in] */ ArrayOf<HANDLE>* states,
     /* [in] */ ArrayOf<Int32>* colors)
 {
     mColors = colors;

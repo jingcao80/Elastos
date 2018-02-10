@@ -120,7 +120,7 @@ ECode CInputBinding::ReadFromParcel(
     /* [in] */ IParcel *source)
 {
     AutoPtr<IInterface> obj;
-    FAIL_RETURN(source->ReadInterfacePtr((Handle32*)&obj));
+    FAIL_RETURN(source->ReadInterfacePtr((HANDLE*)&obj));
     mConnectionToken = IBinder::Probe(obj.Get());
     FAIL_RETURN(source->ReadInt32(&mUid));
     FAIL_RETURN(source->ReadInt32(&mPid));

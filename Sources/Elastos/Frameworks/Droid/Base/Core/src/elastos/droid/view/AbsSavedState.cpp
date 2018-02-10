@@ -86,7 +86,7 @@ ECode AbsSavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mSuperState = IParcelable::Probe(obj);
     if (mSuperState == NULL) {
         AutoPtr<IAbsSavedState> empty = GetEMPTY_STATE();

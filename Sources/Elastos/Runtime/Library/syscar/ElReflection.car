@@ -71,7 +71,8 @@ library
         CarDataType_ArrayOf     = 16,
         CarDataType_CppVector   = 17,
         CarDataType_Struct      = 18,
-        CarDataType_Interface   = 19
+        CarDataType_Interface   = 19,
+        CarDataType_HANDLE      = 20
     }
 
     enum ParamIOAttribute {

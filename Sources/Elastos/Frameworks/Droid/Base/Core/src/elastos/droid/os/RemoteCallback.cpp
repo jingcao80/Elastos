@@ -156,7 +156,7 @@ ECode RemoteCallback::GetHashCode(
 ECode RemoteCallback::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    return in->ReadInterfacePtr((Handle32*)(IIRemoteCallback**)&mTarget);
+    return in->ReadInterfacePtr((HANDLE*)(IIRemoteCallback**)&mTarget);
 }
 
 ECode RemoteCallback::WriteToParcel(

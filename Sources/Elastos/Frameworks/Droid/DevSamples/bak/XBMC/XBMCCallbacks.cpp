@@ -521,7 +521,7 @@ int SurfaceGetNativeWindow(eobject object)
     assert(object != NULL);
 
     android::Surface* nsf = NULL;
-    ((ISurface*)object)->GetSurface((Handle32*)&nsf);
+    ((ISurface*)object)->GetSurface((HANDLE*)&nsf);
     assert(nsf != NULL);
 
     android::sp<ANativeWindow> nw = nsf;

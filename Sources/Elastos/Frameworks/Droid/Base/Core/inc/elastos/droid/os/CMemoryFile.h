@@ -203,10 +203,10 @@ private:
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ Int32 length,
         /* [in] */ Int32 mode,
-        /* [out] */ Handle64* addr);
+        /* [out] */ HANDLE* addr);
 
     static CARAPI native_munmap(
-        /* [in] */ Handle64 addr,
+        /* [in] */ HANDLE addr,
         /* [in] */ Int32 length);
 
     static CARAPI native_close(
@@ -214,7 +214,7 @@ private:
 
     static CARAPI native_read(
         /* [in] */ IFileDescriptor* fd,
-        /* [in] */ Handle64 address,
+        /* [in] */ HANDLE address,
         /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Int32 srcOffset,
         /* [in] */ Int32 destOffset,
@@ -224,7 +224,7 @@ private:
 
     static CARAPI native_write(
         /* [in] */ IFileDescriptor* fd,
-        /* [in] */ Handle64 address,
+        /* [in] */ HANDLE address,
         /* [in] */ ArrayOf<Byte>* buffer,
         /* [in] */ Int32 srcOffset,
         /* [in] */ Int32 destOffset,
@@ -247,7 +247,7 @@ private:
     //static const Int32 PROT_WRITE;// = 0x2;
 
     AutoPtr<IFileDescriptor> mFD;        // ashmem file descriptor
-    Handle64 mAddress;   // address of ashmem memory
+    HANDLE mAddress;   // address of ashmem memory
     Int32 mLength;    // total length of our ashmem region
     Boolean mAllowPurging;// = false;  // true if our ashmem region is unpinned
 

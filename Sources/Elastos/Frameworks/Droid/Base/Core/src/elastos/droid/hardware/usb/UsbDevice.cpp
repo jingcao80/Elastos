@@ -316,7 +316,7 @@ ECode UsbDevice::ReadFromParcel(
     FAIL_RETURN(source->ReadString(&mManufacturerName))
     FAIL_RETURN(source->ReadString(&mProductName))
     FAIL_RETURN(source->ReadString(&mSerialNumber))
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mConfigurations))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mConfigurations))
 
     return NOERROR;
 }
@@ -335,7 +335,7 @@ ECode UsbDevice::WriteToParcel(
     FAIL_RETURN(dest->WriteString(mManufacturerName))
     FAIL_RETURN(dest->WriteString(mProductName))
     FAIL_RETURN(dest->WriteString(mSerialNumber))
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mConfigurations.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mConfigurations.Get()))
 
     return NOERROR;
 }

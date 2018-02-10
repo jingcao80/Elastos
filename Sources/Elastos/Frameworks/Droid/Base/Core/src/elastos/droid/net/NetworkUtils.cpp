@@ -294,7 +294,7 @@ ECode NetworkUtils::ParcelInetAddress(
     if (address != NULL) {
         address->GetAddress((ArrayOf<Byte>**)&addressArray);
     }
-    parcel->WriteArrayOf((Handle32)addressArray.Get());
+    parcel->WriteArrayOf((HANDLE)addressArray.Get());
     return NOERROR;
 }
 
@@ -305,7 +305,7 @@ ECode NetworkUtils::UnparcelInetAddress(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<ArrayOf<Byte> > addressArray;
-    in->ReadArrayOf((Handle32*)&addressArray);
+    in->ReadArrayOf((HANDLE*)&addressArray);
     if (addressArray == NULL) {
         *result = NULL;
         return NOERROR;

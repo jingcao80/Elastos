@@ -63,10 +63,10 @@ ECode CTvContentRatingSystemInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mXmlUri = IUri::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mApplicationInfo = IApplicationInfo::Probe(obj);
     return NOERROR;
 }

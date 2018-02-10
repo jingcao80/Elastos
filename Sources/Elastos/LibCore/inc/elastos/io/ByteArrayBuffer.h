@@ -41,7 +41,7 @@ public:
         /* [in] */ Boolean isReadOnly);
 
     CARAPI GetPrimitiveArray(
-        /* [out] */ Handle64* arrayHandle);
+        /* [out] */ HANDLE* arrayHandle);
 
     CARAPI AsReadOnlyBuffer(
         /* [out] */ IByteBuffer** buffer);

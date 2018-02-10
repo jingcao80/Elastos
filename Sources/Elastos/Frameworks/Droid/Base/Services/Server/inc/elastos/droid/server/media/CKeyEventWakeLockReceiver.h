@@ -67,7 +67,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IHandler* handler,
-        /* [in] */ Handle64 host);
+        /* [in] */ HANDLE host);
 
     CARAPI_(void) OnTimeout();
 

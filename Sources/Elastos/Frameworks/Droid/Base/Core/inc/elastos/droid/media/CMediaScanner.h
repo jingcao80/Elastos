@@ -454,7 +454,7 @@ private:
     AutoPtr<IUri> mFilesUriNoNotify;
     Boolean mProcessPlaylists;
     Boolean mProcessGenres;
-    Handle32 mMtpObjectHandle;
+    HANDLE mMtpObjectHandle;
 
     String mExternalStoragePath;
     Boolean mExternalIsEmulated;

@@ -130,7 +130,7 @@ ECode ResultReceiver::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mReceiver = (MyResultReceiver*)IObject::Probe(obj);
     return NOERROR;
 }

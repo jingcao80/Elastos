@@ -93,7 +93,7 @@ RemoteDisplayProviderProxy::Connection::Connection(
     : mProvider(provider)
     , mHost(host)
 {
-    CProviderCallback::NewByFriend((Handle64)this, (CProviderCallback**)&mCallback);
+    CProviderCallback::NewByFriend((HANDLE)this, (CProviderCallback**)&mCallback);
 }
 
 CAR_INTERFACE_IMPL(RemoteDisplayProviderProxy::Connection, Object, IProxyDeathRecipient)

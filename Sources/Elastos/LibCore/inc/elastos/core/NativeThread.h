@@ -29,7 +29,7 @@ typedef struct NativeObject
      * A word containing either a "thin" lock or a "fat" monitor.  See
      * the comments in Sync.c for a description of its layout.
      */
-    UInt32      mLock;
+    uintptr_t   mLock;
     Int64       mObjectObj;
 } NativeObject;
 
@@ -253,7 +253,7 @@ struct InternalStartArgs
     InternalThreadStartFunc mFunc;
     void* mFuncArg;
     char* mName;
-    Int32 mGroup;
+    Int64 mGroup;
     Boolean mIsDaemon;
     /* result */
     volatile NativeThread** mThread;

@@ -210,7 +210,7 @@ public:
 
     CARAPI ClientCertificateRequested(
         /* [in] */ ArrayOf<Byte>* keyTypeBytes,
-        /* [in] */ ArrayOf<Handle32>* asn1DerEncodedPrincipals);
+        /* [in] */ ArrayOf<HANDLE>* asn1DerEncodedPrincipals);
 
     CARAPI ClientPSKKeyRequested(
         /* [in] */ const String& identityHint,

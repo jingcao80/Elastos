@@ -159,7 +159,7 @@ ECode UsbConfiguration::ReadFromParcel(
     FAIL_RETURN(source->ReadString(&mName))
     FAIL_RETURN(source->ReadInt32(&mAttributes))
     FAIL_RETURN(source->ReadInt32(&mMaxPower))
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mInterfaces))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mInterfaces))
 
     return NOERROR;
 }
@@ -173,7 +173,7 @@ ECode UsbConfiguration::WriteToParcel(
     FAIL_RETURN(dest->WriteString(mName))
     FAIL_RETURN(dest->WriteInt32(mAttributes))
     FAIL_RETURN(dest->WriteInt32(mMaxPower))
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mInterfaces.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mInterfaces.Get()))
 
     return NOERROR;
 }

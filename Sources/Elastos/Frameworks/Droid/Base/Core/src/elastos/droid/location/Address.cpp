@@ -551,7 +551,7 @@ ECode Address::ReadFromParcel(
     source->ReadString(&mUrl);
 
     AutoPtr<IInterface> info;
-    source->ReadInterfacePtr((Handle32*)&info);
+    source->ReadInterfacePtr((HANDLE*)&info);
     mExtras = (info != NULL)? IBundle::Probe(info) : NULL;
     return NOERROR;
 }

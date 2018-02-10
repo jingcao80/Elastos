@@ -191,7 +191,7 @@ ECode IpPrefix::ToString(
 ECode IpPrefix::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
-    parcel->ReadArrayOf((Handle32*)&mAddress);
+    parcel->ReadArrayOf((HANDLE*)&mAddress);
     parcel->ReadInt32(&mPrefixLength);
     return NOERROR;
 }
@@ -199,7 +199,7 @@ ECode IpPrefix::ReadFromParcel(
 ECode IpPrefix::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteArrayOf((Handle32)mAddress.Get());
+    dest->WriteArrayOf((HANDLE)mAddress.Get());
     dest->WriteInt32(mPrefixLength);
     return NOERROR;
 }

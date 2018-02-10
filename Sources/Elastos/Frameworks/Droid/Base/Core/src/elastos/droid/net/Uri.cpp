@@ -587,8 +587,8 @@ ECode OpaqueUri::constructor()
 
 ECode OpaqueUri::constructor(
     /* [in] */ const String& scheme,
-    /* [in] */ Handle32 ssp,
-    /* [in] */ Handle32 fragment)
+    /* [in] */ HANDLE ssp,
+    /* [in] */ HANDLE fragment)
 {
     mScheme = scheme;
     mSsp = (Part*)ssp;
@@ -615,7 +615,7 @@ ECode OpaqueUri::ReadFrom(
     Part::ReadFrom(parcel, (Part**)&p1);
     Part::ReadFrom(parcel, (Part**)&p2);
 
-    return COpaqueUri::New(str, (Handle32)p1.Get(), (Handle32)p2.Get(), result);
+    return COpaqueUri::New(str, (HANDLE)p1.Get(), (HANDLE)p2.Get(), result);
 }
 
 ECode OpaqueUri::WriteToParcel(
@@ -1139,10 +1139,10 @@ ECode HierarchicalUri::constructor()
 
 ECode HierarchicalUri::constructor(
     /* [in] */ const String& scheme,
-    /* [in] */ Handle32 authority,
-    /* [in] */ Handle32 path,
-    /* [in] */ Handle32 query,
-    /* [in] */ Handle32 fragment)
+    /* [in] */ HANDLE authority,
+    /* [in] */ HANDLE path,
+    /* [in] */ HANDLE query,
+    /* [in] */ HANDLE fragment)
 {
     mScheme = scheme;
     mAuthority = (Part*)authority;
@@ -1173,8 +1173,8 @@ ECode HierarchicalUri::ReadFrom(
     Part::ReadFrom(parcel, (Part**)&p3);
     Part::ReadFrom(parcel, (Part**)&p4);
 
-    return CHierarchicalUri::New(str, (Handle32)p1.Get(), (Handle32)p2.Get(),
-        (Handle32)p3.Get(), (Handle32)p4.Get(), result);
+    return CHierarchicalUri::New(str, (HANDLE)p1.Get(), (HANDLE)p2.Get(),
+        (HANDLE)p3.Get(), (HANDLE)p4.Get(), result);
 }
 
 ECode HierarchicalUri::ReadFromParcel(
@@ -1606,8 +1606,8 @@ ECode UriBuilder::Build(
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
 
-        return COpaqueUri::New(mScheme, (Handle32)mOpaquePart.Get(),
-            (Handle32)mFragment.Get(), result);
+        return COpaqueUri::New(mScheme, (HANDLE)mOpaquePart.Get(),
+            (HANDLE)mFragment.Get(), result);
     }
     else {
 
@@ -1626,8 +1626,8 @@ ECode UriBuilder::Build(
             }
         }
 
-        return CHierarchicalUri::New(mScheme, (Handle32)mAuthority.Get(),
-            (Handle32)mPath.Get(), (Handle32)mQuery.Get(), (Handle32)mFragment.Get(), result);
+        return CHierarchicalUri::New(mScheme, (HANDLE)mAuthority.Get(),
+            (HANDLE)mPath.Get(), (HANDLE)mQuery.Get(), (HANDLE)mFragment.Get(), result);
     }
 
     return NOERROR;
@@ -2056,9 +2056,9 @@ AutoPtr<IUri> Uri::CreateEmpty()
     assert(Part::sNULL != NULL);
     assert(PathPart::sEMPTY != NULL);
     AutoPtr<IUri> rev;
-    CHierarchicalUri::New(String(NULL), (Handle32)Part::sNULL.Get(),
-        (Handle32)PathPart::sEMPTY.Get(), (Handle32)Part::sNULL.Get(),
-        (Handle32)Part::sNULL.Get(), (IUri**)&rev);
+    CHierarchicalUri::New(String(NULL), (HANDLE)Part::sNULL.Get(),
+        (HANDLE)PathPart::sEMPTY.Get(), (HANDLE)Part::sNULL.Get(),
+        (HANDLE)Part::sNULL.Get(), (IUri**)&rev);
     return rev;
 }
 INIT_PROI_2 const AutoPtr<IUri> Uri::EMPTY = CreateEmpty();
@@ -2201,8 +2201,8 @@ ECode Uri::FromFile(
     String pathStr;
     file->GetAbsolutePath(&pathStr);
     AutoPtr<PathPart> path = PathPart::FromDecoded(pathStr);
-    return CHierarchicalUri::New(String("file"), (Handle32)Part::sEMPTY.Get(), (Handle32)path.Get(),
-        (Handle32)Part::sNULL.Get(), (Handle32)Part::sNULL.Get(), result);
+    return CHierarchicalUri::New(String("file"), (HANDLE)Part::sEMPTY.Get(), (HANDLE)path.Get(),
+        (HANDLE)Part::sNULL.Get(), (HANDLE)Part::sNULL.Get(), result);
 }
 
 ECode Uri::FromParts(
@@ -2223,7 +2223,7 @@ ECode Uri::FromParts(
     }
     AutoPtr<Part> sspPart = Part::FromDecoded(ssp);
     AutoPtr<Part> fragmentPart = Part::FromDecoded(fragment);
-    return COpaqueUri::New(scheme, (Handle32)sspPart.Get(), (Handle32)fragmentPart.Get(), result);
+    return COpaqueUri::New(scheme, (HANDLE)sspPart.Get(), (HANDLE)fragmentPart.Get(), result);
 }
 
 ECode Uri::GetQueryParameterNames(

@@ -60,7 +60,7 @@ struct NativeCode : public ANativeActivity
         /* [in] */ ISurface* surface)
     {
         if (surface) {
-            Handle32 ptr;
+            HANDLE ptr;
             surface->GetSurface(&ptr);
             mNativeWindow = (ANativeWindow*)(android::Surface*)ptr;
         }
@@ -80,7 +80,7 @@ struct NativeCode : public ANativeActivity
         mInputChannel = channel;
         mNativeInputQueue = NULL;
         if (channel != NULL) {
-            Handle32 nativeChannel;
+            HANDLE nativeChannel;
             channel->GetNativeInputChannel(&nativeChannel);
             android::sp<android::InputChannel> ic =
                 ((NativeInputChannel*)nativeChannel)->getInputChannel();

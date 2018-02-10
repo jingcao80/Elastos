@@ -45,7 +45,7 @@ public:
         /* [in] */ const String& errorMessage);
 
     CARAPI constructor (
-        /* [in] */ Handle32 host);
+        /* [in] */ HANDLE host);
 
 private:
     AutoPtr<CAccountManager::BaseFutureTask> mHost;

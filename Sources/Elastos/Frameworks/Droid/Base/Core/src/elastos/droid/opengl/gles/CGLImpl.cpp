@@ -353,7 +353,7 @@ ECode CGLImpl::GlColorPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         GetDirectBufferPointer(pointer_buf, &tmp);
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -406,11 +406,11 @@ ECode CGLImpl::GlCompressedTexSubImage2D(
     /* [in] */ Int32 imageSize,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     data = (GLvoid *) tmp;
     if (data == NULL) {
@@ -496,11 +496,11 @@ ECode CGLImpl::GlDeleteTextures(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* textures_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *textures = (GLuint *) 0;
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(textures_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     textures = (GLuint *)tmp;
     if (_remaining < n) {
@@ -594,12 +594,12 @@ ECode CGLImpl::GlDrawElements(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* indices_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *indices = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(indices_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     indices = (GLvoid *) tmp;
     if (_remaining < count) {
@@ -699,12 +699,12 @@ ECode CGLImpl::GlFogfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
@@ -816,12 +816,12 @@ ECode CGLImpl::GlFogxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -943,12 +943,12 @@ ECode CGLImpl::GlGenTextures(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* textures_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *textures = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(textures_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     textures = (GLuint *)tmp;
     if (_remaining < n) {
@@ -1058,12 +1058,12 @@ ECode CGLImpl::GlLightModelfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
@@ -1158,12 +1158,12 @@ ECode CGLImpl::GlLightModelxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -1288,12 +1288,12 @@ ECode CGLImpl::GlLightfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
@@ -1445,12 +1445,12 @@ ECode CGLImpl::GlLightxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -1559,12 +1559,12 @@ ECode CGLImpl::GlLoadMatrixf(
 ECode CGLImpl::GlLoadMatrixf(
     /* [in] */ IFloatBuffer* m_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *m = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfloat *)tmp;
     if (m == NULL) {
@@ -1602,12 +1602,12 @@ ECode CGLImpl::GlLoadMatrixx(
 ECode CGLImpl::GlLoadMatrixx(
     /* [in] */ IInt32Buffer* m_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *m = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfixed *)tmp;
     if (m == NULL) {
@@ -1707,12 +1707,12 @@ ECode CGLImpl::GlMaterialfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
@@ -1835,12 +1835,12 @@ ECode CGLImpl::GlMaterialxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -1920,12 +1920,12 @@ ECode CGLImpl::GlMultMatrixf(
 ECode CGLImpl::GlMultMatrixf(
     /* [in] */ IFloatBuffer* m_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *m = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfloat *)tmp;
     if (m == NULL) {
@@ -1964,12 +1964,12 @@ ECode CGLImpl::GlMultMatrixx(
 ECode CGLImpl::GlMultMatrixx(
     /* [in] */ IInt32Buffer* m_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *m = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfixed *)tmp;
     if (m == NULL) {
@@ -2074,7 +2074,7 @@ ECode CGLImpl::GlNormalPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         GetDirectBufferPointer(pointer_buf, &tmp);
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -2200,12 +2200,12 @@ ECode CGLImpl::GlReadPixels(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     pixels = (GLvoid *)tmp;
     if (pixels == NULL) {
@@ -2358,7 +2358,7 @@ ECode CGLImpl::GlTexCoordPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         GetDirectBufferPointer(pointer_buf, &tmp);
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -2414,13 +2414,13 @@ ECode CGLImpl::GlTexImage2D(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
     if (pixels_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp);
         pixels = (GLvoid *)tmp;
     }
@@ -2479,13 +2479,13 @@ ECode CGLImpl::GlTexSubImage2D(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
     if (pixels_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp);
         pixels = (GLvoid *)tmp;
     }
@@ -2543,7 +2543,7 @@ ECode CGLImpl::GlVertexPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -2662,9 +2662,9 @@ ECode CGLImpl::GlQueryMatrixxOES(
 {
     VALIDATE_NOT_NULL(matrixxOES)
 
-    Handle64 _mantissaArray = (Handle64) 0;
+    HANDLE _mantissaArray = (HANDLE) 0;
     Int32 _mantissaBufferOffset = (Int32) 0;
-    Handle64 _exponentArray = (Handle64) 0;
+    HANDLE _exponentArray = (HANDLE) 0;
     Int32 _exponentBufferOffset = (Int32) 0;
     GLbitfield _returnValue = -1;
     Int32 _mantissaRemaining;
@@ -2672,7 +2672,7 @@ ECode CGLImpl::GlQueryMatrixxOES(
     Int32 _exponentRemaining;
     GLint *exponent = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(mantissa_buf), &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset, &tmp);
     mantissa = (GLfixed *)tmp;
     if (_mantissaRemaining < 16) {
@@ -2738,12 +2738,12 @@ ECode CGLImpl::GlTexParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (_remaining < 1) {
@@ -2818,12 +2818,12 @@ ECode CGLImpl::GlDrawTexfvOES(
 ECode CGLImpl::GlDrawTexfvOES(
     /* [in] */ IFloatBuffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *coords = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLfloat *)tmp;
     if (_remaining < 5) {
@@ -2887,12 +2887,12 @@ ECode CGLImpl::GlDrawTexivOES(
 ECode CGLImpl::GlDrawTexivOES(
     /* [in] */ IInt32Buffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *coords = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLint *)tmp;
     if (_remaining < 5) {
@@ -2955,12 +2955,12 @@ ECode CGLImpl::GlDrawTexsvOES(
 ECode CGLImpl::GlDrawTexsvOES(
     /* [in] */ IInt16Buffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLshort *coords = (GLshort *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLshort *)tmp;
     if (_remaining < 5) {
@@ -3024,12 +3024,12 @@ ECode CGLImpl::GlDrawTexxvOES(
 ECode CGLImpl::GlDrawTexxvOES(
     /* [in] */ IInt32Buffer* coords_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *coords = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLfixed *)tmp;
     if (_remaining < 5) {
@@ -3107,7 +3107,7 @@ ECode CGLImpl::GlMatrixIndexPointerOESBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -3166,7 +3166,7 @@ ECode CGLImpl::GlWeightPointerOESBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -3298,11 +3298,11 @@ ECode CGLImpl::GlCompressedTexImage2D(
     /* [in] */ Int32 imageSize,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     data = (GLvoid *) tmp;
     if (data == NULL) {
@@ -3385,12 +3385,12 @@ ECode CGLImpl::GlDeleteFramebuffersOES(
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     framebuffers = (GLuint *)tmp;
     if (_remaining < n) {
@@ -3448,12 +3448,12 @@ ECode CGLImpl::GlDeleteRenderbuffersOES(
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     renderbuffers = (GLuint *)tmp;
     if (_remaining < n) {
@@ -3561,12 +3561,12 @@ ECode CGLImpl::GlGenFramebuffersOES(
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     framebuffers = (GLuint *) tmp;
     if (_remaining < n) {
@@ -3625,12 +3625,12 @@ ECode CGLImpl::GlGenRenderbuffersOES(
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     renderbuffers = (GLuint *)tmp;
     if (_remaining < n) {
@@ -3689,12 +3689,12 @@ ECode CGLImpl::GlGetFramebufferAttachmentParameterivOES(
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
@@ -4075,12 +4075,12 @@ ECode CGLImpl::GlGetIntegerv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     Int32 _needed;
@@ -4467,12 +4467,12 @@ ECode CGLImpl::GlGetRenderbufferParameterivOES(
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
@@ -4524,12 +4524,12 @@ ECode CGLImpl::GlGetTexGenfv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (params == NULL) {
@@ -4582,12 +4582,12 @@ ECode CGLImpl::GlGetTexGeniv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
@@ -4640,12 +4640,12 @@ ECode CGLImpl::GlGetTexGenxv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
@@ -4799,12 +4799,12 @@ ECode CGLImpl::GlTexEnvfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
@@ -4916,12 +4916,12 @@ ECode CGLImpl::GlTexEnvxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -5015,12 +5015,12 @@ ECode CGLImpl::GlTexGenfv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (params == NULL) {
@@ -5088,12 +5088,12 @@ ECode CGLImpl::GlTexGeniv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
@@ -5161,12 +5161,12 @@ ECode CGLImpl::GlTexGenxv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
@@ -5205,13 +5205,13 @@ ECode CGLImpl::GlBufferData(
     /* [in] */ IBuffer* data_buf,
     /* [in] */ Int32 usage)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
     if (data_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
         data = (GLvoid *)tmp;
         if (_remaining < size) {
@@ -5238,12 +5238,12 @@ ECode CGLImpl::GlBufferSubData(
     /* [in] */ Int32 size,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     data = (GLvoid *)tmp;
     if (_remaining < size) {
@@ -5295,12 +5295,12 @@ ECode CGLImpl::GlClipPlanef(
     /* [in] */ Int32 plane,
     /* [in] */ IFloatBuffer* equation_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *equation = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(equation_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     equation = (GLfloat *)tmp;
     if (_remaining < 4) {
@@ -5350,12 +5350,12 @@ ECode CGLImpl::GlClipPlanex(
     /* [in] */ Int32 plane,
     /* [in] */ IInt32Buffer* equation_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *equation = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(equation_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     equation = (GLfixed *)tmp;
     if (_remaining < 4) {
@@ -5435,12 +5435,12 @@ ECode CGLImpl::GlDeleteBuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* buffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *buffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(buffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     buffers = (GLuint *) tmp;
     if (_remaining < n) {
@@ -5505,12 +5505,12 @@ ECode CGLImpl::GlGenBuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* buffers_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *buffers = (GLuint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(buffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     buffers = (GLuint *)tmp;
     if (_remaining < n) {
@@ -5556,12 +5556,12 @@ ECode CGLImpl::GlGetBooleanv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLboolean *params = (GLboolean *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLboolean *)tmp;
     if (params == NULL) {
@@ -5620,12 +5620,12 @@ ECode CGLImpl::GlGetClipPlanef(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* eqn_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *eqn = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(eqn_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     eqn = (GLfloat *)tmp;
     if (eqn == NULL) {
@@ -5667,12 +5667,12 @@ ECode CGLImpl::GlGetClipPlanex(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* eqn_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *eqn = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(eqn_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     eqn = (GLfixed *)tmp;
     if (eqn == NULL) {
@@ -5714,12 +5714,12 @@ ECode CGLImpl::GlGetFixedv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (params == NULL) {
@@ -5761,12 +5761,12 @@ ECode CGLImpl::GlGetFloatv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (params == NULL) {
@@ -5858,12 +5858,12 @@ ECode CGLImpl::GlGetLightfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     Int32 _needed;
     switch (pname) {
@@ -6002,12 +6002,12 @@ ECode CGLImpl::GlGetLightxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -6132,12 +6132,12 @@ ECode CGLImpl::GlGetMaterialfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
@@ -6248,12 +6248,12 @@ ECode CGLImpl::GlGetMaterialxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -6358,12 +6358,12 @@ ECode CGLImpl::GlGetTexEnviv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     Int32 _needed;
@@ -6462,12 +6462,12 @@ ECode CGLImpl::GlGetTexEnvxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
@@ -6544,12 +6544,12 @@ ECode CGLImpl::GlGetTexParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (_remaining < 1) {
@@ -6603,12 +6603,12 @@ ECode CGLImpl::GlGetTexParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (_remaining < 1) {
@@ -6662,12 +6662,12 @@ ECode CGLImpl::GlGetTexParameterxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (_remaining < 1) {
@@ -6784,12 +6784,12 @@ ECode CGLImpl::GlPointParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (_remaining < 1) {
@@ -6850,12 +6850,12 @@ ECode CGLImpl::GlPointParameterxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (_remaining < 1) {
@@ -6902,7 +6902,7 @@ ECode CGLImpl::GlPointSizePointerOESBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -7004,12 +7004,12 @@ ECode CGLImpl::GlTexEnviv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     Int32 _needed;
@@ -7099,12 +7099,12 @@ ECode CGLImpl::GlTexParameteriv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (_remaining < 1) {
@@ -7158,12 +7158,12 @@ ECode CGLImpl::GlTexParameterxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (_remaining < 1) {
@@ -7232,10 +7232,10 @@ Boolean CGLImpl::AllowIndirectBuffers()
 
 ECode CGLImpl::GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle64* array,
+    /* [in, out] */ HANDLE* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle64* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -7254,7 +7254,7 @@ ECode CGLImpl::GetPointer(
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle64)pointer;
+        *rst = (HANDLE)pointer;
         return NOERROR;
     }
 
@@ -7272,11 +7272,11 @@ ECode CGLImpl::GetPointer(
 
 ECode CGLImpl::GetDirectBufferPointer(
     /* [in] */ IBuffer* buffer,
-    /* [out] */ Handle64* result)
+    /* [out] */ HANDLE* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    Handle64 buf;
+    HANDLE buf;
     buffer->GetEffectiveDirectAddress(&buf);
     if (buf != 0) {
         Int32 position, elementSizeShift;
@@ -7285,7 +7285,7 @@ ECode CGLImpl::GetDirectBufferPointer(
         buf += position << elementSizeShift;
     } else {
         if(AllowIndirectBuffers()) {
-            Handle64 array = 0;
+            HANDLE array = 0;
             Int32 remaining;
             Int32 offset;
             GetPointer(buffer, &array, &remaining, &offset, &buf);

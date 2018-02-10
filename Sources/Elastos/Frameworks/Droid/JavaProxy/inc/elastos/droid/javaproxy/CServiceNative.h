@@ -43,8 +43,8 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 jVM,
-        /* [in] */ Handle64 jInstance);
+        /* [in] */ HANDLE jVM,
+        /* [in] */ HANDLE jInstance);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -58,7 +58,7 @@ public:
 public:
     CARAPI GetRemoteInstance(
         /* [in] */ JNIEnv* env,
-        /* [out] */ Handle64* obj);
+        /* [out] */ HANDLE* obj);
 
 private:
     static const String TAG;

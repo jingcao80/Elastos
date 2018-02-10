@@ -74,7 +74,7 @@ ECode CMediaProjectionInfo::ReadFromParcel(
 {
     AutoPtr<IInterface> obj;
     source->ReadString(&mPackageName);
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mUserHandle = IUserHandle::Probe(obj);
     return NOERROR;
 }

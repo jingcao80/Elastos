@@ -140,7 +140,7 @@ public:
      */
     //@CalledByNative
     CARAPI_(Boolean) Start(
-        /* [in] */ Handle64 nativePtr,
+        /* [in] */ HANDLE nativePtr,
         /* [in] */ Int32 eventType,
         /* [in] */ Int32 rateInMilliseconds);
 
@@ -254,7 +254,7 @@ private:
 
     static CARAPI_(Boolean) Start(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativePtr,
+        /* [in] */ HANDLE nativePtr,
         /* [in] */ Int32 eventType,
         /* [in] */ Int32 rateInMilliseconds);
 
@@ -307,7 +307,7 @@ private:
      * Orientation of the device with respect to its reference frame.
      */
     CARAPI_(void) NativeGotOrientation(
-        /* [in] */ Handle64 nativeSensorManagerAndroid,
+        /* [in] */ HANDLE nativeSensorManagerAndroid,
         /* [in] */ Double alpha,
         /* [in] */ Double beta,
         /* [in] */ Double gamma);
@@ -316,7 +316,7 @@ private:
      * Linear acceleration without gravity of the device with respect to its body frame.
      */
     CARAPI_(void) NativeGotAcceleration(
-        /* [in] */ Handle64 nativeSensorManagerAndroid,
+        /* [in] */ HANDLE nativeSensorManagerAndroid,
         /* [in] */ Double x,
         /* [in] */ Double y,
         /* [in] */ Double z);
@@ -325,7 +325,7 @@ private:
      * Acceleration including gravity of the device with respect to its body frame.
      */
     CARAPI_(void) NativeGotAccelerationIncludingGravity(
-        /* [in] */ Handle64 nativeSensorManagerAndroid,
+        /* [in] */ HANDLE nativeSensorManagerAndroid,
         /* [in] */ Double x,
         /* [in] */ Double y,
         /* [in] */ Double z);
@@ -334,7 +334,7 @@ private:
      * Rotation rate of the device with respect to its body frame.
      */
     CARAPI_(void) NativeGotRotationRate(
-        /* [in] */ Handle64 nativeSensorManagerAndroid,
+        /* [in] */ HANDLE nativeSensorManagerAndroid,
         /* [in] */ Double alpha,
         /* [in] */ Double beta,
         /* [in] */ Double gamma);
@@ -371,7 +371,7 @@ private:
 
     // Non-zero if and only if we're listening for events.
     // To avoid race conditions on the C++ side, access must be synchronized.
-    Handle64 mNativePtr;
+    HANDLE mNativePtr;
 
     // The lock to access the mNativePtr.
     Object mNativePtrLock;

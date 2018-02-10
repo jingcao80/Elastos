@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_TouchEventSynthesizer_InitCallback(Handle32 cb);
+    extern void Elastos_TouchEventSynthesizer_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -52,7 +52,7 @@ void* TouchEventSynthesizer::ElaTouchEventSynthesizerCallback_Init()
     sElaTouchEventSynthesizerCallback.elastos_TouchEventSynthesizer_setPointer = &TouchEventSynthesizer::SetPointer;
     sElaTouchEventSynthesizerCallback.elastos_TouchEventSynthesizer_inject = &TouchEventSynthesizer::Inject;
 
-    Elastos_TouchEventSynthesizer_InitCallback((Handle32)&sElaTouchEventSynthesizerCallback);
+    Elastos_TouchEventSynthesizer_InitCallback((HANDLE)&sElaTouchEventSynthesizerCallback);
     return &sElaTouchEventSynthesizerCallback;
 }
 

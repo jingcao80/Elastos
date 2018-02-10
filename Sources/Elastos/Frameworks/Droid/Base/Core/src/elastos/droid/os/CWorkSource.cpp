@@ -901,7 +901,7 @@ ECode CWorkSource::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadInt32(&mNum);
-    source->ReadArrayOf((Handle32*)&mUids);
+    source->ReadArrayOf((HANDLE*)&mUids);
     source->ReadArrayOfString((ArrayOf<String>**)&mNames);
     return NOERROR;
 }
@@ -910,7 +910,7 @@ ECode CWorkSource::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mNum);
-    dest->WriteArrayOf((Handle32)mUids.Get());
+    dest->WriteArrayOf((HANDLE)mUids.Get());
     dest->WriteArrayOfString(mNames);
     return NOERROR;
 }

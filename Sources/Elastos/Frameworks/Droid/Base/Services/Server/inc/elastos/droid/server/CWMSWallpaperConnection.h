@@ -34,8 +34,8 @@ public:
 
     CARAPI constructor(
         /* [in] */ IWallpaperInfo* info,
-        /* [in] */ Handle32 wallpaper,
-        /* [in] */ Handle32 owner);
+        /* [in] */ HANDLE wallpaper,
+        /* [in] */ HANDLE owner);
 
     CARAPI OnServiceConnected(
         /* [in] */ IComponentName* name,

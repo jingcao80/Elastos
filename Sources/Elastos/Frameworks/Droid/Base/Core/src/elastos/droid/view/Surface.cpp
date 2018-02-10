@@ -316,7 +316,7 @@ ECode Surface::NativeReadFromParcel(
     }
 
     android::Parcel* parcel;
-    source->GetDataPayload((Handle32*)&parcel);
+    source->GetDataPayload((HANDLE*)&parcel);
     if (parcel == NULL) {
         *result = 0;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -366,7 +366,7 @@ ECode Surface::NativeWriteToParcel(
 
     }
     android::Parcel* parcel;
-    dest->GetDataPayload((Handle32*)&parcel);
+    dest->GetDataPayload((HANDLE*)&parcel);
     if (parcel == NULL) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

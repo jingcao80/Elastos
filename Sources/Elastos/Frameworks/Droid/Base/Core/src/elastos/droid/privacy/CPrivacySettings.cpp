@@ -836,7 +836,7 @@ ECode CPrivacySettings::ReadFromParcel(
     source->ReadByte(&externalStorageSetting);
     source->ReadByte(&cameraSetting);
     source->ReadByte(&recordAudioSetting);
-    source->ReadArrayOf((Handle32*)&allowedContacts);
+    source->ReadArrayOf((HANDLE*)&allowedContacts);
     source->ReadByte(&smsSendSetting);
     source->ReadByte(&phoneCallSetting);
     source->ReadByte(&ipTableProtectSetting);
@@ -890,7 +890,7 @@ ECode CPrivacySettings::WriteToParcel(
     dest->WriteByte(externalStorageSetting);
     dest->WriteByte(cameraSetting);
     dest->WriteByte(recordAudioSetting);
-    dest->WriteArrayOf((Handle32)allowedContacts.Get());
+    dest->WriteArrayOf((HANDLE)allowedContacts.Get());
     dest->WriteByte(smsSendSetting);
     dest->WriteByte(phoneCallSetting);
     dest->WriteByte(ipTableProtectSetting);

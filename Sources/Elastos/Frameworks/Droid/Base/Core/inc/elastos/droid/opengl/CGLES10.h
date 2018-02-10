@@ -638,7 +638,7 @@ private:
 
     CARAPI GetDirectBufferPointer(
         /* [in] */ IBuffer* buffer,
-        /* [out] */ Handle64* result);
+        /* [out] */ HANDLE* result);
 
     CARAPI GlTexCoordPointerBounds(
         /* [in] */ Int32 size,

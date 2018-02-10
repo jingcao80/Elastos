@@ -841,7 +841,7 @@ ECode CPackageInstallerService::ReadSessionLocked(
 
     AutoPtr<ILooper> looper;
     mInstallHandler->GetLooper((ILooper**)&looper);
-    return CPackageInstallerSession::NewByFriend((Handle64)mInternalCallback.Get(), mContext, mPm,
+    return CPackageInstallerSession::NewByFriend((HANDLE)mInternalCallback.Get(), mContext, mPm,
             looper, sessionId, userId, installerPackageName, installerUid,
             params, createdMillis, stageDir, stageCid, prepared, sealed, session);
 }
@@ -1145,7 +1145,7 @@ ECode CPackageInstallerService::CreateSessionInternal(
 
         AutoPtr<ILooper> looper;
         mInstallThread->GetLooper((ILooper**)&looper);
-        CPackageInstallerSession::NewByFriend((Handle64)mInternalCallback.Get(), mContext, mPm,
+        CPackageInstallerSession::NewByFriend((HANDLE)mInternalCallback.Get(), mContext, mPm,
                 looper, sessionId, userId, installerPackageName, callingUid,
                 params, createdMillis, stageDir, stageCid, FALSE, FALSE, (CPackageInstallerSession**)&session);
         mSessions[sessionId] = session;

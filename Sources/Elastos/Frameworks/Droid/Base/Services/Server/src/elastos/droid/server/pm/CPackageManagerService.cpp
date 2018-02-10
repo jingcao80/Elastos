@@ -4289,7 +4289,7 @@ AutoPtr<IIPackageManager> CPackageManagerService::Main(
     /* [in] */ Boolean onlyCore)
 {
     AutoPtr<IIPackageManager> m;
-    CPackageManagerService::New(context, (Handle32)installer,
+    CPackageManagerService::New(context, (HANDLE)installer,
         factoryTest, onlyCore, (IIPackageManager**)&m);
     ServiceManager::AddService(String("package"), m);
     return m;
@@ -4334,7 +4334,7 @@ void CPackageManagerService::GetDefaultDisplayMetrics(
 
 ECode CPackageManagerService::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ Handle64 installer,
+    /* [in] */ HANDLE installer,
     /* [in] */ Boolean factoryTest,
     /* [in] */ Boolean onlyCore)
 {

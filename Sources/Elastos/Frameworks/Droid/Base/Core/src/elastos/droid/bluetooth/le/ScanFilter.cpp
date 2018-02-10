@@ -246,13 +246,13 @@ ECode ScanFilter::WriteToParcel(
         if (mServiceData != NULL) {
             dest->WriteInt32(mServiceData->GetLength());
             //dest.writeByteArray(mServiceData);
-            dest->WriteArrayOf((Handle32)(mServiceData.Get()));
+            dest->WriteArrayOf((HANDLE)(mServiceData.Get()));
 
             dest->WriteInt32(mServiceDataMask == NULL? 0 : 1);
             if (mServiceDataMask != NULL) {
                 dest->WriteInt32(mServiceDataMask->GetLength());
                 //dest->WriteByteArray(mServiceDataMask);
-                dest->WriteArrayOf((Handle32)(mServiceDataMask.Get()));
+                dest->WriteArrayOf((HANDLE)(mServiceDataMask.Get()));
             }
         }
     }
@@ -261,13 +261,13 @@ ECode ScanFilter::WriteToParcel(
     if (mManufacturerData != NULL) {
         dest->WriteInt32(mManufacturerData->GetLength());
         //dest.writeByteArray(mManufacturerData);
-        dest->WriteArrayOf((Handle32)(mManufacturerData.Get()));
+        dest->WriteArrayOf((HANDLE)(mManufacturerData.Get()));
 
         dest->WriteInt32(mManufacturerDataMask == NULL? 0 : 1);
         if (mManufacturerDataMask != NULL) {
             dest->WriteInt32(mManufacturerDataMask->GetLength());
             //dest->writeByteArray(mManufacturerDataMask);
-            dest->WriteArrayOf((Handle32)(mManufacturerDataMask.Get()));
+            dest->WriteArrayOf((HANDLE)(mManufacturerDataMask.Get()));
         }
     }
     return NOERROR;
@@ -290,7 +290,7 @@ ECode ScanFilter::ReadFromParcel(
     if ((in->ReadInt32(&flag), flag) == 1) {
         //ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
         AutoPtr<IInterface> obj;
-        in->ReadInterfacePtr((Handle32*)((IInterface**)&obj));
+        in->ReadInterfacePtr((HANDLE*)((IInterface**)&obj));
         mServiceUuid = IParcelUuid::Probe(obj);
         //builder.setServiceUuid(uuid);
         flag = 0;
@@ -298,7 +298,7 @@ ECode ScanFilter::ReadFromParcel(
             //ParcelUuid uuidMask = in.readParcelable(ParcelUuid.class.getClassLoader());
             //builder.setServiceUuid(uuid, uuidMask);
             AutoPtr<IInterface> obj;
-            in->ReadInterfacePtr((Handle32*)((IInterface**)&obj));
+            in->ReadInterfacePtr((HANDLE*)((IInterface**)&obj));
             mServiceUuidMask = IParcelUuid::Probe(obj);
         }
     }
@@ -306,7 +306,7 @@ ECode ScanFilter::ReadFromParcel(
     if ((in->ReadInt32(&flag), flag) == 1) {
         //ParcelUuid servcieDataUuid = in.readParcelable(ParcelUuid.class.getClassLoader());
         AutoPtr<IInterface> obj;
-        in->ReadInterfacePtr((Handle32*)((IInterface**)&obj));
+        in->ReadInterfacePtr((HANDLE*)((IInterface**)&obj));
         mServiceDataUuid = IParcelUuid::Probe(obj);
         flag = 0;
         if ((in->ReadInt32(&flag), flag) == 1) {
@@ -315,7 +315,7 @@ ECode ScanFilter::ReadFromParcel(
             //byte[] serviceData = new byte[serviceDataLength];
             //in.readByteArray(serviceData);
             mServiceData = NULL;
-            in->ReadArrayOf((Handle32*)&mServiceData);
+            in->ReadArrayOf((HANDLE*)&mServiceData);
             flag = 0;
             if ((in->ReadInt32(&flag), flag) == 0) {
                 //builder.setServiceData(servcieDataUuid, serviceData);
@@ -328,7 +328,7 @@ ECode ScanFilter::ReadFromParcel(
                 //builder.setServiceData(
                 //        servcieDataUuid, serviceData, serviceDataMask);
                 mServiceDataMask = NULL;
-                in->ReadArrayOf((Handle32*)&mServiceDataMask);
+                in->ReadArrayOf((HANDLE*)&mServiceDataMask);
             }
         }
     }
@@ -342,7 +342,7 @@ ECode ScanFilter::ReadFromParcel(
         //byte[] manufacturerData = new byte[manufacturerDataLength];
         //in.readByteArray(manufacturerData);
         mManufacturerData = NULL;
-        in->ReadArrayOf((Handle32*)&mManufacturerData);
+        in->ReadArrayOf((HANDLE*)&mManufacturerData);
         flag = 0;
         if ((in->ReadInt32(&flag), flag) == 0) {
             //builder.setManufacturerData(manufacturerId, manufacturerData);
@@ -354,7 +354,7 @@ ECode ScanFilter::ReadFromParcel(
             //in.readByteArray(manufacturerDataMask);
             //builder.setManufacturerData(manufacturerId, manufacturerData,
             //        manufacturerDataMask);
-            in->ReadArrayOf((Handle32*)&mManufacturerDataMask);
+            in->ReadArrayOf((HANDLE*)&mManufacturerDataMask);
         }
     }
 

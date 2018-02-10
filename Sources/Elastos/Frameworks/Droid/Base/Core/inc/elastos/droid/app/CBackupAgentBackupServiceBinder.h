@@ -38,7 +38,7 @@ public:
 
 
     CARAPI constructor(
-        /* [in] */ Handle32 host);
+        /* [in] */ HANDLE host);
 
     CARAPI DoBackup(
         /* [in] */ IParcelFileDescriptor* oldState,

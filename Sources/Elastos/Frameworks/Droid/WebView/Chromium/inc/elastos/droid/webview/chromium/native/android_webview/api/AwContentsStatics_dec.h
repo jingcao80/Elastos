@@ -31,7 +31,7 @@ extern "C"
     extern void Elastos_AwContentsStatics_nativeSetDataReductionProxyEnabled(Boolean enabled);
     extern String Elastos_AwContentsStatics_nativeGetUnreachableWebDataUrl();
     extern void Elastos_AwContentsStatics_nativeSetRecordFullDocument(Boolean recordFullDocument);
-    extern void Elastos_AwContentsStatics_InitCallback(Handle32 cb);
+    extern void Elastos_AwContentsStatics_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -55,7 +55,7 @@ void* AwContentsStatics::ElaAwContentsStaticsCallback_Init()
 
     sElaAwContentsStaticsCallback.elastos_AwContentsStatics_clientCertificatesCleared = &AwContentsStatics::ClientCertificatesCleared;
 
-    Elastos_AwContentsStatics_InitCallback((Handle32)&sElaAwContentsStaticsCallback);
+    Elastos_AwContentsStatics_InitCallback((HANDLE)&sElaAwContentsStaticsCallback);
     return &sElaAwContentsStaticsCallback;
 }
 

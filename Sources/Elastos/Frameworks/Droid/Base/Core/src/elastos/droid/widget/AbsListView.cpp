@@ -384,7 +384,7 @@ ECode AbsListView::AbsListViewSavedState::ReadFromParcel(
             Int64 key;
             source->ReadInt64(&key);
             AutoPtr<IInterface> value;
-            source->ReadInterfacePtr((Handle32*)(IInterface**)&value);
+            source->ReadInterfacePtr((HANDLE*)(IInterface**)&value);
             mCheckIdState->Put(key, value);
         }
     }

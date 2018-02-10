@@ -735,7 +735,7 @@ public:
     CARAPI PrepareToDraw();
 
     CARAPI GetNativeBitmap(
-        /* [out] */ Handle64* bitmap);
+        /* [out] */ HANDLE* bitmap);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -992,7 +992,7 @@ public:
      *
      * @hide
      */
-    Handle64 mNativeBitmap;
+    HANDLE mNativeBitmap;
 
     /**
      * Backing buffer for the Bitmap.

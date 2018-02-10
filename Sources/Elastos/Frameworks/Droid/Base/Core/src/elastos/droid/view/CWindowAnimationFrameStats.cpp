@@ -53,7 +53,7 @@ ECode CWindowAnimationFrameStats::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     parcel->WriteInt64(mRefreshPeriodNano);
-    parcel->WriteArrayOf((Handle32)mFramesPresentedTimeNano.Get());
+    parcel->WriteArrayOf((HANDLE)mFramesPresentedTimeNano.Get());
     return NOERROR;
 }
 
@@ -61,7 +61,7 @@ ECode CWindowAnimationFrameStats::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadInt64(&mRefreshPeriodNano);
-    source->ReadArrayOf((Handle32*)(&mFramesPresentedTimeNano));
+    source->ReadArrayOf((HANDLE*)(&mFramesPresentedTimeNano));
     return NOERROR;
 }
 

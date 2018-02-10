@@ -128,7 +128,7 @@ ECode CParceledListSlice::ReadFromParcel(
         return NOERROR;
     }
     AutoPtr<IInterface> creator/* = source.readParcelableCreator(loader)*/;
-    source->ReadInterfacePtr((Handle32*)&creator);
+    source->ReadInterfacePtr((HANDLE*)&creator);
     Int32 i = 0;
     AutoPtr<IClassInfo> cl = Object::GetClassInfo(creator);
     while (i < N) {
@@ -157,7 +157,7 @@ ECode CParceledListSlice::ReadFromParcel(
         return NOERROR;
     }
     AutoPtr<IInterface> retriever;
-    source->ReadInterfacePtr((Handle32*)&retriever);
+    source->ReadInterfacePtr((HANDLE*)&retriever);
     CParceledListSliceBinder* _retriever = (CParceledListSliceBinder*)IBinder::Probe(retriever);
     while (i < N) {
         if (DEBUG) Logger::D(TAG, "Reading more @%d of %d: retriever=%s", i, N, TO_CSTR(retriever));

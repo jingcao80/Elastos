@@ -949,14 +949,14 @@ Int64 XmlBlock::NativeCreate(
         return 0;
     }
 
-    return (Int64)osb;
+    return reinterpret_cast<Int64>(osb);
 }
 
 Int64 XmlBlock::NativeGetStringBlock(
     /* [in] */ Int64 xmlTree)
 {
     assert(xmlTree);
-    return (Int64)&((android::ResXMLTree*)xmlTree)->getStrings();
+    return reinterpret_cast<Int64>(&((android::ResXMLTree*)xmlTree)->getStrings());
 }
 
 Int64 XmlBlock::NativeCreateParseState(
@@ -970,7 +970,7 @@ Int64 XmlBlock::NativeCreateParseState(
 
     st->restart();
 
-    return (Int64)st;
+    return reinterpret_cast<Int64>(st);
 }
 
 Int32 XmlBlock::NativeNext(

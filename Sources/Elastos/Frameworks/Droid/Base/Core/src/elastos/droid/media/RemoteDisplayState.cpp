@@ -273,7 +273,7 @@ ECode RemoteDisplayState::ReadFromParcel(
     /* [in] */ IParcel* src)
 {
     VALIDATE_NOT_NULL(src);
-    return src->ReadInterfacePtr((Handle32*)&mDisplays);
+    return src->ReadInterfacePtr((HANDLE*)&mDisplays);
 }
 
 ECode RemoteDisplayState::IsValid(

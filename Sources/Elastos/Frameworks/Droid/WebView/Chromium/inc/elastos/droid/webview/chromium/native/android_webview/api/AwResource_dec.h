@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AwResource_InitCallback(Handle32 cb);
+    extern void Elastos_AwResource_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -53,7 +53,7 @@ void* AwResource::ElaAwResourceCallback_Init()
     sElaAwResourceCallback.elastos_AwResource_getNoDomainPageContent = &AwResource::GetNoDomainPageContent;
     sElaAwResourceCallback.elastos_AwResource_getLoadErrorPageContent = &AwResource::GetLoadErrorPageContent;
 
-    Elastos_AwResource_InitCallback((Handle32)&sElaAwResourceCallback);
+    Elastos_AwResource_InitCallback((HANDLE)&sElaAwResourceCallback);
     return &sElaAwResourceCallback;
 }
 

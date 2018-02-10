@@ -383,10 +383,10 @@ public:
         /* [in] */ IParcel* out);
 
     CARAPI GetNative(
-        /* [out] */ Handle64* native);
+        /* [out] */ HANDLE* native);
 
     CARAPI SetNative(
-        /* [in] */ Handle64 native);
+        /* [in] */ HANDLE native);
 
     CARAPI GetMap(
         /* [in] */ Int64* map);

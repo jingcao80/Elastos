@@ -87,10 +87,10 @@ ECode CPlaybackState::ReadFromParcel(
     source->ReadInt64(&mActiveItemId);
 
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mCustomActions = IList::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mErrorMessage = ICharSequence::Probe(obj);
     return NOERROR;
 }

@@ -1830,7 +1830,7 @@ static Monitor* NativeCreateMonitor(
         //LOGE("Unable to allocate monitor\n");
         //dvmAbort();
     }
-    if (((UInt32)mon & 7) != 0) {
+    if (((uintptr_t)mon & 7) != 0) {
         //LOGE("Misaligned monitor: %p\n", mon);
         //dvmAbort();
     }
@@ -1840,8 +1840,13 @@ static Monitor* NativeCreateMonitor(
     /* replace the head of the list with the new monitor */
     do {
         mon->mNext = gCore.mMonitorList;
+#if defined(_arm)
     } while (android_atomic_release_cas((int32_t)mon->mNext, (int32_t)mon,
            (int32_t*)(void*)&gCore.mMonitorList) != 0);
+#elif defined(_aarch64)
+    } while (!__sync_bool_compare_and_swap((uintptr_t*)&gCore.mMonitorList,
+            (uintptr_t)mon->mNext, (uintptr_t)mon));
+#endif
 
     return mon;
 }
@@ -2333,7 +2338,7 @@ static void InflateMonitor(
     /* [in] */ NativeObject *obj)
 {
     Monitor *mon;
-    UInt32 thin;
+    uintptr_t thin;
 
     assert(self != NULL);
     assert(obj != NULL);
@@ -2346,9 +2351,13 @@ static void InflateMonitor(
     thin = obj->mLock;
     mon->mLockCount = LW_LOCK_COUNT(thin);
     thin &= LW_HASH_STATE_MASK << LW_HASH_STATE_SHIFT;
-    thin |= (UInt32)mon | LW_SHAPE_FAT;
+    thin |= (uintptr_t)mon | LW_SHAPE_FAT;
     /* Publish the updated lock word. */
+#if defined(_arm)
     android_atomic_release_store(thin, (int32_t *)&obj->mLock);
+#elif defined(_aarch64)
+    __sync_bool_compare_and_swap(&obj->mLock, obj->mLock, thin);
+#endif
 }
 
 NativeObject* NativeCreateObject()
@@ -2376,11 +2385,12 @@ void NativeDestroyObject(
 ECode NativeLockObject(
     /* [in] */ NativeObject *obj)
 {
-    volatile UInt32* thinp;
+    volatile uintptr_t* thinp;
     NativeThreadStatus oldStatus;
     useconds_t sleepDelay;
     const useconds_t maxSleepDelay = 1 << 20;
-    UInt32 thin, newThin, threadId;
+    uintptr_t thin, newThin;
+    UInt32 threadId;
 
     NativeThread* self = NativeThreadSelf();
     assert(self != NULL);
@@ -2417,8 +2427,13 @@ retry:
              * will have tried this before calling out to the VM.
              */
             newThin = thin | (threadId << LW_LOCK_OWNER_SHIFT);
+#if defined(_arm)
             if (android_atomic_acquire_cas(thin, newThin,
                     (int32_t*)thinp) != 0) {
+#elif defined(_aarch64)
+            if (!__sync_bool_compare_and_swap(thinp, thin,
+                    newThin)) {
+#endif
                 /*
                  * The acquire failed.  Try again.
                  */
@@ -2451,8 +2466,13 @@ retry:
                          * owner field.
                          */
                         newThin = thin | (threadId << LW_LOCK_OWNER_SHIFT);
+#if defined(_arm)
                         if (android_atomic_acquire_cas(thin, newThin,
                                 (int32_t *)thinp) == 0) {
+#elif defined(_aarch64)
+                        if (__sync_bool_compare_and_swap(thinp, thin,
+                                newThin)) {
+#endif
                             /*
                              * The acquire succeed.  Break out of the
                              * loop and proceed to inflate the lock.
@@ -2571,7 +2591,7 @@ retry:
 ECode NativeUnlockObject(
     /* [in] */ NativeObject *obj)
 {
-    UInt32 thin;
+    uintptr_t thin;
 
     NativeThread* self = NativeThreadSelf();
     assert(self != NULL);
@@ -2656,7 +2676,7 @@ ECode NativeObjectWait(
     assert(self != NULL);
 
     Monitor* mon;
-    UInt32 thin = obj->mLock;
+    uintptr_t thin = obj->mLock;
 
     /* If the lock is still thin, we need to fatten it.
      */
@@ -2691,7 +2711,7 @@ ELAPI NativeObjectNotify(
     NativeThread* self = NativeThreadSelf();
     assert(self != NULL);
 
-    UInt32 thin = obj->mLock;
+    uintptr_t thin = obj->mLock;
 
     /* If the lock is still thin, there aren't any waiters;
      * waiting on an object forces lock fattening.
@@ -2724,7 +2744,7 @@ ELAPI NativeObjectNotifyAll(
     NativeThread* self = NativeThreadSelf();
     assert(self != NULL);
 
-    UInt32 thin = obj->mLock;
+    uintptr_t thin = obj->mLock;
 
     /* If the lock is still thin, there aren't any waiters;
      * waiting on an object forces lock fattening.

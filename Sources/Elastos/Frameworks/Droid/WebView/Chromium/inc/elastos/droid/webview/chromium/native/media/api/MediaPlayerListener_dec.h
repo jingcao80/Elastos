@@ -26,14 +26,14 @@
 extern "C"
 {
 #endif
-    extern void Elastos_MediaPlayerListener_nativeOnMediaError(IInterface* caller,Handle64 nativeMediaPlayerListener,Int32 errorType);
-    extern void Elastos_MediaPlayerListener_nativeOnVideoSizeChanged(IInterface* caller,Handle64 nativeMediaPlayerListener,Int32 width,Int32 height);
-    extern void Elastos_MediaPlayerListener_nativeOnBufferingUpdate(IInterface* caller,Handle64 nativeMediaPlayerListener,Int32 percent);
-    extern void Elastos_MediaPlayerListener_nativeOnMediaPrepared(IInterface* caller,Handle64 nativeMediaPlayerListener);
-    extern void Elastos_MediaPlayerListener_nativeOnPlaybackComplete(IInterface* caller,Handle64 nativeMediaPlayerListener);
-    extern void Elastos_MediaPlayerListener_nativeOnSeekComplete(IInterface* caller,Handle64 nativeMediaPlayerListener);
-    extern void Elastos_MediaPlayerListener_nativeOnMediaInterrupted(IInterface* caller,Handle64 nativeMediaPlayerListener);
-    extern void Elastos_MediaPlayerListener_InitCallback(Handle64 cb);
+    extern void Elastos_MediaPlayerListener_nativeOnMediaError(IInterface* caller,HANDLE nativeMediaPlayerListener,Int32 errorType);
+    extern void Elastos_MediaPlayerListener_nativeOnVideoSizeChanged(IInterface* caller,HANDLE nativeMediaPlayerListener,Int32 width,Int32 height);
+    extern void Elastos_MediaPlayerListener_nativeOnBufferingUpdate(IInterface* caller,HANDLE nativeMediaPlayerListener,Int32 percent);
+    extern void Elastos_MediaPlayerListener_nativeOnMediaPrepared(IInterface* caller,HANDLE nativeMediaPlayerListener);
+    extern void Elastos_MediaPlayerListener_nativeOnPlaybackComplete(IInterface* caller,HANDLE nativeMediaPlayerListener);
+    extern void Elastos_MediaPlayerListener_nativeOnSeekComplete(IInterface* caller,HANDLE nativeMediaPlayerListener);
+    extern void Elastos_MediaPlayerListener_nativeOnMediaInterrupted(IInterface* caller,HANDLE nativeMediaPlayerListener);
+    extern void Elastos_MediaPlayerListener_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ namespace Media {
 struct ElaMediaPlayerListenerCallback
 {
     void (*elastos_MediaPlayerListener_releaseResources)(IInterface* obj);
-    AutoPtr<IInterface> (*elastos_MediaPlayerListener_create)(Handle64 nativeMediaPlayerListener, IInterface* context, IInterface* mediaPlayerBridge);
+    AutoPtr<IInterface> (*elastos_MediaPlayerListener_create)(HANDLE nativeMediaPlayerListener, IInterface* context, IInterface* mediaPlayerBridge);
 };
 
 void* MediaPlayerListener::ElaMediaPlayerListenerCallback_Init()
@@ -59,7 +59,7 @@ void* MediaPlayerListener::ElaMediaPlayerListenerCallback_Init()
     sElaMediaPlayerListenerCallback.elastos_MediaPlayerListener_releaseResources = &MediaPlayerListener::ReleaseResources;
     sElaMediaPlayerListenerCallback.elastos_MediaPlayerListener_create = &MediaPlayerListener::Create;
 
-    Elastos_MediaPlayerListener_InitCallback((Handle64)&sElaMediaPlayerListenerCallback);
+    Elastos_MediaPlayerListener_InitCallback((HANDLE)&sElaMediaPlayerListenerCallback);
     return &sElaMediaPlayerListenerCallback;
 }
 

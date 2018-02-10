@@ -479,7 +479,7 @@ const Int32 AudioManagerElastos::DEFAULT_FRAME_PER_BUFFER;
 
 AudioManagerElastos::AudioManagerElastos(
     /* [in] */ IContext* context,
-    /* [in] */ Handle64 nativeAudioManagerElastos)
+    /* [in] */ HANDLE nativeAudioManagerElastos)
     : mContext(context)
     , mNativeAudioManagerElastos(nativeAudioManagerElastos)
     , mHasModifyAudioSettingsPermission(FALSE)
@@ -519,7 +519,7 @@ Boolean AudioManagerElastos::RunningOnJellyBeanMR2OrHigher()
 //@CalledByNative return AudioManagerElastos
 AutoPtr<AudioManagerElastos> AudioManagerElastos::CreateAudioManagerElastos(
     /* [in] */ IContext* context,
-    /* [in] */ Handle64 nativeAudioManagerElastos)
+    /* [in] */ HANDLE nativeAudioManagerElastos)
 {
     AutoPtr<AudioManagerElastos> ret(new AudioManagerElastos(context, nativeAudioManagerElastos));
     return ret;
@@ -1427,7 +1427,7 @@ void AudioManagerElastos::StopObservingVolumeChanges()
 }
 
 void AudioManagerElastos::NativeSetMute(
-    /* [in] */ Handle64 nativeAudioManagerElastos,
+    /* [in] */ HANDLE nativeAudioManagerElastos,
     /* [in] */ Boolean muted)
 {
     AutoPtr<IInterface> iAudioManagerElastos = TO_IINTERFACE(this);
@@ -1534,7 +1534,7 @@ Int32 AudioManagerElastos::GetAudioLowLatencyOutputFrameSize(
 
 AutoPtr<IInterface> AudioManagerElastos::CreateAudioManagerElastos(
     /* [in] */ IInterface* context,
-    /* [in} */ Handle64 nativeAudioManagerElastos)
+    /* [in} */ HANDLE nativeAudioManagerElastos)
 {
     AutoPtr<IContext> cObj = (IContext*)(IContext::Probe(context));
     if (NULL == cObj)

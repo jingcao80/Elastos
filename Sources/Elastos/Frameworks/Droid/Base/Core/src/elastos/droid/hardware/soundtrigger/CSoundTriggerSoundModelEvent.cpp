@@ -65,7 +65,7 @@ ECode CSoundTriggerSoundModelEvent::FromParcel(
     Int32 soundModelHandle;
     FAIL_RETURN(source->ReadInt32(&soundModelHandle))
     AutoPtr<ArrayOf<Byte> > data;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&data))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&data))
 
     AutoPtr<CSoundTriggerSoundModelEvent> newResult;
     CSoundTriggerSoundModelEvent::NewByFriend(status, soundModelHandle, data, (CSoundTriggerSoundModelEvent**)&newResult);
@@ -79,7 +79,7 @@ ECode CSoundTriggerSoundModelEvent::WriteToParcel(
 {
     FAIL_RETURN(dest->WriteInt32(mStatus))
     FAIL_RETURN(dest->WriteInt32(mSoundModelHandle))
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mData.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mData.Get()))
     return NOERROR;
 }
 
@@ -88,7 +88,7 @@ ECode CSoundTriggerSoundModelEvent::ReadFromParcel(
 {
     FAIL_RETURN(source->ReadInt32(&mStatus))
     FAIL_RETURN(source->ReadInt32(&mSoundModelHandle))
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mData))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mData))
     return NOERROR;
 }
 

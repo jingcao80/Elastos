@@ -482,7 +482,7 @@ ECode Profile::WriteToParcel(
         CParcelUuid::New(IUUID::Probe(item), (IParcelUuid**)&uuid);
         uuids->Set(i, uuid);
     }
-    dest->WriteArrayOf((Handle32)uuids.Get());
+    dest->WriteArrayOf((HANDLE)uuids.Get());
     dest->WriteInt32(mStatusBarIndicator ? 1 : 0);
     dest->WriteInt32(mProfileType);
     dest->WriteInt32(mDirty ? 1 : 0);
@@ -491,19 +491,19 @@ ECode Profile::WriteToParcel(
     AutoPtr<ArrayOf<IInterface*> > groups;
     mProfileGroups->GetValues((ICollection**)&collection);
     collection->ToArray((ArrayOf<IInterface*>**)&groups);
-    dest->WriteArrayOf((Handle32)groups.Get());
+    dest->WriteArrayOf((HANDLE)groups.Get());
 
     collection = NULL;
     AutoPtr<ArrayOf<IInterface*> > streams;
     mStreams->GetValues((ICollection**)&collection);
     collection->ToArray((ArrayOf<IInterface*>**)&streams);
-    dest->WriteArrayOf((Handle32)streams.Get());
+    dest->WriteArrayOf((HANDLE)streams.Get());
 
     collection = NULL;
     AutoPtr<ArrayOf<IInterface*> > connections;
     mConnections->GetValues((ICollection**)&collection);
     collection->ToArray((ArrayOf<IInterface*>**)&connections);
-    dest->WriteArrayOf((Handle32)connections.Get());
+    dest->WriteArrayOf((HANDLE)connections.Get());
 
     dest->WriteInterfacePtr(mRingMode);
     dest->WriteInterfacePtr(mAirplaneMode);
@@ -539,12 +539,12 @@ ECode Profile::ReadFromParcel(
     source->ReadInt32(&mNameResId);
 
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     IParcelUuid* uuid = IParcelUuid::Probe(obj);
     uuid->GetUuid((IUUID**)&mUuid);
 
     AutoPtr<ArrayOf<IInterface*> > array;
-    source->ReadArrayOf((Handle32*)&array);
+    source->ReadArrayOf((HANDLE*)&array);
     for (Int32 i = 0; i < array->GetLength(); i++) {
         AutoPtr<IUUID> item;
         IParcelUuid::Probe((*array)[i])->GetUuid((IUUID**)&item);
@@ -559,7 +559,7 @@ ECode Profile::ReadFromParcel(
     mDirty = (value == 1);
 
     array = NULL;
-    source->ReadArrayOf((Handle32*)&array);
+    source->ReadArrayOf((HANDLE*)&array);
     Boolean isDefault;
     for (Int32 i = 0; i < array->GetLength(); i++) {
         IProfileGroup* group = IProfileGroup::Probe((*array)[i]);
@@ -573,7 +573,7 @@ ECode Profile::ReadFromParcel(
     }
 
     array = NULL;
-    source->ReadArrayOf((Handle32*)&array);
+    source->ReadArrayOf((HANDLE*)&array);
     Int32 id;
     for (Int32 i = 0; i < array->GetLength(); i++) {
         IStreamSettings* stream = IStreamSettings::Probe((*array)[i]);
@@ -582,7 +582,7 @@ ECode Profile::ReadFromParcel(
     }
 
     array = NULL;
-    source->ReadArrayOf((Handle32*)&array);
+    source->ReadArrayOf((HANDLE*)&array);
     for (Int32 i = 0; i < array->GetLength(); i++) {
         IConnectionSettings* connection = IConnectionSettings::Probe((*array)[i]);
         connection->GetConnectionId(&id);
@@ -590,13 +590,13 @@ ECode Profile::ReadFromParcel(
     }
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mRingMode = IRingModeSettings::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mAirplaneMode = IAirplaneModeSettings::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mBrightness = IBrightnessSettings::Probe(obj);
     source->ReadInt32(&mScreenLockMode);
 
@@ -606,7 +606,7 @@ ECode Profile::ReadFromParcel(
     for (Int32 i = 0; i < size; i++) {
         source->ReadString(&key);
         obj = NULL;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mTriggers->Put(CoreUtils::Convert(key), obj);
     }
 

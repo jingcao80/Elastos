@@ -150,11 +150,11 @@ eobject ANativeWindowFromSurface(eobject eobj)
     ISurface* pSurface = (ISurface*)eobj;;
     assert(pSurface);
 
-    /*Handle32 ptr;
+    /*HANDLE ptr;
     surface->GetSurface(&ptr);
     mNativeWindow = (ANativeWindow*)(android::Surface*)ptr;*/
-    Handle32 ptr;
-    pSurface->GetSurface((Handle32*)&ptr);
+    HANDLE ptr;
+    pSurface->GetSurface((HANDLE*)&ptr);
     return (void*)ptr;
 }
 
@@ -1278,7 +1278,7 @@ int IBitmapGetInfo(
     }
 
     SkBitmap* bm = NULL;
-    ((IBitmap*)eobj)->GetNativeBitmap((Handle32*)&bm);
+    ((IBitmap*)eobj)->GetNativeBitmap((HANDLE*)&bm);
 
     if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
@@ -1322,7 +1322,7 @@ int IBitmapLockPixels(
     }
 
     SkBitmap* bm = NULL;
-    ((IBitmap*)eobj)->GetNativeBitmap((Handle32*)&bm);
+    ((IBitmap*)eobj)->GetNativeBitmap((HANDLE*)&bm);
 
     if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
@@ -1349,7 +1349,7 @@ int IBitmapUnlockPixels(
     }
 
     SkBitmap* bm = NULL;
-    ((IBitmap*)eobj)->GetNativeBitmap((Handle32*)&bm);
+    ((IBitmap*)eobj)->GetNativeBitmap((HANDLE*)&bm);
     if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }

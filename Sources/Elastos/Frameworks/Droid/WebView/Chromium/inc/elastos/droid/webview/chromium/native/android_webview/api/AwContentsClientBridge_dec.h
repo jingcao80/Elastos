@@ -26,11 +26,11 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AwContentsClientBridge_nativeProceedSslError(IInterface* caller,Handle32 nativeAwContentsClientBridge,Boolean proceed,Int32 id);
-    extern void Elastos_AwContentsClientBridge_nativeProvideClientCertificateResponse(IInterface* caller,Handle32 nativeAwContentsClientBridge,Int32 id,ArrayOf<AutoPtr<ArrayOf<Byte> > >* certChain,IInterface* androidKey);
-    extern void Elastos_AwContentsClientBridge_nativeConfirmJsResult(IInterface* caller,Handle32 nativeAwContentsClientBridge,Int32 id,const String& prompt);
-    extern void Elastos_AwContentsClientBridge_nativeCancelJsResult(IInterface* caller,Handle32 nativeAwContentsClientBridge,Int32 id);
-    extern void Elastos_AwContentsClientBridge_InitCallback(Handle32 cb);
+    extern void Elastos_AwContentsClientBridge_nativeProceedSslError(IInterface* caller,HANDLE nativeAwContentsClientBridge,Boolean proceed,Int32 id);
+    extern void Elastos_AwContentsClientBridge_nativeProvideClientCertificateResponse(IInterface* caller,HANDLE nativeAwContentsClientBridge,Int32 id,ArrayOf<AutoPtr<ArrayOf<Byte> > >* certChain,IInterface* androidKey);
+    extern void Elastos_AwContentsClientBridge_nativeConfirmJsResult(IInterface* caller,HANDLE nativeAwContentsClientBridge,Int32 id,const String& prompt);
+    extern void Elastos_AwContentsClientBridge_nativeCancelJsResult(IInterface* caller,HANDLE nativeAwContentsClientBridge,Int32 id);
+    extern void Elastos_AwContentsClientBridge_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -68,7 +68,7 @@ void* AwContentsClientBridge::ElaAwContentsClientBridgeCallback_Init()
     sElaAwContentsClientBridgeCallback.elastos_AwContentsClientBridge_handleJsBeforeUnload = &AwContentsClientBridge::HandleJsBeforeUnload;
     sElaAwContentsClientBridgeCallback.elastos_AwContentsClientBridge_shouldOverrideUrlLoading = &AwContentsClientBridge::ShouldOverrideUrlLoading;
 
-    Elastos_AwContentsClientBridge_InitCallback((Handle32)&sElaAwContentsClientBridgeCallback);
+    Elastos_AwContentsClientBridge_InitCallback((HANDLE)&sElaAwContentsClientBridgeCallback);
     return &sElaAwContentsClientBridgeCallback;
 }
 

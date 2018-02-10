@@ -312,7 +312,7 @@ printf("File=[%s], Line = [%d], FUNC = [%s], mScanResult=[%p], mPassword=[%p]\n"
         params->WriteInterfacePtr(str.Get());
 
         mHost->mApartment->PostCppCallbackDelayed(
-            (Handle32)mHost, *(Handle32*)&pHandlerFunc,
+            (HANDLE)mHost, *(HANDLE*)&pHandlerFunc,
             params, 0, 0);
     }
     return NOERROR;

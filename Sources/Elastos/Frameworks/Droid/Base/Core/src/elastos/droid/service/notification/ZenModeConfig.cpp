@@ -206,7 +206,7 @@ ECode ZenModeConfig::ReadFromParcel(
         mConditionComponents = ArrayOf<IComponentName*>::Alloc(len);
         for (Int32 i = 0; i < len; ++len) {
             AutoPtr<IInterface> obj;
-            source->ReadInterfacePtr((Handle32*)&obj);
+            source->ReadInterfacePtr((HANDLE*)&obj);
             mConditionComponents->Set(i, IComponentName::Probe(obj));
         }
     }
@@ -216,7 +216,7 @@ ECode ZenModeConfig::ReadFromParcel(
         mConditionIds = ArrayOf<IUri*>::Alloc(len);
         for (Int32 i = 0; i < len; ++len) {
             AutoPtr<IInterface> obj;
-            source->ReadInterfacePtr((Handle32*)&obj);
+            source->ReadInterfacePtr((HANDLE*)&obj);
             mConditionIds->Set(i, IUri::Probe(obj));
         }
     }
@@ -225,13 +225,13 @@ ECode ZenModeConfig::ReadFromParcel(
 
     if (source->ReadInt32(&i), i != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mExitCondition = ICondition::Probe(obj);
     }
 
     if (source->ReadInt32(&i), i != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mExitConditionComponent = IComponentName::Probe(obj);
     }
     return NOERROR;

@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_InputStreamUtil_InitCallback(Handle32 cb);
+    extern void Elastos_InputStreamUtil_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -55,7 +55,7 @@ void* InputStreamUtil::ElaInputStreamUtilCallback_Init()
     sElaInputStreamUtilCallback.elastos_InputStreamUtil_read = &InputStreamUtil::Read;
     sElaInputStreamUtilCallback.elastos_InputStreamUtil_skip = &InputStreamUtil::Skip;
 
-    Elastos_InputStreamUtil_InitCallback((Handle32)&sElaInputStreamUtilCallback);
+    Elastos_InputStreamUtil_InitCallback((HANDLE)&sElaInputStreamUtilCallback);
     return &sElaInputStreamUtilCallback;
 }
 

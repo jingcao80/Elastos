@@ -132,7 +132,7 @@ ECode CWifiP2pInfo::ReadFromParcel(
     source->ReadByte(&b);
     if (b == 1) {
         AutoPtr<ArrayOf<Byte> > bytes;
-        source->ReadArrayOf((Handle32*)&bytes); //in.createByteArray()
+        source->ReadArrayOf((HANDLE*)&bytes); //in.createByteArray()
 
         AutoPtr<IInetAddressHelper> helper;
         CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&helper);
@@ -154,7 +154,7 @@ ECode CWifiP2pInfo::WriteToParcel(
         FAIL_RETURN(dest->WriteByte((Byte)1));
         AutoPtr<ArrayOf<Byte> > bytes;
         mGroupOwnerAddress->GetAddress((ArrayOf<Byte> **)&bytes);
-        FAIL_RETURN(dest->WriteArrayOf((Handle32)bytes.Get()));
+        FAIL_RETURN(dest->WriteArrayOf((HANDLE)bytes.Get()));
     }
     else {
         FAIL_RETURN(dest->WriteByte((Byte)0));

@@ -56,7 +56,7 @@ ECode CISerializableNative::ReadFromParcel(
     source->ReadBoolean(&mIsDexClassLoader);
     source->ReadString(&mPkgPath);
     source->ReadString(&mOptimizedDirectory);
-    source->ReadArrayOf((Handle32*)&mObject);
+    source->ReadArrayOf((HANDLE*)&mObject);
     return NOERROR;
 }
 
@@ -66,7 +66,7 @@ ECode CISerializableNative::WriteToParcel(
     dest->WriteBoolean(mIsDexClassLoader);
     dest->WriteString(mPkgPath);
     dest->WriteString(mOptimizedDirectory);
-    dest->WriteArrayOf((Handle32)mObject.Get());
+    dest->WriteArrayOf((HANDLE)mObject.Get());
     return NOERROR;
 }
 

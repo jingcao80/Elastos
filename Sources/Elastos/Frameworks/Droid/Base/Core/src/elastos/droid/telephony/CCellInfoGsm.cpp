@@ -157,8 +157,8 @@ ECode CCellInfoGsm::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     CellInfo::ReadFromParcel(source);
-    source->ReadInterfacePtr((Handle32*)&mCellIdentityGsm);
-    source->ReadInterfacePtr((Handle32*)&mCellSignalStrengthGsm);
+    source->ReadInterfacePtr((HANDLE*)&mCellIdentityGsm);
+    source->ReadInterfacePtr((HANDLE*)&mCellSignalStrengthGsm);
     return NOERROR;
 }
 

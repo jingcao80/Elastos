@@ -26,9 +26,9 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AudioRecordInput_nativeCacheDirectBufferAddress(IInterface* caller,Handle64 nativeAudioRecordInputStream,IInterface* buffer);
-    extern void Elastos_AudioRecordInput_nativeOnData(IInterface* caller,Handle64 nativeAudioRecordInputStream,Int32 size,Int32 hardwareDelayBytes);
-    extern void Elastos_AudioRecordInput_InitCallback(Handle64 cb);
+    extern void Elastos_AudioRecordInput_nativeCacheDirectBufferAddress(IInterface* caller,HANDLE nativeAudioRecordInputStream,IInterface* buffer);
+    extern void Elastos_AudioRecordInput_nativeOnData(IInterface* caller,HANDLE nativeAudioRecordInputStream,Int32 size,Int32 hardwareDelayBytes);
+    extern void Elastos_AudioRecordInput_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -42,7 +42,7 @@ namespace Media {
 
 struct ElaAudioRecordInputCallback
 {
-    AutoPtr<IInterface> (*elastos_AudioRecordInput_createAudioRecordInput)(Handle64 nativeAudioRecordInputStream, Int32 sampleRate, Int32 channels, Int32 bitsPerSample, Int32 bytesPerBuffer, Boolean usePlatformAEC);
+    AutoPtr<IInterface> (*elastos_AudioRecordInput_createAudioRecordInput)(HANDLE nativeAudioRecordInputStream, Int32 sampleRate, Int32 channels, Int32 bitsPerSample, Int32 bytesPerBuffer, Boolean usePlatformAEC);
     Boolean (*elastos_AudioRecordInput_open)(IInterface* obj);
     void (*elastos_AudioRecordInput_start)(IInterface* obj);
     void (*elastos_AudioRecordInput_stop)(IInterface* obj);
@@ -59,7 +59,7 @@ void* AudioRecordInput::ElaAudioRecordInputCallback_Init()
     sElaAudioRecordInputCallback.elastos_AudioRecordInput_stop = &AudioRecordInput::Stop;
     sElaAudioRecordInputCallback.elastos_AudioRecordInput_close = &AudioRecordInput::Close;
 
-    Elastos_AudioRecordInput_InitCallback((Handle64)&sElaAudioRecordInputCallback);
+    Elastos_AudioRecordInput_InitCallback((HANDLE)&sElaAudioRecordInputCallback);
 
     return &sElaAudioRecordInputCallback;
 }

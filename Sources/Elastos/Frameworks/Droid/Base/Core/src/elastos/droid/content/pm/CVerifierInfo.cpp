@@ -58,7 +58,7 @@ ECode CVerifierInfo::ReadFromParcel(
 {
     VALIDATE_NOT_NULL(source);
     source->ReadString(&mPackageName);
-    source->ReadInterfacePtr((Handle32*)&mPublicKey);
+    source->ReadInterfacePtr((HANDLE*)&mPublicKey);
     return NOERROR;
 }
 

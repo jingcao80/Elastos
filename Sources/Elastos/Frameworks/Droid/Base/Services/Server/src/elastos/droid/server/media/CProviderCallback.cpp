@@ -30,7 +30,7 @@ CAR_INTERFACE_IMPL_2(CProviderCallback, Object, IIRemoteDisplayCallback, IBinder
 CAR_OBJECT_IMPL(CProviderCallback)
 
 ECode CProviderCallback::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ HANDLE host)
 {
     AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(
             (IObject*)(RemoteDisplayProviderProxy::Connection*)host);

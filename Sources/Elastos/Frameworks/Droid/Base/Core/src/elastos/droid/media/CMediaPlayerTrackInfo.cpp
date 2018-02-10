@@ -110,7 +110,7 @@ ECode CMediaPlayerTrackInfo::ReadFromParcel(
     VALIDATE_NOT_NULL(src);
     src->ReadInt32(&mTrackType);
     AutoPtr<IInterface> obj;
-    src->ReadInterfacePtr((Handle32*)&obj);
+    src->ReadInterfacePtr((HANDLE*)&obj);
     mFormat = IMediaFormat::Probe(obj);
     return NOERROR;
 }

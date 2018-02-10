@@ -287,7 +287,7 @@ ECode WifiP2pServiceResponse::ReadFromParcel(
 
     mData = NULL;
     if (len > 0) {
-        source->ReadArrayOf((Handle32*)(&mData));
+        source->ReadArrayOf((HANDLE*)(&mData));
     }
 
     return NOERROR;
@@ -314,7 +314,7 @@ ECode WifiP2pServiceResponse::WriteToParcel(
     }
     else {
         FAIL_RETURN(dest->WriteInt32(mData->GetLength()));
-        dest->WriteArrayOf((Handle32)mData.Get());
+        dest->WriteArrayOf((HANDLE)mData.Get());
     }
 
     return NOERROR;

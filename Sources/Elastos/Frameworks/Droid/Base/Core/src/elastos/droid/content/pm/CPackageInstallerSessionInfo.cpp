@@ -81,7 +81,7 @@ ECode CPackageInstallerSessionInfo::ReadFromParcel(
     source->ReadInt32(&mMode);
     source->ReadInt64(&mSizeBytes);
     source->ReadString(&mAppPackageName);
-    source->ReadInterfacePtr((Handle32*)&mAppIcon);
+    source->ReadInterfacePtr((HANDLE*)&mAppIcon);
     String str;
     source->ReadString(&str);
     CString::New(str, (ICharSequence**)&mAppLabel);

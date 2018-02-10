@@ -375,7 +375,7 @@ ECode ParcelableCall::ReadFromParcel(
         //    Logger::E("GatewayInfo", "Wrong URI id:%d, only 1, 2, 3 accepted", id);
         //}
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mHandle = IUri::Probe(obj);
     }
     else {
@@ -409,7 +409,7 @@ ECode ParcelableCall::ReadFromParcel(
     source->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mVideoCallProvider = IIVideoProvider::Probe(obj);
     }
     else {

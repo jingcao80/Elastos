@@ -143,7 +143,7 @@ ECode CBatchedScanResult::ReadFromParcel(
 {
     source->ReadBoolean(&mTruncated);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mScanResults = IList::Probe(obj);
     return NOERROR;
 }

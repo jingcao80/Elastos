@@ -77,7 +77,7 @@ public:
     VideoCapture(
         /* [in] */ IContext* context,
         /* [in] */ Int32 id,
-        /* [in] */ Handle64 nativeVideoCaptureDeviceAndroid);
+        /* [in] */ HANDLE nativeVideoCaptureDeviceAndroid);
 
     //@CalledByNative
     virtual CARAPI_(Boolean) Allocate(
@@ -125,7 +125,7 @@ public:
 
     // Method for VideoCapture implementations to call back native code.
     virtual CARAPI_(void) NativeOnFrameAvailable(
-        /* [in] */ Handle64 nativeVideoCaptureDeviceAndroid,
+        /* [in] */ HANDLE nativeVideoCaptureDeviceAndroid,
         /* [in] */ ArrayOf<Byte>* data,
         /* [in] */ Int32 length,
         /* [in] */ Int32 rotation);
@@ -181,7 +181,7 @@ protected:
 
     Int32 mId;
     // Native callback context variable.
-    Handle64 mNativeVideoCaptureDeviceAndroid;
+    HANDLE mNativeVideoCaptureDeviceAndroid;
     AutoPtr< ArrayOf<Int32> > mGlTextures;
     AutoPtr<ISurfaceTexture> mSurfaceTexture;
     static const Int32 GL_TEXTURE_EXTERNAL_OES = 0x8D65;

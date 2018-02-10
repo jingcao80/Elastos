@@ -326,7 +326,7 @@ public:
 
         //@Override
         CARAPI OnDisplayDeviceEvent(
-            /* [in] */ Handle32 device,
+            /* [in] */ HANDLE device,
             /* [in] */ Int32 event);
 
         //@Override

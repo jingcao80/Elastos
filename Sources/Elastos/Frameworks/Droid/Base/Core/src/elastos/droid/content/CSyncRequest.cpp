@@ -143,7 +143,7 @@ ECode CSyncRequest:: ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     AutoPtr<IInterface> obj;
-    in->ReadInterfacePtr((Handle32*)&obj);
+    in->ReadInterfacePtr((HANDLE*)&obj);
     mExtras = IBundle::Probe(obj);
     in->ReadInt64(&mSyncFlexTimeSecs);
     in->ReadInt64(&mSyncRunTimeSecs);
@@ -157,7 +157,7 @@ ECode CSyncRequest:: ReadFromParcel(
     in->ReadInt32(&ival);
     mIsExpedited = (ival != 0);
     AutoPtr<IInterface> account;
-    in->ReadInterfacePtr((Handle32*)(IInterface**)&account);
+    in->ReadInterfacePtr((HANDLE*)(IInterface**)&account);
     mAccountToSync = IAccount::Probe(account);
     in->ReadString(&mAuthority);
     return NOERROR;

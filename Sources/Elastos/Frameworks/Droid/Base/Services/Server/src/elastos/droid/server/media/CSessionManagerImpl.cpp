@@ -90,10 +90,10 @@ CAR_INTERFACE_IMPL_2(CSessionManagerImpl, Object, IISessionManager, IBinder)
 CAR_OBJECT_IMPL(CSessionManagerImpl)
 
 ECode CSessionManagerImpl::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (MediaSessionService*)host;
-    CKeyEventWakeLockReceiver::NewByFriend(mHost->mHandler, (Handle64)mHost, (CKeyEventWakeLockReceiver**)&mKeyEventReceiver);
+    CKeyEventWakeLockReceiver::NewByFriend(mHost->mHandler, (HANDLE)mHost, (CKeyEventWakeLockReceiver**)&mKeyEventReceiver);
     mKeyEventDone = new KeyEventDone(mHost);
     return NOERROR;
 }

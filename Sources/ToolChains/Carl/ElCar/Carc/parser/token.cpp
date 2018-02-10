@@ -216,7 +216,8 @@ static const KeywordToken s_keywords_F[] = {
     { "Float", Token_K_Float },
 };
 
-static const KeywordToken s_keywords_G[] = {
+static const KeywordToken s_keywords_H[] = {
+    { "HANDLE", Token_K_HANDLE },
 };
 
 static const KeywordToken s_keywords_I[] = {
@@ -295,8 +296,8 @@ static const KeywordIndex s_upperIndexTable[26] = {
     { sizeof(s_keywords_D) / sizeof(KeywordToken), s_keywords_D },  // D
     { sizeof(s_keywords_E) / sizeof(KeywordToken), s_keywords_E },  // E
     { sizeof(s_keywords_F) / sizeof(KeywordToken), s_keywords_F },  // F
-    { sizeof(s_keywords_G) / sizeof(KeywordToken), s_keywords_G },  // G
-    { 0, NULL },                                                    // H
+    { 0, NULL },                                                    // G
+    { sizeof(s_keywords_H) / sizeof(KeywordToken), s_keywords_H },  // H
     { sizeof(s_keywords_I) / sizeof(KeywordToken), s_keywords_I },  // I
     { 0, NULL },                                                    // J
     { 0, NULL },                                                    // K

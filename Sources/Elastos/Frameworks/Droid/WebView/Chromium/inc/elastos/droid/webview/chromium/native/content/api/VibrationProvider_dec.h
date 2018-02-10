@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_VibrationProvider_InitCallback(Handle32 cb);
+    extern void Elastos_VibrationProvider_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -54,7 +54,7 @@ void* VibrationProvider::ElaVibrationProviderCallback_Init()
     sElaVibrationProviderCallback.elastos_VibrationProvider_vibrate = &VibrationProvider::Vibrate;
     sElaVibrationProviderCallback.elastos_VibrationProvider_cancelVibration = &VibrationProvider::CancelVibration;
 
-    Elastos_VibrationProvider_InitCallback((Handle32)&sElaVibrationProviderCallback);
+    Elastos_VibrationProvider_InitCallback((HANDLE)&sElaVibrationProviderCallback);
     return &sElaVibrationProviderCallback;
 }
 

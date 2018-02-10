@@ -971,7 +971,7 @@ public:
 
     static CARAPI SSL_set_client_CA_list(
         /* [in] */ Int64 ssl_address,
-        /* [in] */ ArrayOf<Handle32>* asn1DerEncodedX500Principals);
+        /* [in] */ ArrayOf<HANDLE>* asn1DerEncodedX500Principals);
 
     static CARAPI SSL_get_mode(
         /* [in] */ Int64 ssl_address,

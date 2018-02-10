@@ -309,7 +309,7 @@ MediaProjectionManagerService::MediaProjectionManagerService(
 ECode MediaProjectionManagerService::OnStart()
 {
     AutoPtr<IBinder> b;
-    CMediaProjectionManager::New((Handle64)this, (IBinder**)&b);
+    CMediaProjectionManager::New((HANDLE)this, (IBinder**)&b);
     PublishBinderService(IContext::MEDIA_PROJECTION_SERVICE, b, FALSE /*allowIsolated*/);
     return mMediaRouter->AddCallback(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback,
             IMediaRouter::CALLBACK_FLAG_PASSIVE_DISCOVERY);

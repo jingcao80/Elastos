@@ -58,7 +58,7 @@ ECode NotificationRankingUpdate::ReadFromParcel(
     in->ReadArrayOfString((ArrayOf<String>**)&mKeys);
     in->ReadInt32(&mFirstAmbientIndex);
     in->ReadArrayOfString((ArrayOf<String>**)&mInterceptedKeys);
-    in->ReadInterfacePtr((Handle32*)((IBundle**)&mVisibilityOverrides));
+    in->ReadInterfacePtr((HANDLE*)((IBundle**)&mVisibilityOverrides));
     return NOERROR;
 }
 

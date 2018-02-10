@@ -64,22 +64,22 @@ ECode CMediaDescription::ReadFromParcel(
 {
     source->ReadString(&mMediaId);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mTitle = ICharSequence::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mSubtitle = ICharSequence::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mDescription = ICharSequence::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mIcon = IBitmap::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mIconUri = IUri::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mExtras = IBundle::Probe(obj);
     return NOERROR;
 }

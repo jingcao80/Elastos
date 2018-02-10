@@ -179,7 +179,7 @@ ECode ConnectionRequest::ReadFromParcel(
         //parcel->ReadFromParcel(in);
         //mAccountHandle = pa;
         AutoPtr<IInterface> accountHandle;
-        in->ReadInterfacePtr((Handle32*)&accountHandle);
+        in->ReadInterfacePtr((HANDLE*)&accountHandle);
         mAccountHandle = IPhoneAccountHandle::Probe(accountHandle);
     }
     else {
@@ -196,7 +196,7 @@ ECode ConnectionRequest::ReadFromParcel(
         //parcel->ReadFromParcel(in);
         //mAddress= address;
         AutoPtr<IInterface> address;
-        in->ReadInterfacePtr((Handle32*)&address);
+        in->ReadInterfacePtr((HANDLE*)&address);
         mAddress = IUri::Probe(address);
     }
     else {
@@ -211,7 +211,7 @@ ECode ConnectionRequest::ReadFromParcel(
         //parcel->ReadFromParcel(in);
         //mExtras = bundle;
         AutoPtr<IInterface> extras;
-        in->ReadInterfacePtr((Handle32*)&extras);
+        in->ReadInterfacePtr((HANDLE*)&extras);
         mExtras = IBundle::Probe(extras);
     }
     else {

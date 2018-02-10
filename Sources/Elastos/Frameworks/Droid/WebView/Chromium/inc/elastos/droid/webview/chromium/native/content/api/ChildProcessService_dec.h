@@ -29,7 +29,7 @@ extern "C"
     extern void Elastos_ChildProcessService_nativeInitChildProcess(IInterface* applicationContext,IInterface* service,ArrayOf<Int32>* extraFileIds,ArrayOf<Int32>* extraFileFds,Int32 cpuCount,Int64 cpuFeatures);
     extern void Elastos_ChildProcessService_nativeExitChildProcess();
     extern void Elastos_ChildProcessService_nativeShutdownMainThread(IInterface* caller);
-    extern void Elastos_ChildProcessService_InitCallback(Handle32 cb);
+    extern void Elastos_ChildProcessService_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -58,7 +58,7 @@ void* ChildProcessService::ElaChildProcessServiceCallback_Init()
     sElaChildProcessServiceCallback.elastos_ChildProcessService_getViewSurface = &ChildProcessService::GetViewSurface;
     sElaChildProcessServiceCallback.elastos_ChildProcessService_getSurfaceTextureSurface = &ChildProcessService::GetSurfaceTextureSurface;
 
-    Elastos_ChildProcessService_InitCallback((Handle32)&sElaChildProcessServiceCallback);
+    Elastos_ChildProcessService_InitCallback((HANDLE)&sElaChildProcessServiceCallback);
     return &sElaChildProcessServiceCallback;
 }
 

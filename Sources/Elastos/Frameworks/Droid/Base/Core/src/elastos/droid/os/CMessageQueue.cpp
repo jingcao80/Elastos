@@ -713,7 +713,7 @@ ECode CMessageQueue::RemoveCallbacksAndMessages(
 }
 
 ECode CMessageQueue::GetNativeMessageQueue(
-    /* [out] */ Handle64* queue)
+    /* [out] */ HANDLE* queue)
 {
     VALIDATE_NOT_NULL(queue);
     *queue = mPtr;
@@ -873,7 +873,7 @@ ECode CMessageQueue::NativeInit()
     }
 
     nativeMessageQueue->AddRef();
-    mPtr = reinterpret_cast<Handle64>(nativeMessageQueue);
+    mPtr = reinterpret_cast<HANDLE>(nativeMessageQueue);
     return NOERROR;
 }
 

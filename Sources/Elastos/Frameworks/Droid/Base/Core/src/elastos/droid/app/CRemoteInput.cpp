@@ -209,7 +209,7 @@ ECode CRemoteInput::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     in->ReadString(&mResultKey);
-    in->ReadInterfacePtr((Handle32*)&mLabel);
+    in->ReadInterfacePtr((HANDLE*)&mLabel);
     mChoices = Elastos::Droid::Os::CParcel::ReadCharSequenceArray(in);
     in->ReadInt32(&mFlags);
     mExtras = Elastos::Droid::Os::CParcel::ReadBundle(in);

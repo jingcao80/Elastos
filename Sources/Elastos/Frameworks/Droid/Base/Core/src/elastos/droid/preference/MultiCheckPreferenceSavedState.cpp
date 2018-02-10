@@ -42,7 +42,7 @@ ECode MultiCheckPreferenceSavedState::ReadFromParcel(
 {
     PreferenceBaseSavedState::ReadFromParcel(source);
     mValues = NULL;
-    source->ReadArrayOf((Handle32*)(&mValues));
+    source->ReadArrayOf((HANDLE*)(&mValues));
     return NOERROR;
 }
 
@@ -50,7 +50,7 @@ ECode MultiCheckPreferenceSavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     PreferenceBaseSavedState::WriteToParcel(dest);
-    dest->WriteArrayOf((Handle32)mValues.Get());
+    dest->WriteArrayOf((HANDLE)mValues.Get());
     return NOERROR;
 }
 

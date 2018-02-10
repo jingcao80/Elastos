@@ -219,10 +219,10 @@ ECode CPeriodicSync::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> account;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&account);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&account);
     mAccount = IAccount::Probe(account);
     source->ReadString(&mAuthority);
-    source->ReadInterfacePtr((Handle32*)&mExtras);
+    source->ReadInterfacePtr((HANDLE*)&mExtras);
     source->ReadInt64(&mPeriod);
     source->ReadInt64(&mFlexTime);
     return NOERROR;

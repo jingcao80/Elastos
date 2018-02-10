@@ -52,7 +52,7 @@ ECode CNativeLibraryHelperHandle::Create(
 }
 
 ECode CNativeLibraryHelperHandle::CreatePackage(
-    /* [in] */ Handle64 _pkg,
+    /* [in] */ HANDLE _pkg,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
     AutoPtr<PackageParser::Package> pkg = (PackageParser::Package*)_pkg;

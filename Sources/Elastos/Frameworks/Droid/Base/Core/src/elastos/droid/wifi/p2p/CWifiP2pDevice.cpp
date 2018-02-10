@@ -465,7 +465,7 @@ ECode CWifiP2pDevice::ReadFromParcel(
     FAIL_RETURN(source->ReadInt32(&temp));
     mWfdInfo = NULL;
     if (temp == 1) {
-        FAIL_RETURN(source->ReadInterfacePtr((Handle32*)&mWfdInfo));
+        FAIL_RETURN(source->ReadInterfacePtr((HANDLE*)&mWfdInfo));
     }
 
     return NOERROR;

@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_WebContentsDelegateAndroid_InitCallback(Handle32 cb);
+    extern void Elastos_WebContentsDelegateAndroid_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -81,7 +81,7 @@ void* WebContentsDelegateElastos::ElaWebContentsDelegateElastosCallback_Init()
     sElaWebContentsDelegateAndroidCallback.elastos_WebContentsDelegateAndroid_toggleFullscreenModeForTab = &WebContentsDelegateElastos::ToggleFullscreenModeForTab;
     sElaWebContentsDelegateAndroidCallback.elastos_WebContentsDelegateAndroid_isFullscreenForTabOrPending = &WebContentsDelegateElastos::IsFullscreenForTabOrPending;
 
-    Elastos_WebContentsDelegateAndroid_InitCallback((Handle32)&sElaWebContentsDelegateAndroidCallback);
+    Elastos_WebContentsDelegateAndroid_InitCallback((HANDLE)&sElaWebContentsDelegateAndroidCallback);
     return &sElaWebContentsDelegateAndroidCallback;
 }
 

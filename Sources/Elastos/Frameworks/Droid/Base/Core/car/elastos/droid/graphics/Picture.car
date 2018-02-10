@@ -86,7 +86,7 @@ module
             [in] IOutputStream* stream);
 
         GetNativePicture(
-            [out] Handle32* natviePicture);
+            [out] HANDLE* natviePicture);
     }
 
     interface IPictureHelper {

@@ -48,7 +48,7 @@ CAR_OBJECT_IMPL(CKeyEventWakeLockReceiver)
 
 ECode CKeyEventWakeLockReceiver::constructor(
     /* [in] */ IHandler* handler,
-    /* [in] */ Handle64 host)
+    /* [in] */ HANDLE host)
 {
     ResultReceiver::constructor(handler);
     mHandler = handler;

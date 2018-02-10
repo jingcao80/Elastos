@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_SystemMessageHandler_nativeDoRunLoopOnce(IInterface* caller,Int64 messagePumpDelegateNative,Int64 delayedScheduledTimeTicks);
-    extern void Elastos_SystemMessageHandler_InitCallback(Handle32 cb);
+    extern void Elastos_SystemMessageHandler_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -57,7 +57,7 @@ void* SystemMessageHandler::ElaSystemMessageHandlerCallback_Init()
     sElaSystemMessageHandlerCallback.elastos_SystemMessageHandler_removeAllPendingMessages = &SystemMessageHandler::RemoveAllPendingMessages;
     sElaSystemMessageHandlerCallback.elastos_SystemMessageHandler_create = &SystemMessageHandler::Create;
 
-    Elastos_SystemMessageHandler_InitCallback((Handle32)&sElaSystemMessageHandlerCallback);
+    Elastos_SystemMessageHandler_InitCallback((HANDLE)&sElaSystemMessageHandlerCallback);
     return &sElaSystemMessageHandlerCallback;
 }
 

@@ -72,9 +72,9 @@ ECode CContentProviderHolder::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IBinder> binder;
-    source->ReadInterfacePtr((Handle32*)&mInfo);
-    source->ReadInterfacePtr((Handle32*)&binder);
-    source->ReadInterfacePtr((Handle32*)&mConnection);
+    source->ReadInterfacePtr((HANDLE*)&mInfo);
+    source->ReadInterfacePtr((HANDLE*)&binder);
+    source->ReadInterfacePtr((HANDLE*)&mConnection);
     source->ReadBoolean(&mNoReleaseNeeded);
 
     mProvider = ContentProviderNative::AsInterface(binder);

@@ -97,7 +97,7 @@ module
             [in] IInterface* object);
 
         GetNativeMessageQueue(
-            [out] Handle64* queue);
+            [out] HANDLE* queue);
     }
 
     } // namespace Os

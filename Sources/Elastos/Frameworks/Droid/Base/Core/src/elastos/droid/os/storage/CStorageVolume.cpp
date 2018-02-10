@@ -385,7 +385,7 @@ ECode CStorageVolume::ReadFromParcel(
 
     in->ReadInt64(&mMaxFileSize);
 
-    Handle32 ptr;
+    HANDLE ptr;
     in->ReadInterfacePtr(&ptr);
     mOwner = reinterpret_cast<IUserHandle*>(ptr);
     in->ReadString(&mUuid);

@@ -43,8 +43,8 @@ public:
         /* [out] */ String* str);
 
     CARAPI constructor(
-        /* [in] */ Handle64 jVM,
-        /* [in] */ Handle64 jInstance);
+        /* [in] */ HANDLE jVM,
+        /* [in] */ HANDLE jInstance);
 
 private:
     static const String TAG;

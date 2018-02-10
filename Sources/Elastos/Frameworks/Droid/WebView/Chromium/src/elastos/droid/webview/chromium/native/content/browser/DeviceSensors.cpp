@@ -181,7 +181,7 @@ DeviceSensors::DeviceSensors(
  */
 //@CalledByNative
 Boolean DeviceSensors::Start(
-    /* [in] */ Handle64 nativePtr,
+    /* [in] */ HANDLE nativePtr,
     /* [in] */ Int32 eventType,
     /* [in] */ Int32 rateInMilliseconds)
 {
@@ -659,12 +659,12 @@ AutoPtr<DeviceSensors> DeviceSensors::GetInstance(
  * Orientation of the device with respect to its reference frame.
  */
 void DeviceSensors::NativeGotOrientation(
-    /* [in] */ Handle64 nativeSensorManagerAndroid,
+    /* [in] */ HANDLE nativeSensorManagerAndroid,
     /* [in] */ Double alpha,
     /* [in] */ Double beta,
     /* [in] */ Double gamma)
 {
-    Elastos_DeviceSensors_nativeGotOrientation(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid,
+    Elastos_DeviceSensors_nativeGotOrientation(TO_IINTERFACE(this), (HANDLE)nativeSensorManagerAndroid,
             alpha, beta, gamma);
 }
 
@@ -672,12 +672,12 @@ void DeviceSensors::NativeGotOrientation(
  * Linear acceleration without gravity of the device with respect to its body frame.
  */
 void DeviceSensors::NativeGotAcceleration(
-    /* [in] */ Handle64 nativeSensorManagerAndroid,
+    /* [in] */ HANDLE nativeSensorManagerAndroid,
     /* [in] */ Double x,
     /* [in] */ Double y,
     /* [in] */ Double z)
 {
-    Elastos_DeviceSensors_nativeGotAcceleration(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid,
+    Elastos_DeviceSensors_nativeGotAcceleration(TO_IINTERFACE(this), (HANDLE)nativeSensorManagerAndroid,
             x, y, z);
 }
 
@@ -685,30 +685,30 @@ void DeviceSensors::NativeGotAcceleration(
  * Acceleration including gravity of the device with respect to its body frame.
  */
 void DeviceSensors::NativeGotAccelerationIncludingGravity(
-    /* [in] */ Handle64 nativeSensorManagerAndroid,
+    /* [in] */ HANDLE nativeSensorManagerAndroid,
     /* [in] */ Double x,
     /* [in] */ Double y,
     /* [in] */ Double z)
 {
-    Elastos_DeviceSensors_nativeGotAccelerationIncludingGravity(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid, x, y, z);
+    Elastos_DeviceSensors_nativeGotAccelerationIncludingGravity(TO_IINTERFACE(this), (HANDLE)nativeSensorManagerAndroid, x, y, z);
 }
 
 /**
  * Rotation rate of the device with respect to its body frame.
  */
 void DeviceSensors::NativeGotRotationRate(
-    /* [in] */ Handle64 nativeSensorManagerAndroid,
+    /* [in] */ HANDLE nativeSensorManagerAndroid,
     /* [in] */ Double alpha,
     /* [in] */ Double beta,
     /* [in] */ Double gamma)
 {
-    Elastos_DeviceSensors_nativeGotRotationRate(TO_IINTERFACE(this), (Handle64)nativeSensorManagerAndroid,
+    Elastos_DeviceSensors_nativeGotRotationRate(TO_IINTERFACE(this), (HANDLE)nativeSensorManagerAndroid,
             alpha, beta, gamma);
 }
 
 Boolean DeviceSensors::Start(
     /* [in] */ IInterface* obj,
-    /* [in] */ Handle64 nativePtr,
+    /* [in] */ HANDLE nativePtr,
     /* [in] */ Int32 eventType,
     /* [in] */ Int32 rateInMilliseconds)
 {

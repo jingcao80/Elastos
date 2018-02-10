@@ -73,7 +73,7 @@ public:
 
     // @CalledByNative
     static CARAPI_(AutoPtr<ColorChooserElastos>) CreateColorChooserElastos(
-        /* [in] */ Handle64 nativeColorChooserElastos,
+        /* [in] */ HANDLE nativeColorChooserElastos,
         /* [in] */ ContentViewCore* contentViewCore,
         /* [in] */ Int32 initialColor,
         /* [in] */ ArrayOf<IInterface*>* suggestions);
@@ -85,13 +85,13 @@ private:
         /* [in] */ IInterface* obj);
 
     static CARAPI_(AutoPtr<IInterface>) CreateColorChooserElastos(
-        /* [in] */ Handle64 nativeColorChooserElastos,
+        /* [in] */ HANDLE nativeColorChooserElastos,
         /* [in] */ IInterface* contentViewCore,
         /* [in] */ Int32 initialColor,
         /* [in] */ ArrayOf<IInterface*>* suggestions);
 
     ColorChooserElastos(
-        /* [in] */ Handle64 nativeColorChooserElastos,
+        /* [in] */ HANDLE nativeColorChooserElastos,
         /* [in] */ IContext* context,
         /* [in] */ Int32 initialColor,
         /* [in] */ ArrayOf<IInterface*>* suggestions);
@@ -117,12 +117,12 @@ private:
 
     // Implemented in color_chooser_android.cc
     CARAPI NativeOnColorChosen(
-        /* [in] */ Handle64 nativeColorChooserElastos,
+        /* [in] */ HANDLE nativeColorChooserElastos,
         /* [in] */ Int32 color);
 
 private:
     /*const*/ AutoPtr<ColorPickerDialog> mDialog;
-    /*const*/ Handle64 mNativeColorChooserElastos;
+    /*const*/ HANDLE mNativeColorChooserElastos;
 };
 
 } // namespace Components

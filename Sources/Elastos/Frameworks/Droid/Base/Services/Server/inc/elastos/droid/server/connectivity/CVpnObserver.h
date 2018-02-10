@@ -36,7 +36,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 vpnHost);
+        /* [in] */ HANDLE vpnHost);
 
     CARAPI InterfaceStatusChanged(
         /* [in] */ const String& iface,

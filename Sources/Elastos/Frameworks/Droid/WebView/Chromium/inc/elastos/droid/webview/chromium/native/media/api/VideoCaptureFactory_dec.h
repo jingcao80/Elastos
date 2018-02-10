@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_VideoCaptureFactory_InitCallback(Handle32 cb);
+    extern void Elastos_VideoCaptureFactory_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -69,7 +69,7 @@ void* VideoCaptureFactory::ElaVideoCaptureFactoryCallback_Init()
     sElaVideoCaptureFactoryCallback.elastos_VideoCaptureFactory_getCaptureFormatFramerate = &VideoCaptureFactory::GetCaptureFormatFramerate;
     sElaVideoCaptureFactoryCallback.elastos_VideoCaptureFactory_getCaptureFormatPixelFormat = &VideoCaptureFactory::GetCaptureFormatPixelFormat;
 
-    Elastos_VideoCaptureFactory_InitCallback((Handle32)&sElaVideoCaptureFactoryCallback);
+    Elastos_VideoCaptureFactory_InitCallback((HANDLE)&sElaVideoCaptureFactoryCallback);
     return &sElaVideoCaptureFactoryCallback;
 }
 

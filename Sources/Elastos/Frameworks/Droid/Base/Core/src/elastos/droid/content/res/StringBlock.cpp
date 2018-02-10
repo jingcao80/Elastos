@@ -229,7 +229,7 @@ StringBlock::StringBlock(
 }
 
 StringBlock::StringBlock(
-    /* [in] */ Handle64 obj,
+    /* [in] */ HANDLE obj,
     /* [in] */ Boolean useSparse)
     : mNative(obj)
     , mUseSparse(useSparse)
@@ -634,7 +634,7 @@ String StringBlock::Subtag(
     }
 }
 
-Handle64 StringBlock::NativeCreate(
+HANDLE StringBlock::NativeCreate(
     /* [in] */ const ArrayOf<Byte>& data,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 size)
@@ -655,18 +655,18 @@ Handle64 StringBlock::NativeCreate(
         return 0;
     }
 
-    return (Handle64)osb;
+    return (HANDLE)osb;
 }
 
 Int32 StringBlock::NativeGetSize(
-    /* [in] */ Handle64 pool)
+    /* [in] */ HANDLE pool)
 {
     assert(pool);
     return ((android::ResStringPool*)pool)->size();
 }
 
 String StringBlock::NativeGetString(
-    /* [in] */ Handle64 pool,
+    /* [in] */ HANDLE pool,
     /* [in] */ Int32 idx)
 {
     assert(pool);
@@ -689,7 +689,7 @@ String StringBlock::NativeGetString(
 }
 
 AutoPtr<ArrayOf<Int32> > StringBlock::NativeGetStyle(
-    /* [in] */ Handle64 pool,
+    /* [in] */ HANDLE pool,
     /* [in] */ Int32 idx)
 {
     assert(pool);
@@ -728,7 +728,7 @@ AutoPtr<ArrayOf<Int32> > StringBlock::NativeGetStyle(
 }
 
 void StringBlock::NativeDestroy(
-    /* [in] */ Handle64 pool)
+    /* [in] */ HANDLE pool)
 {
     assert(pool);
     delete (android::ResStringPool*)pool;

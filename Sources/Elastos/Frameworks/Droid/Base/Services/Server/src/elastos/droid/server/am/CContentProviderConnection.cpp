@@ -47,8 +47,8 @@ CContentProviderConnection::~CContentProviderConnection()
 }
 
 ECode CContentProviderConnection::constructor(
-    /* [in] */ Handle32 provider,
-    /* [in] */ Handle32 client)
+    /* [in] */ HANDLE provider,
+    /* [in] */ HANDLE client)
 {
     mProvider = (ContentProviderRecord*)provider;
     mClient = (ProcessRecord*)client;

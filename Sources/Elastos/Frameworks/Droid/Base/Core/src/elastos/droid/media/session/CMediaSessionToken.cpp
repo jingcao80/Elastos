@@ -52,7 +52,7 @@ ECode CMediaSessionToken::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mBinder = IISessionController::Probe(obj);
     return NOERROR;
 }

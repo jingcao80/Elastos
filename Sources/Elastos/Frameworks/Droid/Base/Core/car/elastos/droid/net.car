@@ -245,10 +245,10 @@ module
 
         constructor(
             [in] String scheme,
-            [in] Handle32 authority,
-            [in] Handle32 path,
-            [in] Handle32 query,
-            [in] Handle32 fragment);
+            [in] HANDLE authority,
+            [in] HANDLE path,
+            [in] HANDLE query,
+            [in] HANDLE fragment);
 
         interface IHierarchicalUri;
         interface IUri;
@@ -738,8 +738,8 @@ module
 
         constructor(
             [in] String scheme,
-            [in] Handle32 sspPart,
-            [in] Handle32 fragmentPart);
+            [in] HANDLE sspPart,
+            [in] HANDLE fragmentPart);
 
         interface IOpaqueUri;
         interface IUri;

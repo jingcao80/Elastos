@@ -43,7 +43,7 @@ public:
         /* [in] */ ICharSequence* chseq);
 
     CARAPI GetPrimitiveArray(
-        /* [out] */ Handle64* arrayHandle);
+        /* [out] */ HANDLE* arrayHandle);
 
     static CARAPI Copy(
         /* [in] */ CharSequenceAdapter* other,

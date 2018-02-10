@@ -508,13 +508,13 @@ ECode CMessage::ReadFromParcel(
     Int32 flag = 0;
     source->ReadInt32(&flag);
     if (flag != 0) {
-        source->ReadInterfacePtr((Handle32*)&mObj);
+        source->ReadInterfacePtr((HANDLE*)&mObj);
         source->ReadInt32(&mFlags); // TODO
     }
 
     source->ReadInt64(&mWhen);
-    source->ReadInterfacePtr((Handle32*)&mData);
-    source->ReadInterfacePtr((Handle32*)&mReplyTo);
+    source->ReadInterfacePtr((HANDLE*)&mData);
+    source->ReadInterfacePtr((HANDLE*)&mReplyTo);
     // replyTo = Messenger.readMessengerOrNullFromParcel(source);
     source->ReadInt32(&mSendingUid);
     return NOERROR;

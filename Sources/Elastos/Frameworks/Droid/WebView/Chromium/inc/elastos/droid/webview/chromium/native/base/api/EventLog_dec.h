@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_EventLog_InitCallback(Handle32 cb);
+    extern void Elastos_EventLog_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* EventLog::ElaEventLogCallback_Init()
 
     sElaEventLogCallback.elastos_EventLog_writeEvent = &EventLog::WriteEvent;
 
-    Elastos_EventLog_InitCallback((Handle32)&sElaEventLogCallback);
+    Elastos_EventLog_InitCallback((HANDLE)&sElaEventLogCallback);
     return &sElaEventLogCallback;
 }
 

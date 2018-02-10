@@ -66,8 +66,8 @@ ECode ProviderInfo::ReadFromParcel(
     source->ReadString(&mReadPermission);
     source->ReadString(&mWritePermission);
     source->ReadBoolean(&mGrantUriPermissions);
-    source->ReadArrayOf((Handle32*)&mUriPermissionPatterns);
-    source->ReadArrayOf((Handle32*)&mPathPermissions);
+    source->ReadArrayOf((HANDLE*)&mUriPermissionPatterns);
+    source->ReadArrayOf((HANDLE*)&mPathPermissions);
     source->ReadBoolean(&mMultiprocess);
     source->ReadInt32(&mInitOrder);
     source->ReadInt32(&mFlags);
@@ -83,8 +83,8 @@ ECode ProviderInfo::WriteToParcel(
     dest->WriteString(mReadPermission);
     dest->WriteString(mWritePermission);
     dest->WriteBoolean(mGrantUriPermissions);
-    dest->WriteArrayOf((Handle32)mUriPermissionPatterns.Get());
-    dest->WriteArrayOf((Handle32)mPathPermissions.Get());
+    dest->WriteArrayOf((HANDLE)mUriPermissionPatterns.Get());
+    dest->WriteArrayOf((HANDLE)mPathPermissions.Get());
     dest->WriteBoolean(mMultiprocess);
     dest->WriteInt32(mInitOrder);
     dest->WriteInt32(mFlags);

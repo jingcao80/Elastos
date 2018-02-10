@@ -90,7 +90,7 @@ android::status_t NativeCursorWindow::create(const String& name, size_t size, Na
 android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCursorWindow** outCursorWindow)
 {
     android::Parcel* p;
-    parcel->GetDataPayload((Handle32*)&p);
+    parcel->GetDataPayload((HANDLE*)&p);
 
     android::String8 str8(p->readString8());
     String name(str8.string());
@@ -134,7 +134,7 @@ android::status_t NativeCursorWindow::createFromParcel(IParcel* parcel, NativeCu
 android::status_t NativeCursorWindow::writeToParcel(IParcel* parcel)
 {
     android::Parcel* p;
-    parcel->GetDataPayload((Handle32*)&p);
+    parcel->GetDataPayload((HANDLE*)&p);
 
     android::String8 name(mName.string());
     android::status_t status = p->writeString8(name);

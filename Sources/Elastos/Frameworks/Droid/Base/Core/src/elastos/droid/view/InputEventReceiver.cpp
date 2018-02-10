@@ -83,12 +83,12 @@ static AutoPtr<IMotionEvent> CreateMotionEventFromNative(
         return NULL;
     }
 
-    Handle64 native;
+    HANDLE native;
     eventObj->GetNative(&native);
     android::MotionEvent* destEvent = (android::MotionEvent*)native;
     if (!destEvent) {
         destEvent = new android::MotionEvent();
-        eventObj->SetNative((Handle64)destEvent);
+        eventObj->SetNative((HANDLE)destEvent);
     }
 
     destEvent->copyFrom(event, true);
@@ -606,7 +606,7 @@ ECode InputEventReceiver::NativeInit(
     /* [out] */ Int64* receiverPtr)
 {
     InputChannel* nChannel = (InputChannel*)inputChannelPtr;
-    Handle64 nInputChannel = nChannel->mNative;
+    HANDLE nInputChannel = nChannel->mNative;
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(nInputChannel);
     android::sp<android::InputChannel> inputChannel =
             nativeInputChannel != NULL ? nativeInputChannel->getInputChannel() : NULL;
@@ -616,7 +616,7 @@ ECode InputEventReceiver::NativeInit(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Handle64 msgQueuePtr = 0;
+    HANDLE msgQueuePtr = 0;
     messageQueueObj->GetNativeMessageQueue(&msgQueuePtr);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(msgQueuePtr);
     if (messageQueue == NULL) {

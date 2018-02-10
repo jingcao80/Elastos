@@ -244,7 +244,7 @@ ECode CXBMCActivity::LoadNativeCode()
         AutoPtr<IMessageQueue> queue;
         helper->MyQueue((IMessageQueue**)&queue);
         NativeMessageQueue* messageQueue = NULL;
-        assert(SUCCEEDED(queue->GetNativeMessageQueue((Handle32*)&messageQueue))
+        assert(SUCCEEDED(queue->GetNativeMessageQueue((HANDLE*)&messageQueue))
                && (messageQueue != NULL));
 
         sCode->mLooper = messageQueue->GetLooper();

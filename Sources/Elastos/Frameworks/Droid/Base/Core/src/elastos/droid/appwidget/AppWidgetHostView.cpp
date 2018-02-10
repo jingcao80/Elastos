@@ -133,7 +133,7 @@ ECode AppWidgetHostView::ParcelableSparseArray::ReadFromParcel(
         Int32 key;
         source->ReadInt32(&key);
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         AutoPtr<IParcelable> parcelable = IParcelable::Probe(obj);
         Put(key, parcelable);
     }

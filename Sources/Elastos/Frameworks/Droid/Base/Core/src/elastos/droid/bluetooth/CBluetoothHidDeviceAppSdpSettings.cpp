@@ -58,7 +58,7 @@ ECode CBluetoothHidDeviceAppSdpSettings::ReadFromParcel(
     source->ReadString(&mDescription);
     source->ReadString(&mProvider);
     source->ReadByte(&mSubclass);
-    Handle32 tmp;
+    HANDLE tmp;
     source->ReadArrayOf(&tmp);
     mDescriptors = reinterpret_cast<ArrayOf<Byte>*>(tmp);
     return NOERROR;
@@ -71,7 +71,7 @@ ECode CBluetoothHidDeviceAppSdpSettings::WriteToParcel(
     dest->WriteString(mDescription);
     dest->WriteString(mProvider);
     dest->WriteByte(mSubclass);
-    dest->WriteArrayOf(reinterpret_cast<Handle32>(mDescriptors.Get()));
+    dest->WriteArrayOf(reinterpret_cast<HANDLE>(mDescriptors.Get()));
     return NOERROR;
 }
 

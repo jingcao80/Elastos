@@ -74,7 +74,7 @@ ECode CPreciseDataConnectionState::ReadFromParcel(
     source->ReadString(&mReason);
     source->ReadString(&mFailCause);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mLinkProperties = ILinkProperties::Probe(obj);
     return NOERROR;
 }

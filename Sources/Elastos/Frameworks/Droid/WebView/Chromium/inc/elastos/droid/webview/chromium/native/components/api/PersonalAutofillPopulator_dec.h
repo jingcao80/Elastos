@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_PersonalAutofillPopulator_InitCallback(Handle32 cb);
+    extern void Elastos_PersonalAutofillPopulator_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -77,7 +77,7 @@ void* PersonalAutofillPopulator::ElaPersonalAutofillPopulatorCallback_Init()
     sElaPersonalAutofillPopulatorCallback.elastos_PersonalAutofillPopulator_getPhoneNumbers = &PersonalAutofillPopulator::GetPhoneNumbers;
     sElaPersonalAutofillPopulatorCallback.elastos_PersonalAutofillPopulator_getHasPermissions = &PersonalAutofillPopulator::GetHasPermissions;
 
-    Elastos_PersonalAutofillPopulator_InitCallback((Handle32)&sElaPersonalAutofillPopulatorCallback);
+    Elastos_PersonalAutofillPopulator_InitCallback((HANDLE)&sElaPersonalAutofillPopulatorCallback);
     return &sElaPersonalAutofillPopulatorCallback;
 }
 

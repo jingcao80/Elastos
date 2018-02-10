@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_MediaDrmCredentialManager_nativeResetCredentials(IInterface* callback);
-    extern void Elastos_MediaDrmCredentialManager_InitCallback(Handle32 cb);
+    extern void Elastos_MediaDrmCredentialManager_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -52,7 +52,7 @@ void* MediaDrmCredentialManager::ElaMediaDrmCredentialManagerCallback_Init()
 
     sElaMediaDrmCredentialManagerCallback.elastos_MediaDrmCredentialManagerCallback_onCredentialResetFinished = &MediaDrmCredentialManager::MediaDrmCredentialManagerCallback::OnCredentialResetFinished;
 
-    Elastos_MediaDrmCredentialManager_InitCallback((Handle32)&sElaMediaDrmCredentialManagerCallback);
+    Elastos_MediaDrmCredentialManager_InitCallback((HANDLE)&sElaMediaDrmCredentialManagerCallback);
     return &sElaMediaDrmCredentialManagerCallback;
 }
 

@@ -194,7 +194,7 @@ public:
     // @Override
     CARAPI ClientCertificateRequested(
         /* [in] */ ArrayOf<Byte>* keyTypes,
-        /* [in] */ ArrayOf<Handle32>* asn1DerEncodedX500Principals);
+        /* [in] */ ArrayOf<HANDLE>* asn1DerEncodedX500Principals);
 
     // @Override
     CARAPI ChooseServerAlias(

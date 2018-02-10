@@ -343,7 +343,7 @@ ECode LocationRequest::ReadFromParcel(
     in->ReadBoolean(&mHideFromAppOps);
     in->ReadString(&mProvider);
     AutoPtr<IInterface> obj;
-    in->ReadInterfacePtr((Handle32*)&obj);
+    in->ReadInterfacePtr((HANDLE*)&obj);
     AutoPtr<IWorkSource> workSource = IWorkSource::Probe(obj);
     if (workSource != NULL)
         SetWorkSource(workSource);

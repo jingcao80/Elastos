@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_ViewConfigurationHelper_nativeUpdateSharedViewConfiguration(IInterface* caller,Int32 scaledMaximumFlingVelocity,Int32 scaledMinimumFlingVelocity,Int32 scaledTouchSlop,Int32 scaledDoubleTapSlop,Int32 scaledMinScalingSpan,Int32 scaledMinScalingTouchMajor);
-    extern void Elastos_ViewConfigurationHelper_InitCallback(Handle32 cb);
+    extern void Elastos_ViewConfigurationHelper_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -72,7 +72,7 @@ void* ViewConfigurationHelper::ElaViewConfigurationHelperCallback_Init()
     sElaViewConfigurationHelperCallback.elastos_ViewConfigurationHelper_getScaledMinScalingTouchMajor = &ViewConfigurationHelper::GetScaledMinScalingTouchMajor;
     sElaViewConfigurationHelperCallback.elastos_ViewConfigurationHelper_createWithListener = &ViewConfigurationHelper::CreateWithListener;
 
-    Elastos_ViewConfigurationHelper_InitCallback((Handle32)&sElaViewConfigurationHelperCallback);
+    Elastos_ViewConfigurationHelper_InitCallback((HANDLE)&sElaViewConfigurationHelperCallback);
     return &sElaViewConfigurationHelperCallback;
 }
 

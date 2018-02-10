@@ -35,7 +35,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-            /* [in] */ Handle32 owner);
+            /* [in] */ HANDLE owner);
 
     CARAPI OnUserSwitching(
         /* [in] */ Int32 newUserId,

@@ -68,7 +68,7 @@ ECode ColorChooserElastos::CloseColorChooser()
 }
 
 AutoPtr<ColorChooserElastos> ColorChooserElastos::CreateColorChooserElastos(
-    /* [in] */ Handle64 nativeColorChooserElastos,
+    /* [in] */ HANDLE nativeColorChooserElastos,
     /* [in] */ ContentViewCore* contentViewCore,
     /* [in] */ Int32 initialColor,
     /* [in] */ ArrayOf<IInterface*>* suggestions)
@@ -86,7 +86,7 @@ AutoPtr<ColorChooserElastos> ColorChooserElastos::CreateColorChooserElastos(
 }
 
 ColorChooserElastos::ColorChooserElastos(
-    /* [in] */ Handle64 nativeColorChooserElastos,
+    /* [in] */ HANDLE nativeColorChooserElastos,
     /* [in] */ IContext* context,
     /* [in] */ Int32 initialColor,
     /* [in] */ ArrayOf<IInterface*>* suggestions)
@@ -144,7 +144,7 @@ void ColorChooserElastos::AddToColorSuggestionArray(
 }
 
 ECode ColorChooserElastos::NativeOnColorChosen(
-    /* [in] */ Handle64 nativeColorChooserElastos,
+    /* [in] */ HANDLE nativeColorChooserElastos,
     /* [in] */ Int32 color)
 {
     Elastos_ColorChooserAndroid_nativeOnColorChosen(TO_IINTERFACE(this), nativeColorChooserElastos, color);
@@ -163,7 +163,7 @@ void ColorChooserElastos::CloseColorChooser(
 }
 
 AutoPtr<IInterface> ColorChooserElastos::CreateColorChooserElastos(
-    /* [in] */ Handle64 nativeColorChooserElastos,
+    /* [in] */ HANDLE nativeColorChooserElastos,
     /* [in] */ IInterface* contentViewCore,
     /* [in] */ Int32 initialColor,
     /* [in] */ ArrayOf<IInterface*>* suggestions)

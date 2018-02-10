@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AndroidPrivateKey_InitCallback(Handle32 cb);
+    extern void Elastos_AndroidPrivateKey_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* ElastosPrivateKey::ElaElastosPrivateKeyCallback_Init()
 
     sElaAndroidPrivateKeyCallback.elastos_AndroidPrivateKey_getKeyStore = &ElastosPrivateKey::GetKeyStore;
 
-    Elastos_AndroidPrivateKey_InitCallback((Handle32)&sElaAndroidPrivateKeyCallback);
+    Elastos_AndroidPrivateKey_InitCallback((HANDLE)&sElaAndroidPrivateKeyCallback);
     return &sElaAndroidPrivateKeyCallback;
 }
 

@@ -435,7 +435,7 @@ Boolean CJetPlayer::NativeSetup(
     if (result == EAS_SUCCESS) {
         // save our newly created C++ JetPlayer in the "nativePlayerInJavaObj" field
         // of the Java object (in mNativePlayerInJavaObj)
-        mNativePlayer = (Handle32)lpJet;
+        mNativePlayer = (HANDLE)lpJet;
         return TRUE;
     }
     else {

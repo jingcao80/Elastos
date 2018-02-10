@@ -63,7 +63,7 @@ private:
 public:
     //@CalledByNative AwAutofillClient
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeClient);
+        /* [in] */ HANDLE nativeClient);
 
     virtual CARAPI_(void) Init(
         /* [in] */ ContentViewCore* contentViewCore);
@@ -73,7 +73,7 @@ public:
 
 private:
     AwAutofillClient(
-        /* [in] */ Handle64 nativeAwAutofillClient);
+        /* [in] */ HANDLE nativeAwAutofillClient);
 
     //@CalledByNative
     CARAPI_(void) ShowAutofillPopup(
@@ -103,7 +103,7 @@ private:
         /* [in] */ Int32 uniqueId);
 
     CARAPI_(void) NativeSuggestionSelected(
-        /* [in] */ Handle64 nativeAwAutofillClient,
+        /* [in] */ HANDLE nativeAwAutofillClient,
         /* [in] */ Int32 position);
 
 //callback function declaration
@@ -123,7 +123,7 @@ private:
         /* [in] */ IInterface* obj);
 
 private:
-    const Handle64 mNativeAwAutofillClient;
+    const HANDLE mNativeAwAutofillClient;
     AutoPtr<AutofillPopup> mAutofillPopup;
     AutoPtr<IViewGroup> mContainerView;
     AutoPtr<ContentViewCore> mContentViewCore;

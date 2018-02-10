@@ -60,7 +60,7 @@ ECode CMainActivity::PostcppCallback()
     pHandlerFunc = &CMainActivity::HandleMessage;
 
     Boolean result = FALSE;
-    return mDefaultHandler->PostCppCallback((Handle32)this, *(Handle32*)&pHandlerFunc, NULL, 0, FALSE, &result);
+    return mDefaultHandler->PostCppCallback((HANDLE)this, *(HANDLE*)&pHandlerFunc, NULL, 0, FALSE, &result);
 }
 
 ECode CMainActivity::OnCreate(

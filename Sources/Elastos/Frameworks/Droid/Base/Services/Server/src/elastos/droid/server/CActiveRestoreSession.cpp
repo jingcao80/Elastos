@@ -35,7 +35,7 @@ const Boolean CActiveRestoreSession::DEBUG = FALSE;
 ECode CActiveRestoreSession::constructor(
     /* [in] */ const String &packageName,
     /* [in] */ const String &transport,
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
 {
     mPackageName = packageName;
     mHost = (CBackupManagerService*)host;

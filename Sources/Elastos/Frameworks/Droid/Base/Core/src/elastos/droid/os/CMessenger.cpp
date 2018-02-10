@@ -54,7 +54,7 @@ ECode CMessenger::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mTarget = IIMessenger::Probe(obj);
     return NOERROR;
 }

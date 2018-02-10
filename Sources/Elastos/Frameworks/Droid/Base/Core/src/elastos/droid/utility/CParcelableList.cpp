@@ -55,7 +55,7 @@ ECode CParcelableList::ReadFromParcel(
     EnsureCapacity(size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> item;
-        source->ReadInterfacePtr((Handle32*)&item);
+        source->ReadInterfacePtr((HANDLE*)&item);
         Add(item);
     }
 

@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_SurfaceTextureListener_nativeFrameAvailable(IInterface* caller,Handle64 nativeSurfaceTextureListener);
-    extern void Elastos_SurfaceTextureListener_nativeDestroy(IInterface* caller,Handle64 nativeSurfaceTextureListener);
+    extern void Elastos_SurfaceTextureListener_nativeFrameAvailable(IInterface* caller,HANDLE nativeSurfaceTextureListener);
+    extern void Elastos_SurfaceTextureListener_nativeDestroy(IInterface* caller,HANDLE nativeSurfaceTextureListener);
 #ifdef __cplusplus
 }
 #endif

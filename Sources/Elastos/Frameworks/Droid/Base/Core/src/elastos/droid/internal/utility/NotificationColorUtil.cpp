@@ -259,9 +259,9 @@ AutoPtr<ITextAppearanceSpan> NotificationColorUtil::ProcessTextAppearanceSpan(
             span->GetTextSize(&size);
             AutoPtr<IColorStateList> newColorStateList;
             AutoPtr<ArrayOf<Int32Array > > states = ((CColorStateList*)colorStateList.Get())->GetStates();
-            AutoPtr<ArrayOf<Handle32> >  states2 = ArrayOf<Handle32>::Alloc(states->GetLength());
+            AutoPtr<ArrayOf<HANDLE> >  states2 = ArrayOf<HANDLE>::Alloc(states->GetLength());
             for (Int32 i = 0; i < states->GetLength(); i++)
-                (*states2)[i] = (Handle32)(*states)[i].Get();
+                (*states2)[i] = (HANDLE)(*states)[i].Get();
             CColorStateList::New(states2, colors, (IColorStateList**)&newColorStateList);
             AutoPtr<IColorStateList> textColor;
             span->GetLinkTextColor((IColorStateList**)&textColor);

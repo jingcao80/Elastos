@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_SurfaceTexturePlatformWrapper_InitCallback(Handle32 cb);
+    extern void Elastos_SurfaceTexturePlatformWrapper_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -68,7 +68,7 @@ void* SurfaceTexturePlatformWrapper::ElaSurfaceTexturePlatformWrapperCallback_In
     sElaSurfaceTexturePlatformWrapperCallback.elastos_SurfaceTexturePlatformWrapper_attachToGLContext = &SurfaceTexturePlatformWrapper::AttachToGLContext;
     sElaSurfaceTexturePlatformWrapperCallback.elastos_SurfaceTexturePlatformWrapper_detachFromGLContext = &SurfaceTexturePlatformWrapper::DetachFromGLContext;
 
-    Elastos_SurfaceTexturePlatformWrapper_InitCallback((Handle32)&sElaSurfaceTexturePlatformWrapperCallback);
+    Elastos_SurfaceTexturePlatformWrapper_InitCallback((HANDLE)&sElaSurfaceTexturePlatformWrapperCallback);
     return &sElaSurfaceTexturePlatformWrapperCallback;
 }
 

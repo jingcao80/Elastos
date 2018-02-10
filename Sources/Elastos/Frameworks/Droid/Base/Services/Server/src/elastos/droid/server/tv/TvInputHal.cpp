@@ -504,7 +504,7 @@ void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succ
 ////////////////////////////////////////////////////////////////////////////////
 
 static Int64 nativeOpen(Elastos::Droid::Server::Tv::TvInputHal* thiz, IMessageQueue* messageQueueObj) {
-    Handle64 ptr;
+    HANDLE ptr;
     messageQueueObj->GetNativeMessageQueue(&ptr);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
 

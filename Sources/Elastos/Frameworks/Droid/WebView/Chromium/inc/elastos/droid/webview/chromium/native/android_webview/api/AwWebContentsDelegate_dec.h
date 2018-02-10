@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_AwWebContentsDelegate_nativeFilesSelectedInChooser(Int32 processId,Int32 renderId,Int32 mode_flags,ArrayOf<String>* filePath,ArrayOf<String>* displayName);
-    extern void Elastos_AwWebContentsDelegate_InitCallback(Handle32 cb);
+    extern void Elastos_AwWebContentsDelegate_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -59,7 +59,7 @@ void* AwWebContentsDelegate::ElaAwWebContentsDelegateCallback_Init()
     sElaAwWebContentsDelegateCallback.elastos_AwWebContentsDelegate_activateContents = &AwWebContentsDelegate::ActivateContents;
     sElaAwWebContentsDelegateCallback.elastos_AwWebContentsDelegate_toggleFullscreenModeForTab = &AwWebContentsDelegate::ToggleFullscreenModeForTab;
 
-    Elastos_AwWebContentsDelegate_InitCallback((Handle32)&sElaAwWebContentsDelegateCallback);
+    Elastos_AwWebContentsDelegate_InitCallback((HANDLE)&sElaAwWebContentsDelegateCallback);
     return &sElaAwWebContentsDelegateCallback;
 }
 

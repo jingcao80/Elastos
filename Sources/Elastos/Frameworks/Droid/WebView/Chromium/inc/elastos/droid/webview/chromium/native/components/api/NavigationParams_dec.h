@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_NavigationParams_InitCallback(Handle32 cb);
+    extern void Elastos_NavigationParams_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* NavigationParams::ElaNavigationParamsCallback_Init()
 
     sElaNavigationParamsCallback.elastos_NavigationParams_create = &NavigationParams::Create;
 
-    Elastos_NavigationParams_InitCallback((Handle32)&sElaNavigationParamsCallback);
+    Elastos_NavigationParams_InitCallback((HANDLE)&sElaNavigationParamsCallback);
     return &sElaNavigationParamsCallback;
 }
 

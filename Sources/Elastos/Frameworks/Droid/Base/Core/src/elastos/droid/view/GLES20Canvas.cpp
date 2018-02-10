@@ -992,7 +992,7 @@ ECode GLES20Canvas::DrawPath(
     Paint* p = (Paint*)paint;
     if (pathImpl->mIsSimplePath) {
         if (pathImpl->mRects != NULL) {
-            Handle64 nativeRegion;
+            HANDLE nativeRegion;
             pathImpl->mRects->GetNativeRegion(&nativeRegion);
             nDrawRects(mRenderer, nativeRegion, p->mNativePaint);
         }

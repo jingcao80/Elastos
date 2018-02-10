@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_TouchDevice_InitCallback(Handle32 cb);
+    extern void Elastos_TouchDevice_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -50,7 +50,7 @@ void* TouchDevice::ElaTouchDeviceCallback_Init()
 
     sElaTouchDeviceCallback.elastos_TouchDevice_maxTouchPoints = &TouchDevice::MaxTouchPoints;
 
-    Elastos_TouchDevice_InitCallback((Handle32)&sElaTouchDeviceCallback);
+    Elastos_TouchDevice_InitCallback((HANDLE)&sElaTouchDeviceCallback);
     return &sElaTouchDeviceCallback;
 }
 

@@ -86,7 +86,7 @@ private:
     CARAPI_(void) NativeFinalize();
 
 private:
-    Handle32 mNativeContext; // accessed by native methods
+    HANDLE mNativeContext; // accessed by native methods
 };
 
 } // namespace Media

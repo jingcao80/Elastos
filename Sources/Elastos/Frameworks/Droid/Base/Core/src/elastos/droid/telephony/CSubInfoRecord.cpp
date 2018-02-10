@@ -98,7 +98,7 @@ ECode CSubInfoRecord::ReadFromParcel(
     source->ReadString(&mNumber);
     source->ReadInt32(&mDisplayNumberFormat);
     source->ReadInt32(&mDataRoaming);
-    source->ReadArrayOf((Handle32*)&mSimIconRes);
+    source->ReadArrayOf((HANDLE*)&mSimIconRes);
     source->ReadInt32(&mMcc);
     source->ReadInt32(&mMnc);
     return NOERROR;
@@ -116,7 +116,7 @@ ECode CSubInfoRecord::WriteToParcel(
     dest->WriteString(mNumber);
     dest->WriteInt32(mDisplayNumberFormat);
     dest->WriteInt32(mDataRoaming);
-    dest->WriteArrayOf((Handle32)mSimIconRes.Get());
+    dest->WriteArrayOf((HANDLE)mSimIconRes.Get());
     dest->WriteInt32(mMcc);
     dest->WriteInt32(mMnc);
     return NOERROR;

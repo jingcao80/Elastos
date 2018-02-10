@@ -84,6 +84,9 @@ CarDataType GetCarDataType(
 //        case Type_const:
 //            dataType = CarDataType_;
 //            break;
+        case Type_HANDLE:
+            dataType = CarDataType_HANDLE;
+            break;
         case Type_enum:
             dataType = CarDataType_Enum;
             break;
@@ -212,6 +215,9 @@ UInt32 GetDataTypeSize(
             break;
         case Type_PVoid:
             size = sizeof(PVoid);
+            break;
+        case Type_HANDLE:
+            size = sizeof(HANDLE);
             break;
         case Type_ECode:
             size = sizeof(ECode);
@@ -355,6 +361,9 @@ CarQuintetFlag DataTypeToFlag(
             break;
         case CarDataType_ECode:
             flag = CarQuintetFlag_Type_ECode;
+            break;
+        case CarDataType_HANDLE:
+            flag = CarQuintetFlag_Type_HANDLE;
             break;
         case CarDataType_Enum:
             flag = CarQuintetFlag_Type_Enum;

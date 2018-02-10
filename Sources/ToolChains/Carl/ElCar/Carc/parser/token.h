@@ -47,7 +47,7 @@ typedef enum CARToken {
     Token_K_Int8,           Token_K_Int16,
     Token_K_Int32,          Token_K_Int64,          Token_K_UInt16,
     Token_K_UInt32,         Token_K_UInt64,         Token_K_Char16,
-    Token_K_String,         Token_K_Char32,
+    Token_K_String,         Token_K_Char32,         Token_K_HANDLE,
 
     Token_K_ArrayOf,
 

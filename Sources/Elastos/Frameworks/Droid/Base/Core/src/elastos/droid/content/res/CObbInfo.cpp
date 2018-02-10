@@ -121,7 +121,7 @@ ECode CObbInfo::ReadFromParcel(
     FAIL_RETURN(source->ReadString(&mPackageName))
     FAIL_RETURN(source->ReadInt32(&mVersion))
     FAIL_RETURN(source->ReadInt32(&mFlags))
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mSalt))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mSalt))
     return NOERROR;
 }
 
@@ -132,7 +132,7 @@ ECode CObbInfo::WriteToParcel(
     FAIL_RETURN(dest->WriteString(mPackageName))
     FAIL_RETURN(dest->WriteInt32(mVersion))
     FAIL_RETURN(dest->WriteInt32(mFlags))
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mSalt.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mSalt.Get()))
     return NOERROR;
 }
 

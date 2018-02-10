@@ -139,7 +139,7 @@ ECode CSyncInfo::ReadFromParcel(
 {
     source->ReadInt32(&mAuthorityId);
     AutoPtr<IInterface> account;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&account);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&account);
     mAccount = IAccount::Probe(account);
     source->ReadString(&mAuthority);
     source->ReadInt64(&mStartTime);

@@ -1412,7 +1412,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 installer,
+        /* [in] */ HANDLE installer,
         /* [in] */ Boolean factoryTest,
         /* [in] */ Boolean onlyCore);
 

@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AwContentsIoThreadClient_InitCallback(Handle32 cb);
+    extern void Elastos_AwContentsIoThreadClient_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -63,7 +63,7 @@ void* AwContentsIoThreadClient::ElaAwContentsIoThreadClientCallback_Init()
     sElaAwContentsIoThreadClientCallback.elastos_AwContentsIoThreadClient_newLoginRequest = &AwContentsIoThreadClient::NewLoginRequest;
     sElaAwContentsIoThreadClientCallback.elastos_AwContentsIoThreadClient_shouldInterceptRequest = &AwContentsIoThreadClient::ShouldInterceptRequest;
 
-    Elastos_AwContentsIoThreadClient_InitCallback((Handle32)&sElaAwContentsIoThreadClientCallback);
+    Elastos_AwContentsIoThreadClient_InitCallback((HANDLE)&sElaAwContentsIoThreadClientCallback);
     return &sElaAwContentsIoThreadClientCallback;
 }
 

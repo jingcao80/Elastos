@@ -48,7 +48,7 @@ namespace Input {
 
 ImeAdapter::DelayedDismissInput::DelayedDismissInput(
     /* [in] */ ImeAdapter* owner,
-    /* [in] */ Handle64 nativeImeAdapter)
+    /* [in] */ HANDLE nativeImeAdapter)
     : mOwner(owner)
     , mNativeImeAdapter(nativeImeAdapter)
 {
@@ -210,7 +210,7 @@ Int32 ImeAdapter::GetModifiers(
  * @param showIfNeeded Whether the keyboard should be shown if it is currently hidden.
  */
 void ImeAdapter::UpdateKeyboardVisibility(
-    /* [in] */ Handle64 nativeImeAdapter,
+    /* [in] */ HANDLE nativeImeAdapter,
     /* [in] */ Int32 textInputType,
     /* [in] */ Boolean showIfNeeded)
 {
@@ -245,7 +245,7 @@ void ImeAdapter::UpdateKeyboardVisibility(
 }
 
 void ImeAdapter::Attach(
-    /* [in] */ Handle64 nativeImeAdapter,
+    /* [in] */ HANDLE nativeImeAdapter,
     /* [in] */ Int32 textInputType)
 {
     if (mNativeImeAdapterAndroid != 0) {
@@ -269,7 +269,7 @@ void ImeAdapter::Attach(
  * @param nativeImeAdapter The pointer to the native ImeAdapter object.
  */
 void ImeAdapter::Attach(
-    /* [in] */ Handle64 nativeImeAdapter)
+    /* [in] */ HANDLE nativeImeAdapter)
 {
     Attach(nativeImeAdapter, sTextInputTypeNone);
 }
@@ -669,7 +669,7 @@ void ImeAdapter::Detach()
 }
 
 Boolean ImeAdapter::NativeSendSyntheticKeyEvent(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ Int32 eventType,
     /* [in] */ Int64 timestampMs,
     /* [in] */ Int32 keyCode,
@@ -680,7 +680,7 @@ Boolean ImeAdapter::NativeSendSyntheticKeyEvent(
 }
 
 Boolean ImeAdapter::NativeSendKeyEvent(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ IKeyEvent* event,
     /* [in] */ Int32 action,
     /* [in] */ Int32 modifiers,
@@ -694,7 +694,7 @@ Boolean ImeAdapter::NativeSendKeyEvent(
 }
 
 void ImeAdapter::NativeAppendUnderlineSpan(
-    /* [in] */ Handle64 underlinePtr,
+    /* [in] */ HANDLE underlinePtr,
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
@@ -702,7 +702,7 @@ void ImeAdapter::NativeAppendUnderlineSpan(
 }
 
 void ImeAdapter::NativeAppendBackgroundColorSpan(
-    /* [in] */ Handle64 underlinePtr,
+    /* [in] */ HANDLE underlinePtr,
     /* [in] */ Int32 start,
     /* [in] */ Int32 end,
     /* [in] */ Int32 backgroundColor)
@@ -711,7 +711,7 @@ void ImeAdapter::NativeAppendBackgroundColorSpan(
 }
 
 void ImeAdapter::NativeSetComposingText(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ ICharSequence* text,
     /* [in] */ const String& textStr,
     /* [in] */ Int32 newCursorPosition)
@@ -721,26 +721,26 @@ void ImeAdapter::NativeSetComposingText(
 }
 
 void ImeAdapter::NativeCommitText(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ const String& textStr)
 {
     Elastos_ImeAdapter_nativeCommitText(TO_IINTERFACE(this), nativeImeAdapterAndroid, textStr);
 }
 
 void ImeAdapter::NativeFinishComposingText(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeFinishComposingText(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativeAttachImeAdapter(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeAttachImeAdapter(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativeSetEditableSelectionOffsets(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
@@ -749,7 +749,7 @@ void ImeAdapter::NativeSetEditableSelectionOffsets(
 }
 
 void ImeAdapter::NativeSetComposingRegion(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
@@ -757,7 +757,7 @@ void ImeAdapter::NativeSetComposingRegion(
 }
 
 void ImeAdapter::NativeDeleteSurroundingText(
-    /* [in] */ Handle64 nativeImeAdapterAndroid,
+    /* [in] */ HANDLE nativeImeAdapterAndroid,
     /* [in] */ Int32 before,
     /* [in] */ Int32 after)
 {
@@ -766,37 +766,37 @@ void ImeAdapter::NativeDeleteSurroundingText(
 }
 
 void ImeAdapter::NativeUnselect(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeUnselect(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativeSelectAll(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeSelectAll(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativeCut(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeCut(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativeCopy(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeCopy(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativePaste(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativePaste(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }
 
 void ImeAdapter::NativeResetImeAdapter(
-    /* [in] */ Handle64 nativeImeAdapterAndroid)
+    /* [in] */ HANDLE nativeImeAdapterAndroid)
 {
     Elastos_ImeAdapter_nativeResetImeAdapter(TO_IINTERFACE(this), nativeImeAdapterAndroid);
 }

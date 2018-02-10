@@ -65,7 +65,7 @@ bool NativeInputWindowHandle::updateInfo()
             (Elastos::Droid::Server::Input::InputWindowHandle*)obj.Get();
     AutoPtr<IInputChannel> inputChannelObj = handle->mInputChannel;
     if (inputChannelObj) {
-        Handle64 ptr;
+        HANDLE ptr;
         inputChannelObj->GetNativeInputChannel(&ptr);
         NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
         mInfo->inputChannel = nativeInputChannel != NULL ? nativeInputChannel->getInputChannel() : NULL;
@@ -93,7 +93,7 @@ bool NativeInputWindowHandle::updateInfo()
     AutoPtr<IRegion> regionObj = handle->mTouchableRegion;
     if (regionObj) {
         Int64 regionHandle;
-        regionObj->GetNativeRegion((Handle64*)&regionHandle);
+        regionObj->GetNativeRegion((HANDLE*)&regionHandle);
         SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
         SkASSERT(region != NULL);
 

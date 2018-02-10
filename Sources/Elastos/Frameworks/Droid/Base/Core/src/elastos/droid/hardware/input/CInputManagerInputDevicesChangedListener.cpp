@@ -27,7 +27,7 @@ CAR_INTERFACE_IMPL(CInputManagerInputDevicesChangedListener, Object, IInputDevic
 CAR_OBJECT_IMPL(CInputManagerInputDevicesChangedListener);
 
 ECode CInputManagerInputDevicesChangedListener::constructor(
-    /* [in] */ Handle32 owner)
+    /* [in] */ HANDLE owner)
 {
     mOwner = (CInputManager*)owner;
     mBBinder = NULL;

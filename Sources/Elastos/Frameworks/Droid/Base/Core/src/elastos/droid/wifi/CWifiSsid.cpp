@@ -298,7 +298,7 @@ ECode CWifiSsid::ReadFromParcel(
     Int32 length;
     source->ReadInt32(&length);
     AutoPtr< ArrayOf<Byte> > b;
-    source->ReadArrayOf((Handle32*)&b);
+    source->ReadArrayOf((HANDLE*)&b);
     IOutputStream::Probe(mOctets)->Write(b, 0, length);
     return NOERROR;
 }
@@ -311,7 +311,7 @@ ECode CWifiSsid::WriteToParcel(
     dest->WriteInt32(size);
     AutoPtr<ArrayOf<Byte> > array;
     mOctets->ToByteArray((ArrayOf<Byte>**)&array);
-    dest->WriteArrayOf((Handle32)array.Get());
+    dest->WriteArrayOf((HANDLE)array.Get());
     return NOERROR;
 }
 

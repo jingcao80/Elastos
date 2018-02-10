@@ -56,7 +56,7 @@ ECode CAudioRoutesInfo::ReadFromParcel(
 {
     src->ReadInt32(&mMainType);
     AutoPtr<IInterface> obj;
-    src->ReadInterfacePtr((Handle32*)&obj);
+    src->ReadInterfacePtr((HANDLE*)&obj);
     mBluetoothName = ICharSequence::Probe(obj);
     return NOERROR;
 }

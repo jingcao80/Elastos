@@ -36,7 +36,7 @@ extern "C"
     extern void Elastos_TraceEvent_nativeEndToplevel();
     extern void Elastos_TraceEvent_nativeStartAsync(const String& name,Int64 id,const String& arg);
     extern void Elastos_TraceEvent_nativeFinishAsync(const String& name,Int64 id,const String& arg);
-    extern void Elastos_TraceEvent_InitCallback(Handle32 cb);
+    extern void Elastos_TraceEvent_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -60,7 +60,7 @@ void* TraceEvent::ElaTraceEventCallback_Init()
 
     sElaTraceEventCallback.elastos_TraceEvent_setEnabled = &TraceEvent::SetEnabled;
 
-    Elastos_TraceEvent_InitCallback((Handle32)&sElaTraceEventCallback);
+    Elastos_TraceEvent_InitCallback((HANDLE)&sElaTraceEventCallback);
     return &sElaTraceEventCallback;
 }
 

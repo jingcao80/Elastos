@@ -43,7 +43,7 @@ public:
         /* [out] */ INativeLibraryHelperHandle** handle);
 
     CARAPI CreatePackage(
-        /* [in] */ Handle64 pkg,
+        /* [in] */ HANDLE pkg,
         /* [out] */ INativeLibraryHelperHandle** handle);
 
     CARAPI Create(

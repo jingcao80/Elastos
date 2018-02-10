@@ -62,7 +62,7 @@ module
             [out] IInputChannel** ic);
 
         GetNativeInputChannel(
-            [out] Handle64* ptr);
+            [out] HANDLE* ptr);
     }
 
     interface IInputChannelHelper {

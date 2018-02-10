@@ -326,7 +326,7 @@ ECode CAccountAuthenticatorTransport::GetAccountRemovalAllowed(
 }
 
 ECode CAccountAuthenticatorTransport::constructor(
-    /* [in] */ Handle32 accounts)
+    /* [in] */ HANDLE accounts)
 {
     mHost = (AbstractAccountAuthenticator*)accounts;
     return NOERROR;

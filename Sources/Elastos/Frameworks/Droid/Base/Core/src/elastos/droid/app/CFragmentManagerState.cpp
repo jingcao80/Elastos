@@ -59,7 +59,7 @@ ECode CFragmentManagerState::ReadFromParcel(
     }
 
     mAdded = NULL;
-    source->ReadArrayOf((Handle32*)(&mAdded));
+    source->ReadArrayOf((HANDLE*)(&mAdded));
 
     mBackStack = NULL;
     source->ReadInt32(&value);
@@ -104,7 +104,7 @@ ECode CFragmentManagerState::WriteToParcel(
         }
     }
 
-    dest->WriteArrayOf((Handle32)mAdded.Get());
+    dest->WriteArrayOf((HANDLE)mAdded.Get());
 
     if (mBackStack == NULL) {
         dest->WriteInt32(-1);

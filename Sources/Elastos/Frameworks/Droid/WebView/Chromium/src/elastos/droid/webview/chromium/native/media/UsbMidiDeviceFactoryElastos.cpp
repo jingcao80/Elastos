@@ -86,7 +86,7 @@ const String UsbMidiDeviceFactoryElastos::ACTION_USB_PERMISSION("org.chromium.me
  * @param natviePointer The native pointer to which the created factory is associated.
  */
 UsbMidiDeviceFactoryElastos::UsbMidiDeviceFactoryElastos(
-    /* [in] */ Handle64 nativePointer)
+    /* [in] */ HANDLE nativePointer)
     : mNativePointer(nativePointer)
 {
     CArrayList::New((IList**)&mDevices);
@@ -98,7 +98,7 @@ UsbMidiDeviceFactoryElastos::UsbMidiDeviceFactoryElastos(
  */
 //@CalledByNative return UsbMidiDeviceFactoryElastos
 AutoPtr<IInterface> UsbMidiDeviceFactoryElastos::Create(
-    /* [in] */ Handle64 nativePointer)
+    /* [in] */ HANDLE nativePointer)
 {
     AutoPtr<UsbMidiDeviceFactoryElastos> usbmdFactory = new UsbMidiDeviceFactoryElastos(nativePointer);
     AutoPtr<IInterface> ret = TO_IINTERFACE(usbmdFactory);
@@ -241,7 +241,7 @@ void UsbMidiDeviceFactoryElastos::Close()
 }
 
 void UsbMidiDeviceFactoryElastos::NativeOnUsbMidiDeviceRequestDone(
-    /* [in] */ Handle64 nativeUsbMidiDeviceFactoryElastos,
+    /* [in] */ HANDLE nativeUsbMidiDeviceFactoryElastos,
     /* [in] */ ArrayOf<IInterface*>* devices)
 {
     Elastos_UsbMidiDeviceFactoryAndroid_nativeOnUsbMidiDeviceRequestDone(nativeUsbMidiDeviceFactoryElastos, devices);

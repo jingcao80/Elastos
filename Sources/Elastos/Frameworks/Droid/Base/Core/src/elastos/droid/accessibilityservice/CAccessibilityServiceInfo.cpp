@@ -475,7 +475,7 @@ ECode CAccessibilityServiceInfo::ReadFromParcel(
 
     if (source->ReadInt32(&value), value != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mResolveInfo = IResolveInfo::Probe(obj);
     }
 

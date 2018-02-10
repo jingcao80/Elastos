@@ -181,7 +181,7 @@ ECode ViewPager::SavedState::ReadFromParcel(
     BaseSavedState::ReadFromParcel(source);
     source->ReadInt32(&mPosition);
     AutoPtr<IInterface> temp;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&temp);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&temp);
     mAdapterState = IParcelable::Probe(temp);
     return NOERROR;
 }

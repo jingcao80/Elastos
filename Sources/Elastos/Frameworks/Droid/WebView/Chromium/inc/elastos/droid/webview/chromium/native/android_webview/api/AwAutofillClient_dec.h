@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AwAutofillClient_nativeSuggestionSelected(IInterface* caller,Handle64 nativeAwAutofillClient,Int32 position);
-    extern void Elastos_AwAutofillClient_InitCallback(Handle64 cb);
+    extern void Elastos_AwAutofillClient_nativeSuggestionSelected(IInterface* caller,HANDLE nativeAwAutofillClient,Int32 position);
+    extern void Elastos_AwAutofillClient_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -42,7 +42,7 @@ namespace AndroidWebview {
 
 struct ElaAwAutofillClientCallback
 {
-    AutoPtr<IInterface> (*elastos_AwAutofillClient_create)(Handle64 nativeClient);
+    AutoPtr<IInterface> (*elastos_AwAutofillClient_create)(HANDLE nativeClient);
     void (*elastos_AwAutofillClient_showAutofillPopup)(IInterface* obj, Float x, Float y, Float width, Float height, ArrayOf<IInterface*>* suggestions);
     void (*elastos_AwAutofillClient_hideAutofillPopup)(IInterface* obj);
     AutoPtr<ArrayOf<IInterface*> > (*elastos_AwAutofillClient_createAutofillSuggestionArray)(Int32 size);
@@ -59,7 +59,7 @@ void* AwAutofillClient::ElaAwAutofillClientCallback_Init()
     sElaAwAutofillClientCallback.elastos_AwAutofillClient_createAutofillSuggestionArray = &AwAutofillClient::CreateAutofillSuggestionArray;
     sElaAwAutofillClientCallback.elastos_AwAutofillClient_addToAutofillSuggestionArray = &AwAutofillClient::AddToAutofillSuggestionArray;
 
-    Elastos_AwAutofillClient_InitCallback((Handle64)&sElaAwAutofillClientCallback);
+    Elastos_AwAutofillClient_InitCallback((HANDLE)&sElaAwAutofillClientCallback);
     return &sElaAwAutofillClientCallback;
 }
 

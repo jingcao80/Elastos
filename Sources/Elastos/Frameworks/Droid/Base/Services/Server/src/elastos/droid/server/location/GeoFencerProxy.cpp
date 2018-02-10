@@ -65,7 +65,7 @@ ECode GeoFencerProxy::ServiceConnection::OnServiceDisconnected(
 CAR_INTERFACE_IMPL_2(GeoFencerProxy::GeoFenceListener, Object, IIGeoFenceListener, IBinder)
 
 ECode GeoFencerProxy::GeoFenceListener::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (GeoFencerProxy*)host;
     return NOERROR;
@@ -113,7 +113,7 @@ GeoFencerProxy::GeoFencerProxy(
         | IContext::BIND_ALLOW_OOM_MANAGEMENT, &res);
 
     mServiceConnection = new ServiceConnection(this);
-    CGeoFenceListener::New((Handle64)this, (IBinder**)&mListener);
+    CGeoFenceListener::New((HANDLE)this, (IBinder**)&mListener);
 }
 
 void GeoFencerProxy::RemoveCaller(

@@ -74,7 +74,7 @@ ECode CActivityManagerRunningServiceInfo::ReadFromParcel(
 {
     VALIDATE_NOT_NULL(source);
 
-    FAIL_RETURN(source->ReadInterfacePtr((Handle32*)&mService));
+    FAIL_RETURN(source->ReadInterfacePtr((HANDLE*)&mService));
     FAIL_RETURN(source->ReadInt32(&mPid));
     FAIL_RETURN(source->ReadInt32(&mUid));
     FAIL_RETURN(source->ReadString(&mProcess));

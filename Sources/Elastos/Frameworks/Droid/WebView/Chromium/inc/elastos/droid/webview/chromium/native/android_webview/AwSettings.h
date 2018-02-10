@@ -255,7 +255,7 @@ public:
         /* [in] */ ZoomSupportChangeListener* zoomChangeListener);
 
     CARAPI_(void) SetWebContents(
-        /* [in] */ Handle64 nativeWebContents);
+        /* [in] */ HANDLE nativeWebContents);
 
     /**
      * See {@link android.webkit.WebSettings#setBlockNetworkLoads}.
@@ -766,7 +766,7 @@ public:
 private:
     //@CalledByNative
     CARAPI_(void) NativeAwSettingsGone(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     //@CalledByNative
     CARAPI_(Double) GetDIPScaleLocked();
@@ -927,42 +927,42 @@ private:
 
     //@CalledByNative
     CARAPI_(void) PopulateWebPreferences(
-        /* [in] */ Handle64 webPrefsPtr);
+        /* [in] */ HANDLE webPrefsPtr);
 
     CARAPI_(void) UpdateWebkitPreferencesOnUiThreadLocked();
 
-    CARAPI_(Handle64) NativeInit(
-        /* [in] */ Handle64 webContentsPtr);
+    CARAPI_(HANDLE) NativeInit(
+        /* [in] */ HANDLE webContentsPtr);
 
     CARAPI_(void) NativeDestroy(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     CARAPI_(void) NativePopulateWebPreferencesLocked(
-        /* [in] */ Handle64 nativeAwSettings,
-        /* [in] */ Handle64 webPrefsPtr);
+        /* [in] */ HANDLE nativeAwSettings,
+        /* [in] */ HANDLE webPrefsPtr);
 
     CARAPI_(void) NativeResetScrollAndScaleState(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     CARAPI_(void) NativeUpdateEverythingLocked(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     CARAPI_(void) NativeUpdateInitialPageScaleLocked(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     CARAPI_(void) NativeUpdateUserAgentLocked(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     CARAPI_(void) NativeUpdateWebkitPreferencesLocked(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     static CARAPI_(String) NativeGetDefaultUserAgent();
 
     CARAPI_(void) NativeUpdateFormDataPreferencesLocked(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     CARAPI_(void) NativeUpdateRendererPreferencesLocked(
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
 //callback function declaration
 public:
@@ -971,7 +971,7 @@ public:
 private:
     static CARAPI_(void) NativeAwSettingsGone(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativeAwSettings);
+        /* [in] */ HANDLE nativeAwSettings);
 
     static CARAPI_(Double) GetDIPScaleLocked(
         /* [in] */ IInterface* obj);
@@ -1107,7 +1107,7 @@ private:
 
     static CARAPI_(void) PopulateWebPreferences(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 webPrefsPtr);
+        /* [in] */ HANDLE webPrefsPtr);
 
 private:
     static const String TAG;
@@ -1190,7 +1190,7 @@ private:
     static Boolean sAppCachePathIsSet;
 
     // The native side of this object. It's lifetime is bounded by the WebContent it is attached to.
-    Handle64 mNativeAwSettings;
+    HANDLE mNativeAwSettings;
 
     // Custom handler that queues messages to call native code on the UI thread.
     AutoPtr<EventHandler> mEventHandler;

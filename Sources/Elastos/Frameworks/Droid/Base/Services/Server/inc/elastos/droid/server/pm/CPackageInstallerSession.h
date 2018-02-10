@@ -73,7 +73,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 callback,
+        /* [in] */ HANDLE callback,
         /* [in] */ IContext* ctx,
         /* [in] */ IIPackageManager* pm,
         /* [in] */ ILooper* looper,

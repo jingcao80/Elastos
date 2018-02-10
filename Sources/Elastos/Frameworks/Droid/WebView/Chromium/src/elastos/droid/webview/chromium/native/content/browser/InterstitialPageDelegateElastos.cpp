@@ -38,7 +38,7 @@ InterstitialPageDelegateElastos::InterstitialPageDelegateElastos(
     mNativePtr = NativeInit(htmlContent);
 }
 
-Handle64 InterstitialPageDelegateElastos::GetNative()
+HANDLE InterstitialPageDelegateElastos::GetNative()
 {
     return mNativePtr;
 }
@@ -83,14 +83,14 @@ ECode InterstitialPageDelegateElastos::OnNativeDestroyed()
     return NOERROR;
 }
 
-Handle64 InterstitialPageDelegateElastos::NativeInit(
+HANDLE InterstitialPageDelegateElastos::NativeInit(
     /* [in] */ const String& htmlContent)
 {
     return Elastos_InterstitialPageDelegateAndroid_nativeInit(TO_IINTERFACE(this), htmlContent);
 }
 
 ECode InterstitialPageDelegateElastos::NativeProceed(
-    /* [in] */ Handle64 nativeInterstitialPageDelegateElastos)
+    /* [in] */ HANDLE nativeInterstitialPageDelegateElastos)
 {
     Elastos_InterstitialPageDelegateAndroid_nativeProceed(TO_IINTERFACE(this),
             nativeInterstitialPageDelegateElastos);
@@ -98,7 +98,7 @@ ECode InterstitialPageDelegateElastos::NativeProceed(
 }
 
 ECode InterstitialPageDelegateElastos::NativeDontProceed(
-    /* [in] */ Handle64 nativeInterstitialPageDelegateElastos)
+    /* [in] */ HANDLE nativeInterstitialPageDelegateElastos)
 {
     Elastos_InterstitialPageDelegateAndroid_nativeDontProceed(TO_IINTERFACE(this),
             nativeInterstitialPageDelegateElastos);

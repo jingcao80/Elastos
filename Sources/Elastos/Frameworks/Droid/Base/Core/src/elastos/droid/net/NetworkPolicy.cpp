@@ -249,7 +249,7 @@ ECode NetworkPolicy::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mTemplate = INetworkTemplate::Probe(obj);
     source->ReadInt32(&mCycleDay);
     source->ReadString(&mCycleTimezone);

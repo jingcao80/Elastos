@@ -75,7 +75,7 @@ public:
      */
     //@CalledByNative
     CARAPI_(Boolean) Start(
-      /* [in] */ Handle64 nativePtr);
+      /* [in] */ HANDLE nativePtr);
 
     /**
      * Stop listening to intents.
@@ -111,7 +111,7 @@ private:
 
     static CARAPI_(Boolean) Start(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
     static CARAPI_(void) Stop(
         /* [in] */ IInterface* obj);
@@ -121,7 +121,7 @@ private:
      * see content/browser/battery_status/battery_status_manager.cc
      */
     CARAPI_(void) NativeGotBatteryStatus(
-      /* [in] */ Handle64 nativeBatteryStatusManager,
+      /* [in] */ HANDLE nativeBatteryStatusManager,
       /* [in] */ Boolean charging,
       /* [in] */ Double chargingTime,
       /* [in] */ Double dischargingTime,
@@ -137,7 +137,7 @@ private:
 
     // Non-zero if and only if we're listening for events.
     // To avoid race conditions on the C++ side, access must be synchronized.
-    Handle64 mNativePtr;
+    HANDLE mNativePtr;
 
     // The lock to access the mNativePtr.
     Object mNativePtrLock;

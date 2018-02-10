@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_Clipboard_InitCallback(Handle32 cb);
+    extern void Elastos_Clipboard_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -60,7 +60,7 @@ void* Clipboard::ElaClipboardCallback_Init()
     sElaClipboardCallback.elastos_Clipboard_setHTMLText = &Clipboard::SetHTMLText;
     sElaClipboardCallback.elastos_Clipboard_isHTMLClipboardSupported = &Clipboard::IsHTMLClipboardSupported;
 
-    Elastos_Clipboard_InitCallback((Handle32)&sElaClipboardCallback);
+    Elastos_Clipboard_InitCallback((HANDLE)&sElaClipboardCallback);
     return &sElaClipboardCallback;
 }
 

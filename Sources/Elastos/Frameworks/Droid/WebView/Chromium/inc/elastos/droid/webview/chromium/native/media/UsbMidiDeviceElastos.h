@@ -103,7 +103,7 @@ public:
      */
     //@CalledByNative
     CARAPI_(void) RegisterSelf(
-        /* [in] */ Handle64 nativePointer);
+        /* [in] */ HANDLE nativePointer);
 
     /**
      * Sends a USB-MIDI data to the device.
@@ -158,7 +158,7 @@ private:
         /* [in] */ IByteBuffer* buffer);
 
     static CARAPI_(void) NativeOnData(
-        /* [in] */ Handle64 nativeUsbMidiDeviceElastos,
+        /* [in] */ HANDLE nativeUsbMidiDeviceElastos,
         /* [in] */ Int32 endpointNumber,
         /* [in] */ ArrayOf<Byte>* data);
 
@@ -169,7 +169,7 @@ public:
 private:
     static CARAPI_(void) RegisterSelf(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativePointer);
+        /* [in] */ HANDLE nativePointer);
 
     static CARAPI_(void) Send(
         /* [in] */ IInterface* obj,
@@ -217,7 +217,7 @@ private:
     /**
      * The identifier of this device.
      */
-    Handle64 mNativePointer;
+    HANDLE mNativePointer;
 };
 
 } // namespace Media

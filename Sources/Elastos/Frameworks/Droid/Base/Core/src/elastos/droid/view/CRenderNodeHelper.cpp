@@ -49,7 +49,7 @@ ECode CRenderNodeHelper::Create(
 }
 
 ECode CRenderNodeHelper::Adopt(
-    /* [in] */ Handle64 nativePtr,
+    /* [in] */ HANDLE nativePtr,
     /* [out] */ IRenderNode** node)
 {
     VALIDATE_NOT_NULL(node)

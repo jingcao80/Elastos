@@ -106,7 +106,7 @@ CAR_INTERFACE_IMPL(VideoCapture, Object, IPreviewCallback)
 VideoCapture::VideoCapture(
     /* [in] */ IContext* context,
     /* [in] */ Int32 id,
-    /* [in] */ Handle64 nativeVideoCaptureDeviceAndroid)
+    /* [in] */ HANDLE nativeVideoCaptureDeviceAndroid)
     : mContext(context)
     , mIsRunning(FALSE)
     , mId(id)
@@ -423,7 +423,7 @@ Int32 VideoCapture::GetDeviceOrientation()
 
 // Method for VideoCapture implementations to call back native code.
 void VideoCapture::NativeOnFrameAvailable(
-    /* [in] */ Handle64 nativeVideoCaptureDeviceAndroid,
+    /* [in] */ HANDLE nativeVideoCaptureDeviceAndroid,
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 length,
     /* [in] */ Int32 rotation)

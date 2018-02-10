@@ -203,7 +203,7 @@ ECode CCursorAnchorInfo::ReadFromParcel(
 //    mCharacterBoundsArray = source.readParcelable(SparseRectFArray.class.getClassLoader());
     CMatrix::New((IMatrix**)&mMatrix);
     AutoPtr<ArrayOf<Float> > arr;
-    source->ReadArrayOf((Handle32*)&arr);
+    source->ReadArrayOf((HANDLE*)&arr);
     mMatrix->SetValues(arr);
     return NOERROR;
 }
@@ -224,7 +224,7 @@ ECode CCursorAnchorInfo::WriteToParcel(
 //    dest.writeParcelable(mCharacterBoundsArray, flags);
     AutoPtr<ArrayOf<Float> > matrixArray = ArrayOf<Float>::Alloc(9);
     mMatrix->GetValues(matrixArray);
-    dest->WriteArrayOf((Handle32)matrixArray.Get());
+    dest->WriteArrayOf((HANDLE)matrixArray.Get());
     return NOERROR;
 }
 

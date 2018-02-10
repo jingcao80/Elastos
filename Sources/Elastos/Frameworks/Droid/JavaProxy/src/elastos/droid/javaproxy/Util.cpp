@@ -1980,7 +1980,7 @@ Boolean Util::GetElBitmap(
     CParcel::New((IParcel**)&parcel);
 
     android::Parcel* dest;
-    parcel->GetDataPayload((Handle32*)&dest);
+    parcel->GetDataPayload((HANDLE*)&dest);
 
     dest->appendFrom(source, 0, source->dataSize());
     dest->setDataPosition(0);
@@ -2009,7 +2009,7 @@ jobject Util::ToJavaBitmap(
 
     IParcelable::Probe(bitmap)->ReadFromParcel(parcel);
     parcel->SetDataPosition(0);
-    Handle32 source;
+    HANDLE source;
     parcel->GetDataPayload(&source);
 
     jclass parcelClass = env->FindClass("android/os/Parcel");
@@ -4767,7 +4767,7 @@ jobject Util::ToJavaInputChannel(
 
     IParcelable::Probe(channel)->WriteToParcel(parcel);
     parcel->SetDataPosition(0);
-    Handle32 source;
+    HANDLE source;
     parcel->GetDataPayload(&source);
 
     jclass parcelClass = env->FindClass("android/os/Parcel");
@@ -7611,7 +7611,7 @@ jobject Util::ToJavaRemoteViews(
 
     AutoPtr<IApplicationInfo> application;
     Int32 layoutId = 0;
-    source->ReadInterfacePtr((Handle32*)&application);
+    source->ReadInterfacePtr((HANDLE*)&application);
     source->ReadInt32(&layoutId);
 
     jobject japplication = ToJavaApplicationInfo(env, application);
@@ -7652,7 +7652,7 @@ jobject Util::ToJavaRemoteViews(
                     source->ReadInt32(&temp);
 
                     if (temp == 1){
-                        source->ReadInterfacePtr((Handle32*)&item);
+                        source->ReadInterfacePtr((HANDLE*)&item);
                     }
 
                     if (item != NULL){
@@ -7827,7 +7827,7 @@ jobject Util::ToJavaRemoteViews(
                             source->ReadInt32(&flag);
                             if (flag != 0) {
                                 AutoPtr<IUri> uri;
-                                source->ReadInterfacePtr((Handle32*)&uri);
+                                source->ReadInterfacePtr((HANDLE*)&uri);
                                 if (uri != NULL){
                                     jobject jUri = ToJavaUri(env, uri);
                                     jmethodID method = env->GetMethodID(klass, "setUri", "(ILjava/lang/String;Landroid/net/Uri;)V");
@@ -7985,7 +7985,7 @@ jobject Util::ToJavaRemoteViews(
                     Int32 viewId;
                     source->ReadInt32(&viewId);
                     AutoPtr<IPendingIntent> pendingIntent;
-                    source->ReadInterfacePtr((Handle32*)&pendingIntent);
+                    source->ReadInterfacePtr((HANDLE*)&pendingIntent);
                     jobject jpendingIntent = ToJavaPendingIntent(env, pendingIntent);
                     jmethodID method = env->GetMethodID(klass, "setPendingIntentTemplate", "(ILandroid/app/PendingIntent;)V");
                     CheckErrorAndLog(env, "Util::ToJavaRemoteViews()", "ToJavaRemoteViews(): FindMethod: setPendingIntentTemplate: %d!\n", __LINE__);
@@ -8001,7 +8001,7 @@ jobject Util::ToJavaRemoteViews(
                     Int32 viewId;
                     source->ReadInt32(&viewId);
                     AutoPtr<IIntent> intent;
-                    source->ReadInterfacePtr((Handle32*)&intent);
+                    source->ReadInterfacePtr((HANDLE*)&intent);
                     jobject jintent = ToJavaIntent(env, intent);
                     jmethodID method = env->GetMethodID(klass, "setOnClickFillInIntent", "(ILandroid/content/Intent;)V");
                     CheckErrorAndLog(env, "Util::ToJavaRemoteViews()", "ToJavaRemoteViews(): FindMethod: setOnClickFillInIntent: %d!\n", __LINE__);
@@ -8016,7 +8016,7 @@ jobject Util::ToJavaRemoteViews(
                     Int32 viewId;
                     source->ReadInt32(&viewId);
                     AutoPtr<IIntent> intent;
-                    source->ReadInterfacePtr((Handle32*)&intent);
+                    source->ReadInterfacePtr((HANDLE*)&intent);
                     jobject jintent = ToJavaIntent(env, intent);
                     jmethodID method = env->GetMethodID(klass, "setRemoteAdapter", "(ILandroid/content/Intent;)V");
                     CheckErrorAndLog(env, "Util::ToJavaRemoteViews()", "ToJavaRemoteViews(): FindMethod: setRemoteAdapter: %d!\n", __LINE__);
@@ -8425,7 +8425,7 @@ Boolean Util::GetElPendingIntent(
     jobject jInstance = env->NewGlobalRef(jtarget);
 
     AutoPtr<IIIntentSender> iisender;
-    if (NOERROR != CIIntentSenderNative::New((Handle64)jvm, (Handle64)jInstance, (IIIntentSender**)&iisender)) {
+    if (NOERROR != CIIntentSenderNative::New((HANDLE)jvm, (HANDLE)jInstance, (IIIntentSender**)&iisender)) {
         LOGGERD(TAG, "GetElPendingIntent new CIIntentSenderNative fail!\n");
         return FALSE;
     }
@@ -9266,7 +9266,7 @@ jobject Util::ToJavaMotionEvent(
     jobject jevent = env->NewObject(eventKlass, m);
     Util::CheckErrorAndLog(env, "ToJavaMotionEvent", "NewObject: MotionEvent line: %d", __LINE__);
 
-    Handle64 nativeEvent;
+    HANDLE nativeEvent;
     event->GetNative(&nativeEvent);
 
     android::MotionEvent* destEvent = new android::MotionEvent();
@@ -9586,7 +9586,7 @@ jobject Util::ToJavaDebugMemoryInfo(
     Util::SetJavaIntField(env, dmiKlass, jinfo, tempInt, "otherSwappedOut", "ToJavaDebugMemoryInfo");
 
     AutoPtr<ArrayOf<Int32> > otherStats;
-    parcel->ReadArrayOf((Handle32*)(&otherStats));
+    parcel->ReadArrayOf((HANDLE*)(&otherStats));
     if (otherStats != NULL) {
         jfieldID f = env->GetFieldID(dmiKlass, "otherStats", "[I");
         Util::CheckErrorAndLog(env, "ToJavaDebugMemoryInfo", "GetFieldID: otherStats %d", __LINE__);
@@ -9695,7 +9695,7 @@ Boolean Util::GetElDebugMemoryInfo(
     Util::CheckErrorAndLog(env, "ToJavaDebugMemoryInfo", "GetFieldID: otherStats %d", __LINE__);
     AutoPtr<ArrayOf<Int32> > otherIntArray;
     Util::GetElInt32Array(env, jotherIntArray, (ArrayOf<Int32>**)&otherIntArray);
-    parcel->WriteArrayOf((Handle32)otherIntArray.Get());
+    parcel->WriteArrayOf((HANDLE)otherIntArray.Get());
 
     parcel->SetDataPosition(0);
     AutoPtr<IParcelable> parcelInfo = IParcelable::Probe(info);
@@ -10574,7 +10574,7 @@ jobject Util::ToJavaWifiEnterpriseConfig(
     CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallVoidMethod: writeInt", __LINE__);
     if (len > 0) {
         AutoPtr<ArrayOf<Byte> > byteArray;
-        source->ReadArrayOf((Handle32*)&byteArray);
+        source->ReadArrayOf((HANDLE*)&byteArray);
         jbyteArray jbytearray = ToJavaByteArray(env, byteArray);
         env->CallVoidMethod(jparcel, mWriteByteArray, jbytearray);
         CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallVoidMethod: writeByteArray", __LINE__);
@@ -10586,7 +10586,7 @@ jobject Util::ToJavaWifiEnterpriseConfig(
     CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallVoidMethod: writeInt", __LINE__);
     if (len > 0) {
         AutoPtr<ArrayOf<Byte> > byteArray;
-        source->ReadArrayOf((Handle32*)&byteArray);
+        source->ReadArrayOf((HANDLE*)&byteArray);
         jbyteArray jbytearray = ToJavaByteArray(env, byteArray);
         env->CallVoidMethod(jparcel, mWriteByteArray, jbytearray);
         CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallVoidMethod: writeByteArray", __LINE__);
@@ -10604,7 +10604,7 @@ jobject Util::ToJavaWifiEnterpriseConfig(
     CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallVoidMethod: writeInt", __LINE__);
     if (len > 0) {
         AutoPtr<ArrayOf<Byte> > byteArray;
-        source->ReadArrayOf((Handle32*)&byteArray);
+        source->ReadArrayOf((HANDLE*)&byteArray);
         jbyteArray jbytearray = ToJavaByteArray(env, byteArray);
         env->CallVoidMethod(jparcel, mWriteByteArray, jbytearray);
         CheckErrorAndLog(env, "ToJavaWifiEnterpriseConfig", "CallVoidMethod: writeByteArray", __LINE__);
@@ -11734,7 +11734,7 @@ jobject Util::ToJavaContentProviderOperation(
     Int32 tempInt = 0;
     if ((parcel->ReadInt32(&tempInt), tempInt) != 0) {
         AutoPtr<IInterface> contentValues;
-        parcel->ReadInterfacePtr((Handle32*)(IInterface**)&contentValues);
+        parcel->ReadInterfacePtr((HANDLE*)(IInterface**)&contentValues);
         AutoPtr<IContentValues> values = IContentValues::Probe(contentValues);
 
         jobject jvalues = Util::ToJavaContentValues(env, values);

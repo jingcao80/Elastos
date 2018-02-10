@@ -118,7 +118,7 @@ module
 
     interface IJavaNativeProxy {
         GetJavaInstance(
-            [out] Handle64* obj);
+            [out] HANDLE* obj);
     }
 
     /**
@@ -132,8 +132,8 @@ module
 
     class CApplicationThreadNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IApplicationThread;
         interface IBinder;
@@ -141,16 +141,16 @@ module
 
     class CBinderNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IBinder;
     }
 
     class CDisplayManagerCallbackNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIDisplayManagerCallback;
         interface IBinder;
@@ -158,8 +158,8 @@ module
 
     class CInputMethodClientNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IInputMethodClient;
         interface IBinder;
@@ -167,8 +167,8 @@ module
 
     class CInputContextNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIInputContext;
         interface IBinder;
@@ -176,8 +176,8 @@ module
 
     class CWindowNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIWindow;
         interface IBinder;
@@ -185,8 +185,8 @@ module
 
     class CInputDevicesChangedListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IInputDevicesChangedListener;
         interface IBinder;
@@ -194,8 +194,8 @@ module
 
     class CIntentReceiverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIntentReceiver;
         interface IBinder;
@@ -203,8 +203,8 @@ module
 
     class CPackageStatusObserverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIPackageStatsObserver;
         interface IBinder;
@@ -212,8 +212,8 @@ module
 
     class CCursorNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface ICursor;
         interface ICloseable;
@@ -222,8 +222,8 @@ module
 
     class CContentProviderNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIContentProvider;
         interface IBinder;
@@ -231,8 +231,8 @@ module
 
     class CInputMethodCallbackNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IInputMethodCallback;
         interface IBinder;
@@ -240,8 +240,8 @@ module
 
     class CIContentObserverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIContentObserver;
         interface IBinder;
@@ -249,8 +249,8 @@ module
 
     class CLocalActivityRecordNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface ILocalActivityRecord;
         interface IBinder;
@@ -258,8 +258,8 @@ module
 
     class CMessengerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIMessenger;
         interface IBinder;
@@ -267,8 +267,8 @@ module
 
     class CIIntentSenderNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIIntentSender;
         interface IBinder;
@@ -276,8 +276,8 @@ module
 
     class CGpsStatusListener {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIGpsStatusListener;
         interface IBinder;
@@ -285,8 +285,8 @@ module
 
     class CLocationListener {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IILocationListener;
         interface IBinder;
@@ -294,8 +294,8 @@ module
 
     class CMountServiceListener {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIMountServiceListener;
         interface IBinder;
@@ -303,8 +303,8 @@ module
 
     class CIServiceConnectionNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIServiceConnection;
         interface IBinder;
@@ -314,8 +314,8 @@ module
         constructor();
 
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IBinder;
         interface IParcelable;
@@ -323,8 +323,8 @@ module
 
     class CAccountManagerResponseNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IAccountManagerResponse;
         interface IBinder;
@@ -332,8 +332,8 @@ module
 
     class CAppWidgetHostCallbacksNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIAppWidgetHost;
         interface IBinder;
@@ -341,8 +341,8 @@ module
 
     class CInputMethodServiceNative {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IIInputMethod;
         interface IBinder;
@@ -350,8 +350,8 @@ module
 
     class CIInputMethodSessionNative {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IIInputMethodSession;
         interface IBinder;
@@ -359,8 +359,8 @@ module
 
     class CInputMethodSessionNative {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IInputMethodSession;
         interface IInputMethodSessionNative;
@@ -369,8 +369,8 @@ module
 
     class CIInputContextCallbackNative {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IIInputContextCallback;
         interface IBinder;
@@ -378,8 +378,8 @@ module
 
     class CRemoteViewsAdapterConnectionNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRemoteViewsAdapterConnection;
         interface IBinder;
@@ -387,8 +387,8 @@ module
 
     class CPackageInstallObserverNative {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IIPackageInstallObserver;
         interface IBinder;
@@ -396,8 +396,8 @@ module
 
     class CPackageInstallObserver2Native {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IIPackageInstallObserver2;
         interface IBinder;
@@ -405,8 +405,8 @@ module
 
     class CMediaContainerServiceNative {
         constructor(
-           [in] Handle64 jVM,
-           [in] Handle64 jInstance);
+           [in] HANDLE jVM,
+           [in] HANDLE jInstance);
 
         interface IIMediaContainerService;
         interface IBinder;
@@ -414,8 +414,8 @@ module
 
     class CContentObserverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IContentObserver;
         interface IBinder;
@@ -423,8 +423,8 @@ module
 
     class CIOnPrimaryClipChangedListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IOnPrimaryClipChangedListener;
         interface IBinder;
@@ -432,8 +432,8 @@ module
 
     class CITransientNotificationNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IITransientNotification;
         interface IBinder;
@@ -441,8 +441,8 @@ module
 
     class CIPackageDeleteObserverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIPackageDeleteObserver;
         interface IBinder;
@@ -450,8 +450,8 @@ module
 
     class CIPackageDeleteObserver2Native {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIPackageDeleteObserver2;
         interface IBinder;
@@ -459,8 +459,8 @@ module
 
     class CIWallpaperManagerCallbackNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIWallpaperManagerCallback;
         interface IBinder;
@@ -468,8 +468,8 @@ module
 
     class CIIWallpaperServiceNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIWallpaperService;
         interface IBinder;
@@ -477,8 +477,8 @@ module
 
     class CIWallpaperEngineNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIWallpaperEngine;
         interface IBinder;
@@ -486,8 +486,8 @@ module
 
     class CRemoteViewsFactoryNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRemoteViewsFactory;
         interface IBinder;
@@ -495,8 +495,8 @@ module
 
     class CIILocationProviderNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IILocationProvider;
         interface IBinder;
@@ -531,8 +531,8 @@ module
 
     class CIPackageDataObserverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIPackageDataObserver;
         interface IBinder;
@@ -540,8 +540,8 @@ module
 
     class CDataSetObserverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IDataSetObserver;
         interface IBinder;
@@ -549,8 +549,8 @@ module
 
     class CContentResolverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IContentResolver;
         interface IBinder;
@@ -558,8 +558,8 @@ module
 
     class CIInstrumentationWatcherNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IInstrumentationWatcher;
         interface IBinder;
@@ -567,8 +567,8 @@ module
 
     class CIWallpaperConnectionNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIWallpaperConnection;
         interface IBinder;
@@ -576,8 +576,8 @@ module
 
     class CIActivityControllerNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIActivityController;
         interface IBinder;
@@ -585,8 +585,8 @@ module
 
     class CIStopUserCallbackNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IStopUserCallback;
         interface IBinder;
@@ -594,8 +594,8 @@ module
 
     class CIProcessObserverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIProcessObserver;
         interface IBinder;
@@ -603,8 +603,8 @@ module
 
     class CIUserSwitchObserverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIUserSwitchObserver;
         interface IBinder;
@@ -612,8 +612,8 @@ module
 
     class CIPackageMoveObserverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIPackageMoveObserver;
         interface IBinder;
@@ -621,8 +621,8 @@ module
 
     class CIApplicationTokenNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IApplicationToken;
         interface IBinder;
@@ -630,8 +630,8 @@ module
 
     class CIOnKeyguardExitResultNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IOnKeyguardExitResult;
         interface IBinder;
@@ -639,8 +639,8 @@ module
 
     class CIRemoteCallbackNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRemoteCallback;
         interface IBinder;
@@ -648,8 +648,8 @@ module
 
     class CIRotationWatcherNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IRotationWatcher;
         interface IBinder;
@@ -657,8 +657,8 @@ module
 
     class CIInputFilterNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIInputFilter;
         interface IBinder;
@@ -666,8 +666,8 @@ module
 
     class CISyncStatusObserver{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IISyncStatusObserver;
         interface IBinder;
@@ -675,8 +675,8 @@ module
 
     class CIMountShutdownObserverNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIMountShutdownObserver;
         interface IBinder;
@@ -684,8 +684,8 @@ module
 
     class CIObbActionListenerNative{
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIObbActionListener;
         interface IBinder;
@@ -693,8 +693,8 @@ module
 
     class CIAudioFocusDispatcher {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIAudioFocusDispatcher;
         interface IBinder;
@@ -702,8 +702,8 @@ module
 
     class CIRemoteControlClient {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRemoteControlClient;
         interface IBinder;
@@ -711,8 +711,8 @@ module
 
     class CIRemoteControlDisplay {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRemoteControlDisplay;
         interface IJavaNativeProxy;
@@ -721,8 +721,8 @@ module
 
     class CIRemoteVolumeObserver {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRemoteVolumeObserver;
         interface IBinder;
@@ -730,8 +730,8 @@ module
 
     class CIRingtonePlayer {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRingtonePlayer;
         interface IBinder;
@@ -739,8 +739,8 @@ module
 
     class CIAudioRoutesObserver {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIAudioRoutesObserver;
         interface IBinder;
@@ -748,8 +748,8 @@ module
 
     class CICancellationSignalNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IICancellationSignal;
         interface IBinder;
@@ -757,8 +757,8 @@ module
 
     class CTextServicesSessionListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IITextServicesSessionListener;
         interface IBinder;
@@ -766,8 +766,8 @@ module
 
     class CSpellCheckerSessionListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IISpellCheckerSessionListener;
         interface IBinder;
@@ -775,8 +775,8 @@ module
 
     class CIBackupAgentNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIBackupAgent;
         interface IBinder;
@@ -784,8 +784,8 @@ module
 
     class CIFullBackupRestoreObserverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIFullBackupRestoreObserver;
         interface IBinder;
@@ -793,8 +793,8 @@ module
 
     class CIRestoreObserverNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIRestoreObserver;
         interface IBinder;
@@ -802,8 +802,8 @@ module
 
     class CICountryListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IICountryListener;
         interface IBinder;
@@ -811,8 +811,8 @@ module
 
     class CIGpsMeasurementsListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIGpsMeasurementsListener;
         interface IBinder;
@@ -820,8 +820,8 @@ module
 
     class CIGpsNavigationMessageListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIGpsNavigationMessageListener;
         interface IBinder;
@@ -829,8 +829,8 @@ module
 
     class CIVolumeControllerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIVolumeController;
         interface IBinder;
@@ -838,8 +838,8 @@ module
 
     class CIMediaRouterClientNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIMediaRouterClient;
         interface IBinder;
@@ -847,8 +847,8 @@ module
 
     class CIVoiceInteractionSessionNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIVoiceInteractionSession;
         interface IBinder;
@@ -856,8 +856,8 @@ module
 
     class CIVoiceInteractorNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIVoiceInteractor;
         interface IBinder;
@@ -865,8 +865,8 @@ module
 
     class CIUiAutomationConnectionNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIUiAutomationConnection;
         interface IBinder;
@@ -874,8 +874,8 @@ module
 
     class CIActivityContainerCallbackNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IActivityContainerCallback;
         interface IBinder;
@@ -883,8 +883,8 @@ module
 
     class CINotificationListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IINotificationListener;
         interface IBinder;
@@ -892,8 +892,8 @@ module
 
     class CIConditionProviderNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIConditionProvider;
         interface IBinder;
@@ -901,8 +901,8 @@ module
 
     class CIConditionListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIConditionListener;
         interface IBinder;
@@ -910,8 +910,8 @@ module
 
     class CIParcelFileDescriptorFactoryNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIParcelFileDescriptorFactory;
         interface IBinder;
@@ -919,8 +919,8 @@ module
 
     class CIWindowSessionCallbackNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIWindowSessionCallback;
         interface IBinder;
@@ -928,8 +928,8 @@ module
 
     class CINetworkPolicyListenerNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IINetworkPolicyListener;
         interface IBinder;
@@ -937,8 +937,8 @@ module
 
     class CMediaSessionCallbackStubNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IISessionCallback;
         interface IBinder;
@@ -946,8 +946,8 @@ module
 
     class CIDreamServiceNative {
         constructor(
-            [in] Handle64 jVM,
-            [in] Handle64 jInstance);
+            [in] HANDLE jVM,
+            [in] HANDLE jInstance);
 
         interface IIDreamService;
         interface IBinder;

@@ -38,7 +38,7 @@ namespace Permission {
 String AwPermissionRequest::TAG("AwPermissionRequest");
 
 AwPermissionRequest::AwPermissionRequest(
-    /* [in] */ Handle64 nativeAwPermissionRequest,
+    /* [in] */ HANDLE nativeAwPermissionRequest,
     /* [in] */ IUri* origin,
     /* [in] */ Int64 resources)
     : mOrigin(origin)
@@ -59,7 +59,7 @@ AwPermissionRequest::~AwPermissionRequest()
 
 //@CalledByNative return AwPermissionRequest
 AutoPtr<IInterface> AwPermissionRequest::Create(
-    /* [in] */ Handle64 nativeAwPermissionRequest,
+    /* [in] */ HANDLE nativeAwPermissionRequest,
     /* [in] */ const String& url,
     /* [in] */ Int64 resources)
 {
@@ -134,7 +134,7 @@ ECode AwPermissionRequest::Validate()
 }
 
 void AwPermissionRequest::NativeOnAccept(
-    /* [in] */ Handle64 nativeAwPermissionRequest,
+    /* [in] */ HANDLE nativeAwPermissionRequest,
     /* [in] */ Boolean allowed)
 {
     Elastos_AwPermissionRequest_nativeOnAccept(TO_IINTERFACE(this), nativeAwPermissionRequest, allowed);

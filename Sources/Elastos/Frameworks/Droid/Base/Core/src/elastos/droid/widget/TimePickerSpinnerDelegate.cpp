@@ -195,7 +195,7 @@ ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::ReadFromPa
     source->ReadInt32(&size);
     while (size > 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mTypedTimes->Add(obj);
         size--;
     }

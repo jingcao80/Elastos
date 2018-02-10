@@ -752,7 +752,7 @@ Boolean Monkey::GetSystemInterfaces()
     }
 
     AutoPtr<IIActivityController> iac;
-    CActivityController::New((Handle32)this, (IIActivityController**)&iac);
+    CActivityController::New((HANDLE)this, (IIActivityController**)&iac);
     ECode ec = mAm->SetActivityController(iac.Get());
     FAIL_GOTO(ec, _Exit_)
 

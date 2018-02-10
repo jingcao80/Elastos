@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern Boolean Elastos_LoadUrlParams_nativeIsDataScheme(const String& url);
-    extern void Elastos_LoadUrlParams_InitCallback(Handle32 cb);
+    extern void Elastos_LoadUrlParams_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -52,7 +52,7 @@ void* LoadUrlParams::ElaLoadUrlParamsCallback_Init()
 
     sElaLoadUrlParamsCallback.elastos_LoadUrlParams_initializeConstants = &LoadUrlParams::InitializeConstants;
 
-    Elastos_LoadUrlParams_InitCallback((Handle32)&sElaLoadUrlParamsCallback);
+    Elastos_LoadUrlParams_InitCallback((HANDLE)&sElaLoadUrlParamsCallback);
     return &sElaLoadUrlParamsCallback;
 }
 

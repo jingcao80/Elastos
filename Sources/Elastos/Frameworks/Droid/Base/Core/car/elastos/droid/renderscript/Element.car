@@ -525,7 +525,7 @@ module
          */
         CreateVector(
             [in] IRenderScript* rs,
-            [in] Handle64 dt,
+            [in] HANDLE dt,
             [in] Int32 size,
             [out] IElement** e);
 
@@ -543,7 +543,7 @@ module
          */
         CreatePixel(
             [in] IRenderScript* rs,
-            [in] Handle64 dt,
+            [in] HANDLE dt,
             [in] ElementDataKind dk,
             [out] IElement** e);
 

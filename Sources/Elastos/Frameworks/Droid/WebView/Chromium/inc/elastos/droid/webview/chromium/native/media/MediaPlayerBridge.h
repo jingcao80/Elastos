@@ -115,7 +115,7 @@ protected:
     MediaPlayerBridge();
 
     MediaPlayerBridge(
-        /* [in] */ Handle64 nativeMediaPlayerBridge);
+        /* [in] */ HANDLE nativeMediaPlayerBridge);
 
     //@CalledByNative
     CARAPI_(void) Destroy();
@@ -208,10 +208,10 @@ protected:
 private:
     //@CalledByNative return IInterface
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeMediaPlayerBridge);
+        /* [in] */ HANDLE nativeMediaPlayerBridge);
 
     CARAPI_(void) NativeOnDidSetDataUriDataSource(
-        /* [in] */ Handle64 nativeMediaPlayerBridge,
+        /* [in] */ HANDLE nativeMediaPlayerBridge,
         /* [in] */ Boolean success);
 
 //callback function declaration
@@ -289,7 +289,7 @@ private:
     // want it.
     AutoPtr<LoadDataUriTask> mLoadDataUriTask;
     AutoPtr<IMediaPlayer> mPlayer;
-    Handle64 mNativeMediaPlayerBridge;
+    HANDLE mNativeMediaPlayerBridge;
     friend class MediaPlayerListener;
 };
 

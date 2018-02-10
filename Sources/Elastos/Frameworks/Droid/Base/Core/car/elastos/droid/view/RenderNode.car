@@ -760,7 +760,7 @@ module
          * decRef() when it is destroyed. The caller should have already incRef'd it
          */
         Adopt(
-            [in] Handle64 nativePtr,
+            [in] HANDLE nativePtr,
             [out] IRenderNode** node);
 
 

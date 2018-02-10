@@ -204,7 +204,7 @@ ECode DhcpResults::ReadFromParcel(
     StaticIpConfiguration::ReadFromParcel(in);
     in->ReadInt32(&mLeaseDuration);
     AutoPtr<IInterface> obj;
-    in->ReadInterfacePtr((Handle32*)&obj);
+    in->ReadInterfacePtr((HANDLE*)&obj);
     mServerAddress = IInetAddress::Probe(obj);
     in->ReadString(&mVendorInfo);
     return NOERROR;

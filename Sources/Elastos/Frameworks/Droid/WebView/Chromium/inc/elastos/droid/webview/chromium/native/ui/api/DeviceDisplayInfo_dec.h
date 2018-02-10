@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_DeviceDisplayInfo_nativeUpdateSharedDeviceDisplayInfo(IInterface* caller,Int32 displayHeight,Int32 displayWidth,Int32 physicalDisplayHeight,Int32 physicalDisplayWidth,Int32 bitsPerPixel,Int32 bitsPerComponent,Double dipScale,Int32 smallestDIPWidth,Int32 rotationDegrees);
-    extern void Elastos_DeviceDisplayInfo_InitCallback(Handle32 cb);
+    extern void Elastos_DeviceDisplayInfo_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -70,7 +70,7 @@ void* DeviceDisplayInfo::ElaDeviceDisplayInfoCallback_Init()
     sElaDeviceDisplayInfoCallback.elastos_DeviceDisplayInfo_getRotationDegrees = &DeviceDisplayInfo::GetRotationDegrees;
     sElaDeviceDisplayInfoCallback.elastos_DeviceDisplayInfo_create = &DeviceDisplayInfo::Create;
 
-    Elastos_DeviceDisplayInfo_InitCallback((Handle32)&sElaDeviceDisplayInfoCallback);
+    Elastos_DeviceDisplayInfo_InitCallback((HANDLE)&sElaDeviceDisplayInfoCallback);
     return &sElaDeviceDisplayInfoCallback;
 }
 

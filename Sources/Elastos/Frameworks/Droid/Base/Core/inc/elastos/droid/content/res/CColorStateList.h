@@ -177,7 +177,7 @@ public:
     CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ ArrayOf<Handle32>* states,
+        /* [in] */ ArrayOf<HANDLE>* states,
         /* [in] */ ArrayOf<Int32>* colors);
 
 private:

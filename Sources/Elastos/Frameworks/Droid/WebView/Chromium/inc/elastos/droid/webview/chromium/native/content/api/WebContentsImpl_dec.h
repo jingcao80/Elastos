@@ -26,10 +26,10 @@
 extern "C"
 {
 #endif
-    extern String Elastos_WebContentsImpl_nativeGetTitle(IInterface* caller,Handle64 nativeWebContentsAndroid);
-    extern String Elastos_WebContentsImpl_nativeGetVisibleURL(IInterface* caller,Handle64 nativeWebContentsAndroid);
-    extern void Elastos_WebContentsImpl_nativeStop(IInterface* caller,Handle64 nativeWebContentsAndroid);
-    extern void Elastos_WebContentsImpl_InitCallback(Handle64 cb);
+    extern String Elastos_WebContentsImpl_nativeGetTitle(IInterface* caller,HANDLE nativeWebContentsAndroid);
+    extern String Elastos_WebContentsImpl_nativeGetVisibleURL(IInterface* caller,HANDLE nativeWebContentsAndroid);
+    extern void Elastos_WebContentsImpl_nativeStop(IInterface* caller,HANDLE nativeWebContentsAndroid);
+    extern void Elastos_WebContentsImpl_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -46,9 +46,9 @@ namespace Webcontents {
 
 struct ElaWebContentsImplCallback
 {
-    AutoPtr<IInterface> (*elastos_WebContentsImpl_create)(Handle64 nativeWebContentsAndroid, IInterface* navigationController);
+    AutoPtr<IInterface> (*elastos_WebContentsImpl_create)(HANDLE nativeWebContentsAndroid, IInterface* navigationController);
     void (*elastos_WebContentsImpl_destroy)(IInterface* obj);
-    Handle64 (*elastos_WebContentsImpl_getNativePointer)(IInterface* obj);
+    HANDLE (*elastos_WebContentsImpl_getNativePointer)(IInterface* obj);
 };
 
 void* WebContentsImpl::ElaWebContentsImplCallback_Init()
@@ -59,7 +59,7 @@ void* WebContentsImpl::ElaWebContentsImplCallback_Init()
     sElaWebContentsImplCallback.elastos_WebContentsImpl_destroy = &WebContentsImpl::Destroy;
     sElaWebContentsImplCallback.elastos_WebContentsImpl_getNativePointer = &WebContentsImpl::GetNativePointer;
 
-    Elastos_WebContentsImpl_InitCallback((Handle64)&sElaWebContentsImplCallback);
+    Elastos_WebContentsImpl_InitCallback((HANDLE)&sElaWebContentsImplCallback);
     return &sElaWebContentsImplCallback;
 }
 

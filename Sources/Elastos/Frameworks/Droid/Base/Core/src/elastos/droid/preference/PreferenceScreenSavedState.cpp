@@ -84,7 +84,7 @@ ECode PreferenceScreenSavedState::ReadFromParcel(
     PreferenceBaseSavedState::ReadFromParcel(source);
     source->ReadBoolean(&mIsDialogShowing);
     mDialogBundle = NULL;
-    source->ReadInterfacePtr((Handle32*)(IBundle**)&mDialogBundle);
+    source->ReadInterfacePtr((HANDLE*)(IBundle**)&mDialogBundle);
     return NOERROR;
 }
 

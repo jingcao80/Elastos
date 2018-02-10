@@ -45,7 +45,7 @@ private:
     CARAPI_(void) Destroy();
 
 public:
-    Int32 mObject;
+    Int64 mObject;
 };
 
 } // namespace Os

@@ -413,14 +413,14 @@ public:
     }
 
     CARAPI ReadStruct(
-        /* [out] */ Handle32* address)
+        /* [out] */ HANDLE* address)
     {
         assert(0);
         return E_NOT_IMPLEMENTED;
     }
 
     CARAPI WriteStruct(
-        /* [in] */ Handle32 value,
+        /* [in] */ HANDLE value,
         /* [in] */ Int32 size)
     {
         assert(0);
@@ -456,14 +456,14 @@ public:
     }
 
     CARAPI ReadArrayOf(
-        /* [out] */ Handle32* array)
+        /* [out] */ HANDLE* array)
     {
         assert(0);
         return E_NOT_IMPLEMENTED;
     }
 
     CARAPI WriteArrayOf(
-        /* [in] */ Handle32 array)
+        /* [in] */ HANDLE array)
     {
         assert(0);
         return E_NOT_IMPLEMENTED;
@@ -484,7 +484,7 @@ public:
     }
 
     CARAPI ReadInterfacePtr(
-        /* [out] */ Handle32* itfPtr)
+        /* [out] */ HANDLE* itfPtr)
     {
         assert(0);
         return E_NOT_IMPLEMENTED;
@@ -584,9 +584,9 @@ public:
     }
 
     CARAPI GetDataPayload(
-        /* [out] */ Handle32* buffer)
+        /* [out] */ HANDLE* buffer)
     {
-        *buffer = (Handle32)mData;
+        *buffer = (HANDLE)mData;
         return NOERROR;
     }
 
@@ -1866,7 +1866,7 @@ AutoPtr<IColorStateList> AndroidParcelUtils::ReadColorStateList(
     }
     AutoPtr< ArrayOf<Int32> > colors = CreateInt32Array(source);
     AutoPtr<IColorStateList> colorStateList;
-    CColorStateList::New((ArrayOf<Handle32>*)stateSpecs.Get(), colors,
+    CColorStateList::New((ArrayOf<HANDLE>*)stateSpecs.Get(), colors,
             (IColorStateList**)&colorStateList);
     return colorStateList;
 }

@@ -232,7 +232,7 @@ module
          * at once.  Helps to prevent object leaks.
          */
         SetClassInstanceLimit(
-            [in] Handle32 klass,
+            [in] HANDLE klass,
             [in] Int32 instanceLimit);
 
         /**

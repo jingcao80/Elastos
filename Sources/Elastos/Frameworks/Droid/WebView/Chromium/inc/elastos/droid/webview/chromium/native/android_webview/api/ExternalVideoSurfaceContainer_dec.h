@@ -26,9 +26,9 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ExternalVideoSurfaceContainer_nativeSurfaceCreated(IInterface* caller,Handle64 nativeExternalVideoSurfaceContainerImpl,Int32 playerId,IInterface* surface);
-    extern void Elastos_ExternalVideoSurfaceContainer_nativeSurfaceDestroyed(IInterface* caller,Handle64 nativeExternalVideoSurfaceContainerImpl,Int32 playerId);
-    extern void Elastos_ExternalVideoSurfaceContainer_InitCallback(Handle64 cb);
+    extern void Elastos_ExternalVideoSurfaceContainer_nativeSurfaceCreated(IInterface* caller,HANDLE nativeExternalVideoSurfaceContainerImpl,Int32 playerId,IInterface* surface);
+    extern void Elastos_ExternalVideoSurfaceContainer_nativeSurfaceDestroyed(IInterface* caller,HANDLE nativeExternalVideoSurfaceContainerImpl,Int32 playerId);
+    extern void Elastos_ExternalVideoSurfaceContainer_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -43,7 +43,7 @@ namespace AndroidWebview {
 
 struct ElaExternalVideoSurfaceContainerCallback
 {
-    AutoPtr<IInterface> (*elastos_ExternalVideoSurfaceContainer_create)(Handle64 nativeExternalVideoSurfaceContainer, IInterface* contentViewCore);
+    AutoPtr<IInterface> (*elastos_ExternalVideoSurfaceContainer_create)(HANDLE nativeExternalVideoSurfaceContainer, IInterface* contentViewCore);
     void (*elastos_ExternalVideoSurfaceContainer_requestExternalVideoSurface)(IInterface* obj, Int32 playerId);
     void (*elastos_ExternalVideoSurfaceContainer_releaseExternalVideoSurface)(IInterface* obj, Int32 playerId);
     void (*elastos_ExternalVideoSurfaceContainer_destroy)(IInterface* obj);
@@ -62,7 +62,7 @@ void* ExternalVideoSurfaceContainer::ElaExternalVideoSurfaceContainerCallback_In
     sElaExternalVideoSurfaceContainerCallback.elastos_ExternalVideoSurfaceContainer_onExternalVideoSurfacePositionChanged = &ExternalVideoSurfaceContainer::OnExternalVideoSurfacePositionChanged;
     sElaExternalVideoSurfaceContainerCallback.elastos_ExternalVideoSurfaceContainer_onFrameInfoUpdated = &ExternalVideoSurfaceContainer::OnFrameInfoUpdated;
 
-    Elastos_ExternalVideoSurfaceContainer_InitCallback((Handle64)&sElaExternalVideoSurfaceContainerCallback);
+    Elastos_ExternalVideoSurfaceContainer_InitCallback((HANDLE)&sElaExternalVideoSurfaceContainerCallback);
     return &sElaExternalVideoSurfaceContainerCallback;
 }
 

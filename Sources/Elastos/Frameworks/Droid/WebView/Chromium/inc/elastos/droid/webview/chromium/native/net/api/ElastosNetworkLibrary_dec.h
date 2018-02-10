@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AndroidNetworkLibrary_InitCallback(Handle32 cb);
+    extern void Elastos_AndroidNetworkLibrary_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -67,7 +67,7 @@ void* ElastosNetworkLibrary::ElaElastosNetworkLibraryCallback_Init()
     sElaAndroidNetworkLibraryCallback.elastos_AndroidNetworkLibrary_getNetworkCountryIso = &ElastosNetworkLibrary::GetNetworkCountryIso;
     sElaAndroidNetworkLibraryCallback.elastos_AndroidNetworkLibrary_getNetworkOperator = &ElastosNetworkLibrary::GetNetworkOperator;
 
-    Elastos_AndroidNetworkLibrary_InitCallback((Handle32)&sElaAndroidNetworkLibraryCallback);
+    Elastos_AndroidNetworkLibrary_InitCallback((HANDLE)&sElaAndroidNetworkLibraryCallback);
     return &sElaAndroidNetworkLibraryCallback;
 }
 

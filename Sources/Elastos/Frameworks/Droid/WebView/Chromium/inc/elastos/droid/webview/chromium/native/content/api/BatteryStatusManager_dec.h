@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_BatteryStatusManager_nativeGotBatteryStatus(IInterface* caller,Handle64 nativeBatteryStatusManager,Boolean charging,Double chargingTime,Double dischargingTime,Double level);
-    extern void Elastos_BatteryStatusManager_InitCallback(Handle64 cb);
+    extern void Elastos_BatteryStatusManager_nativeGotBatteryStatus(IInterface* caller,HANDLE nativeBatteryStatusManager,Boolean charging,Double chargingTime,Double dischargingTime,Double level);
+    extern void Elastos_BatteryStatusManager_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -44,7 +44,7 @@ namespace Browser {
 struct ElaBatteryStatusManagerCallback
 {
     AutoPtr<IInterface> (*elastos_BatteryStatusManager_getInstance)(IInterface* appContext);
-    Boolean (*elastos_BatteryStatusManager_start)(IInterface* obj, Handle64 nativePtr);
+    Boolean (*elastos_BatteryStatusManager_start)(IInterface* obj, HANDLE nativePtr);
     void (*elastos_BatteryStatusManager_stop)(IInterface* obj);
 };
 
@@ -56,7 +56,7 @@ void* BatteryStatusManager::ElaBatteryStatusManagerCallback_Init()
     sElaBatteryStatusManagerCallback.elastos_BatteryStatusManager_start = &BatteryStatusManager::Start;
     sElaBatteryStatusManagerCallback.elastos_BatteryStatusManager_stop = &BatteryStatusManager::Stop;
 
-    Elastos_BatteryStatusManager_InitCallback((Handle64)&sElaBatteryStatusManagerCallback);
+    Elastos_BatteryStatusManager_InitCallback((HANDLE)&sElaBatteryStatusManagerCallback);
     return &sElaBatteryStatusManagerCallback;
 }
 

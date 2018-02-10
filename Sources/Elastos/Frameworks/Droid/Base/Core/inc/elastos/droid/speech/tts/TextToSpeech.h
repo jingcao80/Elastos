@@ -125,7 +125,7 @@ private:
         : public Object
     {
     public:
-        virtual CARAPI_(Handle32) Run(
+        virtual CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service) = 0;
     };
 
@@ -133,7 +133,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRShutdown(
@@ -146,7 +146,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRSpeak(
@@ -165,7 +165,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRPlayEarcon(
@@ -184,7 +184,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRPlaySilence(
@@ -203,7 +203,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRGetFeatures(
@@ -218,7 +218,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRIsSpeaking(
@@ -231,7 +231,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRStop(
@@ -244,7 +244,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRSetLanguage(
@@ -259,7 +259,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRGetLanguage(
@@ -272,7 +272,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRIsLanguageAvailable(
@@ -287,7 +287,7 @@ private:
         : public TextToSpeechActionR
     {
     public:
-        CARAPI_(Handle32) Run(
+        CARAPI_(HANDLE) Run(
             /* [in] */ IITextToSpeechService* service);
     public:
         TextToSpeechActionRSynthesizeToFile(
@@ -383,9 +383,9 @@ private:
         CARAPI_(Boolean) IsEstablished();
 
         //<R>
-        CARAPI_(Handle32) RunAction(
+        CARAPI_(HANDLE) RunAction(
             /* [in] */ TextToSpeechActionR* action,
-            /* [in] */ Handle32 errorResult,
+            /* [in] */ HANDLE errorResult,
             /* [in] */ const String& method,
             /* [in] */ Boolean reconnect,
             /* [in] */ Boolean onlyEstablishedConnection);
@@ -1138,22 +1138,22 @@ public:
 
 private:
     //private <R>
-    CARAPI_(Handle32) RunActionNoReconnect(
+    CARAPI_(HANDLE) RunActionNoReconnect(
         /* [in] */ TextToSpeechActionR* action,
-        /* [in] */ Handle32 errorResult,
+        /* [in] */ HANDLE errorResult,
         /* [in] */ const String& method,
         /* [in] */ Boolean onlyEstablishedConnection);
 
     //private <R>
-    CARAPI_(Handle32) RunAction(
+    CARAPI_(HANDLE) RunAction(
         /* [in] */ TextToSpeechActionR* action,
-        /* [in] */ Handle32 errorResult,
+        /* [in] */ HANDLE errorResult,
         /* [in] */ const String& method);
 
     //private <R>
-    CARAPI_(Handle32) RunAction(
+    CARAPI_(HANDLE) RunAction(
         /* [in] */ TextToSpeechActionR* action,
-        /* [in] */ Handle32 errorResult,
+        /* [in] */ HANDLE errorResult,
         /* [in] */ const String& method,
         /* [in] */ Boolean reconnect,
         /* [in] */ Boolean onlyEstablishedConnection);

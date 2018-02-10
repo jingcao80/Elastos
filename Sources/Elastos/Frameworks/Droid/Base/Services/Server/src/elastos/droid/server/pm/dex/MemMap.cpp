@@ -231,7 +231,8 @@ AutoPtr<MemMap> MemMap::MapAnonymous(
 #else
 #if defined(__LP64__)
     if (low_4gb && expected_ptr == NULL) {
-        flags |= MAP_32BIT;
+        assert(0);
+        // flags |= MAP_32BIT;
     }
 #endif
 

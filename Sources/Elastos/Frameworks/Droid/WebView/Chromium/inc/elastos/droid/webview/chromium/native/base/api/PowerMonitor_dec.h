@@ -29,7 +29,7 @@ extern "C"
     extern void Elastos_PowerMonitor_nativeOnBatteryChargingChanged();
     extern void Elastos_PowerMonitor_nativeOnMainActivitySuspended();
     extern void Elastos_PowerMonitor_nativeOnMainActivityResumed();
-    extern void Elastos_PowerMonitor_InitCallback(Handle32 cb);
+    extern void Elastos_PowerMonitor_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -53,7 +53,7 @@ void* PowerMonitor::ElaPowerMonitorCallback_Init()
 
     sElaPowerMonitorCallback.elastos_PowerMonitor_isBatteryPower = &PowerMonitor::IsBatteryPower;
 
-    Elastos_PowerMonitor_InitCallback((Handle32)&sElaPowerMonitorCallback);
+    Elastos_PowerMonitor_InitCallback((HANDLE)&sElaPowerMonitorCallback);
     return &sElaPowerMonitorCallback;
 }
 

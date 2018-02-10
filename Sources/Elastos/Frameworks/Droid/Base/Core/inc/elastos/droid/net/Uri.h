@@ -921,8 +921,8 @@ public:
 
     CARAPI constructor(
         /* [in] */ const String& scheme,
-        /* [in] */ Handle32 ssp,
-        /* [in] */ Handle32 fragment);
+        /* [in] */ HANDLE ssp,
+        /* [in] */ HANDLE fragment);
 
     static CARAPI ReadFrom(
         /* [in] */ IParcel* parcel,
@@ -1024,10 +1024,10 @@ public:
 
     CARAPI constructor(
         /* [in] */ const String& scheme,
-        /* [in] */ Handle32 authority,
-        /* [in] */ Handle32 path,
-        /* [in] */ Handle32 query,
-        /* [in] */ Handle32 fragment);
+        /* [in] */ HANDLE authority,
+        /* [in] */ HANDLE path,
+        /* [in] */ HANDLE query,
+        /* [in] */ HANDLE fragment);
 
     static CARAPI ReadFrom(
         /* [in] */ IParcel* parcel,

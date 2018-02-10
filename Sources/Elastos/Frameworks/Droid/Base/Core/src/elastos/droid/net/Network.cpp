@@ -244,17 +244,17 @@ ECode Network::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
     parcel->ReadInt32(&mNetId);
-    parcel->ReadInterfacePtr((Handle32*)&mLock);
+    parcel->ReadInterfacePtr((HANDLE*)&mLock);
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mNetworkBoundSocketFactory = (NetworkBoundSocketFactory*)ISocketFactory::Probe(obj);
 
     obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mConnectionPool = IConnectionPool::Probe(obj);
 
     obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mHostResolver = IHostResolver::Probe(obj);
     return NOERROR;
 }

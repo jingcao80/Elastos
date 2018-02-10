@@ -72,7 +72,7 @@ ECode CSoundTriggerKeyphraseRecognitionExtra::FromParcel(
     //ConfidenceLevel[] confidenceLevels = in.createTypedArray(ConfidenceLevel.CREATOR);
     assert(0 && "TODO: ConfidenceLevel.CREATOR");
     AutoPtr<ArrayOf<ISoundTriggerConfidenceLevel*> > confidenceLevels;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&confidenceLevels))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&confidenceLevels))
 
     AutoPtr<CSoundTriggerKeyphraseRecognitionExtra> newResult;
     CSoundTriggerKeyphraseRecognitionExtra::NewByFriend(id, recognitionModes, coarseConfidenceLevel,
@@ -90,7 +90,7 @@ ECode CSoundTriggerKeyphraseRecognitionExtra::WriteToParcel(
     FAIL_RETURN(dest->WriteInt32(mCoarseConfidenceLevel))
     //dest.writeTypedArray(confidenceLevels, flags);
     assert(0 && "TODO: writeTypedArray");
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mConfidenceLevels.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mConfidenceLevels.Get()))
     return NOERROR;
 }
 
@@ -102,7 +102,7 @@ ECode CSoundTriggerKeyphraseRecognitionExtra::ReadFromParcel(
     FAIL_RETURN(source->ReadInt32(&mCoarseConfidenceLevel))
     //ConfidenceLevel[] confidenceLevels = in.createTypedArray(ConfidenceLevel.CREATOR);
     assert(0 && "TODO: ConfidenceLevel.CREATOR");
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mConfidenceLevels))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mConfidenceLevels))
     return NOERROR;
 }
 

@@ -469,7 +469,7 @@ ECode GraphicsNative::CreateBitmapRegionDecoder(
 
     SkASSERT(bitmap != NULL);
 
-    *decoder = new BitmapRegionDecoder((Handle32)bitmap);
+    *decoder = new BitmapRegionDecoder((HANDLE)bitmap);
     REFCOUNT_ADD(*decoder);
     return NOERROR;
 }

@@ -64,10 +64,10 @@ static void glVertexAttribIPointerBounds(GLuint indx, GLint size, GLenum type,
 
 static ECode GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle64* array,
+    /* [in, out] */ HANDLE* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle64* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -86,7 +86,7 @@ static ECode GetPointer(
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle64)(pointer);
+        *rst = (HANDLE)(pointer);
         return NOERROR;
     }
 
@@ -104,11 +104,11 @@ static ECode GetPointer(
 
 static ECode GetDirectBufferPointer(
     /* [in] */ IBuffer* buffer,
-    /* [out] */ Handle64* result)
+    /* [out] */ HANDLE* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    Handle64 effectiveDirectAddress;
+    HANDLE effectiveDirectAddress;
     buffer->GetEffectiveDirectAddress(&effectiveDirectAddress);
     if (effectiveDirectAddress != 0) {
         Int32 position, elementSizeShift;
@@ -263,10 +263,10 @@ getarray
     Int32 _exception = 0;
     ECode _exceptionType = NOERROR;
     const char * _exceptionMessage;
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
-    Handle64 data;
+    HANDLE data;
     CTYPE *params = (CTYPE *) 0;
     Int32 _needed = 0;
 
@@ -305,7 +305,7 @@ exit:
 }
 
 #define GET_BUFFER_GL_DATA(_Name, GLTYPE)                                                                                 \
-    Handle64 _array, _dataHandle;                                                                                                      \
+    HANDLE _array, _dataHandle;                                                                                                      \
     Int32 _bufferOffset = (Int32) 0;                                                                                                      \
     Int32 _remaining;                                                                                                                           \
     GLTYPE *_Name = (GLTYPE *) 0;                                                                                               \
@@ -1593,14 +1593,14 @@ ECode GLES30::GlGetTransformFeedbackVarying(
     /* [in] */ IInt32Buffer* type_buf,
     /* [in] */ Byte name)
 {
-    Handle64 _lengthArray = 0;
-    Handle64 _lengthTmp;
+    HANDLE _lengthArray = 0;
+    HANDLE _lengthTmp;
     Int32 _lengthBufferOffset = 0;
-    Handle64 _sizeArray = 0;
-    Handle64 _sizeTmp;
+    HANDLE _sizeArray = 0;
+    HANDLE _sizeTmp;
     Int32 _sizeBufferOffset = 0;
-    Handle64 _typeArray = 0;
-    Handle64 _typeTmp;
+    HANDLE _typeArray = 0;
+    HANDLE _typeTmp;
     Int32 _typeBufferOffset = 0;
     Int32 _lengthRemaining;
     GLsizei *length = (GLsizei *) 0;
@@ -1743,11 +1743,11 @@ ECode GLES30::GlGetTransformFeedbackVarying(
 {
     VALIDATE_NOT_NULL(result)
 
-    Handle64 _sizeArray = 0;
-    Handle64 _sizeTmp = 0;
+    HANDLE _sizeArray = 0;
+    HANDLE _sizeTmp = 0;
     Int32 _sizeBufferOffset = 0;
-    Handle64 _typeArray = 0;
-    Handle64 _typeTmp = 0;
+    HANDLE _typeArray = 0;
+    HANDLE _typeTmp = 0;
     Int32 _typeBufferOffset = 0;
     Int32 _sizeRemaining;
     GLint *size = (GLint *) 0;
@@ -1811,7 +1811,7 @@ ECode GLES30::GlVertexAttribIPointer(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle64 tmp;
+        HANDLE tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp))
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -2502,7 +2502,7 @@ ECode GLES30::GlGetUniformIndices(
     Int32 _count = 0;
     Int32 _i;
     const char** _names = NULL;
-    Handle64 _uniformIndicesArray = 0;
+    HANDLE _uniformIndicesArray = 0;
     Int32 _uniformIndicesRemaining;
     Int32 _uniformIndicesOffset = 0;
     GLuint* _indices = NULL;
@@ -2534,7 +2534,7 @@ ECode GLES30::GlGetUniformIndices(
         _names[_i] = _name.string();
     }
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(uniformIndices_buf), &_uniformIndicesArray, &_uniformIndicesRemaining, &_uniformIndicesOffset, &tmp))
     _indices = (GLuint*)tmp;
     if (!_indices) {
@@ -2635,16 +2635,16 @@ ECode GLES30::GlGetActiveUniformsiv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle64 _uniformIndicesArray =  0;
+    HANDLE _uniformIndicesArray =  0;
     Int32 _uniformIndicesBufferOffset =  0;
-    Handle64 _paramsArray =  0;
+    HANDLE _paramsArray =  0;
     Int32 _paramsBufferOffset =  0;
     Int32 _uniformIndicesRemaining;
     GLuint *uniformIndices = (GLuint *) 0;
     Int32 _paramsRemaining;
     GLint *params = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(uniformIndices_buf), &_uniformIndicesArray, &_uniformIndicesRemaining, &_uniformIndicesBufferOffset, &tmp))
     uniformIndices = (GLuint *)tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(params_buf), &_paramsArray, &_paramsRemaining, &_paramsBufferOffset, &tmp))
@@ -2818,16 +2818,16 @@ ECode GLES30::GlGetActiveUniformBlockName(
     /* [in] */ IBuffer* length_buf,
     /* [in] */ IBuffer* uniformBlockName_buf)
 {
-    Handle64 _lengthArray = 0;
+    HANDLE _lengthArray = 0;
     Int32 _lengthBufferOffset = 0;
     GLsizei* _length = (GLsizei*)0;
     Int32 _lengthRemaining;
-    Handle64 _nameArray = 0;
+    HANDLE _nameArray = 0;
     Int32 _nameBufferOffset = 0;
     GLchar* _name = (GLchar*)0;
     Int32 _nameRemaining;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(length_buf, &_lengthArray, &_lengthRemaining, &_lengthBufferOffset, &tmp))
     _length = (GLsizei*)tmp;
     if (_length == NULL) {
@@ -3126,16 +3126,16 @@ ECode GLES30::GlGetSynciv(
     /* [in] */ IInt32Buffer* length_buf,
     /* [in] */ IInt32Buffer* values_buf)
 {
-    Handle64 _lengthArray = 0;
+    HANDLE _lengthArray = 0;
     Int32 _lengthBufferOffset = (Int32) 0;
-    Handle64 _valuesArray = 0;
+    HANDLE _valuesArray = 0;
     Int32 _valuesBufferOffset = (Int32) 0;
     Int32 _lengthRemaining;
     GLsizei *length = (GLsizei *) 0;
     Int32 _valuesRemaining;
     GLint *values = (GLint *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(length_buf), &_lengthArray, &_lengthRemaining, &_lengthBufferOffset, &tmp))
     length = (GLsizei *)tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(values_buf), &_valuesArray, &_valuesRemaining, &_valuesBufferOffset, &tmp))
@@ -3603,7 +3603,7 @@ ECode GLES30::GlGetProgramBinary(
     Int32 _exception = 0;
     ECode _exceptionType = NOERROR;
     const char * _exceptionMessage = NULL;
-    Handle64 _array = 0;
+    HANDLE _array = 0;
     Int32 _bufferOffset = (Int32) 0;
     GLsizei *length_base = (GLsizei *) 0;
     Int32 UNUSED(_lengthRemaining);
@@ -3646,7 +3646,7 @@ ECode GLES30::GlGetProgramBinary(
     binaryFormat_base = (GLenum *)binaryFormat_ref->GetPayload();
     binaryFormat = binaryFormat_base + binaryFormatOffset;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(binary_buf, &_array, &_binaryRemaining, &_bufferOffset, &tmp))
     binary = (GLvoid *)tmp;
     if (binary == NULL) {
@@ -3677,11 +3677,11 @@ ECode GLES30::GlGetProgramBinary(
     /* [in] */ IInt32Buffer* binaryFormat_buf,
     /* [in] */ IBuffer* binary_buf)
 {
-    Handle64 _lengthArray = 0;
+    HANDLE _lengthArray = 0;
     Int32 _lengthBufferOffset = 0;
-    Handle64 _binaryFormatArray = 0;
+    HANDLE _binaryFormatArray = 0;
     Int32 _binaryFormatBufferOffset = 0;
-    Handle64 _binaryArray = 0;
+    HANDLE _binaryArray = 0;
     Int32 _binaryBufferOffset = 0;
     Int32 _lengthRemaining;
     GLsizei *length = (GLsizei *) 0;
@@ -3690,7 +3690,7 @@ ECode GLES30::GlGetProgramBinary(
     Int32 _binaryRemaining;
     GLvoid *binary = (GLvoid *) 0;
 
-    Handle64 tmp;
+    HANDLE tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(length_buf), &_lengthArray, &_lengthRemaining, &_lengthBufferOffset, &tmp))
     length = (GLsizei *)tmp;
     FAIL_RETURN(GetPointer(IBuffer::Probe(binaryFormat_buf), &_binaryFormatArray, &_binaryFormatRemaining, &_binaryFormatBufferOffset, &tmp))

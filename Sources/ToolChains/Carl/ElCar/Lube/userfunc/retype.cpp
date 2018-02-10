@@ -26,8 +26,7 @@ static const char * s_elatypes[] = {
     "Int32",    "UInt32",   "PInt32",   "PUInt32",
     "Int64",    "UInt64",   "PInt64",   "PUInt64",
     "Float",    "Double",   "PFloat",   "PDouble",
-    "Handle32", "Handle64",
-    "PHandle32", "PHandle64",
+    "HANDLE",   "PHANDLE",
     "Boolean",  "PBoolean",
     "String",
 

@@ -61,11 +61,11 @@ ECode CSentenceSuggestionsInfo::ReadFromParcel(
     Int32 infoSize = 0;
     source->ReadInt32(&infoSize);
     mSuggestionsInfos = ArrayOf<ISuggestionsInfo*>::Alloc(infoSize);
-    source->ReadArrayOf((Handle32*)&mSuggestionsInfos);
+    source->ReadArrayOf((HANDLE*)&mSuggestionsInfos);
     mOffsets = ArrayOf<Int32>::Alloc(mSuggestionsInfos->GetLength());
-    source->ReadArrayOf((Handle32*)&mOffsets);
+    source->ReadArrayOf((HANDLE*)&mOffsets);
     mLengths = ArrayOf<Int32>::Alloc(mSuggestionsInfos->GetLength());
-    source->ReadArrayOf((Handle32*)&mLengths);
+    source->ReadArrayOf((HANDLE*)&mLengths);
 
     return NOERROR;
 }
@@ -75,9 +75,9 @@ ECode CSentenceSuggestionsInfo::WriteToParcel(
 {
     Int32 infoSize = mSuggestionsInfos->GetLength();
     dest->WriteInt32(infoSize);
-    dest->WriteArrayOf((Handle32)mSuggestionsInfos.Get());
-    dest->WriteArrayOf((Handle32)mOffsets.Get());
-    dest->WriteArrayOf((Handle32)mLengths.Get());
+    dest->WriteArrayOf((HANDLE)mSuggestionsInfos.Get());
+    dest->WriteArrayOf((HANDLE)mOffsets.Get());
+    dest->WriteArrayOf((HANDLE)mLengths.Get());
 
     return NOERROR;
 }

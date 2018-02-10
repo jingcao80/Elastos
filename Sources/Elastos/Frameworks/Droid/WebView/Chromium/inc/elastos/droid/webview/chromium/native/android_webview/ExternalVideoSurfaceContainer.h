@@ -94,7 +94,7 @@ public:
     {
         public:
             static AutoPtr<ExternalVideoSurfaceContainer> Create(
-                /* [in] */ Handle64 nativeExternalVideoSurfaceContainer,
+                /* [in] */ HANDLE nativeExternalVideoSurfaceContainer,
                 /* [in] */ ContentViewCore* contentViewCore);
     };
 
@@ -127,7 +127,7 @@ protected:
     static const Int32 INVALID_PLAYER_ID = -1;
 
     ExternalVideoSurfaceContainer(
-        /* [in] */ Handle64 nativeExternalVideoSurfaceContainer,
+        /* [in] */ HANDLE nativeExternalVideoSurfaceContainer,
         /* [in] */ ContentViewCore* contentViewCore);
 
     /**
@@ -188,17 +188,17 @@ private:
     CARAPI_(void) LayOutSurfaceView();
 
     CARAPI_(void) NativeSurfaceCreated(
-        /* [in] */ Handle64 nativeExternalVideoSurfaceContainerImpl,
+        /* [in] */ HANDLE nativeExternalVideoSurfaceContainerImpl,
         /* [in] */ Int32 playerId,
         /* [in] */ ISurface* surface);
 
     CARAPI_(void) NativeSurfaceDestroyed(
-        /* [in] */ Handle64 nativeExternalVideoSurfaceContainerImpl,
+        /* [in] */ HANDLE nativeExternalVideoSurfaceContainerImpl,
         /* [in] */ Int32 playerId);
 
     //@CalledByNative return ExternalVideoSurfaceContainer
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeExternalVideoSurfaceContainer,
+        /* [in] */ HANDLE nativeExternalVideoSurfaceContainer,
         /* [in] */ ContentViewCore* contentViewCore);
 
 //callback function declaration
@@ -207,7 +207,7 @@ public:
 
 private:
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeExternalVideoSurfaceContainer,
+        /* [in] */ HANDLE nativeExternalVideoSurfaceContainer,
         /* [in] */ IInterface* contentViewCore);
 
     static CARAPI_(void) RequestExternalVideoSurface(
@@ -241,7 +241,7 @@ private:
     //static WeakReference<ExternalVideoSurfaceContainer> sActiveContainer = new WeakReference<ExternalVideoSurfaceContainer>(null);
     static AutoPtr<IWeakReference> sActiveContainer;
 
-    const Handle64 mNativeExternalVideoSurfaceContainer;
+    const HANDLE mNativeExternalVideoSurfaceContainer;
     const AutoPtr<ContentViewCore> mContentViewCore;
     Int32 mPlayerId ;
     AutoPtr<ISurfaceView> mSurfaceView;

@@ -30,8 +30,8 @@ namespace Server {
 
 ECode CWMSWallpaperConnection::constructor(
     /* [in] */ IWallpaperInfo* info,
-    /* [in] */ Handle32 wallpaper,
-    /* [in] */ Handle32 owner)
+    /* [in] */ HANDLE wallpaper,
+    /* [in] */ HANDLE owner)
 {
     mInfo = info;
     mWallpaper = (CWallpaperManagerService::WallpaperData*)wallpaper;

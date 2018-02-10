@@ -97,7 +97,7 @@ public:
 
 private:
     SelectFileDialog(
-        /* [in] */ Handle64 nativeSelectFileDialog);
+        /* [in] */ HANDLE nativeSelectFileDialog);
 
     /**
       * Creates and starts an intent based on the passed fileTypes and capture value.
@@ -144,15 +144,15 @@ private:
 
     // @CalledByNative return SelectFileDialog
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeSelectFileDialog);
+        /* [in] */ HANDLE nativeSelectFileDialog);
 
     CARAPI NativeOnFileSelected(
-        /* [in] */ Handle64 nativeSelectFileDialogImpl,
+        /* [in] */ HANDLE nativeSelectFileDialogImpl,
         /* [in] */ const String& filePath,
         /* [in] */ const String& displayName);
 
     CARAPI NativeOnFileNotSelected(
-        /* [in] */ Handle64 nativeSelectFileDialogImpl);
+        /* [in] */ HANDLE nativeSelectFileDialogImpl);
 
     static CARAPI_(void) SelectFile(
         /* [in] */ IInterface* obj,
@@ -169,7 +169,7 @@ private:
     static const String ALL_AUDIO_TYPES;
     static const String ANY_TYPES;
     static const String CAPTURE_IMAGE_DIRECTORY;
-    Handle64 mNativeSelectFileDialog;
+    HANDLE mNativeSelectFileDialog;
     AutoPtr<IList> mFileTypes;
     Boolean mCapture;
     AutoPtr<IUri> mCameraOutputUri;

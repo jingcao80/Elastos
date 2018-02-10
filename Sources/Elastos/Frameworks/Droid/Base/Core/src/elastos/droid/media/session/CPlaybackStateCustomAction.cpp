@@ -58,11 +58,11 @@ ECode CPlaybackStateCustomAction::ReadFromParcel(
 {
     source->ReadString(&mAction);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mName = ICharSequence::Probe(obj);
     source->ReadInt32(&mIcon);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mExtras = IBundle::Probe(obj);
     return NOERROR;
 }

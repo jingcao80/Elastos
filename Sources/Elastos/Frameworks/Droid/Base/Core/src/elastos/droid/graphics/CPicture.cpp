@@ -179,7 +179,7 @@ ECode CPicture::WriteToStream(
 }
 
 ECode CPicture::GetNativePicture(
-    /* [out] */ Handle32* nativePicture)
+    /* [out] */ HANDLE* nativePicture)
 {
     VALIDATE_NOT_NULL(nativePicture);
     *nativePicture = mNativePicture;

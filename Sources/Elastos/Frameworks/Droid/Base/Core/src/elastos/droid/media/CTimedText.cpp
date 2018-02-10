@@ -276,7 +276,7 @@ Boolean CTimedText::ParseParcel(
         parcel->ReadInt32(&textLen);
 
         AutoPtr<ArrayOf<Byte> > text;
-        parcel->ReadArrayOf((Handle32*)(&text));
+        parcel->ReadArrayOf((HANDLE*)(&text));
 
         if (text == NULL || text->GetLength() == 0) {
             mTextChars = String(NULL);
@@ -501,7 +501,7 @@ void CTimedText::ReadFont(
         parcel->ReadInt32(&nameLen);
 
         AutoPtr<ArrayOf<Byte> > text;
-        parcel->ReadArrayOf((Handle32*)(&text));
+        parcel->ReadArrayOf((HANDLE*)(&text));
 
         String name("");
         if (text != NULL && text->GetLength() > 0) {
@@ -576,12 +576,12 @@ void CTimedText::ReadHyperText(
     parcel->ReadInt32(&len);
 
     AutoPtr<ArrayOf<Byte> > url;
-    parcel->ReadArrayOf((Handle32*)(&url));
+    parcel->ReadArrayOf((HANDLE*)(&url));
     String urlString = String((const char*)url->GetPayload(), len);
 
     parcel->ReadInt32(&len);
     AutoPtr<ArrayOf<Byte> > alt;
-    parcel->ReadArrayOf((Handle32*)(&alt));
+    parcel->ReadArrayOf((HANDLE*)(&alt));
     String altString = String((const char*)alt->GetPayload(), len);
 
     AutoPtr<HyperText> hyperText = new HyperText();

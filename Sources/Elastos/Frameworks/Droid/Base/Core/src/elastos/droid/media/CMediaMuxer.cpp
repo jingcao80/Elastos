@@ -475,7 +475,7 @@ ECode CMediaMuxer::NativeWriteSampleData(
     }
 
     // Try to convert the incoming byteBuffer into ABuffer
-    Handle64 addr;
+    HANDLE addr;
     IBuffer::Probe(byteBuf)->GetEffectiveDirectAddress(&addr);
     void *dst = (void*)addr;
 

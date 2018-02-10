@@ -202,7 +202,7 @@ public:
 protected:
     ContentVideoView(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ ContentVideoViewClient* client);
 
     virtual CARAPI_(AutoPtr<ContentVideoViewClient>) GetContentVideoViewClient();
@@ -284,7 +284,7 @@ private:
 
     static CARAPI_(AutoPtr<IInterface>) CreateContentVideoView(
         /* [in] */ IInterface* context,
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ IInterface* client,
         /* [in] */ Boolean legacy);
 
@@ -295,7 +295,7 @@ private:
         /* [in] */ IInterface* obj,
         /* [in] */ Boolean nativeViewDestroyed);
 
-    static CARAPI_(Handle64) GetNativeViewAndroid(
+    static CARAPI_(HANDLE) GetNativeViewAndroid(
         /* [in] */ IInterface* obj);
 
     CARAPI_(void) InitResources(
@@ -312,7 +312,7 @@ private:
     //@CalledByNative
     static CARAPI_(AutoPtr<ContentVideoView>) CreateContentVideoView(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ ContentVideoViewClient* client,
         /* [in] */ Boolean legacy);
 
@@ -323,44 +323,44 @@ private:
     CARAPI_(void) OnExitFullscreen();
 
     //@CalledByNative
-    CARAPI_(Handle64) GetNativeViewAndroid();
+    CARAPI_(HANDLE) GetNativeViewAndroid();
 
     static CARAPI_(AutoPtr<ContentVideoView>) NativeGetSingletonJavaContentVideoView();
 
     CARAPI_(void) NativeExitFullscreen(
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ Boolean relaseMediaPlayer);
 
     CARAPI_(Int32) NativeGetCurrentPosition(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(Int32) NativeGetDurationInMilliSeconds(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(void) NativeRequestMediaMetadata(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(Int32) NativeGetVideoWidth(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(Int32) NativeGetVideoHeight(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(Boolean) NativeIsPlaying(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(void) NativePause(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(void) NativePlay(
-        /* [in] */ Handle64 nativeContentVideoView);
+        /* [in] */ HANDLE nativeContentVideoView);
 
     CARAPI_(void) NativeSeekTo(
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ Int32 msec);
 
     CARAPI_(void) NativeSetSurface(
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ ISurface* surface);
 
 protected:
@@ -400,7 +400,7 @@ private:
     Int32 mDuration;
 
     // Native pointer to C++ ContentVideoView object.
-    Handle64 mNativeContentVideoView;
+    HANDLE mNativeContentVideoView;
 
     // webkit should have prepared the media
     Int32 mCurrentState;

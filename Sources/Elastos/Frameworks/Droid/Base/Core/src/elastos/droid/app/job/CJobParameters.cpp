@@ -91,7 +91,7 @@ ECode CJobParameters::ReadFromParcel(
      in->ReadInt32(&mJobId);
     CPersistableBundle::New((IPersistableBundle**)&mExtras);
     IParcelable::Probe(mExtras)->ReadFromParcel(in);
-    in->ReadInterfacePtr((Handle32*)&mCallback);
+    in->ReadInterfacePtr((HANDLE*)&mCallback);
     Int32 ival;
     in->ReadInt32(&ival);
     mOverrideDeadlineExpired = ival == 1;

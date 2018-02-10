@@ -58,9 +58,9 @@ private:
 
     public:
         DestroyRunnable(
-            /* [in] */ Handle64 nativeAwPicture);
+            /* [in] */ HANDLE nativeAwPicture);
 
-        Handle64 mNativeAwPicture;
+        HANDLE mNativeAwPicture;
     };
 
 public:
@@ -69,7 +69,7 @@ public:
      *                        taken by this java instance.
      */
     AwPicture(
-        /* [in] */ Handle64 nativeAwPicture);
+        /* [in] */ HANDLE nativeAwPicture);
 
     //@Override
     CARAPI BeginRecording(
@@ -94,7 +94,7 @@ public:
 
     //override
     CARAPI GetNativePicture(
-        /* [out] */ Handle32/*TODO Handle64*/* handle);
+        /* [out] */ HANDLE/*TODO HANDLE*/* handle);
     //@Override
     //@SuppressWarnings("deprecation")
     CARAPI WriteToStream(
@@ -104,19 +104,19 @@ private:
     CARAPI_(void) UnsupportedOperation();
 
     static CARAPI_(void) NativeDestroy(
-        /* [in] */ Handle64 nativeAwPicture);
+        /* [in] */ HANDLE nativeAwPicture);
 
     CARAPI_(Int32) NativeGetWidth(
-        /* [in] */ Handle64 nativeAwPicture);
+        /* [in] */ HANDLE nativeAwPicture);
 
     CARAPI_(Int32) NativeGetHeight(
-        /* [in] */ Handle64 nativeAwPicture);
+        /* [in] */ HANDLE nativeAwPicture);
 
     CARAPI_(void) NativeDraw(
-        /* [in] */ Handle64 nativeAwPicture, ICanvas* canvas);
+        /* [in] */ HANDLE nativeAwPicture, ICanvas* canvas);
 
 private:
-    Handle64 mNativeAwPicture;
+    HANDLE mNativeAwPicture;
     AutoPtr<CleanupReference> mCleanupReference;
 };
 

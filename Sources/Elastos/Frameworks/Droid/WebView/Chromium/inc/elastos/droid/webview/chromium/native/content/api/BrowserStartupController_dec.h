@@ -29,7 +29,7 @@ extern "C"
     extern void Elastos_BrowserStartupController_nativeSetCommandLineFlags(Int32 maxRenderProcesses,const String& pluginDescriptor);
     extern Boolean Elastos_BrowserStartupController_nativeIsOfficialBuild();
     extern Boolean Elastos_BrowserStartupController_nativeIsPluginEnabled();
-    extern void Elastos_BrowserStartupController_InitCallback(Handle32 cb);
+    extern void Elastos_BrowserStartupController_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -56,7 +56,7 @@ void* BrowserStartupController::ElaBrowserStartupControllerCallback_Init()
     sElaBrowserStartupControllerCallback.elastos_BrowserStartupController_browserMayStartAsynchonously = &BrowserStartupController::BrowserMayStartAsynchonously;
     sElaBrowserStartupControllerCallback.elastos_BrowserStartupController_browserStartupComplete = &BrowserStartupController::BrowserStartupComplete;
 
-    Elastos_BrowserStartupController_InitCallback((Handle32)&sElaBrowserStartupControllerCallback);
+    Elastos_BrowserStartupController_InitCallback((HANDLE)&sElaBrowserStartupControllerCallback);
     return &sElaBrowserStartupControllerCallback;
 }
 

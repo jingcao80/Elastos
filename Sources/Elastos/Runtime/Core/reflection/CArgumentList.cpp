@@ -589,7 +589,7 @@ ECode CArgumentList::SetInputArgumentOfObjectPtr(
             methodInfo = ((CConstructorInfo *)mFunctionInfo.Get())->mMethodInfo;
         }
 
-        Int32 base = methodInfo->mClsModule->mBase;
+        uintptr_t base = methodInfo->mClsModule->mBase;
         TypeDescriptor* typeDesc = &(getParamDescAddr(base,
                 methodInfo->mMethodDescriptor->mParams, index)->mType);
         if (typeDesc->mType == Type_alias) {

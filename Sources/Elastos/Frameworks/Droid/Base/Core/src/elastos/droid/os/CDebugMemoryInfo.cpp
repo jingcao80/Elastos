@@ -341,7 +341,7 @@ ECode CDebugMemoryInfo::ReadFromParcel(
     source->ReadInt32(&mOtherPrivateClean);
     source->ReadInt32(&mOtherSharedClean);
     source->ReadInt32(&mOtherSwappedOut);
-    source->ReadArrayOf((Handle32*)(&mOtherStats));
+    source->ReadArrayOf((HANDLE*)(&mOtherStats));
 
     return NOERROR;
 }
@@ -372,7 +372,7 @@ ECode CDebugMemoryInfo::WriteToParcel(
     dest->WriteInt32(mOtherPrivateClean);
     dest->WriteInt32(mOtherSharedClean);
     dest->WriteInt32(mOtherSwappedOut);
-    dest->WriteArrayOf((Handle32)mOtherStats.Get());
+    dest->WriteArrayOf((HANDLE)mOtherStats.Get());
 
     return NOERROR;
 }

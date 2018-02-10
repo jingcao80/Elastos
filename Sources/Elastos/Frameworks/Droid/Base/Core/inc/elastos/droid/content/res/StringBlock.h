@@ -112,7 +112,7 @@ public:
      *  of this newly creating StringBlock.
      */
     StringBlock(
-        /* [in] */ Handle64 obj,
+        /* [in] */ HANDLE obj,
         /* [in] */ Boolean useSparse);
 
     virtual ~StringBlock();
@@ -141,24 +141,24 @@ private:
             /* [in] */ const String& full,
             /* [in] */ const String& attribute);
 
-    static CARAPI_(Handle64) NativeCreate(
+    static CARAPI_(HANDLE) NativeCreate(
         /* [in] */ const ArrayOf<Byte>& data,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 size);
 
     static CARAPI_(Int32) NativeGetSize(
-        /* [in] */ Handle64 obj);
+        /* [in] */ HANDLE obj);
 
     static CARAPI_(String) NativeGetString(
-        /* [in] */ Handle64 obj,
+        /* [in] */ HANDLE obj,
         /* [in] */ Int32 idx);
 
     static CARAPI_(AutoPtr< ArrayOf<Int32> >) NativeGetStyle(
-        /* [in] */ Handle64 obj,
+        /* [in] */ HANDLE obj,
         /* [in] */ Int32 idx);
 
     static CARAPI_(void) NativeDestroy(
-        /* [in] */ Handle64 obj);
+        /* [in] */ HANDLE obj);
 
     /**
      * Returns a span for the specified color string representation.
@@ -182,7 +182,7 @@ private:
     static const String TAG;
     static const Boolean sLocalLOGV;
 
-    Handle64 mNative;
+    HANDLE mNative;
     AutoPtr< ArrayOf<ICharSequence*> > mStrings;
     AutoPtr< HashMap<Int32, AutoPtr<ICharSequence> > > mSparseStrings;
     AutoPtr<StyleIDs> mStyleIDs;

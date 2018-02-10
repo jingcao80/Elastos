@@ -154,7 +154,7 @@ public:
         /* [in] */ IOutputStream* stream);
 
     CARAPI GetNativePicture(
-        /* [out] */ Handle32* natviePicture);
+        /* [out] */ HANDLE* natviePicture);
 
 private:
     // return empty picture if src is 0, or a copy of the native src

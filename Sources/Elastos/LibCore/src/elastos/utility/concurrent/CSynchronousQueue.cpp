@@ -38,11 +38,16 @@ namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, Object* expect, Object* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, Object* expect, Object* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -50,11 +55,16 @@ static Boolean CompareAndSwapObject(volatile int32_t* address, Object* expect, O
     return (ret == 0);
 }
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, IInterface* expect, IInterface* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -77,14 +87,14 @@ Boolean CSynchronousQueue::TransferStack::SNode::CasNext(
     /* [in] */ SNode* val)
 {
     return cmp == mNext &&
-        CompareAndSwapObject((volatile int32_t*)&mNext, cmp, val);
+        CompareAndSwapObject((volatile uintptr_t*)&mNext, cmp, val);
 }
 
 Boolean CSynchronousQueue::TransferStack::SNode::TryMatch(
     /* [in] */ SNode* s)
 {
     if (mMatch == NULL &&
-        CompareAndSwapObject((volatile int32_t*)&mMatch, NULL, s)) {
+        CompareAndSwapObject((volatile uintptr_t*)&mMatch, NULL, s)) {
         AutoPtr<IThread> w = mWaiter;
         if (w != NULL) {    // waiters need at most one unpark
             mWaiter = NULL;
@@ -97,7 +107,7 @@ Boolean CSynchronousQueue::TransferStack::SNode::TryMatch(
 
 void CSynchronousQueue::TransferStack::SNode::TryCancel()
 {
-    CompareAndSwapObject((volatile int32_t*)&mMatch, NULL, this);
+    CompareAndSwapObject((volatile uintptr_t*)&mMatch, NULL, this);
 }
 
 Boolean CSynchronousQueue::TransferStack::SNode::IsCancelled()
@@ -125,7 +135,7 @@ Boolean CSynchronousQueue::TransferStack::CasHead(
     /* [in] */ SNode* nh)
 {
     return h == mHead &&
-        CompareAndSwapObject((volatile int32_t*)&mHead, h, nh);
+        CompareAndSwapObject((volatile uintptr_t*)&mHead, h, nh);
 }
 
 AutoPtr<CSynchronousQueue::TransferStack::SNode> CSynchronousQueue::TransferStack::Snode(
@@ -346,7 +356,7 @@ Boolean CSynchronousQueue::TransferQueue::QNode::CasNext(
     /* [in] */ QNode* val)
 {
     return mNext.Get() == cmp &&
-        CompareAndSwapObject((volatile int32_t*)&mNext, cmp, val);
+        CompareAndSwapObject((volatile uintptr_t*)&mNext, cmp, val);
 }
 
 Boolean CSynchronousQueue::TransferQueue::QNode::CasItem(
@@ -354,13 +364,13 @@ Boolean CSynchronousQueue::TransferQueue::QNode::CasItem(
     /* [in] */ IInterface* val)
 {
     return mItem.Get() == cmp &&
-        CompareAndSwapObject((volatile int32_t*)&mItem, cmp, val);
+        CompareAndSwapObject((volatile uintptr_t*)&mItem, cmp, val);
 }
 
 void CSynchronousQueue::TransferQueue::QNode::TryCancel(
     /* [in] */ IInterface* cmp)
 {
-    CompareAndSwapObject((volatile int32_t*)&mItem, cmp, (IObject*)this);
+    CompareAndSwapObject((volatile uintptr_t*)&mItem, cmp, (IObject*)this);
 }
 
 Boolean CSynchronousQueue::TransferQueue::QNode::IsCancelled()
@@ -390,7 +400,7 @@ void CSynchronousQueue::TransferQueue::AdvanceHead(
     /* [in] */ QNode* nh)
 {
     if (h == mHead &&
-        CompareAndSwapObject((volatile int32_t*)&mHead, h, nh))
+        CompareAndSwapObject((volatile uintptr_t*)&mHead, h, nh))
         h->mNext = h; // forget old next
 }
 
@@ -399,7 +409,7 @@ void CSynchronousQueue::TransferQueue::AdvanceTail(
     /* [in] */ QNode* nt)
 {
     if (mTail.Get() == t)
-        CompareAndSwapObject((volatile int32_t*)&mTail, t, nt);
+        CompareAndSwapObject((volatile uintptr_t*)&mTail, t, nt);
 }
 
 Boolean CSynchronousQueue::TransferQueue::CasCleanMe(
@@ -407,7 +417,7 @@ Boolean CSynchronousQueue::TransferQueue::CasCleanMe(
     /* [in] */ QNode* val)
 {
     return mCleanMe.Get() == cmp &&
-        CompareAndSwapObject((volatile int32_t*)&mCleanMe, cmp, val);
+        CompareAndSwapObject((volatile uintptr_t*)&mCleanMe, cmp, val);
 }
 
 AutoPtr<IInterface> CSynchronousQueue::TransferQueue::Transfer(

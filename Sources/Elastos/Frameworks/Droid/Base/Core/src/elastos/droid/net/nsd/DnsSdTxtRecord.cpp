@@ -384,14 +384,14 @@ ECode DnsSdTxtRecord::GetHashCode(
 ECode DnsSdTxtRecord::WriteToParcel(
         /* [in] */ IParcel* dest)
 {
-    return dest->WriteArrayOf((Handle32)mData.Get());
+    return dest->WriteArrayOf((HANDLE)mData.Get());
 }
 
 ECode DnsSdTxtRecord::ReadFromParcel(
         /* [in] */ IParcel* source)
 {
     mData = NULL;
-    return source->ReadArrayOf((Handle32*)&mData);
+    return source->ReadArrayOf((HANDLE*)&mData);
 }
 
 } // namespace Nsd

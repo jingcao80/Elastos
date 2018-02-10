@@ -747,7 +747,7 @@ ECode CWifiInfo::WriteToParcel(
         dest->WriteByte((byte)1);
         AutoPtr<ArrayOf<Byte> > address;
         mIpAddress->GetAddress((ArrayOf<Byte>**)&address);
-        dest->WriteArrayOf((Handle32)address.Get());
+        dest->WriteArrayOf((HANDLE)address.Get());
     }
     else {
         dest->WriteByte((byte)0);
@@ -787,7 +787,7 @@ ECode CWifiInfo::ReadFromParcel(
     source->ReadByte(&b);
     if (b == (byte)1) {
         AutoPtr<ArrayOf<Byte> > address;
-        source->ReadArrayOf((Handle32*)&address);
+        source->ReadArrayOf((HANDLE*)&address);
 
         AutoPtr<IInetAddressHelper> helpler;
         CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&helpler);

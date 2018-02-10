@@ -65,7 +65,7 @@ ECode CParcelableVolumeInfo::ReadFromParcel(
     source->ReadInt32(&mMaxVolume);
     source->ReadInt32(&mCurrentVolume);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mAudioAttrs = IAudioAttributes::Probe(obj);
     return NOERROR;
 }

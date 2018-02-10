@@ -72,7 +72,7 @@ ECode CAccountManagerFutureResponse::OnError(
 }
 
 ECode CAccountManagerFutureResponse::constructor (
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (CAccountManager::BaseFutureTask*)host;
     return NOERROR;

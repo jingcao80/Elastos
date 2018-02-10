@@ -68,11 +68,11 @@ ECode CImsCallProfile::ReadFromParcel(
     source->ReadInt32(&mCallType);
 
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mCallExtras = IBundle::Probe(obj);
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mMediaProfile = IImsStreamMediaProfile::Probe(obj);
 
     return NOERROR;

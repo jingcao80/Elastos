@@ -82,7 +82,7 @@ ECode CEditorInfo::ReadFromParcel(
     source->ReadInt32(&mFieldId);
     source->ReadString(&mFieldName);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mExtras = IBundle::Probe(obj);
     return NOERROR;
 }

@@ -297,7 +297,7 @@ protected:
         /* [out] */ Int32* elementSizeShift);
 
     virtual CARAPI GetEffectiveDirectAddress(
-        /* [out] */ Handle64* effectiveDirectAddress);
+        /* [out] */ HANDLE* effectiveDirectAddress);
 
 public:
     /**

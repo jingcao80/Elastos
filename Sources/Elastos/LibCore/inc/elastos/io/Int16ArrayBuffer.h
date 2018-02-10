@@ -50,7 +50,7 @@ public:
         /* [in] */ Boolean isReadOnly);
 
     CARAPI GetPrimitiveArray(
-        /* [out] */ Handle64* arrayHandle);
+        /* [out] */ HANDLE* arrayHandle);
 
     CARAPI Get(
         /* [out] */ Int16* value);

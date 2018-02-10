@@ -1495,7 +1495,7 @@ ECode CAssetManager::OpenNonAssetNative(
 
     //printf("Created Asset Stream: %p\n", a);
 
-    *value = (Int32)a;
+    *value = reinterpret_cast<Int64>(a);
     return NOERROR;
 }
 
@@ -2457,7 +2457,7 @@ Int64 CAssetManager::GetNativeStringBlock(
     if (am == NULL) {
         return 0;
     }
-    return (Int32)am->getResources().getTableStringBlock(block);
+    return reinterpret_cast<Int64>(am->getResources().getTableStringBlock(block));
 }
 
 ECode CAssetManager::GetCookieName(
@@ -2589,7 +2589,7 @@ ECode CAssetManager::OpenXmlAssetNative(
         return E_FILE_NOT_FOUND_EXCEPTION;
     }
 
-    *result = (Int32)block;
+    *result = reinterpret_cast<Int64>(block);
     return NOERROR;
 }
 

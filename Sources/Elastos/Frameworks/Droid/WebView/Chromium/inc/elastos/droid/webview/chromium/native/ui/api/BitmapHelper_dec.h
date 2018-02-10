@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_BitmapHelper_InitCallback(Handle32 cb);
+    extern void Elastos_BitmapHelper_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -54,7 +54,7 @@ void* BitmapHelper::ElaBitmapHelperCallback_Init()
     sElaBitmapHelperCallback.elastos_BitmapHelper_decodeDrawableResource = &BitmapHelper::DecodeDrawableResource;
     sElaBitmapHelperCallback.elastos_BitmapHelper_getBitmapFormatForConfig = &BitmapHelper::GetBitmapFormatForConfig;
 
-    Elastos_BitmapHelper_InitCallback((Handle32)&sElaBitmapHelperCallback);
+    Elastos_BitmapHelper_InitCallback((HANDLE)&sElaBitmapHelperCallback);
     return &sElaBitmapHelperCallback;
 }
 

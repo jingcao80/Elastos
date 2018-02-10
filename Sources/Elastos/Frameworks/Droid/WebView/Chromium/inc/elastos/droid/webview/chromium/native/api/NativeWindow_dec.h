@@ -25,7 +25,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_NativeWindow_InitCallback(Handle32 cb);
+    extern void Elastos_NativeWindow_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -48,7 +48,7 @@ void* AwNativeWindow::ElaNativeWindowCallback_Init()
 
     sElaNativeWindowCallback.elastos_NativeWindow_GetFromSurface = &AwNativeWindow::GetFromSurface;
 
-    Elastos_NativeWindow_InitCallback((Handle32)&sElaNativeWindowCallback);
+    Elastos_NativeWindow_InitCallback((HANDLE)&sElaNativeWindowCallback);
     return &sElaNativeWindowCallback;
 }
 

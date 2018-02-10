@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_BuildInfo_InitCallback(Handle32 cb);
+    extern void Elastos_BuildInfo_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -69,7 +69,7 @@ void* BuildInfo::ElaBuildInfoCallback_Init()
     sElaBuildInfoCallback.elastos_BuildInfo_getBuildType = &BuildInfo::GetBuildType;
     sElaBuildInfoCallback.elastos_BuildInfo_getSdkInt = &BuildInfo::GetSdkInt;
 
-    Elastos_BuildInfo_InitCallback((Handle32)&sElaBuildInfoCallback);
+    Elastos_BuildInfo_InitCallback((HANDLE)&sElaBuildInfoCallback);
     return &sElaBuildInfoCallback;
 }
 

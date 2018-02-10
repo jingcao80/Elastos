@@ -26,18 +26,18 @@
 extern "C"
 {
 #endif
-    extern Handle64 Elastos_AwSettings_nativeInit(IInterface* caller,Handle64 webContentsPtr);
+    extern HANDLE Elastos_AwSettings_nativeInit(IInterface* caller,HANDLE webContentsPtr);
     extern String Elastos_AwSettings_nativeGetDefaultUserAgent();
-    extern void Elastos_AwSettings_nativeDestroy(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativePopulateWebPreferencesLocked(IInterface* caller,Handle64 nativeAwSettings,Handle64 webPrefsPtr);
-    extern void Elastos_AwSettings_nativeResetScrollAndScaleState(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativeUpdateEverythingLocked(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativeUpdateInitialPageScaleLocked(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativeUpdateUserAgentLocked(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativeUpdateWebkitPreferencesLocked(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativeUpdateFormDataPreferencesLocked(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_nativeUpdateRendererPreferencesLocked(IInterface* caller,Handle64 nativeAwSettings);
-    extern void Elastos_AwSettings_InitCallback(Handle64 cb);
+    extern void Elastos_AwSettings_nativeDestroy(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativePopulateWebPreferencesLocked(IInterface* caller,HANDLE nativeAwSettings,HANDLE webPrefsPtr);
+    extern void Elastos_AwSettings_nativeResetScrollAndScaleState(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativeUpdateEverythingLocked(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativeUpdateInitialPageScaleLocked(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativeUpdateUserAgentLocked(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativeUpdateWebkitPreferencesLocked(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativeUpdateFormDataPreferencesLocked(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_nativeUpdateRendererPreferencesLocked(IInterface* caller,HANDLE nativeAwSettings);
+    extern void Elastos_AwSettings_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -52,7 +52,7 @@ namespace AndroidWebview {
 
 struct ElaAwSettingsCallback
 {
-    void (*elastos_AwSettings_nativeAwSettingsGone)(IInterface* obj, Handle64 nativeAwSettings);
+    void (*elastos_AwSettings_nativeAwSettingsGone)(IInterface* obj, HANDLE nativeAwSettings);
     Double (*elastos_AwSettings_getDIPScaleLocked)(IInterface* obj);
     Float (*elastos_AwSettings_getInitialPageScalePercentLocked)(IInterface* obj);
     Boolean (*elastos_AwSettings_getSpatialNavigationLocked)(IInterface* obj);
@@ -97,7 +97,7 @@ struct ElaAwSettingsCallback
     Boolean (*elastos_AwSettings_getVideoOverlayForEmbeddedVideoEnabledLocked)(IInterface* obj);
     Boolean (*elastos_AwSettings_supportsDoubleTapZoomLocked)(IInterface* obj);
     void (*elastos_AwSettings_updateEverything)(IInterface* obj);
-    void (*elastos_AwSettings_populateWebPreferences)(IInterface* obj, Handle64 webPrefsPtr);
+    void (*elastos_AwSettings_populateWebPreferences)(IInterface* obj, HANDLE webPrefsPtr);
 };
 
 void* AwSettings::ElaAwSettingsCallback_Init()
@@ -151,7 +151,7 @@ void* AwSettings::ElaAwSettingsCallback_Init()
     sElaAwSettingsCallback.elastos_AwSettings_updateEverything = &AwSettings::UpdateEverything;
     sElaAwSettingsCallback.elastos_AwSettings_populateWebPreferences = &AwSettings::PopulateWebPreferences;
 
-    Elastos_AwSettings_InitCallback((Handle64)&sElaAwSettingsCallback);
+    Elastos_AwSettings_InitCallback((HANDLE)&sElaAwSettingsCallback);
     return &sElaAwSettingsCallback;
 }
 

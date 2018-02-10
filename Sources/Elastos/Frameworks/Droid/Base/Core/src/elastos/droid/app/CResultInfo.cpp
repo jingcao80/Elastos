@@ -124,7 +124,7 @@ ECode CResultInfo::ReadFromParcel(
     source->ReadString(&mResultWho);
     source->ReadInt32(&mRequestCode);
     source->ReadInt32(&mResultCode);
-    source->ReadInterfacePtr((Handle32*)&mData);
+    source->ReadInterfacePtr((HANDLE*)&mData);
     return NOERROR;
 }
 

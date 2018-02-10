@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_JNIUtils_InitCallback(Handle32 cb);
+    extern void Elastos_JNIUtils_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* JNIUtils::ElaJNIUtilsCallback_Init()
 
     sElaJNIUtilsCallback.elastos_JNIUtils_getClassLoader = &JNIUtils::GetClassLoader;
 
-    Elastos_JNIUtils_InitCallback((Handle32)&sElaJNIUtilsCallback);
+    Elastos_JNIUtils_InitCallback((HANDLE)&sElaJNIUtilsCallback);
     return &sElaJNIUtilsCallback;
 }
 

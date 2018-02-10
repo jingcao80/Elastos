@@ -98,7 +98,7 @@ ECode CBulkCursorDescriptor::ReadFromParcel(
     /* [in] */ IParcel* readin)
 {
     AutoPtr<IBinder> binder;
-    readin->ReadInterfacePtr((Handle32*)&binder);
+    readin->ReadInterfacePtr((HANDLE*)&binder);
     readin->ReadArrayOfString((ArrayOf<String>**)&mColumnNames);
     readin->ReadBoolean(&mWantsAllOnMoveCalls);
     readin->ReadInt32(&mCount);

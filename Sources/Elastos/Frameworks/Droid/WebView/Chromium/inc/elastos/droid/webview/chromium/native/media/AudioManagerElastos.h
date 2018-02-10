@@ -170,7 +170,7 @@ public:
 private:
     AudioManagerElastos(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeAudioManagerElastos);
+        /* [in] */ HANDLE nativeAudioManagerElastos);
 
     static CARAPI_(Boolean) RunningOnJellyBeanOrHigher();
 
@@ -182,7 +182,7 @@ private:
     //@CalledByNative AudioManagerElastos
     static CARAPI_(AutoPtr<AudioManagerElastos>) CreateAudioManagerElastos(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeAudioManagerElastos);
+        /* [in] */ HANDLE nativeAudioManagerElastos);
 
     /**
      * Saves the initial speakerphone and microphone state.
@@ -406,7 +406,7 @@ private:
     CARAPI_(void) StopObservingVolumeChanges();
 
     CARAPI_(void) NativeSetMute(
-        /* [in] */ Handle64 nativeAudioManagerElastos,
+        /* [in] */ HANDLE nativeAudioManagerElastos,
         /* [in] */ Boolean muted);
 
 // begin the callback function declare
@@ -441,7 +441,7 @@ public:
 
     static CARAPI_(AutoPtr<IInterface>) CreateAudioManagerElastos(
         /* [in] */ IInterface* context,
-        /* [in} */ Handle64 nativeAudioManagerElastos);
+        /* [in} */ HANDLE nativeAudioManagerElastos);
 
 private:
     static const String TAG;
@@ -495,7 +495,7 @@ private:
 
     AutoPtr<IAudioManager> mAudioManager;
     const AutoPtr<IContext> mContext;
-    const Handle64 mNativeAudioManagerElastos;
+    const HANDLE mNativeAudioManagerElastos;
 
     // Enabled during initialization if MODIFY_AUDIO_SETTINGS permission is
     // granted. Required to shift system-wide audio settings.

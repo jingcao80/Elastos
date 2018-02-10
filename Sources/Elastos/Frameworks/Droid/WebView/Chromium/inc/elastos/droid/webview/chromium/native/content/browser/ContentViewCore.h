@@ -753,7 +753,7 @@ public:
     CARAPI_(void) Initialize(
         /* [in] */ IViewGroup* containerView,
         /* [in] */ InternalAccessDelegate* internalDispatcher,
-        /* [in] */ Handle64 nativeWebContents,
+        /* [in] */ HANDLE nativeWebContents,
         /* [in] */ WindowElastos* windowElastos);
 
     /**
@@ -779,7 +779,7 @@ public:
 
     //@CalledByNative
     CARAPI_(void) OnNativeContentViewCoreDestroyed(
-        /* [in] */ Handle64 nativeContentViewCore);
+        /* [in] */ HANDLE nativeContentViewCore);
 
     /**
      * Set the Container view Internals.
@@ -808,7 +808,7 @@ public:
      * @return native ContentViewCore pointer.
      */
     //@CalledByNative
-    CARAPI_(Handle64) GetNativeContentViewCore();
+    CARAPI_(HANDLE) GetNativeContentViewCore();
 
     CARAPI_(void) SetContentViewClient(
         /* [in] */ ContentViewClient* client);
@@ -1771,9 +1771,9 @@ private:
 
     static CARAPI_(void) OnNativeContentViewCoreDestroyed(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativeContentViewCore);
+        /* [in] */ HANDLE nativeContentViewCore);
 
-    static CARAPI_(Handle64) GetNativeContentViewCore(
+    static CARAPI_(HANDLE) GetNativeContentViewCore(
         /* [in] */ IInterface* obj);
 
     static CARAPI_(void) OnBackgroundColorChanged(
@@ -1861,7 +1861,7 @@ private:
 
     static CARAPI_(void) UpdateImeAdapter(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ Int32 textInputType,
         /* [in] */ const String& text,
         /* [in] */ Int32 selectionStart,
@@ -2085,7 +2085,7 @@ private:
 
     //@CalledByNative
     CARAPI_(void) UpdateImeAdapter(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ Int32 textInputType,
         /* [in] */ const String& text,
         /* [in] */ Int32 selectionStart,
@@ -2209,10 +2209,10 @@ private:
      */
     CARAPI_(void) ResetScrollInProgress();
 
-    CARAPI_(Handle64) NativeInit(
-        /* [in] */ Handle64 webContentsPtr,
-        /* [in] */ Handle64 viewAndroidPtr,
-        /* [in] */ Handle64 windowAndroidPtr,
+    CARAPI_(HANDLE) NativeInit(
+        /* [in] */ HANDLE webContentsPtr,
+        /* [in] */ HANDLE viewAndroidPtr,
+        /* [in] */ HANDLE windowAndroidPtr,
         /* [in] */ IHashSet* retainedObjectSet);
 
     //@CalledByNative
@@ -2226,13 +2226,13 @@ private:
     CARAPI_(void) OnNativeFlingStopped();
 
     CARAPI_(AutoPtr<WebContents>) NativeGetWebContentsAndroid(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeOnJavaContentViewCoreDestroyed(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeLoadUrl(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ const String& url,
         /* [in] */ Int32 loadUrlType,
         /* [in] */ Int32 transitionType,
@@ -2247,30 +2247,30 @@ private:
         /* [in] */ Boolean isRendererInitiated);
 
     CARAPI_(String) NativeGetURL(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeShowInterstitialPage(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ const String& url,
-        /* [in] */ Handle64 nativeInterstitialPageDelegateAndroid);
+        /* [in] */ HANDLE nativeInterstitialPageDelegateAndroid);
 
     CARAPI_(Boolean) NativeIsShowingInterstitialPage(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(Boolean) NativeIsIncognito(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSetFocus(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean focused);
 
     CARAPI_(void) NativeSendOrientationChangeEvent(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int32 orientation);
 
     // All touch events (including flings, scrolls etc) accept coordinates in physical pixels.
     CARAPI_(Boolean) NativeOnTouchEvent(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ IMotionEvent* event,
         /* [in] */ Int64 timeMs,
         /* [in] */ Int32 action,
@@ -2292,20 +2292,20 @@ private:
         /* [in] */ Int32 androidButtonState);
 
     CARAPI_(Int32) NativeSendMouseMoveEvent(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     CARAPI_(Int32) NativeSendMouseWheelEvent(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float verticalAxis);
 
     CARAPI_(void) NativeScrollBegin(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y,
@@ -2313,11 +2313,11 @@ private:
         /* [in] */ Float hintY);
 
     CARAPI_(void) NativeScrollEnd(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs);
 
     CARAPI_(void) NativeScrollBy(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y,
@@ -2325,7 +2325,7 @@ private:
         /* [in] */ Float deltaY);
 
     CARAPI_(void) NativeFlingStart(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y,
@@ -2333,194 +2333,194 @@ private:
         /* [in] */ Float vy);
 
     CARAPI_(void) NativeFlingCancel(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs);
 
     CARAPI_(void) NativeSingleTap(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     CARAPI_(void) NativeDoubleTap(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     CARAPI_(void) NativeLongPress(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     CARAPI_(void) NativePinchBegin(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     CARAPI_(void) NativePinchEnd(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs);
 
     CARAPI_(void) NativePinchBy(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int64 timeMs,
         /* [in] */ Float anchorX,
         /* [in] */ Float anchorY,
         /* [in] */ Float deltaScale);
 
     CARAPI_(void) NativeSelectBetweenCoordinates(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Float x1,
         /* [in] */ Float y1,
         /* [in] */ Float x2,
         /* [in] */ Float y2);
 
     CARAPI_(void) NativeMoveCaret(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Float x,
         /* [in] */ Float y);
 
     CARAPI_(void) NativeResetGestureDetection(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSetDoubleTapSupportEnabled(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean enabled);
 
     CARAPI_(void) NativeSetMultiTouchZoomSupportEnabled(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean enabled);
 
     CARAPI_(void) NativeLoadIfNecessary(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeRequestRestoreLoad(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeReload(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean checkForRepost);
 
     CARAPI_(void) NativeReloadIgnoringCache(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean checkForRepost);
 
     CARAPI_(void) NativeCancelPendingReload(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeContinuePendingReload(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSelectPopupMenuItems(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ ArrayOf<Int32>* indices);
 
     CARAPI_(void) NativeScrollFocusedEditableNodeIntoView(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSelectWordAroundCaret(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeClearHistory(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeAddStyleSheetByURL(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ const String& stylesheetUrl);
 
     CARAPI_(void) NativeEvaluateJavaScript(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ const String& script,
         /* [in] */ JavaScriptCallback* callback,
         /* [in] */ Boolean startRenderer);
 
-    CARAPI_(Handle64) NativeGetNativeImeAdapter(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+    CARAPI_(HANDLE) NativeGetNativeImeAdapter(
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(Int32) NativeGetCurrentRenderProcessId(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(Int32) NativeGetBackgroundColor(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeOnShow(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeOnHide(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSetUseDesktopUserAgent(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean enabled,
         /* [in] */ Boolean reloadOnChange);
 
     CARAPI_(Boolean) NativeGetUseDesktopUserAgent(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeClearSslPreferences(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSetAllowJavascriptInterfacesInspection(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean allow);
 
     CARAPI_(void) NativeAddJavascriptInterface(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ IInterface* object,
         /* [in] */ const String& name,
         /* [in] */ IInterface* requiredAnnotation);
 
     CARAPI_(void) NativeRemoveJavascriptInterface(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ const String& name);
 
     CARAPI_(Int32) NativeGetNavigationHistory(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ IInterface* context);
 
     CARAPI_(void) NativeGetDirectedNavigationHistory(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ IInterface* context,
         /* [in] */ Boolean isForward,
         /* [in] */ Int32 maxEntries);
 
     CARAPI_(String) NativeGetOriginalUrlForActiveNavigationEntry(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeWasResized(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(Boolean) NativeIsRenderWidgetHostViewReady(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeExitFullscreen(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeUpdateTopControlsState(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean enableHiding,
         /* [in] */ Boolean enableShowing,
         /* [in] */ Boolean animate);
 
     CARAPI_(void) NativeShowImeIfNeeded(
-        /* [in] */ Handle64 nativeContentViewCoreImpl);
+        /* [in] */ HANDLE nativeContentViewCoreImpl);
 
     CARAPI_(void) NativeSetAccessibilityEnabled(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean enabled);
 
     CARAPI_(void) NativeExtractSmartClipData(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 w,
         /* [in] */ Int32 h);
 
     CARAPI_(void) NativeSetBackgroundOpaque(
-        /* [in] */ Handle64 nativeContentViewCoreImpl,
+        /* [in] */ HANDLE nativeContentViewCoreImpl,
         /* [in] */ Boolean opaque);
 
 public:
@@ -2590,7 +2590,7 @@ private:
     AutoPtr<ContentSettings> mContentSettings;
 
     // Native pointer to C++ ContentViewCoreImpl object which will be set by nativeInit().
-    Handle64 mNativeContentViewCore;
+    HANDLE mNativeContentViewCore;
 
     ObserverList mGestureStateListeners;
     AutoPtr<ObserverList::RewindableIterator> mGestureStateListenersIterator;

@@ -497,7 +497,7 @@ ECode CVpnConfig::ReadFromParcel(
     mAllowedApplications = IList::Probe(CPARCEL::CreateStringArrayList(source));
     mDisallowedApplications = IList::Probe(CPARCEL::CreateStringArrayList(source));
     mConfigureIntent = NULL;
-    source->ReadInterfacePtr((Handle32*)&mConfigureIntent);
+    source->ReadInterfacePtr((HANDLE*)&mConfigureIntent);
     source->ReadInt64(&mStartTime);
     source->ReadBoolean(&mLegacy);
     source->ReadBoolean(&mBlocking);

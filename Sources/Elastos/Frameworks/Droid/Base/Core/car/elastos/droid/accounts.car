@@ -67,21 +67,21 @@ module
 
     class CAccountManagerAmsResponse {
         constructor(
-            [in] Handle32 host);
+            [in] HANDLE host);
 
         interface IAccountManagerResponse;
     }
 
     class CAccountManagerFutureResponse {
         constructor(
-            [in] Handle32 host);
+            [in] HANDLE host);
 
         interface IAccountManagerResponse;
     }
 
     class CChooseResponse {
         constructor(
-            [in] Handle32 host);
+            [in] HANDLE host);
 
         interface IAccountManagerResponse;
     }
@@ -146,7 +146,7 @@ module
 
     class CAccountAuthenticatorTransport {
         constructor(
-            [in] Handle32 host);
+            [in] HANDLE host);
 
         interface IIAccountAuthenticator;
     }

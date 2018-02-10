@@ -26,9 +26,9 @@
 extern "C"
 {
 #endif
-    extern void Elastos_WebAudioMediaCodecBridge_nativeOnChunkDecoded(Handle64 nativeWebAudioMediaCodecBridge,IInterface* buf,Int32 size,Int32 inputChannelCount,Int32 outputChannelCount);
-    extern void Elastos_WebAudioMediaCodecBridge_nativeInitializeDestination(Handle64 nativeWebAudioMediaCodecBridge,Int32 inputChannelCount,Int32 sampleRate,Int64 durationMicroseconds);
-    extern void Elastos_WebAudioMediaCodecBridge_InitCallback(Handle64 cb);
+    extern void Elastos_WebAudioMediaCodecBridge_nativeOnChunkDecoded(HANDLE nativeWebAudioMediaCodecBridge,IInterface* buf,Int32 size,Int32 inputChannelCount,Int32 outputChannelCount);
+    extern void Elastos_WebAudioMediaCodecBridge_nativeInitializeDestination(HANDLE nativeWebAudioMediaCodecBridge,Int32 inputChannelCount,Int32 sampleRate,Int64 durationMicroseconds);
+    extern void Elastos_WebAudioMediaCodecBridge_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -44,7 +44,7 @@ namespace Media {
 struct ElaWebAudioMediaCodecBridgeCallback
 {
     String (*elastos_WebAudioMediaCodecBridge_CreateTempFile)(IInterface* ctx);
-    Boolean (*elastos_WebAudioMediaCodecBridge_decodeAudioFile)(IInterface* ctx, Handle64 nativeMediaCodecBridge, Int32 inputFD, Int64 dataSize);
+    Boolean (*elastos_WebAudioMediaCodecBridge_decodeAudioFile)(IInterface* ctx, HANDLE nativeMediaCodecBridge, Int32 inputFD, Int64 dataSize);
 };
 
 void* WebAudioMediaCodecBridge::ElaWebAudioMediaCodecBridgeCallback_Init()
@@ -54,7 +54,7 @@ void* WebAudioMediaCodecBridge::ElaWebAudioMediaCodecBridgeCallback_Init()
     sElaWebAudioMediaCodecBridgeCallback.elastos_WebAudioMediaCodecBridge_CreateTempFile = &WebAudioMediaCodecBridge::CreateTempFile;
     sElaWebAudioMediaCodecBridgeCallback.elastos_WebAudioMediaCodecBridge_decodeAudioFile = &WebAudioMediaCodecBridge::DecodeAudioFile;
 
-    Elastos_WebAudioMediaCodecBridge_InitCallback((Handle64)&sElaWebAudioMediaCodecBridgeCallback);
+    Elastos_WebAudioMediaCodecBridge_InitCallback((HANDLE)&sElaWebAudioMediaCodecBridgeCallback);
     return &sElaWebAudioMediaCodecBridgeCallback;
 }
 

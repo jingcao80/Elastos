@@ -56,13 +56,13 @@ protected:
 
 private:
     AwPermissionRequest(
-        /* [in] */ Handle64 nativeAwPermissionRequest,
+        /* [in] */ HANDLE nativeAwPermissionRequest,
         /* [in] */ IUri* origin,
         /* [in] */ Int64 resources);
 
     //@CalledByNative return AwPermissionRequest
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeAwPermissionRequest,
+        /* [in] */ HANDLE nativeAwPermissionRequest,
         /* [in] */ const String& url,
         /* [in] */ Int64 resources);
 
@@ -72,7 +72,7 @@ private:
     CARAPI Validate();
 
     CARAPI_(void) NativeOnAccept(
-        /* [in] */ Handle64 nativeAwPermissionRequest,
+        /* [in] */ HANDLE nativeAwPermissionRequest,
         /* [in] */ Boolean allowed);
 
 //callback function declaration
@@ -91,7 +91,7 @@ private:
     Boolean mProcessed;
 
     // AwPermissionRequest native instance.
-    Handle64 mNativeAwPermissionRequest;
+    HANDLE mNativeAwPermissionRequest;
 };
 
 } // namespace Permission

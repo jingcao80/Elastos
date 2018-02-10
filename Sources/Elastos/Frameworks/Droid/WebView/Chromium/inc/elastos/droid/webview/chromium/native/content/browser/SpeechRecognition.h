@@ -126,7 +126,7 @@ public:
 private:
     static CARAPI_(AutoPtr<IInterface>) CreateSpeechRecognition(
         /* [in] */ IInterface* context,
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     static CARAPI_(void) StartRecognition(
         /* [in] */ IInterface* obj,
@@ -142,7 +142,7 @@ private:
 
     SpeechRecognition(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     // This function destroys everything when recognition is done, taking care to properly tear
     // down by calling On{Sound,Audio}End if corresponding On{Audio,Sound}Start were called.
@@ -152,7 +152,7 @@ private:
     // @CalledByNative
     static CARAPI_(AutoPtr<SpeechRecognition>) CreateSpeechRecognition(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     // @CalledByNative
     CARAPI StartRecognition(
@@ -168,29 +168,29 @@ private:
 
     // Native JNI calls to content/browser/speech/speech_recognizer_impl_android.cc
     CARAPI NativeOnAudioStart(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     CARAPI NativeOnSoundStart(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     CARAPI NativeOnSoundEnd(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     CARAPI NativeOnAudioEnd(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
     CARAPI NativeOnRecognitionResults(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid,
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid,
         /* [in] */ ArrayOf<String>* results,
         /* [in] */ ArrayOf<Float>* scores,
         /* [in] */ Boolean provisional);
 
     CARAPI NativeOnRecognitionError(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid,
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid,
         /* [in] */ Int32 error);
 
     CARAPI NativeOnRecognitionEnd(
-        /* [in] */ Handle64 nativeSpeechRecognizerImplAndroid);
+        /* [in] */ HANDLE nativeSpeechRecognizerImplAndroid);
 
 private:
     // Constants describing the speech recognition provider we depend on.
@@ -212,7 +212,7 @@ private:
     /*const*/ AutoPtr<IRecognitionListener> mListener;
     AutoPtr<ISpeechRecognizer> mRecognizer;
     // Native pointer to C++ SpeechRecognizerImplAndroid.
-    Handle64 mNativeSpeechRecognizerImplAndroid;
+    HANDLE mNativeSpeechRecognizerImplAndroid;
     // Remember if we are using continuous recognition.
     Boolean mContinuous;
 };

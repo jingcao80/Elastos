@@ -153,18 +153,18 @@ ECode CSparseRectFArray::constructor()
 ECode CSparseRectFArray::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadArrayOf((Handle32*)&mKeys);
-    source->ReadArrayOf((Handle32*)&mCoordinates);
-    source->ReadArrayOf((Handle32*)&mFlagsArray);
+    source->ReadArrayOf((HANDLE*)&mKeys);
+    source->ReadArrayOf((HANDLE*)&mCoordinates);
+    source->ReadArrayOf((HANDLE*)&mFlagsArray);
     return NOERROR;
 }
 
 ECode CSparseRectFArray::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteArrayOf((Handle32)mKeys.Get());
-    dest->WriteArrayOf((Handle32)mCoordinates.Get());
-    dest->WriteArrayOf((Handle32)mFlagsArray.Get());
+    dest->WriteArrayOf((HANDLE)mKeys.Get());
+    dest->WriteArrayOf((HANDLE)mCoordinates.Get());
+    dest->WriteArrayOf((HANDLE)mFlagsArray.Get());
     return NOERROR;
 }
 

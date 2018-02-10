@@ -126,13 +126,13 @@ ECode CTvInputInfo::ReadFromParcel(
     source->ReadInt32(&mType);
     source->ReadBoolean(&mIsConnectedToHdmiSwitch);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mService = IResolveInfo::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mHdmiDeviceInfo = IHdmiDeviceInfo::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mIconUri = IUri::Probe(obj);
     return NOERROR;
 }

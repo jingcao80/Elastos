@@ -36,7 +36,7 @@ const String CMediaCrypto::TAG("CMediaCrypto");
 
 struct fields_t {
     //jfieldID context;
-    Handle32 context;
+    HANDLE context;
 };
 
 static fields_t gFields;
@@ -168,7 +168,7 @@ android::sp<JCrypto> CMediaCrypto::SetCrypto(
     if (old != NULL) {
         old->decStrong(this);
     }
-    gFields.context = (Handle32)crypto.get();
+    gFields.context = (HANDLE)crypto.get();
 
     return old;
 }

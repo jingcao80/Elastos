@@ -2746,7 +2746,7 @@ ECode Intent::ReadFromParcel(
     source->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mSourceBounds = IRect::Probe(obj);
     }
 
@@ -2764,7 +2764,7 @@ ECode Intent::ReadFromParcel(
     source->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mSelector = IIntent::Probe(obj);
     }
 

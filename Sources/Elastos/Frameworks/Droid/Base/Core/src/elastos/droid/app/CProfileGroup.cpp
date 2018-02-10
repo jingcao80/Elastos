@@ -380,15 +380,15 @@ ECode CProfileGroup::ReadFromParcel(
 {
     source->ReadString(&mName);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     IParcelUuid::Probe(obj)->GetUuid((IUUID**)&mUuid);
     source->ReadBoolean(&mDefaultGroup);
     source->ReadBoolean(&mDirty);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mSoundOverride = IUri::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mRingerOverride = IUri::Probe(obj);
 
     source->ReadInt32(&mSoundMode);

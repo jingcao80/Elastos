@@ -104,7 +104,7 @@ ECode CellBroadcastMessage::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mSmsCbMessage = ISmsCbMessage::Probe(obj);
     source->ReadInt64(&mDeliveryTime);
     Int32 val;

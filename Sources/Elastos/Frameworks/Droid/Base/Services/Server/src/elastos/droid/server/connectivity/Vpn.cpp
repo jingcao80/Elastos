@@ -684,7 +684,7 @@ Vpn::Vpn(
     mPackage = IVpnConfig::LEGACY_VPN;
     mHostUID = GetAppUid(mPackage, mUserHandle);
 
-    CVpnObserver::New((Handle32)this, (IINetworkManagementEventObserver**)&mObserver);
+    CVpnObserver::New((HANDLE)this, (IINetworkManagementEventObserver**)&mObserver);
     ECode ec = netService->RegisterObserver(mObserver);
     if (FAILED(ec)) {
         Logger::W(TAG, "Problem registering observer");

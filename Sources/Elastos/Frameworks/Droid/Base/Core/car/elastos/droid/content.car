@@ -1625,7 +1625,7 @@ module
          * states to colors.
          */
         constructor(
-            [in] ArrayOf<Handle32>* states,
+            [in] ArrayOf<HANDLE>* states,
             [in] ArrayOf<Int32>* colors);
 
         interface IColorStateList;

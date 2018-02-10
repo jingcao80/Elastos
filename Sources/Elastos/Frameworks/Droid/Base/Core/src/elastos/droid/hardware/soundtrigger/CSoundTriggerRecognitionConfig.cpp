@@ -72,7 +72,7 @@ ECode CSoundTriggerRecognitionConfig::FromParcel(
     assert(0 && "TODO: createTypedArray");
     //in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
     AutoPtr<ArrayOf<Byte> > data;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&data))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&data))
 
     AutoPtr<CSoundTriggerRecognitionConfig> newResult;
     CSoundTriggerRecognitionConfig::NewByFriend(captureRequested, allowMultipleTriggers,
@@ -89,7 +89,7 @@ ECode CSoundTriggerRecognitionConfig::WriteToParcel(
     FAIL_RETURN(dest->WriteBoolean(mAllowMultipleTriggers))
     assert(0 && "TODO: writeTypedArray");
     //dest->writeTypedArray(keyphrases, flags);
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mData.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mData.Get()))
 
     return NOERROR;
 }
@@ -102,7 +102,7 @@ ECode CSoundTriggerRecognitionConfig::ReadFromParcel(
 
     assert(0 && "TODO: createTypedArray");
     //in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mData))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mData))
 
     return NOERROR;
 }

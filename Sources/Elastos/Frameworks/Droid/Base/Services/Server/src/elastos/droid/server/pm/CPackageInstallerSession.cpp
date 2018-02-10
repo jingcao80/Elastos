@@ -165,7 +165,7 @@ CAR_INTERFACE_IMPL_2(CPackageInstallerSession, Object, IIPackageInstallerSession
 CAR_OBJECT_IMPL(CPackageInstallerSession)
 
 ECode CPackageInstallerSession::constructor(
-	/* [in] */ Handle64 callback,
+	/* [in] */ HANDLE callback,
     /* [in] */ IContext* context,
     /* [in] */ IIPackageManager* pm,
     /* [in] */ ILooper* looper,

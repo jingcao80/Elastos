@@ -710,7 +710,7 @@ Int64 NativeActivity::LoadNativeCode(
             return 0;
         }
 
-        Handle64 mptr;
+        HANDLE mptr;
         queue->GetNativeMessageQueue(&mptr);
         AutoPtr<NativeMessageQueue> mq = reinterpret_cast<NativeMessageQueue*>(mptr);
         code->mLooper = mq->mLooper;

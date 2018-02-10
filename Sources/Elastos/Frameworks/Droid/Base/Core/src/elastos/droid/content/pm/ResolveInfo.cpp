@@ -284,17 +284,17 @@ ECode ResolveInfo::ReadFromParcel(
     source->ReadInt32(&ival);
     if (ival == 1) {
         AutoPtr<IInterface> info;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&info);
         mActivityInfo = IActivityInfo::Probe(info);
     }
     else if (ival == 2) {
         AutoPtr<IInterface> info;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&info);
         mServiceInfo = IServiceInfo::Probe(info);
     }
     else if (ival == 3) {
         AutoPtr<IInterface> info;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&info);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&info);
         mProviderInfo = IProviderInfo::Probe(info);
     }
     source->ReadInt32(&ival);
@@ -308,7 +308,7 @@ ECode ResolveInfo::ReadFromParcel(
     source->ReadInt32(&mSpecificIndex);
     source->ReadBoolean(&mIsDefault);
     source->ReadInt32(&mLabelRes);
-    source->ReadInterfacePtr((Handle32*)&mNonLocalizedLabel);
+    source->ReadInterfacePtr((HANDLE*)&mNonLocalizedLabel);
     source->ReadInt32(&mIcon);
     source->ReadString(&mResolvePackageName);
     source->ReadInt32(&mTargetUserId);

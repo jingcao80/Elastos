@@ -554,7 +554,7 @@ module
                 [in] InterfaceID interfaceType,
                 [in] ClassID componentClassType,
                 [in] InterfaceID componentInterfaceType);
-                
+
             /**
              * Visible for testing and vendor extensions only.
              *
@@ -1040,7 +1040,7 @@ module
         }
 
         class CSurfaceTextureRenderer {
- 
+
             constructor(
                 [in] Int32 facing);
 
@@ -1074,126 +1074,126 @@ module
 
             class CMarshalQueryableBoolean {
                 constructor();
-                
+
                 interface IMarshalQueryableBoolean;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableColorSpaceTransform {
                 constructor();
-                
+
                 interface IMarshalQueryableColorSpaceTransform;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableEnum {
                 constructor();
-                
+
                 interface IMarshalQueryableEnum;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableHighSpeedVideoConfiguration {
                 constructor();
-                
+
                 interface IMarshalQueryableHighSpeedVideoConfiguration;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableMeteringRectangle {
                 constructor();
-                
+
                 interface IMarshalQueryableMeteringRectangle;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableNativeByteToInteger {
                 constructor();
-                
+
                 interface IMarshalQueryableNativeByteToInteger;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryablePair {
                 constructor();
-                
+
                 interface IMarshalQueryablePair;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableParcelable {
                 constructor();
-                
+
                 interface IMarshalQueryableParcelable;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryablePrimitive {
                 constructor();
-                
+
                 interface IMarshalQueryablePrimitive;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableRange {
                 constructor();
-                
+
                 interface IMarshalQueryableRange;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableRect {
                 constructor();
-                
+
                 interface IMarshalQueryableRect;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableReprocessFormatsMap {
                 constructor();
-                
+
                 interface IMarshalQueryableReprocessFormatsMap;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableRggbChannelVector {
                 constructor();
-                
+
                 interface IMarshalQueryableRggbChannelVector;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableSize {
                 constructor();
-                
+
                 interface IMarshalQueryableSize;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableSizeF {
                 constructor();
-                
+
                 interface IMarshalQueryableSizeF;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableStreamConfiguration {
                 constructor();
-                
+
                 interface IMarshalQueryableStreamConfiguration;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableStreamConfigurationDuration {
                 constructor();
-                
+
                 interface IMarshalQueryableStreamConfigurationDuration;
                 interface IMarshalQueryable;
             }
 
             class CMarshalQueryableString {
                 constructor();
-                
+
                 interface IMarshalQueryableString;
                 interface IMarshalQueryable;
             }
@@ -1525,7 +1525,7 @@ module
 
         class CDisplayManagerCallback {
             constructor(
-                [in] Handle32 owner);
+                [in] HANDLE owner);
 
             interface IIDisplayManagerCallback;
         }
@@ -1640,7 +1640,7 @@ module
 
         class CInputManagerInputDevicesChangedListener {
             constructor(
-                [in] Handle32 inputManager);
+                [in] HANDLE inputManager);
 
             interface IInputDevicesChangedListener;
         }

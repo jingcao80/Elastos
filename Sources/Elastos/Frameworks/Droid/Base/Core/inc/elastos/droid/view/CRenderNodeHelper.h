@@ -43,7 +43,7 @@ public:
         /* [out] */ IRenderNode** node);
 
     CARAPI Adopt(
-        /* [in] */ Handle64 nativePtr,
+        /* [in] */ HANDLE nativePtr,
         /* [out] */ IRenderNode** node);
 };
 

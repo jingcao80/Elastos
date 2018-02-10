@@ -765,7 +765,7 @@ ECode CInputManagerService::NativeInit(
     /* [in] */ IContext* context,
     /* [in] */ IMessageQueue* messageQueue)
 {
-    Handle64 ptr;
+    HANDLE ptr;
     messageQueue->GetNativeMessageQueue(&ptr);
     AutoPtr<MessageQueue> nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
     if (nativeMessageQueue == NULL) {
@@ -882,7 +882,7 @@ ECode CInputManagerService::NativeRegisterInputChannel(
     /* [in] */ IInputWindowHandle* inputWindowHandleObj,
     /* [in] */ Boolean monitor)
 {
-    Handle64 ptr;
+    HANDLE ptr;
     inputChannelObj->GetNativeInputChannel(&ptr);
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
     android::sp<android::InputChannel> inputChannel = nativeInputChannel->getInputChannel();
@@ -911,7 +911,7 @@ ECode CInputManagerService::NativeRegisterInputChannel(
 ECode CInputManagerService::NativeUnregisterInputChannel(
     /* [in] */ IInputChannel* inputChannelObj)
 {
-    Handle64 ptr;
+    HANDLE ptr;
     inputChannelObj->GetNativeInputChannel(&ptr);
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
     android::sp<android::InputChannel> inputChannel = nativeInputChannel->getInputChannel();
@@ -985,7 +985,7 @@ Int32 CInputManagerService::NativeInjectInputEvent(
                 uint32_t(policyFlags));
     }
     else if (IMotionEvent::Probe(event)) {
-        Handle64 ptr;
+        HANDLE ptr;
         IMotionEvent::Probe(event)->GetNative(&ptr);
         const android::MotionEvent* motionEvent = reinterpret_cast<android::MotionEvent*>(ptr);
 
@@ -1028,7 +1028,7 @@ Boolean CInputManagerService::NativeTransferTouchFocus(
     /* [in] */ IInputChannel* fromChannelObj,
     /* [in] */ IInputChannel* toChannelObj)
 {
-    Handle64 ptr;
+    HANDLE ptr;
     fromChannelObj->GetNativeInputChannel(&ptr);
     NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
     android::sp<android::InputChannel> fromChannel = nativeInputChannel->getInputChannel();

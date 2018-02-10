@@ -63,10 +63,10 @@ ECode ConnectTimerTask::Run()
             pHandlerFunc = &CWifiSetting::AddWifiNodesByVector;
             AutoPtr<IParcel> params;
             CCallbackParcel::New((IParcel**)&params);
-            params->WriteInt32((Handle32)(Handle32*)scanList);
+            params->WriteInt32((HANDLE)(HANDLE*)scanList);
 
             mHost->mApartment->PostCppCallbackDelayed(
-                (Handle32)mHost, *(Handle32*)&pHandlerFunc,
+                (HANDLE)mHost, *(HANDLE*)&pHandlerFunc,
                 params, 0, 0);
         }
         else if (mConnectWay == CONNECTWAY_ETH) {
@@ -79,7 +79,7 @@ ECode ConnectTimerTask::Run()
             params->WriteBoolean(connected);
 
             mHost->mApartment->PostCppCallbackDelayed(
-                (Handle32)mHost, *(Handle32*)&pHandlerFunc,
+                (HANDLE)mHost, *(HANDLE*)&pHandlerFunc,
                 params, 0, 0);
 
 printf("============================= Start Ethernet : %d.\n", connected);

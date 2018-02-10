@@ -159,11 +159,11 @@ ECode CWindowInfo::InitFromParcel(
 {
     parcel->ReadInt32(&mType);
     parcel->ReadInt32(&mLayer);
-    parcel->ReadInterfacePtr((Handle32*)&mToken);
-    parcel->ReadInterfacePtr((Handle32*)&mParentToken);
+    parcel->ReadInterfacePtr((HANDLE*)&mToken);
+    parcel->ReadInterfacePtr((HANDLE*)&mParentToken);
     Int32 value = 0;
     mFocused = ((parcel->ReadInt32(&value), value) == 1);
-    parcel->ReadInterfacePtr((Handle32*)&mBoundsInScreen);
+    parcel->ReadInterfacePtr((HANDLE*)&mBoundsInScreen);
 
     Boolean hasChildren = ((parcel->ReadInt32(&value), value) == 1);
     if (hasChildren) {
@@ -173,7 +173,7 @@ ECode CWindowInfo::InitFromParcel(
         parcel->ReadInt32(&value);
         for (Int32 i = 0; i < value; i++) {
             AutoPtr<IInterface> binder;
-            parcel->ReadInterfacePtr((Handle32*)&binder);
+            parcel->ReadInterfacePtr((HANDLE*)&binder);
             mChildTokens->Add(binder);
         }
     }

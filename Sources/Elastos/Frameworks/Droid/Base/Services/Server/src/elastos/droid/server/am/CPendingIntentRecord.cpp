@@ -255,7 +255,7 @@ CPendingIntentRecord::~CPendingIntentRecord()
 {
     if (!mCanceled) {
         AutoPtr<CPendingIntentRecord> obj;
-        CPendingIntentRecord::NewByFriend(mOwner, (Handle32)mKey.Get(), mUid, (CPendingIntentRecord**)&obj);
+        CPendingIntentRecord::NewByFriend(mOwner, (HANDLE)mKey.Get(), mUid, (CPendingIntentRecord**)&obj);
         obj->mCanceled = TRUE;
         obj->mRef = mRef;
 
@@ -270,7 +270,7 @@ CPendingIntentRecord::~CPendingIntentRecord()
 
 ECode CPendingIntentRecord::constructor(
     /* [in] */ IIActivityManager* owner,
-    /* [in] */ Handle32 k,
+    /* [in] */ HANDLE k,
     /* [in] */ Int32 u)
 {
     mOwner = (CActivityManagerService*)owner;

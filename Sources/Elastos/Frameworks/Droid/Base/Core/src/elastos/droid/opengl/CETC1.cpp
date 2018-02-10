@@ -44,7 +44,7 @@ CAR_SINGLETON_IMPL(CETC1)
 ECode CETC1::GetPointer(
     /* [in] */ Elastos::IO::IBuffer* buffer,
     /* [in, out] */ Int32 *remaining,
-    /* [out] */ Handle32* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -63,7 +63,7 @@ ECode CETC1::GetPointer(
 
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
-        *rst = (Handle32)pointer;
+        *rst = (HANDLE)pointer;
         return NOERROR;
     }
     *rst = 0;

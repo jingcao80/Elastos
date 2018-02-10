@@ -117,7 +117,11 @@ String ClassLoader::GetSystemClasspath()
     if (SystemClassLoader::sSystemClasspath.IsNull()) {
         SystemClassLoader::sSystemClasspath = GetSystemProperties(String("elastos.class.path"), String(NULL));
         if (SystemClassLoader::sSystemClasspath.IsNullOrEmpty()) {
+#if defined(_arm)
             SystemClassLoader::sSystemClasspath = "/system/lib/Elastos.Droid.Core.eco";
+#elif defined(_aarch64)
+            SystemClassLoader::sSystemClasspath = "/system/lib64/Elastos.Droid.Core.eco";
+#endif
         }
     }
     return SystemClassLoader::sSystemClasspath;

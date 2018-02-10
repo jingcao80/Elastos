@@ -77,7 +77,7 @@ TextToSpeech::TextToSpeechActionRShutdown::TextToSpeechActionRShutdown(
     mTts = tts;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRShutdown::Run(
+HANDLE TextToSpeech::TextToSpeechActionRShutdown::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     service->SetCallback((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), NULL);
@@ -93,7 +93,7 @@ Handle32 TextToSpeech::TextToSpeechActionRShutdown::Run(
     // This leads to tons of log spam about SynthThread being dead.
     (mTts->mServiceConnection) = NULL;
     (mTts->mCurrentEngine) = String(NULL);
-    return (Handle32)NULL;
+    return (HANDLE)NULL;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRSpeak*************************/
@@ -109,7 +109,7 @@ TextToSpeech::TextToSpeechActionRSpeak::TextToSpeechActionRSpeak(
     mParams = params;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRSpeak::Run(
+HANDLE TextToSpeech::TextToSpeechActionRSpeak::Run(
     /* [in] */ IITextToSpeechService* service)
 {
 #if 0
@@ -117,14 +117,14 @@ Handle32 TextToSpeech::TextToSpeechActionRSpeak::Run(
     if (utteranceUri != NULL) {
         Int32 nRet;
         service->PlayAudio((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), utteranceUri.Get(), mQueueMode, (mTts->ConvertParamsHashMaptoBundle(mParams)).Get(), &nRet);
-        return (Handle32)nRet;
+        return (HANDLE)nRet;
     } else {
         Int32 nRet;
         service->Speak((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), mText, mQueueMode, (mTts->ConvertParamsHashMaptoBundle(mParams)).Get(), &nRet);
-        return (Handle32)nRet;
+        return (HANDLE)nRet;
     }
 #endif
-    return (Handle32)NULL;
+    return (HANDLE)NULL;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRPlayEarcon*************************/
@@ -140,19 +140,19 @@ TextToSpeech::TextToSpeechActionRPlayEarcon::TextToSpeechActionRPlayEarcon(
     mParams = params;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRPlayEarcon::Run(
+HANDLE TextToSpeech::TextToSpeechActionRPlayEarcon::Run(
     /* [in] */ IITextToSpeechService* service)
 {
 #if 0
     AutoPtr<IUri> earconUri = (*((mTts->mEarcons).Find(mEarcon))).mSecond;
     if (earconUri == NULL) {
-        return (Handle32)ITextToSpeech::TTS_ERROR;
+        return (HANDLE)ITextToSpeech::TTS_ERROR;
     }
     Int32 nRet;
     service->PlayAudio((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), earconUri, mQueueMode, (mTts->ConvertParamsHashMaptoBundle(mParams)).Get(), &nRet);
-    return (Handle32)nRet;
+    return (HANDLE)nRet;
 #endif
-    return (Handle32)NULL;
+    return (HANDLE)NULL;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRPlaySilence*************************/
@@ -168,14 +168,14 @@ TextToSpeech::TextToSpeechActionRPlaySilence::TextToSpeechActionRPlaySilence(
     mParams = params;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRPlaySilence::Run(
+HANDLE TextToSpeech::TextToSpeechActionRPlaySilence::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     Int32 nRet;
 #if 0
     service->PlaySilence((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), mDurationInMs, mQueueMode, mTts->ConvertParamsHashMaptoBundle(mParams), &nRet);
 #endif
-    return (Handle32)nRet;
+    return (HANDLE)nRet;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRGetFeatures*************************/
@@ -187,7 +187,7 @@ TextToSpeech::TextToSpeechActionRGetFeatures::TextToSpeechActionRGetFeatures(
     mLocale = locale;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRGetFeatures::Run(
+HANDLE TextToSpeech::TextToSpeechActionRGetFeatures::Run(
     /* [in] */ IITextToSpeechService* service)
 {
 #if 0
@@ -209,10 +209,10 @@ Handle32 TextToSpeech::TextToSpeechActionRGetFeatures::Run(
             CString::New(strTemp, (ICharSequence**)&cs);
             oc->Add((IInterface*)(cs.Get()));
         }
-        return (Handle32)(oc.Get());
+        return (HANDLE)(oc.Get());
     }
 #endif
-    return (Handle32)NULL;
+    return (HANDLE)NULL;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRIsSpeaking*************************/
@@ -222,12 +222,12 @@ TextToSpeech::TextToSpeechActionRIsSpeaking::TextToSpeechActionRIsSpeaking(
     mTts = tts;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRIsSpeaking::Run(
+HANDLE TextToSpeech::TextToSpeechActionRIsSpeaking::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     Boolean bRet;
     service->IsSpeaking(&bRet);
-    return (Handle32)bRet;
+    return (HANDLE)bRet;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRStop*************************/
@@ -237,12 +237,12 @@ TextToSpeech::TextToSpeechActionRStop::TextToSpeechActionRStop(
     mTts = tts;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRStop::Run(
+HANDLE TextToSpeech::TextToSpeechActionRStop::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     Int32 nRet;
     service->Stop((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), &nRet);
-    return (Handle32)nRet;
+    return (HANDLE)nRet;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRSetLanguage*************************/
@@ -254,7 +254,7 @@ TextToSpeech::TextToSpeechActionRSetLanguage::TextToSpeechActionRSetLanguage(
     mLocale = locale;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRSetLanguage::Run(
+HANDLE TextToSpeech::TextToSpeechActionRSetLanguage::Run(
     /* [in] */ IITextToSpeechService* service)
 {
 #if 0
@@ -282,9 +282,9 @@ Handle32 TextToSpeech::TextToSpeechActionRSetLanguage::Run(
         (mTts->mParams)->PutString(ITextToSpeechEngine::KEY_PARAM_COUNTRY, country);
         (mTts->mParams)->PutString(ITextToSpeechEngine::KEY_PARAM_VARIANT, variant);
     }
-    return (Handle32)result;
+    return (HANDLE)result;
 #endif
-    return (Handle32)NULL;
+    return (HANDLE)NULL;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRGetLanguage*************************/
@@ -294,7 +294,7 @@ TextToSpeech::TextToSpeechActionRGetLanguage::TextToSpeechActionRGetLanguage(
     mTts = tts;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRGetLanguage::Run(
+HANDLE TextToSpeech::TextToSpeechActionRGetLanguage::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     AutoPtr< ArrayOf<String> > locStrings;
@@ -302,9 +302,9 @@ Handle32 TextToSpeech::TextToSpeechActionRGetLanguage::Run(
     if (locStrings != NULL && locStrings->GetLength() == 3) {
         AutoPtr<ILocale> localeRet;
         CLocale::New((*locStrings)[0], (*locStrings)[1], (*locStrings)[2], (ILocale**)&localeRet);
-        return (Handle32)(localeRet.Get());
+        return (HANDLE)(localeRet.Get());
     }
-    return (Handle32)NULL;
+    return (HANDLE)NULL;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRIsLanguageAvailable*************************/
@@ -316,7 +316,7 @@ TextToSpeech::TextToSpeechActionRIsLanguageAvailable::TextToSpeechActionRIsLangu
     mLocale = locale;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRIsLanguageAvailable::Run(
+HANDLE TextToSpeech::TextToSpeechActionRIsLanguageAvailable::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     String language, country, variant;
@@ -325,7 +325,7 @@ Handle32 TextToSpeech::TextToSpeechActionRIsLanguageAvailable::Run(
     mLocale->GetVariant(&variant);
     Int32 nRet;
     service->IsLanguageAvailable(language, country, variant, &nRet);
-    return (Handle32)nRet;
+    return (HANDLE)nRet;
 }
 
 /******************************TextToSpeech::TextToSpeechActionRSynthesizeToFile*************************/
@@ -341,14 +341,14 @@ TextToSpeech::TextToSpeechActionRSynthesizeToFile::TextToSpeechActionRSynthesize
     mFilename = filename;
 }
 
-Handle32 TextToSpeech::TextToSpeechActionRSynthesizeToFile::Run(
+HANDLE TextToSpeech::TextToSpeechActionRSynthesizeToFile::Run(
     /* [in] */ IITextToSpeechService* service)
 {
     Int32 nRet;
 #if 0
     service->SynthesizeToFile((/*IIBinder*/IBinder*)((mTts->GetCallerIdentity()).Get()), mText, mFilename, (mTts->ConvertParamsHashMaptoBundle(mParams)).Get(), &nRet);
 #endif
-    return (Handle32)nRet;
+    return (HANDLE)nRet;
 }
 
 /******************
@@ -533,9 +533,9 @@ Boolean TextToSpeech::TextToSpeechConnection::IsEstablished()
     return mService != NULL && mEstablished;
 }
 
-Handle32 TextToSpeech::TextToSpeechConnection::RunAction(
+HANDLE TextToSpeech::TextToSpeechConnection::RunAction(
     /* [in] */ TextToSpeechActionR* action,
-    /* [in] */ Handle32 errorResult,
+    /* [in] */ HANDLE errorResult,
     /* [in] */ const String& method,
     /* [in] */ Boolean reconnect,
     /* [in] */ Boolean onlyEstablishedConnection)
@@ -626,26 +626,26 @@ ECode TextToSpeech::constructor(
     return NOERROR;
 }
 
-Handle32 TextToSpeech::RunActionNoReconnect(
+HANDLE TextToSpeech::RunActionNoReconnect(
     /* [in] */ TextToSpeechActionR* action,
-    /* [in] */ Handle32 errorResult,
+    /* [in] */ HANDLE errorResult,
     /* [in] */ const String& method,
     /* [in] */ Boolean onlyEstablishedConnection)
 {
     return RunAction(action, errorResult, method, FALSE, onlyEstablishedConnection);
 }
 
-Handle32 TextToSpeech::RunAction(
+HANDLE TextToSpeech::RunAction(
     /* [in] */ TextToSpeechActionR* action,
-    /* [in] */ Handle32 errorResult,
+    /* [in] */ HANDLE errorResult,
     /* [in] */ const String& method)
 {
     return RunAction(action, errorResult, method, TRUE, TRUE);
 }
 
-Handle32 TextToSpeech::RunAction(
+HANDLE TextToSpeech::RunAction(
     /* [in] */ TextToSpeechActionR* action,
-    /* [in] */ Handle32 errorResult,
+    /* [in] */ HANDLE errorResult,
     /* [in] */ const String& method,
     /* [in] */ Boolean reconnect,
     /* [in] */ Boolean onlyEstablishedConnection)
@@ -753,7 +753,7 @@ void TextToSpeech::DispatchOnInit(
 ECode TextToSpeech::Shutdown()
 {
     AutoPtr<TextToSpeechActionR> ttsActionR  = new TextToSpeechActionRShutdown(this);
-    RunActionNoReconnect(ttsActionR.Get(), (Handle32)NULL, String("shutdown"), FALSE);
+    RunActionNoReconnect(ttsActionR.Get(), (HANDLE)NULL, String("shutdown"), FALSE);
 
     return NOERROR;
 }
@@ -954,7 +954,7 @@ ECode TextToSpeech::GetFeatures(
 #if 0
     AutoPtr<TextToSpeechActionR> ttsActionR = new TextToSpeechActionRGetFeatures(this, locale);
     AutoPtr<IObjectContainer> oc;
-    oc = RunAction(ttsActionR.Get(), (Handle32)NULL, String("getFeatures") );
+    oc = RunAction(ttsActionR.Get(), (HANDLE)NULL, String("getFeatures") );
 
     AutoPtr<Set<String> > sRet = new Set<String>();
     if(oc != NULL) {
@@ -1083,7 +1083,7 @@ ECode TextToSpeech::GetLanguage(
     /* [out] */ ILocale** language)
 {
     AutoPtr<TextToSpeechActionR> ttsActionR = new TextToSpeechActionRGetLanguage(this);
-    AutoPtr<ILocale> lRet = (ILocale*)RunAction(ttsActionR.Get(), (Handle32)0, String("getLanguage") );
+    AutoPtr<ILocale> lRet = (ILocale*)RunAction(ttsActionR.Get(), (HANDLE)0, String("getLanguage") );
     assert(0 && "TODO");
     *language = lRet;
     REFCOUNT_ADD(*language)

@@ -257,9 +257,9 @@ public:
 
     public:
         DestroyRunnable(
-            /* [in] */ Handle64 nativeAwContents);
+            /* [in] */ HANDLE nativeAwContents);
 
-        const Handle64 mNativeAwContents;
+        const HANDLE mNativeAwContents;
     };
 
     /**
@@ -884,12 +884,12 @@ public:
     virtual CARAPI_(AutoPtr<AwPdfExporter>) GetPdfExporter();
 
     static CARAPI_(void) SetAwDrawSWFunctionTable(
-        /* [in] */ Handle64 functionTablePointer);
+        /* [in] */ HANDLE functionTablePointer);
 
     static CARAPI_(void) SetAwDrawGLFunctionTable(
-        /* [in] */ Handle64 functionTablePointer);
+        /* [in] */ HANDLE functionTablePointer);
 
-    static CARAPI_(Handle64) GetAwDrawGLFunction();
+    static CARAPI_(HANDLE) GetAwDrawGLFunction();
 
     static CARAPI_(void) SetShouldDownloadFavicons();
 
@@ -908,7 +908,7 @@ public:
     //@VisibleForTesting
     static CARAPI_(Int32) GetNativeInstanceCount();
 
-    virtual CARAPI_(Handle64) GetAwDrawGLViewContext();
+    virtual CARAPI_(HANDLE) GetAwDrawGLViewContext();
 
     //--------------------------------------------------------------------------------------------
     //  WebView[Provider] method implementations (where not provided by ContentViewCore)
@@ -1514,7 +1514,7 @@ private:
         /* [in] */ IViewGroup* containerView,
         /* [in] */ IContext* context,
         /* [in] */ InternalAccessDelegate* internalDispatcher,
-        /* [in] */ Handle64 nativeWebContents,
+        /* [in] */ HANDLE nativeWebContents,
         /* [in] */ GestureStateListener* gestureStateListener,
         /* [in] */ ContentViewClient* contentViewClient,
         /* [in] */ ContentViewCore::ZoomControlsDelegate* zoomControlsDelegate);
@@ -1537,13 +1537,13 @@ private:
      * ^^^^^^^^^  See the native class declaration for more details on relative object lifetimes.
      */
     CARAPI_(void) SetNewAwContents(
-        /* [in] */ Handle64 newAwContentsPtr);
+        /* [in] */ HANDLE newAwContentsPtr);
 
 
     // Recap: supplyContentsForPopup() is called on the parent window's content, this method is
     // called on the popup window's content.
     CARAPI_(void) ReceivePopupContents(
-        /* [in] */ Handle64 popupNativeAwContents);
+        /* [in] */ HANDLE popupNativeAwContents);
 
     CARAPI_(AutoPtr<IRect>) GetGlobalVisibleRect();
 
@@ -1693,50 +1693,50 @@ private:
     //  Native methods
     //--------------------------------------------------------------------------------------------
 
-    static CARAPI_(Handle64) NativeInit(
+    static CARAPI_(HANDLE) NativeInit(
         /* [in] */ AwBrowserContext* browserContext);
 
     static CARAPI_(void) NativeDestroy(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     static CARAPI_(void) NativeSetAwDrawSWFunctionTable(
-        /* [in] */ Handle64 functionTablePointer);
+        /* [in] */ HANDLE functionTablePointer);
 
     static CARAPI_(void) NativeSetAwDrawGLFunctionTable(
-        /* [in] */ Handle64 functionTablePointer);
+        /* [in] */ HANDLE functionTablePointer);
 
-    static CARAPI_(Handle64) NativeGetAwDrawGLFunction();
+    static CARAPI_(HANDLE) NativeGetAwDrawGLFunction();
 
     static CARAPI_(Int32) NativeGetNativeInstanceCount();
 
     static CARAPI_(void) NativeSetShouldDownloadFavicons();
 
     CARAPI_(void) NativeSetJavaPeers(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ AwContents* awContents,
         /* [in] */ AwWebContentsDelegate* webViewWebContentsDelegate,
         /* [in] */ AwContentsClientBridge* contentsClientBridge,
         /* [in] */ AwContentsIoThreadClient* ioThreadClient,
         /* [in] */ InterceptNavigationDelegate* navigationInterceptionDelegate);
 
-    CARAPI_(Handle64) NativeGetWebContents(
-        /* [in] */ Handle64 nativeAwContents);
+    CARAPI_(HANDLE) NativeGetWebContents(
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeDocumentHasImages(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ IMessage* message);
 
     CARAPI_(void) NativeGenerateMHTML(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ const String& path,
         /* [in] */ IValueCallback* callback);
 
     CARAPI_(void) NativeAddVisitedLinks(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ ArrayOf<String>* visitedLinks);
 
     CARAPI_(Boolean) NativeOnDraw(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ ICanvas* canvas,
         /* [in] */ Boolean isHardwareAccelerated,
         /* [in] */ Int32 scrollX,
@@ -1747,127 +1747,127 @@ private:
         /* [in] */ Int32 visibleBottom);
 
     CARAPI_(void) NativeFindAllAsync(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ const String& searchString);
 
     CARAPI_(void) NativeFindNext(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean forward);
 
     CARAPI_(void) NativeClearMatches(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeClearCache(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean includeDiskFiles);
 
     CARAPI_(AutoPtr<ArrayOf<Byte> >) NativeGetCertificate(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     // Coordinates in desity independent pixels.
     CARAPI_(void) NativeRequestNewHitTestDataAt(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     CARAPI_(void) NativeUpdateLastHitTestData(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeOnSizeChanged(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,
         /* [in] */ Int32 oh);
 
     CARAPI_(void) NativeScrollTo(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
     CARAPI_(void) NativeSetViewVisibility(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean visible);
 
     CARAPI_(void) NativeSetWindowVisibility(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean visible);
 
     CARAPI_(void) NativeSetIsPaused(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean paused);
 
     CARAPI_(void) NativeOnAttachedToWindow(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 w,
         /* [in] */ Int32 h);
 
     static CARAPI_(void) NativeOnDetachedFromWindow(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeSetDipScale(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Float dipScale);
 
     // Returns null if save state fails.
     CARAPI_(AutoPtr<ArrayOf<Byte> >) NativeGetOpaqueState(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     // Returns false if restore state fails.
     CARAPI_(Boolean) NativeRestoreFromOpaqueState(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ ArrayOf<Byte>* state);
 
-    CARAPI_(Handle64) NativeReleasePopupAwContents(
-        /* [in] */ Handle64 nativeAwContents);
+    CARAPI_(HANDLE) NativeReleasePopupAwContents(
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeFocusFirstNode(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeSetBackgroundColor(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 color);
 
-    CARAPI_(Handle64) NativeGetAwDrawGLViewContext(
-        /* [in] */ Handle64 nativeAwContents);
+    CARAPI_(HANDLE) NativeGetAwDrawGLViewContext(
+        /* [in] */ HANDLE nativeAwContents);
 
-    CARAPI_(Handle64) NativeCapturePicture(
-        /* [in] */ Handle64 nativeAwContents,
+    CARAPI_(HANDLE) NativeCapturePicture(
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
     CARAPI_(void) NativeEnableOnNewPicture(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean enabled);
 
     CARAPI_(void) NativeClearView(
-        /* [in] */ Handle64 nativeAwContents);
+        /* [in] */ HANDLE nativeAwContents);
 
     CARAPI_(void) NativeSetExtraHeadersForUrl(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ const String& url,
         /* [in] */ const String& extraHeaders);
 
     CARAPI_(void) NativeInvokeGeolocationCallback(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean value,
         /* [in] */ const String& requestingFrame);
 
     CARAPI_(void) NativeSetJsOnlineProperty(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Boolean networkUp);
 
     CARAPI_(void) NativeTrimMemory(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ Int32 level,
         /* [in] */ Boolean visible);
 
     CARAPI_(void) NativeCreatePdfExporter(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ AwPdfExporter* awPdfExporter);
 
     CARAPI_(void) NativePreauthorizePermission(
-        /* [in] */ Handle64 nativeAwContents,
+        /* [in] */ HANDLE nativeAwContents,
         /* [in] */ const String& origin,
         /* [in] */ Int64 resources);
 
@@ -2011,7 +2011,7 @@ private:
     // produce little visible difference.
     static const Float ZOOM_CONTROLS_EPSILON;
 
-    Handle64 mNativeAwContents;
+    HANDLE mNativeAwContents;
     AutoPtr<AwBrowserContext> mBrowserContext;
     AutoPtr<IViewGroup> mContainerView;
     AutoPtr<AwLayoutChangeListener> mLayoutChangeListener;

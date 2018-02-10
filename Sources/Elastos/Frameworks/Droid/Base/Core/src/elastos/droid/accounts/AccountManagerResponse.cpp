@@ -32,7 +32,7 @@ AccountManagerResponse::AccountManagerResponse(
     /* [in] */ IParcel* parcel)
 {
     ASSERT_SUCCEEDED(parcel->ReadInterfacePtr(
-            (Handle32*)(IAccountManagerResponse**)&mResponse));
+            (HANDLE*)(IAccountManagerResponse**)&mResponse));
 }
 
 ECode AccountManagerResponse::OnResult(
@@ -57,7 +57,7 @@ ECode AccountManagerResponse::WriteToParcel(
 ECode AccountManagerResponse::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    return source->ReadInterfacePtr((Handle32*)(IAccountManagerResponse**)&mResponse);
+    return source->ReadInterfacePtr((HANDLE*)(IAccountManagerResponse**)&mResponse);
 }
 
 }  //namespace Accounts

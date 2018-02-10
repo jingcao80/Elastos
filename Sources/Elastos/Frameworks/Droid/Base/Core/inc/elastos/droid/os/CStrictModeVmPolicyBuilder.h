@@ -48,7 +48,7 @@ public:
      * at once.  Helps to prevent object leaks.
      */
     CARAPI SetClassInstanceLimit(
-        /* [in] */ Handle32 klass,
+        /* [in] */ HANDLE klass,
         /* [in] */ Int32 instanceLimit);
 
     /**
@@ -137,7 +137,7 @@ private:
 private:
     Int32 mMask;
 
-    HashMap<Handle32, Int32 > mClassInstanceLimit;  // null until needed
+    HashMap<HANDLE, Int32 > mClassInstanceLimit;  // null until needed
     Boolean mClassInstanceLimitNeedCow;             // need copy-on-write
 };
 

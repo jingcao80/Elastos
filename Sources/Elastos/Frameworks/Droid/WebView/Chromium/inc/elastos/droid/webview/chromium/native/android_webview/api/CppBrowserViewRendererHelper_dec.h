@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_JavaBrowserViewRendererHelper_InitCallback(Handle32 cb);
+    extern void Elastos_JavaBrowserViewRendererHelper_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -51,7 +51,7 @@ void* CppBrowserViewRendererHelper::ElaCppBrowserViewRendererHelperCallback_Init
     sElaJavaBrowserViewRendererHelperCallback.elastos_JavaBrowserViewRendererHelper_createBitmap = &CppBrowserViewRendererHelper::CreateBitmap;
     sElaJavaBrowserViewRendererHelperCallback.elastos_JavaBrowserViewRendererHelper_drawBitmapIntoCanvas = &CppBrowserViewRendererHelper::DrawBitmapIntoCanvas;
 
-    Elastos_JavaBrowserViewRendererHelper_InitCallback((Handle32)&sElaJavaBrowserViewRendererHelperCallback);
+    Elastos_JavaBrowserViewRendererHelper_InitCallback((HANDLE)&sElaJavaBrowserViewRendererHelperCallback);
     return &sElaJavaBrowserViewRendererHelperCallback;
 }
 

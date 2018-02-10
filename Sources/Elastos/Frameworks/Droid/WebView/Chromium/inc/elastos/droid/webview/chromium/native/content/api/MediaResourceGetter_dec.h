@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_MediaResourceGetter_InitCallback(Handle32 cb);
+    extern void Elastos_MediaResourceGetter_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -60,7 +60,7 @@ void* MediaResourceGetter::ElaMediaResourceGetterCallback_Init()
     sElaMediaResourceGetterCallback.elastos_MediaResourceGetter_extractMediaMetadata = &MediaResourceGetter::ExtractMediaMetadata;
     sElaMediaResourceGetterCallback.elastos_MediaResourceGetter_extractMediaMetadataFromFd = &MediaResourceGetter::ExtractMediaMetadataFromFd;
 
-    Elastos_MediaResourceGetter_InitCallback((Handle32)&sElaMediaResourceGetterCallback);
+    Elastos_MediaResourceGetter_InitCallback((HANDLE)&sElaMediaResourceGetterCallback);
     return &sElaMediaResourceGetterCallback;
 }
 

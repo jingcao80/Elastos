@@ -133,7 +133,7 @@ ECode CContentProviderResult::ReadFromParcel(
     }
     else {
         AutoPtr<IInterface> uri;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&uri);
         mUri = IUri::Probe(uri);
     }
 

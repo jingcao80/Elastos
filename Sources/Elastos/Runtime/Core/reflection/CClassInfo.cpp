@@ -866,7 +866,7 @@ ECode CClassInfo::GetMethodCount(
 
 ECode CClassInfo::AcquireMethodList()
 {
-    mMethodList = NULL;
+    if (mMethodList != NULL) return NOERROR;
     return AcquireSpecialMethodList(EntryType_Method, (CEntryList**)&mMethodList);
 }
 

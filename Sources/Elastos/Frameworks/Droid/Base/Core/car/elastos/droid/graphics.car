@@ -943,10 +943,10 @@ module
             [in] Int32 bottom);
 
         /*private*/ constructor(
-            [in] Handle64 ni);
+            [in] HANDLE ni);
 
         /*private*/ constructor(
-            [in] Handle64 ni,
+            [in] HANDLE ni,
             [in] Int32 dummy);
 
         interface IRegion;

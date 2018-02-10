@@ -107,7 +107,7 @@ public:
 
         VmPolicy(
             /* [in] */ Int32 mask,
-            /* [in] */ HashMap<Handle32, Int32> classInstanceLimit);
+            /* [in] */ HashMap<HANDLE, Int32> classInstanceLimit);
 
         CARAPI ToString(
             /* [out] */ String* str);
@@ -121,7 +121,7 @@ public:
         Int32 mMask;
 
         // Map from class to max number of allowed instances in memory.
-        HashMap<Handle32, Int32> mClassInstanceLimit;
+        HashMap<HANDLE, Int32> mClassInstanceLimit;
     };
 
     class StrictModeViolation //TODO: : public BlockGuard.BlockGuardPolicyException
@@ -283,7 +283,7 @@ private:
     {
     public:
         InstanceCountViolation(
-            /* [in] */ Handle32 klass,
+            /* [in] */ HANDLE klass,
             /* [in] */ Int64 instances,
             /* [in] */ Int32 limit);
 
@@ -294,7 +294,7 @@ private:
         // };
 
     protected:
-        Handle32 mClass;
+        HANDLE mClass;
         Int64 mInstances;
         Int32 mLimit;
     };
@@ -558,7 +558,7 @@ private:
 
     // TODO: wrap in some ImmutableHashMap thing.
     // Note: must be before static initialization of sVmPolicy.
-    static const HashMap<Handle32, Int32> EMPTY_CLASS_LIMIT_MAP;
+    static const HashMap<HANDLE, Int32> EMPTY_CLASS_LIMIT_MAP;
 
     /**
      * The current VmPolicy in effect.

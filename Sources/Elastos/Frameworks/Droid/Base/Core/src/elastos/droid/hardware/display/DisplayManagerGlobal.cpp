@@ -407,7 +407,7 @@ DisplayManagerGlobal::FindDisplayListenerLocked(
 void DisplayManagerGlobal::RegisterCallbackIfNeededLocked()
 {
     if (mCallback == NULL) {
-        CDisplayManagerCallback::New((Handle32)this, (IIDisplayManagerCallback**)&mCallback);
+        CDisplayManagerCallback::New((HANDLE)this, (IIDisplayManagerCallback**)&mCallback);
         if (FAILED(mDm->RegisterCallback(mCallback))) {
             Logger::E(TAG, "Failed to register callback with display manager service.");
             mCallback = NULL;

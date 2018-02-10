@@ -400,7 +400,7 @@ ECode Gesture::WriteToParcel(
     if (result) {
         AutoPtr<ArrayOf<Byte> > streamBytes;
         byteStream->ToByteArray((ArrayOf<Byte>**)&streamBytes);
-        out->WriteArrayOf((Handle32)streamBytes.Get());
+        out->WriteArrayOf((HANDLE)streamBytes.Get());
     }
     return NOERROR;
 }

@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ValidationMessageBubble_InitCallback(Handle32 cb);
+    extern void Elastos_ValidationMessageBubble_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -53,7 +53,7 @@ void* ValidationMessageBubble::ElaValidationMessageBubbleCallback_Init()
     sElaValidationMessageBubbleCallback.elastos_ValidationMessageBubble_close = &ValidationMessageBubble::Close;
     sElaValidationMessageBubbleCallback.elastos_ValidationMessageBubble_setPositionRelativeToAnchor = &ValidationMessageBubble::SetPositionRelativeToAnchor;
 
-    Elastos_ValidationMessageBubble_InitCallback((Handle32)&sElaValidationMessageBubbleCallback);
+    Elastos_ValidationMessageBubble_InitCallback((HANDLE)&sElaValidationMessageBubbleCallback);
     return &sElaValidationMessageBubbleCallback;
 }
 

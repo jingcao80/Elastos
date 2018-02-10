@@ -45,8 +45,8 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 provider,
-        /* [in] */ Handle32 client);
+        /* [in] */ HANDLE provider,
+        /* [in] */ HANDLE client);
 
     CARAPI ToString(
         /* [out] */ String* str);

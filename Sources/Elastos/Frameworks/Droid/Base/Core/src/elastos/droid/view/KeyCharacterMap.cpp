@@ -707,16 +707,16 @@ ECode KeyCharacterMap::WriteToParcel(
 }
 
 ECode KeyCharacterMap::GetNative(
-    /* [out] */ Handle64* native)
+    /* [out] */ HANDLE* native)
 {
     VALIDATE_NOT_NULL(native);
-    *native = (Handle64)mPtr;
+    *native = (HANDLE)mPtr;
 
     return NOERROR;
 }
 
 ECode KeyCharacterMap::SetNative(
-    /* [in] */ Handle64 native)
+    /* [in] */ HANDLE native)
 {
     android::KeyCharacterMap* event = reinterpret_cast<android::KeyCharacterMap*>(mPtr);
     if (event) {
@@ -741,7 +741,7 @@ ECode KeyCharacterMap::GetMap(
 Int64 KeyCharacterMap::NativeReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    Handle32 data;
+    HANDLE data;
     in->GetDataPayload(&data);
     android::Parcel* parcel = reinterpret_cast<android::Parcel*>(data);
     if (!parcel) {
@@ -769,7 +769,7 @@ void KeyCharacterMap::NativeWriteToParcel(
 {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
 
-    Handle32 data;
+    HANDLE data;
     out->GetDataPayload(&data);
     android::Parcel* parcel = reinterpret_cast<android::Parcel*>(data);
     if (parcel) {

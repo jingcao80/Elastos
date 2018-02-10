@@ -422,7 +422,7 @@ ECode ProxyInfo::ReadFromParcel(
     parcel->ReadByte(&byte);
     if (byte != 0) {
         AutoPtr<IInterface> obj;
-        parcel->ReadInterfacePtr((Handle32*)&obj);
+        parcel->ReadInterfacePtr((HANDLE*)&obj);
         parcel->ReadInt32(&mPort);
         return NOERROR;
     }

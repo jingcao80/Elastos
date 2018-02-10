@@ -389,7 +389,7 @@ ECode GetRemoteClassInfo(
     }
     data = new CRemoteParcel(FALSE);
     data->WriteString(COMMAND);
-    data->GetDataPayload((Handle32*)&payload);
+    data->GetDataPayload((HANDLE*)&payload);
     data->GetDataSize(&payloadSize);
     dataBuf = new DataBuffer();
     totalSize = htonl(sizeof(totalSize) + payloadSize);
@@ -731,7 +731,7 @@ ECode CInterfaceProxy::ProxyEntry_RPC(
         isMethodOneway = thisPtr->IsMethodOneway(methodIndex);
         dataBuf = new DataBuffer();
         inParcel->GetDataSize(&payloadSize);
-        inParcel->GetDataPayload((Handle32*)&data);
+        inParcel->GetDataPayload((HANDLE*)&data);
         inHeader = inParcel->GetMarshalHeader();
         inHeader->mInSize = payloadSize;
         inHeader->mOutSize = outSize;

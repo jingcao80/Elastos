@@ -38,8 +38,8 @@ CIRemoteControlDisplay::~CIRemoteControlDisplay()
 }
 
 ECode CIRemoteControlDisplay::constructor(
-    /* [in] */ Handle64 jVM,
-    /* [in] */ Handle64 jInstance)
+    /* [in] */ HANDLE jVM,
+    /* [in] */ HANDLE jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -47,9 +47,9 @@ ECode CIRemoteControlDisplay::constructor(
 }
 
 ECode CIRemoteControlDisplay::GetJavaInstance(
-    /* [out] */ Handle64* obj)
+    /* [out] */ HANDLE* obj)
 {
-    *obj = (Handle64)mJInstance;
+    *obj = (HANDLE)mJInstance;
     return NOERROR;
 }
 

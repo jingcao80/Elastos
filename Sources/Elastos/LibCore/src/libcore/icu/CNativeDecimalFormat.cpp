@@ -901,12 +901,12 @@ ECode CNativeDecimalFormat::SetRoundingMode(
     return NOERROR;
 }
 
-static U_ICU_NAMESPACE::DecimalFormat* toDecimalFormat(Int32 addr)
+static U_ICU_NAMESPACE::DecimalFormat* toDecimalFormat(Int64 addr)
 {
     return reinterpret_cast<U_ICU_NAMESPACE::DecimalFormat*>(static_cast<uintptr_t>(addr));
 }
 
-static UNumberFormat* toUNumberFormat(Int32 addr)
+static UNumberFormat* toUNumberFormat(Int64 addr)
 {
     return reinterpret_cast<UNumberFormat*>(static_cast<uintptr_t>(addr));
 }

@@ -82,7 +82,7 @@ String WebAudioMediaCodecBridge::CreateTempFile(
 //@CalledByNative
 Boolean WebAudioMediaCodecBridge::DecodeAudioFile(
     /* [in] */ IContext* ctx,
-    /* [in] */ Handle64 nativeMediaCodecBridge,
+    /* [in] */ HANDLE nativeMediaCodecBridge,
     /* [in] */ Int32 inputFD,
     /* [in] */ Int64 dataSize)
 {
@@ -290,7 +290,7 @@ Boolean WebAudioMediaCodecBridge::DecodeAudioFile(
 }
 
 void WebAudioMediaCodecBridge::NativeOnChunkDecoded(
-    /* [in] */ Handle64 nativeWebAudioMediaCodecBridge,
+    /* [in] */ HANDLE nativeWebAudioMediaCodecBridge,
     /* [in] */ IByteBuffer* buf,
     /* [in] */ Int32 size,
     /* [in] */ Int32 inputChannelCount,
@@ -300,7 +300,7 @@ void WebAudioMediaCodecBridge::NativeOnChunkDecoded(
 }
 
 void WebAudioMediaCodecBridge::NativeInitializeDestination(
-    /* [in] */ Handle64 nativeWebAudioMediaCodecBridge,
+    /* [in] */ HANDLE nativeWebAudioMediaCodecBridge,
     /* [in] */ Int32 inputChannelCount,
     /* [in] */ Int32 sampleRate,
     /* [in] */ Int64 durationMicroseconds)
@@ -317,7 +317,7 @@ String WebAudioMediaCodecBridge::CreateTempFile(
 
 Boolean WebAudioMediaCodecBridge::DecodeAudioFile(
     /* [in] */ IInterface* ctx,
-    /* [in] */ Handle64 nativeMediaCodecBridge,
+    /* [in] */ HANDLE nativeMediaCodecBridge,
     /* [in] */ Int32 inputFD,
     /* [in] */ Int64 dataSize)
 {

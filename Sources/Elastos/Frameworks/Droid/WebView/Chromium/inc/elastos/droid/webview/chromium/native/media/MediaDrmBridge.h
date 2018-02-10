@@ -251,7 +251,7 @@ public:
 private:
     MediaDrmBridge(
         /* [in] */ IUUID* schemeUUID,
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Boolean singleSessionMode);
 
     static CARAPI_(AutoPtr<IUUID>) GetUUIDFromBytes(
@@ -311,7 +311,7 @@ private:
     //@CalledByNative return MediaDrmBridge
     static CARAPI_(AutoPtr<IInterface>) Create(
         /* [in] */ ArrayOf<Byte>* schemeUUID,
-        /* [in] */ Handle64 nativeMediaDrmBridge);
+        /* [in] */ HANDLE nativeMediaDrmBridge);
 
     /**
      * Set the security level that the MediaDrm object uses.
@@ -455,33 +455,33 @@ private:
         /* [in] */ IByteBuffer* session);
 
     CARAPI_(void) NativeOnMediaCryptoReady(
-        /* [in] */ Handle64 nativeMediaDrmBridge);
+        /* [in] */ HANDLE nativeMediaDrmBridge);
 
     CARAPI_(void) NativeOnSessionCreated(
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Int32 sessionId,
         /* [in] */ const String& webSessionId);
 
     CARAPI_(void) NativeOnSessionMessage(
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Int32 sessionId,
         /* [in] */ ArrayOf<Byte>* message,
         /* [in] */ const String& destinationUrl);
 
     CARAPI_(void) NativeOnSessionReady(
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Int32 sessionId);
 
     CARAPI_(void) NativeOnSessionClosed(
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Int32 sessionId);
 
     CARAPI_(void) NativeOnSessionError(
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Int32 sessionId);
 
     CARAPI_(void) NativeOnResetDeviceCredentialsCompleted(
-        /* [in] */ Handle64 nativeMediaDrmBridge,
+        /* [in] */ HANDLE nativeMediaDrmBridge,
         /* [in] */ Boolean success);
 
     static CARAPI_(void) NativeAddKeySystemUuidMapping(
@@ -560,7 +560,7 @@ private:
     static const Int32 INVALID_SESSION_ID = 0;
 
     AutoPtr<IMediaDrm> mMediaDrm;
-    Handle64 mNativeMediaDrmBridge;
+    HANDLE mNativeMediaDrmBridge;
     AutoPtr<IUUID> mSchemeUUID;
     AutoPtr<IHandler> mHandler;
 

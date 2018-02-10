@@ -150,7 +150,7 @@ ECode CToneGenerator::NativeSetup(
     }
 
     // Stow our new C++ ToneGenerator in an opaque field in the Java object.
-    mNativeContext = (Handle32)lpToneGen;
+    mNativeContext = (HANDLE)lpToneGen;
 
     // LOGV("ToneGenerator fields.context: %x\n", env->GetIntField(thiz, fields.context));
 

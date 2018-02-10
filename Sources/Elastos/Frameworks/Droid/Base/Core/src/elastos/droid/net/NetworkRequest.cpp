@@ -59,7 +59,7 @@ ECode NetworkRequest::ReadFromParcel(
     /* [in] */ IParcel* parcel)
 {
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mNetworkCapabilities = INetworkCapabilities::Probe(obj);
     parcel->ReadInt32(&mRequestId);
     parcel->ReadInt32(&mLegacyType);

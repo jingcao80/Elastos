@@ -800,7 +800,7 @@ module
         PrepareToDraw();
 
         GetNativeBitmap(
-            [out] Handle64* bitmap);
+            [out] HANDLE* bitmap);
 
         Reinit(
             [in] Int32 width,

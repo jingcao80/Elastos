@@ -607,7 +607,7 @@ ECode CInputManager::PopulateInputDevicesLocked()
     if (mInputDevicesChangedListener == NULL) {
         AutoPtr<IInputDevicesChangedListener> listener;
         CInputManagerInputDevicesChangedListener::New(
-            (Handle32)this, (IInputDevicesChangedListener**)&listener);
+            (HANDLE)this, (IInputDevicesChangedListener**)&listener);
         if (FAILED(mIm->RegisterInputDevicesChangedListener(listener))) {
             Logger::E(TAG, "Could not get register input device changed listener");
             return E_RUNTIME_EXCEPTION;

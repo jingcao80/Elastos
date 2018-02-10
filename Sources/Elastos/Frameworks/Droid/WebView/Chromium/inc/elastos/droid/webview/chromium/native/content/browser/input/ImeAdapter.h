@@ -129,14 +129,14 @@ private:
     public:
         DelayedDismissInput(
             /* [in] */ ImeAdapter* onwer,
-            /* [in] */ Handle64 nativeImeAdapter);
+            /* [in] */ HANDLE nativeImeAdapter);
 
         //@Override
         CARAPI Run();
 
     private:
         ImeAdapter* mOwner;
-        const Handle64 mNativeImeAdapter;
+        const HANDLE mNativeImeAdapter;
     };
 
 public:
@@ -190,12 +190,12 @@ public:
      * @param showIfNeeded Whether the keyboard should be shown if it is currently hidden.
      */
     CARAPI_(void) UpdateKeyboardVisibility(
-        /* [in] */ Handle64 nativeImeAdapter,
+        /* [in] */ HANDLE nativeImeAdapter,
         /* [in] */ Int32 textInputType,
         /* [in] */ Boolean showIfNeeded);
 
     CARAPI_(void) Attach(
-        /* [in] */ Handle64 nativeImeAdapter,
+        /* [in] */ HANDLE nativeImeAdapter,
         /* [in] */ Int32 textInputType);
 
     /**
@@ -204,7 +204,7 @@ public:
      * @param nativeImeAdapter The pointer to the native ImeAdapter object.
      */
     CARAPI_(void) Attach(
-        /* [in] */ Handle64 nativeImeAdapter);
+        /* [in] */ HANDLE nativeImeAdapter);
 
     CARAPI_(Boolean) HasTextInputType();
 
@@ -377,14 +377,14 @@ private:
     CARAPI_(void) CancelComposition();
 
     CARAPI_(Boolean) NativeSendSyntheticKeyEvent(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ Int32 eventType,
         /* [in] */ Int64 timestampMs,
         /* [in] */ Int32 keyCode,
         /* [in] */ Int32 unicodeChar);
 
     CARAPI_(Boolean) NativeSendKeyEvent(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ IKeyEvent* event,
         /* [in] */ Int32 action,
         /* [in] */ Int32 modifiers,
@@ -394,64 +394,64 @@ private:
         /* [in] */ Int32 unicodeChar);
 
     static CARAPI_(void) NativeAppendUnderlineSpan(
-        /* [in] */ Handle64 underlinePtr,
+        /* [in] */ HANDLE underlinePtr,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
     static CARAPI_(void) NativeAppendBackgroundColorSpan(
-        /* [in] */ Handle64 underlinePtr,
+        /* [in] */ HANDLE underlinePtr,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
         /* [in] */ Int32 backgroundColor);
 
     CARAPI_(void) NativeSetComposingText(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ ICharSequence* text,
         /* [in] */ const String& textStr,
         /* [in] */ Int32 newCursorPosition);
 
     CARAPI_(void) NativeCommitText(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ const String& textStr);
 
     CARAPI_(void) NativeFinishComposingText(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativeAttachImeAdapter(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativeSetEditableSelectionOffsets(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
     CARAPI_(void) NativeSetComposingRegion(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
     CARAPI_(void) NativeDeleteSurroundingText(
-        /* [in] */ Handle64 nativeImeAdapterAndroid,
+        /* [in] */ HANDLE nativeImeAdapterAndroid,
         /* [in] */ Int32 before,
         /* [in] */ Int32 after);
 
     CARAPI_(void) NativeUnselect(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativeSelectAll(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativeCut(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativeCopy(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativePaste(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
     CARAPI_(void) NativeResetImeAdapter(
-        /* [in] */ Handle64 nativeImeAdapterAndroid);
+        /* [in] */ HANDLE nativeImeAdapterAndroid);
 
 public:
     // All the constants that are retrieved from the C++ code.
@@ -488,7 +488,7 @@ private:
     // letting the user perceiving important delays.
     static const Int32 INPUT_DISMISS_DELAY = 150;
 
-    Handle64 mNativeImeAdapterAndroid;
+    HANDLE mNativeImeAdapterAndroid;
     AutoPtr<InputMethodManagerWrapper> mInputMethodManagerWrapper;
     AutoPtr<AdapterInputConnection> mInputConnection;
     AutoPtr<ImeAdapterDelegate> mViewEmbedder;

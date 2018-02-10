@@ -484,7 +484,7 @@ ECode CMediaMetadataRetriever::NativeGetFrameAtTime(
     AutoPtr<IBitmap> jBitmap;
     CBitmap::CreateBitmap(width, height, config, (IBitmap**)&jBitmap);
 
-    Handle64 nativeBitmap;
+    HANDLE nativeBitmap;
     jBitmap->GetNativeBitmap(&nativeBitmap);
 
     SkBitmap *bitmap = (SkBitmap *)nativeBitmap;

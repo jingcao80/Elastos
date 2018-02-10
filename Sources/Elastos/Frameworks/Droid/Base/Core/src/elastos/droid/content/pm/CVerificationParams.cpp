@@ -65,12 +65,12 @@ ECode CVerificationParams::constructor(
 {
     VALIDATE_NOT_NULL(source);
 
-    source->ReadInterfacePtr((Handle32*)&mVerificationURI);
-    source->ReadInterfacePtr((Handle32*)&mOriginatingURI);
-    source->ReadInterfacePtr((Handle32*)&mReferrer);
+    source->ReadInterfacePtr((HANDLE*)&mVerificationURI);
+    source->ReadInterfacePtr((HANDLE*)&mOriginatingURI);
+    source->ReadInterfacePtr((HANDLE*)&mReferrer);
     source->ReadInt32(&mOriginatingUid);
     source->ReadInt32(&mInstallerUid);
-    source->ReadInterfacePtr((Handle32*)&mManifestDigest);
+    source->ReadInterfacePtr((HANDLE*)&mManifestDigest);
 
     return NOERROR;
 }
@@ -254,15 +254,15 @@ ECode CVerificationParams::ReadFromParcel(
     VALIDATE_NOT_NULL(source);
 
     mVerificationURI = NULL;
-    source->ReadInterfacePtr((Handle32*)&mVerificationURI);
+    source->ReadInterfacePtr((HANDLE*)&mVerificationURI);
     mOriginatingURI = NULL;
-    source->ReadInterfacePtr((Handle32*)&mOriginatingURI);
+    source->ReadInterfacePtr((HANDLE*)&mOriginatingURI);
     mReferrer = NULL;
-    source->ReadInterfacePtr((Handle32*)&mReferrer);
+    source->ReadInterfacePtr((HANDLE*)&mReferrer);
     source->ReadInt32(&mOriginatingUid);
     source->ReadInt32(&mInstallerUid);
     mManifestDigest = NULL;
-    source->ReadInterfacePtr((Handle32*)&mManifestDigest);
+    source->ReadInterfacePtr((HANDLE*)&mManifestDigest);
 
     return NOERROR;
 }

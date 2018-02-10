@@ -210,7 +210,7 @@ static int getInternalFormat(SkColorType colorType)
 Int32  CGLUtils::Native_getInternalFormat(
     /* [in] */ IBitmap* bitmap)
 {
-    Handle64 nativeMapTmp;
+    HANDLE nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
@@ -239,7 +239,7 @@ static int getType(SkColorType colorType)
 Int32  CGLUtils::Native_getType(
     /* [in] */ IBitmap* bitmap)
 {
-    Handle64 nativeMapTmp;
+    HANDLE nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
@@ -283,7 +283,7 @@ Int32  CGLUtils::Native_texImage2D(
     /* [in] */ Int32 type,
     /* [in] */ Int32 border)
 {
-    Handle64 nativeMapTmp;
+    HANDLE nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
@@ -338,7 +338,7 @@ Int32  CGLUtils::Native_texSubImage2D(
     /* [in] */ Int32 format,
     /* [in] */ Int32 type)
 {
-    Handle64 nativeMapTmp;
+    HANDLE nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;

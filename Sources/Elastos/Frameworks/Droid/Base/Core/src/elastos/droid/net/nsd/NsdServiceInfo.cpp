@@ -366,11 +366,11 @@ ECode NsdServiceInfo::ReadFromParcel(
     AutoPtr<IInterface> obj;
     source->ReadString(&mServiceName);
     source->ReadString(&mServiceType);
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mTxtRecord = IArrayMap::Probe(obj);
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mHost = IInetAddress::Probe(obj);
 
     source->ReadInt32(&mPort);

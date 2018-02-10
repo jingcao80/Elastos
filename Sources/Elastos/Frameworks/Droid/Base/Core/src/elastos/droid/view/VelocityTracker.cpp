@@ -119,8 +119,8 @@ void VelocityTracker::NativeAddMovement(
     if (!event) {
         return;
     }
-    Handle64 handle;
-    event->GetNative((Handle64*)&handle);
+    HANDLE handle;
+    event->GetNative((HANDLE*)&handle);
     const android::MotionEvent* nativeEvent = reinterpret_cast<android::MotionEvent*>(handle);
     if (!nativeEvent) {
         ALOGW("nativeAddMovement failed because MotionEvent was finalized.");

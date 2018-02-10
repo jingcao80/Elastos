@@ -164,7 +164,7 @@ ECode CWindowId::WriteToParcel(
 ECode CWindowId::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    return source->ReadInterfacePtr((Handle32*)&mToken);
+    return source->ReadInterfacePtr((HANDLE*)&mToken);
 }
 
 ECode CWindowId::GetTarget(

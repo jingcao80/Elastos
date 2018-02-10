@@ -626,7 +626,7 @@ ECode CBundle::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     android::Parcel* p;
-    parcel->GetDataPayload((Handle32*)&p);
+    parcel->GetDataPayload((HANDLE*)&p);
     Boolean oldAllowFds = p->pushAllowFds(mAllowFds);
     ECode ec = BaseBundle::WriteToParcelInner(parcel);
     p->restoreAllowFds(oldAllowFds);

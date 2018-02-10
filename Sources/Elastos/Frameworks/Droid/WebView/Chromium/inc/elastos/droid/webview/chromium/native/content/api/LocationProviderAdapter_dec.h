@@ -28,7 +28,7 @@ extern "C"
 #endif
     extern void Elastos_LocationProviderAdapter_nativeNewLocationAvailable(Double latitude,Double longitude,Double timeStamp,Boolean hasAltitude,Double altitude,Boolean hasAccuracy,Double accuracy,Boolean hasHeading,Double heading,Boolean hasSpeed,Double speed);
     extern void Elastos_LocationProviderAdapter_nativeNewErrorAvailable(const String& message);
-    extern void Elastos_LocationProviderAdapter_InitCallback(Handle32 cb);
+    extern void Elastos_LocationProviderAdapter_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -57,7 +57,7 @@ void* LocationProviderAdapter::ElaLocationProviderAdapterCallback_Init()
     sElaLocationProviderAdapterCallback.elastos_LocationProviderAdapter_start = &LocationProviderAdapter::Start;
     sElaLocationProviderAdapterCallback.elastos_LocationProviderAdapter_stop = &LocationProviderAdapter::Stop;
 
-    Elastos_LocationProviderAdapter_InitCallback((Handle32)&sElaLocationProviderAdapterCallback);
+    Elastos_LocationProviderAdapter_InitCallback((HANDLE)&sElaLocationProviderAdapterCallback);
     return &sElaLocationProviderAdapterCallback;
 }
 

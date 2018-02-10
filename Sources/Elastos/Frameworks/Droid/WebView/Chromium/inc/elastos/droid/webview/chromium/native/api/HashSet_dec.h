@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_HashSet_InitCallback(Handle32 cb);
+    extern void Elastos_HashSet_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -71,7 +71,7 @@ void* AwHashSet::ElaHashSetCallback_Init()
     sElaHashSetCallback.elastos_HashSet_ConstructorJUHS_I_F = &AwHashSet::ConstructorJUHSIF;
     sElaHashSetCallback.elastos_HashSet_ConstructorJUHS_JUC = &AwHashSet::ConstructorJUHSJUC;
 
-    Elastos_HashSet_InitCallback((Handle32)&sElaHashSetCallback);
+    Elastos_HashSet_InitCallback((HANDLE)&sElaHashSetCallback);
     return &sElaHashSetCallback;
 }
 

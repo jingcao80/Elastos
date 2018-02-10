@@ -136,7 +136,7 @@ const Int32 CStrictMode::VM_PENALTY_MASK =
 const AutoPtr<IAtomicInteger32> CStrictMode::sDropboxCallsInFlight = InitsDropboxCallsInFlight();
 Int32 CStrictMode::sVmPolicyMask = 0;
 AutoPtr<CStrictMode::VmPolicy> CStrictMode::sVmPolicy = CStrictMode::VmPolicy::LAX;
-const HashMap<Handle32, Int32> CStrictMode::EMPTY_CLASS_LIMIT_MAP;
+const HashMap<HANDLE, Int32> CStrictMode::EMPTY_CLASS_LIMIT_MAP;
 const AutoPtr<CStrictMode::ThreadPolicy> CStrictMode::ThreadPolicy::LAX = new CStrictMode::ThreadPolicy(0);
 
 pthread_key_t CStrictMode::sThisThreadSpanStateKey;
@@ -168,7 +168,7 @@ CAR_INTERFACE_IMPL(CStrictMode::VmPolicy, Object, IStrictModeVmPolicy);
 
 CStrictMode::VmPolicy::VmPolicy(
     /* [in] */ Int32 mask,
-    /* [in] */ HashMap<Handle32, Int32> classInstanceLimit)
+    /* [in] */ HashMap<HANDLE, Int32> classInstanceLimit)
     : mMask(mask)
     , mClassInstanceLimit(classInstanceLimit)
 {
@@ -1344,7 +1344,7 @@ ECode CStrictMode::EnterCriticalSpan(
             state->mFreeListSize--;
         } else {
             // Shouldn't have to do this often.
-            CStrictModeSpan::New((Handle32)state.Get(), (IStrictModeSpan**)&_span);
+            CStrictModeSpan::New((HANDLE)state.Get(), (IStrictModeSpan**)&_span);
             cspan = (CStrictModeSpan*)_span.Get();
         }
         cspan->mName = name;
@@ -1506,7 +1506,7 @@ ECode CStrictMode::DecrementExpectedActivityCount(
 }
 
 CStrictMode::InstanceCountViolation::InstanceCountViolation(
-    /* [in] */ Handle32 klass,
+    /* [in] */ HANDLE klass,
     /* [in] */ Int64 instances,
     /* [in] */ Int32 limit)
     : mClass(klass)

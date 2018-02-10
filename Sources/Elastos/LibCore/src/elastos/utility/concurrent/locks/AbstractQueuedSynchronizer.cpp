@@ -847,11 +847,16 @@ ECode AbstractQueuedSynchronizer::ReleaseShared(
 Boolean AbstractQueuedSynchronizer::CompareAndSetHead(
     /* [in] */ Node* update)
 {
+#if defined(_arm)
     int32_t* address = (int32_t*)&mHead;
 
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
     int result = android_atomic_release_cas((int32_t)NULL,
             (int32_t)update, address);
+#elif defined(_aarch64)
+    int result = !__sync_bool_compare_and_swap((uintptr_t*)&mHead,
+            (uintptr_t)NULL, (uintptr_t)update);
+#endif
     // dvmWriteBarrierField(obj, address);
     if (result == 0) REFCOUNT_ADD(mHead);
     return result == 0;
@@ -861,11 +866,16 @@ Boolean AbstractQueuedSynchronizer::CompareAndSetTail(
     /* [in] */ Node* expect,
     /* [in] */ Node* update)
 {
+#if defined(_arm)
     int32_t* address = (int32_t*)&mTail;
 
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
     int result = android_atomic_release_cas((int32_t)expect,
             (int32_t)update, address);
+#elif defined(_aarch64)
+    int result = !__sync_bool_compare_and_swap((uintptr_t*)&mTail,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     // dvmWriteBarrierField(obj, address);
     if (result == 0) {
         if (expect != NULL) expect->Release();
@@ -892,11 +902,16 @@ Boolean AbstractQueuedSynchronizer::CompareAndSetNext(
     /* [in] */ Node* expect,
     /* [in] */ Node* update)
 {
+#if defined(_arm)
     int32_t* address = (int32_t*)&node->mNext;
 
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
     int result = android_atomic_release_cas((int32_t)expect,
             (int32_t)update, address);
+#elif defined(_aarch64)
+    int result = !__sync_bool_compare_and_swap((uintptr_t*)&node->mNext,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     // dvmWriteBarrierField(obj, address);
     if (result == 0) {
         if (expect != NULL) expect->Release();

@@ -159,8 +159,8 @@ ECode CCellInfoWcdma::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     CellInfo::ReadFromParcel(source);
-    source->ReadInterfacePtr((Handle32*)&mCellIdentityWcdma);
-    source->ReadInterfacePtr((Handle32*)&mCellSignalStrengthWcdma);
+    source->ReadInterfacePtr((HANDLE*)&mCellIdentityWcdma);
+    source->ReadInterfacePtr((HANDLE*)&mCellSignalStrengthWcdma);
     return NOERROR;
 }
 

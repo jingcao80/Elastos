@@ -64,7 +64,7 @@ module
          */
         ClientCertificateRequested(
             [in] ArrayOf<Byte>* keyTypes,
-            [in] ArrayOf<Handle32>* asn1DerEncodedX500Principals);
+            [in] ArrayOf<HANDLE>* asn1DerEncodedX500Principals);
 
         /**
          * Gets the key to be used in client mode for this connection in Pre-Shared Key (PSK) key
@@ -1209,7 +1209,7 @@ module
 
         SSL_set_client_CA_list(
             [in] Int64 ssl,
-            [in] ArrayOf<Handle32>* asn1DerEncodedX500Principals);
+            [in] ArrayOf<HANDLE>* asn1DerEncodedX500Principals);
 
         SSL_get_mode(
             [in] Int64 ssl,

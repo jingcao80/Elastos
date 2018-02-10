@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_VideoCapture_nativeOnFrameAvailable(IInterface* caller,Handle64 nativeVideoCaptureDeviceAndroid,ArrayOf<Byte>* data,Int32 length,Int32 rotation);
-    extern void Elastos_VideoCapture_InitCallback(Handle64 cb);
+    extern void Elastos_VideoCapture_nativeOnFrameAvailable(IInterface* caller,HANDLE nativeVideoCaptureDeviceAndroid,ArrayOf<Byte>* data,Int32 length,Int32 rotation);
+    extern void Elastos_VideoCapture_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -65,7 +65,7 @@ void* VideoCapture::ElaVideoCaptureCallback_Init()
     sElaVideoCaptureCallback.elastos_VideoCapture_queryFrameRate = &VideoCapture::QueryFrameRate;
     sElaVideoCaptureCallback.elastos_VideoCapture_getColorspace = &VideoCapture::GetColorspace;
 
-    Elastos_VideoCapture_InitCallback((Handle64)&sElaVideoCaptureCallback);
+    Elastos_VideoCapture_InitCallback((HANDLE)&sElaVideoCaptureCallback);
     return &sElaVideoCaptureCallback;
 }
 

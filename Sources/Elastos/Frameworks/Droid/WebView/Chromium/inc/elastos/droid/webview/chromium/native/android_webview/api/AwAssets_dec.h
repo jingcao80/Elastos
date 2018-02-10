@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AwAssets_InitCallback(Handle32 cb);
+    extern void Elastos_AwAssets_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* AwAssets::ElaAwAssetsCallback_Init()
 
     sElaAwAssetsCallback.elastos_AwAssets_openAsset = &AwAssets::OpenAsset;
 
-    Elastos_AwAssets_InitCallback((Handle32)&sElaAwAssetsCallback);
+    Elastos_AwAssets_InitCallback((HANDLE)&sElaAwAssetsCallback);
     return &sElaAwAssetsCallback;
 }
 

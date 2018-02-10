@@ -58,6 +58,7 @@ typedef enum _CarQuintetFlag
     CarQuintetFlag_Type_IObject     = 15,
     CarQuintetFlag_Type_RefObject   = 16,
     CarQuintetFlag_Type_LightRefObject   = 17,
+    CarQuintetFlag_Type_HANDLE      = 18,
 
     CarQuintetFlag_TypeMask         = 0x0000ffff
 } CarQuintetFlag;

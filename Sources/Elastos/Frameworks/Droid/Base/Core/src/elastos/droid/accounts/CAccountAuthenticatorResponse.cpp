@@ -77,7 +77,7 @@ ECode CAccountAuthenticatorResponse::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     return source->ReadInterfacePtr(
-            (Handle32*)(IIAccountAuthenticatorResponse**)&mAccountAuthenticatorResponse);
+            (HANDLE*)(IIAccountAuthenticatorResponse**)&mAccountAuthenticatorResponse);
 }
 
 ECode CAccountAuthenticatorResponse::constructor(

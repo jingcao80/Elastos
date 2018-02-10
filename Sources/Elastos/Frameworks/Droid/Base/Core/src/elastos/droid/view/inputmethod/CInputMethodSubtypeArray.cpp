@@ -74,7 +74,7 @@ ECode CInputMethodSubtypeArray::ReadFromParcel(
     // source->ReadInt32(&mCount);
     // if (mCount > 0) {
     //     source->ReadInt32(&mDecompressedSize);
-    //     source->ReadArrayOf((Handle32*)&mCompressedData);
+    //     source->ReadArrayOf((HANDLE*)&mCompressedData);
     // }
     return NOERROR;
 }
@@ -115,7 +115,7 @@ ECode CInputMethodSubtypeArray::WriteToParcel(
     // if (compressedData != NULL && decompressedSize > 0) {
     //     dest->WriteInt32(mCount);
     //     dest->WriteInt32(decompressedSize);
-    //     dest->WriteArrayOf((Handle32)compressedData.Get());
+    //     dest->WriteArrayOf((HANDLE)compressedData.Get());
     // }
     // else {
     //     Slogger::I(TAG, "Unexpected state. Behaving as an empty array.");
@@ -174,7 +174,7 @@ AutoPtr<ArrayOf<Byte> > CInputMethodSubtypeArray::Marshall(
     AutoPtr<IParcel> parcel;
 
     CParcel::New((IParcel**)&parcel);
-    parcel->WriteArrayOf((Handle32)array);
+    parcel->WriteArrayOf((HANDLE)array);
     AutoPtr<ArrayOf<Byte> > arr;
     parcel->Marshall((ArrayOf<Byte>**)&arr);
 
@@ -190,7 +190,7 @@ AutoPtr<ArrayOf<IInputMethodSubtype*> > CInputMethodSubtypeArray::Unmarshall(
     parcel->Unmarshall(data, 0, data->GetLength());
     parcel->SetDataPosition(0);
     AutoPtr<ArrayOf<IInputMethodSubtype*> > arr;
-    parcel->ReadArrayOf((Handle32*)&arr);
+    parcel->ReadArrayOf((HANDLE*)&arr);
 
     return arr;
 }

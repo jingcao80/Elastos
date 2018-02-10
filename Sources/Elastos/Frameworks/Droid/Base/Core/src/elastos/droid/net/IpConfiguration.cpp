@@ -233,10 +233,10 @@ ECode IpConfiguration::ReadFromParcel(
     parcel->ReadInt32(&mIpAssignment);
     parcel->ReadInt32(&mProxySettings);
     AutoPtr<IInterface> obj;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mStaticIpConfiguration = IStaticIpConfiguration::Probe(obj);
     obj = NULL;
-    parcel->ReadInterfacePtr((Handle32*)&obj);
+    parcel->ReadInterfacePtr((HANDLE*)&obj);
     mHttpProxy = IProxyInfo::Probe(obj);
     return NOERROR;
 }

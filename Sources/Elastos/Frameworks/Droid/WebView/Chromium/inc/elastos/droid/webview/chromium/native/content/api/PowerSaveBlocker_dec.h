@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_PowerSaveBlocker_InitCallback(Handle32 cb);
+    extern void Elastos_PowerSaveBlocker_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -52,7 +52,7 @@ void* PowerSaveBlocker::ElaPowerSaveBlockerCallback_Init()
     sElaPowerSaveBlockerCallback.elastos_PowerSaveBlocker_applyBlock = &PowerSaveBlocker::ApplyBlock;
     sElaPowerSaveBlockerCallback.elastos_PowerSaveBlocker_removeBlock = &PowerSaveBlocker::RemoveBlock;
 
-    Elastos_PowerSaveBlocker_InitCallback((Handle32)&sElaPowerSaveBlockerCallback);
+    Elastos_PowerSaveBlocker_InitCallback((HANDLE)&sElaPowerSaveBlockerCallback);
     return &sElaPowerSaveBlockerCallback;
 }
 

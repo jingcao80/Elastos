@@ -1638,7 +1638,7 @@ module
          * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
          * (the first pointer that is down) to {@link #getPointerCount()}-1.
          * @param outPointerCoords The pointer coordinate object to populate.
-         * Handle32 = PointerCoords*
+         * HANDLE = PointerCoords*
          */
         GetPointerCoords(
             [in] Int32 pointerIndex,
@@ -2061,7 +2061,7 @@ module
          * @param pos Which historical value to return; must be less than
          * {@link #getHistorySize}
          * @param outPointerCoords The pointer coordinate object to populate.
-         * Handle32 = PointerCoords*
+         * HANDLE = PointerCoords*
          *
          * @see #getHistorySize
          * @see #getPointerCoords
@@ -2235,10 +2235,10 @@ module
 
         // add for JNI
         GetNative(
-            [out] Handle64* native);
+            [out] HANDLE* native);
 
         SetNative(
-            [in] Handle64 native);
+            [in] HANDLE native);
     }
 
     [deprecated]

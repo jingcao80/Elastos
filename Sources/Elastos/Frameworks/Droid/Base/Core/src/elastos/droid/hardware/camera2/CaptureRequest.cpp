@@ -579,7 +579,7 @@ ECode CaptureRequest::WriteToParcel(
     IParcelable::Probe(mSettings)->WriteToParcel(dest);
     AutoPtr<ArrayOf<IInterface*> > objArray;
     mSurfaceSet->ToArray((ArrayOf<IInterface*>**)&objArray);
-    return dest->WriteArrayOf((Handle32)objArray.Get());
+    return dest->WriteArrayOf((HANDLE)objArray.Get());
 }
 
 ECode CaptureRequest::ReadFromParcel(
@@ -590,7 +590,7 @@ ECode CaptureRequest::ReadFromParcel(
     mSurfaceSet->Clear();
 
     AutoPtr<ArrayOf<IInterface*> > objArray;
-    source->ReadArrayOf((Handle32*)(&objArray));
+    source->ReadArrayOf((HANDLE*)(&objArray));
 
     if (objArray == NULL) {
         return NOERROR;

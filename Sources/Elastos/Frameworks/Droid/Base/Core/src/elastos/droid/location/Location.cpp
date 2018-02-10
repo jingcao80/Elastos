@@ -753,7 +753,7 @@ ECode Location::ReadFromParcel(
     in->ReadInt32(&tempInt32);
     mHasAccuracy = tempInt32 != 0;
     in->ReadFloat(&mAccuracy);
-    in->ReadInterfacePtr((Handle32*)&mExtras);
+    in->ReadInterfacePtr((HANDLE*)&mExtras);
     Int32 v;
     in->ReadInt32(&v);
     mIsFromMockProvider = v != 0;

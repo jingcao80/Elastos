@@ -57,14 +57,14 @@ ECode CSmsRawData::GetBytes(
 ECode CSmsRawData::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    source->ReadArrayOf((Handle32*)(&mData));
+    source->ReadArrayOf((HANDLE*)(&mData));
     return NOERROR;
 }
 
 ECode CSmsRawData::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    dest->WriteArrayOf((Handle32)mData.Get());
+    dest->WriteArrayOf((HANDLE)mData.Get());
     return NOERROR;
 }
 

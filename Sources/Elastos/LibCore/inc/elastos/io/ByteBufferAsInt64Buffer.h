@@ -51,7 +51,7 @@ public:
         /* [in] */ IByteBuffer* byteBuffer);
 
     CARAPI GetPrimitiveArray(
-        /* [out] */ Handle64* arrayHandle);
+        /* [out] */ HANDLE* arrayHandle);
 
     // @Override
     CARAPI AsReadOnlyBuffer(

@@ -61,10 +61,10 @@ static void glVertexAttribIPointerBounds(GLuint indx, GLint size, GLenum type,
 
 static ECode GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle64* array,
+    /* [in, out] */ HANDLE* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle64* rst)
+    /* [out] */ HANDLE* rst)
 {
     VALIDATE_NOT_NULL(rst)
 
@@ -83,7 +83,7 @@ static ECode GetPointer(
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle64)(pointer);
+        *rst = (HANDLE)(pointer);
         return NOERROR;
     }
 
@@ -101,11 +101,11 @@ static ECode GetPointer(
 
 static ECode GetDirectBufferPointer(
     /* [in] */ IBuffer* buffer,
-    /* [out] */ Handle64* result)
+    /* [out] */ HANDLE* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    Handle64 effectiveDirectAddress;
+    HANDLE effectiveDirectAddress;
     buffer->GetEffectiveDirectAddress(&effectiveDirectAddress);
     if (effectiveDirectAddress != 0) {
         Int32 position, elementSizeShift;
@@ -260,10 +260,10 @@ getarray
     Int32 _exception = 0;
     ECode _exceptionType = NOERROR;
     const char * _exceptionMessage;
-    Handle64 _array = (Handle64) 0;
+    HANDLE _array = (HANDLE) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
-    Handle64 data;
+    HANDLE data;
     CTYPE *params = (CTYPE *) 0;
     Int32 _needed = 0;
 
@@ -302,7 +302,7 @@ exit:
 }
 
 #define GET_BUFFER_GL_DATA(_Name, GLTYPE)                                                                                 \
-    Handle64 _array, _dataHandle;                                                                                                      \
+    HANDLE _array, _dataHandle;                                                                                                      \
     Int32 _bufferOffset = (Int32) 0;                                                                                                      \
     Int32 _remaining;                                                                                                                           \
     GLTYPE *_Name = (GLTYPE *) 0;                                                                                               \

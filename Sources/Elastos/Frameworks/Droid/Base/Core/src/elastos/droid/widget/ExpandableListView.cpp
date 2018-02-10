@@ -237,7 +237,7 @@ ECode ExpandableListView::ExpandableListViewSavedState::ReadFromParcel(
         }
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> value;
-            in->ReadInterfacePtr((Handle32*)(IInterface**)&value);
+            in->ReadInterfacePtr((HANDLE*)(IInterface**)&value);
             mExpandedGroupMetadataList->Add(value);
         }
     }

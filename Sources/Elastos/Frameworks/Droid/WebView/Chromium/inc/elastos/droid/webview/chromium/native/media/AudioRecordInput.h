@@ -64,7 +64,7 @@ private:
 
 private:
     AudioRecordInput(
-        /* [in] */ Handle64 nativeAudioRecordInputStream,
+        /* [in] */ HANDLE nativeAudioRecordInputStream,
         /* [in] */ Int32 sampleRate,
         /* [in] */ Int32 channels,
         /* [in] */ Int32 bitsPerSample,
@@ -73,7 +73,7 @@ private:
 
     //@CalledByNative return AudioRecordInput
     static CARAPI_(AutoPtr<IInterface>) CreateAudioRecordInput(
-        /* [in] */ Handle64 nativeAudioRecordInputStream,
+        /* [in] */ HANDLE nativeAudioRecordInputStream,
         /* [in] */ Int32 sampleRate,
         /* [in] */ Int32 channels,
         /* [in] */ Int32 bitsPerSample,
@@ -95,11 +95,11 @@ private:
     CARAPI_(void) Close();
 
     CARAPI_(void) NativeCacheDirectBufferAddress(
-        /* [in] */ Handle64 nativeAudioRecordInputStream,
+        /* [in] */ HANDLE nativeAudioRecordInputStream,
         /* [in] */ IByteBuffer* buffer);
 
     CARAPI_(void) NativeOnData(
-        /* [in] */ Handle64 nativeAudioRecordInputStream,
+        /* [in] */ HANDLE nativeAudioRecordInputStream,
         /* [in] */ Int32 size,
         /* [in] */ Int32 hardwareDelayBytes);
 
@@ -128,7 +128,7 @@ private:
     // could surely be tightened with further testing.
     static const Int32 HARDWARE_DELAY_MS = 100;
 
-    const Handle64 mNativeAudioRecordInputStream;
+    const HANDLE mNativeAudioRecordInputStream;
     const Int32 mSampleRate;
     const Int32 mChannels;
     const Int32 mBitsPerSample;

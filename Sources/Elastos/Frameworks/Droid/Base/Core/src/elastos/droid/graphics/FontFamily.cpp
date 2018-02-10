@@ -285,7 +285,7 @@ Boolean FontFamily::NativeAddFont(
     /* [in] */ Int32 isItalic)
 {
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    Handle64 address;
+    HANDLE address;
     IBuffer::Probe(font)->GetEffectiveDirectAddress(&address);
     const void* fontPtr = reinterpret_cast<void*>(address);
     if (fontPtr == NULL) {
@@ -314,7 +314,7 @@ Boolean FontFamily::NativeAddFontWeightStyle(
     /* [in] */ Boolean isItalic)
 {
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    Handle64 address;
+    HANDLE address;
     IBuffer::Probe(font)->GetEffectiveDirectAddress(&address);
     const void* fontPtr = reinterpret_cast<void*>(address);
     if (fontPtr == NULL) {

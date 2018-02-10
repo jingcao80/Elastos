@@ -1051,13 +1051,13 @@ ECode NetworkStatsHistory::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadInt64(&mBucketDuration);
-    source->ReadArrayOf((Handle32*)&mBucketStart);
-    source->ReadArrayOf((Handle32*)&mActiveTime);
-    source->ReadArrayOf((Handle32*)&mRxBytes);
-    source->ReadArrayOf((Handle32*)&mRxPackets);
-    source->ReadArrayOf((Handle32*)&mTxBytes);
-    source->ReadArrayOf((Handle32*)&mTxPackets);
-    source->ReadArrayOf((Handle32*)&mOperations);
+    source->ReadArrayOf((HANDLE*)&mBucketStart);
+    source->ReadArrayOf((HANDLE*)&mActiveTime);
+    source->ReadArrayOf((HANDLE*)&mRxBytes);
+    source->ReadArrayOf((HANDLE*)&mRxPackets);
+    source->ReadArrayOf((HANDLE*)&mTxBytes);
+    source->ReadArrayOf((HANDLE*)&mTxPackets);
+    source->ReadArrayOf((HANDLE*)&mOperations);
     mBucketCount = mBucketStart->GetLength();
     source->ReadInt64(&mTotalBytes);
     return NOERROR;
@@ -1067,13 +1067,13 @@ ECode NetworkStatsHistory::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt64(mBucketDuration);
-    dest->WriteArrayOf((Handle32)mBucketStart.Get());
-    dest->WriteArrayOf((Handle32)mActiveTime.Get());
-    dest->WriteArrayOf((Handle32)mRxBytes.Get());
-    dest->WriteArrayOf((Handle32)mRxPackets.Get());
-    dest->WriteArrayOf((Handle32)mTxBytes.Get());
-    dest->WriteArrayOf((Handle32)mTxPackets.Get());
-    dest->WriteArrayOf((Handle32)mOperations.Get());
+    dest->WriteArrayOf((HANDLE)mBucketStart.Get());
+    dest->WriteArrayOf((HANDLE)mActiveTime.Get());
+    dest->WriteArrayOf((HANDLE)mRxBytes.Get());
+    dest->WriteArrayOf((HANDLE)mRxPackets.Get());
+    dest->WriteArrayOf((HANDLE)mTxBytes.Get());
+    dest->WriteArrayOf((HANDLE)mTxPackets.Get());
+    dest->WriteArrayOf((HANDLE)mOperations.Get());
     dest->WriteInt64(mTotalBytes);
     return NOERROR;
 }

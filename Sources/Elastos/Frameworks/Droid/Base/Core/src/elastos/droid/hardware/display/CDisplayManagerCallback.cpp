@@ -29,7 +29,7 @@ CAR_INTERFACE_IMPL(CDisplayManagerCallback, Object, IIDisplayManagerCallback)
 CAR_OBJECT_IMPL(CDisplayManagerCallback)
 
 ECode CDisplayManagerCallback::constructor(
-    /* [in] */ Handle32 owner)
+    /* [in] */ HANDLE owner)
 {
     mBBinder = NULL;
     mOwner = (DisplayManagerGlobal*)owner;

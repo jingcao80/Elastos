@@ -37,7 +37,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 owner);
+        /* [in] */ HANDLE owner);
 
     //@Override
     CARAPI OnDisplayEvent(

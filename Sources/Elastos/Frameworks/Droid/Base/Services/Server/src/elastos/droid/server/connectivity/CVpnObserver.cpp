@@ -34,7 +34,7 @@ namespace Connectivity {
 CAR_OBJECT_IMPL(CVpnObserver)
 
 ECode CVpnObserver::constructor(
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (Vpn*)host;
     return NOERROR;

@@ -180,7 +180,7 @@ private:
 public:
     ContentVideoViewLegacy(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativeContentVideoView,
+        /* [in] */ HANDLE nativeContentVideoView,
         /* [in] */ ContentVideoViewClient* client);
 
     //@Override

@@ -226,7 +226,7 @@ Boolean CAssetAtlasService::Renderer::RenderAtlas(
     system->GetNanoTime(&startRender);
 
     Int32 x, y, ival;
-    Handle64 bmp;
+    HANDLE bmp;
     Boolean rotated;
     List<AutoPtr<IBitmap> >::Iterator it;
     Int32 index = 0;

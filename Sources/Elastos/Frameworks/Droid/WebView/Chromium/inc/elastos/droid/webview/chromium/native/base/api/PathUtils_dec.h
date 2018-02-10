@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_PathUtils_InitCallback(Handle32 cb);
+    extern void Elastos_PathUtils_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -59,7 +59,7 @@ void* PathUtils::ElaPathUtilsCallback_Init()
     sElaPathUtilsCallback.elastos_PathUtils_getNativeLibraryDirectory = &PathUtils::GetNativeLibraryDirectory;
     sElaPathUtilsCallback.elastos_PathUtils_getExternalStorageDirectory = &PathUtils::GetExternalStorageDirectory;
 
-    Elastos_PathUtils_InitCallback((Handle32)&sElaPathUtilsCallback);
+    Elastos_PathUtils_InitCallback((HANDLE)&sElaPathUtilsCallback);
     return &sElaPathUtilsCallback;
 }
 

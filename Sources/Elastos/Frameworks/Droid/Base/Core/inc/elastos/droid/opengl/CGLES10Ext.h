@@ -54,10 +54,10 @@ public:
 private:
     CARAPI GetPointer(
         /* [in] */ IBuffer* buffer,
-        /* [in, out] */ Handle64* array,
+        /* [in, out] */ HANDLE* array,
         /* [in, out] */ Int32* remaining,
         /* [in, out] */ Int32* offset,
-        /* [out] */ Handle64* rst);
+        /* [out] */ HANDLE* rst);
 };
 
 } // namespace Opengl

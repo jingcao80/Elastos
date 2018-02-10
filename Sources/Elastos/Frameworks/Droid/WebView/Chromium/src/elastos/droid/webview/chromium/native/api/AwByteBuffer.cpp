@@ -38,7 +38,7 @@ void* AwByteBuffer::GetDirectBufferAddress(
         Logger::E("AwByteBuffer", "AwByteBuffer::GetDirectBufferAddress, mObj is NULL");
         return NULL;
     }
-    Handle64 effectiveDirectAddress;
+    HANDLE effectiveDirectAddress;
     mObj->GetEffectiveDirectAddress(&effectiveDirectAddress);
     return (void*)effectiveDirectAddress;
 }

@@ -80,7 +80,7 @@ public:
         /* [in] */ IAccount* account);
 
     CARAPI constructor(
-        /* [in] */ Handle32 accounts);
+        /* [in] */ HANDLE accounts);
 
     CARAPI GetAccountCredentialsForCloning(
         /* [in] */ IIAccountAuthenticatorResponse* response,

@@ -59,7 +59,7 @@ const String BackupAgent::GENERIC_FILE_NAME("foo");
 
 BackupAgent::BackupAgent()
 {
-    CBackupAgentBackupServiceBinder::New((Handle32)this, (IBinder**)&mBinder);
+    CBackupAgentBackupServiceBinder::New((HANDLE)this, (IBinder**)&mBinder);
 }
 
 BackupAgent::~BackupAgent()

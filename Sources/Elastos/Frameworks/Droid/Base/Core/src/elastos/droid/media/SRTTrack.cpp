@@ -245,7 +245,7 @@ ECode SRTTrack::UpdateView(
 
         Int32 len = buf->GetLength();
         parcel->WriteInt32(len);
-        parcel->WriteArrayOf((Handle32)buf.Get());
+        parcel->WriteArrayOf((HANDLE)buf.Get());
         AutoPtr<IMessage> msg;
         mEventHandler->ObtainMessage(MEDIA_TIMED_TEXT, i_, i_, parcel, (IMessage**)&msg);
         Boolean flag = FALSE;

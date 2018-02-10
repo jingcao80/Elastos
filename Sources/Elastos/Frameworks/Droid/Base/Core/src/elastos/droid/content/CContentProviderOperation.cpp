@@ -145,7 +145,7 @@ ECode CContentProviderOperation::ReadFromParcel(
 
     if (source->ReadInt32(&value), value != 0) {
         AutoPtr<IInterface> contentValues;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&contentValues);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&contentValues);
         mValues = IContentValues::Probe(contentValues);
     }
 

@@ -302,7 +302,7 @@ module
 
     class CActivityController {
         constructor(
-            [in] Handle32 monkey);
+            [in] HANDLE monkey);
 
         interface IIActivityController;
     }

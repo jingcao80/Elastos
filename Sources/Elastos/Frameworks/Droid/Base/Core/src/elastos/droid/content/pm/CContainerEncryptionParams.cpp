@@ -341,24 +341,24 @@ ECode CContainerEncryptionParams::ReadFromParcel(
     source->ReadInt32(&encParamType);
 
     AutoPtr<ArrayOf<Byte> > encParamsEncoded;
-    source->ReadArrayOf((Handle32*)(&encParamsEncoded));
+    source->ReadArrayOf((HANDLE*)(&encParamsEncoded));
 
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mEncryptionKey = ISecretKey::Probe(obj);
 
     source->ReadString(&mMacAlgorithm);
     Int32 macParamType;
     source->ReadInt32(&macParamType);
     AutoPtr<ArrayOf<Byte> > macParamsEncoded;
-    source->ReadArrayOf((Handle32*)(&macParamsEncoded));
+    source->ReadArrayOf((HANDLE*)(&macParamsEncoded));
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mMacKey = ISecretKey::Probe(obj);
 
     mMacTag = NULL;
-    source->ReadArrayOf((Handle32*)(&mMacTag));
+    source->ReadArrayOf((HANDLE*)(&mMacTag));
 
     source->ReadInt64(&mAuthenticatedDataStart);
     source->ReadInt64(&mDataEnd);
@@ -399,16 +399,16 @@ ECode CContainerEncryptionParams::WriteToParcel(
     dest->WriteInt32(ENC_PARAMS_IV_PARAMETERS);
     AutoPtr<ArrayOf<Byte> > ivs;
     mEncryptionSpec->GetIV((ArrayOf<Byte>**)&ivs);
-    dest->WriteArrayOf((Handle32)ivs.Get());
+    dest->WriteArrayOf((HANDLE)ivs.Get());
     dest->WriteInterfacePtr(mEncryptionKey);
 
     dest->WriteString(mMacAlgorithm);
     dest->WriteInt32(MAC_PARAMS_NONE);
     AutoPtr<ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(0);
-    dest->WriteArrayOf((Handle32)array.Get());
+    dest->WriteArrayOf((HANDLE)array.Get());
     dest->WriteInterfacePtr(mMacKey);
 
-    dest->WriteArrayOf((Handle32)mMacTag.Get());
+    dest->WriteArrayOf((HANDLE)mMacTag.Get());
 
     dest->WriteInt64(mAuthenticatedDataStart);
     dest->WriteInt64(mEncryptedDataStart);

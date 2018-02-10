@@ -26,17 +26,17 @@
 extern "C"
 {
 #endif
-    extern Int32 Elastos_BrowserAccessibilityManager_nativeGetRootId(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid);
-    extern Boolean Elastos_BrowserAccessibilityManager_nativeIsNodeValid(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,Int32 id);
-    extern void Elastos_BrowserAccessibilityManager_nativeHitTest(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,Int32 x,Int32 y);
-    extern Boolean Elastos_BrowserAccessibilityManager_nativePopulateAccessibilityNodeInfo(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,IInterface* info,Int32 id);
-    extern Boolean Elastos_BrowserAccessibilityManager_nativePopulateAccessibilityEvent(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,IInterface* event,Int32 id,Int32 eventType);
-    extern void Elastos_BrowserAccessibilityManager_nativeClick(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,Int32 id);
-    extern void Elastos_BrowserAccessibilityManager_nativeFocus(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,Int32 id);
-    extern void Elastos_BrowserAccessibilityManager_nativeBlur(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid);
-    extern void Elastos_BrowserAccessibilityManager_nativeScrollToMakeNodeVisible(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,Int32 id);
-    extern Int32 Elastos_BrowserAccessibilityManager_nativeFindElementType(IInterface* caller,Handle64 nativeBrowserAccessibilityManagerAndroid,Int32 startId,const String& elementType,Boolean forwards);
-    extern void Elastos_BrowserAccessibilityManager_InitCallback(Handle64 cb);
+    extern Int32 Elastos_BrowserAccessibilityManager_nativeGetRootId(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid);
+    extern Boolean Elastos_BrowserAccessibilityManager_nativeIsNodeValid(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,Int32 id);
+    extern void Elastos_BrowserAccessibilityManager_nativeHitTest(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,Int32 x,Int32 y);
+    extern Boolean Elastos_BrowserAccessibilityManager_nativePopulateAccessibilityNodeInfo(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,IInterface* info,Int32 id);
+    extern Boolean Elastos_BrowserAccessibilityManager_nativePopulateAccessibilityEvent(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,IInterface* event,Int32 id,Int32 eventType);
+    extern void Elastos_BrowserAccessibilityManager_nativeClick(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,Int32 id);
+    extern void Elastos_BrowserAccessibilityManager_nativeFocus(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,Int32 id);
+    extern void Elastos_BrowserAccessibilityManager_nativeBlur(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid);
+    extern void Elastos_BrowserAccessibilityManager_nativeScrollToMakeNodeVisible(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,Int32 id);
+    extern Int32 Elastos_BrowserAccessibilityManager_nativeFindElementType(IInterface* caller,HANDLE nativeBrowserAccessibilityManagerAndroid,Int32 startId,const String& elementType,Boolean forwards);
+    extern void Elastos_BrowserAccessibilityManager_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -53,7 +53,7 @@ namespace Accessibility {
 
 struct ElaBrowserAccessibilityManagerCallback
 {
-    AutoPtr<IInterface> (*elastos_BrowserAccessibilityManager_create)(Handle64 nativeBrowserAccessibilityManagerAndroid, IInterface* contentViewCore);
+    AutoPtr<IInterface> (*elastos_BrowserAccessibilityManager_create)(HANDLE nativeBrowserAccessibilityManagerAndroid, IInterface* contentViewCore);
     void (*elastos_BrowserAccessibilityManager_onNativeObjectDestroyed)(IInterface* obj);
     void (*elastos_BrowserAccessibilityManager_handlePageLoaded)(IInterface* obj, Int32 id);
     void (*elastos_BrowserAccessibilityManager_handleFocusChanged)(IInterface* obj, Int32 id);
@@ -128,7 +128,7 @@ void* BrowserAccessibilityManager::ElaBrowserAccessibilityManagerCallback_Init()
     sElaBrowserAccessibilityManagerCallback.elastos_BrowserAccessibilityManager_setAccessibilityEventCollectionItemInfo = &BrowserAccessibilityManager::SetAccessibilityEventCollectionItemInfo;
     sElaBrowserAccessibilityManagerCallback.elastos_BrowserAccessibilityManager_setAccessibilityEventRangeInfo = &BrowserAccessibilityManager::SetAccessibilityEventRangeInfo;
 
-    Elastos_BrowserAccessibilityManager_InitCallback((Handle64)&sElaBrowserAccessibilityManagerCallback);
+    Elastos_BrowserAccessibilityManager_InitCallback((HANDLE)&sElaBrowserAccessibilityManagerCallback);
     return &sElaBrowserAccessibilityManagerCallback;
 }
 

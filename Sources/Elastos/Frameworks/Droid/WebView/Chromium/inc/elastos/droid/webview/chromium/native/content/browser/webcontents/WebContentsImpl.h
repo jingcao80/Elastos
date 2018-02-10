@@ -61,41 +61,41 @@ public:
 
 private:
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeWebContentsAndroid,
+        /* [in] */ HANDLE nativeWebContentsAndroid,
         /* [in] */ IInterface* navigationController);
 
     static CARAPI_(void) Destroy(
         /* [in] */ IInterface* obj);
 
-    static CARAPI_(Handle64) GetNativePointer(
+    static CARAPI_(HANDLE) GetNativePointer(
         /* [in] */ IInterface* obj);
 
     WebContentsImpl(
-        /* [in] */ Handle64 nativeWebContentsAndroid,
+        /* [in] */ HANDLE nativeWebContentsAndroid,
         /* [in] */ NavigationController* navigationController);
 
     //@CalledByNative
     static CARAPI_(AutoPtr<WebContentsImpl>) Create(
-        /* [in] */ Handle64 nativeWebContentsAndroid,
+        /* [in] */ HANDLE nativeWebContentsAndroid,
         /* [in] */ NavigationController* navigationController);
 
     //@CalledByNative
     CARAPI_(void) Destroy();
 
     //@CalledByNative
-    CARAPI_(Handle64) GetNativePointer();
+    CARAPI_(HANDLE) GetNativePointer();
 
     CARAPI_(String) NativeGetTitle(
-        /* [in] */ Handle64 nativeWebContentsAndroid);
+        /* [in] */ HANDLE nativeWebContentsAndroid);
 
     CARAPI_(String) NativeGetVisibleURL(
-        /* [in] */ Handle64 nativeWebContentsAndroid);
+        /* [in] */ HANDLE nativeWebContentsAndroid);
 
     CARAPI_(void) NativeStop(
-        /* [in] */ Handle64 nativeWebContentsAndroid);
+        /* [in] */ HANDLE nativeWebContentsAndroid);
 
 private:
-    Handle64 mNativeWebContentsAndroid;
+    HANDLE mNativeWebContentsAndroid;
     AutoPtr<NavigationController> mNavigationController;
 };
 

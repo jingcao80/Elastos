@@ -42,6 +42,6 @@ SOURCES += invokeCallback_gnuc.S
 SOURCES += invokeCoalescer_gnuc.S
 endif
 else
-SOURCES += invokeCallback.cpp
-SOURCES += invokeCoalescer.cpp
+# SOURCES += invokeCallback.cpp
+# SOURCES += invokeCoalescer.cpp
 endif

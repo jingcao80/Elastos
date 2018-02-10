@@ -157,8 +157,8 @@ ECode CCellInfoCdma::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     CellInfo::ReadFromParcel(source);
-    source->ReadInterfacePtr((Handle32*)&mCellIdentityCdma);
-    source->ReadInterfacePtr((Handle32*)&mCellSignalStrengthCdma);
+    source->ReadInterfacePtr((HANDLE*)&mCellIdentityCdma);
+    source->ReadInterfacePtr((HANDLE*)&mCellSignalStrengthCdma);
     return NOERROR;
 }
 

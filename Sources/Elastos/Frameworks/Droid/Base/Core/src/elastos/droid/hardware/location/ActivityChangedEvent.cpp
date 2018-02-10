@@ -72,7 +72,7 @@ ECode ActivityChangedEvent::WriteToParcel(
     AutoPtr<ArrayOf<IActivityRecognitionEvent*> > activityRecognitionEventArray;
     mActivityRecognitionEvents->ToArray((ArrayOf<IInterface*>**)&activityRecognitionEventArray);
     dest->WriteInt32(activityRecognitionEventArray->GetLength());
-    dest->WriteArrayOf((Handle32)activityRecognitionEventArray.Get());
+    dest->WriteArrayOf((HANDLE)activityRecognitionEventArray.Get());
     return NOERROR;
 }
 
@@ -82,7 +82,7 @@ ECode ActivityChangedEvent::ReadFromParcel(
     Int32 length;
     source->ReadInt32(&length);
     AutoPtr<ArrayOf<IActivityRecognitionEvent*> > data  = ArrayOf<IActivityRecognitionEvent*>::Alloc(length);
-    source->ReadArrayOf((Handle32*)&data);
+    source->ReadArrayOf((HANDLE*)&data);
     Arrays::AsList(data, (IList**)&mActivityRecognitionEvents);
     return NOERROR;
 }

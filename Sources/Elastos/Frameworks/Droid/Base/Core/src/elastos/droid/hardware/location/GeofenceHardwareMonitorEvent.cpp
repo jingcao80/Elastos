@@ -110,7 +110,7 @@ ECode GeofenceHardwareMonitorEvent::ReadFromParcel(
     source->ReadInt32(&mMonitoringType);
     source->ReadInt32(&mMonitoringStatus);
     source->ReadInt32(&mSourceTechnologies);
-    source->ReadInterfacePtr((Handle32*)&mLocation);
+    source->ReadInterfacePtr((HANDLE*)&mLocation);
     return NOERROR;
 }
 

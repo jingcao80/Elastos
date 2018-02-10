@@ -290,7 +290,7 @@ ECode CActivityManagerTaskDescription::ReadFromParcel(
     source->ReadInt32(&ival);
     if (ival > 0) {
         AutoPtr<IInterface> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mIcon = IBitmap::Probe(obj);
     }
 

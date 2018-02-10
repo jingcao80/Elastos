@@ -247,7 +247,7 @@ String ProxyChangeListener::GetProperty(
 }
 
 ECode ProxyChangeListener::Start(
-    /* [in] */ Handle64 nativePtr)
+    /* [in] */ HANDLE nativePtr)
 {
     // ==================before translated======================
     // assert mNativePtr == 0;
@@ -364,18 +364,18 @@ ECode ProxyChangeListener::UnregisterReceiver()
 }
 
 ECode ProxyChangeListener::NativeProxySettingsChangedTo(
-    /* [in] */ Handle64 nativePtr,
+    /* [in] */ HANDLE nativePtr,
     /* [in] */ const String& host,
     /* [in] */ Int32 port)
 {
-    Elastos_ProxyChangeListener_nativeProxySettingsChangedTo(TO_IINTERFACE(this), (Handle64)nativePtr, host, port);
+    Elastos_ProxyChangeListener_nativeProxySettingsChangedTo(TO_IINTERFACE(this), (HANDLE)nativePtr, host, port);
     return NOERROR;
 }
 
 ECode ProxyChangeListener::NativeProxySettingsChanged(
-    /* [in] */ Handle64 nativePtr)
+    /* [in] */ HANDLE nativePtr)
 {
-    Elastos_ProxyChangeListener_nativeProxySettingsChanged(TO_IINTERFACE(this), (Handle64)nativePtr);
+    Elastos_ProxyChangeListener_nativeProxySettingsChanged(TO_IINTERFACE(this), (HANDLE)nativePtr);
     return NOERROR;
 }
 
@@ -388,7 +388,7 @@ AutoPtr<IInterface> ProxyChangeListener::Create(
 
 void ProxyChangeListener::Start(
     /* [in] */ IInterface* obj,
-    /* [in] */ Handle64 nativePtr)
+    /* [in] */ HANDLE nativePtr)
 {
     ProxyChangeListener* mObj = (ProxyChangeListener*)(IObject::Probe(obj));
     if (NULL == mObj) {

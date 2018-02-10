@@ -2359,7 +2359,7 @@ ECode PhoneWindow::PanelFeatureState::SavedState::ReadFromParcel(
     source->ReadBoolean(&mIsInExpandedMode);
 
     if (mIsOpen) {
-        source->ReadInterfacePtr((Handle32*)&mMenuState);
+        source->ReadInterfacePtr((HANDLE*)&mMenuState);
     }
     return NOERROR;
 }

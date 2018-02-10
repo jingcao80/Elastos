@@ -265,16 +265,16 @@ ECode CThemeChangeRequest::ReadFromParcel(
     source->ReadInt32(&numComponents);
     for (Int32 i = 0; i < numComponents; i++) {
         AutoPtr<IInterface> ikey, ivalue;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&ikey);
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&ivalue);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&ikey);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&ivalue);
         mThemeComponents->Put(ikey, ivalue);
     }
 
     source->ReadInt32(&numComponents);
     for (Int32 i = 0 ; i < numComponents; i++) {
         AutoPtr<IInterface> ikey, ivalue;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&ikey);
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&ivalue);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&ikey);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&ivalue);
         mPerAppOverlays->Put(ikey, ivalue);
     }
     source->ReadInt32(&mRequestType);

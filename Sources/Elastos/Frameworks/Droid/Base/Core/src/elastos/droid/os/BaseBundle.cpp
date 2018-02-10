@@ -1609,7 +1609,7 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
 
     case VAL_PARCELABLE:{
         AutoPtr<IParcelable> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         if(obj == NULL){
             Logger::E(TAG, "Read IParcelable got null");
         }
@@ -1685,7 +1685,7 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
     //     return readCharSequenceArray();
     case VAL_IBINDER: {
         AutoPtr<IBinder> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         if(obj == NULL){
             Logger::E(TAG, "Read IBinder got null");
         }
@@ -1746,7 +1746,7 @@ AutoPtr<IInterface> BaseBundle::ReadValue(
     //     return readSparseBooleanArray();
     case VAL_BUNDLE:{
         AutoPtr<IParcelable> obj;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         if(obj == NULL){
             Logger::E(TAG, "Read IBundle got null");
         }
@@ -1877,7 +1877,7 @@ ECode BaseBundle::WriteToParcelInner(
     if (length != 0) {
         if (mJavaData != NULL) {
            dest->WriteInt32(mJavaData->GetLength());
-           dest->WriteArrayOf((Handle32)mJavaData.Get());
+           dest->WriteArrayOf((HANDLE)mJavaData.Get());
         }
         else {
            dest->WriteInt32(0);
@@ -1911,7 +1911,7 @@ ECode BaseBundle::ReadFromParcelInner(
     }
 
     android::Parcel* parcel;
-    source->GetDataPayload((Handle32*)&parcel);
+    source->GetDataPayload((HANDLE*)&parcel);
 
     Int32 magic;
     source->ReadInt32(&magic);
@@ -1939,7 +1939,7 @@ ECode BaseBundle::ReadFromParcelInner(
     source->ReadInt32(&javaDataLength);
     if (javaDataLength > 0) {
        AutoPtr<ArrayOf<Byte> > data;
-       source->ReadArrayOf((Handle32*)&data);
+       source->ReadArrayOf((HANDLE*)&data);
        mJavaData = data;
     }
     return NOERROR;

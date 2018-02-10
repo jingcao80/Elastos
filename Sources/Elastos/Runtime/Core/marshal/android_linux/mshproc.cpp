@@ -316,7 +316,7 @@ ECode Proxy_ProcessMsh_In(
 
                 case BT_TYPE_STRUCT:
                 case BT_TYPE_PSTRUCT:
-                    parcel->WriteStruct(*args, BT_TYPE_SIZE(params[n]) * 4);
+                    parcel->WriteStruct(*(HANDLE*)args, BT_TYPE_SIZE(params[n]) * 4);
                     args++;
                     break;
 
@@ -331,7 +331,7 @@ ECode Proxy_ProcessMsh_In(
                     break;
 
                 case BT_TYPE_ARRAYOF:
-                    parcel->WriteArrayOf((Handle32)*args);
+                    parcel->WriteArrayOf((HANDLE)*args);
                     args++;
                     break;
 
@@ -422,7 +422,7 @@ ECode Proxy_ProcessUnmsh_Out(
                         break;
 
                     case BT_TYPE_PSTRUCT:
-                        parcel->ReadStruct((Handle32*)*args);
+                        parcel->ReadStruct((HANDLE*)*args);
                         break;
 
                     case BT_TYPE_PEMUID:
@@ -442,19 +442,19 @@ ECode Proxy_ProcessUnmsh_Out(
                     case BT_TYPE_ARRAYOF:
                         if (!BT_IS_CALLEE(params[n])) {
                             PCARQUINTET p;
-                            parcel->ReadArrayOf((Handle32*)&p);
+                            parcel->ReadArrayOf((HANDLE*)&p);
                             PCARQUINTET qArg = (PCARQUINTET)*args;
                             qArg->mUsed = p->mUsed;
                             memcpy(qArg->mBuf, p->mBuf, p->mSize);
                             _CarQuintet_Release(p);
                         }
                         else {
-                            parcel->ReadArrayOf((Handle32*)*args);
+                            parcel->ReadArrayOf((HANDLE*)*args);
                         }
                         break;
 
                     case BT_TYPE_PINTERFACE:
-                        parcel->ReadInterfacePtr((Handle32*)*args);
+                        parcel->ReadInterfacePtr((HANDLE*)*args);
                         break;
 
                     default:
@@ -663,7 +663,7 @@ ECode Stub_ProcessUnmsh_In(
 
 
                 case BT_TYPE_ARRAYOF:
-                    parcel->ReadArrayOf((Handle32*)args);
+                    parcel->ReadArrayOf((HANDLE*)args);
                     args++;
                     break;
 
@@ -676,7 +676,7 @@ ECode Stub_ProcessUnmsh_In(
                 }
 
                 case BT_TYPE_INTERFACE: {
-                    ECode ec = parcel->ReadInterfacePtr((Handle32*)args);
+                    ECode ec = parcel->ReadInterfacePtr((HANDLE*)args);
                     if (FAILED(ec)) {
                         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
                                 "MshProc: unmsh interface, ec = %x\n", ec));
@@ -762,7 +762,7 @@ ECode Stub_ProcessMsh_Out(
 
                     case BT_TYPE_ARRAYOF:
                         {
-                            parcel->WriteArrayOf((Handle32)*outBuffer);
+                            parcel->WriteArrayOf((HANDLE)*outBuffer);
                             PCARQUINTET p = (PCARQUINTET)*outBuffer;
                             if (p != NULL) {
                                 if (!BT_IS_CALLEE(params[n])) {
@@ -813,7 +813,7 @@ ECode Stub_ProcessMsh_Out(
                         break;
 
                     case BT_TYPE_PSTRUCT:
-                        parcel->WriteStruct((Handle32)outBuffer, BT_TYPE_SIZE(params[n]) * 4);
+                        parcel->WriteStruct((HANDLE)outBuffer, BT_TYPE_SIZE(params[n]) * 4);
                         outBuffer += BT_TYPE_SIZE(params[n]);
                         break;
 

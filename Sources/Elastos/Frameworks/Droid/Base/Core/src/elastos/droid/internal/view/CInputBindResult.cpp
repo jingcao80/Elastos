@@ -52,10 +52,10 @@ ECode CInputBindResult::ReadFromParcel(
     /* [in] */ IParcel *source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mMethod = IIInputMethodSession::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mChannel = IInputChannel::Probe(obj);
     source->ReadString(&mId);
     source->ReadInt32(&mSequence);

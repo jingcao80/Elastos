@@ -599,7 +599,7 @@ private:
 
 public:
     // The two fields below are accessed by native methods
-    Handle64 mNativeContext;
+    HANDLE mNativeContext;
 
     //@SuppressWarnings("unused")
     AutoPtr<ISurface> mSurface;

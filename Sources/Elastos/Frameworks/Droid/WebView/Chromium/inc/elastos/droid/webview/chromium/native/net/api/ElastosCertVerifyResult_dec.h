@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_AndroidCertVerifyResult_InitCallback(Handle32 cb);
+    extern void Elastos_AndroidCertVerifyResult_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -53,7 +53,7 @@ void* ElastosCertVerifyResult::ElaElastosCertVerifyResultCallback_Init()
     sElaAndroidCertVerifyResultCallback.elastos_AndroidCertVerifyResult_isIssuedByKnownRoot = &ElastosCertVerifyResult::IsIssuedByKnownRoot;
     sElaAndroidCertVerifyResultCallback.elastos_AndroidCertVerifyResult_getCertificateChainEncoded = &ElastosCertVerifyResult::GetCertificateChainEncoded;
 
-    Elastos_AndroidCertVerifyResult_InitCallback((Handle32)&sElaAndroidCertVerifyResultCallback);
+    Elastos_AndroidCertVerifyResult_InitCallback((HANDLE)&sElaAndroidCertVerifyResultCallback);
     return &sElaAndroidCertVerifyResultCallback;
 }
 

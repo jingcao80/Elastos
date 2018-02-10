@@ -69,7 +69,7 @@ ECode SmsCbEtwsInfo::WriteToParcel(
     dest->WriteInt32(mWarningType);
     dest->WriteInt32(mEmergencyUserAlert ? 1 : 0);
     dest->WriteInt32(mActivatePopup ? 1 : 0);
-    dest->WriteArrayOf((Handle32)mWarningSecurityInformation.Get());
+    dest->WriteArrayOf((HANDLE)mWarningSecurityInformation.Get());
     return NOERROR;
 }
 
@@ -80,7 +80,7 @@ ECode SmsCbEtwsInfo::ReadFromParcel(
     Int32 val;
     mEmergencyUserAlert = (source->ReadInt32(&val), val) == 1 ? TRUE : FALSE;
     mActivatePopup = (source->ReadInt32(&val), val) == 1 ? TRUE : FALSE;
-    source->ReadArrayOf((Handle32*)(&mWarningSecurityInformation));
+    source->ReadArrayOf((HANDLE*)(&mWarningSecurityInformation));
     return NOERROR;
 }
 

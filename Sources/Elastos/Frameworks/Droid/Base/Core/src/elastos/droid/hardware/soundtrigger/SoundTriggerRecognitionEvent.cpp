@@ -120,7 +120,7 @@ ECode SoundTriggerRecognitionEvent::FromParcel(
     }
 
     AutoPtr<ArrayOf<Byte> > data;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&data))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&data))
 
     AutoPtr<SoundTriggerRecognitionEvent> newResult = new SoundTriggerRecognitionEvent();
     FAIL_RETURN(newResult->constructor(status, soundModelHandle, captureAvailable,
@@ -154,7 +154,7 @@ ECode SoundTriggerRecognitionEvent::WriteToParcel(
     } else {
         FAIL_RETURN(dest->WriteByte((Byte)0))
     }
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mData.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mData.Get()))
 
     return NOERROR;
 }
@@ -192,7 +192,7 @@ ECode SoundTriggerRecognitionEvent::ReadFromParcel(
         mCaptureFormat = NULL;
     }
 
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mData))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mData))
 
     return NOERROR;
 }

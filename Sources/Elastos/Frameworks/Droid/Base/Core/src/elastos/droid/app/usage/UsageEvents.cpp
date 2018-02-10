@@ -274,7 +274,7 @@ ECode UsageEvents::ReadFromParcel(
         mParcel->GetDataPosition(&position);
 
         android::Parcel* parcelObj;
-        mParcel->GetDataPayload((Handle32*)&parcelObj);
+        mParcel->GetDataPayload((HANDLE*)&parcelObj);
         parcelObj->setDataSize(position);
         parcelObj->setDataPosition(positionInParcel);
     }

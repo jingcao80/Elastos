@@ -27,7 +27,7 @@ namespace Chromium {
 namespace AndroidWebview {
 
 AwHttpAuthHandler::AwHttpAuthHandler(
-    /* [in] */ Handle64 nativeAwHttpAuthHandler,
+    /* [in] */ HANDLE nativeAwHttpAuthHandler,
     /* [in] */ Boolean firstAttempt)
     : mNativeAwHttpAuthHandler(nativeAwHttpAuthHandler)
     , mFirstAttempt(firstAttempt)
@@ -59,7 +59,7 @@ Boolean AwHttpAuthHandler::IsFirstAttempt()
 
 //@CalledByNative return AwHttpAuthHandler
 AutoPtr<IInterface> AwHttpAuthHandler::Create(
-    /* [in] */ Handle64 nativeAwAuthHandler,
+    /* [in] */ HANDLE nativeAwAuthHandler,
     /* [in] */ Boolean firstAttempt)
 {
     AutoPtr<AwHttpAuthHandler> handler = new AwHttpAuthHandler(nativeAwAuthHandler, firstAttempt);
@@ -74,7 +74,7 @@ void AwHttpAuthHandler::HandlerDestroyed()
 }
 
 void AwHttpAuthHandler::NativeProceed(
-    /* [in] */ Handle64 nativeAwHttpAuthHandler,
+    /* [in] */ HANDLE nativeAwHttpAuthHandler,
     /* [in] */ const String& username,
     /* [in] */ const String& password)
 {
@@ -82,7 +82,7 @@ void AwHttpAuthHandler::NativeProceed(
 }
 
 void AwHttpAuthHandler::NativeCancel(
-    /* [in] */ Handle64 nativeAwHttpAuthHandler)
+    /* [in] */ HANDLE nativeAwHttpAuthHandler)
 {
     Elastos_AwHttpAuthHandler_nativeCancel(TO_IINTERFACE(this), nativeAwHttpAuthHandler);
 }

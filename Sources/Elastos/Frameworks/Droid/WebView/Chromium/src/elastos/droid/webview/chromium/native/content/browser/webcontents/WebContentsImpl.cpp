@@ -29,7 +29,7 @@ namespace Browser {
 namespace Webcontents {
 
 WebContentsImpl::WebContentsImpl(
-    /* [in] */ Handle64 nativeWebContentsAndroid,
+    /* [in] */ HANDLE nativeWebContentsAndroid,
     /* [in] */ NavigationController* navigationController)
     : mNativeWebContentsAndroid(nativeWebContentsAndroid)
     , mNavigationController(navigationController)
@@ -38,7 +38,7 @@ WebContentsImpl::WebContentsImpl(
 
 //@CalledByNative
 AutoPtr<WebContentsImpl> WebContentsImpl::Create(
-    /* [in] */ Handle64 nativeWebContentsAndroid,
+    /* [in] */ HANDLE nativeWebContentsAndroid,
     /* [in] */ NavigationController* navigationController)
 {
     return new WebContentsImpl(nativeWebContentsAndroid, navigationController);
@@ -52,7 +52,7 @@ void WebContentsImpl::Destroy()
 }
 
 //@CalledByNative
-Handle64 WebContentsImpl::GetNativePointer()
+HANDLE WebContentsImpl::GetNativePointer()
 {
     return mNativeWebContentsAndroid;
 }
@@ -82,25 +82,25 @@ void WebContentsImpl::Stop()
 }
 
 String WebContentsImpl::NativeGetTitle(
-    /* [in] */ Handle64 nativeWebContentsAndroid)
+    /* [in] */ HANDLE nativeWebContentsAndroid)
 {
     return Elastos_WebContentsImpl_nativeGetTitle(TO_IINTERFACE(this), nativeWebContentsAndroid);
 }
 
 String WebContentsImpl::NativeGetVisibleURL(
-    /* [in] */ Handle64 nativeWebContentsAndroid)
+    /* [in] */ HANDLE nativeWebContentsAndroid)
 {
     return Elastos_WebContentsImpl_nativeGetVisibleURL(TO_IINTERFACE(this), nativeWebContentsAndroid);
 }
 
 void WebContentsImpl::NativeStop(
-    /* [in] */ Handle64 nativeWebContentsAndroid)
+    /* [in] */ HANDLE nativeWebContentsAndroid)
 {
     Elastos_WebContentsImpl_nativeStop(TO_IINTERFACE(this), nativeWebContentsAndroid);
 }
 
 AutoPtr<IInterface> WebContentsImpl::Create(
-    /* [in] */ Handle64 nativeWebContentsAndroid,
+    /* [in] */ HANDLE nativeWebContentsAndroid,
     /* [in] */ IInterface* navigationController)
 {
     AutoPtr<NavigationController> nc = (NavigationController*)(IObject::Probe(navigationController));
@@ -119,7 +119,7 @@ void WebContentsImpl::Destroy(
     mObj->Destroy();
 }
 
-Handle64 WebContentsImpl::GetNativePointer(
+HANDLE WebContentsImpl::GetNativePointer(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<WebContentsImpl> mObj = (WebContentsImpl*)(IObject::Probe(obj));

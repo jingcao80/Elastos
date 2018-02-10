@@ -27,7 +27,7 @@ extern "C"
 {
 #endif
     extern void Elastos_MemoryPressureListener_nativeOnMemoryPressure(Int32 memoryPressureType);
-    extern void Elastos_MemoryPressureListener_InitCallback(Handle32 cb);
+    extern void Elastos_MemoryPressureListener_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -51,7 +51,7 @@ void* MemoryPressureListener::ElaMemoryPressureListenerCallback_Init()
 
     sElaMemoryPressureListenerCallback.elastos_MemoryPressureListener_registerSystemCallback = &MemoryPressureListener::RegisterSystemCallback;
 
-    Elastos_MemoryPressureListener_InitCallback((Handle32)&sElaMemoryPressureListenerCallback);
+    Elastos_MemoryPressureListener_InitCallback((HANDLE)&sElaMemoryPressureListenerCallback);
     return &sElaMemoryPressureListenerCallback;
 }
 

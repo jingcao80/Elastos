@@ -76,7 +76,7 @@ ECode ScanResult::WriteToParcel(
         //dest.writeByteArray(mScanRecord.getBytes());
         AutoPtr<ArrayOf<Byte> > bytes;
         mScanRecord->GetBytes((ArrayOf<Byte>**)&bytes);
-        dest->WriteArrayOf((Handle32)bytes.Get());
+        dest->WriteArrayOf((HANDLE)bytes.Get());
     } else {
         dest->WriteInt32(0);
     }
@@ -173,7 +173,7 @@ ECode ScanResult::ReadFromParcel(
     flag = 0;
     if (in->ReadInt32(&flag) == 1) {
         AutoPtr<ArrayOf<Byte> > array;
-        in->ReadArrayOf((Handle32*)&array);
+        in->ReadArrayOf((HANDLE*)&array);
         mScanRecord = ScanRecord::ParseFromBytes(array);
     }
     in->ReadInt32(&mRssi);

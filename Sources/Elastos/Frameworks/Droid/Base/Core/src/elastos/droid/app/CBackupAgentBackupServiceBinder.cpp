@@ -39,7 +39,7 @@ const String CBackupAgentBackupServiceBinder::TAG("BackupServiceBinder");
 const Boolean CBackupAgentBackupServiceBinder::DEBUG = FALSE;
 
 ECode CBackupAgentBackupServiceBinder::constructor(
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (BackupAgent*)host;
     return NOERROR;

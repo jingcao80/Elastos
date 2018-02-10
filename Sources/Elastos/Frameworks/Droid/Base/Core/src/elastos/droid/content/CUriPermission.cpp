@@ -90,7 +90,7 @@ ECode CUriPermission::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     AutoPtr<IInterface> uri;
-    in->ReadInterfacePtr((Handle32*)(IInterface**)&uri);
+    in->ReadInterfacePtr((HANDLE*)(IInterface**)&uri);
     mUri = IUri::Probe(uri);
     in->ReadInt32(&mModeFlags);
     in->ReadInt64(&mPersistedTime);

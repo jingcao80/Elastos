@@ -57,7 +57,7 @@ void DateTimeChooserElastos::InnerInputActionDelegate::CancelDateTimeDialog()
 
 DateTimeChooserElastos::DateTimeChooserElastos(
     /* [in] */ IContext* context,
-    /* [in] */ Handle64 nativeDateTimeChooserElastos)
+    /* [in] */ HANDLE nativeDateTimeChooserElastos)
     : mNativeDateTimeChooserElastos(nativeDateTimeChooserElastos)
 {
     AutoPtr<InputDialogContainer::InputActionDelegate> delegate = new InnerInputActionDelegate(this);
@@ -78,7 +78,7 @@ void DateTimeChooserElastos::ShowDialog(
 //@CalledByNative
 AutoPtr<DateTimeChooserElastos> DateTimeChooserElastos::CreateDateTimeChooser(
     /* [in] */ ContentViewCore* contentViewCore,
-    /* [in] */ Handle64 nativeDateTimeChooserElastos,
+    /* [in] */ HANDLE nativeDateTimeChooserElastos,
     /* [in] */ Int32 dialogType,
     /* [in] */ Double dialogValue,
     /* [in] */ Double min,
@@ -138,21 +138,21 @@ void DateTimeChooserElastos::InitializeDateInputTypes(
 }
 
 void DateTimeChooserElastos::NativeReplaceDateTime(
-    /* [in] */ Handle64 nativeDateTimeChooserElastos,
+    /* [in] */ HANDLE nativeDateTimeChooserElastos,
     /* [in] */ Double dialogValue)
 {
-    Elastos_DateTimeChooserAndroid_nativeReplaceDateTime(TO_IINTERFACE(this), (Handle64)nativeDateTimeChooserElastos, dialogValue);
+    Elastos_DateTimeChooserAndroid_nativeReplaceDateTime(TO_IINTERFACE(this), (HANDLE)nativeDateTimeChooserElastos, dialogValue);
 }
 
 void DateTimeChooserElastos::NativeCancelDialog(
-    /* [in] */ Handle64 nativeDateTimeChooserElastos)
+    /* [in] */ HANDLE nativeDateTimeChooserElastos)
 {
-    Elastos_DateTimeChooserAndroid_nativeCancelDialog(TO_IINTERFACE(this), (Handle64)nativeDateTimeChooserElastos);
+    Elastos_DateTimeChooserAndroid_nativeCancelDialog(TO_IINTERFACE(this), (HANDLE)nativeDateTimeChooserElastos);
 }
 
 AutoPtr<IInterface> DateTimeChooserElastos::CreateDateTimeChooser(
     /* [in] */ IInterface* contentViewCore,
-    /* [in] */ Handle64 nativeDateTimeChooserElastos,
+    /* [in] */ HANDLE nativeDateTimeChooserElastos,
     /* [in] */ Int32 dialogType,
     /* [in] */ Double dialogValue,
     /* [in] */ Double min,

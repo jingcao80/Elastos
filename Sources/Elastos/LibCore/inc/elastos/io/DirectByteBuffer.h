@@ -46,7 +46,7 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetPrimitiveArray(
-        /* [out] */ Handle64* arrayHandle);
+        /* [out] */ HANDLE* arrayHandle);
 
     CARAPI Get(
         /* [out] */ ArrayOf<Byte>* dst,

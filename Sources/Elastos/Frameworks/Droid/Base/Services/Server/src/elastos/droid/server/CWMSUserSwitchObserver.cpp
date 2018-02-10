@@ -22,7 +22,7 @@ namespace Droid {
 namespace Server {
 
 ECode CWMSUserSwitchObserver::constructor(
-    /* [in] */ Handle32 owner)
+    /* [in] */ HANDLE owner)
 {
     mOwner = (CWallpaperManagerService*)owner;
     return NOERROR;

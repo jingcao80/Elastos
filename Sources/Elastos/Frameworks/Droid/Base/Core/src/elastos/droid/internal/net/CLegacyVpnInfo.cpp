@@ -98,7 +98,7 @@ ECode CLegacyVpnInfo::ReadFromParcel(
     source->ReadString(&mKey);
     source->ReadInt32(&mState);
     mIntent = NULL;
-    source->ReadInterfacePtr((Handle32*)&mIntent);
+    source->ReadInterfacePtr((HANDLE*)&mIntent);
     return NOERROR;
 }
 

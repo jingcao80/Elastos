@@ -54,10 +54,10 @@ public:
         /* [in] */ Int32 bottom);
 
     CARAPI constructor(
-        /* [in] */ Handle64 ni);
+        /* [in] */ HANDLE ni);
 
     CARAPI constructor(
-        /* [in] */ Handle64 ni,
+        /* [in] */ HANDLE ni,
         /* [in] */ Int32 dummy);
 
     /** Set the region to the empty region
@@ -335,7 +335,7 @@ public:
     CARAPI Recycle();
 
     CARAPI GetNativeRegion(
-        /* [out] */ Handle64* region);
+        /* [out] */ HANDLE* region);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -345,40 +345,40 @@ public:
 
 private:
     static CARAPI_(Boolean) NativeEquals(
-        /* [in] */ Handle64 region1,
-        /* [in] */ Handle64 region2);
+        /* [in] */ HANDLE region1,
+        /* [in] */ HANDLE region2);
 
-    static CARAPI_(Handle64) NativeConstructor();
+    static CARAPI_(HANDLE) NativeConstructor();
 
     static CARAPI_(void) NativeDestructor(
-        /* [in] */ Handle64 region);
+        /* [in] */ HANDLE region);
 
     static CARAPI_(void) NativeSetRegion(
-        /* [in] */ Handle64 dst,
-        /* [in] */ Handle64 src);
+        /* [in] */ HANDLE dst,
+        /* [in] */ HANDLE src);
 
     static CARAPI_(Boolean) NativeSetRect(
-        /* [in] */ Handle64 dst,
+        /* [in] */ HANDLE dst,
         /* [in] */ Int32 left,
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
     static CARAPI_(Boolean) NativeSetPath(
-        /* [in] */ Handle64 dst,
-        /* [in] */ Handle64 path,
-        /* [in] */ Handle64 clip);
+        /* [in] */ HANDLE dst,
+        /* [in] */ HANDLE path,
+        /* [in] */ HANDLE clip);
 
     static CARAPI_(Boolean) NativeGetBounds(
-        /* [in] */ Handle64 region,
+        /* [in] */ HANDLE region,
         /* [out] */ IRect* rect);
 
     static CARAPI_(Boolean) NativeGetBoundaryPath(
-        /* [in] */ Handle64 region,
-        /* [out] */ Handle64 path);
+        /* [in] */ HANDLE region,
+        /* [out] */ HANDLE path);
 
     static CARAPI_(Boolean) NativeOp(
-        /* [in] */ Handle64 dst,
+        /* [in] */ HANDLE dst,
         /* [in] */ Int32 left,
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,
@@ -386,29 +386,29 @@ private:
         /* [in] */ RegionOp op);
 
     static CARAPI_(Boolean) NativeOp(
-        /* [in] */ Handle64 dst,
+        /* [in] */ HANDLE dst,
         /* [in] */ IRect* rect,
-        /* [in] */ Handle64 region,
+        /* [in] */ HANDLE region,
         /* [in] */ RegionOp op);
 
     static CARAPI_(Boolean) NativeOp(
-        /* [in] */ Handle64 dst,
-        /* [in] */ Handle64 region1,
-        /* [in] */ Handle64 region2,
+        /* [in] */ HANDLE dst,
+        /* [in] */ HANDLE region1,
+        /* [in] */ HANDLE region2,
         /* [in] */ RegionOp op);
 
-    static CARAPI_(Handle64) NativeCreateFromParcel(
+    static CARAPI_(HANDLE) NativeCreateFromParcel(
         /* [in] */ IParcel* parcel);
 
     static CARAPI_(Boolean) NativeWriteToParcel(
-        /* [in] */ Handle64 region,
+        /* [in] */ HANDLE region,
         /* [out] */ IParcel* parcel);
 
     static CARAPI_(String) NativeToString(
-        /* [in] */ Handle64 region);
+        /* [in] */ HANDLE region);
 
 public:
-    Handle64 mNativeRegion;
+    HANDLE mNativeRegion;
 
 private:
     static const Int32 MAX_POOL_SIZE;

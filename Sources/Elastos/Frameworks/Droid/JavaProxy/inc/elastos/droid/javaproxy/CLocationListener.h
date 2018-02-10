@@ -43,8 +43,8 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 jVM,
-        /* [in] */ Handle64 jInstance);
+        /* [in] */ HANDLE jVM,
+        /* [in] */ HANDLE jInstance);
 
     CARAPI OnLocationChanged(
         /* [in] */ ILocation* location);

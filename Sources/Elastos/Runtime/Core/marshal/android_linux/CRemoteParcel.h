@@ -118,10 +118,10 @@ public:
         /* [in] */ const String& str);
 
     CARAPI ReadStruct(
-        /* [out] */ Handle32* address);
+        /* [out] */ HANDLE* address);
 
     CARAPI WriteStruct(
-        /* [in] */ Handle32 value,
+        /* [in] */ HANDLE value,
         /* [in] */ Int32 size);
 
     CARAPI ReadEMuid(
@@ -137,10 +137,10 @@ public:
         /* [in] */ const EGuid& id);
 
     CARAPI ReadArrayOf(
-        /* [out] */ Handle32* array);
+        /* [out] */ HANDLE* array);
 
     CARAPI WriteArrayOf(
-        /* [in] */ Handle32 array);
+        /* [in] */ HANDLE array);
 
     CARAPI ReadArrayOfString(
         /* [out, callee] */ ArrayOf<String>** array);
@@ -149,7 +149,7 @@ public:
         /* [in] */ ArrayOf<String>* array);
 
     CARAPI ReadInterfacePtr(
-        /* [out] */ Handle32* itfPtr);
+        /* [out] */ HANDLE* itfPtr);
 
     CARAPI WriteInterfacePtr(
         /* [in] */ IInterface* value);
@@ -194,7 +194,7 @@ public:
         /* [in] */ Int32 capacity);
 
     CARAPI GetDataPayload(
-        /* [ouy] */ Handle32* buffer);
+        /* [ouy] */ HANDLE* buffer);
 
     CARAPI_(MarshalHeader*) GetMarshalHeader();
 

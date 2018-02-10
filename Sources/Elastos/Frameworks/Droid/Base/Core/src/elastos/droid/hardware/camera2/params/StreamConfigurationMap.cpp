@@ -367,7 +367,7 @@ ECode StreamConfigurationMap::GetHighSpeedVideoFpsRangesFor(
     //     size->Equals(_size, &result);
     //     if (result) {
     //         AutoPtr<Range<IInteger32> > fpsRange;
-    //         config->GetFpsRange((Handle32*)&fpsRange);
+    //         config->GetFpsRange((HANDLE*)&fpsRange);
     //         fpsRanges->Set(i, fpsRange.Get());
     //     }
     // }

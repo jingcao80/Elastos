@@ -69,9 +69,8 @@ ECode MemoryBlock::Mmap(
         flags = OsConstants::_MAP_SHARED;
     }
     // try {
-    Int64 result;
-    CLibcore::sOs->Mmap(0LL, size, prot, flags, fd, offset, &result);
-    Int32 address = (Int32)result;
+    Int64 address;
+    CLibcore::sOs->Mmap(0LL, size, prot, flags, fd, offset, &address);
     *mb = new MemoryMappedBlock(address, size);
     REFCOUNT_ADD(*mb);
     return NOERROR;

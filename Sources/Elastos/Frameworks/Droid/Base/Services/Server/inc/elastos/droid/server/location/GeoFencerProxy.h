@@ -49,7 +49,7 @@ public:
     {
     public:
         CARAPI constructor(
-            /* [in] */ Handle64 host);
+            /* [in] */ HANDLE host);
 
         CAR_INTERFACE_DECL()
 

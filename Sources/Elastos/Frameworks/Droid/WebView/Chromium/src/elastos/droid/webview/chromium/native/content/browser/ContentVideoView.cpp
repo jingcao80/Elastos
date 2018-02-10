@@ -196,7 +196,7 @@ CAR_INTERFACE_IMPL(ContentVideoView, FrameLayout, ISurfaceHolderCallback);
 
 ContentVideoView::ContentVideoView(
     /* [in] */ IContext* context,
-    /* [in] */ Handle64 nativeContentVideoView,
+    /* [in] */ HANDLE nativeContentVideoView,
     /* [in] */ ContentVideoViewClient* client)
     : mVideoWidth(0)
     , mVideoHeight(0)
@@ -496,7 +496,7 @@ Boolean ContentVideoView::IsPlaying()
 //@CalledByNative
 AutoPtr<ContentVideoView> ContentVideoView::CreateContentVideoView(
     /* [in] */ IContext* context,
-    /* [in] */ Handle64 nativeContentVideoView,
+    /* [in] */ HANDLE nativeContentVideoView,
     /* [in] */ ContentVideoViewClient* client,
     /* [in] */ Boolean legacy)
 {
@@ -640,7 +640,7 @@ ECode ContentVideoView::ReleaseAnchorView(
 }
 
 //@CalledByNative
-Handle64 ContentVideoView::GetNativeViewAndroid()
+HANDLE ContentVideoView::GetNativeViewAndroid()
 {
     return mViewAndroid->GetNativePointer();
 }
@@ -652,69 +652,69 @@ AutoPtr<ContentVideoView> ContentVideoView::NativeGetSingletonJavaContentVideoVi
 }
 
 void ContentVideoView::NativeExitFullscreen(
-    /* [in] */ Handle64 nativeContentVideoView,
+    /* [in] */ HANDLE nativeContentVideoView,
     /* [in] */ Boolean relaseMediaPlayer)
 {
     Elastos_ContentVideoView_nativeExitFullscreen(TO_IINTERFACE(this), nativeContentVideoView, relaseMediaPlayer);
 }
 
 Int32 ContentVideoView::NativeGetCurrentPosition(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     return Elastos_ContentVideoView_nativeGetCurrentPosition(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 Int32 ContentVideoView::NativeGetDurationInMilliSeconds(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     return Elastos_ContentVideoView_nativeGetDurationInMilliSeconds(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 void ContentVideoView::NativeRequestMediaMetadata(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     Elastos_ContentVideoView_nativeRequestMediaMetadata(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 Int32 ContentVideoView::NativeGetVideoWidth(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     return Elastos_ContentVideoView_nativeGetVideoWidth(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 Int32 ContentVideoView::NativeGetVideoHeight(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     return Elastos_ContentVideoView_nativeGetVideoHeight(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 Boolean ContentVideoView::NativeIsPlaying(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     return Elastos_ContentVideoView_nativeIsPlaying(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 void ContentVideoView::NativePause(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     Elastos_ContentVideoView_nativePause(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 void ContentVideoView::NativePlay(
-    /* [in] */ Handle64 nativeContentVideoView)
+    /* [in] */ HANDLE nativeContentVideoView)
 {
     Elastos_ContentVideoView_nativePlay(TO_IINTERFACE(this), nativeContentVideoView);
 }
 
 void ContentVideoView::NativeSeekTo(
-    /* [in] */ Handle64 nativeContentVideoView,
+    /* [in] */ HANDLE nativeContentVideoView,
     /* [in] */ Int32 msec)
 {
     Elastos_ContentVideoView_nativeSeekTo(TO_IINTERFACE(this), nativeContentVideoView, msec);
 }
 
 void ContentVideoView::NativeSetSurface(
-    /* [in] */ Handle64 nativeContentVideoView,
+    /* [in] */ HANDLE nativeContentVideoView,
     /* [in] */ ISurface* surface)
 {
     Elastos_ContentVideoView_nativeSetSurface(TO_IINTERFACE(this), nativeContentVideoView, TO_IINTERFACE(surface));
@@ -804,7 +804,7 @@ void ContentVideoView::OpenVideo(
 
 AutoPtr<IInterface> ContentVideoView::CreateContentVideoView(
     /* [in] */ IInterface* context,
-    /* [in] */ Handle64 nativeContentVideoView,
+    /* [in] */ HANDLE nativeContentVideoView,
     /* [in] */ IInterface* client,
     /* [in] */ Boolean legacy)
 {
@@ -838,7 +838,7 @@ void ContentVideoView::DestroyContentVideoView(
     mObj->DestroyContentVideoView(nativeViewDestroyed);
 }
 
-Handle64 ContentVideoView::GetNativeViewAndroid(
+HANDLE ContentVideoView::GetNativeViewAndroid(
     /* [in] */ IInterface* obj)
 {
     AutoPtr<ContentVideoView> mObj = (ContentVideoView*)(FrameLayout*)(IObject::Probe(obj));

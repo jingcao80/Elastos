@@ -78,9 +78,9 @@ ECode CSoundTriggerKeyphraseSoundModel::FromParcel(
     }
     AutoPtr<ArrayOf<Byte> > data;
     AutoPtr<ArrayOf<ISoundTriggerKeyphrase*> > keyphrases;
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&data))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&data))
     assert(0 && "TODO: Keyphrase.CREATOR");
-    // FAIL_RETURN(source->ReadArrayOf((Handle32*)&mKeyphrases)) //Keyphrase[] keyphrases = in.createTypedArray(Keyphrase.CREATOR);
+    // FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mKeyphrases)) //Keyphrase[] keyphrases = in.createTypedArray(Keyphrase.CREATOR);
 
     AutoPtr<CSoundTriggerKeyphraseSoundModel> newResult;
     CSoundTriggerKeyphraseSoundModel::NewByFriend(uuid, vendorUuid, data,
@@ -104,8 +104,8 @@ ECode CSoundTriggerKeyphraseSoundModel::WriteToParcel(
         FAIL_RETURN(dest->WriteInt32(str.GetLength()))
         FAIL_RETURN(dest->WriteString(str))
     }
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mData.Get()))
-    FAIL_RETURN(dest->WriteArrayOf((Handle32)mKeyphrases.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mData.Get()))
+    FAIL_RETURN(dest->WriteArrayOf((HANDLE)mKeyphrases.Get()))
     return NOERROR;
 }
 
@@ -128,8 +128,8 @@ ECode CSoundTriggerKeyphraseSoundModel::ReadFromParcel(
     else {
         mVendorUuid = NULL;
     }
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mData))
-    FAIL_RETURN(source->ReadArrayOf((Handle32*)&mKeyphrases))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mData))
+    FAIL_RETURN(source->ReadArrayOf((HANDLE*)&mKeyphrases))
 
     return NOERROR;
 }

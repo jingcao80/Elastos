@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ScreenOrientationProvider_InitCallback(Handle32 cb);
+    extern void Elastos_ScreenOrientationProvider_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -54,7 +54,7 @@ void* ScreenOrientationProvider::ElaScreenOrientationProviderCallback_Init()
     sElaScreenOrientationProviderCallback.elastos_ScreenOrientationProvider_lockOrientation = &ScreenOrientationProvider::LockOrientation;
     sElaScreenOrientationProviderCallback.elastos_ScreenOrientationProvider_unlockOrientation = &ScreenOrientationProvider::UnlockOrientation;
 
-    Elastos_ScreenOrientationProvider_InitCallback((Handle32)&sElaScreenOrientationProviderCallback);
+    Elastos_ScreenOrientationProvider_InitCallback((HANDLE)&sElaScreenOrientationProviderCallback);
     return &sElaScreenOrientationProviderCallback;
 }
 

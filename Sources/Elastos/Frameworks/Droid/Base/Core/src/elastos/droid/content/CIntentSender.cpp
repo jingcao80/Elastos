@@ -283,7 +283,7 @@ ECode CIntentSender::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&obj);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&obj);
     mTarget = IIIntentSender::Probe(obj.Get());
     return NOERROR;
 }

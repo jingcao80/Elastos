@@ -99,7 +99,7 @@ DisplayAdapter::SendDisplayDeviceEventRunnable::SendDisplayDeviceEventRunnable(
 ECode DisplayAdapter::SendDisplayDeviceEventRunnable::Run()
 {
     if (mHost->mListener)
-        mHost->mListener->OnDisplayDeviceEvent((Handle32)mDevice.Get(), mEvent);
+        mHost->mListener->OnDisplayDeviceEvent((HANDLE)mDevice.Get(), mEvent);
     return NOERROR;
 }
 

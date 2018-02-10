@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_InterceptNavigationDelegate_InitCallback(Handle32 cb);
+    extern void Elastos_InterceptNavigationDelegate_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -49,7 +49,7 @@ void* InterceptNavigationDelegate::ElaInterceptNavigationDelegateCallback_Init()
 
     sElaInterceptNavigationDelegateCallback.elastos_InterceptNavigationDelegate_shouldIgnoreNavigation = &InterceptNavigationDelegate::ShouldIgnoreNavigation;
 
-    Elastos_InterceptNavigationDelegate_InitCallback((Handle32)&sElaInterceptNavigationDelegateCallback);
+    Elastos_InterceptNavigationDelegate_InitCallback((HANDLE)&sElaInterceptNavigationDelegateCallback);
     return &sElaInterceptNavigationDelegateCallback;
 }
 

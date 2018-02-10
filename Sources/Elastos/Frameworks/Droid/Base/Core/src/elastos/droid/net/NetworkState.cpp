@@ -57,13 +57,13 @@ ECode NetworkState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mNetworkInfo = INetworkInfo::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&mLinkProperties);
+    source->ReadInterfacePtr((HANDLE*)&mLinkProperties);
     mLinkProperties = ILinkProperties::Probe(obj);
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&mNetworkCapabilities);
+    source->ReadInterfacePtr((HANDLE*)&mNetworkCapabilities);
     mNetworkCapabilities = INetworkCapabilities::Probe(obj);
     source->ReadString(&mSubscriberId);
     source->ReadString(&mNetworkId);

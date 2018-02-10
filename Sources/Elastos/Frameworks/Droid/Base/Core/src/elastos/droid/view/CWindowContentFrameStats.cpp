@@ -85,9 +85,9 @@ ECode CWindowContentFrameStats::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
     parcel->WriteInt64(mRefreshPeriodNano);
-    parcel->WriteArrayOf((Handle32)mFramesPostedTimeNano.Get());
-    parcel->WriteArrayOf((Handle32)mFramesPresentedTimeNano.Get());
-    parcel->WriteArrayOf((Handle32)mFramesReadyTimeNano.Get());
+    parcel->WriteArrayOf((HANDLE)mFramesPostedTimeNano.Get());
+    parcel->WriteArrayOf((HANDLE)mFramesPresentedTimeNano.Get());
+    parcel->WriteArrayOf((HANDLE)mFramesReadyTimeNano.Get());
     return NOERROR;
 }
 
@@ -95,9 +95,9 @@ ECode CWindowContentFrameStats::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadInt64(&mRefreshPeriodNano);
-    source->ReadArrayOf((Handle32*)&mFramesPostedTimeNano);
-    source->ReadArrayOf((Handle32*)&mFramesPresentedTimeNano);
-    source->ReadArrayOf((Handle32*)&mFramesReadyTimeNano);
+    source->ReadArrayOf((HANDLE*)&mFramesPostedTimeNano);
+    source->ReadArrayOf((HANDLE*)&mFramesPresentedTimeNano);
+    source->ReadArrayOf((HANDLE*)&mFramesReadyTimeNano);
 
     return NOERROR;
 }

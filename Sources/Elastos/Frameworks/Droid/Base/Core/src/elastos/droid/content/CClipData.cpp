@@ -392,14 +392,14 @@ ECode CClipData::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> interfaceV;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&interfaceV);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&interfaceV);
     mClipDescription  = IClipDescription::Probe(interfaceV);
 
     Int32 value;
     source->ReadInt32(&value);
     if (value != 0) {
         AutoPtr<IInterface> icon;
-        source->ReadInterfacePtr((Handle32*)(IInterface**)&icon);
+        source->ReadInterfacePtr((HANDLE*)(IInterface**)&icon);
         mIcon = IBitmap::Probe(icon);
     }
     else {
@@ -415,7 +415,7 @@ ECode CClipData::ReadFromParcel(
         source->ReadInt32(&value);
         AutoPtr<IIntent> intent;
         if (value != 0) {
-            source->ReadInterfacePtr((Handle32*)&intent);
+            source->ReadInterfacePtr((HANDLE*)&intent);
         }
         source->ReadInt32(&value);
         AutoPtr<IUri> uri;

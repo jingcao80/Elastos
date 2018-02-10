@@ -68,7 +68,7 @@ ECode ViewElastos::Destroy()
     return NOERROR;
 }
 
-Handle64 ViewElastos::GetNativePointer()
+HANDLE ViewElastos::GetNativePointer()
 {
     // ==================before translated======================
     // return mNativeViewElastos;
@@ -114,16 +114,16 @@ ECode ViewElastos::DecrementKeepScreenOnCount()
     return NOERROR;
 }
 
-Handle64 ViewElastos::NativeInit(
-    /* [in] */ Handle64 windowPtr)
+HANDLE ViewElastos::NativeInit(
+    /* [in] */ HANDLE windowPtr)
 {
     return Elastos_ViewAndroid_nativeInit(TO_IINTERFACE(this), windowPtr);
 }
 
 ECode ViewElastos::NativeDestroy(
-    /* [in] */ Handle64 nativeViewElastos)
+    /* [in] */ HANDLE nativeViewElastos)
 {
-    Elastos_ViewAndroid_nativeDestroy(TO_IINTERFACE(this), (Handle64)nativeViewElastos);
+    Elastos_ViewAndroid_nativeDestroy(TO_IINTERFACE(this), (HANDLE)nativeViewElastos);
     return NOERROR;
 }
 

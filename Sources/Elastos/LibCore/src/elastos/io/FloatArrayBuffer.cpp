@@ -48,7 +48,7 @@ ECode FloatArrayBuffer::constructor(
 }
 
 ECode FloatArrayBuffer::GetPrimitiveArray(
-    /* [out] */ Handle64* arrayHandle)
+    /* [out] */ HANDLE* arrayHandle)
 {
     AutoPtr<ArrayOf<Float> > arrayTmp;
     GetArray((ArrayOf<Float>**)&arrayTmp);
@@ -58,7 +58,7 @@ ECode FloatArrayBuffer::GetPrimitiveArray(
         return NOERROR;
     }
     Float* primitiveArray = arrayTmp->GetPayload();
-    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    *arrayHandle = reinterpret_cast<HANDLE>(primitiveArray);
     return NOERROR;
 }
 

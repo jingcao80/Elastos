@@ -413,10 +413,10 @@ module
 
         // add for JNI
         GetNative(
-            [out] Handle64* native);
+            [out] HANDLE* native);
 
         SetNative(
-            [in] Handle64 native);
+            [in] HANDLE native);
     }
 
     [deprecated]

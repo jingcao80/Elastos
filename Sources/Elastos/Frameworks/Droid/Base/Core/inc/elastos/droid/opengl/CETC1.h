@@ -50,7 +50,7 @@ private:
             /* [in] */ Boolean* rst)
         {
             if (mBuffer) {
-                Handle32 dataTmp;
+                HANDLE dataTmp;
                 FAIL_RETURN(CETC1::GetPointer(mBuffer, &mRemaining, &dataTmp));
                 mData = reinterpret_cast<void*>(dataTmp);
                 if (mData == NULL) {
@@ -134,7 +134,7 @@ private:
     static CARAPI GetPointer(
         /* [in] */ Elastos::IO::IBuffer* inBuf,
         /* [in, out] */ Int32 *remaining,
-        /* [out] */ Handle32* rst);
+        /* [out] */ HANDLE* rst);
 };
 
 } // namespace Opengl

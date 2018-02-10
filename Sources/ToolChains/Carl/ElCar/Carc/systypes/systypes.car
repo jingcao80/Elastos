@@ -25,11 +25,7 @@ library
 
     typedef [dummytype] Int32 MemorySize;
 
-    typedef [dummytype] Int32 Handle32;
-    typedef [dummytype] Int64 Handle64;
-
-    typedef [dummytype] Handle32* PHandle32;
-    typedef [dummytype] Handle64* PHandle64;
+    typedef [dummytype] HANDLE* PHANDLE;
 
     interface IInterface {
     }

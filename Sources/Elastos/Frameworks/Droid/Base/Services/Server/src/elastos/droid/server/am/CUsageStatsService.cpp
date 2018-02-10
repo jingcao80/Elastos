@@ -386,7 +386,7 @@ AutoPtr<IParcel> CUsageStatsService::GetParcelForFile(
     CParcel::New((IParcel**)&in);
     if (raw != NULL) {
         android::Parcel* nativeParcel;
-        in->GetElementPayload((Handle32*)&nativeParcel);
+        in->GetElementPayload((HANDLE*)&nativeParcel);
         Int32 length = raw->GetLength();
         nativeParcel->setDataSize(length);
         nativeParcel->setDataPosition(0);

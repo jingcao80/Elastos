@@ -240,7 +240,7 @@ ECode SelectFileDialog::OnIntentCompleted(
 }
 
 SelectFileDialog::SelectFileDialog(
-    /* [in] */ Handle64 nativeSelectFileDialog)
+    /* [in] */ HANDLE nativeSelectFileDialog)
     : mNativeSelectFileDialog(nativeSelectFileDialog)
 {
     // ==================before translated======================
@@ -591,7 +591,7 @@ Boolean SelectFileDialog::AcceptSpecificType(
 }
 
 AutoPtr<IInterface> SelectFileDialog::Create(
-    /* [in] */ Handle64 nativeSelectFileDialog)
+    /* [in] */ HANDLE nativeSelectFileDialog)
 {
     // ==================before translated======================
     // return new SelectFileDialog(nativeSelectFileDialog);
@@ -601,18 +601,18 @@ AutoPtr<IInterface> SelectFileDialog::Create(
 }
 
 ECode SelectFileDialog::NativeOnFileSelected(
-    /* [in] */ Handle64 nativeSelectFileDialogImpl,
+    /* [in] */ HANDLE nativeSelectFileDialogImpl,
     /* [in] */ const String& filePath,
     /* [in] */ const String& displayName)
 {
-    Elastos_SelectFileDialog_nativeOnFileSelected(TO_IINTERFACE(this), (Handle64)nativeSelectFileDialogImpl, filePath, displayName);
+    Elastos_SelectFileDialog_nativeOnFileSelected(TO_IINTERFACE(this), (HANDLE)nativeSelectFileDialogImpl, filePath, displayName);
     return NOERROR;
 }
 
 ECode SelectFileDialog::NativeOnFileNotSelected(
-    /* [in] */ Handle64 nativeSelectFileDialogImpl)
+    /* [in] */ HANDLE nativeSelectFileDialogImpl)
 {
-    Elastos_SelectFileDialog_nativeOnFileNotSelected(TO_IINTERFACE(this), (Handle64)nativeSelectFileDialogImpl);
+    Elastos_SelectFileDialog_nativeOnFileNotSelected(TO_IINTERFACE(this), (HANDLE)nativeSelectFileDialogImpl);
     return NOERROR;
 }
 

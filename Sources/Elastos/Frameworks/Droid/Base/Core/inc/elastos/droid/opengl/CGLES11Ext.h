@@ -642,14 +642,14 @@ private:
 
     CARAPI GetPointer(
         /* [in] */ IBuffer* buffer,
-        /* [in, out] */ Handle64* array,
+        /* [in, out] */ HANDLE* array,
         /* [in, out] */ Int32* remaining,
         /* [in, out] */ Int32* offset,
-        /* [out] */ Handle64* rst);
+        /* [out] */ HANDLE* rst);
 
     CARAPI GetDirectBufferPointer(
         /* [in] */ IBuffer* buffer,
-        /* [out] */ Handle64* result);
+        /* [out] */ HANDLE* result);
 
 private:
     static const Int32 GL_BYTE = IGLES10::_GL_BYTE;

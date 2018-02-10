@@ -26,7 +26,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ContentUriUtils_InitCallback(Handle32 cb);
+    extern void Elastos_ContentUriUtils_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -51,7 +51,7 @@ void* ContentUriUtils::ElaContentUriUtilsCallback_Init()
     sElaContentUriUtilsCallback.elastos_ContentUriUtils_openContentUriForRead = &ContentUriUtils::OpenContentUriForRead;
     sElaContentUriUtilsCallback.elastos_ContentUriUtils_contentUriExists = &ContentUriUtils::ContentUriExists;
 
-    Elastos_ContentUriUtils_InitCallback((Handle32)&sElaContentUriUtilsCallback);
+    Elastos_ContentUriUtils_InitCallback((HANDLE)&sElaContentUriUtilsCallback);
     return &sElaContentUriUtilsCallback;
 }
 

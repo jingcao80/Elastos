@@ -789,7 +789,7 @@ ECode CWindowManagerLayoutParams::ReadFromParcel(
     source->ReadFloat(&mScreenBrightness);
     source->ReadFloat(&mButtonBrightness);
     source->ReadInt32(&mRotationAnimation);
-    source->ReadInterfacePtr((Handle32*)&mToken);
+    source->ReadInterfacePtr((HANDLE*)&mToken);
     source->ReadString(&mPackageName);
     TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mTitle);
     source->ReadInt32(&mScreenOrientation);

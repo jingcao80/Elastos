@@ -127,7 +127,7 @@ ECode CParcel::ReadString(
 }
 
 ECode CParcel::ReadStruct(
-    /* [out] */ Handle32* addr)
+    /* [out] */ HANDLE* addr)
 {
     return mData->ReadStruct(addr);
 }
@@ -145,7 +145,7 @@ ECode CParcel::ReadEGuid(
 }
 
 ECode CParcel::ReadArrayOf(
-    /* [out] */ Handle32* array)
+    /* [out] */ HANDLE* array)
 {
     return mData->ReadArrayOf(array);
 }
@@ -157,7 +157,7 @@ ECode CParcel::ReadArrayOfString(
 }
 
 ECode CParcel::ReadInterfacePtr(
-    /* [out] */ Handle32* itfPtr)
+    /* [out] */ HANDLE* itfPtr)
 {
     return mData->ReadInterfacePtr(itfPtr);
 }
@@ -231,7 +231,7 @@ ECode CParcel::WriteString(
 }
 
 ECode CParcel::WriteStruct(
-    /* [in] */ Handle32 value,
+    /* [in] */ HANDLE value,
     /* [in] */ Int32 size)
 {
     return mData->WriteStruct(value, size);
@@ -250,7 +250,7 @@ ECode CParcel::WriteEGuid(
 }
 
 ECode CParcel::WriteArrayOf(
-    /* [in] */ Handle32 array)
+    /* [in] */ HANDLE array)
 {
     return mData->WriteArrayOf(array);
 }
@@ -298,7 +298,7 @@ ECode CParcel::SetDataPosition(
 }
 
 ECode CParcel::GetDataPayload(
-    /* [out] */ Handle32* buffer)
+    /* [out] */ HANDLE* buffer)
 {
     return mData->GetDataPayload(buffer);
 }
@@ -572,12 +572,12 @@ ECode CParcel::ReadTypedList(
     Int32 i = 0;
     for (; i < M && i < N; i++) {
         AutoPtr<IInterface> item;
-        source->ReadInterfacePtr((Handle32*)&item);
+        source->ReadInterfacePtr((HANDLE*)&item);
         list->Set(i, item);
     }
     for (; i < N; i++) {
         AutoPtr<IInterface> item;
-        source->ReadInterfacePtr((Handle32*)&item);
+        source->ReadInterfacePtr((HANDLE*)&item);
         list->Add(item);
     }
     for (; i < M; i++) {
@@ -615,7 +615,7 @@ AutoPtr<ArrayOf<ICharSequence*> > CParcel::ReadCharSequenceArray(
 
         for (Int32 i = 0 ; i < length ; i++) {
             AutoPtr<ICharSequence> csq;
-            source->ReadInterfacePtr((Handle32*)&csq);
+            source->ReadInterfacePtr((HANDLE*)&csq);
             array->Set(i, csq);
         }
     }

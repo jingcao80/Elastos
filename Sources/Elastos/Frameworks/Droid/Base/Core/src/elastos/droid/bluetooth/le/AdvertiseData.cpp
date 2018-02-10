@@ -275,7 +275,7 @@ ECode AdvertiseData::WriteToParcel(
                 iByte->GetValue(&bValue);
                 arrayByte->Set(i, bValue);
             }
-            dest->WriteArrayOf((Handle32)(arrayByte.Get()));
+            dest->WriteArrayOf((HANDLE)(arrayByte.Get()));
         }
     }
     Int32 mapSize;
@@ -309,7 +309,7 @@ ECode AdvertiseData::WriteToParcel(
                 iByte->GetValue(&bValue);
                 arrayByte->Set(i, bValue);
             }
-            dest->WriteArrayOf((Handle32)(arrayByte.Get()));
+            dest->WriteArrayOf((HANDLE)(arrayByte.Get()));
         }
     }
     Boolean bPL = FALSE, bDN = FALSE;
@@ -324,7 +324,7 @@ ECode AdvertiseData::ReadFromParcel(
     AutoPtr<Builder> builder = new Builder();
     //List<ParcelUuid> uuids = in.readArrayList(ParcelUuid.class.getClassLoader());
     AutoPtr<IInterface> listInterface;
-    in->ReadInterfacePtr((Handle32*)(IInterface**)&listInterface);
+    in->ReadInterfacePtr((HANDLE*)(IInterface**)&listInterface);
     AutoPtr<IList> uuids = IList::Probe(listInterface.Get());
     Int32 listSize;
     uuids->GetSize(&listSize);
@@ -348,7 +348,7 @@ ECode AdvertiseData::ReadFromParcel(
             in->ReadInt32(&manufacturerDataLength);
             //byte[] manufacturerData = new byte[manufacturerDataLength];
             AutoPtr<ArrayOf<Byte> > manufacturerData = ArrayOf<Byte>::Alloc(manufacturerDataLength);
-            in->ReadArrayOf((Handle32*)(&manufacturerData));
+            in->ReadArrayOf((HANDLE*)(&manufacturerData));
             builder->AddManufacturerData(manufacturerId, manufacturerData);
         }
     }
@@ -357,7 +357,7 @@ ECode AdvertiseData::ReadFromParcel(
     for (Int32 i = 0; i < serviceDataSize; ++i) {
         //ParcelUuid serviceDataUuid = in.readParcelable( ParcelUuid.class.getClassLoader());
         AutoPtr<IInterface> itfp;
-        in->ReadInterfacePtr((Handle32*)(IInterface**)&itfp);
+        in->ReadInterfacePtr((HANDLE*)(IInterface**)&itfp);
         AutoPtr<IParcelUuid> serviceDataUuid = IParcelUuid::Probe(itfp);
         Int32 flag;
         in->ReadInt32(&flag);
@@ -366,8 +366,8 @@ ECode AdvertiseData::ReadFromParcel(
             in->ReadInt32(&serviceDataLength);
             //byte[] serviceData = new byte[serviceDataLength];
             AutoPtr<ArrayOf<Byte> > serviceData = ArrayOf<Byte>::Alloc(serviceDataLength);
-            //in->ReadByteArray((Handle32*)&serviceData);
-            in->ReadArrayOf((Handle32*)&serviceData);
+            //in->ReadByteArray((HANDLE*)&serviceData);
+            in->ReadArrayOf((HANDLE*)&serviceData);
             builder->AddServiceData(serviceDataUuid, serviceData);
         }
     }

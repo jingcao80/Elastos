@@ -38,7 +38,7 @@ CAR_INTERFACE_IMPL_2(CMediaProjectionManager, Object, IIMediaProjectionManager, 
 CAR_OBJECT_IMPL(CMediaProjectionManager)
 
 ECode CMediaProjectionManager::constructor(
-    /* [in] */ Handle64 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (MediaProjectionManagerService*)host;
     return NOERROR;
@@ -89,7 +89,7 @@ ECode CMediaProjectionManager::CreateProjection(
     Int64 callingToken = Binder::ClearCallingIdentity();
     AutoPtr<CMediaProjection> projection;
     // try {
-    CMediaProjection::NewByFriend(type, uid, packageName, (Handle64)this, (CMediaProjection**)&projection);
+    CMediaProjection::NewByFriend(type, uid, packageName, (HANDLE)this, (CMediaProjection**)&projection);
     if (isPermanentGrant) {
         mHost->mAppOps->SetMode(IAppOpsManager::OP_PROJECT_MEDIA,
                 projection->mUid, projection->mPackageName, IAppOpsManager::MODE_ALLOWED);

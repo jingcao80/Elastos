@@ -124,13 +124,13 @@ private:
         /* [in] */ Boolean success,
         /* [in] */ IBitmap* bitmap);
 
-    CARAPI_(Handle64) NativeInit();
+    CARAPI_(HANDLE) NativeInit();
 
     CARAPI_(void) NativeDestroy(
-        /* [in] */ Handle64 nativeContentReadbackHandler);
+        /* [in] */ HANDLE nativeContentReadbackHandler);
 
     CARAPI_(void) NativeGetContentBitmap(
-        /* [in] */ Handle64 nativeContentReadbackHandler,
+        /* [in] */ HANDLE nativeContentReadbackHandler,
         /* [in] */ Int32 readback_id,
         /* [in] */ Float scale,
         /* [in] */ /*BitmapConfig*/Int32 config,
@@ -141,15 +141,15 @@ private:
         /* [in] */ IInterface* contentViewCore);
 
     CARAPI_(void) NativeGetCompositorBitmap(
-        /* [in] */ Handle64 nativeContentReadbackHandler,
+        /* [in] */ HANDLE nativeContentReadbackHandler,
         /* [in] */ Int32 readback_id,
-        /* [in] */ Handle64 nativeWindowAndroid);
+        /* [in] */ HANDLE nativeWindowAndroid);
 
 private:
     Int32 mNextReadbackId;
     AutoPtr<ISparseArray> mGetBitmapRequests;// <GetBitmapCallback>
 
-    Handle64 mNativeContentReadbackHandler;
+    HANDLE mNativeContentReadbackHandler;
 };
 
 } // namespace Browser

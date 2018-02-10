@@ -26,8 +26,8 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ColorChooserAndroid_nativeOnColorChosen(IInterface* caller,Handle64 nativeColorChooserAndroid,Int32 color);
-    extern void Elastos_ColorChooserAndroid_InitCallback(Handle64 cb);
+    extern void Elastos_ColorChooserAndroid_nativeOnColorChosen(IInterface* caller,HANDLE nativeColorChooserAndroid,Int32 color);
+    extern void Elastos_ColorChooserAndroid_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -43,7 +43,7 @@ namespace Components {
 struct ElaColorChooserAndroidCallback
 {
     void (*elastos_ColorChooserAndroid_closeColorChooser)(IInterface* obj);
-    AutoPtr<IInterface> (*elastos_ColorChooserAndroid_createColorChooserAndroid)(Handle64 nativeColorChooserAndroid, IInterface* contentViewCore, Int32 initialColor, ArrayOf<IInterface*>* suggestions);
+    AutoPtr<IInterface> (*elastos_ColorChooserAndroid_createColorChooserAndroid)(HANDLE nativeColorChooserAndroid, IInterface* contentViewCore, Int32 initialColor, ArrayOf<IInterface*>* suggestions);
     AutoPtr<ArrayOf<IInterface*> > (*elastos_ColorChooserAndroid_createColorSuggestionArray)(Int32 size);
     void (*elastos_ColorChooserAndroid_addToColorSuggestionArray)(ArrayOf<IInterface*>* array, Int32 index, Int32 color, const String& label);
 };
@@ -57,7 +57,7 @@ void* ColorChooserElastos::ElaColorChooserElastosCallback_Init()
     sElaColorChooserAndroidCallback.elastos_ColorChooserAndroid_createColorSuggestionArray = &ColorChooserElastos::CreateColorSuggestionArray;
     sElaColorChooserAndroidCallback.elastos_ColorChooserAndroid_addToColorSuggestionArray = &ColorChooserElastos::AddToColorSuggestionArray;
 
-    Elastos_ColorChooserAndroid_InitCallback((Handle64)&sElaColorChooserAndroidCallback);
+    Elastos_ColorChooserAndroid_InitCallback((HANDLE)&sElaColorChooserAndroidCallback);
     return &sElaColorChooserAndroidCallback;
 }
 

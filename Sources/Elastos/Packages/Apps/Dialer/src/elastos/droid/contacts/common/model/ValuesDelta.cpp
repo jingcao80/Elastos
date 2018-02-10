@@ -668,10 +668,10 @@ ECode ValuesDelta::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     AutoPtr<IInterface> before;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&before);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&before);
     mBefore = IContentValues::Probe(before);
     AutoPtr<IInterface> after;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&after);
+    source->ReadInterfacePtr((HANDLE*)(IInterface**)&after);
     mAfter = IContentValues::Probe(after);
     source->ReadString(&mIdColumn);
     return NOERROR;

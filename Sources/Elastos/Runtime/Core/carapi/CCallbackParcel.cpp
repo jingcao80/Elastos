@@ -580,7 +580,7 @@ ECode CCallbackParcel::ReadString(
 }
 
 ECode CCallbackParcel::ReadStruct(
-    /* [out] */ Handle32* addr)
+    /* [out] */ HANDLE* addr)
 {
     return E_NOT_IMPLEMENTED;
 }
@@ -598,13 +598,13 @@ ECode CCallbackParcel::ReadEGuid(
 }
 
 ECode CCallbackParcel::ReadInterfacePtr(
-    /* [out] */ Handle32* itfPtr)
+    /* [out] */ HANDLE* itfPtr)
 {
     return E_NOT_IMPLEMENTED;
 }
 
 ECode CCallbackParcel::ReadArrayOf(
-    /* [out] */ Handle32* array)
+    /* [out] */ HANDLE* array)
 {
     return E_NOT_IMPLEMENTED;
 }
@@ -682,7 +682,7 @@ ECode CCallbackParcel::WriteString(
 }
 
 ECode CCallbackParcel::WriteStruct(
-    /* [in] */ Handle32 value,
+    /* [in] */ HANDLE value,
     /* [in] */ Int32 size)
 {
     return WriteValue((PVoid)value, Type_Struct, size);
@@ -707,7 +707,7 @@ ECode CCallbackParcel::WriteInterfacePtr(
 }
 
 ECode CCallbackParcel::WriteArrayOf(
-    /* [in] */ Handle32 pArray)
+    /* [in] */ HANDLE pArray)
 {
     Int32 size = pArray != 0 ? sizeof(CarQuintet) + ((CarQuintet*)pArray)->mSize : 0;
     return WriteValue((PVoid)pArray, Type_ArrayOf, size);
@@ -752,11 +752,11 @@ ECode CCallbackParcel::SetDataPosition(
 }
 
 ECode CCallbackParcel::GetDataPayload(
-    /* [out] */ Handle32* buffer)
+    /* [out] */ HANDLE* buffer)
 {
     if (NULL == buffer) return E_INVALID_ARGUMENT;
 
-    *buffer = (Handle32)mElemBuf;
+    *buffer = (HANDLE)mElemBuf;
 
     return NOERROR;
 }

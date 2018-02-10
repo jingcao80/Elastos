@@ -68,7 +68,7 @@ ECode CAccountManagerAmsResponse::OnError(
 }
 
 ECode CAccountManagerAmsResponse::constructor (
-    /* [in] */ Handle32 host)
+    /* [in] */ HANDLE host)
 {
     mHost = (CAccountManager::AmsTask*)host;
     return NOERROR;

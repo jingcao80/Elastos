@@ -103,7 +103,7 @@ ECode CActivityManagerRecentTaskInfo::ReadFromParcel(
     Int32 ival;
     source->ReadInt32(&ival);
     if (ival > 0) {
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mBaseIntent = IIntent::Probe(obj);
     }
     else {
@@ -111,7 +111,7 @@ ECode CActivityManagerRecentTaskInfo::ReadFromParcel(
     }
 
     obj = NULL;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mOrigActivity = IComponentName::Probe(obj);
 
     TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
@@ -120,7 +120,7 @@ ECode CActivityManagerRecentTaskInfo::ReadFromParcel(
     source->ReadInt32(&ival);
     if (ival > 0) {
         obj = NULL;
-        source->ReadInterfacePtr((Handle32*)&obj);
+        source->ReadInterfacePtr((HANDLE*)&obj);
         mTaskDescription = IActivityManagerTaskDescription::Probe(obj);
     }
     else {

@@ -315,7 +315,7 @@ ECode CRemoteParcel::WriteString(
 }
 
 ECode CRemoteParcel::WriteStruct(
-    /* [in] */ Handle32 value,
+    /* [in] */ HANDLE value,
     /* [in] */ Int32 size)
 {
     if (value == 0) {
@@ -342,7 +342,7 @@ ECode CRemoteParcel::WriteEGuid(
 }
 
 ECode CRemoteParcel::WriteArrayOf(
-    /* [in] */ Handle32 array)
+    /* [in] */ HANDLE array)
 {
     return WriteArrayOfInner((PCARQUINTET)array);
 }
@@ -676,14 +676,14 @@ ECode CRemoteParcel::ReadString(
 }
 
 ECode CRemoteParcel::ReadStruct(
-    /* [out] */ Handle32* address)
+    /* [out] */ HANDLE* address)
 {
     if (address == NULL) return E_INVALID_ARGUMENT;
 
     Int32 tag;
     ECode ec = ReadInt32(&tag);
     if (FAILED(ec) || tag == MSH_NULL) {
-        *address = (Handle32)NULL;
+        *address = (HANDLE)NULL;
         return ec;
     }
 
@@ -715,7 +715,7 @@ ECode CRemoteParcel::ReadEGuid(
 }
 
 ECode CRemoteParcel::ReadArrayOf(
-    /* [out] */ Handle32* array)
+    /* [out] */ HANDLE* array)
 {
     if (array == NULL) return E_INVALID_ARGUMENT;
 
@@ -850,7 +850,7 @@ ECode CRemoteParcel::Read(
 }
 
 ECode CRemoteParcel::ReadInterfacePtr(
-    /* [out] */ Handle32* itfPtr)
+    /* [out] */ HANDLE* itfPtr)
 {
     UInt32 tag;
     ECode ec = ReadAligned(&tag);
@@ -1237,9 +1237,9 @@ ECode CRemoteParcel::SetDataPosition(
 }
 
 ECode CRemoteParcel::GetDataPayload(
-    /* [out] */ Handle32* buffer)
+    /* [out] */ HANDLE* buffer)
 {
-    *buffer = (Handle32)mData;
+    *buffer = (HANDLE)mData;
     return NOERROR;
 }
 

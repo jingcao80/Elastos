@@ -52,7 +52,7 @@ public:
     /**
       * @return The pointer to the underlying native counterpart.
       */
-    virtual CARAPI_(Handle64) GetNative();
+    virtual CARAPI_(HANDLE) GetNative();
 
     static CARAPI_(void*) ElaInterstitialPageDelegateElastosCallback_Init();
 
@@ -105,17 +105,17 @@ private:
     // @CalledByNative
     CARAPI OnNativeDestroyed();
 
-    CARAPI_(Handle64) NativeInit(
+    CARAPI_(HANDLE) NativeInit(
         /* [in] */ const String& htmlContent);
 
     CARAPI NativeProceed(
-        /* [in] */ Handle64 nativeInterstitialPageDelegateElastos);
+        /* [in] */ HANDLE nativeInterstitialPageDelegateElastos);
 
     CARAPI NativeDontProceed(
-        /* [in] */ Handle64 nativeInterstitialPageDelegateElastos);
+        /* [in] */ HANDLE nativeInterstitialPageDelegateElastos);
 
 private:
-    Handle64 mNativePtr;
+    HANDLE mNativePtr;
 };
 
 } // namespace Browser

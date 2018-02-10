@@ -31,11 +31,16 @@ namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expect, IInterface* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, IInterface* expect, IInterface* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -43,11 +48,16 @@ static Boolean CompareAndSwapObject(volatile int32_t* address, IInterface* expec
     return (ret == 0);
 }
 
-static Boolean CompareAndSwapObject(volatile int32_t* address, Object* expect, Object* update)
+static Boolean CompareAndSwapObject(volatile uintptr_t* address, Object* expect, Object* update)
 {
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
+#if defined(_arm)
     int ret = android_atomic_release_cas((int32_t)expect,
-            (int32_t)update, address);
+            (int32_t)update, (int32_t*)address);
+#elif defined(_aarch64)
+    int ret = !__sync_bool_compare_and_swap(address,
+            (uintptr_t)expect, (uintptr_t)update);
+#endif
     if (ret == 0) {
         REFCOUNT_ADD(update)
         REFCOUNT_RELEASE(expect)
@@ -78,7 +88,7 @@ Boolean CConcurrentLinkedQueue::Node::CasItem(
     /* [in] */ IInterface* cmp,
     /* [in] */ IInterface* val)
 {
-    return CompareAndSwapObject((volatile int32_t*)&mItem, cmp, val);
+    return CompareAndSwapObject((volatile uintptr_t*)&mItem, cmp, val);
 }
 
 void CConcurrentLinkedQueue::Node::LazySetNext(
@@ -91,7 +101,7 @@ Boolean CConcurrentLinkedQueue::Node::CasNext(
     /* [in] */ Node* cmp,
     /* [in] */ Node* val)
 {
-    return CompareAndSwapObject((volatile int32_t*)&mNext, (Object*)cmp, (Object*)val);
+    return CompareAndSwapObject((volatile uintptr_t*)&mNext, (Object*)cmp, (Object*)val);
 }
 
 
@@ -622,14 +632,14 @@ Boolean CConcurrentLinkedQueue::CasTail(
     /* [in] */ Node* cmp,
     /* [in] */ Node* val)
 {
-    return CompareAndSwapObject((volatile int32_t*)&mTail, (Object*)cmp, (Object*)val);
+    return CompareAndSwapObject((volatile uintptr_t*)&mTail, (Object*)cmp, (Object*)val);
 }
 
 Boolean CConcurrentLinkedQueue::CasHead(
     /* [in] */ Node* cmp,
     /* [in] */ Node* val)
 {
-    return CompareAndSwapObject((volatile int32_t*)&mHead, (Object*)cmp, (Object*)val);
+    return CompareAndSwapObject((volatile uintptr_t*)&mHead, (Object*)cmp, (Object*)val);
 }
 
 ECode CConcurrentLinkedQueue::Equals(

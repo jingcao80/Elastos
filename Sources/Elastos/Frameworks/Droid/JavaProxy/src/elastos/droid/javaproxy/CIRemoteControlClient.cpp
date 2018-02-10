@@ -40,8 +40,8 @@ CIRemoteControlClient::~CIRemoteControlClient()
 }
 
 ECode CIRemoteControlClient::constructor(
-    /* [in] */ Handle64 jVM,
-    /* [in] */ Handle64 jInstance)
+    /* [in] */ HANDLE jVM,
+    /* [in] */ HANDLE jInstance)
 {
     mJVM = (JavaVM*)jVM;
     mJInstance = (jobject)jInstance;
@@ -79,7 +79,7 @@ ECode CIRemoteControlClient::InformationRequestForDisplay(
         return NOERROR;
     }
 
-    Handle64 jrcd;
+    HANDLE jrcd;
     crcd->GetJavaInstance(&jrcd);
 
     JNIEnv* env;
@@ -129,7 +129,7 @@ ECode CIRemoteControlClient::PlugRemoteControlDisplay(
         return NOERROR;
     }
 
-    Handle64 jrcd;
+    HANDLE jrcd;
     crcd->GetJavaInstance(&jrcd);
 
     JNIEnv* env;
@@ -157,7 +157,7 @@ ECode CIRemoteControlClient::UnplugRemoteControlDisplay(
         return NOERROR;
     }
 
-    Handle64 jrcd;
+    HANDLE jrcd;
     crcd->GetJavaInstance(&jrcd);
 
     JNIEnv* env;
@@ -188,7 +188,7 @@ ECode CIRemoteControlClient::SetBitmapSizeForDisplay(
         return NOERROR;
     }
 
-    Handle64 jrcd;
+    HANDLE jrcd;
     crcd->GetJavaInstance(&jrcd);
 
     JNIEnv* env;
@@ -218,7 +218,7 @@ ECode CIRemoteControlClient::SetWantsSyncForDisplay(
         return NOERROR;
     }
 
-    Handle64 jrcd;
+    HANDLE jrcd;
     crcd->GetJavaInstance(&jrcd);
 
     JNIEnv* env;
@@ -248,7 +248,7 @@ ECode CIRemoteControlClient::EnableRemoteControlDisplay(
         return NOERROR;
     }
 
-    Handle64 jrcd;
+    HANDLE jrcd;
     crcd->GetJavaInstance(&jrcd);
 
     JNIEnv* env;

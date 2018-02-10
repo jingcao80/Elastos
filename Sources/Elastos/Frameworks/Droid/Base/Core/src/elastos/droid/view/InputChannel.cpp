@@ -144,7 +144,7 @@ ECode InputChannel::Dup(
 }
 
 ECode InputChannel::GetNativeInputChannel(
-    /* [out] */ Handle64* ptr)
+    /* [out] */ HANDLE* ptr)
 {
     VALIDATE_NOT_NULL(ptr);
     *ptr = mNative;
@@ -173,12 +173,12 @@ ECode InputChannel::NativeOpenInputChannelPair(
     NativeInputChannel* tmpServer = new NativeInputChannel(serverChannel);
     AutoPtr<IInputChannel> serverChannelObj;
     CInputChannel::New((IInputChannel**)&serverChannelObj);
-    ((InputChannel*)serverChannelObj.Get())->mNative = reinterpret_cast<Handle64>(tmpServer);
+    ((InputChannel*)serverChannelObj.Get())->mNative = reinterpret_cast<HANDLE>(tmpServer);
 
     NativeInputChannel* tmpClient = new NativeInputChannel(clientChannel);
     AutoPtr<IInputChannel> clientChannelObj;
     CInputChannel::New((IInputChannel**)&clientChannelObj);
-    ((InputChannel*)clientChannelObj.Get())->mNative = reinterpret_cast<Handle64>(tmpClient);
+    ((InputChannel*)clientChannelObj.Get())->mNative = reinterpret_cast<HANDLE>(tmpClient);
 
     rArray->Set(0, serverChannelObj);
     rArray->Set(1, clientChannelObj);
@@ -231,7 +231,7 @@ ECode InputChannel::NativeReadFromParcel(
 
     if (in != NULL) {
         android::Parcel* parcel;
-        in->GetDataPayload((Handle32*)&parcel);
+        in->GetDataPayload((HANDLE*)&parcel);
         Boolean isInitialized = parcel->readInt32();
         if (isInitialized) {
             String8 name = parcel->readString8();
@@ -245,7 +245,7 @@ ECode InputChannel::NativeReadFromParcel(
 
             android::InputChannel* inputChannel = new android::InputChannel(name, dupFd);
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
-            mNative = reinterpret_cast<Handle64>(nativeInputChannel);
+            mNative = reinterpret_cast<HANDLE>(nativeInputChannel);
         }
     }
     return NOERROR;
@@ -256,7 +256,7 @@ ECode InputChannel::NativeWriteToParcel(
 {
     if (dest) {
         android::Parcel* parcel;
-        dest->GetDataPayload((Handle32*)&parcel);
+        dest->GetDataPayload((HANDLE*)&parcel);
         if (0 != mNative) {
             NativeInputChannel* pNative = reinterpret_cast<NativeInputChannel*>(mNative);
             android::sp<android::InputChannel> inputChannel = pNative->getInputChannel();
@@ -283,7 +283,7 @@ ECode InputChannel::NativeDup(
     if (nativeInputChannel) {
         InputChannel* impl= (InputChannel*)otherObj;
         NativeInputChannel* otherChannel = new NativeInputChannel(nativeInputChannel->getInputChannel()->dup());
-        impl->mNative =reinterpret_cast<Handle64>(otherChannel);
+        impl->mNative =reinterpret_cast<HANDLE>(otherChannel);
     }
     return NOERROR;
 }

@@ -75,7 +75,7 @@ module
 
         //Please remaining GetPrimitiveArray, don't delete !!! zhangjingcheng
         GetPrimitiveArray(
-             [out] Handle64* offset);
+             [out] HANDLE* offset);
 
         GetArray(
             [out] IArrayOf** array);
@@ -268,7 +268,7 @@ module
          * TODO: make this final at the cost of loads of extra constructors? [how many?]
          */
         GetEffectiveDirectAddress(
-            [out] Handle64* effectiveDirectAddress);
+            [out] HANDLE* effectiveDirectAddress);
     }
 
     } // namespace IO

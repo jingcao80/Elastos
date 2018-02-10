@@ -113,10 +113,10 @@ library
             [in] String str);
 
         ReadStruct(
-            [out] Handle32 *address);
+            [out] HANDLE *address);
 
         WriteStruct(
-            [in] Handle32 value,
+            [in] HANDLE value,
             [in] Int32 size);
 
         ReadEMuid(
@@ -132,10 +132,10 @@ library
             [in] EGuid id);
 
         ReadArrayOf(
-            [out] Handle32 *array);
+            [out] HANDLE *array);
 
         WriteArrayOf(
-            [in] Handle32 array);
+            [in] HANDLE array);
 
         ReadArrayOfString(
             [out, callee] ArrayOf<String>* array);
@@ -144,7 +144,7 @@ library
             [in] ArrayOf<String>* array);
 
         ReadInterfacePtr(
-            [out] Handle32 *itfpp);
+            [out] HANDLE *itfpp);
 
         WriteInterfacePtr(
             [in] IInterface* value);
@@ -177,7 +177,7 @@ library
             [in] Int32 position);
 
         GetDataPayload(
-            [out] Handle32* buffer);
+            [out] HANDLE* buffer);
 
         GetDataSize(
             [out] Int32* size);

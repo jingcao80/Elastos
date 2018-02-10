@@ -101,6 +101,9 @@ void GenerateTypeString(
         case Type_PVoid:
             strcat(pszBuf, "PVoid");
             break;
+        case Type_HANDLE:
+            strcat(pszBuf, "HANDLE");
+            break;
         case Type_ECode:
             strcat(pszBuf, "ECode");
             break;
@@ -254,6 +257,9 @@ void GenerateTypeStringForParam(
             break;
         case Type_PVoid:
             strcat(pszBuf, "PVoid");
+            break;
+        case Type_HANDLE:
+            strcat(pszBuf, "HANDLE");
             break;
         case Type_ECode:
             strcat(pszBuf, "ECode");

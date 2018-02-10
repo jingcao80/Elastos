@@ -80,7 +80,7 @@ ECode CTvTrackInfo::ReadFromParcel(
     source->ReadString(&mId);
     source->ReadString(&mLanguage);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mExtra = IBundle::Probe(obj);
     return NOERROR;
 }

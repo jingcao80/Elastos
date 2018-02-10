@@ -2396,16 +2396,16 @@ ECode MotionEvent::ReadFromParcel(
 }
 
 ECode MotionEvent::GetNative(
-    /* [out] */ Handle64* native)
+    /* [out] */ HANDLE* native)
 {
     VALIDATE_NOT_NULL(native);
-    *native = (Handle64)mNativePtr;
+    *native = (HANDLE)mNativePtr;
 
     return NOERROR;
 }
 
 ECode MotionEvent::SetNative(
-    /* [in] */ Handle64 native)
+    /* [in] */ HANDLE native)
 {
     android::MotionEvent* event = reinterpret_cast<android::MotionEvent*>(mNativePtr);
     if (event) {
@@ -2887,7 +2887,7 @@ ECode MotionEvent::NativeReadFromParcel(
     }
 
     android::Parcel* parcel;
-    parcelObj->GetDataPayload((Handle32*)&parcel);
+    parcelObj->GetDataPayload((HANDLE*)&parcel);
 
     android::status_t status = event->readFromParcel(parcel);
     if (status) {
@@ -2907,7 +2907,7 @@ ECode MotionEvent::NativeWriteToParcel(
 {
     android::MotionEvent* event = reinterpret_cast<android::MotionEvent*>(nativePtr);
     android::Parcel* parcel;
-    parcelObj->GetDataPayload((Handle32*)&parcel);
+    parcelObj->GetDataPayload((HANDLE*)&parcel);
 
     android::status_t status = event->writeToParcel(parcel);
     if (status) {

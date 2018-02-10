@@ -46,7 +46,7 @@ module
             [out] INativeLibraryHelperHandle** handle);
 
         CreatePackage(
-            [in] Handle64 pkg, //PackageParser.Package*
+            [in] HANDLE pkg, //PackageParser.Package*
             [out] INativeLibraryHelperHandle** handle);
 
         Create(

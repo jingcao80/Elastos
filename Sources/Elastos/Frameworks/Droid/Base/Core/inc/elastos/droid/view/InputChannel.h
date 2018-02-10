@@ -81,7 +81,7 @@ public:
         /* [out] */ IInputChannel** target);
 
     CARAPI GetNativeInputChannel(
-        /* [out] */ Handle64* ptr);
+        /* [out] */ HANDLE* ptr);
 
 private:
     static CARAPI NativeOpenInputChannelPair(
@@ -107,7 +107,7 @@ private:
         /* [out] */ String* name);
 
 public:
-    Handle64 mNative; // used by native code
+    HANDLE mNative; // used by native code
 };
 
 } // namespace View

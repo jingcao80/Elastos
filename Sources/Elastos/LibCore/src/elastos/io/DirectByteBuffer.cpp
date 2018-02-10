@@ -86,7 +86,7 @@ ECode DirectByteBuffer::constructor(
 }
 
 ECode DirectByteBuffer::GetPrimitiveArray(
-    /* [out] */ Handle64* arrayHandle)
+    /* [out] */ HANDLE* arrayHandle)
 {
     AutoPtr<ArrayOf<Byte> > arrayTmp;
     GetArray((ArrayOf<Byte>**)&arrayTmp);
@@ -96,7 +96,7 @@ ECode DirectByteBuffer::GetPrimitiveArray(
         return NOERROR;
     }
     Byte* primitiveArray = arrayTmp->GetPayload();
-    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    *arrayHandle = reinterpret_cast<HANDLE>(primitiveArray);
     return NOERROR;
 }
 

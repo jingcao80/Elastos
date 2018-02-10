@@ -8783,7 +8783,7 @@ ECode CActivityManagerService::GetIntentSenderLocked(
     }
 
     rec = NULL;
-    CPendingIntentRecord::NewByFriend(this, (Handle32)key.Get(), callingUid, (CPendingIntentRecord**)&rec);
+    CPendingIntentRecord::NewByFriend(this, (HANDLE)key.Get(), callingUid, (CPendingIntentRecord**)&rec);
     mIntentSenderRecords[key] = rec->mRef;
     if (type == IActivityManager::INTENT_SENDER_ACTIVITY_RESULT) {
         if (activity->mPendingResults == NULL) {
@@ -11962,7 +11962,7 @@ AutoPtr<CContentProviderConnection> CActivityManagerService::IncProviderCountLoc
             }
         }
         AutoPtr<CContentProviderConnection> conn;
-        CContentProviderConnection::NewByFriend((Handle32)cpr, (Handle32)r, (CContentProviderConnection**)&conn);
+        CContentProviderConnection::NewByFriend((HANDLE)cpr, (HANDLE)r, (CContentProviderConnection**)&conn);
         if (stable) {
             conn->mStableCount = 1;
             conn->mNumStableIncs = 1;

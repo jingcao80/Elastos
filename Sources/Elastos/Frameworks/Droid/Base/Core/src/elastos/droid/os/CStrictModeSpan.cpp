@@ -32,7 +32,7 @@ ECode CStrictModeSpan::constructor()
 }
 
 ECode CStrictModeSpan::constructor(
-    /* [in] */ Handle32 threadState)
+    /* [in] */ HANDLE threadState)
 {
     mContainerState = (CStrictMode::ThreadSpanState*)threadState;
     return NOERROR;

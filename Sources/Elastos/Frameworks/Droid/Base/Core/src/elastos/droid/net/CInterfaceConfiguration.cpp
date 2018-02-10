@@ -203,7 +203,7 @@ ECode CInterfaceConfiguration::ReadFromParcel(
     src->ReadByte(&bv);
     if (bv == 1) {
         AutoPtr<IInterface> obj;
-        src->ReadInterfacePtr((Handle32*)&obj);
+        src->ReadInterfacePtr((HANDLE*)&obj);
         mAddr = ILinkAddress::Probe(obj);
     }
     Int32 size;

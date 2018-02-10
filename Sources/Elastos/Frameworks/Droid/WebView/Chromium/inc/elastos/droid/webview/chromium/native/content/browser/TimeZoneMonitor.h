@@ -70,7 +70,7 @@ public:
     // @CalledByNative
     static CARAPI_(AutoPtr<TimeZoneMonitor>) GetInstance(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
     /**
       * Stop listening for intents.
@@ -83,7 +83,7 @@ public:
 private:
     static CARAPI_(AutoPtr<IInterface>) GetInstance(
         /* [in] */ IInterface* context,
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
     static CARAPI_(void) Stop(
         /* [in] */ IInterface* obj);
@@ -94,21 +94,21 @@ private:
       */
     TimeZoneMonitor(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 nativePtr);
+        /* [in] */ HANDLE nativePtr);
 
     /**
       * Native JNI call to content::TimeZoneMonitorAndroid::TimeZoneChanged.
       * See content/browser/time_zone_monitor_android.cc.
       */
     CARAPI NativeTimeZoneChangedFromJava(
-        /* [in] */ Handle64 nativeTimeZoneMonitorAndroid);
+        /* [in] */ HANDLE nativeTimeZoneMonitorAndroid);
 
 private:
     static const String TAG;
     AutoPtr<IContext> mAppContext;
     AutoPtr<IIntentFilter> mFilter;
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
-    Handle64 mNativePtr;
+    HANDLE mNativePtr;
 };
 
 } // namespace Browser

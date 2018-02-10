@@ -42,7 +42,7 @@ public:
 
     //@CalledByNative return AwHttpAuthHandler
     static CARAPI_(AutoPtr<IInterface>) Create(
-        /* [in] */ Handle64 nativeAwAuthHandler,
+        /* [in] */ HANDLE nativeAwAuthHandler,
         /* [in] */ Boolean firstAttempt);
 
     //@CalledByNative
@@ -50,16 +50,16 @@ public:
 
 private:
     AwHttpAuthHandler(
-        /* [in] */ Handle64 nativeAwHttpAuthHandler,
+        /* [in] */ HANDLE nativeAwHttpAuthHandler,
         /* [in] */ Boolean firstAttempt);
 
     CARAPI_(void) NativeProceed(
-        /* [in] */ Handle64 nativeAwHttpAuthHandler,
+        /* [in] */ HANDLE nativeAwHttpAuthHandler,
         /* [in] */ const String& username,
         /* [in] */ const String& password);
 
     CARAPI_(void) NativeCancel(
-        /* [in] */ Handle64 nativeAwHttpAuthHandler);
+        /* [in] */ HANDLE nativeAwHttpAuthHandler);
 
 //callback function declaration
 public:
@@ -70,7 +70,7 @@ private:
         /* [in] */ IInterface* obj);
 
 private:
-    Handle64 mNativeAwHttpAuthHandler;
+    HANDLE mNativeAwHttpAuthHandler;
     const Boolean mFirstAttempt;
 };
 

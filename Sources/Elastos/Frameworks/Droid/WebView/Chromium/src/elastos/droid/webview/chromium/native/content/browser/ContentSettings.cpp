@@ -39,7 +39,7 @@ const String ContentSettings::TAG("ContentSettings");
  */
 ContentSettings::ContentSettings(
     /* [in] */ ContentViewCore* contentViewCore,
-    /* [in] */ Handle64 nativeContentView)
+    /* [in] */ HANDLE nativeContentView)
 {
     ThreadUtils::AssertOnUiThread();
     mContentViewCore = contentViewCore;
@@ -53,7 +53,7 @@ ContentSettings::ContentSettings(
  */
 //@CalledByNative
 void ContentSettings::OnNativeContentSettingsDestroyed(
-    /* [in] */ Handle64 nativeContentSettings)
+    /* [in] */ HANDLE nativeContentSettings)
 {
     assert(mNativeContentSettings == nativeContentSettings);
     mNativeContentSettings = 0;
@@ -72,21 +72,21 @@ Boolean ContentSettings::GetJavaScriptEnabled()
 }
 
 // Initialize the ContentSettings native side.
-Handle64 ContentSettings::NativeInit(
-    /* [in] */ Handle64 contentViewPtr)
+HANDLE ContentSettings::NativeInit(
+    /* [in] */ HANDLE contentViewPtr)
 {
     return Elastos_ContentSettings_nativeInit(TO_IINTERFACE(this), contentViewPtr);
 }
 
 Boolean ContentSettings::NativeGetJavaScriptEnabled(
-    /* [in] */ Handle64 nativeContentSettings)
+    /* [in] */ HANDLE nativeContentSettings)
 {
-    return Elastos_ContentSettings_nativeGetJavaScriptEnabled(TO_IINTERFACE(this), (Handle64)nativeContentSettings);
+    return Elastos_ContentSettings_nativeGetJavaScriptEnabled(TO_IINTERFACE(this), (HANDLE)nativeContentSettings);
 }
 
 void ContentSettings::OnNativeContentSettingsDestroyed(
     /* [in] */ IInterface* obj,
-    /* [in] */ Handle64 nativeContentSettings)
+    /* [in] */ HANDLE nativeContentSettings)
 {
     AutoPtr<ContentSettings> mObj = (ContentSettings*)(IObject::Probe(obj));
     if (NULL == mObj)

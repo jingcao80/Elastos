@@ -195,7 +195,7 @@ ECode ComponentInfo::ReadFromParcel(
 
     PackageItemInfo::ReadFromParcel(source);
     AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
+    source->ReadInterfacePtr((HANDLE*)&obj);
     mApplicationInfo = obj != NULL ? IApplicationInfo::Probe(obj) : NULL;
     source->ReadString(&mProcessName);
     source->ReadInt32(&mDescriptionRes);

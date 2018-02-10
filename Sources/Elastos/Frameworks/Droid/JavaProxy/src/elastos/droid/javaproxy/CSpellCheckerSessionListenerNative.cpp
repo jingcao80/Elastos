@@ -40,8 +40,8 @@ CSpellCheckerSessionListenerNative::~CSpellCheckerSessionListenerNative()
 }
 
 ECode CSpellCheckerSessionListenerNative::constructor(
-    /* [in] */ Handle64 jVM,
-    /* [in] */ Handle64 jInstance)
+    /* [in] */ HANDLE jVM,
+    /* [in] */ HANDLE jInstance)
 {
     mJVM = (JavaVM*)jVM;
     JNIEnv* env;

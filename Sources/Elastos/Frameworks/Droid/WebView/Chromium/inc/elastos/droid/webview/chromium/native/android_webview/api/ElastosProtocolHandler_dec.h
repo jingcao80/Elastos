@@ -29,7 +29,7 @@ extern "C"
     extern void Elastos_AndroidProtocolHandler_nativeSetResourceContextForTesting(IInterface* context);
     extern String Elastos_AndroidProtocolHandler_nativeGetAndroidAssetPath();
     extern String Elastos_AndroidProtocolHandler_nativeGetAndroidResourcePath();
-    extern void Elastos_AndroidProtocolHandler_InitCallback(Handle32 cb);
+    extern void Elastos_AndroidProtocolHandler_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -55,7 +55,7 @@ void* ElastosProtocolHandler::ElaElastosProtocolHandlerCallback_Init()
     sElaAndroidProtocolHandlerCallback.elastos_AndroidProtocolHandler_open = &ElastosProtocolHandler::Open;
     sElaAndroidProtocolHandlerCallback.elastos_AndroidProtocolHandler_getMimeType = &ElastosProtocolHandler::GetMimeType;
 
-    Elastos_AndroidProtocolHandler_InitCallback((Handle32)&sElaAndroidProtocolHandlerCallback);
+    Elastos_AndroidProtocolHandler_InitCallback((HANDLE)&sElaAndroidProtocolHandlerCallback);
     return &sElaAndroidProtocolHandlerCallback;
 }
 

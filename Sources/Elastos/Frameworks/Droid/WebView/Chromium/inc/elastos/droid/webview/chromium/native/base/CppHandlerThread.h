@@ -48,8 +48,8 @@ private:
     public:
         InnerRunnable(
             /* [in] */ CppHandlerThread* owner,
-            /* [in] */ const Handle64 nativeThread,
-            /* [in] */ const Handle64 nativeEvent);
+            /* [in] */ const HANDLE nativeThread,
+            /* [in] */ const HANDLE nativeEvent);
 
         CAR_INTERFACE_DECL()
 
@@ -58,8 +58,8 @@ private:
 
     private:
         CppHandlerThread* mOwner;
-        const Handle64 mNativeThread;
-        const Handle64 mNativeEvent;
+        const HANDLE mNativeThread;
+        const HANDLE mNativeEvent;
     };
 
 public:
@@ -68,8 +68,8 @@ public:
 private:
     static CARAPI_(void) Start(
         /* [in] */ IInterface* obj,
-        /* [in] */ Handle64 nativeThread,
-        /* [in] */ Handle64 nativeEvent);
+        /* [in] */ HANDLE nativeThread,
+        /* [in] */ HANDLE nativeEvent);
 
     CppHandlerThread(
         /* [in] */ const String& name);
@@ -80,12 +80,12 @@ private:
 
     //@CalledByNative
     CARAPI_(void) Start(
-        /* [in] */ const Handle64 nativeThread,
-        /* [in] */ const Handle64 nativeEvent);
+        /* [in] */ const HANDLE nativeThread,
+        /* [in] */ const HANDLE nativeEvent);
 
     CARAPI_(void) NativeInitializeThread(
-        /* [in] */ Handle64 nativeCppHandlerThread,
-        /* [in] */ Handle64 nativeEvent);
+        /* [in] */ HANDLE nativeCppHandlerThread,
+        /* [in] */ HANDLE nativeEvent);
 
 public:
     AutoPtr<IHandlerThread> mThread;

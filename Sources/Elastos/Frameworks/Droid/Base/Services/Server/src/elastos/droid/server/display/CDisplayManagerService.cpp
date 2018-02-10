@@ -757,7 +757,7 @@ CDisplayManagerService::DisplayAdapterListener::DisplayAdapterListener(
 }
 
 ECode CDisplayManagerService::DisplayAdapterListener::OnDisplayDeviceEvent(
-    /* [in] */ Handle32 deviceHandle,
+    /* [in] */ HANDLE deviceHandle,
     /* [in] */ Int32 event)
 {
     AutoPtr<DisplayDevice> device = (DisplayDevice*)deviceHandle;

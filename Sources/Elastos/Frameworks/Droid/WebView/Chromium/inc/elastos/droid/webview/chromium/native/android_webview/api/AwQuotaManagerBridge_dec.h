@@ -26,13 +26,13 @@
 extern "C"
 {
 #endif
-    extern Handle64 Elastos_AwQuotaManagerBridge_nativeGetDefaultNativeAwQuotaManagerBridge();
-    extern void Elastos_AwQuotaManagerBridge_nativeInit(IInterface* caller,Handle64 nativeAwQuotaManagerBridgeImpl);
-    extern void Elastos_AwQuotaManagerBridge_nativeDeleteAllData(IInterface* caller,Handle64 nativeAwQuotaManagerBridgeImpl);
-    extern void Elastos_AwQuotaManagerBridge_nativeDeleteOrigin(IInterface* caller,Handle64 nativeAwQuotaManagerBridgeImpl,const String& origin);
-    extern void Elastos_AwQuotaManagerBridge_nativeGetOrigins(IInterface* caller,Handle64 nativeAwQuotaManagerBridgeImpl,Int32 callbackId);
-    extern void Elastos_AwQuotaManagerBridge_nativeGetUsageAndQuotaForOrigin(IInterface* caller,Handle64 nativeAwQuotaManagerBridgeImpl,const String& origin,Int32 callbackId,Boolean isQuota);
-    extern void Elastos_AwQuotaManagerBridge_InitCallback(Handle64 cb);
+    extern HANDLE Elastos_AwQuotaManagerBridge_nativeGetDefaultNativeAwQuotaManagerBridge();
+    extern void Elastos_AwQuotaManagerBridge_nativeInit(IInterface* caller,HANDLE nativeAwQuotaManagerBridgeImpl);
+    extern void Elastos_AwQuotaManagerBridge_nativeDeleteAllData(IInterface* caller,HANDLE nativeAwQuotaManagerBridgeImpl);
+    extern void Elastos_AwQuotaManagerBridge_nativeDeleteOrigin(IInterface* caller,HANDLE nativeAwQuotaManagerBridgeImpl,const String& origin);
+    extern void Elastos_AwQuotaManagerBridge_nativeGetOrigins(IInterface* caller,HANDLE nativeAwQuotaManagerBridgeImpl,Int32 callbackId);
+    extern void Elastos_AwQuotaManagerBridge_nativeGetUsageAndQuotaForOrigin(IInterface* caller,HANDLE nativeAwQuotaManagerBridgeImpl,const String& origin,Int32 callbackId,Boolean isQuota);
+    extern void Elastos_AwQuotaManagerBridge_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -58,7 +58,7 @@ void* AwQuotaManagerBridge::ElaAwQuotaManagerBridgeCallback_Init()
     sElaAwQuotaManagerBridgeCallback.elastos_AwQuotaManagerBridge_onGetOriginsCallback = &AwQuotaManagerBridge::OnGetOriginsCallback;
     sElaAwQuotaManagerBridgeCallback.elastos_AwQuotaManagerBridge_onGetUsageAndQuotaForOriginCallback = &AwQuotaManagerBridge::OnGetUsageAndQuotaForOriginCallback;
 
-    Elastos_AwQuotaManagerBridge_InitCallback((Handle64)&sElaAwQuotaManagerBridgeCallback);
+    Elastos_AwQuotaManagerBridge_InitCallback((HANDLE)&sElaAwQuotaManagerBridgeCallback);
     return &sElaAwQuotaManagerBridgeCallback;
 }
 

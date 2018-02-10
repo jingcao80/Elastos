@@ -477,7 +477,7 @@ ECode PhoneAccount::ReadFromParcel(
         //parcel->ReadFromParcel(source);
         //mAddress= address;
         AutoPtr<IInterface> address;
-        in->ReadInterfacePtr((Handle32*)&address);
+        in->ReadInterfacePtr((HANDLE*)&address);
         mAddress = IUri::Probe(address);
     }
     else {
@@ -494,7 +494,7 @@ ECode PhoneAccount::ReadFromParcel(
         //parcel->ReadFromParcel(source);
         //mAddress= address;
         AutoPtr<IInterface> address;
-        in->ReadInterfacePtr((Handle32*)&address);
+        in->ReadInterfacePtr((HANDLE*)&address);
         mSubscriptionAddress = IUri::Probe(address);
     }
     else {

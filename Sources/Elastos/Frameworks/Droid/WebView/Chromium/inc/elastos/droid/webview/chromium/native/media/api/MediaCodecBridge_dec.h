@@ -25,7 +25,7 @@
 extern "C"
 {
 #endif
-    extern void Elastos_MediaCodecBridge_InitCallback(Handle32 cb);
+    extern void Elastos_MediaCodecBridge_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -131,7 +131,7 @@ void* MediaCodecBridge::ElaMediaCodecBridgeCallback_Init()
     sElaMediaCodecBridgeCallback.elastos_MediaCodecBridge_playOutputBuffer = &MediaCodecBridge::PlayOutputBuffer;
     sElaMediaCodecBridgeCallback.elastos_MediaCodecBridge_setVolume = &MediaCodecBridge::SetVolume;
 
-    Elastos_MediaCodecBridge_InitCallback((Handle32)&sElaMediaCodecBridgeCallback);
+    Elastos_MediaCodecBridge_InitCallback((HANDLE)&sElaMediaCodecBridgeCallback);
     return &sElaMediaCodecBridgeCallback;
 }
 

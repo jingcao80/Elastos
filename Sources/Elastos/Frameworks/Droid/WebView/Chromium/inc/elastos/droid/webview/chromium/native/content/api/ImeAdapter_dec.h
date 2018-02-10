@@ -26,24 +26,24 @@
 extern "C"
 {
 #endif
-    extern void Elastos_ImeAdapter_nativeAppendUnderlineSpan(Handle64 underlinePtr,Int32 start,Int32 end);
-    extern void Elastos_ImeAdapter_nativeAppendBackgroundColorSpan(Handle64 underlinePtr,Int32 start,Int32 end,Int32 backgroundColor);
-    extern Boolean Elastos_ImeAdapter_nativeSendSyntheticKeyEvent(IInterface* caller,Handle64 nativeImeAdapterAndroid,Int32 eventType,Int64 timestampMs,Int32 keyCode,Int32 unicodeChar);
-    extern Boolean Elastos_ImeAdapter_nativeSendKeyEvent(IInterface* caller,Handle64 nativeImeAdapterAndroid,IInterface* event,Int32 action,Int32 modifiers,Int64 timestampMs,Int32 keyCode,Boolean isSystemKey,Int32 unicodeChar);
-    extern void Elastos_ImeAdapter_nativeSetComposingText(IInterface* caller,Handle64 nativeImeAdapterAndroid,IInterface* text,const String& textStr,Int32 newCursorPosition);
-    extern void Elastos_ImeAdapter_nativeCommitText(IInterface* caller,Handle64 nativeImeAdapterAndroid,const String& textStr);
-    extern void Elastos_ImeAdapter_nativeFinishComposingText(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativeAttachImeAdapter(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativeSetEditableSelectionOffsets(IInterface* caller,Handle64 nativeImeAdapterAndroid,Int32 start,Int32 end);
-    extern void Elastos_ImeAdapter_nativeSetComposingRegion(IInterface* caller,Handle64 nativeImeAdapterAndroid,Int32 start,Int32 end);
-    extern void Elastos_ImeAdapter_nativeDeleteSurroundingText(IInterface* caller,Handle64 nativeImeAdapterAndroid,Int32 before,Int32 after);
-    extern void Elastos_ImeAdapter_nativeUnselect(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativeSelectAll(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativeCut(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativeCopy(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativePaste(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_nativeResetImeAdapter(IInterface* caller,Handle64 nativeImeAdapterAndroid);
-    extern void Elastos_ImeAdapter_InitCallback(Handle64 cb);
+    extern void Elastos_ImeAdapter_nativeAppendUnderlineSpan(HANDLE underlinePtr,Int32 start,Int32 end);
+    extern void Elastos_ImeAdapter_nativeAppendBackgroundColorSpan(HANDLE underlinePtr,Int32 start,Int32 end,Int32 backgroundColor);
+    extern Boolean Elastos_ImeAdapter_nativeSendSyntheticKeyEvent(IInterface* caller,HANDLE nativeImeAdapterAndroid,Int32 eventType,Int64 timestampMs,Int32 keyCode,Int32 unicodeChar);
+    extern Boolean Elastos_ImeAdapter_nativeSendKeyEvent(IInterface* caller,HANDLE nativeImeAdapterAndroid,IInterface* event,Int32 action,Int32 modifiers,Int64 timestampMs,Int32 keyCode,Boolean isSystemKey,Int32 unicodeChar);
+    extern void Elastos_ImeAdapter_nativeSetComposingText(IInterface* caller,HANDLE nativeImeAdapterAndroid,IInterface* text,const String& textStr,Int32 newCursorPosition);
+    extern void Elastos_ImeAdapter_nativeCommitText(IInterface* caller,HANDLE nativeImeAdapterAndroid,const String& textStr);
+    extern void Elastos_ImeAdapter_nativeFinishComposingText(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativeAttachImeAdapter(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativeSetEditableSelectionOffsets(IInterface* caller,HANDLE nativeImeAdapterAndroid,Int32 start,Int32 end);
+    extern void Elastos_ImeAdapter_nativeSetComposingRegion(IInterface* caller,HANDLE nativeImeAdapterAndroid,Int32 start,Int32 end);
+    extern void Elastos_ImeAdapter_nativeDeleteSurroundingText(IInterface* caller,HANDLE nativeImeAdapterAndroid,Int32 before,Int32 after);
+    extern void Elastos_ImeAdapter_nativeUnselect(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativeSelectAll(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativeCut(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativeCopy(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativePaste(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_nativeResetImeAdapter(IInterface* caller,HANDLE nativeImeAdapterAndroid);
+    extern void Elastos_ImeAdapter_InitCallback(HANDLE cb);
 #ifdef __cplusplus
 }
 #endif
@@ -79,7 +79,7 @@ void* ImeAdapter::ElaImeAdapterCallback_Init()
     sElaImeAdapterCallback.elastos_ImeAdapter_cancelComposition = &ImeAdapter::CancelComposition;
     sElaImeAdapterCallback.elastos_ImeAdapter_detach = &ImeAdapter::Detach;
 
-    Elastos_ImeAdapter_InitCallback((Handle64)&sElaImeAdapterCallback);
+    Elastos_ImeAdapter_InitCallback((HANDLE)&sElaImeAdapterCallback);
     return &sElaImeAdapterCallback;
 }
 
